@@ -4,14 +4,13 @@ class EventDispatcher {
     hasDispose = false;
 
     constructor(target) {
-        super();
         this.$EventDispatcher = {
             0: target || this,
             1: {}
         }
     }
 
-    public dispose() {
+    dispose() {
         this.$EventDispatcher = null;
         this.hasDispose = true;
     }
@@ -23,7 +22,7 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    public once(type, listener, thisObject, priority = 0) {
+    once(type, listener, thisObject, priority = 0) {
         this.__addListener(type, listener, thisObject, priority, true);
     }
 
@@ -34,7 +33,7 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    public addListener(type, listener, thisObject, priority = 0) {
+    addListener(type, listener, thisObject, priority = 0) {
         this.__addListener(type, listener, thisObject, priority, false);
     }
 
@@ -52,7 +51,6 @@ class EventDispatcher {
             if (this.hasDispose) {
                 $error(1002);
             }
-            return;
         }
         var values = this.$EventDispatcher;
         var events = values[1];
@@ -69,12 +67,11 @@ class EventDispatcher {
         list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false});
     }
 
-    public removeListener(type, listener, thisObject) {
+    removeListener(type, listener, thisObject) {
         if (DEBUG) {
             if (this.hasDispose) {
                 $error(1002);
             }
-            return;
         }
         var values = this.$EventDispatcher;
         var events = values[1];
@@ -92,7 +89,7 @@ class EventDispatcher {
         }
     }
 
-    public removeAllListener() {
+    removeAllListener() {
         if (DEBUG) {
             if (this.hasDispose) {
                 $error(1002);
@@ -104,12 +101,11 @@ class EventDispatcher {
         events = {};
     }
 
-    public hasListener(type) {
+    hasListener(type) {
         if (DEBUG) {
             if (this.hasDispose) {
                 $error(1002);
             }
-            return;
         }
         var events = this.$EventDispatcher[1];
         var list = events[type];
@@ -124,12 +120,11 @@ class EventDispatcher {
         return false;
     }
 
-    public dispatch(event) {
+    dispatch(event) {
         if (DEBUG) {
             if (this.hasDispose) {
                 $error(1002);
             }
-            return;
         }
         var list = this.$EventDispatcher[1][event.type];
         if (!list) {
@@ -159,12 +154,11 @@ class EventDispatcher {
         }
     }
 
-    public dispatchWidth(type, data = null) {
+    dispatchWidth(type, data = null) {
         if (DEBUG) {
             if (this.hasDispose) {
                 $error(1002);
             }
-            return;
         }
         var e = flower.Event.create(type, data);
         e.$target = this;
@@ -172,3 +166,5 @@ class EventDispatcher {
         flower.Event.release(e);
     }
 }
+
+exports.EventDispatcher = EventDispatcher;

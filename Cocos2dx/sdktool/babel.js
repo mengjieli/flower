@@ -1,7 +1,5 @@
 require("./help/com/requirecom");
 require("./help/shell/requireshell");
-require("./help/ftp/requireftp");
-require("./help/net/requirenet");
 
 function compressComplete() {
     new ShellCommand("babel", ["./src6", "-d", "./src"], function () {
@@ -165,7 +163,9 @@ var list = [
     "Flower",
     "Platform",
     "Language",
-    "zh_CN"
+    "zh_CN",
+    "EventDispatcher",
+    "Event"
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "(function(){\n";

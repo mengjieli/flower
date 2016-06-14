@@ -5,6 +5,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Main = function Main() {
     _classCallCheck(this, Main);
 
-    console.log("Hello,man!");
     flower.start();
+
+    new Test();
 };

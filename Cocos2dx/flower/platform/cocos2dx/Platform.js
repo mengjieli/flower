@@ -6,7 +6,6 @@ class Platform {
     static height;
 
     static start(engine, root) {
-        console.log("hello baby!");
         return;
         var scene = cc.Scene.extend({
             ctor: function () {
