@@ -6,4 +6,5 @@ var Main = function Main() {
     _classCallCheck(this, Main);
 
     console.log("Hello,man!");
+    flower.start();
 };

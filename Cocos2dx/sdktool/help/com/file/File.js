@@ -26,7 +26,7 @@ function File(url) {
 /**
  *
  */
-File.prototype.isDirection = function() {
+File.prototype.isDirection = function () {
     return this.state.isDirectory();//this.type==global.FileType.DIRECTION?true:false;
 }
 
@@ -60,7 +60,7 @@ File.prototype.isExist = function () {
     try {
         this.state.isDirection();
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
