@@ -164,8 +164,21 @@ var list = [
     "Platform",
     "Language",
     "zh_CN",
+    "Action",
+    "Feature",
+    "ObjectBase",
     "EventDispatcher",
-    "Event"
+    "Event",
+    "Matrix",
+    "Point",
+    "Rectangle",
+    "Size",
+    "BlendMode",
+    "DisplayObject",
+    "Sprite",
+    "Bitmap",
+    "Texture",
+    "Loader"
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "(function(){\n";
@@ -185,7 +198,6 @@ fileContent += "})();\n";
 fileContent += "var flower = exports;\n";
 file = new File("src6/Flower.js");
 file.save(fileContent);
-
 
 
 compressComplete();

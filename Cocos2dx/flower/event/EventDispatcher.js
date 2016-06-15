@@ -1,7 +1,7 @@
 class EventDispatcher {
 
     $EventDispatcher;
-    hasDispose = false;
+    _hasDispose = false;
 
     constructor(target) {
         this.$EventDispatcher = {
@@ -12,7 +12,7 @@ class EventDispatcher {
 
     dispose() {
         this.$EventDispatcher = null;
-        this.hasDispose = true;
+        this._hasDispose = true;
     }
 
     /**
@@ -48,7 +48,7 @@ class EventDispatcher {
      */
     __addListener(type, listener, thisObject, priority, once) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -69,7 +69,7 @@ class EventDispatcher {
 
     removeListener(type, listener, thisObject) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -91,7 +91,7 @@ class EventDispatcher {
 
     removeAllListener() {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
             return;
@@ -103,7 +103,7 @@ class EventDispatcher {
 
     hasListener(type) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -122,7 +122,7 @@ class EventDispatcher {
 
     dispatch(event) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -156,7 +156,7 @@ class EventDispatcher {
 
     dispatchWidth(type, data = null) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }

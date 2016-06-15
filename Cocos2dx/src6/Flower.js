@@ -12,6 +12,25 @@ function $error(errorCode, ...args) {
     console.log(getLanguage(errorCode, args));
 }
 
+function isNaN(value) {
+    value = +value;
+    return value !== value;
+}
+
+/**
+ * @private
+ * 格式化旋转角度的值
+ */
+function clampRotation(value) {
+    value %= 360;
+    if (value > 180) {
+        value -= 360;
+    } else if (value < -180) {
+        value += 360;
+    }
+    return value;
+}
+
 exports.start = start;
 
 //////////////////////////End File:flower/Flower.js///////////////////////////
@@ -111,11 +130,186 @@ locale_strings[1002] = "对象已释放。";
 
 
 
+//////////////////////////File:flower/core/Action.js///////////////////////////
+class Action {
+
+    /**
+     * 行为名称
+     * @type {string}
+     */
+    name = "";
+
+    constructor() {
+
+    }
+
+    /**
+     * 执行行为
+     */
+    execute() {
+
+    }
+}
+//////////////////////////End File:flower/core/Action.js///////////////////////////
+
+
+
+//////////////////////////File:flower/core/Feature.js///////////////////////////
+class Feature {
+
+    items = [];
+
+    constructor() {
+
+    }
+
+    /**
+     * 获取某个特征
+     * @param name
+     * @returns {*}
+     */
+    getItemByName(name) {
+        var items = this.items;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].name == name) {
+                return items[i];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 添加特征描述，如果之前已有此名称的特征，会覆盖之前的特征值，不会插入新的特征描述
+     * @param name 特征名称,比如 x
+     * @param value 特征值，比如 100
+     */
+    addItem(name, value) {
+        var item = this.getItemByName(name);
+        if(item) {
+            item.value = value;
+            return;
+        }
+        this.items.push({
+            "name": name,
+            "value": value
+        })
+    }
+
+    /**
+     * 移除特征，根据名字匹配
+     * @param name
+     * @returns {*}
+     */
+    removeItemByName(name) {
+        var items = this.items;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].name == name) {
+                return items.splice(i, 1)[0];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 检测对象特征是否符合
+     * @param object
+     */
+    checkObject(object) {
+        var items = this.items;
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (object[item.name] != item.value) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+//////////////////////////End File:flower/core/Feature.js///////////////////////////
+
+
+
+//////////////////////////File:flower/core/ObjectBase.js///////////////////////////
+class ObjectBase {
+
+    /**
+     * 行为队列
+     * @type {Array}
+     */
+    actions = [];
+
+    constructor() {
+    }
+
+    /**
+     * 执行特定的行为
+     * @param name 行为名称
+     * @param args 行为参数
+     */
+    executeAction(name, ...args) {
+        var action;
+        var actions = this.actions;
+        for (var i = 0; i < actions.length; i++) {
+            if (actions[i].name == action.name) {
+                action = actions[i];
+                break;
+            }
+        }
+        if (action) {
+            action.execute.apply(action, args);
+        }
+    }
+
+    getAction(name) {
+        var actions = this.actions;
+        for (var i = 0; i < actions.length; i++) {
+            if (actions[i].name == action.name) {
+                return actions[i];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 添加行为，如果之前已有相同名称的行为，会被顶替
+     * @param action
+     */
+    addAction(action) {
+        var actions = this.actions;
+        for (var i = 0; i < actions.length; i++) {
+            if (actions[i].name == action.name) {
+                actions.splice(i, 1);
+                break;
+            }
+        }
+        this.actions.push(action);
+    }
+
+    /**
+     * 移除行为
+     * @param name 要移除的行为名称
+     * @returns {*}
+     */
+    removeAction(name) {
+        var actions = this.actions;
+        for (var i = 0; i < actions.length; i++) {
+            var action = actions[i];
+            if (action.name == name) {
+                return actions.splice(i, 1)[0];
+            }
+        }
+        return null;
+    }
+}
+//////////////////////////End File:flower/core/ObjectBase.js///////////////////////////
+
+
+
 //////////////////////////File:flower/event/EventDispatcher.js///////////////////////////
 class EventDispatcher {
 
     $EventDispatcher;
-    hasDispose = false;
+    _hasDispose = false;
 
     constructor(target) {
         this.$EventDispatcher = {
@@ -126,7 +320,7 @@ class EventDispatcher {
 
     dispose() {
         this.$EventDispatcher = null;
-        this.hasDispose = true;
+        this._hasDispose = true;
     }
 
     /**
@@ -162,7 +356,7 @@ class EventDispatcher {
      */
     __addListener(type, listener, thisObject, priority, once) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -183,7 +377,7 @@ class EventDispatcher {
 
     removeListener(type, listener, thisObject) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -205,7 +399,7 @@ class EventDispatcher {
 
     removeAllListener() {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
             return;
@@ -217,7 +411,7 @@ class EventDispatcher {
 
     hasListener(type) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -236,7 +430,7 @@ class EventDispatcher {
 
     dispatch(event) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -270,7 +464,7 @@ class EventDispatcher {
 
     dispatchWidth(type, data = null) {
         if (DEBUG) {
-            if (this.hasDispose) {
+            if (this._hasDispose) {
                 $error(1002);
             }
         }
@@ -367,6 +561,439 @@ class Event {
 
 exports.Event = Event;
 //////////////////////////End File:flower/event/Event.js///////////////////////////
+
+
+
+//////////////////////////File:flower/geom/Matrix.js///////////////////////////
+class Matrix {
+    static sin;
+    static cos;
+    a = 1;
+    b = 0;
+    c = 0;
+    d = 1;
+    tx = 0;
+    ty = 0;
+    _storeList = [];
+
+    constructor() {
+    }
+
+    identity() {
+        this.a = 1;
+        this.b = 0;
+        this.c = 0;
+        this.d = 1;
+        this.tx = 0;
+        this.ty = 0;
+    }
+
+    setTo(a, b, c, d, tx, ty) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
+        this.tx = tx;
+        this.ty = ty;
+    }
+
+    translate(x, y) {
+        this.tx += x;
+        this.ty += y;
+    }
+
+    rotate(angle) {
+        flower.Matrix.sin = Math.sin(angle);
+        flower.Matrix.cos = Math.cos(angle);
+        this.setTo(this.a * flower.Matrix.cos - this.c * flower.Matrix.sin, this.a * flower.Matrix.sin + this.c * flower.Matrix.cos, this.b * flower.Matrix.cos - this.d * flower.Matrix.sin, this.b * flower.Matrix.sin + this.d * flower.Matrix.cos, this.tx * flower.Matrix.cos - this.ty * flower.Matrix.sin, this.tx * flower.Matrix.sin + this.ty * flower.Matrix.cos);
+    }
+
+    scale(scaleX, scaleY) {
+        this.a = scaleX;
+        this.d = scaleY;
+        this.tx *= this.a;
+        this.ty *= this.d;
+    }
+
+    prependMatrix(prep) {
+        this.setTo(this.a * prep.a + this.c * prep.b, this.b * prep.a + this.d * prep.b, this.a * prep.c + this.c * prep.d, this.b * prep.c + this.d * prep.d, this.tx + this.a * prep.tx + this.c * prep.ty, this.ty + this.b * prep.tx + this.d * prep.ty);
+    }
+
+    prependTranslation(tx, ty) {
+        this.tx += this.a * tx + this.c * ty;
+        this.ty += this.b * tx + this.d * ty;
+    }
+
+    prependScale(sx, sy) {
+        this.setTo(this.a * sx, this.b * sx, this.c * sy, this.d * sy, this.tx, this.ty);
+    }
+
+    prependRotation(angle) {
+        var sin = Math.sin(angle);
+        var cos = Math.cos(angle);
+        this.setTo(this.a * cos + this.c * sin, this.b * cos + this.d * sin, this.c * cos - this.a * sin, this.d * cos - this.b * sin, this.tx, this.ty);
+    }
+
+    prependSkew(skewX, skewY) {
+        var sinX = Math.sin(skewX);
+        var cosX = Math.cos(skewX);
+        var sinY = Math.sin(skewY);
+        var cosY = Math.cos(skewY);
+        this.setTo(this.a * cosY + this.c * sinY, this.b * cosY + this.d * sinY, this.c * cosX - this.a * sinX, this.d * cosX - this.b * sinX, this.tx, this.ty);
+    }
+
+    get deformation() {
+        if (this.a != 1 || this.b != 0 || this.c != 0 || this.d != 1)
+            return true;
+        return false;
+    }
+
+    save() {
+        var matrix = flower.Matrix.create();
+        matrix.a = this.a;
+        matrix.b = this.b;
+        matrix.c = this.c;
+        matrix.d = this.d;
+        matrix.tx = this.tx;
+        matrix.ty = this.ty;
+        this._storeList.push(matrix);
+    }
+
+    restore() {
+        var matrix = this._storeList.pop();
+        this.setTo(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
+        flower.Matrix.release(matrix);
+    }
+
+    static $matrix = new Matrix();
+    static matrixPool = [];
+
+    static release(matrix) {
+        if (!matrix) {
+            return;
+        }
+        matrix._storeList.length = 0;
+        flower.Matrix.matrixPool.push(matrix);
+    }
+
+    static create() {
+        var matrix = flower.Matrix.matrixPool.pop();
+        if (!matrix) {
+            matrix = new flower.Matrix();
+        }
+        return matrix;
+    }
+
+}
+
+exports.Matrix = Matrix;
+//////////////////////////End File:flower/geom/Matrix.js///////////////////////////
+
+
+
+//////////////////////////File:flower/geom/Point.js///////////////////////////
+class Point {
+
+    x;
+    y;
+
+    constructor(x, y) {
+        this.x = +x || 0;
+        this.y = +y || 0;
+    }
+
+    setTo(x, y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
+    get length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    static distance(p1, p2) {
+        return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+    }
+
+    static $TempPoint = new Point();
+    static pointPool = [];
+
+    static release(point) {
+        if (!point) {
+            return;
+        }
+        Point.pointPool.push(point);
+    }
+
+    static create(x, y) {
+        var point = Point.pointPool.pop();
+        if (!point) {
+            point = new Point(x, y);
+        }
+        else {
+            point.x = +x || 0;
+            point.y = +y || 0;
+        }
+        return point;
+    }
+}
+
+exports.Point = Point;
+//////////////////////////End File:flower/geom/Point.js///////////////////////////
+
+
+
+//////////////////////////File:flower/geom/Rectangle.js///////////////////////////
+class Rectangle {
+    x;
+    y;
+    width;
+    height;
+
+    constructor(x, y, width, height) {
+        this.x = +x || 0;
+        this.y = +y || 0;
+        this.width = +width || 0;
+        this.height = +height || 0;
+    }
+
+    get right() {
+        return this.x + this.width;
+    }
+
+    set right(value) {
+        this.width = value - this.x;
+    }
+
+    get bottom() {
+        return this.y + this.height;
+    }
+
+    set bottom(value) {
+        this.height = value - this.y;
+    }
+
+    get left() {
+        return this.x;
+    }
+
+    set left(value) {
+        this.width += this.x - value;
+        this.x = value;
+    }
+
+    get top() {
+        return this.y;
+    }
+
+    set top(value) {
+        this.height += this.y - value;
+        this.y = value;
+    }
+
+    copyFrom(sourceRect) {
+        this.x = sourceRect.x;
+        this.y = sourceRect.y;
+        this.width = sourceRect.width;
+        this.height = sourceRect.height;
+        return this;
+    }
+
+    setTo(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        return this;
+    }
+
+    contains(x, y) {
+        return this.x <= x && this.x + this.width >= x && this.y <= y && this.y + this.height >= y;
+    }
+
+    intersection(toIntersect) {
+        return this.clone().$intersectInPlace(toIntersect);
+    }
+
+    $intersectInPlace(clipRect) {
+        var x0 = this.x;
+        var y0 = this.y;
+        var x1 = clipRect.x;
+        var y1 = clipRect.y;
+        var l = Math.max(x0, x1);
+        var r = Math.min(x0 + this.width, x1 + clipRect.width);
+        if (l <= r) {
+            var t = Math.max(y0, y1);
+            var b = Math.min(y0 + this.height, y1 + clipRect.height);
+            if (t <= b) {
+                this.setTo(l, t, r - l, b - t);
+                return this;
+            }
+        }
+        this.setEmpty();
+        return this;
+    }
+
+    intersects(toIntersect) {
+        return Math.max(this.x, toIntersect.x) <= Math.min(this.right, toIntersect.right) && Math.max(this.y, toIntersect.y) <= Math.min(this.bottom, toIntersect.bottom);
+    }
+
+    isEmpty() {
+        return this.width <= 0 || this.height <= 0;
+    }
+
+    setEmpty() {
+        this.x = 0;
+        this.y = 0;
+        this.width = 0;
+        this.height = 0;
+    }
+
+    clone() {
+        return new flower.Rectangle(this.x, this.y, this.width, this.height);
+    }
+
+    _getBaseWidth(angle) {
+        var u = Math.abs(Math.cos(angle));
+        var v = Math.abs(Math.sin(angle));
+        return u * this.width + v * this.height;
+    }
+
+    _getBaseHeight(angle) {
+        var u = Math.abs(Math.cos(angle));
+        var v = Math.abs(Math.sin(angle));
+        return v * this.width + u * this.height;
+    }
+
+    static rectanglePool = [];
+
+    static release(rect) {
+        if (!rect) {
+            return;
+        }
+        flower.Rectangle.rectanglePool.push(rect);
+    }
+
+    static create(x, y, width, height) {
+        var rect = flower.Rectangle.rectanglePool.pop();
+        if (!rect) {
+            rect = new flower.Rectangle(x, y, width, height);
+        } else {
+            rect.x = +x || 0;
+            rect.y = +y || 0;
+            rect.width = +width || 0;
+            rect.height = +height || 0;
+        }
+        return rect;
+    }
+}
+
+exports.Rectangle = Rectangle;
+//////////////////////////End File:flower/geom/Rectangle.js///////////////////////////
+
+
+
+//////////////////////////File:flower/geom/Size.js///////////////////////////
+class Size {
+
+    width;
+    height;
+
+    constructor(width, height) {
+        this.width = +width || 0;
+        this.height = +height || 0;
+    }
+
+    setTo(width, height) {
+        this.width = width;
+        this.height = height;
+        return this;
+    }
+
+    get area() {
+        return this.width * this.height;
+    }
+
+    static $TempSize = new Size();
+    static sizePool = [];
+
+    static release(size) {
+        if (!size) {
+            return;
+        }
+        flower.Size.sizePool.push(size);
+    }
+
+    static create(width, height) {
+        var size = flower.Size.sizePool.pop();
+        if (!size) {
+            size = new flower.Size(width, height);
+        }
+        else {
+            size.width = +width || 0;
+            size.height = +height || 0;
+        }
+        return size;
+    }
+}
+
+exports.Size = Size;
+//////////////////////////End File:flower/geom/Size.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/BlendMode.js///////////////////////////
+class BlendMode {
+    static NORMAL = "normal";
+}
+
+function numberToBlendMode(val) {
+    return BlendMode.NORMAL;
+}
+
+function blendModeToNumber(val) {
+    if (val == BlendMode.NORMAL) {
+        return 0;
+    }
+    return 0;
+}
+//////////////////////////End File:flower/display/BlendMode.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/DisplayObject.js///////////////////////////
+class DisplayObject extends EventDispatcher {
+    constructor() {
+        super();
+    }
+}
+//////////////////////////End File:flower/display/DisplayObject.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/Sprite.js///////////////////////////
+class Sprite extends DisplayObject {
+
+    _childs;
+
+    constructor() {
+        super();
+        this._childs = [];
+    }
+
+    $addFlagsDown(flags) {
+        if (this.$hasFlags(flags)) {
+            return;
+        }
+        this.$addFlag(flags);
+        var childs = this._childs;
+        for (var i = 0; i < childs.length; i++) {
+            childs[i].$addFlagsDown(flags);
+        }
+    }
+}
+//////////////////////////End File:flower/display/Sprite.js///////////////////////////
 
 
 
