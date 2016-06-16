@@ -1,33 +1,80 @@
-class Action {
+class Action extends EventDispatcher {
 
     /**
      * 行为名称
      * @type {string}
      */
     name = "";
+
     /**
-     * 宿主数据
+     * 描述，用自然语言描述行为
+     * @type {string}
+     */
+    desc;
+
+    /**
+     * 当前行为的状态，用自然语言描述
+     * @type {string}
+     */
+    state;
+
+    /**
+     * 行为执行的时间
+     */
+    time;
+
+    /**
+     * 行为的总时长
+     */
+    life;
+
+    /**
+     * 行为执行到第几次
+     */
+    currentCount;
+
+    /**
+     * 行为执行的总次数
+     */
+    count;
+
+
+    /**
+     * 宿主属性
      * @type {null}
      */
     data = null;
 
-    constructor() {
-    }
-
+    /**
+     * 宿主
+     */
     $owner;
 
+    constructor(owner) {
+        super();
+        this.$owner = val;
+        this.data = this.$owner.data;
+    }
+
     /**
-     * 设置行为宿主
-     * @param val
+     * 继续当前行为
      */
-    setOwner(val) {
-        if (val) {
-            this.$owner = val;
-            this.data = this.$owner.data;
-        } else {
-            this.$owner = null;
-            this.data = null;
-        }
+    play() {
+
+    }
+
+    /**
+     * 暂停行为
+     */
+    pause() {
+
+    }
+
+    /**
+     * 停止当前行为，停止后会重置属性，比如进度，持续时间都归零
+     */
+    stop() {
+
     }
 
     get owner() {
@@ -39,5 +86,12 @@ class Action {
      */
     execute() {
 
+    }
+
+    /**
+     * 行为完成
+     */
+    complete() {
+        this.dispatchWidth(Event.COMPLETE);
     }
 }

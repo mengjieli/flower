@@ -1,0 +1,22 @@
+{
+  "desc": "Tween",
+  "detail": "集合了所有的运动类型\n详情参考 http://{server}/doc/Tween.html",
+  "params": [
+    {
+      "desc": "移动目标",
+      "init": "this"
+    },
+    {
+      "desc": "运动时间(单位秒)",
+      "init": "1"
+    },
+    {
+      "desc": "运动参数",
+      "init": "{'x':100,'y':100}"
+    },
+    {
+      "desc": "缓动参数",
+      "init": "Ease.NONE/**无**/"
+    }
+  ]
+}
