@@ -1,18 +1,18 @@
 class EventDispatcher {
 
-    $EventDispatcher;
-    _hasDispose = false;
+    __EventDispatcher;
+    __hasDispose = false;
 
     constructor(target) {
-        this.$EventDispatcher = {
+        this.__EventDispatcher = {
             0: target || this,
             1: {}
         }
     }
 
     dispose() {
-        this.$EventDispatcher = null;
-        this._hasDispose = true;
+        this.__EventDispatcher = null;
+        this.__hasDispose = true;
     }
 
     /**
@@ -48,11 +48,11 @@ class EventDispatcher {
      */
     __addListener(type, listener, thisObject, priority, once) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var values = this.$EventDispatcher;
+        var values = this.__EventDispatcher;
         var events = values[1];
         var list = events[type];
         if (!list) {
@@ -69,11 +69,11 @@ class EventDispatcher {
 
     removeListener(type, listener, thisObject) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var values = this.$EventDispatcher;
+        var values = this.__EventDispatcher;
         var events = values[1];
         var list = events[type];
         if (!list) {
@@ -91,23 +91,23 @@ class EventDispatcher {
 
     removeAllListener() {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
             return;
         }
-        var values = this.$EventDispatcher;
+        var values = this.__EventDispatcher;
         var events = values[1];
         events = {};
     }
 
     hasListener(type) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var events = this.$EventDispatcher[1];
+        var events = this.__EventDispatcher[1];
         var list = events[type];
         if (!list) {
             return false;
@@ -122,11 +122,11 @@ class EventDispatcher {
 
     dispatch(event) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var list = this.$EventDispatcher[1][event.type];
+        var list = this.__EventDispatcher[1][event.type];
         if (!list) {
             return;
         }
@@ -156,7 +156,7 @@ class EventDispatcher {
 
     dispatchWidth(type, data = null) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }

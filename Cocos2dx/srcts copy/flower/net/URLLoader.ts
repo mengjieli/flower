@@ -1,5 +1,6 @@
 module flower {
     export class URLLoader extends flower.EventDispatcher {
+
         private _res:flower.ResItem;
         private _isLoading:boolean = false;
         private _data:any;
@@ -173,7 +174,7 @@ module flower {
         }
 
         public dispose() {
-            if(!this._selfDispose) {
+            if (!this._selfDispose) {
                 super.dispose();
                 return;
             }

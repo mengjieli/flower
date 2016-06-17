@@ -47,4 +47,32 @@ class Platform {
         //Platform.stage.addChild(debugRoot);
         //System.$mesureTxt.retain();
     }
+
+    static pools = {};
+
+    static create(name) {
+        var pools = Platform.pools;
+        if (name == "Sprite") {
+            if (pools.Sprite && pools.Sprite.length) {
+                return pools.Sprite.pop();
+            }
+            return new PlatformSprite();
+        }
+        if (name == "TextField") {
+            if (pools.TextField && pools.TextField.length) {
+                return pools.TextField.pop();
+            }
+            return new PlatformTextField();
+        }
+        return null;
+    }
+
+    static release(name, object) {
+        var pools = Platform.pools;
+        if (!pools[name]) {
+            pools[name] = [];
+        }
+        pools[name].push(object);
+
+    }
 }

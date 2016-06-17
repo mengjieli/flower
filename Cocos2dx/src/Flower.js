@@ -1,5 +1,7 @@
 "use strict";
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -12,15 +14,38 @@ var _exports = {};
 (function () {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
+    var TIP = true;
     var $language = "zh_CN";
+    /**
+     * 用户使用的语言
+     * @type {null}
+     */
+    var language = "";
 
-    function start() {
+    /**
+     * 启动引擎
+     * @param language 使用的语言版本
+     */
+    function start(language) {
+        language = language || "";
         Platform.start();
+    }
+
+    function getLanaguge() {
+        return language;
     }
 
     function $error(errorCode) {
         for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
             args[_key - 1] = arguments[_key];
+        }
+
+        console.log(getLanguage(errorCode, args));
+    }
+
+    function $tip(errorCode) {
+        for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+            args[_key2 - 1] = arguments[_key2];
         }
 
         console.log(getLanguage(errorCode, args));
@@ -46,7 +71,7 @@ var _exports = {};
     }
 
     _exports.start = start;
-
+    _exports.getLanguage = getLanaguge;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/Platform.js///////////////////////////
@@ -100,6 +125,33 @@ var _exports = {};
                 //Platform.stage.addChild(debugRoot);
                 //System.$mesureTxt.retain();
             }
+        }, {
+            key: "create",
+            value: function create(name) {
+                var pools = Platform.pools;
+                if (name == "Sprite") {
+                    if (pools.Sprite && pools.Sprite.length) {
+                        return pools.Sprite.pop();
+                    }
+                    return new PlatformSprite();
+                }
+                if (name == "TextField") {
+                    if (pools.TextField && pools.TextField.length) {
+                        return pools.TextField.pop();
+                    }
+                    return new PlatformTextField();
+                }
+                return null;
+            }
+        }, {
+            key: "release",
+            value: function release(name, object) {
+                var pools = Platform.pools;
+                if (!pools[name]) {
+                    pools[name] = [];
+                }
+                pools[name].push(object);
+            }
         }]);
 
         return Platform;
@@ -110,6 +162,7 @@ var _exports = {};
 
 
     Platform.type = "cocos2dx";
+    Platform.pools = {};
     var $locale_strings = {};
 
     /**
@@ -141,233 +194,21 @@ var _exports = {};
     //core  1000-1999
     locale_strings[1001] = "对象已经回收。";
     locale_strings[1002] = "对象已释放。";
+    locale_strings[1003] = "重复创建纹理:{0}";
+    locale_strings[1004] = "创建纹理:{0}";
+    locale_strings[1005] = "释放纹理:{0}";
+
     //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
-    //////////////////////////File:flower/core/Action.js///////////////////////////
-
-    var Action = function () {
-        function Action() {
-            _classCallCheck(this, Action);
-
-            this.name = "";
-        }
-
-        /**
-         * 执行行为
-         */
-
-
-        /**
-         * 行为名称
-         * @type {string}
-         */
-
-
-        _createClass(Action, [{
-            key: "execute",
-            value: function execute() {}
-        }]);
-
-        return Action;
-    }();
-    //////////////////////////End File:flower/core/Action.js///////////////////////////
-
-    //////////////////////////File:flower/core/Feature.js///////////////////////////
-
-
-    var Feature = function () {
-        function Feature() {
-            _classCallCheck(this, Feature);
-
-            this.items = [];
-        }
-
-        /**
-         * 获取某个特征
-         * @param name
-         * @returns {*}
-         */
-
-
-        _createClass(Feature, [{
-            key: "getItemByName",
-            value: function getItemByName(name) {
-                var items = this.items;
-                for (var i = 0; i < items.length; i++) {
-                    if (items[i].name == name) {
-                        return items[i];
-                    }
-                }
-                return null;
-            }
-
-            /**
-             * 添加特征描述，如果之前已有此名称的特征，会覆盖之前的特征值，不会插入新的特征描述
-             * @param name 特征名称,比如 x
-             * @param value 特征值，比如 100
-             */
-
-        }, {
-            key: "addItem",
-            value: function addItem(name, value) {
-                var item = this.getItemByName(name);
-                if (item) {
-                    item.value = value;
-                    return;
-                }
-                this.items.push({
-                    "name": name,
-                    "value": value
-                });
-            }
-
-            /**
-             * 移除特征，根据名字匹配
-             * @param name
-             * @returns {*}
-             */
-
-        }, {
-            key: "removeItemByName",
-            value: function removeItemByName(name) {
-                var items = this.items;
-                for (var i = 0; i < items.length; i++) {
-                    if (items[i].name == name) {
-                        return items.splice(i, 1)[0];
-                    }
-                }
-                return null;
-            }
-
-            /**
-             * 检测对象特征是否符合
-             * @param object
-             */
-
-        }, {
-            key: "checkObject",
-            value: function checkObject(object) {
-                var items = this.items;
-                for (var i = 0; i < items.length; i++) {
-                    var item = items[i];
-                    if (object[item.name] != item.value) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }]);
-
-        return Feature;
-    }();
-    //////////////////////////End File:flower/core/Feature.js///////////////////////////
-
-    //////////////////////////File:flower/core/ObjectBase.js///////////////////////////
-
-
-    var ObjectBase = function () {
-        function ObjectBase() {
-            _classCallCheck(this, ObjectBase);
-
-            this.actions = [];
-        }
-
-        /**
-         * 执行特定的行为
-         * @param name 行为名称
-         * @param args 行为参数
-         */
-
-
-        /**
-         * 行为队列
-         * @type {Array}
-         */
-
-
-        _createClass(ObjectBase, [{
-            key: "executeAction",
-            value: function executeAction(name) {
-                var action;
-                var actions = this.actions;
-                for (var i = 0; i < actions.length; i++) {
-                    if (actions[i].name == action.name) {
-                        action = actions[i];
-                        break;
-                    }
-                }
-                if (action) {
-                    for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-                        args[_key2 - 1] = arguments[_key2];
-                    }
-
-                    action.execute.apply(action, args);
-                }
-            }
-        }, {
-            key: "getAction",
-            value: function getAction(name) {
-                var actions = this.actions;
-                for (var i = 0; i < actions.length; i++) {
-                    if (actions[i].name == action.name) {
-                        return actions[i];
-                    }
-                }
-                return null;
-            }
-
-            /**
-             * 添加行为，如果之前已有相同名称的行为，会被顶替
-             * @param action
-             */
-
-        }, {
-            key: "addAction",
-            value: function addAction(action) {
-                var actions = this.actions;
-                for (var i = 0; i < actions.length; i++) {
-                    if (actions[i].name == action.name) {
-                        actions.splice(i, 1);
-                        break;
-                    }
-                }
-                this.actions.push(action);
-            }
-
-            /**
-             * 移除行为
-             * @param name 要移除的行为名称
-             * @returns {*}
-             */
-
-        }, {
-            key: "removeAction",
-            value: function removeAction(name) {
-                var actions = this.actions;
-                for (var i = 0; i < actions.length; i++) {
-                    var action = actions[i];
-                    if (action.name == name) {
-                        return actions.splice(i, 1)[0];
-                    }
-                }
-                return null;
-            }
-        }]);
-
-        return ObjectBase;
-    }();
-    //////////////////////////End File:flower/core/ObjectBase.js///////////////////////////
-
     //////////////////////////File:flower/event/EventDispatcher.js///////////////////////////
-
 
     var EventDispatcher = function () {
         function EventDispatcher(target) {
             _classCallCheck(this, EventDispatcher);
 
-            this._hasDispose = false;
+            this.__hasDispose = false;
 
-            this.$EventDispatcher = {
+            this.__EventDispatcher = {
                 0: target || this,
                 1: {}
             };
@@ -376,8 +217,8 @@ var _exports = {};
         _createClass(EventDispatcher, [{
             key: "dispose",
             value: function dispose() {
-                this.$EventDispatcher = null;
-                this._hasDispose = true;
+                this.__EventDispatcher = null;
+                this.__hasDispose = true;
             }
 
             /**
@@ -426,11 +267,11 @@ var _exports = {};
             key: "__addListener",
             value: function __addListener(type, listener, thisObject, priority, once) {
                 if (DEBUG) {
-                    if (this._hasDispose) {
+                    if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
-                var values = this.$EventDispatcher;
+                var values = this.__EventDispatcher;
                 var events = values[1];
                 var list = events[type];
                 if (!list) {
@@ -448,11 +289,11 @@ var _exports = {};
             key: "removeListener",
             value: function removeListener(type, listener, thisObject) {
                 if (DEBUG) {
-                    if (this._hasDispose) {
+                    if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
-                var values = this.$EventDispatcher;
+                var values = this.__EventDispatcher;
                 var events = values[1];
                 var list = events[type];
                 if (!list) {
@@ -471,12 +312,12 @@ var _exports = {};
             key: "removeAllListener",
             value: function removeAllListener() {
                 if (DEBUG) {
-                    if (this._hasDispose) {
+                    if (this.__hasDispose) {
                         $error(1002);
                     }
                     return;
                 }
-                var values = this.$EventDispatcher;
+                var values = this.__EventDispatcher;
                 var events = values[1];
                 events = {};
             }
@@ -484,11 +325,11 @@ var _exports = {};
             key: "hasListener",
             value: function hasListener(type) {
                 if (DEBUG) {
-                    if (this._hasDispose) {
+                    if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
-                var events = this.$EventDispatcher[1];
+                var events = this.__EventDispatcher[1];
                 var list = events[type];
                 if (!list) {
                     return false;
@@ -504,11 +345,11 @@ var _exports = {};
             key: "dispatch",
             value: function dispatch(event) {
                 if (DEBUG) {
-                    if (this._hasDispose) {
+                    if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
-                var list = this.$EventDispatcher[1][event.type];
+                var list = this.__EventDispatcher[1][event.type];
                 if (!list) {
                     return;
                 }
@@ -541,7 +382,7 @@ var _exports = {};
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
                 if (DEBUG) {
-                    if (this._hasDispose) {
+                    if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
@@ -1100,11 +941,340 @@ var _exports = {};
     var DisplayObject = function (_EventDispatcher) {
         _inherits(DisplayObject, _EventDispatcher);
 
+        /**
+         * 舞台类
+         */
+
+
+        /**
+         * 脏标识
+         * 0x0001 size 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+         * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
+         * 0x0100 重排子对象顺序
+         */
+
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            return _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+
+            _this.__DisplayObject = {
+                0: 1, //scaleX
+                1: 1, //scaleY
+                2: 0, //rotation
+                3: null, //settingWidth
+                4: null, //settingHeight
+                5: "", //name
+                6: new Size() //size 自身尺寸
+            };
+            _this.__flags = 0;
+            return _this;
         }
+
+        /**
+         * 是否有此标识位
+         * @param flags
+         * @returns {boolean}
+         */
+
+
+        /**
+         * native 显示，比如 cocos2dx 的显示对象或者 egret 的显示对象等...
+         */
+
+
+        /**
+         * 父对象
+         */
+
+
+        _createClass(DisplayObject, [{
+            key: "$hasFlags",
+            value: function $hasFlags(flags) {
+                return this.__flags & flags == flags ? true : false;
+            }
+        }, {
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                this.__flags |= flags;
+            }
+        }, {
+            key: "$addFlagsUp",
+            value: function $addFlagsUp(flags) {
+                if (this.$hasFlags(flags)) {
+                    return;
+                }
+                this.$addFlags(flags);
+                if (this.__parent) {
+                    this.__parent.$addFlags(flags);
+                }
+            }
+        }, {
+            key: "$addFlagsDown",
+            value: function $addFlagsDown(flags) {
+                if (this.$hasFlags(flags)) {
+                    return;
+                }
+                this.$addFlags(flags);
+            }
+        }, {
+            key: "$removeFlags",
+            value: function $removeFlags(flags) {
+                this.__flags &= ~flags;
+            }
+        }, {
+            key: "$removeFlagsUp",
+            value: function $removeFlagsUp(flags) {
+                if (!this.$hasFlags(flags)) {
+                    return;
+                }
+                this.$removeFlags(flags);
+                if (this.__parent) {
+                    this.__parent.$removeFlags(flags);
+                }
+            }
+        }, {
+            key: "$removeFlagsDown",
+            value: function $removeFlagsDown(flags) {
+                if (!this.$hasFlags(flags)) {
+                    return;
+                }
+                this.$removeFlags(flags);
+            }
+        }, {
+            key: "$setX",
+            value: function $setX(val) {
+                val = +val || 0;
+                if (val == this.__x) {
+                    return;
+                }
+                this.__x = val;
+                this.$invalidPositionScale();
+            }
+        }, {
+            key: "$setY",
+            value: function $setY(val) {
+                val = +val || 0;
+                if (val == this.__y) {
+                    return;
+                }
+                this.__y = val;
+                this.$invalidPositionScale();
+            }
+        }, {
+            key: "$setScaleX",
+            value: function $setScaleX(val) {
+                val = +val || 0;
+                var p = this.$DisplayObject;
+                if (p[0] == val) {
+                    return;
+                }
+                p[0] = val;
+                this.$invalidPositionScale();
+            }
+        }, {
+            key: "$setScaleY",
+            value: function $setScaleY(val) {
+                val = +val || 0;
+                var p = this.$DisplayObject;
+                if (p[1] == val) {
+                    return;
+                }
+                p[1] = val;
+                this.$invalidPositionScale();
+            }
+        }, {
+            key: "$setRotation",
+            value: function $setRotation(val) {
+                val = +val || 0;
+                var p = this.$DisplayObject;
+                if (p[2] == val) {
+                    return;
+                }
+                p[2] = val;
+                this.$invalidPositionScale();
+            }
+        }, {
+            key: "$setWidth",
+            value: function $setWidth(val) {
+                val = +val || 0;
+                val = val < 0 ? 0 : val;
+                var p = this.$DisplayObject;
+                if (p[3] == val) {
+                    return;
+                }
+                p[3] = val;
+                this.invalidSize();
+            }
+        }, {
+            key: "$getWidth",
+            value: function $getWidth() {
+                var p = this.$DisplayObject;
+                return p[2] != null ? p[2] : this.$getSize().height;
+            }
+        }, {
+            key: "$setHeight",
+            value: function $setHeight(val) {
+                val = +val || 0;
+                val = val < 0 ? 0 : val;
+                var p = this.$DisplayObject;
+                if (p[4] == val) {
+                    return;
+                }
+                p[4] = val;
+                this.invalidSize();
+            }
+        }, {
+            key: "$getHeight",
+            value: function $getHeight() {
+                var p = this.$DisplayObject;
+                return p[3] != null ? p[3] : this.$getSize().width;
+            }
+        }, {
+            key: "$getSize",
+            value: function $getSize() {
+                var size = this.$DisplayObject[6];
+                if (this.$hasFlags(0x0001)) {
+                    this.calculateSize();
+                    this.$removeFlags(0x0001);
+                }
+                return size;
+            }
+        }, {
+            key: "$setParent",
+            value: function $setParent(parent, stage) {
+                this.__parent = parent;
+                this.__stage = stage;
+                if (this.__parent) {
+                    this.dispatchWidth(Event.ADDED);
+                } else {
+                    this.dispatchWidth(Event.REMOVED);
+                }
+            }
+        }, {
+            key: "$dispatchAddedToStageEvent",
+            value: function $dispatchAddedToStageEvent() {
+                if (this.__stage) {
+                    this.dispatchWidth(Event.ADDED_TO_STAGE);
+                }
+            }
+        }, {
+            key: "$dispatchRemovedFromStageEvent",
+            value: function $dispatchRemovedFromStageEvent() {
+                if (!this.__stage) {
+                    this.dispatchWidth(Event.REMOVED_FROM_STAGE);
+                }
+            }
+        }, {
+            key: "dispatch",
+            value: function dispatch(e) {
+                if (e.bubbles && this.__parent) {
+                    this.__parent.dispatch(e);
+                }
+            }
+        }, {
+            key: "calculateSize",
+
+
+            /**
+             * 计算尺寸
+             * 子类实现
+             * @param size
+             */
+            value: function calculateSize(size) {}
+
+            /**
+             * 本身尺寸失效
+             */
+
+        }, {
+            key: "invalidSize",
+            value: function invalidSize() {
+                this.$addFlagsUp(0x0001);
+            }
+        }, {
+            key: "$invalidPositionScale",
+            value: function $invalidPositionScale() {
+                if (this.__parent) {
+                    this.__parent.$addFlagsUp(0x0001);
+                }
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {}
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                if (this.parent) {
+                    this.parent.removeChild(this);
+                }
+                _get(Object.getPrototypeOf(DisplayObject.prototype), "dispose", this).call(this);
+            }
+        }, {
+            key: "x",
+            get: function get() {
+                return this.__x;
+            },
+            set: function set(val) {
+                this.$setX(val);
+            }
+        }, {
+            key: "y",
+            get: function get() {
+                return this.__y;
+            },
+            set: function set(val) {
+                this.$setY(val);
+            }
+        }, {
+            key: "scaleX",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[0];
+            },
+            set: function set(val) {
+                this.$setScaleX(val);
+            }
+        }, {
+            key: "scaleY",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[1];
+            },
+            set: function set(val) {
+                this.$setScaleY(val);
+            }
+        }, {
+            key: "rotation",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[2];
+            },
+            set: function set(val) {
+                this.$setRotation(val);
+            }
+        }, {
+            key: "width",
+            get: function get() {
+                return this.$getWidth();
+            },
+            set: function set(val) {
+                this.$setWidth(val);
+            }
+        }, {
+            key: "height",
+            get: function get() {
+                return this.$getHeight();
+            },
+            set: function set(val) {
+                this.$setHeight(val);
+            }
+        }, {
+            key: "parent",
+            get: function get() {
+                return this.__parent;
+            }
+        }]);
 
         return DisplayObject;
     }(EventDispatcher);
@@ -1121,7 +1291,8 @@ var _exports = {};
 
             var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this2._childs = [];
+            _this2.__children = [];
+            _this2.$nativeShow = Platform.create("Sprite");
             return _this2;
         }
 
@@ -1132,15 +1303,323 @@ var _exports = {};
                     return;
                 }
                 this.$addFlag(flags);
-                var childs = this._childs;
-                for (var i = 0; i < childs.length; i++) {
-                    childs[i].$addFlagsDown(flags);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$addFlagsDown(flags);
                 }
+            }
+        }, {
+            key: "$removeFlagsDown",
+            value: function $removeFlagsDown(flags) {
+                if (!this.$hasFlags(flags)) {
+                    return;
+                }
+                this.$removeFlags(flags);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$removeFlagsDown(flags);
+                }
+            }
+        }, {
+            key: "addChild",
+            value: function addChild(child) {
+                this.addChildAt(child, this.__children.length);
+            }
+        }, {
+            key: "addChildAt",
+            value: function addChildAt(child, index) {
+                var children = this.__children;
+                if (index < 0 || index > children.length) {
+                    return;
+                }
+                if (child.parent == this) {
+                    this.setChildIndex(child, index);
+                } else {
+                    if (child.parent) {
+                        child.parent.$removeChild(child);
+                    }
+                    children.splice(index, 0, child);
+                    child.$setParent(this, this.stage);
+                    if (child.parent == this) {
+                        child.$dispatchAddedToStageEvent();
+                        this.invalidSize();
+                        this.$addFlags(0x0100);
+                    }
+                }
+            }
+        }, {
+            key: "$removeChild",
+            value: function $removeChild(child) {
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i] == child) {
+                        children.splice(i, 1);
+                        this.invalidSize();
+                        this.$addFlags(0x0100);
+                        break;
+                    }
+                }
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(child) {
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i] == child) {
+                        children.splice(i, 1);
+                        child.$setParent(null, null);
+                        child.$dispatchRemovedFromStageEvent();
+                        this.invalidSize();
+                        this.$addFlags(0x0100);
+                        break;
+                    }
+                }
+            }
+        }, {
+            key: "removeChildAt",
+            value: function removeChildAt(index) {
+                var children = this.__children;
+                if (index < 0 || index >= children.length) {
+                    return;
+                }
+                this.removeChild(children[index]);
+            }
+        }, {
+            key: "setChildIndex",
+            value: function setChildIndex(child, index) {
+                var childIndex = this.getChildIndex(child);
+                if (childIndex == index) {
+                    return;
+                }
+                var children = this.__children;
+                children.splice(childIndex, 1);
+                children.splice(index, 0, child);
+                this.$addFlags(0x0100);
+            }
+        }, {
+            key: "getChildIndex",
+            value: function getChildIndex(child) {
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (child == children[i]) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    this.$nativeShow.resetChildIndex(this.__children);
+                    this.$removeFlags(0x0100);
+                }
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                var children = this.__children;
+                while (children.length) {
+                    var child = children[children.length - 1];
+                    child.dispose();
+                }
+                _get(Object.getPrototypeOf(Sprite.prototype), "dispose", this).call(this);
+                this.$nativeShow.release();
+                Platform.release(this.$nativeShow);
+            }
+        }, {
+            key: "numChildren",
+            get: function get() {
+                return this.__children.length;
             }
         }]);
 
         return Sprite;
     }(DisplayObject);
     //////////////////////////End File:flower/display/Sprite.js///////////////////////////
+
+    //////////////////////////File:flower/texture/Texture.js///////////////////////////
+
+
+    var Texture = function () {
+        function Texture(nativeTexture, url, nativeURL, w, h) {
+            _classCallCheck(this, Texture);
+
+            this.__offX = 0;
+            this.__offY = 0;
+            this.__sourceRotation = false;
+
+            this.__nativeTexture = nativeTexture;
+            this.__url = url;
+            this.__nativeURL = nativeURL;
+            this.$count = 0;
+            this.__width = w;
+            this.__height = h;
+        }
+
+        _createClass(Texture, [{
+            key: "createSubTexture",
+            value: function createSubTexture(startX, startY, width, height) {
+                var offX = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
+                var offY = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
+                var rotation = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
+
+                var sub = new flower.Texture2D(this.__nativeTexture, this.__url, this.__nativeURL, width, height);
+                sub.$parentTexture = this.$parentTexture || this;
+                var rect = flower.Rectangle.create();
+                rect.x = startX;
+                rect.y = startY;
+                rect.width = width;
+                rect.height = height;
+                sub.__source = rect;
+                sub.__sourceRotation = rotation;
+                sub.__offX = offX;
+                sub.__offY = offY;
+                return sub;
+            }
+        }, {
+            key: "$addCount",
+            value: function $addCount() {
+                if (this._parentTexture) {
+                    this._parentTexture.$addCount();
+                } else {
+                    this.$count++;
+                }
+            }
+        }, {
+            key: "$delCount",
+            value: function $delCount() {
+                if (this._parentTexture) {
+                    this._parentTexture.$delCount();
+                } else {
+                    this.$count--;
+                    if (this.$count < 0) {
+                        this.$count = 0;
+                    }
+                }
+            }
+        }, {
+            key: "getCount",
+            value: function getCount() {
+                if (this._parentTexture) {
+                    this._parentTexture.getCount();
+                } else {
+                    return this.$count;
+                }
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                if (this.$count != 0) {
+                    return;
+                }
+                this.__nativeTexture.dispose();
+                this.__nativeTexture = null;
+                if (TIP) {
+                    tip(1005, this.url);
+                }
+            }
+
+            /**
+             * 空白图片
+             */
+
+        }, {
+            key: "url",
+            get: function get() {
+                return this.__url;
+            }
+        }, {
+            key: "nativeURL",
+            get: function get() {
+                return this.__nativeURL;
+            }
+        }, {
+            key: "width",
+            get: function get() {
+                return this.__width;
+            }
+        }, {
+            key: "height",
+            get: function get() {
+                return this.__height;
+            }
+        }, {
+            key: "source",
+            get: function get() {
+                return this.__source;
+            }
+        }, {
+            key: "offX",
+            get: function get() {
+                return this.__offX;
+            }
+        }, {
+            key: "offY",
+            get: function get() {
+                return this.__offY;
+            }
+        }, {
+            key: "sourceRotation",
+            get: function get() {
+                return this.__sourceRotation;
+            }
+        }, {
+            key: "$nativeTexture",
+            get: function get() {
+                return this.__nativeTexture;
+            }
+        }]);
+
+        return Texture;
+    }();
+    //////////////////////////End File:flower/texture/Texture.js///////////////////////////
+
+    //////////////////////////File:flower/res/ResItem.js///////////////////////////
+
+
+    var ResItem = function () {
+        /**
+         * 使用时的路径
+         */
+
+        function ResItem() {
+            _classCallCheck(this, ResItem);
+
+            this.__loadList = [];
+        }
+
+        /**
+         * 实际的加载地址有哪些
+         */
+
+
+        _createClass(ResItem, [{
+            key: "addInfo",
+            value: function addInfo(url, settingWidth, settingHeight, scale, language) {
+                var info = new ResItemInfo();
+                info.url = url;
+                info.settingWidth = settingWidth;
+                info.settingHeight = settingHeight;
+                info.scale = scale;
+                info.language = language;
+                this.__loadList.push(info);
+            }
+        }]);
+
+        return ResItem;
+    }();
+    //////////////////////////End File:flower/res/ResItem.js///////////////////////////
+
+    //////////////////////////File:flower/res/ResItemInfo.js///////////////////////////
+
+
+    var ResItemInfo = function ResItemInfo() {
+        _classCallCheck(this, ResItemInfo);
+    };
+    //////////////////////////End File:flower/res/ResItemInfo.js///////////////////////////
 })();
 var flower = _exports;

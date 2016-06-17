@@ -51,8 +51,8 @@
  *
  */
 
-cc.game.onStart = function(){
-    if(!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
+cc.game.onStart = function () {
+    if (!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
         document.body.removeChild(document.getElementById("cocosLoading"));
 
 
@@ -61,6 +61,12 @@ cc.game.onStart = function(){
             new Main();
         });
     });
+
+    //console.log(8899 & 0x7fffffff);
+    //console.log(-8899 & 0x7fffffff);
+    //console.log(8899 & 0xffffffff);
+    //console.log(-8899 & 0xffffffff);
+
     //// Pass true to enable retina display, on Android disabled by default to improve performance
     //cc.view.enableRetina(cc.sys.os === cc.sys.OS_IOS ? true : false);
     //// Adjust viewport meta

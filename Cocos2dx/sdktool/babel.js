@@ -178,7 +178,9 @@ var list = [
     "Sprite",
     "Bitmap",
     "Texture",
-    "Loader"
+    "Loader",
+    "ResItem",
+    "ResItemInfo"
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "(function(){\n";

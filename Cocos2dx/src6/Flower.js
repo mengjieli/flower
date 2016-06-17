@@ -2,13 +2,32 @@ var exports = {};
 (function(){
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
+var TIP = true;
 var $language = "zh_CN";
+/**
+ * 用户使用的语言
+ * @type {null}
+ */
+var language = "";
 
-function start() {
+/**
+ * 启动引擎
+ * @param language 使用的语言版本
+ */
+function start(language) {
+    language = language || "";
     Platform.start();
 }
 
+function getLanaguge() {
+    return language;
+}
+
 function $error(errorCode, ...args) {
+    console.log(getLanguage(errorCode, args));
+}
+
+function $tip(errorCode, ...args) {
     console.log(getLanguage(errorCode, args));
 }
 
@@ -32,7 +51,7 @@ function clampRotation(value) {
 }
 
 exports.start = start;
-
+exports.getLanguage = getLanaguge;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
 
@@ -87,6 +106,34 @@ class Platform {
         //Platform.stage.addChild(debugRoot);
         //System.$mesureTxt.retain();
     }
+
+    static pools = {};
+
+    static create(name) {
+        var pools = Platform.pools;
+        if (name == "Sprite") {
+            if (pools.Sprite && pools.Sprite.length) {
+                return pools.Sprite.pop();
+            }
+            return new PlatformSprite();
+        }
+        if (name == "TextField") {
+            if (pools.TextField && pools.TextField.length) {
+                return pools.TextField.pop();
+            }
+            return new PlatformTextField();
+        }
+        return null;
+    }
+
+    static release(name, object) {
+        var pools = Platform.pools;
+        if (!pools[name]) {
+            pools[name] = [];
+        }
+        pools[name].push(object);
+
+    }
 }
 //////////////////////////End File:flower/platform/cocos2dx/Platform.js///////////////////////////
 
@@ -126,201 +173,30 @@ var locale_strings = $locale_strings["zh_CN"];
 //core  1000-1999
 locale_strings[1001] = "对象已经回收。";
 locale_strings[1002] = "对象已释放。";
+locale_strings[1003] = "重复创建纹理:{0}";
+locale_strings[1004] = "创建纹理:{0}";
+locale_strings[1005] = "释放纹理:{0}";
+
 //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
-
-
-
-//////////////////////////File:flower/core/Action.js///////////////////////////
-class Action {
-
-    /**
-     * 行为名称
-     * @type {string}
-     */
-    name = "";
-
-    constructor() {
-
-    }
-
-    /**
-     * 执行行为
-     */
-    execute() {
-
-    }
-}
-//////////////////////////End File:flower/core/Action.js///////////////////////////
-
-
-
-//////////////////////////File:flower/core/Feature.js///////////////////////////
-class Feature {
-
-    items = [];
-
-    constructor() {
-
-    }
-
-    /**
-     * 获取某个特征
-     * @param name
-     * @returns {*}
-     */
-    getItemByName(name) {
-        var items = this.items;
-        for (var i = 0; i < items.length; i++) {
-            if (items[i].name == name) {
-                return items[i];
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 添加特征描述，如果之前已有此名称的特征，会覆盖之前的特征值，不会插入新的特征描述
-     * @param name 特征名称,比如 x
-     * @param value 特征值，比如 100
-     */
-    addItem(name, value) {
-        var item = this.getItemByName(name);
-        if(item) {
-            item.value = value;
-            return;
-        }
-        this.items.push({
-            "name": name,
-            "value": value
-        })
-    }
-
-    /**
-     * 移除特征，根据名字匹配
-     * @param name
-     * @returns {*}
-     */
-    removeItemByName(name) {
-        var items = this.items;
-        for (var i = 0; i < items.length; i++) {
-            if (items[i].name == name) {
-                return items.splice(i, 1)[0];
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 检测对象特征是否符合
-     * @param object
-     */
-    checkObject(object) {
-        var items = this.items;
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            if (object[item.name] != item.value) {
-                return false;
-            }
-        }
-        return true;
-    }
-}
-//////////////////////////End File:flower/core/Feature.js///////////////////////////
-
-
-
-//////////////////////////File:flower/core/ObjectBase.js///////////////////////////
-class ObjectBase {
-
-    /**
-     * 行为队列
-     * @type {Array}
-     */
-    actions = [];
-
-    constructor() {
-    }
-
-    /**
-     * 执行特定的行为
-     * @param name 行为名称
-     * @param args 行为参数
-     */
-    executeAction(name, ...args) {
-        var action;
-        var actions = this.actions;
-        for (var i = 0; i < actions.length; i++) {
-            if (actions[i].name == action.name) {
-                action = actions[i];
-                break;
-            }
-        }
-        if (action) {
-            action.execute.apply(action, args);
-        }
-    }
-
-    getAction(name) {
-        var actions = this.actions;
-        for (var i = 0; i < actions.length; i++) {
-            if (actions[i].name == action.name) {
-                return actions[i];
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 添加行为，如果之前已有相同名称的行为，会被顶替
-     * @param action
-     */
-    addAction(action) {
-        var actions = this.actions;
-        for (var i = 0; i < actions.length; i++) {
-            if (actions[i].name == action.name) {
-                actions.splice(i, 1);
-                break;
-            }
-        }
-        this.actions.push(action);
-    }
-
-    /**
-     * 移除行为
-     * @param name 要移除的行为名称
-     * @returns {*}
-     */
-    removeAction(name) {
-        var actions = this.actions;
-        for (var i = 0; i < actions.length; i++) {
-            var action = actions[i];
-            if (action.name == name) {
-                return actions.splice(i, 1)[0];
-            }
-        }
-        return null;
-    }
-}
-//////////////////////////End File:flower/core/ObjectBase.js///////////////////////////
 
 
 
 //////////////////////////File:flower/event/EventDispatcher.js///////////////////////////
 class EventDispatcher {
 
-    $EventDispatcher;
-    _hasDispose = false;
+    __EventDispatcher;
+    __hasDispose = false;
 
     constructor(target) {
-        this.$EventDispatcher = {
+        this.__EventDispatcher = {
             0: target || this,
             1: {}
         }
     }
 
     dispose() {
-        this.$EventDispatcher = null;
-        this._hasDispose = true;
+        this.__EventDispatcher = null;
+        this.__hasDispose = true;
     }
 
     /**
@@ -356,11 +232,11 @@ class EventDispatcher {
      */
     __addListener(type, listener, thisObject, priority, once) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var values = this.$EventDispatcher;
+        var values = this.__EventDispatcher;
         var events = values[1];
         var list = events[type];
         if (!list) {
@@ -377,11 +253,11 @@ class EventDispatcher {
 
     removeListener(type, listener, thisObject) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var values = this.$EventDispatcher;
+        var values = this.__EventDispatcher;
         var events = values[1];
         var list = events[type];
         if (!list) {
@@ -399,23 +275,23 @@ class EventDispatcher {
 
     removeAllListener() {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
             return;
         }
-        var values = this.$EventDispatcher;
+        var values = this.__EventDispatcher;
         var events = values[1];
         events = {};
     }
 
     hasListener(type) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var events = this.$EventDispatcher[1];
+        var events = this.__EventDispatcher[1];
         var list = events[type];
         if (!list) {
             return false;
@@ -430,11 +306,11 @@ class EventDispatcher {
 
     dispatch(event) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var list = this.$EventDispatcher[1][event.type];
+        var list = this.__EventDispatcher[1][event.type];
         if (!list) {
             return;
         }
@@ -464,7 +340,7 @@ class EventDispatcher {
 
     dispatchWidth(type, data = null) {
         if (DEBUG) {
-            if (this._hasDispose) {
+            if (this.__hasDispose) {
                 $error(1002);
             }
         }
@@ -964,8 +840,310 @@ function blendModeToNumber(val) {
 
 //////////////////////////File:flower/display/DisplayObject.js///////////////////////////
 class DisplayObject extends EventDispatcher {
+
+    __x;
+    __y;
+
+    __DisplayObject;
+
+    /**
+     * 脏标识
+     * 0x0001 size 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+     * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
+     * 0x0100 重排子对象顺序
+     */
+    __flags;
+
+    /**
+     * 父对象
+     */
+    __parent;
+
+    /**
+     * 舞台类
+     */
+    __stage;
+
+    /**
+     * native 显示，比如 cocos2dx 的显示对象或者 egret 的显示对象等...
+     */
+    $nativeShow;
+
     constructor() {
         super();
+        this.__DisplayObject = {
+            0: 1, //scaleX
+            1: 1, //scaleY
+            2: 0, //rotation
+            3: null, //settingWidth
+            4: null, //settingHeight
+            5: "", //name
+            6: new Size() //size 自身尺寸
+        }
+        this.__flags = 0;
+    }
+
+    /**
+     * 是否有此标识位
+     * @param flags
+     * @returns {boolean}
+     */
+    $hasFlags(flags) {
+        return this.__flags & flags == flags ? true : false;
+    }
+
+    $addFlags(flags) {
+        this.__flags |= flags;
+    }
+
+    $addFlagsUp(flags) {
+        if (this.$hasFlags(flags)) {
+            return;
+        }
+        this.$addFlags(flags);
+        if (this.__parent) {
+            this.__parent.$addFlags(flags);
+        }
+    }
+
+    $addFlagsDown(flags) {
+        if (this.$hasFlags(flags)) {
+            return;
+        }
+        this.$addFlags(flags);
+    }
+
+    $removeFlags(flags) {
+        this.__flags &= ~flags;
+    }
+
+    $removeFlagsUp(flags) {
+        if (!this.$hasFlags(flags)) {
+            return;
+        }
+        this.$removeFlags(flags);
+        if (this.__parent) {
+            this.__parent.$removeFlags(flags);
+        }
+    }
+
+    $removeFlagsDown(flags) {
+        if (!this.$hasFlags(flags)) {
+            return;
+        }
+        this.$removeFlags(flags);
+    }
+
+    $setX(val) {
+        val = +val || 0;
+        if (val == this.__x) {
+            return;
+        }
+        this.__x = val;
+        this.$invalidPositionScale();
+    }
+
+    $setY(val) {
+        val = +val || 0;
+        if (val == this.__y) {
+            return;
+        }
+        this.__y = val;
+        this.$invalidPositionScale();
+    }
+
+    $setScaleX(val) {
+        val = +val || 0;
+        var p = this.$DisplayObject;
+        if (p[0] == val) {
+            return;
+        }
+        p[0] = val;
+        this.$invalidPositionScale();
+    }
+
+    $setScaleY(val) {
+        val = +val || 0;
+        var p = this.$DisplayObject;
+        if (p[1] == val) {
+            return;
+        }
+        p[1] = val;
+        this.$invalidPositionScale();
+    }
+
+    $setRotation(val) {
+        val = +val || 0;
+        var p = this.$DisplayObject;
+        if (p[2] == val) {
+            return;
+        }
+        p[2] = val;
+        this.$invalidPositionScale();
+    }
+
+    $setWidth(val) {
+        val = +val || 0;
+        val = val < 0 ? 0 : val;
+        var p = this.$DisplayObject;
+        if (p[3] == val) {
+            return;
+        }
+        p[3] = val;
+        this.invalidSize();
+    }
+
+    $getWidth() {
+        var p = this.$DisplayObject;
+        return p[2] != null ? p[2] : this.$getSize().height;
+    }
+
+    $setHeight(val) {
+        val = +val || 0;
+        val = val < 0 ? 0 : val;
+        var p = this.$DisplayObject;
+        if (p[4] == val) {
+            return;
+        }
+        p[4] = val;
+        this.invalidSize();
+    }
+
+    $getHeight() {
+        var p = this.$DisplayObject;
+        return p[3] != null ? p[3] : this.$getSize().width;
+    }
+
+    $getSize() {
+        var size = this.$DisplayObject[6];
+        if (this.$hasFlags(0x0001)) {
+            this.calculateSize();
+            this.$removeFlags(0x0001);
+        }
+        return size;
+    }
+
+    $setParent(parent, stage) {
+        this.__parent = parent;
+        this.__stage = stage;
+        if (this.__parent) {
+            this.dispatchWidth(Event.ADDED);
+        } else {
+            this.dispatchWidth(Event.REMOVED);
+        }
+    }
+
+    $dispatchAddedToStageEvent() {
+        if (this.__stage) {
+            this.dispatchWidth(Event.ADDED_TO_STAGE);
+        }
+    }
+
+    $dispatchRemovedFromStageEvent() {
+        if (!this.__stage) {
+            this.dispatchWidth(Event.REMOVED_FROM_STAGE);
+        }
+    }
+
+    dispatch(e) {
+        if (e.bubbles && this.__parent) {
+            this.__parent.dispatch(e);
+        }
+    }
+
+    get x() {
+        return this.__x;
+    }
+
+    set x(val) {
+        this.$setX(val);
+    }
+
+    get y() {
+        return this.__y;
+    }
+
+    set y(val) {
+        this.$setY(val);
+    }
+
+    get scaleX() {
+        var p = this.$DisplayObject;
+        return p[0];
+    }
+
+    set scaleX(val) {
+        this.$setScaleX(val);
+    }
+
+    get scaleY() {
+        var p = this.$DisplayObject;
+        return p[1];
+    }
+
+    set scaleY(val) {
+        this.$setScaleY(val);
+    }
+
+    get rotation() {
+        var p = this.$DisplayObject;
+        return p[2];
+    }
+
+    set rotation(val) {
+        this.$setRotation(val);
+    }
+
+    get width() {
+        return this.$getWidth();
+    }
+
+    set width(val) {
+        this.$setWidth(val);
+    }
+
+    get height() {
+        return this.$getHeight();
+    }
+
+    set height(val) {
+        this.$setHeight(val);
+    }
+
+    get parent() {
+        return this.__parent;
+    }
+
+    /**
+     * 计算尺寸
+     * 子类实现
+     * @param size
+     */
+    calculateSize(size) {
+
+    }
+
+    /**
+     * 本身尺寸失效
+     */
+    invalidSize() {
+        this.$addFlagsUp(0x0001);
+    }
+
+    $invalidPositionScale() {
+        if (this.__parent) {
+            this.__parent.$addFlagsUp(0x0001);
+        }
+    }
+
+    $onFrameEnd() {
+    }
+
+    dispose() {
+        if (this.parent) {
+            this.parent.removeChild(this);
+        }
+        super.dispose();
     }
 }
 //////////////////////////End File:flower/display/DisplayObject.js///////////////////////////
@@ -975,11 +1153,12 @@ class DisplayObject extends EventDispatcher {
 //////////////////////////File:flower/display/Sprite.js///////////////////////////
 class Sprite extends DisplayObject {
 
-    _childs;
+    __children;
 
     constructor() {
         super();
-        this._childs = [];
+        this.__children = [];
+        this.$nativeShow = Platform.create("Sprite");
     }
 
     $addFlagsDown(flags) {
@@ -987,13 +1166,313 @@ class Sprite extends DisplayObject {
             return;
         }
         this.$addFlag(flags);
-        var childs = this._childs;
-        for (var i = 0; i < childs.length; i++) {
-            childs[i].$addFlagsDown(flags);
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$addFlagsDown(flags);
         }
+    }
+
+    $removeFlagsDown(flags) {
+        if (!this.$hasFlags(flags)) {
+            return;
+        }
+        this.$removeFlags(flags);
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$removeFlagsDown(flags);
+        }
+    }
+
+    addChild(child) {
+        this.addChildAt(child, this.__children.length);
+    }
+
+    addChildAt(child, index) {
+        var children = this.__children;
+        if (index < 0 || index > children.length) {
+            return;
+        }
+        if (child.parent == this) {
+            this.setChildIndex(child, index);
+        } else {
+            if (child.parent) {
+                child.parent.$removeChild(child);
+            }
+            children.splice(index, 0, child);
+            child.$setParent(this, this.stage);
+            if (child.parent == this) {
+                child.$dispatchAddedToStageEvent();
+                this.invalidSize();
+                this.$addFlags(0x0100);
+            }
+        }
+    }
+
+    $removeChild(child) {
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            if (children[i] == child) {
+                children.splice(i, 1);
+                this.invalidSize();
+                this.$addFlags(0x0100);
+                break;
+            }
+        }
+    }
+
+    removeChild(child) {
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            if (children[i] == child) {
+                children.splice(i, 1);
+                child.$setParent(null, null);
+                child.$dispatchRemovedFromStageEvent();
+                this.invalidSize();
+                this.$addFlags(0x0100);
+                break;
+            }
+        }
+    }
+
+    removeChildAt(index) {
+        var children = this.__children;
+        if (index < 0 || index >= children.length) {
+            return;
+        }
+        this.removeChild(children[index]);
+    }
+
+    setChildIndex(child, index) {
+        var childIndex = this.getChildIndex(child);
+        if (childIndex == index) {
+            return;
+        }
+        var children = this.__children;
+        children.splice(childIndex, 1);
+        children.splice(index, 0, child);
+        this.$addFlags(0x0100);
+    }
+
+    getChildIndex(child) {
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            if (child == children[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    $onFrameEnd() {
+        /**
+         * 子对象序列改变
+         */
+        if (this.$hasFlags(0x0100)) {
+            this.$nativeShow.resetChildIndex(this.__children);
+            this.$removeFlags(0x0100);
+        }
+    }
+
+    get numChildren() {
+        return this.__children.length;
+    }
+
+    dispose() {
+        var children = this.__children;
+        while (children.length) {
+            var child = children[children.length - 1];
+            child.dispose();
+        }
+        super.dispose();
+        this.$nativeShow.release();
+        Platform.release(this.$nativeShow);
     }
 }
 //////////////////////////End File:flower/display/Sprite.js///////////////////////////
+
+
+
+//////////////////////////File:flower/texture/Texture.js///////////////////////////
+class Texture {
+
+    __source;
+    __offX = 0;
+    __offY = 0;
+    __sourceRotation = false;
+    __width;
+    __height;
+    __url;
+    __nativeURL;
+    __nativeTexture;
+    $count;
+    $parentTexture;
+
+    constructor(nativeTexture, url, nativeURL, w, h) {
+        this.__nativeTexture = nativeTexture;
+        this.__url = url;
+        this.__nativeURL = nativeURL;
+        this.$count = 0;
+        this.__width = w;
+        this.__height = h;
+    }
+
+    createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
+        var sub = new flower.Texture2D(this.__nativeTexture, this.__url, this.__nativeURL, width, height);
+        sub.$parentTexture = this.$parentTexture || this;
+        var rect = flower.Rectangle.create();
+        rect.x = startX;
+        rect.y = startY;
+        rect.width = width;
+        rect.height = height;
+        sub.__source = rect;
+        sub.__sourceRotation = rotation;
+        sub.__offX = offX;
+        sub.__offY = offY;
+        return sub;
+    }
+
+    $addCount() {
+        if (this._parentTexture) {
+            this._parentTexture.$addCount();
+        } else {
+            this.$count++;
+        }
+    }
+
+    $delCount() {
+        if (this._parentTexture) {
+            this._parentTexture.$delCount();
+        } else {
+            this.$count--;
+            if (this.$count < 0) {
+                this.$count = 0;
+            }
+        }
+    }
+
+    getCount() {
+        if (this._parentTexture) {
+            this._parentTexture.getCount();
+        } else {
+            return this.$count;
+        }
+    }
+
+    get url() {
+        return this.__url;
+    }
+
+    get nativeURL() {
+        return this.__nativeURL;
+    }
+
+    get width() {
+        return this.__width;
+    }
+
+    get height() {
+        return this.__height;
+    }
+
+    get source() {
+        return this.__source;
+    }
+
+    get offX() {
+        return this.__offX;
+    }
+
+    get offY() {
+        return this.__offY;
+    }
+
+    get sourceRotation() {
+        return this.__sourceRotation;
+    }
+
+    get $nativeTexture() {
+        return this.__nativeTexture;
+    }
+
+    dispose() {
+        if (this.$count != 0) {
+            return;
+        }
+        this.__nativeTexture.dispose();
+        this.__nativeTexture = null;
+        if (TIP) {
+            tip(1005, this.url);
+        }
+    }
+
+    /**
+     * 空白图片
+     */
+    static blank;
+}
+//////////////////////////End File:flower/texture/Texture.js///////////////////////////
+
+
+
+//////////////////////////File:flower/res/ResItem.js///////////////////////////
+class ResItem {
+    /**
+     * 使用时的路径
+     */
+    __url;
+
+    /**
+     * 实际的加载地址有哪些
+     */
+    __loadList = [];
+
+    constructor() {
+
+    }
+
+    addInfo(url, settingWidth, settingHeight, scale, language) {
+        var info = new ResItemInfo();
+        info.url = url;
+        info.settingWidth = settingWidth;
+        info.settingHeight = settingHeight;
+        info.scale = scale;
+        info.language = language;
+        this.__loadList.push(info);
+    }
+}
+//////////////////////////End File:flower/res/ResItem.js///////////////////////////
+
+
+
+//////////////////////////File:flower/res/ResItemInfo.js///////////////////////////
+class ResItemInfo {
+
+    /**
+     * 实际的加载地址
+     */
+    url;
+
+    /**
+     * 预设的宽
+     */
+    settingWidth;
+
+    /**
+     * 预设的高
+     */
+    settingHeight;
+
+    /**
+     * 支持的缩放倍数
+     */
+    scale;
+
+    /**
+     * 支持的语言
+     */
+    language;
+}
+//////////////////////////End File:flower/res/ResItemInfo.js///////////////////////////
 
 
 
