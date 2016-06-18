@@ -14,9 +14,20 @@ var language = "";
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(language) {
+function start(completeFunc, native, language) {
+    Platform.native = native;
     language = language || "";
-    Platform.start();
+    var stage = new Stage();
+    Platform._runBack = CoreTime.$run;
+    Platform.start(stage, stage.$nativeShow);
+
+    //completeFunc();
+    var loader = new URLLoader("res/blank.png");
+    loader.addListener(Event.COMPLETE, function (e) {
+        Texture.$blank = e.data;
+        completeFunc(Platform.stage,Platform.stage2);
+    });
+    loader.load();
 }
 
 function getLanaguge() {
@@ -59,13 +70,13 @@ exports.getLanguage = getLanaguge;
 //////////////////////////File:flower/platform/cocos2dx/Platform.js///////////////////////////
 class Platform {
     static type = "cocos2dx";
+    static native = cc.sys.isNative;
 
     static stage;
     static width;
     static height;
 
     static start(engine, root) {
-        return;
         var scene = cc.Scene.extend({
             ctor: function () {
                 this._super();
@@ -95,16 +106,33 @@ class Platform {
                 return true;
             },
         });
+        Platform.stage2 = root.show;
         Platform.stage = new scene();
         Platform.stage.update = Platform._run;
         cc.director.runScene(Platform.stage);
-        Platform.width = cc.Director.getInstance().getWinSize().width;
-        Platform.height = cc.Director.getInstance().getWinSize().height;
-        root.setPositionY(Platform.height);
+        Platform.width = cc.director.getWinSize().width;
+        Platform.height = cc.director.getWinSize().height;
+        root.show.setPositionY(Platform.height);
         //debugRoot.setPositionY(Platform.height);
-        Platform.stage.addChild(root);
+        Platform.stage.addChild(root.show);
         //Platform.stage.addChild(debugRoot);
         //System.$mesureTxt.retain();
+    }
+
+
+    static _runBack;
+    static lastTime = (new Date()).getTime();
+    static frame = 0;
+
+    static _run() {
+        Platform.frame++;
+        var now = (new Date()).getTime();
+        Platform._runBack(now - Platform.lastTime);
+        Platform.lastTime = now;
+        if (PlatformURLLoader.loadingList.length) {
+            var item = PlatformURLLoader.loadingList.shift();
+            item[0](item[1], item[2], item[3], item[4]);
+        }
     }
 
     static pools = {};
@@ -117,6 +145,12 @@ class Platform {
             }
             return new PlatformSprite();
         }
+        if (name == "Bitmap") {
+            if (pools.Bitmap && pools.Bitmap.length) {
+                return pools.Bitmap.pop();
+            }
+            return new PlatformBitmap();
+        }
         if (name == "TextField") {
             if (pools.TextField && pools.TextField.length) {
                 return pools.TextField.pop();
@@ -127,6 +161,7 @@ class Platform {
     }
 
     static release(name, object) {
+        object.release();
         var pools = Platform.pools;
         if (!pools[name]) {
             pools[name] = [];
@@ -136,6 +171,269 @@ class Platform {
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/Platform.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
+class PlatformSprite {
+
+    show;
+
+    constructor() {
+        this.show = new cc.Node();
+        this.show.setAnchorPoint(0, 0);
+        this.show.retain();
+    }
+
+    addChild(child) {
+        this.show.addChild(child.show);
+    }
+
+    removeChild(child) {
+        this.show.removeChild(child.show);
+    }
+
+    resetChildIndex(children) {
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$nativeShow.show.setLocalZOrder(i);
+        }
+    }
+
+    set x(val) {
+        this.show.setPositionX(val);
+    }
+
+    set y(val) {
+        this.show.setPositionY(-val);
+    }
+
+    set scaleX(val) {
+        this.show.setScaleX(val);
+    }
+
+    set scaleY(val) {
+        this.show.setScaleY(val);
+    }
+
+    set rotation(val) {
+        this.show.setRotation(val);
+    }
+
+    release() {
+        var show = this.show;
+        show.setPosition(0, 0);
+        show.setScale(1);
+        show.setOpacity(255);
+        show.setRotation(0);
+        show.setVisible(true);
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
+class PlatformTextField {
+
+    show;
+
+    constructor() {
+        this.show = new cc.LabelTTF("", "Times Roman", 12);
+        this.show.setAnchorPoint(0, 1);
+        this.show.retain();
+    }
+
+    release() {
+        var show = this.show;
+        show.setPosition(0, 0);
+        show.setScale(1);
+        show.setOpacity(255);
+        show.setRotation(0);
+        show.setVisible(true);
+        show.setString("");
+        show.setFontSize(12);
+        show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
+class PlatformBitmap {
+
+    show;
+
+    __texture;
+    __x = 0;
+    __y = 0;
+
+    constructor() {
+        this.show = new cc.Sprite();
+        this.show.setAnchorPoint(0, 1);
+        this.show.retain();
+    }
+
+    setTexture(texture) {
+        this.__texture = texture;
+        this.show.initWithTexture(texture.$nativeTexture);
+        var source = texture.source;
+        if (source) {
+            this.show.setTextureRect(source, texture.sourceRotation, {
+                width: source.width,
+                height: source.height
+            });
+        }
+        this.show.setAnchorPoint(0, 1);
+        this.x = this.__x;
+        this.y = this.__y;
+    }
+
+    set x(val) {
+        this.__x = val;
+        this.show.setPositionX(this.__x + this.__texture.offX);
+    }
+
+    set y(val) {
+        this.__y = val;
+        this.show.setPositionY(-this.__y + this.__texture.offY);
+    }
+
+    set scaleX(val) {
+        console.log("set scaleX " + val);
+        this.show.setScaleX(val);
+    }
+
+    set scaleY(val) {
+        this.show.setScaleY(val);
+    }
+
+    set rotation(val) {
+        console.log("rot?" + val);
+        this.show.setRotation(val);
+    }
+
+    release() {
+        var show = this.show;
+        show.setPosition(0, 0);
+        show.setScale(1);
+        show.setOpacity(255);
+        show.setRotation(0);
+        show.setVisible(true);
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
+class PlatformTexture {
+
+    textrue;
+    url;
+
+    constructor() {
+
+    }
+
+    dispose() {
+        cc.TextureCache.getInstance().removeTextureForKey(this.url);
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
+class PlatformURLLoader {
+
+    static isLoading = false;
+    static loadingList = [];
+
+    static loadText(url, back, errorBack, thisObj) {
+        if (PlatformURLLoader.isLoading) {
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
+            return;
+        }
+        PlatformURLLoader.isLoading = true;
+        if (TIP) {
+            $tip(2001, url);
+        }
+        if (url.slice(0, "http://".length) == "http://") {
+            var xhr = cc.loader.getXMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onloadend = function () {
+                if (xhr.status != 200) {
+                    errorBack.call(thisObj);
+                } else {
+                    back.call(thisObj, xhr.responseText);
+                }
+                PlatformURLLoader.isLoading = false;
+            };
+            xhr.send();
+        } else {
+            cc.loader.loadTxt(url, function (error, data) {
+                if (error) {
+                    errorBack.call(thisObj);
+                }
+                else {
+                    back.call(thisObj, data);
+                }
+                PlatformURLLoader.isLoading = false;
+            });
+        }
+    }
+
+    static loadTexture(url, back, errorBack, thisObj) {
+        if (PlatformURLLoader.isLoading) {
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
+            return;
+        }
+        PlatformURLLoader.isLoading = true;
+        if (TIP) {
+            $tip(2002, url);
+        }
+        cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
+            console.log("loadTextureOK?" + url + "," + err)
+            if (err) {
+                errorBack.call(thisObj);
+            }
+            else {
+                var texture = img;
+                if (Platform.native) {
+                    console.log("[loadTextureComplete]" + texture + "," + texture.getContentSize().width + "," + texture.getContentSize().height);
+                    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                } else {
+                    back.call(thisObj, texture, texture.width, texture.height);
+                }
+            }
+            PlatformURLLoader.isLoading = false;
+        });
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
+
+
+
+//////////////////////////File:flower/core/CoreTime.js///////////////////////////
+class CoreTime {
+
+    static currentTime = 0;
+    static lastTimeGap;
+
+    static $run(gap) {
+        CoreTime.lastTimeGap = gap;
+        CoreTime.currentTime += gap;
+        EnterFrame.$update(CoreTime.currentTime, gap);
+        //Engine.getInstance().$onFrameEnd();
+        TextureManager.getInstance().$check();
+    }
+
+    static getTime() {
+        return CoreTime.getTime();
+    }
+}
+//////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
 
 
@@ -176,6 +474,8 @@ locale_strings[1002] = "对象已释放。";
 locale_strings[1003] = "重复创建纹理:{0}";
 locale_strings[1004] = "创建纹理:{0}";
 locale_strings[1005] = "释放纹理:{0}";
+locale_strings[2001] = "[loadText] {0}";
+locale_strings[2002] = "[loadTexture] {0}";
 
 //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
@@ -864,6 +1164,9 @@ class DisplayObject extends EventDispatcher {
      */
     __stage;
 
+    __alpha = 1;
+    __concatAlpha = 1;
+
     /**
      * native 显示，比如 cocos2dx 的显示对象或者 egret 的显示对象等...
      */
@@ -940,6 +1243,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__x = val;
+        this.$nativeShow.x = val;
         this.$invalidPositionScale();
     }
 
@@ -949,43 +1253,76 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__y = val;
+        this.$nativeShow.y = val;
         this.$invalidPositionScale();
     }
 
     $setScaleX(val) {
         val = +val || 0;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[0] == val) {
             return;
         }
         p[0] = val;
+        this.$nativeShow.scaleX = val;
         this.$invalidPositionScale();
     }
 
     $setScaleY(val) {
         val = +val || 0;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[1] == val) {
             return;
         }
         p[1] = val;
+        this.$nativeShow.scaleY = val;
         this.$invalidPositionScale();
     }
 
     $setRotation(val) {
         val = +val || 0;
-        var p = this.$DisplayObject;
+        console.log("rot1? " + val);
+        var p = this.__DisplayObject;
+        console.log("rot12 " + val + "," + p[2]);
         if (p[2] == val) {
+            console.log("rot0!? " + val);
             return;
         }
         p[2] = val;
+        this.$nativeShow.rotation = val;
         this.$invalidPositionScale();
+    }
+
+    $setAlpha(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        if (val > 1) {
+            val = 1;
+        }
+        if (val == this.__alpha) {
+            return;
+        }
+        this.__alpha = val;
+        this.$addFlagsDown(0x0002);
+    }
+
+    $getConcatAlpha() {
+        if (this.$hasFlags(0x0002)) {
+            this.__concatAlpha = this.__alpha;
+            if (this.__parent) {
+                this.__concatAlpha *= this.__parent.$getConcatAlpha();
+            }
+            this.$removeFlags(0x0002);
+        }
+        return this.__concatAlpha;
     }
 
     $setWidth(val) {
         val = +val || 0;
         val = val < 0 ? 0 : val;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[3] == val) {
             return;
         }
@@ -994,14 +1331,14 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getWidth() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[2] != null ? p[2] : this.$getSize().height;
     }
 
     $setHeight(val) {
         val = +val || 0;
         val = val < 0 ? 0 : val;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[4] == val) {
             return;
         }
@@ -1010,12 +1347,12 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getHeight() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[3] != null ? p[3] : this.$getSize().width;
     }
 
     $getSize() {
-        var size = this.$DisplayObject[6];
+        var size = this.__DisplayObject[6];
         if (this.$hasFlags(0x0001)) {
             this.calculateSize();
             this.$removeFlags(0x0001);
@@ -1026,6 +1363,7 @@ class DisplayObject extends EventDispatcher {
     $setParent(parent, stage) {
         this.__parent = parent;
         this.__stage = stage;
+        this.$addFlagsDown(0x0002);
         if (this.__parent) {
             this.dispatchWidth(Event.ADDED);
         } else {
@@ -1068,7 +1406,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleX() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[0];
     }
 
@@ -1077,7 +1415,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleY() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[1];
     }
 
@@ -1086,12 +1424,20 @@ class DisplayObject extends EventDispatcher {
     }
 
     get rotation() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[2];
     }
 
     set rotation(val) {
         this.$setRotation(val);
+    }
+
+    get alpha() {
+        return this.__alpha;
+    }
+
+    set alpha(val) {
+        this.$setAlpha(val);
     }
 
     get width() {
@@ -1137,6 +1483,9 @@ class DisplayObject extends EventDispatcher {
     }
 
     $onFrameEnd() {
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.alpha = this.$getConcatAlpha();
+        }
     }
 
     dispose() {
@@ -1165,7 +1514,7 @@ class Sprite extends DisplayObject {
         if (this.$hasFlags(flags)) {
             return;
         }
-        this.$addFlag(flags);
+        this.$addFlags(flags);
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             children[i].$addFlagsDown(flags);
@@ -1198,6 +1547,7 @@ class Sprite extends DisplayObject {
             if (child.parent) {
                 child.parent.$removeChild(child);
             }
+            this.$nativeShow.addChild(child.$nativeShow);
             children.splice(index, 0, child);
             child.$setParent(this, this.stage);
             if (child.parent == this) {
@@ -1212,6 +1562,7 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
+                this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
                 this.invalidSize();
                 this.$addFlags(0x0100);
@@ -1224,6 +1575,7 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
+                this.$nativeShow.removeChild(child);
                 children.splice(i, 1);
                 child.$setParent(null, null);
                 child.$dispatchRemovedFromStageEvent();
@@ -1284,11 +1636,113 @@ class Sprite extends DisplayObject {
             child.dispose();
         }
         super.dispose();
-        this.$nativeShow.release();
-        Platform.release(this.$nativeShow);
+        Platform.release("Sprite", this.$nativeShow);
     }
 }
+
+exports.Sprite = Sprite;
 //////////////////////////End File:flower/display/Sprite.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/Bitmap.js///////////////////////////
+class Bitmap extends DisplayObject {
+
+    __texture;
+
+    constructor(texture) {
+        super();
+        this.$nativeShow = Platform.create("Bitmap");
+        this.texture = texture;
+    }
+
+    $setTexture(val) {
+        if (val == this.__texture) {
+            return false;
+        }
+        if (this.__texture) {
+            this.__texture.$delCount();
+        }
+        this.__texture = val;
+
+        if (val) {
+            //if (this._width || this._height) {
+            //    this.scaleX *= this._width / this.texture.width;
+            //    this.scaleY *= this._height / this.texture.height;
+            //}
+            this.__texture.$addCount();
+
+
+            this.$nativeShow.setTexture(this.__texture);
+
+            //this._setX(this.x);
+            //this._setY(this.y);
+
+            //this.$addFlag(DisplayObjectFlag.BITMAP_SHADER_CHANGE);
+            //this.$addShaderFlag(ShaderFlag.TEXTURE_CHANGE);
+            //if (this._scale9Grid) {
+            //    this.$addShaderFlag(ShaderFlag.SCALE_9_GRID);
+            //}
+        }
+        else {
+            this._width = 0;
+            this._height = 0;
+            this.$nativeShow.setTexture(Texture.$blank);
+            //p.exe(this._show, flower.Texture2D.blank.$nativeTexture);
+        }
+        return true;
+    }
+
+    calculateSize(size) {
+        if (this.__texture) {
+            size.width = this.__texture.width;
+            size.height = this.__texture.height;
+        } else {
+            size.width = 0;
+            size.height = 0;
+        }
+    }
+
+    set texture(val) {
+        this.$setTexture(val);
+    }
+
+    dispose() {
+        super.dispose();
+        Platform.release("Bitmap", this.$nativeShow);
+    }
+}
+
+exports.Bitmap = Bitmap;
+//////////////////////////End File:flower/display/Bitmap.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/Stage.js///////////////////////////
+class Stage extends Sprite {
+    constructor() {
+        super();
+        this.__stage = this;
+        Stage.stages.push(this);
+    }
+
+    get stageWidth() {
+        return Platform.width;
+    }
+
+    get stageHeight() {
+        return Platform.height;
+    }
+
+    static stages = [];
+
+    static getInstance() {
+        return Stage.stages[0];
+    }
+}
+
+exports.Stage = Stage;
+//////////////////////////End File:flower/display/Stage.js///////////////////////////
 
 
 
@@ -1303,12 +1757,12 @@ class Texture {
     __height;
     __url;
     __nativeURL;
-    __nativeTexture;
+    $nativeTexture;
     $count;
     $parentTexture;
 
     constructor(nativeTexture, url, nativeURL, w, h) {
-        this.__nativeTexture = nativeTexture;
+        this.$nativeTexture = nativeTexture;
         this.__url = url;
         this.__nativeURL = nativeURL;
         this.$count = 0;
@@ -1317,7 +1771,7 @@ class Texture {
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new flower.Texture2D(this.__nativeTexture, this.__url, this.__nativeURL, width, height);
+        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -1390,16 +1844,12 @@ class Texture {
         return this.__sourceRotation;
     }
 
-    get $nativeTexture() {
-        return this.__nativeTexture;
-    }
-
     dispose() {
         if (this.$count != 0) {
             return;
         }
-        this.__nativeTexture.dispose();
-        this.__nativeTexture = null;
+        this.$nativeTexture.dispose();
+        this.$nativeTexture = null;
         if (TIP) {
             tip(1005, this.url);
         }
@@ -1408,9 +1858,295 @@ class Texture {
     /**
      * 空白图片
      */
-    static blank;
+    static $blank;
 }
 //////////////////////////End File:flower/texture/Texture.js///////////////////////////
+
+
+
+//////////////////////////File:flower/texture/TextureManager.js///////////////////////////
+class TextureManager {
+
+    list = [];
+
+    /**
+     * 创建纹理
+     * @param nativeTexture
+     * @param url
+     * @param nativeURL
+     * @param w
+     * @param h
+     * @returns {*}
+     */
+    $createTexture(nativeTexture, url, nativeURL, w, h) {
+        for (var i = 0; i < this.list.length; i++) {
+            if (this.list[i].url == url) {
+                if (DEBUG) {
+                    $error(1003, url);
+                }
+                return this.list[i];
+            }
+        }
+        if (TIP) {
+            $tip(1004, url);
+        }
+        var texture = new Texture(nativeTexture, url, nativeURL, w, h);
+        this.list.push(texture);
+        return texture;
+    }
+
+    $getTextureByNativeURL(url) {
+        for (var i = 0; i < this.list.length; i++) {
+            if (this.list[i].nativeURL == url) {
+                return this.list[i];
+            }
+        }
+        return null;
+    }
+
+    $check() {
+        for (var i = 0; i < this.list.length; i++) {
+            if (this.list[i].$count == 0) {
+                this.list.splice(i, 1)[0].dispose();
+                return;
+            }
+        }
+    }
+
+
+    static instance;
+
+    static getInstance() {
+        if (TextureManager.instance == null) {
+            TextureManager.instance = new TextureManager();
+        }
+        return TextureManager.instance;
+    }
+}
+//////////////////////////End File:flower/texture/TextureManager.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/URLLoader.js///////////////////////////
+class URLLoader extends EventDispatcher {
+
+    _res;
+    _isLoading = false;
+    _data;
+    _linkLoader;
+    _links;
+    _type;
+    _selfDispose = false;
+    _language;
+    _scale;
+    _loadInfo;
+
+    constructor(res) {
+        super();
+        if (typeof(res) == "string") {
+            res = ResItem.create(res);
+        }
+        this._res = res;
+        this._type = this._res.type;
+    }
+
+    get url() {
+        return this._res ? this._res.url : "";
+    }
+
+    get loadURL() {
+        return this._loadInfo ? this._loadInfo.url : "";
+    }
+
+    get type() {
+        return this._res ? this._res.type : "";
+    }
+
+    set language(val) {
+        this._language = val;
+    }
+
+    set scale(val) {
+        this._scale = val;
+    }
+
+    $addLink(loader) {
+        if (!this._links) {
+            this._links = [];
+        }
+        this._links.push(loader);
+    }
+
+    load(res) {
+        if (this._isLoading) {
+            dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+            return;
+        }
+        this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
+        this._isLoading = true;
+        for (var i = 0; i < URLLoader.list.length; i++) {
+            if (URLLoader.list[i].loadURL == this.loadURL) {
+                this._linkLoader = URLLoader.list[i];
+                break;
+            }
+        }
+        if (this._linkLoader) {
+            this._linkLoader.$addLink(this);
+            return;
+        }
+        URLLoader.list.push(this);
+        if (this.type == ResType.IMAGE) {
+            this.loadTexture();
+        } else {
+            this.loadText();
+        }
+    }
+
+    loadTexture() {
+        var texture = TextureManager.getInstance().$getTextureByNativeURL(this._loadInfo.url);
+        if (texture) {
+            texture.$addCount();
+            this._data = texture;
+            new CallLater(this.loadComplete, this);
+        }
+        else {
+            PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+        }
+    }
+
+    loadTextureComplete(nativeTexture, width, height) {
+        var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height);
+        this._data = texture;
+        texture.$addCount();
+        new CallLater(this.loadComplete, this);
+    }
+
+    setTextureByLink(texture) {
+        texture.$addCount();
+        this._data = texture;
+        this.loadComplete();
+    }
+
+    loadText() {
+        PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this);
+    }
+
+    loadTextComplete(content) {
+        if (this._type == ResType.TEXT) {
+            this._data = content;
+        }
+        else if (this._type == ResType.JSON) {
+            this._data = JSON.parse(content);
+        }
+        new CallLater(this.loadComplete, this);
+    }
+
+    setTextByLink(content) {
+        if (this._type == ResType.TEXT) {
+            this._data = content;
+        }
+        else if (this._type == ResType.JSON) {
+            this._data = JSON.parse(content);
+        }
+        this.loadComplete();
+    }
+
+    setJsonByLink(content) {
+        this._data = content;
+        this.loadComplete();
+    }
+
+    loadComplete() {
+        if (this._links) {
+            for (var i = 0; i < this._links.length; i++) {
+                if (this._type == ResType.Image) {
+                    this._links[i].setTextureByLink(this._data);
+                }
+                else if (this._type == ResType.TEXT) {
+                    this._links[i].setTextByLink(this._data);
+                }
+                else if (this._type == ResType.JSON) {
+                    this._links[i].setJsonByLink(this._data);
+                }
+            }
+        }
+        this._links = null;
+        this._isLoading = false;
+        if (!this._res || !this._data) {
+            this._selfDispose = true;
+            this.dispose();
+            this._selfDispose = false;
+            return;
+        }
+        for (var i = 0; i < URLLoader.list.length; i++) {
+            if (URLLoader.list[i] == this) {
+                URLLoader.list.splice(i, 1);
+                break;
+            }
+        }
+        this.dispatchWidth(Event.COMPLETE, this._data);
+        this._selfDispose = true;
+        this.dispose();
+        this._selfDispose = false;
+    }
+
+    loadError() {
+        if (this.hasListener(IOErrorEvent.ERROR)) {
+            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, "[加载纹理失败] " + this._res.localURL));
+        }
+        else {
+            DebugInfo.debug("[加载纹理失败] " + this._res.localURL, DebugInfo.ERROR);
+        }
+    }
+
+    dispose() {
+        if (!this._selfDispose) {
+            super.dispose();
+            return;
+        }
+        if (this._data && this._type == ResType.Image) {
+            this._data.$delCount();
+            this._data = null;
+        }
+        this._res = null;
+        this._data = null;
+        super.dispose();
+        for (var i = 0; i < URLLoader.list.length; i++) {
+            if (URLLoader.list[i] == this) {
+                URLLoader.list.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    static list = [];
+
+    static clear() {
+        while (URLLoader.list.length) {
+            var loader = URLLoader.list.pop();
+            loader.dispose();
+        }
+    }
+}
+
+exports.URLLoader = URLLoader;
+//////////////////////////End File:flower/net/URLLoader.js///////////////////////////
+
+
+
+//////////////////////////File:flower/res/Res.js///////////////////////////
+class Res {
+
+    static __resItems = [];
+
+    /**
+     * 查询存储的 ResItem，通过 url 查找匹配的项
+     * @param url
+     */
+    static getRes(url) {
+    }
+}
+//////////////////////////End File:flower/res/Res.js///////////////////////////
 
 
 
@@ -1426,12 +2162,18 @@ class ResItem {
      */
     __loadList = [];
 
-    constructor() {
+    /**
+     * 资源类型
+     */
+    __type;
 
+    constructor(url, type) {
+        this.__url = url;
+        this.__type = type;
     }
 
     addInfo(url, settingWidth, settingHeight, scale, language) {
-        var info = new ResItemInfo();
+        var info = ResItemInfo.create();
         info.url = url;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
@@ -1439,7 +2181,100 @@ class ResItem {
         info.language = language;
         this.__loadList.push(info);
     }
+
+    getLoadInfo(language, scale) {
+        var loadList = this.__loadList;
+        if (loadList.length == 1) {
+            return loadList[0];
+        }
+        var info;
+        for (var i = 0; i < loadList.length; i++) {
+            if (language && loadList[i].language && language != loadList[i].language) {
+                continue;
+            }
+            if (!info) {
+                info = loadList[i];
+            } else if (scale != null) {
+                if (loadList[i].scale != null && Math.abs(loadList[i].scale - scale) < Math.abs(info.scale - scale)) {
+                    info = loadList[i];
+                }
+            }
+        }
+        if (!info) {
+            info = loadList[0];
+        }
+        return info;
+    }
+
+    get type() {
+        return this.__type;
+    }
+
+    get url() {
+        return this.__url;
+    }
+
+    static $pools = [];
+
+    static create(url) {
+        var array = url.split("/");
+        var last = array.pop();
+        var nameArray = last.split(".");
+        var name = "";
+        var end = "";
+        if (nameArray.length == 1) {
+            name = nameArray[0];
+        } else {
+            end = nameArray[nameArray.length - 1];
+            name = last.slice(0, last.length - end.length - 1);
+        }
+        nameArray = name.split("@");
+        var settingWidth;
+        var settingHeight;
+        var scale;
+        var language;
+        for (var i = 1; i < nameArray.length; i++) {
+            var content = nameArray[i];
+            var code = content.charCodeAt(0);
+            if (code >= "0".charCodeAt(0) && code <= "9".charCodeAt(0) || code == ".".charCodeAt(0)) {
+                var nums = content.split("x");
+                if (nums.length == 1) {
+                    scale = parseFloat(content);
+                } else if (nums.length == 2) {
+                    settingWidth = parseInt(nums[0]);
+                    settingHeight = parseInt(nums[1]);
+                }
+            } else {
+                language = content;
+            }
+        }
+        var useURL = "";
+        for (var i = 0; i < array.length; i++) {
+            useURL += array[i] + "/";
+        }
+        useURL += nameArray[0] + (end != "" ? "." + end : "");
+        var res;
+        if (ResItem.$pools.length) {
+            res = ResItem.$pools.pop();
+            res.__url = useURL;
+            res.__type = ResType.getType(end);
+            res.__loadList.length = 0;
+        } else {
+            res = new ResItem(useURL, ResType.getType(end));
+        }
+        res.addInfo(url, settingWidth, settingHeight, scale, language);
+        return res;
+    }
+
+    static release(item) {
+        while (item.__loadList.length) {
+            ResItemInfo.release(item.__loadList.pop());
+        }
+        ResItem.$pools.push(item);
+    }
 }
+
+exports.ResItem = ResItem;
 //////////////////////////End File:flower/res/ResItem.js///////////////////////////
 
 
@@ -1471,8 +2306,160 @@ class ResItemInfo {
      * 支持的语言
      */
     language;
+
+    static $pools = [];
+
+    static create() {
+        if (ResItemInfo.$pools.length) {
+            return ResItemInfo.$pools.pop();
+        } else {
+            return new ResItemInfo();
+        }
+    }
+
+    static release(info) {
+        ResItemInfo.$pools.push(info);
+    }
 }
+
+exports.ResItemInfo = ResItemInfo;
 //////////////////////////End File:flower/res/ResItemInfo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/res/ResType.js///////////////////////////
+class ResType {
+    static TEXT = 1;
+    static JSON = 2;
+    static IMAGE = 3;
+
+    static getURLType(url) {
+        if (url.split(".").length == 1) {
+            return ResType.TEXT;
+        }
+        var end = url.split(".")[url.split(".").length - 1];
+        return ResType.getType(end);
+    }
+
+    static getType(end) {
+        if (end == "json") {
+            return ResType.JSON;
+        }
+        if (end == "png" || end == "jpg") {
+            return ResType.IMAGE;
+        }
+        return ResType.TEXT;
+    }
+}
+//////////////////////////End File:flower/res/ResType.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/EnterFrame.js///////////////////////////
+class EnterFrame {
+    static enterFrames = [];
+    static waitAdd = [];
+
+    static add(call, owner) {
+        for (var i = 0; i < flower.EnterFrame.enterFrames.length; i++) {
+            if (flower.EnterFrame.enterFrames[i].call == call && flower.EnterFrame.enterFrames[i].owner == owner) {
+                return;
+            }
+        }
+        for (i = 0; i < flower.EnterFrame.waitAdd.length; i++) {
+            if (flower.EnterFrame.waitAdd[i].call == call && flower.EnterFrame.waitAdd[i].owner == owner) {
+                return;
+            }
+        }
+        flower.EnterFrame.waitAdd.push({"call": call, "owner": owner});
+    }
+
+    static del(call, owner) {
+        for (var i = 0; i < flower.EnterFrame.enterFrames.length; i++) {
+            if (flower.EnterFrame.enterFrames[i].call == call && flower.EnterFrame.enterFrames[i].owner == owner) {
+                flower.EnterFrame.enterFrames.splice(i, 1);
+                return;
+            }
+        }
+        for (i = 0; i < flower.EnterFrame.waitAdd.length; i++) {
+            if (flower.EnterFrame.waitAdd[i].call == call && flower.EnterFrame.waitAdd[i].owner == owner) {
+                flower.EnterFrame.waitAdd.splice(i, 1);
+                return;
+            }
+        }
+    }
+
+    static frame = 0;
+    static updateFactor = 1;
+
+    static $update(now, gap) {
+        flower.EnterFrame.frame++;
+        flower.CallLater.$run();
+        if (flower.EnterFrame.waitAdd.length) {
+            flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
+            flower.EnterFrame.waitAdd = [];
+        }
+        var copy = flower.EnterFrame.enterFrames;
+        for (var i = 0; i < copy.length; i++) {
+            copy[i].call.apply(copy[i].owner, [now, gap]);
+        }
+    }
+}
+
+exports.EnterFrame = EnterFrame;
+//////////////////////////End File:flower/utils/EnterFrame.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/CallLater.js///////////////////////////
+class CallLater {
+    _func;
+    _thisObj;
+    _data;
+
+    constructor(func, thisObj, args = null) {
+        this._func = func;
+        this._thisObj = thisObj;
+        this._data = args || [];
+        flower.CallLater._next.push(this);
+    }
+
+    $call() {
+        this._func.apply(this._thisObj, this._data);
+        this._func = null;
+        this._thisObj = null;
+        this._data = null;
+    }
+
+    static add(func, thisObj, args = null) {
+        for (var i = 0, len = flower.CallLater._next.length; i < len; i++) {
+            if (flower.CallLater._next[i]._func == func && flower.CallLater._next[i]._thisObj == thisObj) {
+                flower.CallLater._next[i]._data = args || [];
+                return;
+            }
+        }
+        new flower.CallLater(func, thisObj, args);
+    }
+
+    static _next = [];
+    static _list = [];
+
+    static $run() {
+        if (!flower.CallLater._next.length) {
+            return;
+        }
+        flower.CallLater._list = flower.CallLater._next;
+        flower.CallLater._next = [];
+        var list = flower.CallLater._list;
+        while (list.length) {
+            list.pop().$call();
+        }
+    }
+
+}
+
+exports.CallLater = CallLater;
+//////////////////////////End File:flower/utils/CallLater.js///////////////////////////
 
 
 

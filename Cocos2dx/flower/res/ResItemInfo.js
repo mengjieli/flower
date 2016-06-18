@@ -24,6 +24,20 @@ class ResItemInfo {
      * 支持的语言
      */
     language;
+
+    static $pools = [];
+
+    static create() {
+        if (ResItemInfo.$pools.length) {
+            return ResItemInfo.$pools.pop();
+        } else {
+            return new ResItemInfo();
+        }
+    }
+
+    static release(info) {
+        ResItemInfo.$pools.push(info);
+    }
 }
 
 exports.ResItemInfo = ResItemInfo;

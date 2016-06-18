@@ -23,7 +23,7 @@ class TextureManager {
         if (TIP) {
             $tip(1004, url);
         }
-        var texture = new flower.Texture2D(nativeTexture, url, nativeURL, w, h);
+        var texture = new Texture(nativeTexture, url, nativeURL, w, h);
         this.list.push(texture);
         return texture;
     }

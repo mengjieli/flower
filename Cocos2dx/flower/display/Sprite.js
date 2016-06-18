@@ -12,7 +12,7 @@ class Sprite extends DisplayObject {
         if (this.$hasFlags(flags)) {
             return;
         }
-        this.$addFlag(flags);
+        this.$addFlags(flags);
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             children[i].$addFlagsDown(flags);
@@ -45,6 +45,7 @@ class Sprite extends DisplayObject {
             if (child.parent) {
                 child.parent.$removeChild(child);
             }
+            this.$nativeShow.addChild(child.$nativeShow);
             children.splice(index, 0, child);
             child.$setParent(this, this.stage);
             if (child.parent == this) {
@@ -59,6 +60,7 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
+                this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
                 this.invalidSize();
                 this.$addFlags(0x0100);
@@ -71,6 +73,7 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
+                this.$nativeShow.removeChild(child);
                 children.splice(i, 1);
                 child.$setParent(null, null);
                 child.$dispatchRemovedFromStageEvent();
@@ -131,7 +134,8 @@ class Sprite extends DisplayObject {
             child.dispose();
         }
         super.dispose();
-        this.$nativeShow.release();
-        Platform.release(this.$nativeShow);
+        Platform.release("Sprite", this.$nativeShow);
     }
 }
+
+exports.Sprite = Sprite;

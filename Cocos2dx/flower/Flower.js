@@ -11,9 +11,20 @@ var language = "";
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(language) {
+function start(completeFunc, native, language) {
+    Platform.native = native;
     language = language || "";
-    Platform.start();
+    var stage = new Stage();
+    Platform._runBack = CoreTime.$run;
+    Platform.start(stage, stage.$nativeShow);
+
+    //completeFunc();
+    var loader = new URLLoader("res/blank.png");
+    loader.addListener(Event.COMPLETE, function (e) {
+        Texture.$blank = e.data;
+        completeFunc(Platform.stage,Platform.stage2);
+    });
+    loader.load();
 }
 
 function getLanaguge() {

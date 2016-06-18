@@ -8,12 +8,12 @@ class Texture {
     __height;
     __url;
     __nativeURL;
-    __nativeTexture;
+    $nativeTexture;
     $count;
     $parentTexture;
 
     constructor(nativeTexture, url, nativeURL, w, h) {
-        this.__nativeTexture = nativeTexture;
+        this.$nativeTexture = nativeTexture;
         this.__url = url;
         this.__nativeURL = nativeURL;
         this.$count = 0;
@@ -22,7 +22,7 @@ class Texture {
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new flower.Texture2D(this.__nativeTexture, this.__url, this.__nativeURL, width, height);
+        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -95,16 +95,12 @@ class Texture {
         return this.__sourceRotation;
     }
 
-    get $nativeTexture() {
-        return this.__nativeTexture;
-    }
-
     dispose() {
         if (this.$count != 0) {
             return;
         }
-        this.__nativeTexture.dispose();
-        this.__nativeTexture = null;
+        this.$nativeTexture.dispose();
+        this.$nativeTexture = null;
         if (TIP) {
             tip(1005, this.url);
         }
@@ -113,5 +109,5 @@ class Texture {
     /**
      * 空白图片
      */
-    static blank;
+    static $blank;
 }

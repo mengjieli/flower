@@ -162,25 +162,44 @@ var files = file.readFilesWidthEnd("js");
 var list = [
     "Flower",
     "Platform",
+    "PlatformSprite",
+    "PlatformTextField",
+    "PlatformBitmap",
+    "PlatformTexture",
+    "PlatformURLLoader",
+
+    "CoreTime",
+
     "Language",
     "zh_CN",
-    "Action",
-    "Feature",
-    "ObjectBase",
+
     "EventDispatcher",
     "Event",
+
     "Matrix",
     "Point",
     "Rectangle",
     "Size",
+
     "BlendMode",
+
     "DisplayObject",
     "Sprite",
     "Bitmap",
+    "Stage",
+
     "Texture",
-    "Loader",
+    "TextureManager",
+
+    "URLLoader",
+
+    "Res",
     "ResItem",
-    "ResItemInfo"
+    "ResItemInfo",
+    "ResType",
+
+    "EnterFrame",
+    "CallLater"
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "(function(){\n";

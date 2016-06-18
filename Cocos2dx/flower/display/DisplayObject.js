@@ -23,6 +23,9 @@ class DisplayObject extends EventDispatcher {
      */
     __stage;
 
+    __alpha = 1;
+    __concatAlpha = 1;
+
     /**
      * native 显示，比如 cocos2dx 的显示对象或者 egret 的显示对象等...
      */
@@ -99,6 +102,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__x = val;
+        this.$nativeShow.x = val;
         this.$invalidPositionScale();
     }
 
@@ -108,43 +112,76 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__y = val;
+        this.$nativeShow.y = val;
         this.$invalidPositionScale();
     }
 
     $setScaleX(val) {
         val = +val || 0;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[0] == val) {
             return;
         }
         p[0] = val;
+        this.$nativeShow.scaleX = val;
         this.$invalidPositionScale();
     }
 
     $setScaleY(val) {
         val = +val || 0;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[1] == val) {
             return;
         }
         p[1] = val;
+        this.$nativeShow.scaleY = val;
         this.$invalidPositionScale();
     }
 
     $setRotation(val) {
         val = +val || 0;
-        var p = this.$DisplayObject;
+        console.log("rot1? " + val);
+        var p = this.__DisplayObject;
+        console.log("rot12 " + val + "," + p[2]);
         if (p[2] == val) {
+            console.log("rot0!? " + val);
             return;
         }
         p[2] = val;
+        this.$nativeShow.rotation = val;
         this.$invalidPositionScale();
+    }
+
+    $setAlpha(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        if (val > 1) {
+            val = 1;
+        }
+        if (val == this.__alpha) {
+            return;
+        }
+        this.__alpha = val;
+        this.$addFlagsDown(0x0002);
+    }
+
+    $getConcatAlpha() {
+        if (this.$hasFlags(0x0002)) {
+            this.__concatAlpha = this.__alpha;
+            if (this.__parent) {
+                this.__concatAlpha *= this.__parent.$getConcatAlpha();
+            }
+            this.$removeFlags(0x0002);
+        }
+        return this.__concatAlpha;
     }
 
     $setWidth(val) {
         val = +val || 0;
         val = val < 0 ? 0 : val;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[3] == val) {
             return;
         }
@@ -153,14 +190,14 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getWidth() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[2] != null ? p[2] : this.$getSize().height;
     }
 
     $setHeight(val) {
         val = +val || 0;
         val = val < 0 ? 0 : val;
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         if (p[4] == val) {
             return;
         }
@@ -169,12 +206,12 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getHeight() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[3] != null ? p[3] : this.$getSize().width;
     }
 
     $getSize() {
-        var size = this.$DisplayObject[6];
+        var size = this.__DisplayObject[6];
         if (this.$hasFlags(0x0001)) {
             this.calculateSize();
             this.$removeFlags(0x0001);
@@ -185,6 +222,7 @@ class DisplayObject extends EventDispatcher {
     $setParent(parent, stage) {
         this.__parent = parent;
         this.__stage = stage;
+        this.$addFlagsDown(0x0002);
         if (this.__parent) {
             this.dispatchWidth(Event.ADDED);
         } else {
@@ -227,7 +265,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleX() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[0];
     }
 
@@ -236,7 +274,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleY() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[1];
     }
 
@@ -245,12 +283,20 @@ class DisplayObject extends EventDispatcher {
     }
 
     get rotation() {
-        var p = this.$DisplayObject;
+        var p = this.__DisplayObject;
         return p[2];
     }
 
     set rotation(val) {
         this.$setRotation(val);
+    }
+
+    get alpha() {
+        return this.__alpha;
+    }
+
+    set alpha(val) {
+        this.$setAlpha(val);
     }
 
     get width() {
@@ -296,6 +342,9 @@ class DisplayObject extends EventDispatcher {
     }
 
     $onFrameEnd() {
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.alpha = this.$getConcatAlpha();
+        }
     }
 
     dispose() {

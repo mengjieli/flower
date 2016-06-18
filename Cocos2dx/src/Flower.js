@@ -26,9 +26,20 @@ var _exports = {};
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(language) {
+    function start(completeFunc, native, language) {
+        Platform.native = native;
         language = language || "";
-        Platform.start();
+        var stage = new Stage();
+        Platform._runBack = CoreTime.$run;
+        Platform.start(stage, stage.$nativeShow);
+
+        //completeFunc();
+        var loader = new URLLoader("res/blank.png");
+        loader.addListener(Event.COMPLETE, function (e) {
+            Texture.$blank = e.data;
+            completeFunc(Platform.stage, Platform.stage2);
+        });
+        loader.load();
     }
 
     function getLanaguge() {
@@ -84,7 +95,6 @@ var _exports = {};
         _createClass(Platform, null, [{
             key: "start",
             value: function start(engine, root) {
-                return;
                 var scene = cc.Scene.extend({
                     ctor: function ctor() {
                         this._super();
@@ -114,16 +124,29 @@ var _exports = {};
                         return true;
                     }
                 });
+                Platform.stage2 = root.show;
                 Platform.stage = new scene();
                 Platform.stage.update = Platform._run;
                 cc.director.runScene(Platform.stage);
-                Platform.width = cc.Director.getInstance().getWinSize().width;
-                Platform.height = cc.Director.getInstance().getWinSize().height;
-                root.setPositionY(Platform.height);
+                Platform.width = cc.director.getWinSize().width;
+                Platform.height = cc.director.getWinSize().height;
+                root.show.setPositionY(Platform.height);
                 //debugRoot.setPositionY(Platform.height);
-                Platform.stage.addChild(root);
+                Platform.stage.addChild(root.show);
                 //Platform.stage.addChild(debugRoot);
                 //System.$mesureTxt.retain();
+            }
+        }, {
+            key: "_run",
+            value: function _run() {
+                Platform.frame++;
+                var now = new Date().getTime();
+                Platform._runBack(now - Platform.lastTime);
+                Platform.lastTime = now;
+                if (PlatformURLLoader.loadingList.length) {
+                    var item = PlatformURLLoader.loadingList.shift();
+                    item[0](item[1], item[2], item[3], item[4]);
+                }
             }
         }, {
             key: "create",
@@ -134,6 +157,12 @@ var _exports = {};
                         return pools.Sprite.pop();
                     }
                     return new PlatformSprite();
+                }
+                if (name == "Bitmap") {
+                    if (pools.Bitmap && pools.Bitmap.length) {
+                        return pools.Bitmap.pop();
+                    }
+                    return new PlatformBitmap();
                 }
                 if (name == "TextField") {
                     if (pools.TextField && pools.TextField.length) {
@@ -146,6 +175,7 @@ var _exports = {};
         }, {
             key: "release",
             value: function release(name, object) {
+                object.release();
                 var pools = Platform.pools;
                 if (!pools[name]) {
                     pools[name] = [];
@@ -158,11 +188,318 @@ var _exports = {};
     }();
     //////////////////////////End File:flower/platform/cocos2dx/Platform.js///////////////////////////
 
-    //////////////////////////File:flower/language/Language.js///////////////////////////
+    //////////////////////////File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
 
 
     Platform.type = "cocos2dx";
+    Platform.native = cc.sys.isNative;
+    Platform.lastTime = new Date().getTime();
+    Platform.frame = 0;
     Platform.pools = {};
+
+    var PlatformSprite = function () {
+        function PlatformSprite() {
+            _classCallCheck(this, PlatformSprite);
+
+            this.show = new cc.Node();
+            this.show.setAnchorPoint(0, 0);
+            this.show.retain();
+        }
+
+        _createClass(PlatformSprite, [{
+            key: "addChild",
+            value: function addChild(child) {
+                this.show.addChild(child.show);
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(child) {
+                this.show.removeChild(child.show);
+            }
+        }, {
+            key: "resetChildIndex",
+            value: function resetChildIndex(children) {
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$nativeShow.show.setLocalZOrder(i);
+                }
+            }
+        }, {
+            key: "release",
+            value: function release() {
+                var show = this.show;
+                show.setPosition(0, 0);
+                show.setScale(1);
+                show.setOpacity(255);
+                show.setRotation(0);
+                show.setVisible(true);
+            }
+        }, {
+            key: "x",
+            set: function set(val) {
+                this.show.setPositionX(val);
+            }
+        }, {
+            key: "y",
+            set: function set(val) {
+                this.show.setPositionY(-val);
+            }
+        }, {
+            key: "scaleX",
+            set: function set(val) {
+                this.show.setScaleX(val);
+            }
+        }, {
+            key: "scaleY",
+            set: function set(val) {
+                this.show.setScaleY(val);
+            }
+        }, {
+            key: "rotation",
+            set: function set(val) {
+                this.show.setRotation(val);
+            }
+        }]);
+
+        return PlatformSprite;
+    }();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
+
+    //////////////////////////File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
+
+
+    var PlatformTextField = function () {
+        function PlatformTextField() {
+            _classCallCheck(this, PlatformTextField);
+
+            this.show = new cc.LabelTTF("", "Times Roman", 12);
+            this.show.setAnchorPoint(0, 1);
+            this.show.retain();
+        }
+
+        _createClass(PlatformTextField, [{
+            key: "release",
+            value: function release() {
+                var show = this.show;
+                show.setPosition(0, 0);
+                show.setScale(1);
+                show.setOpacity(255);
+                show.setRotation(0);
+                show.setVisible(true);
+                show.setString("");
+                show.setFontSize(12);
+                show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
+            }
+        }]);
+
+        return PlatformTextField;
+    }();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
+
+    //////////////////////////File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
+
+
+    var PlatformBitmap = function () {
+        function PlatformBitmap() {
+            _classCallCheck(this, PlatformBitmap);
+
+            this.__x = 0;
+            this.__y = 0;
+
+            this.show = new cc.Sprite();
+            this.show.setAnchorPoint(0, 1);
+            this.show.retain();
+        }
+
+        _createClass(PlatformBitmap, [{
+            key: "setTexture",
+            value: function setTexture(texture) {
+                this.__texture = texture;
+                this.show.initWithTexture(texture.$nativeTexture);
+                var source = texture.source;
+                if (source) {
+                    this.show.setTextureRect(source, texture.sourceRotation, {
+                        width: source.width,
+                        height: source.height
+                    });
+                }
+                this.show.setAnchorPoint(0, 1);
+                this.x = this.__x;
+                this.y = this.__y;
+            }
+        }, {
+            key: "release",
+            value: function release() {
+                var show = this.show;
+                show.setPosition(0, 0);
+                show.setScale(1);
+                show.setOpacity(255);
+                show.setRotation(0);
+                show.setVisible(true);
+            }
+        }, {
+            key: "x",
+            set: function set(val) {
+                this.__x = val;
+                this.show.setPositionX(this.__x + this.__texture.offX);
+            }
+        }, {
+            key: "y",
+            set: function set(val) {
+                this.__y = val;
+                this.show.setPositionY(-this.__y + this.__texture.offY);
+            }
+        }, {
+            key: "scaleX",
+            set: function set(val) {
+                console.log("set scaleX " + val);
+                this.show.setScaleX(val);
+            }
+        }, {
+            key: "scaleY",
+            set: function set(val) {
+                this.show.setScaleY(val);
+            }
+        }, {
+            key: "rotation",
+            set: function set(val) {
+                console.log("rot?" + val);
+                this.show.setRotation(val);
+            }
+        }]);
+
+        return PlatformBitmap;
+    }();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
+
+    //////////////////////////File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
+
+
+    var PlatformTexture = function () {
+        function PlatformTexture() {
+            _classCallCheck(this, PlatformTexture);
+        }
+
+        _createClass(PlatformTexture, [{
+            key: "dispose",
+            value: function dispose() {
+                cc.TextureCache.getInstance().removeTextureForKey(this.url);
+            }
+        }]);
+
+        return PlatformTexture;
+    }();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
+
+    //////////////////////////File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
+
+
+    var PlatformURLLoader = function () {
+        function PlatformURLLoader() {
+            _classCallCheck(this, PlatformURLLoader);
+        }
+
+        _createClass(PlatformURLLoader, null, [{
+            key: "loadText",
+            value: function loadText(url, back, errorBack, thisObj) {
+                if (PlatformURLLoader.isLoading) {
+                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
+                    return;
+                }
+                PlatformURLLoader.isLoading = true;
+                if (TIP) {
+                    $tip(2001, url);
+                }
+                if (url.slice(0, "http://".length) == "http://") {
+                    var xhr = cc.loader.getXMLHttpRequest();
+                    xhr.open("GET", url, true);
+                    xhr.onloadend = function () {
+                        if (xhr.status != 200) {
+                            errorBack.call(thisObj);
+                        } else {
+                            back.call(thisObj, xhr.responseText);
+                        }
+                        PlatformURLLoader.isLoading = false;
+                    };
+                    xhr.send();
+                } else {
+                    cc.loader.loadTxt(url, function (error, data) {
+                        if (error) {
+                            errorBack.call(thisObj);
+                        } else {
+                            back.call(thisObj, data);
+                        }
+                        PlatformURLLoader.isLoading = false;
+                    });
+                }
+            }
+        }, {
+            key: "loadTexture",
+            value: function loadTexture(url, back, errorBack, thisObj) {
+                if (PlatformURLLoader.isLoading) {
+                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
+                    return;
+                }
+                PlatformURLLoader.isLoading = true;
+                if (TIP) {
+                    $tip(2002, url);
+                }
+                cc.loader.loadImg(url, { isCrossOrigin: true }, function (err, img) {
+                    console.log("loadTextureOK?" + url + "," + err);
+                    if (err) {
+                        errorBack.call(thisObj);
+                    } else {
+                        var texture = img;
+                        if (Platform.native) {
+                            console.log("[loadTextureComplete]" + texture + "," + texture.getContentSize().width + "," + texture.getContentSize().height);
+                            back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                        } else {
+                            back.call(thisObj, texture, texture.width, texture.height);
+                        }
+                    }
+                    PlatformURLLoader.isLoading = false;
+                });
+            }
+        }]);
+
+        return PlatformURLLoader;
+    }();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
+
+    //////////////////////////File:flower/core/CoreTime.js///////////////////////////
+
+
+    PlatformURLLoader.isLoading = false;
+    PlatformURLLoader.loadingList = [];
+
+    var CoreTime = function () {
+        function CoreTime() {
+            _classCallCheck(this, CoreTime);
+        }
+
+        _createClass(CoreTime, null, [{
+            key: "$run",
+            value: function $run(gap) {
+                CoreTime.lastTimeGap = gap;
+                CoreTime.currentTime += gap;
+                EnterFrame.$update(CoreTime.currentTime, gap);
+                //Engine.getInstance().$onFrameEnd();
+                TextureManager.getInstance().$check();
+            }
+        }, {
+            key: "getTime",
+            value: function getTime() {
+                return CoreTime.getTime();
+            }
+        }]);
+
+        return CoreTime;
+    }();
+    //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
+
+    //////////////////////////File:flower/language/Language.js///////////////////////////
+
+
+    CoreTime.currentTime = 0;
     var $locale_strings = {};
 
     /**
@@ -197,6 +534,8 @@ var _exports = {};
     locale_strings[1003] = "重复创建纹理:{0}";
     locale_strings[1004] = "创建纹理:{0}";
     locale_strings[1005] = "释放纹理:{0}";
+    locale_strings[2001] = "[loadText] {0}";
+    locale_strings[2002] = "[loadTexture] {0}";
 
     //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
@@ -958,6 +1297,9 @@ var _exports = {};
 
             var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
+            _this.__alpha = 1;
+            _this.__concatAlpha = 1;
+
             _this.__DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
@@ -1049,6 +1391,7 @@ var _exports = {};
                     return;
                 }
                 this.__x = val;
+                this.$nativeShow.x = val;
                 this.$invalidPositionScale();
             }
         }, {
@@ -1059,47 +1402,82 @@ var _exports = {};
                     return;
                 }
                 this.__y = val;
+                this.$nativeShow.y = val;
                 this.$invalidPositionScale();
             }
         }, {
             key: "$setScaleX",
             value: function $setScaleX(val) {
                 val = +val || 0;
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 if (p[0] == val) {
                     return;
                 }
                 p[0] = val;
+                this.$nativeShow.scaleX = val;
                 this.$invalidPositionScale();
             }
         }, {
             key: "$setScaleY",
             value: function $setScaleY(val) {
                 val = +val || 0;
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 if (p[1] == val) {
                     return;
                 }
                 p[1] = val;
+                this.$nativeShow.scaleY = val;
                 this.$invalidPositionScale();
             }
         }, {
             key: "$setRotation",
             value: function $setRotation(val) {
                 val = +val || 0;
-                var p = this.$DisplayObject;
+                console.log("rot1? " + val);
+                var p = this.__DisplayObject;
+                console.log("rot12 " + val + "," + p[2]);
                 if (p[2] == val) {
+                    console.log("rot0!? " + val);
                     return;
                 }
                 p[2] = val;
+                this.$nativeShow.rotation = val;
                 this.$invalidPositionScale();
+            }
+        }, {
+            key: "$setAlpha",
+            value: function $setAlpha(val) {
+                val = +val || 0;
+                if (val < 0) {
+                    val = 0;
+                }
+                if (val > 1) {
+                    val = 1;
+                }
+                if (val == this.__alpha) {
+                    return;
+                }
+                this.__alpha = val;
+                this.$addFlagsDown(0x0002);
+            }
+        }, {
+            key: "$getConcatAlpha",
+            value: function $getConcatAlpha() {
+                if (this.$hasFlags(0x0002)) {
+                    this.__concatAlpha = this.__alpha;
+                    if (this.__parent) {
+                        this.__concatAlpha *= this.__parent.$getConcatAlpha();
+                    }
+                    this.$removeFlags(0x0002);
+                }
+                return this.__concatAlpha;
             }
         }, {
             key: "$setWidth",
             value: function $setWidth(val) {
                 val = +val || 0;
                 val = val < 0 ? 0 : val;
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 if (p[3] == val) {
                     return;
                 }
@@ -1109,7 +1487,7 @@ var _exports = {};
         }, {
             key: "$getWidth",
             value: function $getWidth() {
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 return p[2] != null ? p[2] : this.$getSize().height;
             }
         }, {
@@ -1117,7 +1495,7 @@ var _exports = {};
             value: function $setHeight(val) {
                 val = +val || 0;
                 val = val < 0 ? 0 : val;
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 if (p[4] == val) {
                     return;
                 }
@@ -1127,13 +1505,13 @@ var _exports = {};
         }, {
             key: "$getHeight",
             value: function $getHeight() {
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 return p[3] != null ? p[3] : this.$getSize().width;
             }
         }, {
             key: "$getSize",
             value: function $getSize() {
-                var size = this.$DisplayObject[6];
+                var size = this.__DisplayObject[6];
                 if (this.$hasFlags(0x0001)) {
                     this.calculateSize();
                     this.$removeFlags(0x0001);
@@ -1145,6 +1523,7 @@ var _exports = {};
             value: function $setParent(parent, stage) {
                 this.__parent = parent;
                 this.__stage = stage;
+                this.$addFlagsDown(0x0002);
                 if (this.__parent) {
                     this.dispatchWidth(Event.ADDED);
                 } else {
@@ -1201,7 +1580,11 @@ var _exports = {};
             }
         }, {
             key: "$onFrameEnd",
-            value: function $onFrameEnd() {}
+            value: function $onFrameEnd() {
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.alpha = this.$getConcatAlpha();
+                }
+            }
         }, {
             key: "dispose",
             value: function dispose() {
@@ -1229,7 +1612,7 @@ var _exports = {};
         }, {
             key: "scaleX",
             get: function get() {
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 return p[0];
             },
             set: function set(val) {
@@ -1238,7 +1621,7 @@ var _exports = {};
         }, {
             key: "scaleY",
             get: function get() {
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 return p[1];
             },
             set: function set(val) {
@@ -1247,11 +1630,19 @@ var _exports = {};
         }, {
             key: "rotation",
             get: function get() {
-                var p = this.$DisplayObject;
+                var p = this.__DisplayObject;
                 return p[2];
             },
             set: function set(val) {
                 this.$setRotation(val);
+            }
+        }, {
+            key: "alpha",
+            get: function get() {
+                return this.__alpha;
+            },
+            set: function set(val) {
+                this.$setAlpha(val);
             }
         }, {
             key: "width",
@@ -1302,7 +1693,7 @@ var _exports = {};
                 if (this.$hasFlags(flags)) {
                     return;
                 }
-                this.$addFlag(flags);
+                this.$addFlags(flags);
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
                     children[i].$addFlagsDown(flags);
@@ -1338,6 +1729,7 @@ var _exports = {};
                     if (child.parent) {
                         child.parent.$removeChild(child);
                     }
+                    this.$nativeShow.addChild(child.$nativeShow);
                     children.splice(index, 0, child);
                     child.$setParent(this, this.stage);
                     if (child.parent == this) {
@@ -1353,6 +1745,7 @@ var _exports = {};
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
                     if (children[i] == child) {
+                        this.$nativeShow.removeChild(child.$nativeShow);
                         children.splice(i, 1);
                         this.invalidSize();
                         this.$addFlags(0x0100);
@@ -1366,6 +1759,7 @@ var _exports = {};
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
                     if (children[i] == child) {
+                        this.$nativeShow.removeChild(child);
                         children.splice(i, 1);
                         child.$setParent(null, null);
                         child.$dispatchRemovedFromStageEvent();
@@ -1427,8 +1821,7 @@ var _exports = {};
                     child.dispose();
                 }
                 _get(Object.getPrototypeOf(Sprite.prototype), "dispose", this).call(this);
-                this.$nativeShow.release();
-                Platform.release(this.$nativeShow);
+                Platform.release("Sprite", this.$nativeShow);
             }
         }, {
             key: "numChildren",
@@ -1439,10 +1832,133 @@ var _exports = {};
 
         return Sprite;
     }(DisplayObject);
+
+    _exports.Sprite = Sprite;
     //////////////////////////End File:flower/display/Sprite.js///////////////////////////
 
-    //////////////////////////File:flower/texture/Texture.js///////////////////////////
+    //////////////////////////File:flower/display/Bitmap.js///////////////////////////
 
+    var Bitmap = function (_DisplayObject2) {
+        _inherits(Bitmap, _DisplayObject2);
+
+        function Bitmap(texture) {
+            _classCallCheck(this, Bitmap);
+
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+
+            _this3.$nativeShow = Platform.create("Bitmap");
+            _this3.texture = texture;
+            return _this3;
+        }
+
+        _createClass(Bitmap, [{
+            key: "$setTexture",
+            value: function $setTexture(val) {
+                if (val == this.__texture) {
+                    return false;
+                }
+                if (this.__texture) {
+                    this.__texture.$delCount();
+                }
+                this.__texture = val;
+
+                if (val) {
+                    //if (this._width || this._height) {
+                    //    this.scaleX *= this._width / this.texture.width;
+                    //    this.scaleY *= this._height / this.texture.height;
+                    //}
+                    this.__texture.$addCount();
+
+                    this.$nativeShow.setTexture(this.__texture);
+
+                    //this._setX(this.x);
+                    //this._setY(this.y);
+
+                    //this.$addFlag(DisplayObjectFlag.BITMAP_SHADER_CHANGE);
+                    //this.$addShaderFlag(ShaderFlag.TEXTURE_CHANGE);
+                    //if (this._scale9Grid) {
+                    //    this.$addShaderFlag(ShaderFlag.SCALE_9_GRID);
+                    //}
+                } else {
+                        this._width = 0;
+                        this._height = 0;
+                        this.$nativeShow.setTexture(Texture.$blank);
+                        //p.exe(this._show, flower.Texture2D.blank.$nativeTexture);
+                    }
+                return true;
+            }
+        }, {
+            key: "calculateSize",
+            value: function calculateSize(size) {
+                if (this.__texture) {
+                    size.width = this.__texture.width;
+                    size.height = this.__texture.height;
+                } else {
+                    size.width = 0;
+                    size.height = 0;
+                }
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
+                Platform.release("Bitmap", this.$nativeShow);
+            }
+        }, {
+            key: "texture",
+            set: function set(val) {
+                this.$setTexture(val);
+            }
+        }]);
+
+        return Bitmap;
+    }(DisplayObject);
+
+    _exports.Bitmap = Bitmap;
+    //////////////////////////End File:flower/display/Bitmap.js///////////////////////////
+
+    //////////////////////////File:flower/display/Stage.js///////////////////////////
+
+    var Stage = function (_Sprite) {
+        _inherits(Stage, _Sprite);
+
+        function Stage() {
+            _classCallCheck(this, Stage);
+
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+
+            _this4.__stage = _this4;
+            Stage.stages.push(_this4);
+            return _this4;
+        }
+
+        _createClass(Stage, [{
+            key: "stageWidth",
+            get: function get() {
+                return Platform.width;
+            }
+        }, {
+            key: "stageHeight",
+            get: function get() {
+                return Platform.height;
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                return Stage.stages[0];
+            }
+        }]);
+
+        return Stage;
+    }(Sprite);
+
+    Stage.stages = [];
+
+
+    _exports.Stage = Stage;
+    //////////////////////////End File:flower/display/Stage.js///////////////////////////
+
+    //////////////////////////File:flower/texture/Texture.js///////////////////////////
 
     var Texture = function () {
         function Texture(nativeTexture, url, nativeURL, w, h) {
@@ -1452,7 +1968,7 @@ var _exports = {};
             this.__offY = 0;
             this.__sourceRotation = false;
 
-            this.__nativeTexture = nativeTexture;
+            this.$nativeTexture = nativeTexture;
             this.__url = url;
             this.__nativeURL = nativeURL;
             this.$count = 0;
@@ -1467,7 +1983,7 @@ var _exports = {};
                 var offY = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
                 var rotation = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
 
-                var sub = new flower.Texture2D(this.__nativeTexture, this.__url, this.__nativeURL, width, height);
+                var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height);
                 sub.$parentTexture = this.$parentTexture || this;
                 var rect = flower.Rectangle.create();
                 rect.x = startX;
@@ -1516,8 +2032,8 @@ var _exports = {};
                 if (this.$count != 0) {
                     return;
                 }
-                this.__nativeTexture.dispose();
-                this.__nativeTexture = null;
+                this.$nativeTexture.dispose();
+                this.$nativeTexture = null;
                 if (TIP) {
                     tip(1005, this.url);
                 }
@@ -1567,40 +2083,361 @@ var _exports = {};
             get: function get() {
                 return this.__sourceRotation;
             }
-        }, {
-            key: "$nativeTexture",
-            get: function get() {
-                return this.__nativeTexture;
-            }
         }]);
 
         return Texture;
     }();
     //////////////////////////End File:flower/texture/Texture.js///////////////////////////
 
+    //////////////////////////File:flower/texture/TextureManager.js///////////////////////////
+
+
+    var TextureManager = function () {
+        function TextureManager() {
+            _classCallCheck(this, TextureManager);
+
+            this.list = [];
+        }
+
+        _createClass(TextureManager, [{
+            key: "$createTexture",
+
+
+            /**
+             * 创建纹理
+             * @param nativeTexture
+             * @param url
+             * @param nativeURL
+             * @param w
+             * @param h
+             * @returns {*}
+             */
+            value: function $createTexture(nativeTexture, url, nativeURL, w, h) {
+                for (var i = 0; i < this.list.length; i++) {
+                    if (this.list[i].url == url) {
+                        if (DEBUG) {
+                            $error(1003, url);
+                        }
+                        return this.list[i];
+                    }
+                }
+                if (TIP) {
+                    $tip(1004, url);
+                }
+                var texture = new Texture(nativeTexture, url, nativeURL, w, h);
+                this.list.push(texture);
+                return texture;
+            }
+        }, {
+            key: "$getTextureByNativeURL",
+            value: function $getTextureByNativeURL(url) {
+                for (var i = 0; i < this.list.length; i++) {
+                    if (this.list[i].nativeURL == url) {
+                        return this.list[i];
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "$check",
+            value: function $check() {
+                for (var i = 0; i < this.list.length; i++) {
+                    if (this.list[i].$count == 0) {
+                        this.list.splice(i, 1)[0].dispose();
+                        return;
+                    }
+                }
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                if (TextureManager.instance == null) {
+                    TextureManager.instance = new TextureManager();
+                }
+                return TextureManager.instance;
+            }
+        }]);
+
+        return TextureManager;
+    }();
+    //////////////////////////End File:flower/texture/TextureManager.js///////////////////////////
+
+    //////////////////////////File:flower/net/URLLoader.js///////////////////////////
+
+
+    var URLLoader = function (_EventDispatcher2) {
+        _inherits(URLLoader, _EventDispatcher2);
+
+        function URLLoader(res) {
+            _classCallCheck(this, URLLoader);
+
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+
+            _this5._isLoading = false;
+            _this5._selfDispose = false;
+
+            if (typeof res == "string") {
+                res = ResItem.create(res);
+            }
+            _this5._res = res;
+            _this5._type = _this5._res.type;
+            return _this5;
+        }
+
+        _createClass(URLLoader, [{
+            key: "$addLink",
+            value: function $addLink(loader) {
+                if (!this._links) {
+                    this._links = [];
+                }
+                this._links.push(loader);
+            }
+        }, {
+            key: "load",
+            value: function load(res) {
+                if (this._isLoading) {
+                    dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+                    return;
+                }
+                this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
+                this._isLoading = true;
+                for (var i = 0; i < URLLoader.list.length; i++) {
+                    if (URLLoader.list[i].loadURL == this.loadURL) {
+                        this._linkLoader = URLLoader.list[i];
+                        break;
+                    }
+                }
+                if (this._linkLoader) {
+                    this._linkLoader.$addLink(this);
+                    return;
+                }
+                URLLoader.list.push(this);
+                if (this.type == ResType.IMAGE) {
+                    this.loadTexture();
+                } else {
+                    this.loadText();
+                }
+            }
+        }, {
+            key: "loadTexture",
+            value: function loadTexture() {
+                var texture = TextureManager.getInstance().$getTextureByNativeURL(this._loadInfo.url);
+                if (texture) {
+                    texture.$addCount();
+                    this._data = texture;
+                    new CallLater(this.loadComplete, this);
+                } else {
+                    PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+                }
+            }
+        }, {
+            key: "loadTextureComplete",
+            value: function loadTextureComplete(nativeTexture, width, height) {
+                var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height);
+                this._data = texture;
+                texture.$addCount();
+                new CallLater(this.loadComplete, this);
+            }
+        }, {
+            key: "setTextureByLink",
+            value: function setTextureByLink(texture) {
+                texture.$addCount();
+                this._data = texture;
+                this.loadComplete();
+            }
+        }, {
+            key: "loadText",
+            value: function loadText() {
+                PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this);
+            }
+        }, {
+            key: "loadTextComplete",
+            value: function loadTextComplete(content) {
+                if (this._type == ResType.TEXT) {
+                    this._data = content;
+                } else if (this._type == ResType.JSON) {
+                    this._data = JSON.parse(content);
+                }
+                new CallLater(this.loadComplete, this);
+            }
+        }, {
+            key: "setTextByLink",
+            value: function setTextByLink(content) {
+                if (this._type == ResType.TEXT) {
+                    this._data = content;
+                } else if (this._type == ResType.JSON) {
+                    this._data = JSON.parse(content);
+                }
+                this.loadComplete();
+            }
+        }, {
+            key: "setJsonByLink",
+            value: function setJsonByLink(content) {
+                this._data = content;
+                this.loadComplete();
+            }
+        }, {
+            key: "loadComplete",
+            value: function loadComplete() {
+                if (this._links) {
+                    for (var i = 0; i < this._links.length; i++) {
+                        if (this._type == ResType.Image) {
+                            this._links[i].setTextureByLink(this._data);
+                        } else if (this._type == ResType.TEXT) {
+                            this._links[i].setTextByLink(this._data);
+                        } else if (this._type == ResType.JSON) {
+                            this._links[i].setJsonByLink(this._data);
+                        }
+                    }
+                }
+                this._links = null;
+                this._isLoading = false;
+                if (!this._res || !this._data) {
+                    this._selfDispose = true;
+                    this.dispose();
+                    this._selfDispose = false;
+                    return;
+                }
+                for (var i = 0; i < URLLoader.list.length; i++) {
+                    if (URLLoader.list[i] == this) {
+                        URLLoader.list.splice(i, 1);
+                        break;
+                    }
+                }
+                this.dispatchWidth(Event.COMPLETE, this._data);
+                this._selfDispose = true;
+                this.dispose();
+                this._selfDispose = false;
+            }
+        }, {
+            key: "loadError",
+            value: function loadError() {
+                if (this.hasListener(IOErrorEvent.ERROR)) {
+                    this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, "[加载纹理失败] " + this._res.localURL));
+                } else {
+                    DebugInfo.debug("[加载纹理失败] " + this._res.localURL, DebugInfo.ERROR);
+                }
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                if (!this._selfDispose) {
+                    _get(Object.getPrototypeOf(URLLoader.prototype), "dispose", this).call(this);
+                    return;
+                }
+                if (this._data && this._type == ResType.Image) {
+                    this._data.$delCount();
+                    this._data = null;
+                }
+                this._res = null;
+                this._data = null;
+                _get(Object.getPrototypeOf(URLLoader.prototype), "dispose", this).call(this);
+                for (var i = 0; i < URLLoader.list.length; i++) {
+                    if (URLLoader.list[i] == this) {
+                        URLLoader.list.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }, {
+            key: "url",
+            get: function get() {
+                return this._res ? this._res.url : "";
+            }
+        }, {
+            key: "loadURL",
+            get: function get() {
+                return this._loadInfo ? this._loadInfo.url : "";
+            }
+        }, {
+            key: "type",
+            get: function get() {
+                return this._res ? this._res.type : "";
+            }
+        }, {
+            key: "language",
+            set: function set(val) {
+                this._language = val;
+            }
+        }, {
+            key: "scale",
+            set: function set(val) {
+                this._scale = val;
+            }
+        }], [{
+            key: "clear",
+            value: function clear() {
+                while (URLLoader.list.length) {
+                    var loader = URLLoader.list.pop();
+                    loader.dispose();
+                }
+            }
+        }]);
+
+        return URLLoader;
+    }(EventDispatcher);
+
+    URLLoader.list = [];
+
+
+    _exports.URLLoader = URLLoader;
+    //////////////////////////End File:flower/net/URLLoader.js///////////////////////////
+
+    //////////////////////////File:flower/res/Res.js///////////////////////////
+
+    var Res = function () {
+        function Res() {
+            _classCallCheck(this, Res);
+        }
+
+        _createClass(Res, null, [{
+            key: "getRes",
+
+
+            /**
+             * 查询存储的 ResItem，通过 url 查找匹配的项
+             * @param url
+             */
+            value: function getRes(url) {}
+        }]);
+
+        return Res;
+    }();
+    //////////////////////////End File:flower/res/Res.js///////////////////////////
+
     //////////////////////////File:flower/res/ResItem.js///////////////////////////
 
 
+    Res.__resItems = [];
+
     var ResItem = function () {
-        /**
-         * 使用时的路径
-         */
-
-        function ResItem() {
-            _classCallCheck(this, ResItem);
-
-            this.__loadList = [];
-        }
 
         /**
          * 实际的加载地址有哪些
+         */
+
+        function ResItem(url, type) {
+            _classCallCheck(this, ResItem);
+
+            this.__loadList = [];
+
+            this.__url = url;
+            this.__type = type;
+        }
+
+        /**
+         * 资源类型
+         */
+
+        /**
+         * 使用时的路径
          */
 
 
         _createClass(ResItem, [{
             key: "addInfo",
             value: function addInfo(url, settingWidth, settingHeight, scale, language) {
-                var info = new ResItemInfo();
+                var info = ResItemInfo.create();
                 info.url = url;
                 info.settingWidth = settingWidth;
                 info.settingHeight = settingHeight;
@@ -1608,18 +2445,330 @@ var _exports = {};
                 info.language = language;
                 this.__loadList.push(info);
             }
+        }, {
+            key: "getLoadInfo",
+            value: function getLoadInfo(language, scale) {
+                var loadList = this.__loadList;
+                if (loadList.length == 1) {
+                    return loadList[0];
+                }
+                var info;
+                for (var i = 0; i < loadList.length; i++) {
+                    if (language && loadList[i].language && language != loadList[i].language) {
+                        continue;
+                    }
+                    if (!info) {
+                        info = loadList[i];
+                    } else if (scale != null) {
+                        if (loadList[i].scale != null && Math.abs(loadList[i].scale - scale) < Math.abs(info.scale - scale)) {
+                            info = loadList[i];
+                        }
+                    }
+                }
+                if (!info) {
+                    info = loadList[0];
+                }
+                return info;
+            }
+        }, {
+            key: "type",
+            get: function get() {
+                return this.__type;
+            }
+        }, {
+            key: "url",
+            get: function get() {
+                return this.__url;
+            }
+        }], [{
+            key: "create",
+            value: function create(url) {
+                var array = url.split("/");
+                var last = array.pop();
+                var nameArray = last.split(".");
+                var name = "";
+                var end = "";
+                if (nameArray.length == 1) {
+                    name = nameArray[0];
+                } else {
+                    end = nameArray[nameArray.length - 1];
+                    name = last.slice(0, last.length - end.length - 1);
+                }
+                nameArray = name.split("@");
+                var settingWidth;
+                var settingHeight;
+                var scale;
+                var language;
+                for (var i = 1; i < nameArray.length; i++) {
+                    var content = nameArray[i];
+                    var code = content.charCodeAt(0);
+                    if (code >= "0".charCodeAt(0) && code <= "9".charCodeAt(0) || code == ".".charCodeAt(0)) {
+                        var nums = content.split("x");
+                        if (nums.length == 1) {
+                            scale = parseFloat(content);
+                        } else if (nums.length == 2) {
+                            settingWidth = parseInt(nums[0]);
+                            settingHeight = parseInt(nums[1]);
+                        }
+                    } else {
+                        language = content;
+                    }
+                }
+                var useURL = "";
+                for (var i = 0; i < array.length; i++) {
+                    useURL += array[i] + "/";
+                }
+                useURL += nameArray[0] + (end != "" ? "." + end : "");
+                var res;
+                if (ResItem.$pools.length) {
+                    res = ResItem.$pools.pop();
+                    res.__url = useURL;
+                    res.__type = ResType.getType(end);
+                    res.__loadList.length = 0;
+                } else {
+                    res = new ResItem(useURL, ResType.getType(end));
+                }
+                res.addInfo(url, settingWidth, settingHeight, scale, language);
+                return res;
+            }
+        }, {
+            key: "release",
+            value: function release(item) {
+                while (item.__loadList.length) {
+                    ResItemInfo.release(item.__loadList.pop());
+                }
+                ResItem.$pools.push(item);
+            }
         }]);
 
         return ResItem;
     }();
+
+    ResItem.$pools = [];
+
+
+    _exports.ResItem = ResItem;
     //////////////////////////End File:flower/res/ResItem.js///////////////////////////
 
     //////////////////////////File:flower/res/ResItemInfo.js///////////////////////////
 
+    var ResItemInfo = function () {
+        function ResItemInfo() {
+            _classCallCheck(this, ResItemInfo);
+        }
 
-    var ResItemInfo = function ResItemInfo() {
-        _classCallCheck(this, ResItemInfo);
-    };
+        _createClass(ResItemInfo, null, [{
+            key: "create",
+
+
+            /**
+             * 支持的语言
+             */
+
+
+            /**
+             * 预设的高
+             */
+
+
+            /**
+             * 实际的加载地址
+             */
+            value: function create() {
+                if (ResItemInfo.$pools.length) {
+                    return ResItemInfo.$pools.pop();
+                } else {
+                    return new ResItemInfo();
+                }
+            }
+
+            /**
+             * 支持的缩放倍数
+             */
+
+
+            /**
+             * 预设的宽
+             */
+
+        }, {
+            key: "release",
+            value: function release(info) {
+                ResItemInfo.$pools.push(info);
+            }
+        }]);
+
+        return ResItemInfo;
+    }();
+
+    ResItemInfo.$pools = [];
+
+
+    _exports.ResItemInfo = ResItemInfo;
     //////////////////////////End File:flower/res/ResItemInfo.js///////////////////////////
+
+    //////////////////////////File:flower/res/ResType.js///////////////////////////
+
+    var ResType = function () {
+        function ResType() {
+            _classCallCheck(this, ResType);
+        }
+
+        _createClass(ResType, null, [{
+            key: "getURLType",
+            value: function getURLType(url) {
+                if (url.split(".").length == 1) {
+                    return ResType.TEXT;
+                }
+                var end = url.split(".")[url.split(".").length - 1];
+                return ResType.getType(end);
+            }
+        }, {
+            key: "getType",
+            value: function getType(end) {
+                if (end == "json") {
+                    return ResType.JSON;
+                }
+                if (end == "png" || end == "jpg") {
+                    return ResType.IMAGE;
+                }
+                return ResType.TEXT;
+            }
+        }]);
+
+        return ResType;
+    }();
+    //////////////////////////End File:flower/res/ResType.js///////////////////////////
+
+    //////////////////////////File:flower/utils/EnterFrame.js///////////////////////////
+
+
+    ResType.TEXT = 1;
+    ResType.JSON = 2;
+    ResType.IMAGE = 3;
+
+    var EnterFrame = function () {
+        function EnterFrame() {
+            _classCallCheck(this, EnterFrame);
+        }
+
+        _createClass(EnterFrame, null, [{
+            key: "add",
+            value: function add(call, owner) {
+                for (var i = 0; i < flower.EnterFrame.enterFrames.length; i++) {
+                    if (flower.EnterFrame.enterFrames[i].call == call && flower.EnterFrame.enterFrames[i].owner == owner) {
+                        return;
+                    }
+                }
+                for (i = 0; i < flower.EnterFrame.waitAdd.length; i++) {
+                    if (flower.EnterFrame.waitAdd[i].call == call && flower.EnterFrame.waitAdd[i].owner == owner) {
+                        return;
+                    }
+                }
+                flower.EnterFrame.waitAdd.push({ "call": call, "owner": owner });
+            }
+        }, {
+            key: "del",
+            value: function del(call, owner) {
+                for (var i = 0; i < flower.EnterFrame.enterFrames.length; i++) {
+                    if (flower.EnterFrame.enterFrames[i].call == call && flower.EnterFrame.enterFrames[i].owner == owner) {
+                        flower.EnterFrame.enterFrames.splice(i, 1);
+                        return;
+                    }
+                }
+                for (i = 0; i < flower.EnterFrame.waitAdd.length; i++) {
+                    if (flower.EnterFrame.waitAdd[i].call == call && flower.EnterFrame.waitAdd[i].owner == owner) {
+                        flower.EnterFrame.waitAdd.splice(i, 1);
+                        return;
+                    }
+                }
+            }
+        }, {
+            key: "$update",
+            value: function $update(now, gap) {
+                flower.EnterFrame.frame++;
+                flower.CallLater.$run();
+                if (flower.EnterFrame.waitAdd.length) {
+                    flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
+                    flower.EnterFrame.waitAdd = [];
+                }
+                var copy = flower.EnterFrame.enterFrames;
+                for (var i = 0; i < copy.length; i++) {
+                    copy[i].call.apply(copy[i].owner, [now, gap]);
+                }
+            }
+        }]);
+
+        return EnterFrame;
+    }();
+
+    EnterFrame.enterFrames = [];
+    EnterFrame.waitAdd = [];
+    EnterFrame.frame = 0;
+    EnterFrame.updateFactor = 1;
+
+
+    _exports.EnterFrame = EnterFrame;
+    //////////////////////////End File:flower/utils/EnterFrame.js///////////////////////////
+
+    //////////////////////////File:flower/utils/CallLater.js///////////////////////////
+
+    var CallLater = function () {
+        function CallLater(func, thisObj) {
+            var args = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+            _classCallCheck(this, CallLater);
+
+            this._func = func;
+            this._thisObj = thisObj;
+            this._data = args || [];
+            flower.CallLater._next.push(this);
+        }
+
+        _createClass(CallLater, [{
+            key: "$call",
+            value: function $call() {
+                this._func.apply(this._thisObj, this._data);
+                this._func = null;
+                this._thisObj = null;
+                this._data = null;
+            }
+        }], [{
+            key: "add",
+            value: function add(func, thisObj) {
+                var args = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+                for (var i = 0, len = flower.CallLater._next.length; i < len; i++) {
+                    if (flower.CallLater._next[i]._func == func && flower.CallLater._next[i]._thisObj == thisObj) {
+                        flower.CallLater._next[i]._data = args || [];
+                        return;
+                    }
+                }
+                new flower.CallLater(func, thisObj, args);
+            }
+        }, {
+            key: "$run",
+            value: function $run() {
+                if (!flower.CallLater._next.length) {
+                    return;
+                }
+                flower.CallLater._list = flower.CallLater._next;
+                flower.CallLater._next = [];
+                var list = flower.CallLater._list;
+                while (list.length) {
+                    list.pop().$call();
+                }
+            }
+        }]);
+
+        return CallLater;
+    }();
+
+    CallLater._next = [];
+    CallLater._list = [];
+
+
+    _exports.CallLater = CallLater;
+    //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
 })();
 var flower = _exports;

@@ -52,8 +52,8 @@
  */
 
 cc.game.onStart = function () {
-    if (!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
-        document.body.removeChild(document.getElementById("cocosLoading"));
+    //if (!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
+    //    document.body.removeChild(document.getElementById("cocosLoading"));
 
 
     cc.loader.loadJs(["src/require.js"], function (err) {
