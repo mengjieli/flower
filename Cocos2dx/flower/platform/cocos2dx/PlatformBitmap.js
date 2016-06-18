@@ -14,7 +14,12 @@ class PlatformBitmap {
 
     setTexture(texture) {
         this.__texture = texture;
-        this.show.initWithTexture(texture.$nativeTexture);
+        console.log("native?" + Platform.native + "?" + cc.sys.isNative);
+        if (Platform.native) {
+            this.show.initWithTexture(texture.$nativeTexture);
+        } else {
+            this.show.setTexture(texture.$nativeTexture);
+        }
         var source = texture.source;
         if (source) {
             this.show.setTextureRect(source, texture.sourceRotation, {

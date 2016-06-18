@@ -70,13 +70,14 @@ exports.getLanguage = getLanaguge;
 //////////////////////////File:flower/platform/cocos2dx/Platform.js///////////////////////////
 class Platform {
     static type = "cocos2dx";
-    static native = cc.sys.isNative;
+    static native;
 
     static stage;
     static width;
     static height;
 
     static start(engine, root) {
+        Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
             ctor: function () {
                 this._super();
@@ -276,7 +277,12 @@ class PlatformBitmap {
 
     setTexture(texture) {
         this.__texture = texture;
-        this.show.initWithTexture(texture.$nativeTexture);
+        console.log("native?" + Platform.native + "?" + cc.sys.isNative);
+        if (Platform.native) {
+            this.show.initWithTexture(texture.$nativeTexture);
+        } else {
+            this.show.setTexture(texture.$nativeTexture);
+        }
         var source = texture.source;
         if (source) {
             this.show.setTextureRect(source, texture.sourceRotation, {
@@ -399,13 +405,20 @@ class PlatformURLLoader {
                 errorBack.call(thisObj);
             }
             else {
-                var texture = img;
+                var texture;
                 if (Platform.native) {
-                    console.log("[loadTextureComplete]" + texture + "," + texture.getContentSize().width + "," + texture.getContentSize().height);
-                    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                    texture = img;
                 } else {
-                    back.call(thisObj, texture, texture.width, texture.height);
+                    texture = new cc.Texture2D();
+                    texture.initWithElement(img);
                 }
+                back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                //if (Platform.native) {
+                //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                //} else {
+                //
+                //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
+                //}
             }
             PlatformURLLoader.isLoading = false;
         });
@@ -1281,11 +1294,8 @@ class DisplayObject extends EventDispatcher {
 
     $setRotation(val) {
         val = +val || 0;
-        console.log("rot1? " + val);
         var p = this.__DisplayObject;
-        console.log("rot12 " + val + "," + p[2]);
         if (p[2] == val) {
-            console.log("rot0!? " + val);
             return;
         }
         p[2] = val;

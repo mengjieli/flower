@@ -140,11 +140,8 @@ class DisplayObject extends EventDispatcher {
 
     $setRotation(val) {
         val = +val || 0;
-        console.log("rot1? " + val);
         var p = this.__DisplayObject;
-        console.log("rot12 " + val + "," + p[2]);
         if (p[2] == val) {
-            console.log("rot0!? " + val);
             return;
         }
         p[2] = val;

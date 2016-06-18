@@ -41,15 +41,15 @@ class Main {
 
         var bitmap = new flower.Bitmap(e.data);
         container.addChild(bitmap);
-        bitmap.x = 100;
-        bitmap.y = 150;
+        //bitmap.x = 100;
+        //bitmap.y = 150;
         //bitmap.scaleX = 2;
         //bitmap.scaleY = 4;
         bitmap.rotation = 0;
-        setInterval(function () {
-            container.rotation++;
-            bitmap.rotation--;
-        }, 30);
+        //setInterval(function () {
+        //    container.rotation++;
+        //    bitmap.rotation--;
+        //}, 30);
         //this.stage.setPosition(200, 200);
 
         //var sp = new cc.Sprite("res/qq.png");

@@ -1,12 +1,13 @@
 class Platform {
     static type = "cocos2dx";
-    static native = cc.sys.isNative;
+    static native;
 
     static stage;
     static width;
     static height;
 
     static start(engine, root) {
+        Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
             ctor: function () {
                 this._super();

@@ -95,6 +95,7 @@ var _exports = {};
         _createClass(Platform, null, [{
             key: "start",
             value: function start(engine, root) {
+                Platform.native = cc.sys.isNative;
                 var scene = cc.Scene.extend({
                     ctor: function ctor() {
                         this._super();
@@ -192,7 +193,6 @@ var _exports = {};
 
 
     Platform.type = "cocos2dx";
-    Platform.native = cc.sys.isNative;
     Platform.lastTime = new Date().getTime();
     Platform.frame = 0;
     Platform.pools = {};
@@ -314,7 +314,12 @@ var _exports = {};
             key: "setTexture",
             value: function setTexture(texture) {
                 this.__texture = texture;
-                this.show.initWithTexture(texture.$nativeTexture);
+                console.log("native?" + Platform.native + "?" + cc.sys.isNative);
+                if (Platform.native) {
+                    this.show.initWithTexture(texture.$nativeTexture);
+                } else {
+                    this.show.setTexture(texture.$nativeTexture);
+                }
                 var source = texture.source;
                 if (source) {
                     this.show.setTextureRect(source, texture.sourceRotation, {
@@ -448,13 +453,20 @@ var _exports = {};
                     if (err) {
                         errorBack.call(thisObj);
                     } else {
-                        var texture = img;
+                        var texture;
                         if (Platform.native) {
-                            console.log("[loadTextureComplete]" + texture + "," + texture.getContentSize().width + "," + texture.getContentSize().height);
-                            back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                            texture = img;
                         } else {
-                            back.call(thisObj, texture, texture.width, texture.height);
+                            texture = new cc.Texture2D();
+                            texture.initWithElement(img);
                         }
+                        back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                        //if (Platform.native) {
+                        //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                        //} else {
+                        //
+                        //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
+                        //}
                     }
                     PlatformURLLoader.isLoading = false;
                 });
@@ -1433,11 +1445,8 @@ var _exports = {};
             key: "$setRotation",
             value: function $setRotation(val) {
                 val = +val || 0;
-                console.log("rot1? " + val);
                 var p = this.__DisplayObject;
-                console.log("rot12 " + val + "," + p[2]);
                 if (p[2] == val) {
-                    console.log("rot0!? " + val);
                     return;
                 }
                 p[2] = val;

@@ -52,13 +52,20 @@ class PlatformURLLoader {
                 errorBack.call(thisObj);
             }
             else {
-                var texture = img;
+                var texture;
                 if (Platform.native) {
-                    console.log("[loadTextureComplete]" + texture + "," + texture.getContentSize().width + "," + texture.getContentSize().height);
-                    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                    texture = img;
                 } else {
-                    back.call(thisObj, texture, texture.width, texture.height);
+                    texture = new cc.Texture2D();
+                    texture.initWithElement(img);
                 }
+                back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                //if (Platform.native) {
+                //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                //} else {
+                //
+                //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
+                //}
             }
             PlatformURLLoader.isLoading = false;
         });
