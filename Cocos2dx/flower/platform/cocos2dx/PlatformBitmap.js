@@ -41,7 +41,7 @@ class PlatformBitmap {
     setScale9Grid(scale9Grid) {
         var hasScale9 = this.__scale9Grid;
         this.__scale9Grid = scale9Grid;
-        this.__shaderFlag &= PlatformShaderType.SCALE_9_GRID;
+        this.__shaderFlag |= PlatformShaderType.SCALE_9_GRID;
         this.__shaderFlagChange = true;
         if (this.__scale9Grid) {
             if (hasScale9 == null) {
@@ -58,12 +58,18 @@ class PlatformBitmap {
 
     _changeShader() {
         if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
-            this.show.setGLProgramState(this.__programmer);
+            if (Platform.native) {
+                this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+            } else {
+                this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+            }
             this.__textureChange = false;
             this.__programmerChange = false;
         }
         if (this.__shaderFlagChange && this.__programmer) {
             this.__programmer.shaderFlag = this.__shaderFlag;
+            this.__shaderFlag &= ~PlatformShaderType.SCALE_9_GRID;
+            this.__shaderFlagChange = false;
         }
         if (this.__texture) {
             if (this.__scale9Grid) {
@@ -74,6 +80,7 @@ class PlatformBitmap {
     }
 
     _changeScale9Grid(width, height, scale9Grid, setWidth, setHeight) {
+        flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
         var scaleX = setWidth / width;
         var scaleY = setHeight / height;
         var left = scale9Grid.x / width;
@@ -86,17 +93,30 @@ class PlatformBitmap {
         var tbottom = 1.0 - (1.0 - top) / scaleY;
         var scaleGapX = (right - left) / (tright - tleft);
         var scaleGapY = (bottom - top) / (tbottom - ttop);
-        var programmer = this.__programmer;
-        programmer.setUniformFloat("left", left);
-        programmer.setUniformFloat("top", top);
-        programmer.setUniformFloat("tleft", tleft);
-        programmer.setUniformFloat("ttop", ttop);
-        programmer.setUniformFloat("tright", tright);
-        programmer.setUniformFloat("tbottom", tbottom);
-        programmer.setUniformFloat("scaleGapX", scaleGapX);
-        programmer.setUniformFloat("scaleGapY", scaleGapY);
-        programmer.setUniformFloat("scaleX", scaleX);
-        programmer.setUniformFloat("scaleY", scaleY);
+        var programmer = this.__programmer.$nativeProgrammer;
+        if (Platform.native) {
+            programmer.setUniformFloat("left", left);
+            programmer.setUniformFloat("top", top);
+            programmer.setUniformFloat("tleft", tleft);
+            programmer.setUniformFloat("ttop", ttop);
+            programmer.setUniformFloat("tright", tright);
+            programmer.setUniformFloat("tbottom", tbottom);
+            programmer.setUniformFloat("scaleGapX", scaleGapX);
+            programmer.setUniformFloat("scaleGapY", scaleGapY);
+            programmer.setUniformFloat("scaleX", scaleX);
+            programmer.setUniformFloat("scaleY", scaleY);
+        } else {
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("tleft"), tleft);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("ttop"), ttop);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("tright"), tright);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("tbottom"), tbottom);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapX"), scaleGapX);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapY"), scaleGapY);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
+            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
+        }
     }
 
     set x(val) {
@@ -110,13 +130,13 @@ class PlatformBitmap {
     }
 
     set scaleX(val) {
-        this.__scaleX = 1;
+        this.__scaleX = val;
         this.show.setScaleX(val);
         this._changeShader();
     }
 
     set scaleY(val) {
-        this.__scaleY = 1;
+        this.__scaleY = val;
         this.show.setScaleY(val);
         this._changeShader();
     }

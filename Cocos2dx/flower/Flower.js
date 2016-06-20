@@ -11,8 +11,7 @@ var language = "";
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, native, language) {
-    Platform.native = native;
+function start(completeFunc, language) {
     language = language || "";
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
@@ -24,7 +23,7 @@ function start(completeFunc, native, language) {
         Texture.$blank = e.data;
         loader = new URLLoader("res/shaders/Bitmap.fsh");
         loader.addListener(Event.COMPLETE, function (e) {
-            loader = new URLLoader("res/shaders/Bitmap.vsh");
+            loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
             loader.addListener(Event.COMPLETE, function (e) {
                 loader = new URLLoader("res/shaders/Source.fsh");
                 loader.addListener(Event.COMPLETE, function (e) {
@@ -70,5 +69,14 @@ function clampRotation(value) {
     return value;
 }
 
+function trace() {
+    var str = "";
+    for (var i = 0; i < arguments.length; i++) {
+        str += arguments[i] + "\t\t";
+    }
+    console.log(str);
+}
+
 exports.start = start;
 exports.getLanguage = getLanaguge;
+exports.trace = trace;

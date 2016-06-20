@@ -1,32 +1,39 @@
 class PlatformProgrammer {
 
-    _nativeProgrammer;
+    $nativeProgrammer;
     _scale9Grid;
 
-    constructor(vsh = "res/shaders/Bitmap.vsh", fsh = "res/shaders/Bitmap.fsh") {
+    constructor(vsh = "", fsh = "res/shaders/Bitmap.fsh") {
+        if(vsh == "") {
+            if(Platform.native) {
+                vsh = "res/shaders/Bitmap.vsh";
+            } else {
+                vsh = "res/shaders/BitmapWeb.vsh";
+            }
+        }
         var shader;// = Programmer.shader;
-        if (fsh != "res/shaders/Bitmap.fsh") {
-            shader = new cc.GLProgram(vsh, fsh);
-            shader.retain();
-            shader.link();
-            shader.updateUniforms();
+        shader = new cc.GLProgram(vsh, fsh);
+        shader.retain();
+        if(!Platform.native) {
+            shader.addAttribute("a_position", 0);
+            shader.addAttribute("a_texCoord", 1);
+            shader.addAttribute("a_color", 2);
         }
-        if (!shader) {
-            //shader = Programmer.shader = new cc.GLProgram(vsh, fsh);
-            shader = new cc.GLProgram(vsh, fsh);
-            shader.retain();
-            shader.link();
-            shader.updateUniforms();
+        shader.link();
+        shader.updateUniforms();
+        if (Platform.native) {
+            this.$nativeProgrammer = cc.GLProgramState.getOrCreateWithGLProgram(shader);
+        } else {
+            this.$nativeProgrammer = shader;
         }
-        this._nativeProgrammer = cc.GLProgramState.getOrCreateWithGLProgram(shader);
     }
 
     set shaderFlag(type) {
-        this._nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID);
-    }
-
-    get nativeProgrammer() {
-        return this._nativeProgrammer;
+        if (Platform.native) {
+            this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID);
+        } else {
+            this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID);
+        }
     }
 
     static programmers = [];
@@ -46,7 +53,7 @@ class PlatformProgrammer {
 
     static getInstance() {
         if (PlatformProgrammer.instance == null) {
-            PlatformProgrammer.instance = new PlatformProgrammer("res/shaders/Bitmap.vsh", "res/shaders/Source.fsh");
+            PlatformProgrammer.instance = new PlatformProgrammer(Platform.native?"res/shaders/Bitmap.vsh":"res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
         }
         return PlatformProgrammer.instance;
     }

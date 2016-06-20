@@ -26,8 +26,7 @@ var _exports = {};
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc, native, language) {
-        Platform.native = native;
+    function start(completeFunc, language) {
         language = language || "";
         var stage = new Stage();
         Platform._runBack = CoreTime.$run;
@@ -39,7 +38,7 @@ var _exports = {};
             Texture.$blank = e.data;
             loader = new URLLoader("res/shaders/Bitmap.fsh");
             loader.addListener(Event.COMPLETE, function (e) {
-                loader = new URLLoader("res/shaders/Bitmap.vsh");
+                loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
                 loader.addListener(Event.COMPLETE, function (e) {
                     loader = new URLLoader("res/shaders/Source.fsh");
                     loader.addListener(Event.COMPLETE, function (e) {
@@ -93,8 +92,17 @@ var _exports = {};
         return value;
     }
 
+    function trace() {
+        var str = "";
+        for (var i = 0; i < arguments.length; i++) {
+            str += arguments[i] + "\t\t";
+        }
+        console.log(str);
+    }
+
     _exports.start = start;
     _exports.getLanguage = getLanaguge;
+    _exports.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/Platform.js///////////////////////////
@@ -353,7 +361,7 @@ var _exports = {};
             value: function setScale9Grid(scale9Grid) {
                 var hasScale9 = this.__scale9Grid;
                 this.__scale9Grid = scale9Grid;
-                this.__shaderFlag &= PlatformShaderType.SCALE_9_GRID;
+                this.__shaderFlag |= PlatformShaderType.SCALE_9_GRID;
                 this.__shaderFlagChange = true;
                 if (this.__scale9Grid) {
                     if (hasScale9 == null) {
@@ -371,12 +379,18 @@ var _exports = {};
             key: "_changeShader",
             value: function _changeShader() {
                 if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
-                    this.show.setGLProgramState(this.__programmer);
+                    if (Platform.native) {
+                        this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+                    } else {
+                        this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                    }
                     this.__textureChange = false;
                     this.__programmerChange = false;
                 }
                 if (this.__shaderFlagChange && this.__programmer) {
                     this.__programmer.shaderFlag = this.__shaderFlag;
+                    this.__shaderFlag &= ~PlatformShaderType.SCALE_9_GRID;
+                    this.__shaderFlagChange = false;
                 }
                 if (this.__texture) {
                     if (this.__scale9Grid) {
@@ -387,6 +401,7 @@ var _exports = {};
         }, {
             key: "_changeScale9Grid",
             value: function _changeScale9Grid(width, height, scale9Grid, setWidth, setHeight) {
+                flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
                 var scaleX = setWidth / width;
                 var scaleY = setHeight / height;
                 var left = scale9Grid.x / width;
@@ -399,17 +414,30 @@ var _exports = {};
                 var tbottom = 1.0 - (1.0 - top) / scaleY;
                 var scaleGapX = (right - left) / (tright - tleft);
                 var scaleGapY = (bottom - top) / (tbottom - ttop);
-                var programmer = this.__programmer;
-                programmer.setUniformFloat("left", left);
-                programmer.setUniformFloat("top", top);
-                programmer.setUniformFloat("tleft", tleft);
-                programmer.setUniformFloat("ttop", ttop);
-                programmer.setUniformFloat("tright", tright);
-                programmer.setUniformFloat("tbottom", tbottom);
-                programmer.setUniformFloat("scaleGapX", scaleGapX);
-                programmer.setUniformFloat("scaleGapY", scaleGapY);
-                programmer.setUniformFloat("scaleX", scaleX);
-                programmer.setUniformFloat("scaleY", scaleY);
+                var programmer = this.__programmer.$nativeProgrammer;
+                if (Platform.native) {
+                    programmer.setUniformFloat("left", left);
+                    programmer.setUniformFloat("top", top);
+                    programmer.setUniformFloat("tleft", tleft);
+                    programmer.setUniformFloat("ttop", ttop);
+                    programmer.setUniformFloat("tright", tright);
+                    programmer.setUniformFloat("tbottom", tbottom);
+                    programmer.setUniformFloat("scaleGapX", scaleGapX);
+                    programmer.setUniformFloat("scaleGapY", scaleGapY);
+                    programmer.setUniformFloat("scaleX", scaleX);
+                    programmer.setUniformFloat("scaleY", scaleY);
+                } else {
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("tleft"), tleft);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("ttop"), ttop);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("tright"), tright);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("tbottom"), tbottom);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapX"), scaleGapX);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapY"), scaleGapY);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
+                }
             }
         }, {
             key: "release",
@@ -450,14 +478,14 @@ var _exports = {};
         }, {
             key: "scaleX",
             set: function set(val) {
-                this.__scaleX = 1;
+                this.__scaleX = val;
                 this.show.setScaleX(val);
                 this._changeShader();
             }
         }, {
             key: "scaleY",
             set: function set(val) {
-                this.__scaleY = 1;
+                this.__scaleY = val;
                 this.show.setScaleY(val);
                 this._changeShader();
             }
@@ -589,37 +617,43 @@ var _exports = {};
 
     var PlatformProgrammer = function () {
         function PlatformProgrammer() {
-            var vsh = arguments.length <= 0 || arguments[0] === undefined ? "res/shaders/Bitmap.vsh" : arguments[0];
+            var vsh = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
             var fsh = arguments.length <= 1 || arguments[1] === undefined ? "res/shaders/Bitmap.fsh" : arguments[1];
 
             _classCallCheck(this, PlatformProgrammer);
 
+            if (vsh == "") {
+                if (Platform.native) {
+                    vsh = "res/shaders/Bitmap.vsh";
+                } else {
+                    vsh = "res/shaders/BitmapWeb.vsh";
+                }
+            }
             var shader; // = Programmer.shader;
-            if (fsh != "res/shaders/Bitmap.fsh") {
-                shader = new cc.GLProgram(vsh, fsh);
-                shader.retain();
-                shader.link();
-                shader.updateUniforms();
+            shader = new cc.GLProgram(vsh, fsh);
+            shader.retain();
+            if (!Platform.native) {
+                shader.addAttribute("a_position", 0);
+                shader.addAttribute("a_texCoord", 1);
+                shader.addAttribute("a_color", 2);
             }
-            if (!shader) {
-                //shader = Programmer.shader = new cc.GLProgram(vsh, fsh);
-                shader = new cc.GLProgram(vsh, fsh);
-                shader.retain();
-                shader.link();
-                shader.updateUniforms();
+            shader.link();
+            shader.updateUniforms();
+            if (Platform.native) {
+                this.$nativeProgrammer = cc.GLProgramState.getOrCreateWithGLProgram(shader);
+            } else {
+                this.$nativeProgrammer = shader;
             }
-            this._nativeProgrammer = cc.GLProgramState.getOrCreateWithGLProgram(shader);
         }
 
         _createClass(PlatformProgrammer, [{
             key: "shaderFlag",
             set: function set(type) {
-                this._nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID);
-            }
-        }, {
-            key: "nativeProgrammer",
-            get: function get() {
-                return this._nativeProgrammer;
+                if (Platform.native) {
+                    this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID);
+                } else {
+                    this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID);
+                }
             }
         }], [{
             key: "createProgrammer",
@@ -638,7 +672,7 @@ var _exports = {};
             key: "getInstance",
             value: function getInstance() {
                 if (PlatformProgrammer.instance == null) {
-                    PlatformProgrammer.instance = new PlatformProgrammer("res/shaders/Bitmap.vsh", "res/shaders/Source.fsh");
+                    PlatformProgrammer.instance = new PlatformProgrammer(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
                 }
                 return PlatformProgrammer.instance;
             }

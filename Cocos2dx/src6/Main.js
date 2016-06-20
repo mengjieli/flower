@@ -10,9 +10,9 @@ class Main {
         load.addListener(flower.Event.COMPLETE, this.loadJsonComplete, this);
         load.load();
 
-        var load = new flower.URLLoader("res/actions/rpg/RolerMove.js");
-        load.addListener(flower.Event.COMPLETE, this.loadJsComplete, this);
-        load.load();
+        //var load = new flower.URLLoader("res/actions/rpg/RolerMove.js");
+        //load.addListener(flower.Event.COMPLETE, this.loadJsComplete, this);
+        //load.load();
 
         var load = new flower.URLLoader("res/font.png");
         load.addListener(flower.Event.COMPLETE, this.loadImageComplete, this);
