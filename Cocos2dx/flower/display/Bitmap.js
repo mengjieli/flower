@@ -1,6 +1,7 @@
 class Bitmap extends DisplayObject {
 
     __texture;
+    __scale9Grid;
 
     constructor(texture) {
         super();
@@ -27,21 +28,14 @@ class Bitmap extends DisplayObject {
 
             this.$nativeShow.setTexture(this.__texture);
 
-            //this._setX(this.x);
-            //this._setY(this.y);
-
-            //this.$addFlag(DisplayObjectFlag.BITMAP_SHADER_CHANGE);
-            //this.$addShaderFlag(ShaderFlag.TEXTURE_CHANGE);
             //if (this._scale9Grid) {
             //    this.$addShaderFlag(ShaderFlag.SCALE_9_GRID);
             //}
         }
         else {
-            this._width = 0;
-            this._height = 0;
             this.$nativeShow.setTexture(Texture.$blank);
-            //p.exe(this._show, flower.Texture2D.blank.$nativeTexture);
         }
+        this.invalidSize();
         return true;
     }
 
@@ -55,8 +49,20 @@ class Bitmap extends DisplayObject {
         }
     }
 
+    $setScale9Grid(val) {
+        if (this.__scale9Grid == val) {
+            return false;
+        }
+        this.__scale9Grid = val;
+        this.$nativeShow.setScale9Grid(val);
+    }
+
     set texture(val) {
         this.$setTexture(val);
+    }
+
+    set scale9Grid(val) {
+        this.$setScale9Grid(val);
     }
 
     dispose() {

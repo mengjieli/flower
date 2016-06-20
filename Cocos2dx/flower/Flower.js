@@ -22,7 +22,19 @@ function start(completeFunc, native, language) {
     var loader = new URLLoader("res/blank.png");
     loader.addListener(Event.COMPLETE, function (e) {
         Texture.$blank = e.data;
-        completeFunc(Platform.stage,Platform.stage2);
+        loader = new URLLoader("res/shaders/Bitmap.fsh");
+        loader.addListener(Event.COMPLETE, function (e) {
+            loader = new URLLoader("res/shaders/Bitmap.vsh");
+            loader.addListener(Event.COMPLETE, function (e) {
+                loader = new URLLoader("res/shaders/Source.fsh");
+                loader.addListener(Event.COMPLETE, function (e) {
+                    completeFunc(Platform.stage, Platform.stage2);
+                });
+                loader.load();
+            });
+            loader.load();
+        });
+        loader.load();
     });
     loader.load();
 }

@@ -37,7 +37,19 @@ var _exports = {};
         var loader = new URLLoader("res/blank.png");
         loader.addListener(Event.COMPLETE, function (e) {
             Texture.$blank = e.data;
-            completeFunc(Platform.stage, Platform.stage2);
+            loader = new URLLoader("res/shaders/Bitmap.fsh");
+            loader.addListener(Event.COMPLETE, function (e) {
+                loader = new URLLoader("res/shaders/Bitmap.vsh");
+                loader.addListener(Event.COMPLETE, function (e) {
+                    loader = new URLLoader("res/shaders/Source.fsh");
+                    loader.addListener(Event.COMPLETE, function (e) {
+                        completeFunc(Platform.stage, Platform.stage2);
+                    });
+                    loader.load();
+                });
+                loader.load();
+            });
+            loader.load();
         });
         loader.load();
     }
@@ -302,8 +314,14 @@ var _exports = {};
         function PlatformBitmap() {
             _classCallCheck(this, PlatformBitmap);
 
+            this.__textureChange = false;
             this.__x = 0;
             this.__y = 0;
+            this.__programmerChange = false;
+            this.__shaderFlagChange = false;
+            this.__shaderFlag = 0;
+            this.__scaleX = 1;
+            this.__scaleY = 1;
 
             this.show = new cc.Sprite();
             this.show.setAnchorPoint(0, 1);
@@ -314,6 +332,9 @@ var _exports = {};
             key: "setTexture",
             value: function setTexture(texture) {
                 this.__texture = texture;
+                if (this.__texture) {
+                    this.__textureChange = true;
+                }
                 this.show.initWithTexture(texture.$nativeTexture);
                 var source = texture.source;
                 if (source) {
@@ -325,6 +346,70 @@ var _exports = {};
                 this.show.setAnchorPoint(0, 1);
                 this.x = this.__x;
                 this.y = this.__y;
+                this._changeShader();
+            }
+        }, {
+            key: "setScale9Grid",
+            value: function setScale9Grid(scale9Grid) {
+                var hasScale9 = this.__scale9Grid;
+                this.__scale9Grid = scale9Grid;
+                this.__shaderFlag &= PlatformShaderType.SCALE_9_GRID;
+                this.__shaderFlagChange = true;
+                if (this.__scale9Grid) {
+                    if (hasScale9 == null) {
+                        if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
+                            this.__programmer = PlatformProgrammer.createProgrammer();
+                            this.__programmerChange = true;
+                        }
+                    }
+                } else {
+                    this.show.setGLProgramState(PlatformProgrammer.getInstance());
+                }
+                this._changeShader();
+            }
+        }, {
+            key: "_changeShader",
+            value: function _changeShader() {
+                if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
+                    this.show.setGLProgramState(this.__programmer);
+                    this.__textureChange = false;
+                    this.__programmerChange = false;
+                }
+                if (this.__shaderFlagChange && this.__programmer) {
+                    this.__programmer.shaderFlag = this.__shaderFlag;
+                }
+                if (this.__texture) {
+                    if (this.__scale9Grid) {
+                        this._changeScale9Grid(this.__texture.width, this.__texture.height, this.__scale9Grid, this.__texture.width * this.__scaleX, this.__texture.height * this.__scaleY);
+                    }
+                }
+            }
+        }, {
+            key: "_changeScale9Grid",
+            value: function _changeScale9Grid(width, height, scale9Grid, setWidth, setHeight) {
+                var scaleX = setWidth / width;
+                var scaleY = setHeight / height;
+                var left = scale9Grid.x / width;
+                var top = scale9Grid.y / height;
+                var right = (scale9Grid.x + scale9Grid.width) / width;
+                var bottom = (scale9Grid.y + scale9Grid.height) / height;
+                var tleft = left / scaleX;
+                var ttop = top / scaleY;
+                var tright = 1.0 - (1.0 - right) / scaleX;
+                var tbottom = 1.0 - (1.0 - top) / scaleY;
+                var scaleGapX = (right - left) / (tright - tleft);
+                var scaleGapY = (bottom - top) / (tbottom - ttop);
+                var programmer = this.__programmer;
+                programmer.setUniformFloat("left", left);
+                programmer.setUniformFloat("top", top);
+                programmer.setUniformFloat("tleft", tleft);
+                programmer.setUniformFloat("ttop", ttop);
+                programmer.setUniformFloat("tright", tright);
+                programmer.setUniformFloat("tbottom", tbottom);
+                programmer.setUniformFloat("scaleGapX", scaleGapX);
+                programmer.setUniformFloat("scaleGapY", scaleGapY);
+                programmer.setUniformFloat("scaleX", scaleX);
+                programmer.setUniformFloat("scaleY", scaleY);
             }
         }, {
             key: "release",
@@ -335,6 +420,20 @@ var _exports = {};
                 show.setOpacity(255);
                 show.setRotation(0);
                 show.setVisible(true);
+                this.__scaleX = 1;
+                this.__scaleY = 1;
+                this.__textureChange = false;
+                this.__texture = null;
+                this.__x = 0;
+                this.__y = 0;
+                this.__programmerChange = false;
+                if (this.__programmer) {
+                    PlatformProgrammer.release(this.__programmer);
+                    this.show.setGLProgramState(PlatformProgrammer.getInstance());
+                }
+                this.__programmer = null;
+                this.__shaderFlagChange = false;
+                this.__shaderFlag = 0;
             }
         }, {
             key: "x",
@@ -351,13 +450,16 @@ var _exports = {};
         }, {
             key: "scaleX",
             set: function set(val) {
-                console.log("set scaleX " + val);
+                this.__scaleX = 1;
                 this.show.setScaleX(val);
+                this._changeShader();
             }
         }, {
             key: "scaleY",
             set: function set(val) {
+                this.__scaleY = 1;
                 this.show.setScaleY(val);
+                this._changeShader();
             }
         }, {
             key: "rotation",
@@ -422,7 +524,13 @@ var _exports = {};
                     };
                     xhr.send();
                 } else {
-                    cc.loader.loadTxt(url, function (error, data) {
+                    cc.loader.load(url, function () {
+                        //console.log("what?",arguments);
+                    }, function (error, data) {
+                        if (data instanceof String) {} else {
+                            data = JSON.stringify(data);
+                        }
+                        //console.log(typeof data);
                         if (error) {
                             errorBack.call(thisObj);
                         } else {
@@ -473,11 +581,88 @@ var _exports = {};
     }();
     //////////////////////////End File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
 
-    //////////////////////////File:flower/core/CoreTime.js///////////////////////////
+    //////////////////////////File:flower/platform/cocos2dx/PlatformProgrammer.js///////////////////////////
 
 
     PlatformURLLoader.isLoading = false;
     PlatformURLLoader.loadingList = [];
+
+    var PlatformProgrammer = function () {
+        function PlatformProgrammer() {
+            var vsh = arguments.length <= 0 || arguments[0] === undefined ? "res/shaders/Bitmap.vsh" : arguments[0];
+            var fsh = arguments.length <= 1 || arguments[1] === undefined ? "res/shaders/Bitmap.fsh" : arguments[1];
+
+            _classCallCheck(this, PlatformProgrammer);
+
+            var shader; // = Programmer.shader;
+            if (fsh != "res/shaders/Bitmap.fsh") {
+                shader = new cc.GLProgram(vsh, fsh);
+                shader.retain();
+                shader.link();
+                shader.updateUniforms();
+            }
+            if (!shader) {
+                //shader = Programmer.shader = new cc.GLProgram(vsh, fsh);
+                shader = new cc.GLProgram(vsh, fsh);
+                shader.retain();
+                shader.link();
+                shader.updateUniforms();
+            }
+            this._nativeProgrammer = cc.GLProgramState.getOrCreateWithGLProgram(shader);
+        }
+
+        _createClass(PlatformProgrammer, [{
+            key: "shaderFlag",
+            set: function set(type) {
+                this._nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID);
+            }
+        }, {
+            key: "nativeProgrammer",
+            get: function get() {
+                return this._nativeProgrammer;
+            }
+        }], [{
+            key: "createProgrammer",
+            value: function createProgrammer() {
+                if (PlatformProgrammer.programmers.length) {
+                    return PlatformProgrammer.programmers.pop();
+                }
+                return new PlatformProgrammer();
+            }
+        }, {
+            key: "releaseProgrammer",
+            value: function releaseProgrammer(programmer) {
+                PlatformProgrammer.programmers.push(programmer);
+            }
+        }, {
+            key: "getInstance",
+            value: function getInstance() {
+                if (PlatformProgrammer.instance == null) {
+                    PlatformProgrammer.instance = new PlatformProgrammer("res/shaders/Bitmap.vsh", "res/shaders/Source.fsh");
+                }
+                return PlatformProgrammer.instance;
+            }
+        }]);
+
+        return PlatformProgrammer;
+    }();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformProgrammer.js///////////////////////////
+
+    //////////////////////////File:flower/platform/cocos2dx/PlatformShaderType.js///////////////////////////
+
+
+    PlatformProgrammer.programmers = [];
+
+    var PlatformShaderType = function PlatformShaderType() {
+        _classCallCheck(this, PlatformShaderType);
+    };
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformShaderType.js///////////////////////////
+
+    //////////////////////////File:flower/core/CoreTime.js///////////////////////////
+
+
+    PlatformShaderType.TEXTURE_CHANGE = 0x0001;
+    PlatformShaderType.SCALE_9_GRID = 0x0002;
 
     var CoreTime = function () {
         function CoreTime() {
@@ -1876,20 +2061,13 @@ var _exports = {};
 
                     this.$nativeShow.setTexture(this.__texture);
 
-                    //this._setX(this.x);
-                    //this._setY(this.y);
-
-                    //this.$addFlag(DisplayObjectFlag.BITMAP_SHADER_CHANGE);
-                    //this.$addShaderFlag(ShaderFlag.TEXTURE_CHANGE);
                     //if (this._scale9Grid) {
                     //    this.$addShaderFlag(ShaderFlag.SCALE_9_GRID);
                     //}
                 } else {
-                        this._width = 0;
-                        this._height = 0;
                         this.$nativeShow.setTexture(Texture.$blank);
-                        //p.exe(this._show, flower.Texture2D.blank.$nativeTexture);
                     }
+                this.invalidSize();
                 return true;
             }
         }, {
@@ -1904,6 +2082,15 @@ var _exports = {};
                 }
             }
         }, {
+            key: "$setScale9Grid",
+            value: function $setScale9Grid(val) {
+                if (this.__scale9Grid == val) {
+                    return false;
+                }
+                this.__scale9Grid = val;
+                this.$nativeShow.setScale9Grid(val);
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
@@ -1913,6 +2100,11 @@ var _exports = {};
             key: "texture",
             set: function set(val) {
                 this.$setTexture(val);
+            }
+        }, {
+            key: "scale9Grid",
+            set: function set(val) {
+                this.$setScale9Grid(val);
             }
         }]);
 
@@ -2775,5 +2967,196 @@ var _exports = {};
 
     _exports.CallLater = CallLater;
     //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
+
+    //////////////////////////File:flower/utils/ObjectDo.js///////////////////////////
+
+    var ObjectDo = function () {
+        function ObjectDo() {
+            _classCallCheck(this, ObjectDo);
+        }
+
+        _createClass(ObjectDo, null, [{
+            key: "toString",
+            value: function toString(obj) {
+                var maxDepth = arguments.length <= 1 || arguments[1] === undefined ? 4 : arguments[1];
+                var before = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var depth = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
+                before = before || "";
+                depth = depth || 0;
+                maxDepth = maxDepth || 4;
+                var str = "";
+                if (typeof obj == "string") {
+                    str += "\"" + obj + "\"";
+                } else if (typeof obj == "number") {
+                    str += obj;
+                } else if (obj instanceof Array) {
+                    if (depth > maxDepth) {
+                        return "...";
+                    }
+                    str = "[\n";
+                    for (var i = 0; i < obj.length; i++) {
+                        str += before + "\t" + flower.ObjectDo.toString(obj[i], maxDepth, before + "\t", depth + 1) + (i < obj.length - 1 ? ",\n" : "\n");
+                    }
+                    str += before + "]";
+                } else if (obj instanceof Object) {
+                    if (depth > maxDepth) {
+                        return "...";
+                    }
+                    str = "{\n";
+                    for (var key in obj) {
+                        str += before + "\t" + key + "\t: " + flower.ObjectDo.toString(obj[key], maxDepth, before + "\t", depth + 1);
+                        str += ",\n";
+                    }
+                    if (str.slice(str.length - 2, str.length) == ",\n") {
+                        str = str.slice(0, str.length - 2) + "\n";
+                    }
+                    str += before + "}";
+                } else {
+                    str += obj;
+                }
+                return str;
+            }
+        }, {
+            key: "keys",
+            value: function keys(obj) {
+                var list = [];
+                for (var key in obj) {
+                    list.push(key);
+                }
+                return list;
+            }
+        }, {
+            key: "clone",
+            value: function clone(obj) {
+                var res = "";
+                if (typeof obj == "string" || typeof obj == "number") {
+                    res = obj;
+                } else if (obj instanceof Array) {
+                    res = obj.concat();
+                } else if (obj instanceof Object) {
+                    res = {};
+                    for (var key in obj) {
+                        res[key] = ObjectDo.clone(obj[key]);
+                    }
+                } else {
+                    if (obj.hasOwnProperty("clone")) {
+                        res = obj.clone();
+                    } else {
+                        res = obj;
+                    }
+                }
+                return res;
+            }
+        }]);
+
+        return ObjectDo;
+    }();
+
+    _exports.ObjectDo = ObjectDo;
+    //////////////////////////End File:flower/utils/ObjectDo.js///////////////////////////
+
+    //////////////////////////File:flower/utils/StringDo.js///////////////////////////
+
+    var StringDo = function () {
+        function StringDo() {
+            _classCallCheck(this, StringDo);
+        }
+
+        _createClass(StringDo, null, [{
+            key: "changeStringToInner",
+            value: function changeStringToInner(content) {
+                var len = content.length;
+                for (var i = 0; i < len; i++) {
+                    if (content.charAt(i) == "\t") {
+                        content = content.slice(0, i) + "\\t" + content.slice(i + 1, len);
+                        i++;
+                        len++;
+                    } else if (content.charAt(i) == "\n") {
+                        content = content.slice(0, i) + "\\n" + content.slice(i + 1, len);
+                        i++;
+                        len++;
+                    } else if (content.charAt(i) == "\r") {
+                        content = content.slice(0, i) + "\\r" + content.slice(i + 1, len);
+                        i++;
+                        len++;
+                    } else if (content.charAt(i) == "\"") {
+                        content = content.slice(0, i) + "\\\"" + content.slice(i + 1, len);
+                        i++;
+                        len++;
+                    }
+                }
+                return content;
+            }
+        }, {
+            key: "findString",
+            value: function findString(content, _findString, begin) {
+                begin = begin || 0;
+                for (var i = begin; i < content.length; i++) {
+                    if (content.slice(i, i + _findString.length) == _findString) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+        }, {
+            key: "jumpStrings",
+            value: function jumpStrings(content, start, jumps) {
+                var pos = start;
+                while (true) {
+                    var find = false;
+                    for (var i = 0; i < jumps.length; i++) {
+                        if (jumps[i] == content.slice(pos, pos + jumps[i].length)) {
+                            find = true;
+                            pos += jumps[i].length;
+                            break;
+                        }
+                    }
+                    if (find == false) {
+                        break;
+                    }
+                }
+                return pos;
+            }
+        }, {
+            key: "findCharNotABC",
+            value: function findCharNotABC(content, start) {
+                start = +start;
+                for (var i = start; i < content.length; i++) {
+                    if (!StringDo.isCharABC(content.charAt(i))) {
+                        return i;
+                    }
+                }
+                return content.length;
+            }
+        }, {
+            key: "replaceString",
+            value: function replaceString(str, findStr, tstr) {
+                for (var i = 0; i < str.length; i++) {
+                    if (StringDo.hasStringAt(str, [findStr], i)) {
+                        str = str.slice(0, i) + tstr + str.slice(i + findStr.length, str.length);
+                        i--;
+                    }
+                }
+                return str;
+            }
+        }, {
+            key: "hasStringAt",
+            value: function hasStringAt(str, hstrs, pos) {
+                for (var i = 0; i < hstrs.length; i++) {
+                    var hstr = hstrs[i];
+                    if (str.length - pos >= hstr.length && str.slice(pos, pos + hstr.length) == hstr) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }]);
+
+        return StringDo;
+    }();
+
+    _exports.StringDo = StringDo;
+    //////////////////////////End File:flower/utils/StringDo.js///////////////////////////
 })();
 var flower = _exports;

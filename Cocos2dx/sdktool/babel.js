@@ -167,6 +167,8 @@ var list = [
     "PlatformBitmap",
     "PlatformTexture",
     "PlatformURLLoader",
+    "PlatformProgrammer",
+    "PlatformShaderType",
 
     "CoreTime",
 
@@ -199,7 +201,9 @@ var list = [
     "ResType",
 
     "EnterFrame",
-    "CallLater"
+    "CallLater",
+    "ObjectDo",
+    "StringDo"
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "(function(){\n";

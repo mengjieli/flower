@@ -30,7 +30,7 @@ StringDo.findStringWidthBeforeAndFollow = function (content, findString, befores
             find = false;
             for (var i = 0; i < befores.length; i++) {
                 if (befores[i] == 0) {
-                    if(begin == 0) {
+                    if (begin == 0) {
                         find = true;
                         break;
                     }

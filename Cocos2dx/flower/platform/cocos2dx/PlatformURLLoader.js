@@ -25,7 +25,15 @@ class PlatformURLLoader {
             };
             xhr.send();
         } else {
-            cc.loader.loadTxt(url, function (error, data) {
+            cc.loader.load(url, function () {
+                //console.log("what?",arguments);
+            }, function (error, data) {
+                if (data instanceof String) {
+
+                } else {
+                    data = JSON.stringify(data);
+                }
+                //console.log(typeof data);
                 if (error) {
                     errorBack.call(thisObj);
                 }
