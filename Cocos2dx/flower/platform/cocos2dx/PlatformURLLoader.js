@@ -58,6 +58,7 @@ class PlatformURLLoader {
                 } else {
                     texture = new cc.Texture2D();
                     texture.initWithElement(img);
+                    texture.handleLoadedTexture();
                 }
                 back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
                 //if (Platform.native) {

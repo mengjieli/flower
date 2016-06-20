@@ -314,12 +314,7 @@ var _exports = {};
             key: "setTexture",
             value: function setTexture(texture) {
                 this.__texture = texture;
-                console.log("native?" + Platform.native + "?" + cc.sys.isNative);
-                if (Platform.native) {
-                    this.show.initWithTexture(texture.$nativeTexture);
-                } else {
-                    this.show.setTexture(texture.$nativeTexture);
-                }
+                this.show.initWithTexture(texture.$nativeTexture);
                 var source = texture.source;
                 if (source) {
                     this.show.setTextureRect(source, texture.sourceRotation, {
@@ -459,6 +454,7 @@ var _exports = {};
                         } else {
                             texture = new cc.Texture2D();
                             texture.initWithElement(img);
+                            texture.handleLoadedTexture();
                         }
                         back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
                         //if (Platform.native) {
