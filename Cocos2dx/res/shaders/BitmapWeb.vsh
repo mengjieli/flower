@@ -1,6 +1,6 @@
 attribute vec4 a_position;
-attribute vec2 a_texCoord;
 attribute vec4 a_color;
+attribute vec2 a_texCoord;
 
 #ifdef GL_ES
     varying lowp vec4 v_fragmentColor;

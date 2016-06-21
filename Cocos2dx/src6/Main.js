@@ -33,7 +33,9 @@ class Main {
     loadImageComplete(e) {
         var bm = new flower.Bitmap(e.data);
         flower.Stage.getInstance().addChild(bm);
-        bm.x = bm.y = 150;
+        bm.x = bm.y = 50;
+        //bm.width = 100;
+        //bm.height = 130;
         bm.scaleX = 2;
         bm.scaleY = 2;
         bm.scale9Grid = new flower.Rectangle(30, 24, 40, 50);

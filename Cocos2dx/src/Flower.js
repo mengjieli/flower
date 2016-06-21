@@ -371,7 +371,11 @@ var _exports = {};
                         }
                     }
                 } else {
-                    this.show.setGLProgramState(PlatformProgrammer.getInstance());
+                    if (Platform.native) {
+                        this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    } else {
+                        this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    }
                 }
                 this._changeShader();
             }
@@ -411,7 +415,7 @@ var _exports = {};
                 var tleft = left / scaleX;
                 var ttop = top / scaleY;
                 var tright = 1.0 - (1.0 - right) / scaleX;
-                var tbottom = 1.0 - (1.0 - top) / scaleY;
+                var tbottom = 1.0 - (1.0 - bottom) / scaleY;
                 var scaleGapX = (right - left) / (tright - tleft);
                 var scaleGapY = (bottom - top) / (tbottom - ttop);
                 var programmer = this.__programmer.$nativeProgrammer;
@@ -641,9 +645,9 @@ var _exports = {};
             shader = new cc.GLProgram(vsh, fsh);
             shader.retain();
             if (!Platform.native) {
-                shader.addAttribute("a_position", 0);
-                shader.addAttribute("a_texCoord", 1);
-                shader.addAttribute("a_color", 2);
+                shader.addAttribute(cc.ATTRIBUTE_NAME_POSITION, cc.VERTEX_ATTRIB_POSITION);
+                shader.addAttribute(cc.ATTRIBUTE_NAME_COLOR, cc.VERTEX_ATTRIB_COLOR);
+                shader.addAttribute(cc.ATTRIBUTE_NAME_TEX_COORD, cc.VERTEX_ATTRIB_TEX_COORDS);
             }
             shader.link();
             shader.updateUniforms();
@@ -717,7 +721,7 @@ var _exports = {};
                 CoreTime.lastTimeGap = gap;
                 CoreTime.currentTime += gap;
                 EnterFrame.$update(CoreTime.currentTime, gap);
-                //Engine.getInstance().$onFrameEnd();
+                Stage.$onFrameEnd();
                 TextureManager.getInstance().$check();
             }
         }, {
@@ -1653,6 +1657,15 @@ var _exports = {};
                 this.$invalidPositionScale();
             }
         }, {
+            key: "$getScaleX",
+            value: function $getScaleX() {
+                var p = this.__DisplayObject;
+                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
+                    this.$getSize();
+                }
+                return p[0];
+            }
+        }, {
             key: "$setScaleY",
             value: function $setScaleY(val) {
                 val = +val || 0;
@@ -1663,6 +1676,15 @@ var _exports = {};
                 p[1] = val;
                 this.$nativeShow.scaleY = val;
                 this.$invalidPositionScale();
+            }
+        }, {
+            key: "$getScaleY",
+            value: function $getScaleY() {
+                var p = this.__DisplayObject;
+                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
+                    this.$getSize();
+                }
+                return p[1];
             }
         }, {
             key: "$setRotation",
@@ -1720,7 +1742,7 @@ var _exports = {};
             key: "$getWidth",
             value: function $getWidth() {
                 var p = this.__DisplayObject;
-                return p[2] != null ? p[2] : this.$getSize().height;
+                return p[3] != null ? p[3] : this.$getSize().height;
             }
         }, {
             key: "$setHeight",
@@ -1738,17 +1760,50 @@ var _exports = {};
             key: "$getHeight",
             value: function $getHeight() {
                 var p = this.__DisplayObject;
-                return p[3] != null ? p[3] : this.$getSize().width;
+                return p[4] != null ? p[4] : this.$getSize().width;
             }
         }, {
             key: "$getSize",
             value: function $getSize() {
                 var size = this.__DisplayObject[6];
                 if (this.$hasFlags(0x0001)) {
-                    this.calculateSize();
+                    this.calculateSize(size);
+                    this.__checkSettingSize(size);
                     this.$removeFlags(0x0001);
                 }
                 return size;
+            }
+        }, {
+            key: "__checkSettingSize",
+            value: function __checkSettingSize(size) {
+                var p = this.__DisplayObject;
+                /**
+                 * 尺寸失效， 并且约定过 宽 或者 高
+                 */
+                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
+                    if (p[3] != null) {
+                        if (size.width == 0) {
+                            if (p[3] == 0) {
+                                this.scaleX = 0;
+                            } else {
+                                this.scaleX = Infinity;
+                            }
+                        } else {
+                            this.scaleX = p[3] / size.width;
+                        }
+                    }
+                    if (p[4]) {
+                        if (size.height == 0) {
+                            if (p[4] == 0) {
+                                this.scaleY = 0;
+                            } else {
+                                this.scaleY = Infinity;
+                            }
+                        } else {
+                            this.scaleY = p[4] / size.height;
+                        }
+                    }
+                }
             }
         }, {
             key: "$setParent",
@@ -1813,8 +1868,12 @@ var _exports = {};
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
+                var p = this.__DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.alpha = this.$getConcatAlpha();
+                }
+                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
+                    this.$getSize();
                 }
             }
         }, {
@@ -2036,13 +2095,18 @@ var _exports = {};
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
+                var children = this.__children;
                 /**
                  * 子对象序列改变
                  */
                 if (this.$hasFlags(0x0100)) {
-                    this.$nativeShow.resetChildIndex(this.__children);
+                    this.$nativeShow.resetChildIndex(children);
                     this.$removeFlags(0x0100);
                 }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$onFrameEnd();
+                }
+                _get(Object.getPrototypeOf(Sprite.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
             key: "dispose",
@@ -2185,6 +2249,13 @@ var _exports = {};
             key: "getInstance",
             value: function getInstance() {
                 return Stage.stages[0];
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                for (var i = 0; i < Stage.stages.length; i++) {
+                    Stage.stages[i].$onFrameEnd();
+                }
             }
         }]);
 

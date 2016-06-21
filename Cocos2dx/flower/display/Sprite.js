@@ -114,13 +114,18 @@ class Sprite extends DisplayObject {
     }
 
     $onFrameEnd() {
+        var children = this.__children;
         /**
          * 子对象序列改变
          */
         if (this.$hasFlags(0x0100)) {
-            this.$nativeShow.resetChildIndex(this.__children);
+            this.$nativeShow.resetChildIndex(children);
             this.$removeFlags(0x0100);
         }
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$onFrameEnd();
+        }
+        super.$onFrameEnd();
     }
 
     get numChildren() {

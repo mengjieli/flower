@@ -51,7 +51,11 @@ class PlatformBitmap {
                 }
             }
         } else {
-            this.show.setGLProgramState(PlatformProgrammer.getInstance());
+            if (Platform.native) {
+                this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+            } else {
+                this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+            }
         }
         this._changeShader();
     }
@@ -90,7 +94,7 @@ class PlatformBitmap {
         var tleft = left / scaleX;
         var ttop = top / scaleY;
         var tright = 1.0 - (1.0 - right) / scaleX;
-        var tbottom = 1.0 - (1.0 - top) / scaleY;
+        var tbottom = 1.0 - (1.0 - bottom) / scaleY;
         var scaleGapX = (right - left) / (tright - tleft);
         var scaleGapY = (bottom - top) / (tbottom - ttop);
         var programmer = this.__programmer.$nativeProgrammer;

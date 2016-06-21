@@ -7,7 +7,7 @@ class CoreTime {
         CoreTime.lastTimeGap = gap;
         CoreTime.currentTime += gap;
         EnterFrame.$update(CoreTime.currentTime, gap);
-        //Engine.getInstance().$onFrameEnd();
+        Stage.$onFrameEnd();
         TextureManager.getInstance().$check();
     }
 

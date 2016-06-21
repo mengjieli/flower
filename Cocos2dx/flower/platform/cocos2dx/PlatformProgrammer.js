@@ -15,9 +15,9 @@ class PlatformProgrammer {
         shader = new cc.GLProgram(vsh, fsh);
         shader.retain();
         if(!Platform.native) {
-            shader.addAttribute("a_position", 0);
-            shader.addAttribute("a_texCoord", 1);
-            shader.addAttribute("a_color", 2);
+            shader.addAttribute(cc.ATTRIBUTE_NAME_POSITION, cc.VERTEX_ATTRIB_POSITION);
+            shader.addAttribute(cc.ATTRIBUTE_NAME_COLOR, cc.VERTEX_ATTRIB_COLOR);
+            shader.addAttribute(cc.ATTRIBUTE_NAME_TEX_COORD, cc.VERTEX_ATTRIB_TEX_COORDS);
         }
         shader.link();
         shader.updateUniforms();

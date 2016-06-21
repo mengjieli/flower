@@ -18,6 +18,12 @@ class Stage extends Sprite {
     static getInstance() {
         return Stage.stages[0];
     }
+
+    static $onFrameEnd() {
+        for (var i = 0; i < Stage.stages.length; i++) {
+            Stage.stages[i].$onFrameEnd();
+        }
+    }
 }
 
 exports.Stage = Stage;
