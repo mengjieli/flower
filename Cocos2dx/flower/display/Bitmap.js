@@ -17,20 +17,9 @@ class Bitmap extends DisplayObject {
             this.__texture.$delCount();
         }
         this.__texture = val;
-
         if (val) {
-            //if (this._width || this._height) {
-            //    this.scaleX *= this._width / this.texture.width;
-            //    this.scaleY *= this._height / this.texture.height;
-            //}
             this.__texture.$addCount();
-
-
             this.$nativeShow.setTexture(this.__texture);
-
-            //if (this._scale9Grid) {
-            //    this.$addShaderFlag(ShaderFlag.SCALE_9_GRID);
-            //}
         }
         else {
             this.$nativeShow.setTexture(Texture.$blank);
@@ -55,6 +44,7 @@ class Bitmap extends DisplayObject {
         }
         this.__scale9Grid = val;
         this.$nativeShow.setScale9Grid(val);
+        return true;
     }
 
     set texture(val) {

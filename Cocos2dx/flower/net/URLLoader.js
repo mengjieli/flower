@@ -1,5 +1,6 @@
 class URLLoader extends EventDispatcher {
 
+    _createRes = false;
     _res;
     _isLoading = false;
     _data;
@@ -14,10 +15,13 @@ class URLLoader extends EventDispatcher {
     constructor(res) {
         super();
         if (typeof(res) == "string") {
+            this._createRes = true;
             res = ResItem.create(res);
         }
         this._res = res;
         this._type = this._res.type;
+        this._language = LANGUAGE;
+        this._scale = SCALE ? SCALE : null;
     }
 
     get url() {
@@ -37,7 +41,7 @@ class URLLoader extends EventDispatcher {
     }
 
     set scale(val) {
-        this._scale = val;
+        this._scale = val * (SCALE ? SCALE : 1);
     }
 
     $addLink(loader) {
@@ -85,7 +89,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadTextureComplete(nativeTexture, width, height) {
-        var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height);
+        var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
         this._data = texture;
         texture.$addCount();
         new CallLater(this.loadComplete, this);
@@ -177,6 +181,9 @@ class URLLoader extends EventDispatcher {
         if (this._data && this._type == ResType.Image) {
             this._data.$delCount();
             this._data = null;
+        }
+        if (this._createRes) {
+            ResItem.release(this._res);
         }
         this._res = null;
         this._data = null;

@@ -12,6 +12,8 @@ class PlatformBitmap {
     __scale9Grid;
     __scaleX = 1;
     __scaleY = 1;
+    __textureScaleX = 1;
+    __textureScaleY = 1;
 
     constructor() {
         this.show = new cc.Sprite();
@@ -32,9 +34,17 @@ class PlatformBitmap {
                 height: source.height
             });
         }
+        this.__textureScaleX = texture.scaleX;
+        this.__textureScaleY = texture.scaleY;
         this.show.setAnchorPoint(0, 1);
         this.x = this.__x;
         this.y = this.__y;
+        if (this.__textureScaleX != 1) {
+            this.scaleX = this.__scaleX;
+        }
+        if (this.__textureScaleY != 1) {
+            this.scaleY = this.__scaleY;
+        }
         this._changeShader();
     }
 
@@ -84,7 +94,13 @@ class PlatformBitmap {
     }
 
     _changeScale9Grid(width, height, scale9Grid, setWidth, setHeight) {
-        flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
+        //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
+        //width /= this.__textureScaleX;
+        //height /= this.__textureScaleY;
+        //scale9Grid.x /= this.__textureScaleX;
+        //scale9Grid.y /= this.__textureScaleY;
+        //scale9Grid.width /= this.__textureScaleX;
+        //scale9Grid.height /= this.__textureScaleY;
         var scaleX = setWidth / width;
         var scaleY = setHeight / height;
         var left = scale9Grid.x / width;
@@ -135,13 +151,13 @@ class PlatformBitmap {
 
     set scaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val);
+        this.show.setScaleX(val * this.__textureScaleX);
         this._changeShader();
     }
 
     set scaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val);
+        this.show.setScaleY(val * this.__textureScaleY);
         this._changeShader();
     }
 
@@ -163,6 +179,8 @@ class PlatformBitmap {
         this.__texture = null;
         this.__x = 0;
         this.__y = 0;
+        this.__textureScaleX = 1;
+        this.__textureScaleY = 1;
         this.__programmerChange = false;
         if (this.__programmer) {
             PlatformProgrammer.release(this.__programmer);

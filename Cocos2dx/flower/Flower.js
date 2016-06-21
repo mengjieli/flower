@@ -5,14 +5,16 @@ var $language = "zh_CN";
  * 用户使用的语言
  * @type {null}
  */
-var language = "";
+var LANGUAGE = "";
+var SCALE = null;
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, language) {
-    language = language || "";
+function start(completeFunc, scale, language) {
+    SCALE = scale;
+    LANGUAGE = language || "";
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
     Platform.start(stage, stage.$nativeShow);

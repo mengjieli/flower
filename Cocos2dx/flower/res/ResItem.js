@@ -19,12 +19,53 @@ class ResItem {
         this.__type = type;
     }
 
+    addURL(url) {
+        var info = ResItemInfo.create();
+        var array = url.split("/");
+        var last = array.pop();
+        var nameArray = last.split(".");
+        var name = "";
+        var end = "";
+        if (nameArray.length == 1) {
+            name = nameArray[0];
+        } else {
+            end = nameArray[nameArray.length - 1];
+            name = last.slice(0, last.length - end.length - 1);
+        }
+        nameArray = name.split("@");
+        var settingWidth;
+        var settingHeight;
+        var scale;
+        var language;
+        for (var i = 1; i < nameArray.length; i++) {
+            var content = nameArray[i];
+            var code = content.charCodeAt(0);
+            if (code >= "0".charCodeAt(0) && code <= "9".charCodeAt(0) || code == ".".charCodeAt(0)) {
+                var nums = content.split("x");
+                if (nums.length == 1) {
+                    scale = parseFloat(content);
+                } else if (nums.length == 2) {
+                    settingWidth = parseInt(nums[0]);
+                    settingHeight = parseInt(nums[1]);
+                }
+            } else {
+                language = content;
+            }
+        }
+        info.url = url;
+        info.settingWidth = settingWidth;
+        info.settingHeight = settingHeight;
+        info.scale = scale || 1;
+        info.language = language;
+        this.__loadList.push(info);
+    }
+
     addInfo(url, settingWidth, settingHeight, scale, language) {
         var info = ResItemInfo.create();
         info.url = url;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
-        info.scale = scale;
+        info.scale = scale || 1;
         info.language = language;
         this.__loadList.push(info);
     }
@@ -36,7 +77,7 @@ class ResItem {
         }
         var info;
         for (var i = 0; i < loadList.length; i++) {
-            if (language && loadList[i].language && language != loadList[i].language) {
+            if (language && language != loadList[i].language) {
                 continue;
             }
             if (!info) {

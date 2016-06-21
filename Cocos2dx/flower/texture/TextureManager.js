@@ -9,9 +9,11 @@ class TextureManager {
      * @param nativeURL
      * @param w
      * @param h
+     * @param settingWidth
+     * @param settingHeight
      * @returns {*}
      */
-    $createTexture(nativeTexture, url, nativeURL, w, h) {
+    $createTexture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
         for (var i = 0; i < this.list.length; i++) {
             if (this.list[i].url == url) {
                 if (DEBUG) {
@@ -21,9 +23,9 @@ class TextureManager {
             }
         }
         if (TIP) {
-            $tip(1004, url);
+            $tip(1004, nativeURL);
         }
-        var texture = new Texture(nativeTexture, url, nativeURL, w, h);
+        var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
         this.list.push(texture);
         return texture;
     }

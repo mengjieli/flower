@@ -65,7 +65,6 @@ class PlatformURLLoader {
             $tip(2002, url);
         }
         cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
-            console.log("loadTextureOK?" + url + "," + err)
             if (err) {
                 errorBack.call(thisObj);
             }

@@ -8,7 +8,7 @@ var Main = function () {
     function Main() {
         _classCallCheck(this, Main);
 
-        flower.start(this.ready.bind(this));
+        flower.start(this.ready.bind(this), 2, "cn");
     }
 
     _createClass(Main, [{
@@ -24,7 +24,15 @@ var Main = function () {
             //load.addListener(flower.Event.COMPLETE, this.loadJsComplete, this);
             //load.load();
 
-            var load = new flower.URLLoader("res/font.png");
+            var res = new flower.ResItem("res/font.png", flower.ResType.IMAGE);
+            res.addURL("res/font.png");
+            res.addURL("res/font@100x100@cn@2.png");
+            res.addURL("res/font@100x100@en.png");
+            flower.Res.addRes(res);
+
+            var load = new flower.URLLoader(flower.Res.getRes("res/font.png"));
+            //load.scale = 1.49;
+            //load.language = "cn";
             load.addListener(flower.Event.COMPLETE, this.loadImageComplete, this);
             load.load();
 

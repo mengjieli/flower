@@ -6,23 +6,27 @@ class Texture {
     __sourceRotation = false;
     __width;
     __height;
+    __settingWidth;
+    __settingHeight;
     __url;
     __nativeURL;
     $nativeTexture;
     $count;
     $parentTexture;
 
-    constructor(nativeTexture, url, nativeURL, w, h) {
+    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
         this.$nativeTexture = nativeTexture;
         this.__url = url;
         this.__nativeURL = nativeURL;
         this.$count = 0;
         this.__width = w;
         this.__height = h;
+        this.__settingWidth = settingWidth;
+        this.__settingHeight = settingHeight;
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height);
+        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -72,11 +76,11 @@ class Texture {
     }
 
     get width() {
-        return this.__width;
+        return this.__settingWidth || this.__width;
     }
 
     get height() {
-        return this.__height;
+        return this.__settingHeight || this.__height;
     }
 
     get source() {
@@ -95,6 +99,14 @@ class Texture {
         return this.__sourceRotation;
     }
 
+    get scaleX() {
+        return this.width / this.__width;
+    }
+
+    get scaleY() {
+        return this.height / this.__height;
+    }
+
     dispose() {
         if (this.$count != 0) {
             return;
@@ -102,7 +114,7 @@ class Texture {
         this.$nativeTexture.dispose();
         this.$nativeTexture = null;
         if (TIP) {
-            tip(1005, this.url);
+            $tip(1005, this.__nativeURL);
         }
     }
 

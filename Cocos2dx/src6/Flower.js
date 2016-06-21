@@ -8,14 +8,16 @@ var $language = "zh_CN";
  * 用户使用的语言
  * @type {null}
  */
-var language = "";
+var LANGUAGE = "";
+var SCALE = null;
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, language) {
-    language = language || "";
+function start(completeFunc, scale, language) {
+    SCALE = scale;
+    LANGUAGE = language || "";
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
     Platform.start(stage, stage.$nativeShow);
@@ -295,6 +297,8 @@ class PlatformBitmap {
     __scale9Grid;
     __scaleX = 1;
     __scaleY = 1;
+    __textureScaleX = 1;
+    __textureScaleY = 1;
 
     constructor() {
         this.show = new cc.Sprite();
@@ -315,9 +319,17 @@ class PlatformBitmap {
                 height: source.height
             });
         }
+        this.__textureScaleX = texture.scaleX;
+        this.__textureScaleY = texture.scaleY;
         this.show.setAnchorPoint(0, 1);
         this.x = this.__x;
         this.y = this.__y;
+        if (this.__textureScaleX != 1) {
+            this.scaleX = this.__scaleX;
+        }
+        if (this.__textureScaleY != 1) {
+            this.scaleY = this.__scaleY;
+        }
         this._changeShader();
     }
 
@@ -367,7 +379,13 @@ class PlatformBitmap {
     }
 
     _changeScale9Grid(width, height, scale9Grid, setWidth, setHeight) {
-        flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
+        //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
+        //width /= this.__textureScaleX;
+        //height /= this.__textureScaleY;
+        //scale9Grid.x /= this.__textureScaleX;
+        //scale9Grid.y /= this.__textureScaleY;
+        //scale9Grid.width /= this.__textureScaleX;
+        //scale9Grid.height /= this.__textureScaleY;
         var scaleX = setWidth / width;
         var scaleY = setHeight / height;
         var left = scale9Grid.x / width;
@@ -418,13 +436,13 @@ class PlatformBitmap {
 
     set scaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val);
+        this.show.setScaleX(val * this.__textureScaleX);
         this._changeShader();
     }
 
     set scaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val);
+        this.show.setScaleY(val * this.__textureScaleY);
         this._changeShader();
     }
 
@@ -446,6 +464,8 @@ class PlatformBitmap {
         this.__texture = null;
         this.__x = 0;
         this.__y = 0;
+        this.__textureScaleX = 1;
+        this.__textureScaleY = 1;
         this.__programmerChange = false;
         if (this.__programmer) {
             PlatformProgrammer.release(this.__programmer);
@@ -546,7 +566,6 @@ class PlatformURLLoader {
             $tip(2002, url);
         }
         cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
-            console.log("loadTextureOK?" + url + "," + err)
             if (err) {
                 errorBack.call(thisObj);
             }
@@ -1953,20 +1972,9 @@ class Bitmap extends DisplayObject {
             this.__texture.$delCount();
         }
         this.__texture = val;
-
         if (val) {
-            //if (this._width || this._height) {
-            //    this.scaleX *= this._width / this.texture.width;
-            //    this.scaleY *= this._height / this.texture.height;
-            //}
             this.__texture.$addCount();
-
-
             this.$nativeShow.setTexture(this.__texture);
-
-            //if (this._scale9Grid) {
-            //    this.$addShaderFlag(ShaderFlag.SCALE_9_GRID);
-            //}
         }
         else {
             this.$nativeShow.setTexture(Texture.$blank);
@@ -1991,6 +1999,7 @@ class Bitmap extends DisplayObject {
         }
         this.__scale9Grid = val;
         this.$nativeShow.setScale9Grid(val);
+        return true;
     }
 
     set texture(val) {
@@ -2055,23 +2064,27 @@ class Texture {
     __sourceRotation = false;
     __width;
     __height;
+    __settingWidth;
+    __settingHeight;
     __url;
     __nativeURL;
     $nativeTexture;
     $count;
     $parentTexture;
 
-    constructor(nativeTexture, url, nativeURL, w, h) {
+    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
         this.$nativeTexture = nativeTexture;
         this.__url = url;
         this.__nativeURL = nativeURL;
         this.$count = 0;
         this.__width = w;
         this.__height = h;
+        this.__settingWidth = settingWidth;
+        this.__settingHeight = settingHeight;
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height);
+        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -2121,11 +2134,11 @@ class Texture {
     }
 
     get width() {
-        return this.__width;
+        return this.__settingWidth || this.__width;
     }
 
     get height() {
-        return this.__height;
+        return this.__settingHeight || this.__height;
     }
 
     get source() {
@@ -2144,6 +2157,14 @@ class Texture {
         return this.__sourceRotation;
     }
 
+    get scaleX() {
+        return this.width / this.__width;
+    }
+
+    get scaleY() {
+        return this.height / this.__height;
+    }
+
     dispose() {
         if (this.$count != 0) {
             return;
@@ -2151,7 +2172,7 @@ class Texture {
         this.$nativeTexture.dispose();
         this.$nativeTexture = null;
         if (TIP) {
-            tip(1005, this.url);
+            $tip(1005, this.__nativeURL);
         }
     }
 
@@ -2176,9 +2197,11 @@ class TextureManager {
      * @param nativeURL
      * @param w
      * @param h
+     * @param settingWidth
+     * @param settingHeight
      * @returns {*}
      */
-    $createTexture(nativeTexture, url, nativeURL, w, h) {
+    $createTexture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
         for (var i = 0; i < this.list.length; i++) {
             if (this.list[i].url == url) {
                 if (DEBUG) {
@@ -2188,9 +2211,9 @@ class TextureManager {
             }
         }
         if (TIP) {
-            $tip(1004, url);
+            $tip(1004, nativeURL);
         }
-        var texture = new Texture(nativeTexture, url, nativeURL, w, h);
+        var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
         this.list.push(texture);
         return texture;
     }
@@ -2230,6 +2253,7 @@ class TextureManager {
 //////////////////////////File:flower/net/URLLoader.js///////////////////////////
 class URLLoader extends EventDispatcher {
 
+    _createRes = false;
     _res;
     _isLoading = false;
     _data;
@@ -2244,10 +2268,13 @@ class URLLoader extends EventDispatcher {
     constructor(res) {
         super();
         if (typeof(res) == "string") {
+            this._createRes = true;
             res = ResItem.create(res);
         }
         this._res = res;
         this._type = this._res.type;
+        this._language = LANGUAGE;
+        this._scale = SCALE ? SCALE : null;
     }
 
     get url() {
@@ -2267,7 +2294,7 @@ class URLLoader extends EventDispatcher {
     }
 
     set scale(val) {
-        this._scale = val;
+        this._scale = val * (SCALE ? SCALE : 1);
     }
 
     $addLink(loader) {
@@ -2315,7 +2342,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadTextureComplete(nativeTexture, width, height) {
-        var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height);
+        var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
         this._data = texture;
         texture.$addCount();
         new CallLater(this.loadComplete, this);
@@ -2408,6 +2435,9 @@ class URLLoader extends EventDispatcher {
             this._data.$delCount();
             this._data = null;
         }
+        if (this._createRes) {
+            ResItem.release(this._res);
+        }
         this._res = null;
         this._data = null;
         super.dispose();
@@ -2444,8 +2474,28 @@ class Res {
      * @param url
      */
     static getRes(url) {
+        var list = Res.__resItems;
+        for (var i = 0, len = list.length; i < len; i++) {
+            if (list[i].url == url) {
+                return list[i];
+            }
+        }
+        return null;
+    }
+
+    static addRes(res) {
+        var list = Res.__resItems;
+        for (var i = 0, len = list.length; i < len; i++) {
+            if (list[i].url == res.url) {
+                list.splice(i, 1);
+                break;
+            }
+        }
+        list.push(res);
     }
 }
+
+exports.Res = Res;
 //////////////////////////End File:flower/res/Res.js///////////////////////////
 
 
@@ -2472,12 +2522,53 @@ class ResItem {
         this.__type = type;
     }
 
+    addURL(url) {
+        var info = ResItemInfo.create();
+        var array = url.split("/");
+        var last = array.pop();
+        var nameArray = last.split(".");
+        var name = "";
+        var end = "";
+        if (nameArray.length == 1) {
+            name = nameArray[0];
+        } else {
+            end = nameArray[nameArray.length - 1];
+            name = last.slice(0, last.length - end.length - 1);
+        }
+        nameArray = name.split("@");
+        var settingWidth;
+        var settingHeight;
+        var scale;
+        var language;
+        for (var i = 1; i < nameArray.length; i++) {
+            var content = nameArray[i];
+            var code = content.charCodeAt(0);
+            if (code >= "0".charCodeAt(0) && code <= "9".charCodeAt(0) || code == ".".charCodeAt(0)) {
+                var nums = content.split("x");
+                if (nums.length == 1) {
+                    scale = parseFloat(content);
+                } else if (nums.length == 2) {
+                    settingWidth = parseInt(nums[0]);
+                    settingHeight = parseInt(nums[1]);
+                }
+            } else {
+                language = content;
+            }
+        }
+        info.url = url;
+        info.settingWidth = settingWidth;
+        info.settingHeight = settingHeight;
+        info.scale = scale || 1;
+        info.language = language;
+        this.__loadList.push(info);
+    }
+
     addInfo(url, settingWidth, settingHeight, scale, language) {
         var info = ResItemInfo.create();
         info.url = url;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
-        info.scale = scale;
+        info.scale = scale || 1;
         info.language = language;
         this.__loadList.push(info);
     }
@@ -2489,7 +2580,7 @@ class ResItem {
         }
         var info;
         for (var i = 0; i < loadList.length; i++) {
-            if (language && loadList[i].language && language != loadList[i].language) {
+            if (language && language != loadList[i].language) {
                 continue;
             }
             if (!info) {
@@ -2651,6 +2742,8 @@ class ResType {
         return ResType.TEXT;
     }
 }
+
+exports.ResType = ResType;
 //////////////////////////End File:flower/res/ResType.js///////////////////////////
 
 

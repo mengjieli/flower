@@ -21,3 +21,5 @@ class ResType {
         return ResType.TEXT;
     }
 }
+
+exports.ResType = ResType;
