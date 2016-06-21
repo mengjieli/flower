@@ -552,20 +552,28 @@ var _exports = {};
                     };
                     xhr.send();
                 } else {
-                    cc.loader.load(url, function () {
-                        //console.log("what?",arguments);
-                    }, function (error, data) {
-                        if (data instanceof String) {} else {
-                            data = JSON.stringify(data);
+                    var res = cc.loader.getRes(url);
+                    if (res) {
+                        if (res instanceof String) {} else {
+                            res = JSON.stringify(res);
                         }
-                        //console.log(typeof data);
-                        if (error) {
-                            errorBack.call(thisObj);
-                        } else {
-                            back.call(thisObj, data);
-                        }
+                        back.call(thisObj, res);
                         PlatformURLLoader.isLoading = false;
-                    });
+                    } else {
+                        cc.loader.load(url, function () {
+                            //console.log("what?",arguments);
+                        }, function (error, data) {
+                            if (error) {
+                                errorBack.call(thisObj);
+                            } else {
+                                if (data instanceof String) {} else {
+                                    data = JSON.stringify(data);
+                                }
+                                back.call(thisObj, data);
+                            }
+                            PlatformURLLoader.isLoading = false;
+                        });
+                    }
                 }
             }
         }, {
