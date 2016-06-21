@@ -1,6 +1,6 @@
 class Main {
     constructor() {
-        flower.start(this.ready.bind(this), 2, "cn");
+        flower.start(this.ready.bind(this), null, null);
     }
 
     ready(stage, stage2) {
@@ -21,6 +21,7 @@ class Main {
         flower.Res.addRes(res);
 
 
+        //var load = new flower.URLLoader("res/castle1.png");
         var load = new flower.URLLoader(flower.Res.getRes("res/font.png"));
         //load.scale = 1.49;
         //load.language = "cn";
@@ -40,14 +41,29 @@ class Main {
     }
 
     loadImageComplete(e) {
-        var bm = new flower.Bitmap(e.data);
+        var texture = e.data;
+
+        //var subTexture = texture.createSubTexture(2, 214, 290, 206, -43, 38, true);
+        var subTexture = texture.createSubTexture(30, 24, 40, 50, 0, 0, false);
+        var bm = new flower.Bitmap(subTexture);
         flower.Stage.getInstance().addChild(bm);
         bm.x = bm.y = 50;
-        //bm.width = 100;
-        //bm.height = 130;
-        bm.scaleX = 2;
-        bm.scaleY = 2;
-        bm.scale9Grid = new flower.Rectangle(30, 24, 40, 50);
+        bm.scaleX = 1.5;
+        bm.scaleY = 1.5;
+
+        bm.scale9Grid = new flower.Rectangle(10, 10, 20, 30);
+
+
+        //subTexture = texture.createSubTexture(2, 2, 286, 210, -48, 34, false);
+        //var bm = new flower.Bitmap(subTexture);
+        //flower.Stage.getInstance().addChild(bm);
+        //bm.x = bm.y = 50;
+
+        //bm.width = 300;
+        //bm.height = 200;
+        //bm.scaleX = 2;
+        //bm.scaleY = 2;
+        //bm.scale9Grid = new flower.Rectangle(30, 24, 40, 50);
 
         //var bm2 = new flower.Bitmap(e.data);
         //flower.Stage.getInstance().addChild(bm2);

@@ -491,19 +491,22 @@ var _exports = {};
             key: "x",
             set: function set(val) {
                 this.__x = val;
-                this.show.setPositionX(this.__x + this.__texture.offX);
+                this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
             }
         }, {
             key: "y",
             set: function set(val) {
                 this.__y = val;
-                this.show.setPositionY(-this.__y + this.__texture.offY);
+                this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
             }
         }, {
             key: "scaleX",
             set: function set(val) {
                 this.__scaleX = val;
                 this.show.setScaleX(val * this.__textureScaleX);
+                if (this.__texture.offX) {
+                    this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+                }
                 this._changeShader();
             }
         }, {
@@ -511,6 +514,9 @@ var _exports = {};
             set: function set(val) {
                 this.__scaleY = val;
                 this.show.setScaleY(val * this.__textureScaleY);
+                if (this.__texture.offY) {
+                    this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+                }
                 this._changeShader();
             }
         }, {
@@ -2305,7 +2311,7 @@ var _exports = {};
                 var offY = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
                 var rotation = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
 
-                var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+                var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
                 sub.$parentTexture = this.$parentTexture || this;
                 var rect = flower.Rectangle.create();
                 rect.x = startX;

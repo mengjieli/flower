@@ -426,23 +426,29 @@ class PlatformBitmap {
 
     set x(val) {
         this.__x = val;
-        this.show.setPositionX(this.__x + this.__texture.offX);
+        this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
     }
 
     set y(val) {
         this.__y = val;
-        this.show.setPositionY(-this.__y + this.__texture.offY);
+        this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
     }
 
     set scaleX(val) {
         this.__scaleX = val;
         this.show.setScaleX(val * this.__textureScaleX);
+        if(this.__texture.offX) {
+            this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+        }
         this._changeShader();
     }
 
     set scaleY(val) {
         this.__scaleY = val;
         this.show.setScaleY(val * this.__textureScaleY);
+        if(this.__texture.offY) {
+            this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+        }
         this._changeShader();
     }
 
@@ -2084,7 +2090,7 @@ class Texture {
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+        var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;

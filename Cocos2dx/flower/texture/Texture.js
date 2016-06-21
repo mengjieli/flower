@@ -26,7 +26,7 @@ class Texture {
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new flower.Texture2D(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+        var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
