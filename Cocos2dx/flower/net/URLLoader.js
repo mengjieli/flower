@@ -15,8 +15,13 @@ class URLLoader extends EventDispatcher {
     constructor(res) {
         super();
         if (typeof(res) == "string") {
-            this._createRes = true;
-            res = ResItem.create(res);
+            var resItem = Res.getRes(res);
+            if (resItem) {
+                res = resItem;
+            } else {
+                this._createRes = true;
+                res = ResItem.create(res);
+            }
         }
         this._res = res;
         this._type = this._res.type;
@@ -166,10 +171,10 @@ class URLLoader extends EventDispatcher {
 
     loadError() {
         if (this.hasListener(IOErrorEvent.ERROR)) {
-            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, "[加载纹理失败] " + this._res.localURL));
+            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, getLanguage(2003, this._loadInfo.url)));
         }
         else {
-            DebugInfo.debug("[加载纹理失败] " + this._res.localURL, DebugInfo.ERROR);
+            $error(2003, this._loadInfo.url);
         }
     }
 

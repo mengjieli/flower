@@ -11,3 +11,4 @@ locale_strings[1004] = "创建纹理:{0}";
 locale_strings[1005] = "释放纹理:{0}";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
+locale_strings[2003] = "[加载纹理失败] {0}";

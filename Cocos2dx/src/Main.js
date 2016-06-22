@@ -8,104 +8,50 @@ var Main = function () {
     function Main() {
         _classCallCheck(this, Main);
 
-        flower.start(this.ready.bind(this), null, null);
+        flower.start(this.ready.bind(this), 2, "cn");
     }
 
     _createClass(Main, [{
         key: "ready",
-        value: function ready(stage, stage2) {
+        value: function ready() {
             new Test();
 
-            var load = new flower.URLLoader("res/actions/display/Close.json");
-            load.addListener(flower.Event.COMPLETE, this.loadJsonComplete, this);
-            load.load();
+            var res = new flower.ResItem("Close.json", flower.ResType.JSON);
+            res.addURL("res/actions/display/Close@en.json");
+            res.addURL("res/actions/display/Dispose@cn.json");
+            flower.Res.addRes(res);
 
-            //var load = new flower.URLLoader("res/actions/rpg/RolerMove.js");
-            //load.addListener(flower.Event.COMPLETE, this.loadJsComplete, this);
-            //load.load();
-
-            var res = new flower.ResItem("res/font.png", flower.ResType.IMAGE);
+            res = new flower.ResItem("Image.png", flower.ResType.IMAGE);
             res.addURL("res/font.png");
             res.addURL("res/font@100x100@cn@2.png");
             res.addURL("res/font@100x100@en.png");
             flower.Res.addRes(res);
 
-            //var load = new flower.URLLoader("res/castle1.png");
-            var load = new flower.URLLoader(flower.Res.getRes("res/font.png"));
-            //load.scale = 1.49;
-            //load.language = "cn";
-            load.addListener(flower.Event.COMPLETE, this.loadImageComplete, this);
+            var load = new flower.URLLoaderList(["Close.json", "Image.png"]);
+            load.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
             load.load();
 
-            this.stage = stage;
-            this.stage2 = stage2;
-        }
-    }, {
-        key: "loadJsonComplete",
-        value: function loadJsonComplete(e) {
-            console.log(flower.ObjectDo.toString(e.data));
-        }
-    }, {
-        key: "loadJsComplete",
-        value: function loadJsComplete(e) {
-            console.log(e.data);
-        }
-    }, {
-        key: "loadImageComplete",
-        value: function loadImageComplete(e) {
-            var texture = e.data;
+            //var load = new flower.URLLoader("Close.json");
+            //load.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
+            //load.load();
 
-            //var subTexture = texture.createSubTexture(2, 214, 290, 206, -43, 38, true);
-            var subTexture = texture.createSubTexture(30, 24, 40, 50, 0, 0, false);
-            var bm = new flower.Bitmap(subTexture);
-            flower.Stage.getInstance().addChild(bm);
+            ////var load = new flower.URLLoader("res/castle1.png");
+            //var load = new flower.URLLoader(flower.Res.getRes("res/font.png"));
+            ////load.scale = 1.49;
+            ////load.language = "cn";
+            //load.addListener(flower.Event.COMPLETE, this.loadImageComplete, this);
+            //load.load();
+        }
+    }, {
+        key: "onLoadComplete",
+        value: function onLoadComplete(e) {
+            console.log(e.data[0]);
+
+            var container = flower.Stage.getInstance();
+            var bm = new flower.Bitmap(e.data[1]);
             bm.x = bm.y = 50;
-            bm.scaleX = 1.5;
-            bm.scaleY = 1.5;
-            bm.scale9Grid = new flower.Rectangle(10, 10, 20, 30);
-
-            //subTexture = texture.createSubTexture(2, 2, 286, 210, -48, 34, false);
-            //var bm = new flower.Bitmap(subTexture);
-            //flower.Stage.getInstance().addChild(bm);
-            //bm.x = bm.y = 50;
-
-            //bm.width = 300;
-            //bm.height = 200;
-            //bm.scaleX = 2;
-            //bm.scaleY = 2;
-            //bm.scale9Grid = new flower.Rectangle(30, 24, 40, 50);
-
-            //var bm2 = new flower.Bitmap(e.data);
-            //flower.Stage.getInstance().addChild(bm2);
-            //bm2.x = bm2.y = 50;
-            //bm2.scaleX = 2;
-            //bm2.scaleY = 2;
-
-            //console.log(e.data);
-            //var container = new flower.Sprite();
-            //flower.Stage.getInstance().addChild(container);
-            //container.x = 50;
-            //container.y = 100;
-            //container.scaleX = 0.5;
-            //container.scaleY = 0.25;
-            //
-            //var bitmap = new flower.Bitmap(e.data);
-            //container.addChild(bitmap);
-            //bitmap.x = 100;
-            //bitmap.y = 150;
-            //bitmap.scaleX = 2;
-            //bitmap.scaleY = 4;
-            //bitmap.rotation = 0;
-            //setInterval(function () {
-            //    container.rotation++;
-            //    bitmap.rotation--;
-            //}, 30);
-            //this.stage.setPositio  33n(200, 200);
-
-            //var sp = new cc.Sprite("res/qq.png");
-            //this.stage2.addChild(sp);
-            //sp.initWithTexture(e.data.$nativeTexture);
-            //sp.setPosition(100, 100);
+            bm.scaleX = bm.scaleY = 2;
+            container.addChild(bm);
         }
     }]);
 

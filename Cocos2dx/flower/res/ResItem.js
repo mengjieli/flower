@@ -16,7 +16,11 @@ class ResItem {
 
     constructor(url, type) {
         this.__url = url;
-        this.__type = type;
+        if (type) {
+            this.__type = type;
+        } else {
+            this.__type = ResType.getURLType(url);
+        }
     }
 
     addURL(url) {

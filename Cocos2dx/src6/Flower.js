@@ -32,7 +32,7 @@ function start(completeFunc, scale, language) {
             loader.addListener(Event.COMPLETE, function (e) {
                 loader = new URLLoader("res/shaders/Source.fsh");
                 loader.addListener(Event.COMPLETE, function (e) {
-                    completeFunc(Platform.stage, Platform.stage2);
+                    completeFunc();
                 });
                 loader.load();
             });
@@ -43,12 +43,18 @@ function start(completeFunc, scale, language) {
     loader.load();
 }
 
-function getLanaguge() {
+function $getLanguage() {
     return language;
 }
 
 function $error(errorCode, ...args) {
-    console.log(getLanguage(errorCode, args));
+    var msg;
+    if (errorCode instanceof String) {
+        msg = errorCode;
+    } else {
+        msg = getLanguage(errorCode, args);
+    }
+    console.log(msg);
 }
 
 function $tip(errorCode, ...args) {
@@ -83,7 +89,7 @@ function trace() {
 }
 
 exports.start = start;
-exports.getLanguage = getLanaguge;
+exports.getLanguage = $getLanguage;
 exports.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -735,6 +741,7 @@ locale_strings[1004] = "创建纹理:{0}";
 locale_strings[1005] = "释放纹理:{0}";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
+locale_strings[2003] = "[加载纹理失败] {0}";
 
 //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
@@ -996,6 +1003,26 @@ class Event {
 
 exports.Event = Event;
 //////////////////////////End File:flower/event/Event.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/IOErrorEvent.js///////////////////////////
+class IOErrorEvent extends Event {
+
+    static ERROR = "error";
+
+    _message;
+
+    constructor(type, message) {
+        super(type);
+    }
+
+    get message() {
+        return this._message;
+    }
+
+}
+//////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
 
 
 
@@ -2274,8 +2301,13 @@ class URLLoader extends EventDispatcher {
     constructor(res) {
         super();
         if (typeof(res) == "string") {
-            this._createRes = true;
-            res = ResItem.create(res);
+            var resItem = Res.getRes(res);
+            if (resItem) {
+                res = resItem;
+            } else {
+                this._createRes = true;
+                res = ResItem.create(res);
+            }
         }
         this._res = res;
         this._type = this._res.type;
@@ -2425,10 +2457,10 @@ class URLLoader extends EventDispatcher {
 
     loadError() {
         if (this.hasListener(IOErrorEvent.ERROR)) {
-            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, "[加载纹理失败] " + this._res.localURL));
+            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, getLanguage(2003, this._loadInfo.url)));
         }
         else {
-            DebugInfo.debug("[加载纹理失败] " + this._res.localURL, DebugInfo.ERROR);
+            $error(2003, this._loadInfo.url);
         }
     }
 
@@ -2467,6 +2499,72 @@ class URLLoader extends EventDispatcher {
 
 exports.URLLoader = URLLoader;
 //////////////////////////End File:flower/net/URLLoader.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/URLLoaderList.js///////////////////////////
+class URLLoaderList extends EventDispatcher {
+
+    __list;
+    __dataList;
+    __index;
+    __language;
+    __scale;
+
+    constructor(list) {
+        super();
+        this.__list = list;
+        this.__dataList = [];
+        this.__index = 0;
+    }
+
+    set language(val) {
+        this.__language = val;
+    }
+
+    set scale(val) {
+        this.__scale = val;
+    }
+
+    load() {
+        this.__loadNext();
+    }
+
+    __loadNext() {
+        if (this.__index >= this.__list.length) {
+            this.dispatchWidth(flower.Event.COMPLETE, this.__dataList);
+            this.__list = null;
+            this.__dataList = null;
+            this.dispose();
+            return;
+        }
+        var item = this.__list[this.__index];
+        var load = new flower.URLLoader(item);
+        if (this.__language != null) load.language = this.__language;
+        if (this.__scale != null) load.scale = this.__scale;
+        load.addListener(flower.Event.COMPLETE, this.__onComplete, this);
+        load.addListener(IOErrorEvent.ERROR, this.__onError, this);
+        load.load();
+    }
+
+    __onError(e) {
+        if (this.hasListener(IOErrorEvent.ERROR)) {
+            this.dispatch(e);
+        }
+        else {
+            $error(e.message);
+        }
+    }
+
+    __onComplete(e) {
+        this.__dataList[this.__index] = e.data;
+        this.__index++;
+        this.__loadNext();
+    }
+}
+
+exports.URLLoaderList = URLLoaderList;
+//////////////////////////End File:flower/net/URLLoaderList.js///////////////////////////
 
 
 
@@ -2525,7 +2623,11 @@ class ResItem {
 
     constructor(url, type) {
         this.__url = url;
-        this.__type = type;
+        if (type) {
+            this.__type = type;
+        } else {
+            this.__type = ResType.getURLType(url);
+        }
     }
 
     addURL(url) {

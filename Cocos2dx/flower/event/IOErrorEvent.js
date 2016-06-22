@@ -1,3 +1,15 @@
-/**
- * Created by mengjieli on 16/6/22.
- */
+class IOErrorEvent extends Event {
+
+    static ERROR = "error";
+
+    _message;
+
+    constructor(type, message) {
+        super(type);
+    }
+
+    get message() {
+        return this._message;
+    }
+
+}

@@ -29,7 +29,7 @@ function start(completeFunc, scale, language) {
             loader.addListener(Event.COMPLETE, function (e) {
                 loader = new URLLoader("res/shaders/Source.fsh");
                 loader.addListener(Event.COMPLETE, function (e) {
-                    completeFunc(Platform.stage, Platform.stage2);
+                    completeFunc();
                 });
                 loader.load();
             });
@@ -40,12 +40,18 @@ function start(completeFunc, scale, language) {
     loader.load();
 }
 
-function getLanaguge() {
+function $getLanguage() {
     return language;
 }
 
 function $error(errorCode, ...args) {
-    console.log(getLanguage(errorCode, args));
+    var msg;
+    if (errorCode instanceof String) {
+        msg = errorCode;
+    } else {
+        msg = getLanguage(errorCode, args);
+    }
+    console.log(msg);
 }
 
 function $tip(errorCode, ...args) {
@@ -80,5 +86,5 @@ function trace() {
 }
 
 exports.start = start;
-exports.getLanguage = getLanaguge;
+exports.getLanguage = $getLanguage;
 exports.trace = trace;

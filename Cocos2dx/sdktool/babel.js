@@ -177,6 +177,7 @@ var list = [
 
     "EventDispatcher",
     "Event",
+    "IOErrorEvent",
 
     "Matrix",
     "Point",
@@ -194,6 +195,7 @@ var list = [
     "TextureManager",
 
     "URLLoader",
+    "URLLoaderList",
 
     "Res",
     "ResItem",

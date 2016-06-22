@@ -44,7 +44,7 @@ var _exports = {};
                 loader.addListener(Event.COMPLETE, function (e) {
                     loader = new URLLoader("res/shaders/Source.fsh");
                     loader.addListener(Event.COMPLETE, function (e) {
-                        completeFunc(Platform.stage, Platform.stage2);
+                        completeFunc();
                     });
                     loader.load();
                 });
@@ -55,16 +55,22 @@ var _exports = {};
         loader.load();
     }
 
-    function getLanaguge() {
+    function $getLanguage() {
         return language;
     }
 
     function $error(errorCode) {
-        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-            args[_key - 1] = arguments[_key];
-        }
+        var msg;
+        if (errorCode instanceof String) {
+            msg = errorCode;
+        } else {
+            for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+                args[_key - 1] = arguments[_key];
+            }
 
-        console.log(getLanguage(errorCode, args));
+            msg = getLanguage(errorCode, args);
+        }
+        console.log(msg);
     }
 
     function $tip(errorCode) {
@@ -103,7 +109,7 @@ var _exports = {};
     }
 
     _exports.start = start;
-    _exports.getLanguage = getLanaguge;
+    _exports.getLanguage = $getLanguage;
     _exports.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -800,6 +806,7 @@ var _exports = {};
     locale_strings[1005] = "释放纹理:{0}";
     locale_strings[2001] = "[loadText] {0}";
     locale_strings[2002] = "[loadTexture] {0}";
+    locale_strings[2003] = "[加载纹理失败] {0}";
 
     //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
@@ -1098,7 +1105,32 @@ var _exports = {};
     _exports.Event = Event;
     //////////////////////////End File:flower/event/Event.js///////////////////////////
 
+    //////////////////////////File:flower/event/IOErrorEvent.js///////////////////////////
+
+    var IOErrorEvent = function (_Event) {
+        _inherits(IOErrorEvent, _Event);
+
+        function IOErrorEvent(type, message) {
+            _classCallCheck(this, IOErrorEvent);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(IOErrorEvent).call(this, type));
+        }
+
+        _createClass(IOErrorEvent, [{
+            key: "message",
+            get: function get() {
+                return this._message;
+            }
+        }]);
+
+        return IOErrorEvent;
+    }(Event);
+    //////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
+
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
+
+
+    IOErrorEvent.ERROR = "error";
 
     var Matrix = function () {
         function Matrix() {
@@ -1559,12 +1591,12 @@ var _exports = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this.__alpha = 1;
-            _this.__concatAlpha = 1;
+            _this2.__alpha = 1;
+            _this2.__concatAlpha = 1;
 
-            _this.__DisplayObject = {
+            _this2.__DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -1573,8 +1605,8 @@ var _exports = {};
                 5: "", //name
                 6: new Size() //size 自身尺寸
             };
-            _this.__flags = 0;
-            return _this;
+            _this2.__flags = 0;
+            return _this2;
         }
 
         /**
@@ -1996,11 +2028,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this2.__children = [];
-            _this2.$nativeShow = Platform.create("Sprite");
-            return _this2;
+            _this3.__children = [];
+            _this3.$nativeShow = Platform.create("Sprite");
+            return _this3;
         }
 
         _createClass(Sprite, [{
@@ -2165,11 +2197,11 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this3.$nativeShow = Platform.create("Bitmap");
-            _this3.texture = texture;
-            return _this3;
+            _this4.$nativeShow = Platform.create("Bitmap");
+            _this4.texture = texture;
+            return _this4;
         }
 
         _createClass(Bitmap, [{
@@ -2244,11 +2276,11 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this4.__stage = _this4;
-            Stage.stages.push(_this4);
-            return _this4;
+            _this5.__stage = _this5;
+            Stage.stages.push(_this5);
+            return _this5;
         }
 
         _createClass(Stage, [{
@@ -2511,21 +2543,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this5._createRes = false;
-            _this5._isLoading = false;
-            _this5._selfDispose = false;
+            _this6._createRes = false;
+            _this6._isLoading = false;
+            _this6._selfDispose = false;
 
             if (typeof res == "string") {
-                _this5._createRes = true;
-                res = ResItem.create(res);
+                var resItem = Res.getRes(res);
+                if (resItem) {
+                    res = resItem;
+                } else {
+                    _this6._createRes = true;
+                    res = ResItem.create(res);
+                }
             }
-            _this5._res = res;
-            _this5._type = _this5._res.type;
-            _this5._language = LANGUAGE;
-            _this5._scale = SCALE ? SCALE : null;
-            return _this5;
+            _this6._res = res;
+            _this6._type = _this6._res.type;
+            _this6._language = LANGUAGE;
+            _this6._scale = SCALE ? SCALE : null;
+            return _this6;
         }
 
         _createClass(URLLoader, [{
@@ -2657,9 +2694,9 @@ var _exports = {};
             key: "loadError",
             value: function loadError() {
                 if (this.hasListener(IOErrorEvent.ERROR)) {
-                    this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, "[加载纹理失败] " + this._res.localURL));
+                    this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, getLanguage(2003, this._loadInfo.url)));
                 } else {
-                    DebugInfo.debug("[加载纹理失败] " + this._res.localURL, DebugInfo.ERROR);
+                    $error(2003, this._loadInfo.url);
                 }
             }
         }, {
@@ -2730,6 +2767,79 @@ var _exports = {};
     _exports.URLLoader = URLLoader;
     //////////////////////////End File:flower/net/URLLoader.js///////////////////////////
 
+    //////////////////////////File:flower/net/URLLoaderList.js///////////////////////////
+
+    var URLLoaderList = function (_EventDispatcher3) {
+        _inherits(URLLoaderList, _EventDispatcher3);
+
+        function URLLoaderList(list) {
+            _classCallCheck(this, URLLoaderList);
+
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+
+            _this7.__list = list;
+            _this7.__dataList = [];
+            _this7.__index = 0;
+            return _this7;
+        }
+
+        _createClass(URLLoaderList, [{
+            key: "load",
+            value: function load() {
+                this.__loadNext();
+            }
+        }, {
+            key: "__loadNext",
+            value: function __loadNext() {
+                if (this.__index >= this.__list.length) {
+                    this.dispatchWidth(flower.Event.COMPLETE, this.__dataList);
+                    this.__list = null;
+                    this.__dataList = null;
+                    this.dispose();
+                    return;
+                }
+                var item = this.__list[this.__index];
+                var load = new flower.URLLoader(item);
+                if (this.__language != null) load.language = this.__language;
+                if (this.__scale != null) load.scale = this.__scale;
+                load.addListener(flower.Event.COMPLETE, this.__onComplete, this);
+                load.addListener(IOErrorEvent.ERROR, this.__onError, this);
+                load.load();
+            }
+        }, {
+            key: "__onError",
+            value: function __onError(e) {
+                if (this.hasListener(IOErrorEvent.ERROR)) {
+                    this.dispatch(e);
+                } else {
+                    $error(e.message);
+                }
+            }
+        }, {
+            key: "__onComplete",
+            value: function __onComplete(e) {
+                this.__dataList[this.__index] = e.data;
+                this.__index++;
+                this.__loadNext();
+            }
+        }, {
+            key: "language",
+            set: function set(val) {
+                this.__language = val;
+            }
+        }, {
+            key: "scale",
+            set: function set(val) {
+                this.__scale = val;
+            }
+        }]);
+
+        return URLLoaderList;
+    }(EventDispatcher);
+
+    _exports.URLLoaderList = URLLoaderList;
+    //////////////////////////End File:flower/net/URLLoaderList.js///////////////////////////
+
     //////////////////////////File:flower/res/Res.js///////////////////////////
 
     var Res = function () {
@@ -2791,7 +2901,11 @@ var _exports = {};
             this.__loadList = [];
 
             this.__url = url;
-            this.__type = type;
+            if (type) {
+                this.__type = type;
+            } else {
+                this.__type = ResType.getURLType(url);
+            }
         }
 
         /**
