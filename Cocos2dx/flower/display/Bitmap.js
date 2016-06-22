@@ -48,6 +48,10 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    get texture() {
+        return this.__texture;
+    }
+
     set texture(val) {
         this.$setTexture(val);
     }

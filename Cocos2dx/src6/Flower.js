@@ -559,10 +559,8 @@ class PlatformURLLoader {
                         errorBack.call(thisObj);
                     }
                     else {
-                        if (data instanceof String) {
-
-                        } else {
-                            data = JSON.stringify(data);
+                        if (data instanceof Array) {
+                            data = JSON.stringify(data[0]);
                         }
                         back.call(thisObj, data);
                     }
@@ -2351,6 +2349,10 @@ class Bitmap extends DisplayObject {
         this.__scale9Grid = val;
         this.$nativeShow.setScale9Grid(val);
         return true;
+    }
+
+    get texture() {
+        return this.__texture;
     }
 
     set texture(val) {

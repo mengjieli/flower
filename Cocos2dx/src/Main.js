@@ -46,7 +46,8 @@ var Main = function () {
         key: "onLoadComplete",
         value: function onLoadComplete(e) {
             var list = e.data;
-            console.log(e.data[0]);
+            console.log("纹理列表", list);
+            console.log(e.data[0].desc);
 
             var container = flower.Stage.getInstance();
             container.width = 150;

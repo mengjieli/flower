@@ -606,8 +606,8 @@ var _exports = {};
                             if (error) {
                                 errorBack.call(thisObj);
                             } else {
-                                if (data instanceof String) {} else {
-                                    data = JSON.stringify(data);
+                                if (data instanceof Array) {
+                                    data = JSON.stringify(data[0]);
                                 }
                                 back.call(thisObj, data);
                             }
@@ -2609,6 +2609,9 @@ var _exports = {};
             }
         }, {
             key: "texture",
+            get: function get() {
+                return this.__texture;
+            },
             set: function set(val) {
                 this.$setTexture(val);
             }
