@@ -17,7 +17,7 @@ class Main {
         res.addURL("res/font@100x100@en.png");
         flower.Res.addRes(res);
 
-        var load = new flower.URLLoaderList(["Close.json", "Image.png"]);
+        var load = new flower.URLLoaderList(["Close.json", "Image.png", "res/qq.png"]);
         load.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
         load.load();
 
@@ -34,12 +34,49 @@ class Main {
     }
 
     onLoadComplete(e) {
+        var list = e.data;
         console.log(e.data[0]);
 
         var container = flower.Stage.getInstance();
-        var bm = new flower.Bitmap(e.data[1]);
-        bm.x = bm.y = 50;
+        var bm = new flower.Bitmap();
+        bm.x = bm.y = 100;
         bm.scaleX = bm.scaleY = 2;
+        bm.texture = e.data[1];
+        bm.rotation = 30;
+        bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
+        bm.addListener(flower.TouchEvent.TOUCH_MOVE, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
+        bm.addListener(flower.TouchEvent.TOUCH_END, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
+        bm.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
         container.addChild(bm);
+
+        setTimeout(function () {
+            bm.texture = list[2];
+            flower.trace(bm.scaleX, bm.scaleY);
+        }, 1500);
+
+        var qq = new flower.Bitmap();
+        qq.x = qq.y = 300;
+        qq.texture = e.data[2];
+        container.addChild(qq);
+        qq.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
+        qq.addListener(flower.TouchEvent.TOUCH_MOVE, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
+        qq.addListener(flower.TouchEvent.TOUCH_END, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
+        qq.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
+            console.log(e.type,e.touchX,e.touchY,e.stageX,e.stageY);
+        }, this);
     }
 }

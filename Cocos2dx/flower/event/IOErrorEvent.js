@@ -13,3 +13,5 @@ class IOErrorEvent extends Event {
     }
 
 }
+
+exports.IOErrorEvent = IOErrorEvent;

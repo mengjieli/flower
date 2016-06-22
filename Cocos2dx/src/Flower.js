@@ -71,6 +71,7 @@ var _exports = {};
             msg = getLanguage(errorCode, args);
         }
         console.log(msg);
+        throw msg;
     }
 
     function $tip(errorCode) {
@@ -366,12 +367,8 @@ var _exports = {};
                 this.show.setAnchorPoint(0, 1);
                 this.x = this.__x;
                 this.y = this.__y;
-                if (this.__textureScaleX != 1) {
-                    this.scaleX = this.__scaleX;
-                }
-                if (this.__textureScaleY != 1) {
-                    this.scaleY = this.__scaleY;
-                }
+                this.scaleX = this.__scaleX;
+                this.scaleY = this.__scaleY;
                 this._changeShader();
             }
         }, {
@@ -497,20 +494,20 @@ var _exports = {};
             key: "x",
             set: function set(val) {
                 this.__x = val;
-                this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+                this.show.setPositionX(this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX);
             }
         }, {
             key: "y",
             set: function set(val) {
                 this.__y = val;
-                this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+                this.show.setPositionY(-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY);
             }
         }, {
             key: "scaleX",
             set: function set(val) {
                 this.__scaleX = val;
                 this.show.setScaleX(val * this.__textureScaleX);
-                if (this.__texture.offX) {
+                if (this.__texture && this.__texture.offX) {
                     this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
                 }
                 this._changeShader();
@@ -520,7 +517,7 @@ var _exports = {};
             set: function set(val) {
                 this.__scaleY = val;
                 this.show.setScaleY(val * this.__textureScaleY);
-                if (this.__texture.offY) {
+                if (this.__texture && this.__texture.offY) {
                     this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
                 }
                 this._changeShader();
@@ -1105,10 +1102,35 @@ var _exports = {};
     _exports.Event = Event;
     //////////////////////////End File:flower/event/Event.js///////////////////////////
 
+    //////////////////////////File:flower/event/TouchEvent.js///////////////////////////
+
+    var TouchEvent = function (_Event) {
+        _inherits(TouchEvent, _Event);
+
+        function TouchEvent(type) {
+            var bubbles = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            _classCallCheck(this, TouchEvent);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+        }
+
+        return TouchEvent;
+    }(Event);
+
+    TouchEvent.TOUCH_BEGIN = "touch_begin";
+    TouchEvent.TOUCH_MOVE = "touch_move";
+    TouchEvent.TOUCH_END = "touch_end";
+    TouchEvent.TOUCH_RELEASE = "touch_release";
+
+
+    _exports.TouchEvent = TouchEvent;
+    //////////////////////////End File:flower/event/TouchEvent.js///////////////////////////
+
     //////////////////////////File:flower/event/IOErrorEvent.js///////////////////////////
 
-    var IOErrorEvent = function (_Event) {
-        _inherits(IOErrorEvent, _Event);
+    var IOErrorEvent = function (_Event2) {
+        _inherits(IOErrorEvent, _Event2);
 
         function IOErrorEvent(type, message) {
             _classCallCheck(this, IOErrorEvent);
@@ -1125,12 +1147,14 @@ var _exports = {};
 
         return IOErrorEvent;
     }(Event);
+
+    IOErrorEvent.ERROR = "error";
+
+
+    _exports.IOErrorEvent = IOErrorEvent;
     //////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
 
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
-
-
-    IOErrorEvent.ERROR = "error";
 
     var Matrix = function () {
         function Matrix() {
@@ -1591,22 +1615,28 @@ var _exports = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this2.__alpha = 1;
-            _this2.__concatAlpha = 1;
+            _this3.__x = 0;
+            _this3.__y = 0;
+            _this3.__flags = 0;
+            _this3.__alpha = 1;
+            _this3.__concatAlpha = 1;
 
-            _this2.__DisplayObject = {
+            _this3.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
                 3: null, //settingWidth
                 4: null, //settingHeight
                 5: "", //name
-                6: new Size() //size 自身尺寸
+                6: new Size(), //size 自身尺寸
+                7: true, //touchEnabeld
+                8: true, //multiplyTouchEnabled
+                10: 0, //lastTouchX
+                11: 0 //lastTouchY
             };
-            _this2.__flags = 0;
-            return _this2;
+            return _this3;
         }
 
         /**
@@ -1705,7 +1735,7 @@ var _exports = {};
             key: "$setScaleX",
             value: function $setScaleX(val) {
                 val = +val || 0;
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (p[0] == val) {
                     return;
                 }
@@ -1716,7 +1746,7 @@ var _exports = {};
         }, {
             key: "$getScaleX",
             value: function $getScaleX() {
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
                     this.$getSize();
                 }
@@ -1726,7 +1756,7 @@ var _exports = {};
             key: "$setScaleY",
             value: function $setScaleY(val) {
                 val = +val || 0;
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (p[1] == val) {
                     return;
                 }
@@ -1737,7 +1767,7 @@ var _exports = {};
         }, {
             key: "$getScaleY",
             value: function $getScaleY() {
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
                     this.$getSize();
                 }
@@ -1747,7 +1777,7 @@ var _exports = {};
             key: "$setRotation",
             value: function $setRotation(val) {
                 val = +val || 0;
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (p[2] == val) {
                     return;
                 }
@@ -1788,7 +1818,7 @@ var _exports = {};
             value: function $setWidth(val) {
                 val = +val || 0;
                 val = val < 0 ? 0 : val;
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (p[3] == val) {
                     return;
                 }
@@ -1798,15 +1828,15 @@ var _exports = {};
         }, {
             key: "$getWidth",
             value: function $getWidth() {
-                var p = this.__DisplayObject;
-                return p[3] != null ? p[3] : this.$getSize().height;
+                var p = this.$DisplayObject;
+                return p[3] != null ? p[3] : this.$getSize().width;
             }
         }, {
             key: "$setHeight",
             value: function $setHeight(val) {
                 val = +val || 0;
                 val = val < 0 ? 0 : val;
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (p[4] == val) {
                     return;
                 }
@@ -1816,13 +1846,13 @@ var _exports = {};
         }, {
             key: "$getHeight",
             value: function $getHeight() {
-                var p = this.__DisplayObject;
-                return p[4] != null ? p[4] : this.$getSize().width;
+                var p = this.$DisplayObject;
+                return p[4] != null ? p[4] : this.$getSize().height;
             }
         }, {
             key: "$getSize",
             value: function $getSize() {
-                var size = this.__DisplayObject[6];
+                var size = this.$DisplayObject[6];
                 if (this.$hasFlags(0x0001)) {
                     this.calculateSize(size);
                     this.__checkSettingSize(size);
@@ -1831,9 +1861,29 @@ var _exports = {};
                 return size;
             }
         }, {
+            key: "$setTouchEnabled",
+            value: function $setTouchEnabled(val) {
+                var p = this.$DisplayObject;
+                if (p[7] == val) {
+                    return false;
+                }
+                p[7] = val;
+                return true;
+            }
+        }, {
+            key: "$setMultiplyTouchEnabled",
+            value: function $setMultiplyTouchEnabled(val) {
+                varp = this.$DisplayObject;
+                if (p[8] == val) {
+                    return false;
+                }
+                p[8] = val;
+                return true;
+            }
+        }, {
             key: "__checkSettingSize",
             value: function __checkSettingSize(size) {
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 /**
                  * 尺寸失效， 并且约定过 宽 或者 高
                  */
@@ -1891,6 +1941,7 @@ var _exports = {};
         }, {
             key: "dispatch",
             value: function dispatch(e) {
+                _get(Object.getPrototypeOf(DisplayObject.prototype), "dispatch", this).call(this, e);
                 if (e.bubbles && this.__parent) {
                     this.__parent.dispatch(e);
                 }
@@ -1923,9 +1974,28 @@ var _exports = {};
                 }
             }
         }, {
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(matrix, multiply) {
+                if (this.touchEnabled == false || this._visible == false) return null;
+                matrix.save();
+                matrix.translate(-this.x, -this.y);
+                if (this.rotation) matrix.rotate(-this.radian);
+                if (this.scaleX != 1 || this.scaleY != 1) matrix.scale(1 / this.scaleX, 1 / this.scaleY);
+                var touchX = Math.floor(matrix.tx);
+                var touchY = Math.floor(matrix.ty);
+                var p = this.$DisplayObject;
+                p[10] = touchX;
+                p[11] = touchY;
+                if (touchX >= 0 && touchY >= 0 && touchX < this.width && touchY < this.height) {
+                    return this;
+                }
+                matrix.restore();
+                return null;
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.alpha = this.$getConcatAlpha();
                 }
@@ -1960,7 +2030,7 @@ var _exports = {};
         }, {
             key: "scaleX",
             get: function get() {
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 return p[0];
             },
             set: function set(val) {
@@ -1969,7 +2039,7 @@ var _exports = {};
         }, {
             key: "scaleY",
             get: function get() {
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 return p[1];
             },
             set: function set(val) {
@@ -1978,11 +2048,16 @@ var _exports = {};
         }, {
             key: "rotation",
             get: function get() {
-                var p = this.__DisplayObject;
+                var p = this.$DisplayObject;
                 return p[2];
             },
             set: function set(val) {
                 this.$setRotation(val);
+            }
+        }, {
+            key: "radian",
+            get: function get() {
+                return this.rotation * Math.PI / 180;
             }
         }, {
             key: "alpha",
@@ -2013,6 +2088,36 @@ var _exports = {};
             get: function get() {
                 return this.__parent;
             }
+        }, {
+            key: "touchEnabled",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[7];
+            },
+            set: function set(val) {
+                this.$setTouchEnabeld(val);
+            }
+        }, {
+            key: "multiplyTouchEnabled",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[8];
+            },
+            set: function set(val) {
+                this.$setMultiplyTouchEnabled(val);
+            }
+        }, {
+            key: "lastTouchX",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[10];
+            }
+        }, {
+            key: "lastTouchY",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[11];
+            }
         }]);
 
         return DisplayObject;
@@ -2028,11 +2133,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this3.__children = [];
-            _this3.$nativeShow = Platform.create("Sprite");
-            return _this3;
+            _this4.__children = [];
+            _this4.$nativeShow = Platform.create("Sprite");
+            return _this4;
         }
 
         _createClass(Sprite, [{
@@ -2150,6 +2255,36 @@ var _exports = {};
                 return -1;
             }
         }, {
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(matrix, multiply) {
+                if (this.touchEnabled == false || this.visible == false) return null;
+                if (multiply == true && this.multiplyTouchEnabled == false) return null;
+                matrix.save();
+                matrix.translate(-this.x, -this.y);
+                if (this.rotation) matrix.rotate(-this.radian);
+                if (this.scaleX != 1 || this.scaleY != 1) {
+                    matrix.scale(1 / this.scaleX, 1 / this.scaleY);
+                }
+                var touchX = Math.floor(matrix.tx);
+                var touchY = Math.floor(matrix.ty);
+                var p = this.$DisplayObject;
+                p[10] = touchX;
+                p[11] = touchY;
+                var target;
+                var childs = this.__children;
+                var len = childs.length;
+                for (var i = len - 1; i >= 0; i--) {
+                    if (childs[i].touchEnabled && (multiply == false || multiply == true && childs[i].multiplyTouchEnabled == true)) {
+                        target = childs[i].$getMouseTarget(matrix, multiply);
+                        if (target) {
+                            break;
+                        }
+                    }
+                }
+                matrix.restore();
+                return target;
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 var children = this.__children;
@@ -2197,11 +2332,11 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this4.$nativeShow = Platform.create("Bitmap");
-            _this4.texture = texture;
-            return _this4;
+            _this5.$nativeShow = Platform.create("Bitmap");
+            _this5.texture = texture;
+            return _this5;
         }
 
         _createClass(Bitmap, [{
@@ -2276,14 +2411,142 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this5.__stage = _this5;
-            Stage.stages.push(_this5);
-            return _this5;
+            _this6.__touchList = [];
+
+            _this6.__stage = _this6;
+            Stage.stages.push(_this6);
+            return _this6;
         }
 
         _createClass(Stage, [{
+            key: "getMouseTarget",
+            value: function getMouseTarget(touchX, touchY, mutiply) {
+                var matrix = Matrix.$matrix;
+                matrix.identity();
+                matrix.tx = touchX;
+                matrix.ty = touchY;
+                var target = this.$getMouseTarget(matrix, mutiply) || this;
+                return target;
+            }
+        }, {
+            key: "onMouseDown",
+            value: function onMouseDown(id, x, y) {
+                var mouse = {
+                    id: 0,
+                    mutiply: false,
+                    startX: 0,
+                    startY: 0,
+                    moveX: 0,
+                    moveY: 0,
+                    target: null,
+                    parents: []
+                };
+                mouse.id = id;
+                mouse.startX = x;
+                mouse.startY = y;
+                mouse.mutiply = this.__touchList.length == 0 ? false : true;
+                this.__touchList.push(mouse);
+                var target = this.getMouseTarget(x, y, mouse.mutiply);
+                mouse.target = target;
+                var parent = target.parent;
+                while (parent && parent != this) {
+                    mouse.parents.push(parent);
+                    parent = parent.parent;
+                }
+                //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
+                if (target) {
+                    var event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
+                    event.stageX = x;
+                    event.stageY = y;
+                    event.$target = target;
+                    event.touchX = target.lastTouchX;
+                    event.touchY = target.lastTouchY;
+                    target.dispatch(event);
+                }
+            }
+        }, {
+            key: "onMouseMove",
+            value: function onMouseMove(id, x, y) {
+                var mouse;
+                for (var i = 0; i < this.__touchList.length; i++) {
+                    if (this.__touchList[i].id == id) {
+                        mouse = this.__touchList[i];
+                        break;
+                    }
+                }
+                if (mouse == null) {
+                    return;
+                }
+                if (mouse.moveX == x && mouse.moveY == y) {
+                    return;
+                }
+                while (mouse.target.stage == null && mouse.parents.length) {
+                    mouse.target = mouse.parents.shift();
+                }
+                if (!mouse.target) {
+                    mouse.target = this;
+                }
+                this.getMouseTarget(x, y, mouse.mutiply);
+                var target = mouse.target; //this.getMouseTarget(x, y, mouse.mutiply);
+                mouse.moveX = x;
+                mouse.moveY = y;
+                var event;
+                if (target) {
+                    event = new flower.TouchEvent(flower.TouchEvent.TOUCH_MOVE);
+                    event.stageX = x;
+                    event.stageY = y;
+                    event.$target = target;
+                    event.touchX = target.lastTouchX;
+                    event.touchY = target.lastTouchY;
+                    target.dispatch(event);
+                }
+            }
+        }, {
+            key: "onMouseUp",
+            value: function onMouseUp(id, x, y) {
+                var mouse;
+                for (var i = 0; i < this.__touchList.length; i++) {
+                    if (this.__touchList[i].id == id) {
+                        mouse = this.__touchList.splice(i, 1)[0];
+                        break;
+                    }
+                }
+                if (mouse == null) {
+                    return;
+                }
+                while (mouse.target.stage == null && mouse.parents.length) {
+                    mouse.target = mouse.parents.shift();
+                }
+                if (!mouse.target) {
+                    mouse.target = this;
+                }
+                var target = this.getMouseTarget(x, y, mouse.mutiply);
+                var event;
+                if (target == mouse.target) {
+                    event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);
+                    event.stageX = x;
+                    event.stageY = y;
+                    event.$target = target;
+                    event.touchX = target.lastTouchX;
+                    event.touchY = target.lastTouchY;
+                    target.dispatch(event);
+                } else {
+                    target = mouse.target;
+                    event = new flower.TouchEvent(flower.TouchEvent.TOUCH_RELEASE);
+                    event.stageX = x;
+                    event.stageY = y;
+                    event.$target = target;
+                    event.touchX = target.lastTouchX;
+                    event.touchY = target.lastTouchY;
+                    target.dispatch(event);
+                }
+            }
+
+            ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+
+        }, {
             key: "stageWidth",
             get: function get() {
                 return Platform.width;
@@ -2293,6 +2556,9 @@ var _exports = {};
             get: function get() {
                 return Platform.height;
             }
+
+            ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+
         }], [{
             key: "getInstance",
             value: function getInstance() {
@@ -2543,26 +2809,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this6._createRes = false;
-            _this6._isLoading = false;
-            _this6._selfDispose = false;
+            _this7._createRes = false;
+            _this7._isLoading = false;
+            _this7._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this6._createRes = true;
+                    _this7._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this6._res = res;
-            _this6._type = _this6._res.type;
-            _this6._language = LANGUAGE;
-            _this6._scale = SCALE ? SCALE : null;
-            return _this6;
+            _this7._res = res;
+            _this7._type = _this7._res.type;
+            _this7._language = LANGUAGE;
+            _this7._scale = SCALE ? SCALE : null;
+            return _this7;
         }
 
         _createClass(URLLoader, [{
@@ -2775,12 +3041,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this7.__list = list;
-            _this7.__dataList = [];
-            _this7.__index = 0;
-            return _this7;
+            _this8.__list = list;
+            _this8.__dataList = [];
+            _this8.__index = 0;
+            return _this8;
         }
 
         _createClass(URLLoaderList, [{

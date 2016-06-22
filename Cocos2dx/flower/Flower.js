@@ -52,6 +52,7 @@ function $error(errorCode, ...args) {
         msg = getLanguage(errorCode, args);
     }
     console.log(msg);
+    throw msg;
 }
 
 function $tip(errorCode, ...args) {

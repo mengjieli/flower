@@ -39,12 +39,8 @@ class PlatformBitmap {
         this.show.setAnchorPoint(0, 1);
         this.x = this.__x;
         this.y = this.__y;
-        if (this.__textureScaleX != 1) {
-            this.scaleX = this.__scaleX;
-        }
-        if (this.__textureScaleY != 1) {
-            this.scaleY = this.__scaleY;
-        }
+        this.scaleX = this.__scaleX;
+        this.scaleY = this.__scaleY;
         this._changeShader();
     }
 
@@ -141,18 +137,18 @@ class PlatformBitmap {
 
     set x(val) {
         this.__x = val;
-        this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+        this.show.setPositionX(this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX);
     }
 
     set y(val) {
         this.__y = val;
-        this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+        this.show.setPositionY(-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY);
     }
 
     set scaleX(val) {
         this.__scaleX = val;
         this.show.setScaleX(val * this.__textureScaleX);
-        if(this.__texture.offX) {
+        if (this.__texture && this.__texture.offX) {
             this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
         }
         this._changeShader();
@@ -161,7 +157,7 @@ class PlatformBitmap {
     set scaleY(val) {
         this.__scaleY = val;
         this.show.setScaleY(val * this.__textureScaleY);
-        if(this.__texture.offY) {
+        if (this.__texture && this.__texture.offY) {
             this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
         }
         this._changeShader();

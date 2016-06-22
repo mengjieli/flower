@@ -1,9 +1,9 @@
 class DisplayObject extends EventDispatcher {
 
-    __x;
-    __y;
+    __x = 0;
+    __y = 0;
 
-    __DisplayObject;
+    $DisplayObject;
 
     /**
      * 脏标识
@@ -11,7 +11,7 @@ class DisplayObject extends EventDispatcher {
      * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
      * 0x0100 重排子对象顺序
      */
-    __flags;
+    __flags = 0;
 
     /**
      * 父对象
@@ -33,16 +33,19 @@ class DisplayObject extends EventDispatcher {
 
     constructor() {
         super();
-        this.__DisplayObject = {
+        this.$DisplayObject = {
             0: 1, //scaleX
             1: 1, //scaleY
             2: 0, //rotation
             3: null, //settingWidth
             4: null, //settingHeight
             5: "", //name
-            6: new Size() //size 自身尺寸
+            6: new Size(), //size 自身尺寸
+            7: true, //touchEnabeld
+            8: true, //multiplyTouchEnabled
+            10: 0, //lastTouchX
+            11: 0 //lastTouchY
         }
-        this.__flags = 0;
     }
 
     /**
@@ -118,7 +121,7 @@ class DisplayObject extends EventDispatcher {
 
     $setScaleX(val) {
         val = +val || 0;
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (p[0] == val) {
             return;
         }
@@ -128,7 +131,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getScaleX() {
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
             this.$getSize();
         }
@@ -137,7 +140,7 @@ class DisplayObject extends EventDispatcher {
 
     $setScaleY(val) {
         val = +val || 0;
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (p[1] == val) {
             return;
         }
@@ -147,7 +150,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getScaleY() {
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
             this.$getSize();
         }
@@ -156,7 +159,7 @@ class DisplayObject extends EventDispatcher {
 
     $setRotation(val) {
         val = +val || 0;
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (p[2] == val) {
             return;
         }
@@ -194,7 +197,7 @@ class DisplayObject extends EventDispatcher {
     $setWidth(val) {
         val = +val || 0;
         val = val < 0 ? 0 : val;
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (p[3] == val) {
             return;
         }
@@ -203,14 +206,14 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getWidth() {
-        var p = this.__DisplayObject;
-        return p[3] != null ? p[3] : this.$getSize().height;
+        var p = this.$DisplayObject;
+        return p[3] != null ? p[3] : this.$getSize().width;
     }
 
     $setHeight(val) {
         val = +val || 0;
         val = val < 0 ? 0 : val;
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (p[4] == val) {
             return;
         }
@@ -219,12 +222,12 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getHeight() {
-        var p = this.__DisplayObject;
-        return p[4] != null ? p[4] : this.$getSize().width;
+        var p = this.$DisplayObject;
+        return p[4] != null ? p[4] : this.$getSize().height;
     }
 
     $getSize() {
-        var size = this.__DisplayObject[6];
+        var size = this.$DisplayObject[6];
         if (this.$hasFlags(0x0001)) {
             this.calculateSize(size);
             this.__checkSettingSize(size);
@@ -233,8 +236,26 @@ class DisplayObject extends EventDispatcher {
         return size;
     }
 
+    $setTouchEnabled(val) {
+        var p = this.$DisplayObject;
+        if (p[7] == val) {
+            return false;
+        }
+        p[7] = val;
+        return true;
+    }
+
+    $setMultiplyTouchEnabled(val) {
+        varp = this.$DisplayObject;
+        if (p[8] == val) {
+            return false;
+        }
+        p[8] = val;
+        return true;
+    }
+
     __checkSettingSize(size) {
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         /**
          * 尺寸失效， 并且约定过 宽 或者 高
          */
@@ -288,6 +309,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     dispatch(e) {
+        super.dispatch(e);
         if (e.bubbles && this.__parent) {
             this.__parent.dispatch(e);
         }
@@ -310,7 +332,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleX() {
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         return p[0];
     }
 
@@ -319,7 +341,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleY() {
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         return p[1];
     }
 
@@ -328,12 +350,16 @@ class DisplayObject extends EventDispatcher {
     }
 
     get rotation() {
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         return p[2];
     }
 
     set rotation(val) {
         this.$setRotation(val);
+    }
+
+    get radian() {
+        return this.rotation * Math.PI / 180;
     }
 
     get alpha() {
@@ -364,6 +390,34 @@ class DisplayObject extends EventDispatcher {
         return this.__parent;
     }
 
+    get touchEnabled() {
+        var p = this.$DisplayObject;
+        return p[7];
+    }
+
+    set touchEnabled(val) {
+        this.$setTouchEnabeld(val);
+    }
+
+    get multiplyTouchEnabled() {
+        var p = this.$DisplayObject;
+        return p[8];
+    }
+
+    set multiplyTouchEnabled(val) {
+        this.$setMultiplyTouchEnabled(val);
+    }
+
+    get lastTouchX() {
+        var p = this.$DisplayObject;
+        return p[10];
+    }
+
+    get lastTouchY() {
+        var p = this.$DisplayObject;
+        return p[11];
+    }
+
     /**
      * 计算尺寸
      * 子类实现
@@ -386,8 +440,29 @@ class DisplayObject extends EventDispatcher {
         }
     }
 
+    $getMouseTarget(matrix, multiply) {
+        if (this.touchEnabled == false || this._visible == false)
+            return null;
+        matrix.save();
+        matrix.translate(-this.x, -this.y);
+        if (this.rotation)
+            matrix.rotate(-this.radian);
+        if (this.scaleX != 1 || this.scaleY != 1)
+            matrix.scale(1 / this.scaleX, 1 / this.scaleY);
+        var touchX = Math.floor(matrix.tx);
+        var touchY = Math.floor(matrix.ty);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        if (touchX >= 0 && touchY >= 0 && touchX < this.width && touchY < this.height) {
+            return this;
+        }
+        matrix.restore();
+        return null;
+    }
+
     $onFrameEnd() {
-        var p = this.__DisplayObject;
+        var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.alpha = this.$getConcatAlpha();
         }
