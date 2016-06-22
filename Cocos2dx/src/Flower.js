@@ -282,13 +282,11 @@ var _exports = {};
         }, {
             key: "scaleX",
             set: function set(val) {
-                console.log("set scaleX ," + val);
                 this.show.setScaleX(val);
             }
         }, {
             key: "scaleY",
             set: function set(val) {
-                console.log("set scaleY ," + val);
                 this.show.setScaleY(val);
             }
         }, {
