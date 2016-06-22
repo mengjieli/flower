@@ -31,10 +31,12 @@ class PlatformSprite {
     }
 
     set scaleX(val) {
+        console.log("set scaleX ," + val);
         this.show.setScaleX(val);
     }
 
     set scaleY(val) {
+        console.log("set scaleY ," + val);
         this.show.setScaleY(val);
     }
 

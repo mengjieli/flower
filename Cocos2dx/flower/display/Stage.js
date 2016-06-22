@@ -16,9 +16,12 @@ class Stage extends Sprite {
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
     __nativeMouseMoveEvent = [];
     __nativeTouchEvent = [];
+    __mouseOverList = [this];
+    __touchList = [];
 
     $addMouseMoveEvent(x, y) {
         this.__nativeMouseMoveEvent.push({x: x, y: y});
+        //flower.trace("mouseEvent",x,y);
     }
 
     $addTouchEvent(type, id, x, y) {
@@ -28,9 +31,8 @@ class Stage extends Sprite {
             x: x,
             y: y
         });
+        //flower.trace("touchEvent",type,id,x,y);
     }
-
-    __touchList = [];
 
     getMouseTarget(touchX, touchY, mutiply) {
         var matrix = Matrix.$matrix;
@@ -66,7 +68,8 @@ class Stage extends Sprite {
         }
         //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
         if (target) {
-            var event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
+            var event;
+            event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
             event.$touchId = id;
             event.$stageX = x;
             event.$stageY = y;
@@ -78,29 +81,56 @@ class Stage extends Sprite {
     }
 
     $onMouseMove(x, y) {
-        var mouse = {
-            mutiply: false,
-            startX: 0,
-            startY: 0,
-            moveX: 0,
-            moveY: 0,
-            target: null,
-            parents: []
-        };
-        mouse.startX = x;
-        mouse.startY = y;
-        mouse.mutiply = this.__touchList.length == 0 ? false : true;
-        this.__touchList.push(mouse);
-        var target = this.getMouseTarget(x, y, mouse.mutiply);
-        mouse.target = target;
+        var target = this.getMouseTarget(x, y, false);
         var parent = target.parent;
+        var list = [];
+        if (target) {
+            list.push(target);
+        }
         while (parent && parent != this) {
-            mouse.parents.push(parent);
+            list.push(parent);
             parent = parent.parent;
         }
-        //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
+        var event;
+        for (var i = 0; i < list.length; i++) {
+            var find = false;
+            for (var j = 0; j < this.__mouseOverList.length; j++) {
+                if (list[i] == this.__mouseOverList[j]) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER,false);
+                event.$stageX = x;
+                event.$stageY = y;
+                event.$target = target;
+                event.$touchX = list[i].lastTouchX;
+                event.$touchY = list[i].lastTouchY;
+                list[i].dispatch(event);
+            }
+        }
+        for (var j = 0; j < this.__mouseOverList.length; j++) {
+            var find = false;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i] == this.__mouseOverList[j]) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT,false);
+                event.$stageX = x;
+                event.$stageY = y;
+                event.$target = target;
+                event.$touchX = this.__mouseOverList[j].lastTouchX;
+                event.$touchY = this.__mouseOverList[j].lastTouchY;
+                this.__mouseOverList[j].dispatch(event);
+            }
+        }
+        this.__mouseOverList = list;
         if (target) {
-            var event = new flower.TouchEvent(flower.MouseEvent.MOUSE_MOVE);
+            event = new flower.MouseEvent(flower.MouseEvent.MOUSE_MOVE);
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
@@ -193,9 +223,6 @@ class Stage extends Sprite {
     $onFrameEnd() {
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
-        if (touchList.length) {
-            mouseMoveList.length = 0;
-        }
         while (touchList.length) {
             var touch = touchList.shift();
             if (touch.type == "begin") {

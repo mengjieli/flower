@@ -35,12 +35,19 @@ class Main {
 
     onLoadComplete(e) {
         var list = e.data;
-        console.log("纹理列表", list);
-        console.log(e.data[0].desc);
+        //flower.trace("纹理列表", list);
+        //flower.trace(e.data[0].desc);
 
-        var container = flower.Stage.getInstance();
+        var container = new flower.Sprite();
         container.width = 150;
         container.height = 200;
+        flower.Stage.getInstance().addChild(container);
+        container.addListener(flower.MouseEvent.MOUSE_OVER, function (e) {
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+        }, this);
+        container.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+        }, this);
 
         var bm = new flower.Bitmap();
         bm.x = bm.y = 100;
@@ -48,28 +55,34 @@ class Main {
         bm.texture = e.data[1];
         bm.rotation = 30;
         bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         bm.addListener(flower.TouchEvent.TOUCH_MOVE, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         bm.addListener(flower.TouchEvent.TOUCH_END, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         bm.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
-        bm.addListener(flower.MouseEvent.MOUSE_MOVE, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+        //bm.addListener(flower.MouseEvent.MOUSE_MOVE, function (e) {
+        //                 flower.trace(e.currentTarget.name,e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+        //}, this);
+        bm.addListener(flower.MouseEvent.MOUSE_OVER, function (e) {
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+        }, this);
+        bm.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         container.addChild(bm);
 
-        console.log(container.width, container.height);
+        flower.trace(container.width, container.height);
 
         setTimeout(function () {
             bm.texture = list[2];
             flower.trace(bm.scaleX, bm.scaleY);
-            console.log(container.width, container.height);
+            flower.trace(container.width, container.height);
         }, 1500);
 
         var qq = new flower.Bitmap();
@@ -77,17 +90,17 @@ class Main {
         qq.texture = e.data[2];
         container.addChild(qq);
         qq.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         qq.addListener(flower.TouchEvent.TOUCH_MOVE, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         qq.addListener(flower.TouchEvent.TOUCH_END, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         qq.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
-            console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
-        console.log(container.width, container.height);
+        flower.trace(container.width, container.height);
     }
 }

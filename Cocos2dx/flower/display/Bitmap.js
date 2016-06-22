@@ -37,6 +37,7 @@ class Bitmap extends DisplayObject {
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
+        flower.trace("BitmapSize",rect.width,rect.height);
     }
 
     $setScale9Grid(val) {

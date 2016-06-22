@@ -1,5 +1,7 @@
 class DisplayObject extends EventDispatcher {
 
+    static id = 0;
+
     __x = 0;
     __y = 0;
 
@@ -40,7 +42,7 @@ class DisplayObject extends EventDispatcher {
             2: 0, //rotation
             3: null, //settingWidth
             4: null, //settingHeight
-            5: "", //name
+            5: "instance" + DisplayObject.id++, //name
             6: new Rectangle(), //contentBounds 自身显示尺寸失效
             7: new Rectangle(), //bounds 在父类中的表现尺寸
             8: true, //touchEnabeld
@@ -56,7 +58,7 @@ class DisplayObject extends EventDispatcher {
      * @returns {boolean}
      */
     $hasFlags(flags) {
-        return this.__flags & flags == flags ? true : false;
+        return (this.__flags & flags) == flags ? true : false;
     }
 
     $addFlags(flags) {
@@ -285,6 +287,10 @@ class DisplayObject extends EventDispatcher {
             this.$measureContentBounds(rect);
             this.$measureChildrenBounds(rect);
             this.$removeFlags(0x0001);
+            if (rect.width == 0) {
+                this.$measureContentBounds(rect);
+                this.$measureChildrenBounds(rect);
+            }
             this.__checkSettingSize(rect);
         }
         return rect;
@@ -318,7 +324,7 @@ class DisplayObject extends EventDispatcher {
                 if (p[3] == 0) {
                     this.scaleX = 0;
                 } else {
-                    this.scaleX = Infinity;
+                    this.scaleX = 1;
                 }
             } else {
                 this.scaleX = p[3] / rect.width;
@@ -329,7 +335,7 @@ class DisplayObject extends EventDispatcher {
                 if (p[4] == 0) {
                     this.scaleY = 0;
                 } else {
-                    this.scaleY = Infinity;
+                    this.scaleY = 1;
                 }
             } else {
                 this.scaleY = p[4] / rect.height;
@@ -440,6 +446,15 @@ class DisplayObject extends EventDispatcher {
 
     get parent() {
         return this.__parent;
+    }
+
+    get stage() {
+        return this.__stage;
+    }
+
+    get name() {
+        var p = this.$DisplayObject;
+        return p[5];
     }
 
     get touchEnabled() {

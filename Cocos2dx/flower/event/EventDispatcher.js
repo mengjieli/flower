@@ -121,6 +121,9 @@ class EventDispatcher {
     }
 
     dispatch(event) {
+        if (!this.__EventDispatcher) {
+            return;
+        }
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
@@ -130,6 +133,7 @@ class EventDispatcher {
         if (!list) {
             return;
         }
+
         for (var i = 0, len = list.length; i < len; i++) {
             if (list[i].del == false) {
                 var listener = list[i].listener;

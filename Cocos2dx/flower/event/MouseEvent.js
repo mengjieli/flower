@@ -29,7 +29,9 @@ class MouseEvent extends Event {
      * 此事件是在没有 touch 的情况下发生的，即没有按下
      * @type {string}
      */
-    static MOUSE_MOVE = "move";
+    static MOUSE_MOVE = "mouse_move";
+    static MOUSE_OVER = "mouse_over";
+    static MOUSE_OUT = "mouse_out";
 }
 
 exports.MouseEvent = MouseEvent;

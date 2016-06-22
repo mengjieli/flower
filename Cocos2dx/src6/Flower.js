@@ -245,10 +245,12 @@ class PlatformSprite {
     }
 
     set scaleX(val) {
+        console.log("set scaleX ," + val);
         this.show.setScaleX(val);
     }
 
     set scaleY(val) {
+        console.log("set scaleY ," + val);
         this.show.setScaleY(val);
     }
 
@@ -463,7 +465,6 @@ class PlatformBitmap {
     }
 
     set rotation(val) {
-        console.log("rot?" + val);
         this.show.setRotation(val);
     }
 
@@ -553,7 +554,6 @@ class PlatformURLLoader {
                 PlatformURLLoader.isLoading = false;
             } else {
                 cc.loader.load(url, function () {
-                    //console.log("what?",arguments);
                 }, function (error, data) {
                     if (error) {
                         errorBack.call(thisObj);
@@ -873,6 +873,9 @@ class EventDispatcher {
     }
 
     dispatch(event) {
+        if (!this.__EventDispatcher) {
+            return;
+        }
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
@@ -882,6 +885,7 @@ class EventDispatcher {
         if (!list) {
             return;
         }
+
         for (var i = 0, len = list.length; i < len; i++) {
             if (list[i].del == false) {
                 var listener = list[i].listener;
@@ -1089,7 +1093,9 @@ class MouseEvent extends Event {
      * 此事件是在没有 touch 的情况下发生的，即没有按下
      * @type {string}
      */
-    static MOUSE_MOVE = "move";
+    static MOUSE_MOVE = "mouse_move";
+    static MOUSE_OVER = "mouse_over";
+    static MOUSE_OUT = "mouse_out";
 }
 
 exports.MouseEvent = MouseEvent;
@@ -1524,6 +1530,8 @@ function blendModeToNumber(val) {
 //////////////////////////File:flower/display/DisplayObject.js///////////////////////////
 class DisplayObject extends EventDispatcher {
 
+    static id = 0;
+
     __x = 0;
     __y = 0;
 
@@ -1564,7 +1572,7 @@ class DisplayObject extends EventDispatcher {
             2: 0, //rotation
             3: null, //settingWidth
             4: null, //settingHeight
-            5: "", //name
+            5: "instance" + DisplayObject.id++, //name
             6: new Rectangle(), //contentBounds 自身显示尺寸失效
             7: new Rectangle(), //bounds 在父类中的表现尺寸
             8: true, //touchEnabeld
@@ -1580,7 +1588,7 @@ class DisplayObject extends EventDispatcher {
      * @returns {boolean}
      */
     $hasFlags(flags) {
-        return this.__flags & flags == flags ? true : false;
+        return (this.__flags & flags) == flags ? true : false;
     }
 
     $addFlags(flags) {
@@ -1809,6 +1817,10 @@ class DisplayObject extends EventDispatcher {
             this.$measureContentBounds(rect);
             this.$measureChildrenBounds(rect);
             this.$removeFlags(0x0001);
+            if (rect.width == 0) {
+                this.$measureContentBounds(rect);
+                this.$measureChildrenBounds(rect);
+            }
             this.__checkSettingSize(rect);
         }
         return rect;
@@ -1842,7 +1854,7 @@ class DisplayObject extends EventDispatcher {
                 if (p[3] == 0) {
                     this.scaleX = 0;
                 } else {
-                    this.scaleX = Infinity;
+                    this.scaleX = 1;
                 }
             } else {
                 this.scaleX = p[3] / rect.width;
@@ -1853,7 +1865,7 @@ class DisplayObject extends EventDispatcher {
                 if (p[4] == 0) {
                     this.scaleY = 0;
                 } else {
-                    this.scaleY = Infinity;
+                    this.scaleY = 1;
                 }
             } else {
                 this.scaleY = p[4] / rect.height;
@@ -1964,6 +1976,15 @@ class DisplayObject extends EventDispatcher {
 
     get parent() {
         return this.__parent;
+    }
+
+    get stage() {
+        return this.__stage;
+    }
+
+    get name() {
+        var p = this.$DisplayObject;
+        return p[5];
     }
 
     get touchEnabled() {
@@ -2340,6 +2361,7 @@ class Bitmap extends DisplayObject {
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
+        flower.trace("BitmapSize",rect.width,rect.height);
     }
 
     $setScale9Grid(val) {
@@ -2393,9 +2415,12 @@ class Stage extends Sprite {
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
     __nativeMouseMoveEvent = [];
     __nativeTouchEvent = [];
+    __mouseOverList = [this];
+    __touchList = [];
 
     $addMouseMoveEvent(x, y) {
         this.__nativeMouseMoveEvent.push({x: x, y: y});
+        //flower.trace("mouseEvent",x,y);
     }
 
     $addTouchEvent(type, id, x, y) {
@@ -2405,9 +2430,8 @@ class Stage extends Sprite {
             x: x,
             y: y
         });
+        //flower.trace("touchEvent",type,id,x,y);
     }
-
-    __touchList = [];
 
     getMouseTarget(touchX, touchY, mutiply) {
         var matrix = Matrix.$matrix;
@@ -2443,7 +2467,8 @@ class Stage extends Sprite {
         }
         //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
         if (target) {
-            var event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
+            var event;
+            event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
             event.$touchId = id;
             event.$stageX = x;
             event.$stageY = y;
@@ -2455,29 +2480,56 @@ class Stage extends Sprite {
     }
 
     $onMouseMove(x, y) {
-        var mouse = {
-            mutiply: false,
-            startX: 0,
-            startY: 0,
-            moveX: 0,
-            moveY: 0,
-            target: null,
-            parents: []
-        };
-        mouse.startX = x;
-        mouse.startY = y;
-        mouse.mutiply = this.__touchList.length == 0 ? false : true;
-        this.__touchList.push(mouse);
-        var target = this.getMouseTarget(x, y, mouse.mutiply);
-        mouse.target = target;
+        var target = this.getMouseTarget(x, y, false);
         var parent = target.parent;
+        var list = [];
+        if (target) {
+            list.push(target);
+        }
         while (parent && parent != this) {
-            mouse.parents.push(parent);
+            list.push(parent);
             parent = parent.parent;
         }
-        //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
+        var event;
+        for (var i = 0; i < list.length; i++) {
+            var find = false;
+            for (var j = 0; j < this.__mouseOverList.length; j++) {
+                if (list[i] == this.__mouseOverList[j]) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER,false);
+                event.$stageX = x;
+                event.$stageY = y;
+                event.$target = target;
+                event.$touchX = list[i].lastTouchX;
+                event.$touchY = list[i].lastTouchY;
+                list[i].dispatch(event);
+            }
+        }
+        for (var j = 0; j < this.__mouseOverList.length; j++) {
+            var find = false;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i] == this.__mouseOverList[j]) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT,false);
+                event.$stageX = x;
+                event.$stageY = y;
+                event.$target = target;
+                event.$touchX = this.__mouseOverList[j].lastTouchX;
+                event.$touchY = this.__mouseOverList[j].lastTouchY;
+                this.__mouseOverList[j].dispatch(event);
+            }
+        }
+        this.__mouseOverList = list;
         if (target) {
-            var event = new flower.TouchEvent(flower.MouseEvent.MOUSE_MOVE);
+            event = new flower.MouseEvent(flower.MouseEvent.MOUSE_MOVE);
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
@@ -2570,9 +2622,6 @@ class Stage extends Sprite {
     $onFrameEnd() {
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
-        if (touchList.length) {
-            mouseMoveList.length = 0;
-        }
         while (touchList.length) {
             var touch = touchList.shift();
             if (touch.type == "begin") {

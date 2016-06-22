@@ -164,7 +164,6 @@ class PlatformBitmap {
     }
 
     set rotation(val) {
-        console.log("rot?" + val);
         this.show.setRotation(val);
     }
 

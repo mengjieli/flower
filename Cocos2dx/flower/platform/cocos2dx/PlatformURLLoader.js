@@ -36,7 +36,6 @@ class PlatformURLLoader {
                 PlatformURLLoader.isLoading = false;
             } else {
                 cc.loader.load(url, function () {
-                    //console.log("what?",arguments);
                 }, function (error, data) {
                     if (error) {
                         errorBack.call(thisObj);
