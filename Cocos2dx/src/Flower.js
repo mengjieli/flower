@@ -137,20 +137,27 @@ var _exports = {};
                             onTouchMoved: this.onTouchesMoved.bind(this),
                             onTouchEnded: this.onTouchesEnded.bind(this)
                         }, this);
+                        cc.eventManager.addListener({
+                            event: cc.EventListener.MOUSE,
+                            onMouseMove: this.onMouseMove.bind(this)
+                        }, this);
                     },
                     update: function update(dt) {
                         trace("dt", dt);
                     },
+                    onMouseMove: function onMouseMove(e) {
+                        engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
+                    },
                     onTouchesBegan: function onTouchesBegan(touch) {
-                        engine.onMouseDown(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                        engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                         return true;
                     },
                     onTouchesMoved: function onTouchesMoved(touch) {
-                        engine.onMouseMove(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                        engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                         return true;
                     },
                     onTouchesEnded: function onTouchesEnded(touch) {
-                        engine.onMouseUp(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                        engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                         return true;
                     }
                 });
@@ -1112,8 +1119,47 @@ var _exports = {};
 
             _classCallCheck(this, TouchEvent);
 
-            return _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+
+            _this.$touchId = 0;
+            _this.$touchX = 0;
+            _this.$touchY = 0;
+            _this.$stageX = 0;
+            _this.$stageY = 0;
+            return _this;
         }
+
+        _createClass(TouchEvent, [{
+            key: "touchId",
+            get: function get() {
+                return this.$touchId;
+            }
+        }, {
+            key: "touchX",
+            get: function get() {
+                return this.$touchX;
+            }
+        }, {
+            key: "touchY",
+            get: function get() {
+                return this.$touchY;
+            }
+        }, {
+            key: "stageX",
+            get: function get() {
+                return this.$stageX;
+            }
+        }, {
+            key: "stageY",
+            get: function get() {
+                return this.$stageY;
+            }
+            /**
+             * 此事件是在没有 touch 的情况下发生的，即没有按下
+             * @type {string}
+             */
+
+        }]);
 
         return TouchEvent;
     }(Event);
@@ -1122,15 +1168,66 @@ var _exports = {};
     TouchEvent.TOUCH_MOVE = "touch_move";
     TouchEvent.TOUCH_END = "touch_end";
     TouchEvent.TOUCH_RELEASE = "touch_release";
+    TouchEvent.MOVE = "move";
 
 
     _exports.TouchEvent = TouchEvent;
     //////////////////////////End File:flower/event/TouchEvent.js///////////////////////////
 
+    //////////////////////////File:flower/event/MouseEvent.js///////////////////////////
+
+    var MouseEvent = function (_Event2) {
+        _inherits(MouseEvent, _Event2);
+
+        function MouseEvent(type) {
+            var bubbles = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            _classCallCheck(this, MouseEvent);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(MouseEvent).call(this, type, bubbles));
+        }
+
+        _createClass(MouseEvent, [{
+            key: "touchX",
+            get: function get() {
+                return this.$touchX;
+            }
+        }, {
+            key: "touchY",
+            get: function get() {
+                return this.$touchY;
+            }
+        }, {
+            key: "stageX",
+            get: function get() {
+                return this.$stageX;
+            }
+        }, {
+            key: "stageY",
+            get: function get() {
+                return this.$stageY;
+            }
+
+            /**
+             * 此事件是在没有 touch 的情况下发生的，即没有按下
+             * @type {string}
+             */
+
+        }]);
+
+        return MouseEvent;
+    }(Event);
+
+    MouseEvent.MOUSE_MOVE = "move";
+
+
+    _exports.MouseEvent = MouseEvent;
+    //////////////////////////End File:flower/event/MouseEvent.js///////////////////////////
+
     //////////////////////////File:flower/event/IOErrorEvent.js///////////////////////////
 
-    var IOErrorEvent = function (_Event2) {
-        _inherits(IOErrorEvent, _Event2);
+    var IOErrorEvent = function (_Event3) {
+        _inherits(IOErrorEvent, _Event3);
 
         function IOErrorEvent(type, message) {
             _classCallCheck(this, IOErrorEvent);
@@ -1276,6 +1373,12 @@ var _exports = {};
                 matrix._storeList.length = 0;
                 flower.Matrix.matrixPool.push(matrix);
             }
+
+            /**
+             * 创建出来的矩阵可能不是规范矩阵
+             * @returns {flower.Matrix}
+             */
+
         }, {
             key: "create",
             value: function create() {
@@ -1607,36 +1710,38 @@ var _exports = {};
 
         /**
          * 脏标识
-         * 0x0001 size 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+         * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
          * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
+         * 0x0004 bounds 在父类中的尺寸失效
          * 0x0100 重排子对象顺序
          */
 
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this3.__x = 0;
-            _this3.__y = 0;
-            _this3.__flags = 0;
-            _this3.__alpha = 1;
-            _this3.__concatAlpha = 1;
+            _this4.__x = 0;
+            _this4.__y = 0;
+            _this4.__flags = 0;
+            _this4.__alpha = 1;
+            _this4.__concatAlpha = 1;
 
-            _this3.$DisplayObject = {
+            _this4.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
                 3: null, //settingWidth
                 4: null, //settingHeight
                 5: "", //name
-                6: new Size(), //size 自身尺寸
-                7: true, //touchEnabeld
-                8: true, //multiplyTouchEnabled
+                6: new Rectangle(), //contentBounds 自身显示尺寸失效
+                7: new Rectangle(), //bounds 在父类中的表现尺寸
+                8: true, //touchEnabeld
+                9: true, //multiplyTouchEnabled
                 10: 0, //lastTouchX
                 11: 0 //lastTouchY
             };
-            return _this3;
+            return _this4;
         }
 
         /**
@@ -1718,7 +1823,7 @@ var _exports = {};
                 }
                 this.__x = val;
                 this.$nativeShow.x = val;
-                this.$invalidPositionScale();
+                this.$invalidatePosition();
             }
         }, {
             key: "$setY",
@@ -1729,7 +1834,7 @@ var _exports = {};
                 }
                 this.__y = val;
                 this.$nativeShow.y = val;
-                this.$invalidPositionScale();
+                this.$invalidatePosition();
             }
         }, {
             key: "$setScaleX",
@@ -1741,14 +1846,14 @@ var _exports = {};
                 }
                 p[0] = val;
                 this.$nativeShow.scaleX = val;
-                this.$invalidPositionScale();
+                this.$invalidatePosition();
             }
         }, {
             key: "$getScaleX",
             value: function $getScaleX() {
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-                    this.$getSize();
+                    this.$getContentBounds();
                 }
                 return p[0];
             }
@@ -1762,14 +1867,14 @@ var _exports = {};
                 }
                 p[1] = val;
                 this.$nativeShow.scaleY = val;
-                this.$invalidPositionScale();
+                this.$invalidatePosition();
             }
         }, {
             key: "$getScaleY",
             value: function $getScaleY() {
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-                    this.$getSize();
+                    this.$getContentBounds();
                 }
                 return p[1];
             }
@@ -1783,7 +1888,7 @@ var _exports = {};
                 }
                 p[2] = val;
                 this.$nativeShow.rotation = val;
-                this.$invalidPositionScale();
+                this.$invalidatePosition();
             }
         }, {
             key: "$setAlpha",
@@ -1823,13 +1928,13 @@ var _exports = {};
                     return;
                 }
                 p[3] = val;
-                this.invalidSize();
+                this.$invalidatePosition();
             }
         }, {
             key: "$getWidth",
             value: function $getWidth() {
                 var p = this.$DisplayObject;
-                return p[3] != null ? p[3] : this.$getSize().width;
+                return p[3] != null ? p[3] : this.$getContentBounds().width;
             }
         }, {
             key: "$setHeight",
@@ -1841,39 +1946,81 @@ var _exports = {};
                     return;
                 }
                 p[4] = val;
-                this.invalidSize();
+                this.$invalidatePosition();
             }
         }, {
             key: "$getHeight",
             value: function $getHeight() {
                 var p = this.$DisplayObject;
-                return p[4] != null ? p[4] : this.$getSize().height;
+                return p[4] != null ? p[4] : this.$getContentBounds().height;
             }
         }, {
-            key: "$getSize",
-            value: function $getSize() {
-                var size = this.$DisplayObject[6];
-                if (this.$hasFlags(0x0001)) {
-                    this.calculateSize(size);
-                    this.__checkSettingSize(size);
-                    this.$removeFlags(0x0001);
+            key: "$getBounds",
+            value: function $getBounds() {
+                var rect = this.$DisplayObject[7];
+                if (this.$hasFlags(0x0004)) {
+                    var contentRect = this.$getContentBounds();
+                    var x = this.x;
+                    var y = this.y;
+                    var scaleX = this.scaleX;
+                    var scaleY = this.scaleY;
+                    var rotation = this.radian;
+                    var list = [[contentRect.x, contentRect.y], [contentRect.x + contentRect.width, contentRect.y], [contentRect.x, contentRect.y + contentRect.height], [contentRect.x + contentRect.width, contentRect.y + contentRect.height]];
+                    var matrix = Matrix.create();
+                    var minX;
+                    var maxX;
+                    var minY;
+                    var maxY;
+                    for (var i = 0; i < list.length; i++) {
+                        matrix.identity();
+                        matrix.tx = list[i][0];
+                        matrix.ty = list[i][1];
+                        matrix.scale(scaleX, scaleY);
+                        matrix.rotate(rotation);
+                        matrix.translate(x, y);
+                        if (i == 0) {
+                            minX = maxX = matrix.tx;
+                            minY = maxY = matrix.ty;
+                        } else {
+                            if (matrix.tx < minX) {
+                                minX = matrix.tx;
+                            }
+                            if (matrix.ty < minY) {
+                                minY = matrix.ty;
+                            }
+                            if (matrix.tx > maxX) {
+                                maxX = matrix.tx;
+                            }
+                            if (matrix.ty > maxY) {
+                                maxY = matrix.ty;
+                            }
+                        }
+                    }
+                    Matrix.release(matrix);
+                    rect.x = minX;
+                    rect.y = minY;
+                    rect.width = maxX - minX;
+                    rect.height = maxY - minY;
+                    this.$removeFlags(0x0004);
                 }
-                return size;
+                return rect;
+            }
+        }, {
+            key: "$getContentBounds",
+            value: function $getContentBounds() {
+                var rect = this.$DisplayObject[6];
+                if (this.$hasFlags(0x0001)) {
+                    this.$measureContentBounds(rect);
+                    this.$measureChildrenBounds(rect);
+                    this.$removeFlags(0x0001);
+                    this.__checkSettingSize(rect);
+                }
+                return rect;
             }
         }, {
             key: "$setTouchEnabled",
             value: function $setTouchEnabled(val) {
                 var p = this.$DisplayObject;
-                if (p[7] == val) {
-                    return false;
-                }
-                p[7] = val;
-                return true;
-            }
-        }, {
-            key: "$setMultiplyTouchEnabled",
-            value: function $setMultiplyTouchEnabled(val) {
-                varp = this.$DisplayObject;
                 if (p[8] == val) {
                     return false;
                 }
@@ -1881,34 +2028,42 @@ var _exports = {};
                 return true;
             }
         }, {
+            key: "$setMultiplyTouchEnabled",
+            value: function $setMultiplyTouchEnabled(val) {
+                varp = this.$DisplayObject;
+                if (p[9] == val) {
+                    return false;
+                }
+                p[9] = val;
+                return true;
+            }
+        }, {
             key: "__checkSettingSize",
-            value: function __checkSettingSize(size) {
+            value: function __checkSettingSize(rect) {
                 var p = this.$DisplayObject;
                 /**
                  * 尺寸失效， 并且约定过 宽 或者 高
                  */
-                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-                    if (p[3] != null) {
-                        if (size.width == 0) {
-                            if (p[3] == 0) {
-                                this.scaleX = 0;
-                            } else {
-                                this.scaleX = Infinity;
-                            }
+                if (p[3] != null) {
+                    if (rect.width == 0) {
+                        if (p[3] == 0) {
+                            this.scaleX = 0;
                         } else {
-                            this.scaleX = p[3] / size.width;
+                            this.scaleX = Infinity;
                         }
+                    } else {
+                        this.scaleX = p[3] / rect.width;
                     }
-                    if (p[4]) {
-                        if (size.height == 0) {
-                            if (p[4] == 0) {
-                                this.scaleY = 0;
-                            } else {
-                                this.scaleY = Infinity;
-                            }
+                }
+                if (p[4]) {
+                    if (rect.height == 0) {
+                        if (p[4] == 0) {
+                            this.scaleY = 0;
                         } else {
-                            this.scaleY = p[4] / size.height;
+                            this.scaleY = Infinity;
                         }
+                    } else {
+                        this.scaleY = p[4] / rect.height;
                     }
                 }
             }
@@ -1947,28 +2102,52 @@ var _exports = {};
                 }
             }
         }, {
-            key: "calculateSize",
+            key: "$measureContentBounds",
 
 
             /**
-             * 计算尺寸
+             * 计算自身尺寸
              * 子类实现
              * @param size
              */
-            value: function calculateSize(size) {}
+            value: function $measureContentBounds(rect) {}
+
+            /**
+             * 测量子对象的尺寸
+             * @param size
+             */
+
+        }, {
+            key: "$measureChildrenBounds",
+            value: function $measureChildrenBounds(rect) {}
+
+            /**
+             * 计算自身在父类中的尺寸
+             * @param rect
+             */
+
+        }, {
+            key: "$measureBounds",
+            value: function $measureBounds(rect) {}
 
             /**
              * 本身尺寸失效
              */
 
         }, {
-            key: "invalidSize",
-            value: function invalidSize() {
-                this.$addFlagsUp(0x0001);
+            key: "$invalidateContentBounds",
+            value: function $invalidateContentBounds() {
+                this.$addFlagsUp(0x0001 | 0x0004);
             }
+
+            /**
+             * 位置失效
+             */
+
         }, {
-            key: "$invalidPositionScale",
-            value: function $invalidPositionScale() {
+            key: "$invalidatePosition",
+            value: function $invalidatePosition() {
+                this.$addFlagsUp(0x0004);
                 if (this.__parent) {
                     this.__parent.$addFlagsUp(0x0001);
                 }
@@ -1986,7 +2165,8 @@ var _exports = {};
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
-                if (touchX >= 0 && touchY >= 0 && touchX < this.width && touchY < this.height) {
+                var bounds = this.$getContentBounds();
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.width && touchY < bounds.height) {
                     return this;
                 }
                 matrix.restore();
@@ -2000,7 +2180,7 @@ var _exports = {};
                     this.$nativeShow.alpha = this.$getConcatAlpha();
                 }
                 if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-                    this.$getSize();
+                    this.$getContentBounds();
                 }
             }
         }, {
@@ -2092,7 +2272,7 @@ var _exports = {};
             key: "touchEnabled",
             get: function get() {
                 var p = this.$DisplayObject;
-                return p[7];
+                return p[8];
             },
             set: function set(val) {
                 this.$setTouchEnabeld(val);
@@ -2101,7 +2281,7 @@ var _exports = {};
             key: "multiplyTouchEnabled",
             get: function get() {
                 var p = this.$DisplayObject;
-                return p[8];
+                return p[9];
             },
             set: function set(val) {
                 this.$setMultiplyTouchEnabled(val);
@@ -2133,11 +2313,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this4.__children = [];
-            _this4.$nativeShow = Platform.create("Sprite");
-            return _this4;
+            _this5.__children = [];
+            _this5.$nativeShow = Platform.create("Sprite");
+            return _this5;
         }
 
         _createClass(Sprite, [{
@@ -2187,7 +2367,7 @@ var _exports = {};
                     child.$setParent(this, this.stage);
                     if (child.parent == this) {
                         child.$dispatchAddedToStageEvent();
-                        this.invalidSize();
+                        this.$invalidateContentBounds();
                         this.$addFlags(0x0100);
                     }
                 }
@@ -2200,7 +2380,7 @@ var _exports = {};
                     if (children[i] == child) {
                         this.$nativeShow.removeChild(child.$nativeShow);
                         children.splice(i, 1);
-                        this.invalidSize();
+                        this.$invalidateContentBounds();
                         this.$addFlags(0x0100);
                         break;
                     }
@@ -2216,7 +2396,7 @@ var _exports = {};
                         children.splice(i, 1);
                         child.$setParent(null, null);
                         child.$dispatchRemovedFromStageEvent();
-                        this.invalidSize();
+                        this.$invalidateContentBounds();
                         this.$addFlags(0x0100);
                         break;
                     }
@@ -2253,6 +2433,47 @@ var _exports = {};
                     }
                 }
                 return -1;
+            }
+
+            /**
+             * 测量子对象的区域
+             * @param rect
+             */
+
+        }, {
+            key: "$measureChildrenBounds",
+            value: function $measureChildrenBounds(rect) {
+                var minX = 0;
+                var minY = 0;
+                var maxX = 0;
+                var maxY = 0;
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    var bounds = children[i].$getBounds();
+                    if (i == 0) {
+                        minX = bounds.x;
+                        minY = bounds.y;
+                        maxX = bounds.x + bounds.width;
+                        maxY = bounds.y + bounds.height;
+                    } else {
+                        if (bounds.x < minX) {
+                            minX = bounds.x;
+                        }
+                        if (bounds.y < minY) {
+                            minY = bounds.y;
+                        }
+                        if (bounds.x + bounds.width > maxX) {
+                            maxX = bounds.x + bounds.width;
+                        }
+                        if (bounds.y + bounds.height > maxY) {
+                            maxY = bounds.y + bounds.height;
+                        }
+                    }
+                }
+                rect.x = minX;
+                rect.y = minX;
+                rect.width = maxX - minX;
+                rect.height = maxY - minY;
             }
         }, {
             key: "$getMouseTarget",
@@ -2332,11 +2553,11 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this5.$nativeShow = Platform.create("Bitmap");
-            _this5.texture = texture;
-            return _this5;
+            _this6.$nativeShow = Platform.create("Bitmap");
+            _this6.texture = texture;
+            return _this6;
         }
 
         _createClass(Bitmap, [{
@@ -2355,18 +2576,19 @@ var _exports = {};
                 } else {
                     this.$nativeShow.setTexture(Texture.$blank);
                 }
-                this.invalidSize();
+                this.$invalidateContentBounds();
                 return true;
             }
         }, {
-            key: "calculateSize",
-            value: function calculateSize(size) {
+            key: "$measureContentBounds",
+            value: function $measureContentBounds(rect) {
                 if (this.__texture) {
-                    size.width = this.__texture.width;
-                    size.height = this.__texture.height;
+                    rect.x = this.__texture.offX;
+                    rect.y = this.__texture.offY;
+                    rect.width = this.__texture.width;
+                    rect.height = this.__texture.height;
                 } else {
-                    size.width = 0;
-                    size.height = 0;
+                    rect.x = rect.y = rect.width = rect.height = 0;
                 }
             }
         }, {
@@ -2411,16 +2633,33 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this6.__touchList = [];
+            _this7.__nativeMouseMoveEvent = [];
+            _this7.__nativeTouchEvent = [];
+            _this7.__touchList = [];
 
-            _this6.__stage = _this6;
-            Stage.stages.push(_this6);
-            return _this6;
+            _this7.__stage = _this7;
+            Stage.stages.push(_this7);
+            return _this7;
         }
 
         _createClass(Stage, [{
+            key: "$addMouseMoveEvent",
+            value: function $addMouseMoveEvent(x, y) {
+                this.__nativeMouseMoveEvent.push({ x: x, y: y });
+            }
+        }, {
+            key: "$addTouchEvent",
+            value: function $addTouchEvent(type, id, x, y) {
+                this.__nativeTouchEvent.push({
+                    type: type,
+                    id: id,
+                    x: x,
+                    y: y
+                });
+            }
+        }, {
             key: "getMouseTarget",
             value: function getMouseTarget(touchX, touchY, mutiply) {
                 var matrix = Matrix.$matrix;
@@ -2431,8 +2670,8 @@ var _exports = {};
                 return target;
             }
         }, {
-            key: "onMouseDown",
-            value: function onMouseDown(id, x, y) {
+            key: "$onTouchBegin",
+            value: function $onTouchBegin(id, x, y) {
                 var mouse = {
                     id: 0,
                     mutiply: false,
@@ -2458,17 +2697,52 @@ var _exports = {};
                 //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
                 if (target) {
                     var event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
-                    event.stageX = x;
-                    event.stageY = y;
+                    event.$touchId = id;
+                    event.$stageX = x;
+                    event.$stageY = y;
                     event.$target = target;
-                    event.touchX = target.lastTouchX;
-                    event.touchY = target.lastTouchY;
+                    event.$touchX = target.lastTouchX;
+                    event.$touchY = target.lastTouchY;
                     target.dispatch(event);
                 }
             }
         }, {
-            key: "onMouseMove",
-            value: function onMouseMove(id, x, y) {
+            key: "$onMouseMove",
+            value: function $onMouseMove(x, y) {
+                var mouse = {
+                    mutiply: false,
+                    startX: 0,
+                    startY: 0,
+                    moveX: 0,
+                    moveY: 0,
+                    target: null,
+                    parents: []
+                };
+                mouse.startX = x;
+                mouse.startY = y;
+                mouse.mutiply = this.__touchList.length == 0 ? false : true;
+                this.__touchList.push(mouse);
+                var target = this.getMouseTarget(x, y, mouse.mutiply);
+                mouse.target = target;
+                var parent = target.parent;
+                while (parent && parent != this) {
+                    mouse.parents.push(parent);
+                    parent = parent.parent;
+                }
+                //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
+                if (target) {
+                    var event = new flower.TouchEvent(flower.MouseEvent.MOUSE_MOVE);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = target.lastTouchX;
+                    event.$touchY = target.lastTouchY;
+                    target.dispatch(event);
+                }
+            }
+        }, {
+            key: "$onTouchMove",
+            value: function $onTouchMove(id, x, y) {
                 var mouse;
                 for (var i = 0; i < this.__touchList.length; i++) {
                     if (this.__touchList[i].id == id) {
@@ -2495,17 +2769,18 @@ var _exports = {};
                 var event;
                 if (target) {
                     event = new flower.TouchEvent(flower.TouchEvent.TOUCH_MOVE);
-                    event.stageX = x;
-                    event.stageY = y;
+                    event.$touchId = id;
+                    event.$stageX = x;
+                    event.$stageY = y;
                     event.$target = target;
-                    event.touchX = target.lastTouchX;
-                    event.touchY = target.lastTouchY;
+                    event.$touchX = target.lastTouchX;
+                    event.$touchY = target.lastTouchY;
                     target.dispatch(event);
                 }
             }
         }, {
-            key: "onMouseUp",
-            value: function onMouseUp(id, x, y) {
+            key: "$onTouchEnd",
+            value: function $onTouchEnd(id, x, y) {
                 var mouse;
                 for (var i = 0; i < this.__touchList.length; i++) {
                     if (this.__touchList[i].id == id) {
@@ -2526,26 +2801,53 @@ var _exports = {};
                 var event;
                 if (target == mouse.target) {
                     event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);
-                    event.stageX = x;
-                    event.stageY = y;
+                    event.$touchId = id;
+                    event.$stageX = x;
+                    event.$stageY = y;
                     event.$target = target;
-                    event.touchX = target.lastTouchX;
-                    event.touchY = target.lastTouchY;
+                    event.$touchX = target.lastTouchX;
+                    event.$touchY = target.lastTouchY;
                     target.dispatch(event);
                 } else {
                     target = mouse.target;
                     event = new flower.TouchEvent(flower.TouchEvent.TOUCH_RELEASE);
-                    event.stageX = x;
-                    event.stageY = y;
+                    event.$touchId = id;
+                    event.$stageX = x;
+                    event.$stageY = y;
                     event.$target = target;
-                    event.touchX = target.lastTouchX;
-                    event.touchY = target.lastTouchY;
+                    event.$touchX = target.lastTouchX;
+                    event.$touchY = target.lastTouchY;
                     target.dispatch(event);
                 }
             }
 
             ///////////////////////////////////////触摸事件处理///////////////////////////////////////
 
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                var touchList = this.__nativeTouchEvent;
+                var mouseMoveList = this.__nativeMouseMoveEvent;
+                if (touchList.length) {
+                    mouseMoveList.length = 0;
+                }
+                while (touchList.length) {
+                    var touch = touchList.shift();
+                    if (touch.type == "begin") {
+                        this.$onTouchBegin(touch.id, touch.x, touch.y);
+                    } else if (touch.type == "move") {
+                        this.$onTouchMove(touch.id, touch.x, touch.y);
+                    } else if (touch.type == "end") {
+                        this.$onTouchEnd(touch.id, touch.x, touch.y);
+                    }
+                }
+                if (mouseMoveList.length) {
+                    var moveInfo = mouseMoveList[mouseMoveList.length - 1];
+                    this.$onMouseMove(moveInfo.x, moveInfo.y);
+                }
+                mouseMoveList.length = 0;
+                _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
+            }
         }, {
             key: "stageWidth",
             get: function get() {
@@ -2809,26 +3111,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this7._createRes = false;
-            _this7._isLoading = false;
-            _this7._selfDispose = false;
+            _this8._createRes = false;
+            _this8._isLoading = false;
+            _this8._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this7._createRes = true;
+                    _this8._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this7._res = res;
-            _this7._type = _this7._res.type;
-            _this7._language = LANGUAGE;
-            _this7._scale = SCALE ? SCALE : null;
-            return _this7;
+            _this8._res = res;
+            _this8._type = _this8._res.type;
+            _this8._language = LANGUAGE;
+            _this8._scale = SCALE ? SCALE : null;
+            return _this8;
         }
 
         _createClass(URLLoader, [{
@@ -3041,12 +3343,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this8.__list = list;
-            _this8.__dataList = [];
-            _this8.__index = 0;
-            return _this8;
+            _this9.__list = list;
+            _this9.__dataList = [];
+            _this9.__index = 0;
+            return _this9;
         }
 
         _createClass(URLLoaderList, [{

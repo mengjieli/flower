@@ -109,6 +109,10 @@ class Matrix {
         flower.Matrix.matrixPool.push(matrix);
     }
 
+    /**
+     * 创建出来的矩阵可能不是规范矩阵
+     * @returns {flower.Matrix}
+     */
     static create() {
         var matrix = flower.Matrix.matrixPool.pop();
         if (!matrix) {

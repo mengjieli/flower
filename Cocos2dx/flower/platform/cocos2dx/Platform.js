@@ -20,20 +20,27 @@ class Platform {
                     onTouchMoved: this.onTouchesMoved.bind(this),
                     onTouchEnded: this.onTouchesEnded.bind(this)
                 }, this);
+                cc.eventManager.addListener({
+                    event: cc.EventListener.MOUSE,
+                    onMouseMove: this.onMouseMove.bind(this)
+                }, this);
             },
             update: function (dt) {
                 trace("dt", dt);
             },
+            onMouseMove: function (e) {
+                engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
+            },
             onTouchesBegan: function (touch) {
-                engine.onMouseDown(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("begin",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesMoved: function (touch) {
-                engine.onMouseMove(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("move",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesEnded: function (touch) {
-                engine.onMouseUp(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("end",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
         });

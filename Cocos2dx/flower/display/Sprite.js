@@ -50,7 +50,7 @@ class Sprite extends DisplayObject {
             child.$setParent(this, this.stage);
             if (child.parent == this) {
                 child.$dispatchAddedToStageEvent();
-                this.invalidSize();
+                this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
             }
         }
@@ -62,7 +62,7 @@ class Sprite extends DisplayObject {
             if (children[i] == child) {
                 this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
-                this.invalidSize();
+                this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
                 break;
             }
@@ -77,7 +77,7 @@ class Sprite extends DisplayObject {
                 children.splice(i, 1);
                 child.$setParent(null, null);
                 child.$dispatchRemovedFromStageEvent();
-                this.invalidSize();
+                this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
                 break;
             }
@@ -111,6 +111,44 @@ class Sprite extends DisplayObject {
             }
         }
         return -1;
+    }
+
+    /**
+     * 测量子对象的区域
+     * @param rect
+     */
+    $measureChildrenBounds(rect) {
+        var minX = 0;
+        var minY = 0;
+        var maxX = 0;
+        var maxY = 0;
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            var bounds = children[i].$getBounds();
+            if (i == 0) {
+                minX = bounds.x;
+                minY = bounds.y;
+                maxX = bounds.x + bounds.width;
+                maxY = bounds.y + bounds.height;
+            } else {
+                if (bounds.x < minX) {
+                    minX = bounds.x;
+                }
+                if (bounds.y < minY) {
+                    minY = bounds.y;
+                }
+                if (bounds.x + bounds.width > maxX) {
+                    maxX = bounds.x + bounds.width;
+                }
+                if (bounds.y + bounds.height > maxY) {
+                    maxY = bounds.y + bounds.height;
+                }
+            }
+        }
+        rect.x = minX;
+        rect.y = minX;
+        rect.width = maxX - minX;
+        rect.height = maxY - minY;
     }
 
     $getMouseTarget(matrix, multiply) {

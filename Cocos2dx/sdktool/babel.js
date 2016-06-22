@@ -178,6 +178,7 @@ var list = [
     "EventDispatcher",
     "Event",
     "TouchEvent",
+    "MouseEvent",
     "IOErrorEvent",
 
     "Matrix",

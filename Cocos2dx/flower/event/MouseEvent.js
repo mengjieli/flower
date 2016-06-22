@@ -1,17 +1,12 @@
-class TouchEvent extends Event {
+class MouseEvent extends Event {
 
-    $touchId = 0;
-    $touchX = 0;
-    $touchY = 0;
-    $stageX = 0;
-    $stageY = 0;
+    $touchX;
+    $touchY;
+    $stageX;
+    $stageY;
 
     constructor(type, bubbles = true) {
         super(type, bubbles);
-    }
-
-    get touchId() {
-        return this.$touchId;
     }
 
     get touchX() {
@@ -30,15 +25,11 @@ class TouchEvent extends Event {
         return this.$stageY;
     }
 
-    static TOUCH_BEGIN = "touch_begin";
-    static TOUCH_MOVE = "touch_move";
-    static TOUCH_END = "touch_end";
-    static TOUCH_RELEASE = "touch_release";
     /**
      * 此事件是在没有 touch 的情况下发生的，即没有按下
      * @type {string}
      */
-    static MOVE = "move";
+    static MOUSE_MOVE = "move";
 }
 
-exports.TouchEvent = TouchEvent;
+exports.MouseEvent = MouseEvent;

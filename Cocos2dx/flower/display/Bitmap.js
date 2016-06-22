@@ -24,17 +24,18 @@ class Bitmap extends DisplayObject {
         else {
             this.$nativeShow.setTexture(Texture.$blank);
         }
-        this.invalidSize();
+        this.$invalidateContentBounds();
         return true;
     }
 
-    calculateSize(size) {
+    $measureContentBounds(rect) {
         if (this.__texture) {
-            size.width = this.__texture.width;
-            size.height = this.__texture.height;
+            rect.x = this.__texture.offX;
+            rect.y = this.__texture.offY;
+            rect.width = this.__texture.width;
+            rect.height = this.__texture.height;
         } else {
-            size.width = 0;
-            size.height = 0;
+            rect.x = rect.y = rect.width = rect.height = 0;
         }
     }
 

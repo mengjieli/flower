@@ -49,6 +49,9 @@ var Main = function () {
             console.log(e.data[0]);
 
             var container = flower.Stage.getInstance();
+            container.width = 150;
+            container.height = 200;
+
             var bm = new flower.Bitmap();
             bm.x = bm.y = 100;
             bm.scaleX = bm.scaleY = 2;
@@ -66,11 +69,17 @@ var Main = function () {
             bm.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
                 console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
+            bm.addListener(flower.MouseEvent.MOUSE_MOVE, function (e) {
+                console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            }, this);
             container.addChild(bm);
+
+            console.log(container.width, container.height);
 
             setTimeout(function () {
                 bm.texture = list[2];
                 flower.trace(bm.scaleX, bm.scaleY);
+                console.log(container.width, container.height);
             }, 1500);
 
             var qq = new flower.Bitmap();
@@ -89,6 +98,7 @@ var Main = function () {
             qq.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
                 console.log(e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
+            console.log(container.width, container.height);
         }
     }]);
 

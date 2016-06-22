@@ -14,6 +14,22 @@ class Stage extends Sprite {
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+    __nativeMouseMoveEvent = [];
+    __nativeTouchEvent = [];
+
+    $addMouseMoveEvent(x, y) {
+        this.__nativeMouseMoveEvent.push({x: x, y: y});
+    }
+
+    $addTouchEvent(type, id, x, y) {
+        this.__nativeTouchEvent.push({
+            type: type,
+            id: id,
+            x: x,
+            y: y
+        });
+    }
+
     __touchList = [];
 
     getMouseTarget(touchX, touchY, mutiply) {
@@ -25,7 +41,7 @@ class Stage extends Sprite {
         return target;
     }
 
-    onMouseDown(id, x, y) {
+    $onTouchBegin(id, x, y) {
         var mouse = {
             id: 0,
             mutiply: false,
@@ -51,16 +67,50 @@ class Stage extends Sprite {
         //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
         if (target) {
             var event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
     }
 
-    onMouseMove(id, x, y) {
+    $onMouseMove(x, y) {
+        var mouse = {
+            mutiply: false,
+            startX: 0,
+            startY: 0,
+            moveX: 0,
+            moveY: 0,
+            target: null,
+            parents: []
+        };
+        mouse.startX = x;
+        mouse.startY = y;
+        mouse.mutiply = this.__touchList.length == 0 ? false : true;
+        this.__touchList.push(mouse);
+        var target = this.getMouseTarget(x, y, mouse.mutiply);
+        mouse.target = target;
+        var parent = target.parent;
+        while (parent && parent != this) {
+            mouse.parents.push(parent);
+            parent = parent.parent;
+        }
+        //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
+        if (target) {
+            var event = new flower.TouchEvent(flower.MouseEvent.MOUSE_MOVE);
+            event.$stageX = x;
+            event.$stageY = y;
+            event.$target = target;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
+            target.dispatch(event);
+        }
+    }
+
+    $onTouchMove(id, x, y) {
         var mouse;
         for (var i = 0; i < this.__touchList.length; i++) {
             if (this.__touchList[i].id == id) {
@@ -87,16 +137,17 @@ class Stage extends Sprite {
         var event;
         if (target) {
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_MOVE);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
     }
 
-    onMouseUp(id, x, y) {
+    $onTouchEnd(id, x, y) {
         var mouse;
         for (var i = 0; i < this.__touchList.length; i++) {
             if (this.__touchList[i].id == id) {
@@ -117,26 +168,51 @@ class Stage extends Sprite {
         var event;
         if (target == mouse.target) {
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
         else {
             target = mouse.target;
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_RELEASE);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+    $onFrameEnd() {
+        var touchList = this.__nativeTouchEvent;
+        var mouseMoveList = this.__nativeMouseMoveEvent;
+        if (touchList.length) {
+            mouseMoveList.length = 0;
+        }
+        while (touchList.length) {
+            var touch = touchList.shift();
+            if (touch.type == "begin") {
+                this.$onTouchBegin(touch.id, touch.x, touch.y);
+            } else if (touch.type == "move") {
+                this.$onTouchMove(touch.id, touch.x, touch.y);
+            } else if (touch.type == "end") {
+                this.$onTouchEnd(touch.id, touch.x, touch.y);
+            }
+        }
+        if (mouseMoveList.length) {
+            var moveInfo = mouseMoveList[mouseMoveList.length - 1];
+            this.$onMouseMove(moveInfo.x, moveInfo.y);
+        }
+        mouseMoveList.length = 0;
+        super.$onFrameEnd();
+    }
 
     static stages = [];
 

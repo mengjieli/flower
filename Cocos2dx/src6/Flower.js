@@ -119,20 +119,27 @@ class Platform {
                     onTouchMoved: this.onTouchesMoved.bind(this),
                     onTouchEnded: this.onTouchesEnded.bind(this)
                 }, this);
+                cc.eventManager.addListener({
+                    event: cc.EventListener.MOUSE,
+                    onMouseMove: this.onMouseMove.bind(this)
+                }, this);
             },
             update: function (dt) {
                 trace("dt", dt);
             },
+            onMouseMove: function (e) {
+                engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
+            },
             onTouchesBegan: function (touch) {
-                engine.onMouseDown(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("begin",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesMoved: function (touch) {
-                engine.onMouseMove(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("move",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesEnded: function (touch) {
-                engine.onMouseUp(touch.getID(), Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("end",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
         });
@@ -1006,23 +1013,89 @@ exports.Event = Event;
 //////////////////////////File:flower/event/TouchEvent.js///////////////////////////
 class TouchEvent extends Event {
 
-    touchX;
-    touchY;
-    stageX;
-    stageY;
+    $touchId = 0;
+    $touchX = 0;
+    $touchY = 0;
+    $stageX = 0;
+    $stageY = 0;
 
     constructor(type, bubbles = true) {
         super(type, bubbles);
+    }
+
+    get touchId() {
+        return this.$touchId;
+    }
+
+    get touchX() {
+        return this.$touchX;
+    }
+
+    get touchY() {
+        return this.$touchY;
+    }
+
+    get stageX() {
+        return this.$stageX;
+    }
+
+    get stageY() {
+        return this.$stageY;
     }
 
     static TOUCH_BEGIN = "touch_begin";
     static TOUCH_MOVE = "touch_move";
     static TOUCH_END = "touch_end";
     static TOUCH_RELEASE = "touch_release";
+    /**
+     * 此事件是在没有 touch 的情况下发生的，即没有按下
+     * @type {string}
+     */
+    static MOVE = "move";
 }
 
 exports.TouchEvent = TouchEvent;
 //////////////////////////End File:flower/event/TouchEvent.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/MouseEvent.js///////////////////////////
+class MouseEvent extends Event {
+
+    $touchX;
+    $touchY;
+    $stageX;
+    $stageY;
+
+    constructor(type, bubbles = true) {
+        super(type, bubbles);
+    }
+
+    get touchX() {
+        return this.$touchX;
+    }
+
+    get touchY() {
+        return this.$touchY;
+    }
+
+    get stageX() {
+        return this.$stageX;
+    }
+
+    get stageY() {
+        return this.$stageY;
+    }
+
+    /**
+     * 此事件是在没有 touch 的情况下发生的，即没有按下
+     * @type {string}
+     */
+    static MOUSE_MOVE = "move";
+}
+
+exports.MouseEvent = MouseEvent;
+//////////////////////////End File:flower/event/MouseEvent.js///////////////////////////
 
 
 
@@ -1160,6 +1233,10 @@ class Matrix {
         flower.Matrix.matrixPool.push(matrix);
     }
 
+    /**
+     * 创建出来的矩阵可能不是规范矩阵
+     * @returns {flower.Matrix}
+     */
     static create() {
         var matrix = flower.Matrix.matrixPool.pop();
         if (!matrix) {
@@ -1456,8 +1533,9 @@ class DisplayObject extends EventDispatcher {
 
     /**
      * 脏标识
-     * 0x0001 size 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+     * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
      * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
+     * 0x0004 bounds 在父类中的尺寸失效
      * 0x0100 重排子对象顺序
      */
     __flags = 0;
@@ -1489,9 +1567,10 @@ class DisplayObject extends EventDispatcher {
             3: null, //settingWidth
             4: null, //settingHeight
             5: "", //name
-            6: new Size(), //size 自身尺寸
-            7: true, //touchEnabeld
-            8: true, //multiplyTouchEnabled
+            6: new Rectangle(), //contentBounds 自身显示尺寸失效
+            7: new Rectangle(), //bounds 在父类中的表现尺寸
+            8: true, //touchEnabeld
+            9: true, //multiplyTouchEnabled
             10: 0, //lastTouchX
             11: 0 //lastTouchY
         }
@@ -1555,7 +1634,7 @@ class DisplayObject extends EventDispatcher {
         }
         this.__x = val;
         this.$nativeShow.x = val;
-        this.$invalidPositionScale();
+        this.$invalidatePosition();
     }
 
     $setY(val) {
@@ -1565,7 +1644,7 @@ class DisplayObject extends EventDispatcher {
         }
         this.__y = val;
         this.$nativeShow.y = val;
-        this.$invalidPositionScale();
+        this.$invalidatePosition();
     }
 
     $setScaleX(val) {
@@ -1576,13 +1655,13 @@ class DisplayObject extends EventDispatcher {
         }
         p[0] = val;
         this.$nativeShow.scaleX = val;
-        this.$invalidPositionScale();
+        this.$invalidatePosition();
     }
 
     $getScaleX() {
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            this.$getSize();
+            this.$getContentBounds();
         }
         return p[0];
     }
@@ -1595,13 +1674,13 @@ class DisplayObject extends EventDispatcher {
         }
         p[1] = val;
         this.$nativeShow.scaleY = val;
-        this.$invalidPositionScale();
+        this.$invalidatePosition();
     }
 
     $getScaleY() {
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            this.$getSize();
+            this.$getContentBounds();
         }
         return p[1];
     }
@@ -1614,7 +1693,7 @@ class DisplayObject extends EventDispatcher {
         }
         p[2] = val;
         this.$nativeShow.rotation = val;
-        this.$invalidPositionScale();
+        this.$invalidatePosition();
     }
 
     $setAlpha(val) {
@@ -1651,12 +1730,12 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[3] = val;
-        this.invalidSize();
+        this.$invalidatePosition();
     }
 
     $getWidth() {
         var p = this.$DisplayObject;
-        return p[3] != null ? p[3] : this.$getSize().width;
+        return p[3] != null ? p[3] : this.$getContentBounds().width;
     }
 
     $setHeight(val) {
@@ -1667,35 +1746,78 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[4] = val;
-        this.invalidSize();
+        this.$invalidatePosition();
     }
 
     $getHeight() {
         var p = this.$DisplayObject;
-        return p[4] != null ? p[4] : this.$getSize().height;
+        return p[4] != null ? p[4] : this.$getContentBounds().height;
     }
 
-    $getSize() {
-        var size = this.$DisplayObject[6];
-        if (this.$hasFlags(0x0001)) {
-            this.calculateSize(size);
-            this.__checkSettingSize(size);
-            this.$removeFlags(0x0001);
+    $getBounds() {
+        var rect = this.$DisplayObject[7];
+        if (this.$hasFlags(0x0004)) {
+            var contentRect = this.$getContentBounds();
+            var x = this.x;
+            var y = this.y;
+            var scaleX = this.scaleX;
+            var scaleY = this.scaleY;
+            var rotation = this.radian;
+            var list = [[contentRect.x, contentRect.y], [contentRect.x + contentRect.width, contentRect.y],
+                [contentRect.x, contentRect.y + contentRect.height], [contentRect.x + contentRect.width, contentRect.y + contentRect.height]];
+            var matrix = Matrix.create();
+            var minX;
+            var maxX;
+            var minY;
+            var maxY;
+            for (var i = 0; i < list.length; i++) {
+                matrix.identity();
+                matrix.tx = list[i][0];
+                matrix.ty = list[i][1];
+                matrix.scale(scaleX, scaleY);
+                matrix.rotate(rotation);
+                matrix.translate(x, y);
+                if (i == 0) {
+                    minX = maxX = matrix.tx;
+                    minY = maxY = matrix.ty;
+                } else {
+                    if (matrix.tx < minX) {
+                        minX = matrix.tx;
+                    }
+                    if (matrix.ty < minY) {
+                        minY = matrix.ty;
+                    }
+                    if (matrix.tx > maxX) {
+                        maxX = matrix.tx;
+                    }
+                    if (matrix.ty > maxY) {
+                        maxY = matrix.ty;
+                    }
+                }
+            }
+            Matrix.release(matrix);
+            rect.x = minX;
+            rect.y = minY;
+            rect.width = maxX - minX;
+            rect.height = maxY - minY;
+            this.$removeFlags(0x0004);
         }
-        return size;
+        return rect;
+    }
+
+    $getContentBounds() {
+        var rect = this.$DisplayObject[6];
+        if (this.$hasFlags(0x0001)) {
+            this.$measureContentBounds(rect);
+            this.$measureChildrenBounds(rect);
+            this.$removeFlags(0x0001);
+            this.__checkSettingSize(rect);
+        }
+        return rect;
     }
 
     $setTouchEnabled(val) {
         var p = this.$DisplayObject;
-        if (p[7] == val) {
-            return false;
-        }
-        p[7] = val;
-        return true;
-    }
-
-    $setMultiplyTouchEnabled(val) {
-        varp = this.$DisplayObject;
         if (p[8] == val) {
             return false;
         }
@@ -1703,33 +1825,40 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
-    __checkSettingSize(size) {
+    $setMultiplyTouchEnabled(val) {
+        varp = this.$DisplayObject;
+        if (p[9] == val) {
+            return false;
+        }
+        p[9] = val;
+        return true;
+    }
+
+    __checkSettingSize(rect) {
         var p = this.$DisplayObject;
         /**
          * 尺寸失效， 并且约定过 宽 或者 高
          */
-        if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            if (p[3] != null) {
-                if (size.width == 0) {
-                    if (p[3] == 0) {
-                        this.scaleX = 0;
-                    } else {
-                        this.scaleX = Infinity;
-                    }
+        if (p[3] != null) {
+            if (rect.width == 0) {
+                if (p[3] == 0) {
+                    this.scaleX = 0;
                 } else {
-                    this.scaleX = p[3] / size.width;
+                    this.scaleX = Infinity;
                 }
+            } else {
+                this.scaleX = p[3] / rect.width;
             }
-            if (p[4]) {
-                if (size.height == 0) {
-                    if (p[4] == 0) {
-                        this.scaleY = 0;
-                    } else {
-                        this.scaleY = Infinity;
-                    }
+        }
+        if (p[4]) {
+            if (rect.height == 0) {
+                if (p[4] == 0) {
+                    this.scaleY = 0;
                 } else {
-                    this.scaleY = p[4] / size.height;
+                    this.scaleY = Infinity;
                 }
+            } else {
+                this.scaleY = p[4] / rect.height;
             }
         }
     }
@@ -1841,7 +1970,7 @@ class DisplayObject extends EventDispatcher {
 
     get touchEnabled() {
         var p = this.$DisplayObject;
-        return p[7];
+        return p[8];
     }
 
     set touchEnabled(val) {
@@ -1850,7 +1979,7 @@ class DisplayObject extends EventDispatcher {
 
     get multiplyTouchEnabled() {
         var p = this.$DisplayObject;
-        return p[8];
+        return p[9];
     }
 
     set multiplyTouchEnabled(val) {
@@ -1868,22 +1997,42 @@ class DisplayObject extends EventDispatcher {
     }
 
     /**
-     * 计算尺寸
+     * 计算自身尺寸
      * 子类实现
      * @param size
      */
-    calculateSize(size) {
+    $measureContentBounds(rect) {
+
+    }
+
+    /**
+     * 测量子对象的尺寸
+     * @param size
+     */
+    $measureChildrenBounds(rect) {
+
+    }
+
+    /**
+     * 计算自身在父类中的尺寸
+     * @param rect
+     */
+    $measureBounds(rect) {
 
     }
 
     /**
      * 本身尺寸失效
      */
-    invalidSize() {
-        this.$addFlagsUp(0x0001);
+    $invalidateContentBounds() {
+        this.$addFlagsUp(0x0001 | 0x0004);
     }
 
-    $invalidPositionScale() {
+    /**
+     * 位置失效
+     */
+    $invalidatePosition() {
+        this.$addFlagsUp(0x0004);
         if (this.__parent) {
             this.__parent.$addFlagsUp(0x0001);
         }
@@ -1903,7 +2052,8 @@ class DisplayObject extends EventDispatcher {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
-        if (touchX >= 0 && touchY >= 0 && touchX < this.width && touchY < this.height) {
+        var bounds = this.$getContentBounds();
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.width && touchY < bounds.height) {
             return this;
         }
         matrix.restore();
@@ -1916,7 +2066,7 @@ class DisplayObject extends EventDispatcher {
             this.$nativeShow.alpha = this.$getConcatAlpha();
         }
         if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            this.$getSize();
+            this.$getContentBounds();
         }
     }
 
@@ -1984,7 +2134,7 @@ class Sprite extends DisplayObject {
             child.$setParent(this, this.stage);
             if (child.parent == this) {
                 child.$dispatchAddedToStageEvent();
-                this.invalidSize();
+                this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
             }
         }
@@ -1996,7 +2146,7 @@ class Sprite extends DisplayObject {
             if (children[i] == child) {
                 this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
-                this.invalidSize();
+                this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
                 break;
             }
@@ -2011,7 +2161,7 @@ class Sprite extends DisplayObject {
                 children.splice(i, 1);
                 child.$setParent(null, null);
                 child.$dispatchRemovedFromStageEvent();
-                this.invalidSize();
+                this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
                 break;
             }
@@ -2045,6 +2195,44 @@ class Sprite extends DisplayObject {
             }
         }
         return -1;
+    }
+
+    /**
+     * 测量子对象的区域
+     * @param rect
+     */
+    $measureChildrenBounds(rect) {
+        var minX = 0;
+        var minY = 0;
+        var maxX = 0;
+        var maxY = 0;
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            var bounds = children[i].$getBounds();
+            if (i == 0) {
+                minX = bounds.x;
+                minY = bounds.y;
+                maxX = bounds.x + bounds.width;
+                maxY = bounds.y + bounds.height;
+            } else {
+                if (bounds.x < minX) {
+                    minX = bounds.x;
+                }
+                if (bounds.y < minY) {
+                    minY = bounds.y;
+                }
+                if (bounds.x + bounds.width > maxX) {
+                    maxX = bounds.x + bounds.width;
+                }
+                if (bounds.y + bounds.height > maxY) {
+                    maxY = bounds.y + bounds.height;
+                }
+            }
+        }
+        rect.x = minX;
+        rect.y = minX;
+        rect.width = maxX - minX;
+        rect.height = maxY - minY;
     }
 
     $getMouseTarget(matrix, multiply) {
@@ -2141,17 +2329,18 @@ class Bitmap extends DisplayObject {
         else {
             this.$nativeShow.setTexture(Texture.$blank);
         }
-        this.invalidSize();
+        this.$invalidateContentBounds();
         return true;
     }
 
-    calculateSize(size) {
+    $measureContentBounds(rect) {
         if (this.__texture) {
-            size.width = this.__texture.width;
-            size.height = this.__texture.height;
+            rect.x = this.__texture.offX;
+            rect.y = this.__texture.offY;
+            rect.width = this.__texture.width;
+            rect.height = this.__texture.height;
         } else {
-            size.width = 0;
-            size.height = 0;
+            rect.x = rect.y = rect.width = rect.height = 0;
         }
     }
 
@@ -2200,6 +2389,22 @@ class Stage extends Sprite {
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+    __nativeMouseMoveEvent = [];
+    __nativeTouchEvent = [];
+
+    $addMouseMoveEvent(x, y) {
+        this.__nativeMouseMoveEvent.push({x: x, y: y});
+    }
+
+    $addTouchEvent(type, id, x, y) {
+        this.__nativeTouchEvent.push({
+            type: type,
+            id: id,
+            x: x,
+            y: y
+        });
+    }
+
     __touchList = [];
 
     getMouseTarget(touchX, touchY, mutiply) {
@@ -2211,7 +2416,7 @@ class Stage extends Sprite {
         return target;
     }
 
-    onMouseDown(id, x, y) {
+    $onTouchBegin(id, x, y) {
         var mouse = {
             id: 0,
             mutiply: false,
@@ -2237,16 +2442,50 @@ class Stage extends Sprite {
         //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
         if (target) {
             var event = new flower.TouchEvent(flower.TouchEvent.TOUCH_BEGIN);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
     }
 
-    onMouseMove(id, x, y) {
+    $onMouseMove(x, y) {
+        var mouse = {
+            mutiply: false,
+            startX: 0,
+            startY: 0,
+            moveX: 0,
+            moveY: 0,
+            target: null,
+            parents: []
+        };
+        mouse.startX = x;
+        mouse.startY = y;
+        mouse.mutiply = this.__touchList.length == 0 ? false : true;
+        this.__touchList.push(mouse);
+        var target = this.getMouseTarget(x, y, mouse.mutiply);
+        mouse.target = target;
+        var parent = target.parent;
+        while (parent && parent != this) {
+            mouse.parents.push(parent);
+            parent = parent.parent;
+        }
+        //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
+        if (target) {
+            var event = new flower.TouchEvent(flower.MouseEvent.MOUSE_MOVE);
+            event.$stageX = x;
+            event.$stageY = y;
+            event.$target = target;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
+            target.dispatch(event);
+        }
+    }
+
+    $onTouchMove(id, x, y) {
         var mouse;
         for (var i = 0; i < this.__touchList.length; i++) {
             if (this.__touchList[i].id == id) {
@@ -2273,16 +2512,17 @@ class Stage extends Sprite {
         var event;
         if (target) {
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_MOVE);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
     }
 
-    onMouseUp(id, x, y) {
+    $onTouchEnd(id, x, y) {
         var mouse;
         for (var i = 0; i < this.__touchList.length; i++) {
             if (this.__touchList[i].id == id) {
@@ -2303,26 +2543,51 @@ class Stage extends Sprite {
         var event;
         if (target == mouse.target) {
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
         else {
             target = mouse.target;
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_RELEASE);
-            event.stageX = x;
-            event.stageY = y;
+            event.$touchId = id;
+            event.$stageX = x;
+            event.$stageY = y;
             event.$target = target;
-            event.touchX = target.lastTouchX;
-            event.touchY = target.lastTouchY;
+            event.$touchX = target.lastTouchX;
+            event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+    $onFrameEnd() {
+        var touchList = this.__nativeTouchEvent;
+        var mouseMoveList = this.__nativeMouseMoveEvent;
+        if (touchList.length) {
+            mouseMoveList.length = 0;
+        }
+        while (touchList.length) {
+            var touch = touchList.shift();
+            if (touch.type == "begin") {
+                this.$onTouchBegin(touch.id, touch.x, touch.y);
+            } else if (touch.type == "move") {
+                this.$onTouchMove(touch.id, touch.x, touch.y);
+            } else if (touch.type == "end") {
+                this.$onTouchEnd(touch.id, touch.x, touch.y);
+            }
+        }
+        if (mouseMoveList.length) {
+            var moveInfo = mouseMoveList[mouseMoveList.length - 1];
+            this.$onMouseMove(moveInfo.x, moveInfo.y);
+        }
+        mouseMoveList.length = 0;
+        super.$onFrameEnd();
+    }
 
     static stages = [];
 
