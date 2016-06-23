@@ -2415,8 +2415,12 @@ class Stage extends Sprite {
     __nativeTouchEvent = [];
     __mouseOverList = [this];
     __touchList = [];
+    __lastMouseX = -1;
+    __lastMouseY = -1;
 
     $addMouseMoveEvent(x, y) {
+        this.__lastMouseX = x;
+        this.__lastMouseY = y;
         this.__nativeMouseMoveEvent.push({x: x, y: y});
         //flower.trace("mouseEvent",x,y);
     }
@@ -2498,7 +2502,7 @@ class Stage extends Sprite {
                 }
             }
             if (!find) {
-                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER,false);
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER, false);
                 event.$stageX = x;
                 event.$stageY = y;
                 event.$target = target;
@@ -2516,7 +2520,7 @@ class Stage extends Sprite {
                 }
             }
             if (!find) {
-                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT,false);
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT, false);
                 event.$stageX = x;
                 event.$stageY = y;
                 event.$target = target;
@@ -2629,6 +2633,9 @@ class Stage extends Sprite {
             } else if (touch.type == "end") {
                 this.$onTouchEnd(touch.id, touch.x, touch.y);
             }
+        }
+        if (mouseMoveList.length == 0) {
+            mouseMoveList.push({x: this.__lastMouseX, y: this.__lastMouseY});
         }
         if (mouseMoveList.length) {
             var moveInfo = mouseMoveList[mouseMoveList.length - 1];

@@ -2663,6 +2663,8 @@ var _exports = {};
             _this7.__nativeTouchEvent = [];
             _this7.__mouseOverList = [_this7];
             _this7.__touchList = [];
+            _this7.__lastMouseX = -1;
+            _this7.__lastMouseY = -1;
 
             _this7.__stage = _this7;
             Stage.stages.push(_this7);
@@ -2672,6 +2674,8 @@ var _exports = {};
         _createClass(Stage, [{
             key: "$addMouseMoveEvent",
             value: function $addMouseMoveEvent(x, y) {
+                this.__lastMouseX = x;
+                this.__lastMouseY = y;
                 this.__nativeMouseMoveEvent.push({ x: x, y: y });
                 //flower.trace("mouseEvent",x,y);
             }
@@ -2892,6 +2896,9 @@ var _exports = {};
                     } else if (touch.type == "end") {
                         this.$onTouchEnd(touch.id, touch.x, touch.y);
                     }
+                }
+                if (mouseMoveList.length == 0) {
+                    mouseMoveList.push({ x: this.__lastMouseX, y: this.__lastMouseY });
                 }
                 if (mouseMoveList.length) {
                     var moveInfo = mouseMoveList[mouseMoveList.length - 1];
