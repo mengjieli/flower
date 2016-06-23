@@ -145,6 +145,9 @@ class PlatformBitmap {
         var scaleGapX = (right - left) / (tright - tleft);
         var scaleGapY = (bottom - top) / (tbottom - ttop);
         var programmer = this.__programmer.$nativeProgrammer;
+        if (!Platform.native) {
+            this.__programmer.use();
+        }
         if (Platform.native) {
             programmer.setUniformFloat("left", left);
             programmer.setUniformFloat("top", top);

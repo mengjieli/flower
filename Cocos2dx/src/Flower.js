@@ -482,6 +482,9 @@ var _exports = {};
                 var scaleGapX = (right - left) / (tright - tleft);
                 var scaleGapY = (bottom - top) / (tbottom - ttop);
                 var programmer = this.__programmer.$nativeProgrammer;
+                if (!Platform.native) {
+                    this.__programmer.use();
+                }
                 if (Platform.native) {
                     programmer.setUniformFloat("left", left);
                     programmer.setUniformFloat("top", top);
@@ -730,6 +733,11 @@ var _exports = {};
         }
 
         _createClass(PlatformProgrammer, [{
+            key: "use",
+            value: function use() {
+                this.$nativeProgrammer.use();
+            }
+        }, {
             key: "getUniformLocationForName",
             value: function getUniformLocationForName(name) {
                 var uniforms = this.__uniforms;
@@ -746,6 +754,7 @@ var _exports = {};
                     this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
                     this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
                 } else {
+                    this.use();
                     this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
                     this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
                 }
@@ -1320,9 +1329,9 @@ var _exports = {};
             this.__s = 0;
             this.__l = 0;
 
-            this.__h = h;
-            this.__s = s;
-            this.__l = l;
+            this.h = h;
+            this.s = s;
+            this.l = l;
         }
 
         _createClass(ColorFilter, [{
@@ -1331,13 +1340,14 @@ var _exports = {};
                 return this.__h;
             },
             set: function set(val) {
-                if (val > 180) {
-                    val = 180;
+                val += 180;
+                if (val < 0) {
+                    val = 360 - -val % 360;
+                } else {
+                    val = val % 360;
                 }
-                if (val < -180) {
-                    val = -180;
-                }
-                this._h = val;
+                val -= 180;
+                this.__h = val;
             }
         }, {
             key: "s",

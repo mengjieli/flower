@@ -108,8 +108,9 @@ class Main {
         var s = 0;
         var l = 0;
         setInterval(function(){
-            s -= 10;
+            h += 5;
             qq.colorFilter = new flower.ColorFilter(h,s,l);
-        },1000);
+            //flower.trace(h,s,l);
+        },50);
     }
 }

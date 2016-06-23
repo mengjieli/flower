@@ -444,6 +444,9 @@ class PlatformBitmap {
         var scaleGapX = (right - left) / (tright - tleft);
         var scaleGapY = (bottom - top) / (tbottom - ttop);
         var programmer = this.__programmer.$nativeProgrammer;
+        if (!Platform.native) {
+            this.__programmer.use();
+        }
         if (Platform.native) {
             programmer.setUniformFloat("left", left);
             programmer.setUniformFloat("top", top);
@@ -680,9 +683,14 @@ class PlatformProgrammer {
             this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
             this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
         } else {
+            this.use();
             this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
             this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
         }
+    }
+
+    use() {
+        this.$nativeProgrammer.use();
     }
 
     getUniformLocationForName(name) {
@@ -1180,9 +1188,9 @@ class ColorFilter {
     __l = 0;
 
     constructor(h = 0, s = 0, l = 0) {
-        this.__h = h;
-        this.__s = s;
-        this.__l = l;
+        this.h = h;
+        this.s = s;
+        this.l = l;
     }
 
     get h() {
@@ -1190,13 +1198,14 @@ class ColorFilter {
     }
 
     set h(val) {
-        if (val > 180) {
-            val = 180;
+        val += 180;
+        if (val < 0) {
+            val = 360 - (-val) % 360;
+        } else {
+            val = val % 360;
         }
-        if (val < -180) {
-            val = -180;
-        }
-        this._h = val;
+        val -= 180;
+        this.__h = val;
     }
 
     get s() {

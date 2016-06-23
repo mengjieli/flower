@@ -4,9 +4,9 @@ class ColorFilter {
     __l = 0;
 
     constructor(h = 0, s = 0, l = 0) {
-        this.__h = h;
-        this.__s = s;
-        this.__l = l;
+        this.h = h;
+        this.s = s;
+        this.l = l;
     }
 
     get h() {
@@ -14,13 +14,14 @@ class ColorFilter {
     }
 
     set h(val) {
-        if (val > 180) {
-            val = 180;
+        val += 180;
+        if (val < 0) {
+            val = 360 - (-val) % 360;
+        } else {
+            val = val % 360;
         }
-        if (val < -180) {
-            val = -180;
-        }
-        this._h = val;
+        val -= 180;
+        this.__h = val;
     }
 
     get s() {
