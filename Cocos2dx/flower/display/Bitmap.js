@@ -1,12 +1,17 @@
 class Bitmap extends DisplayObject {
 
     __texture;
-    __scale9Grid;
+    $Bitmap;
 
     constructor(texture) {
         super();
         this.$nativeShow = Platform.create("Bitmap");
         this.texture = texture;
+        this.$Bitmap = {
+            0: null,    //scale9Grid
+            100: null,  //colorMatrix
+            200: null,  //parentColorMatrix
+        }
     }
 
     $setTexture(val) {
@@ -37,16 +42,26 @@ class Bitmap extends DisplayObject {
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
-        flower.trace("BitmapSize",rect.width,rect.height);
+        flower.trace("BitmapSize", rect.width, rect.height);
     }
 
     $setScale9Grid(val) {
-        if (this.__scale9Grid == val) {
+        var p = this.$Bitmap;
+        if (p[0] == val) {
             return false;
         }
-        this.__scale9Grid = val;
+        p[0] = val;
         this.$nativeShow.setScale9Grid(val);
         return true;
+    }
+
+    $setColorFilter(filter) {
+        var p = this.$Bitmap;
+        if (p[100] == filter) {
+            return;
+        }
+        p[100] = filter;
+        this.$nativeShow.setColorFilter(filter);
     }
 
     get texture() {
@@ -57,8 +72,22 @@ class Bitmap extends DisplayObject {
         this.$setTexture(val);
     }
 
+    get scale9Grid() {
+        var p = this.$Bitmap;
+        return p[0];
+    }
+
     set scale9Grid(val) {
         this.$setScale9Grid(val);
+    }
+
+    get colorFilter() {
+        var p = this.$Bitmap;
+        return p[100];
+    }
+
+    set colorFilter(val) {
+        this.$setColorFilter(val);
     }
 
     dispose() {

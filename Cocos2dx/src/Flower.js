@@ -402,6 +402,29 @@ var _exports = {};
                 this._changeShader();
             }
         }, {
+            key: "setColorFilter",
+            value: function setColorFilter(colorFilter) {
+                var hasMatrix = this.__colorFilter;
+                this.__colorFilter = colorFilter;
+                this.__shaderFlag |= PlatformShaderType.COLOR_FILTER;
+                this.__shaderFlagChange = true;
+                if (this.__colorFilter) {
+                    if (hasMatrix == null) {
+                        if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
+                            this.__programmer = PlatformProgrammer.createProgrammer();
+                            this.__programmerChange = true;
+                        }
+                    }
+                } else {
+                    if (Platform.native) {
+                        this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    } else {
+                        this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    }
+                }
+                this._changeShader();
+            }
+        }, {
             key: "_changeShader",
             value: function _changeShader() {
                 if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
@@ -421,6 +444,18 @@ var _exports = {};
                 if (this.__texture) {
                     if (this.__scale9Grid) {
                         this._changeScale9Grid(this.__texture.width, this.__texture.height, this.__scale9Grid, this.__texture.width * this.__scaleX, this.__texture.height * this.__scaleY);
+                    }
+                    if (this.__colorFilter) {
+                        var programmer = this.__programmer.$nativeProgrammer;
+                        if (Platform.native) {
+                            programmer.setUniformFloat("colorFilterH", this.__colorFilter.h);
+                            programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
+                            programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
+                        } else {
+                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
+                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
+                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                        }
                     }
                 }
             }
@@ -493,6 +528,8 @@ var _exports = {};
                     PlatformProgrammer.release(this.__programmer);
                     this.show.setGLProgramState(PlatformProgrammer.getInstance());
                 }
+                this.__scale9Grid = null;
+                this.__colorFilter = null;
                 this.__programmer = null;
                 this.__shaderFlagChange = false;
                 this.__shaderFlag = 0;
@@ -694,9 +731,11 @@ var _exports = {};
             key: "shaderFlag",
             set: function set(type) {
                 if (Platform.native) {
-                    this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID);
+                    this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
+                    this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
                 } else {
-                    this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID);
+                    this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
+                    this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
                 }
             }
         }], [{
@@ -741,6 +780,7 @@ var _exports = {};
 
     PlatformShaderType.TEXTURE_CHANGE = 0x0001;
     PlatformShaderType.SCALE_9_GRID = 0x0002;
+    PlatformShaderType.COLOR_FILTER = 0x0004;
 
     var CoreTime = function () {
         function CoreTime() {
@@ -1253,6 +1293,73 @@ var _exports = {};
 
     _exports.IOErrorEvent = IOErrorEvent;
     //////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
+
+    //////////////////////////File:flower/filters/ColorFilter.js///////////////////////////
+
+    var ColorFilter = function () {
+        function ColorFilter() {
+            var h = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+            var s = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+            var l = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+
+            _classCallCheck(this, ColorFilter);
+
+            this.__h = 0;
+            this.__s = 0;
+            this.__l = 0;
+
+            this.__h = h;
+            this.__s = s;
+            this.__l = l;
+        }
+
+        _createClass(ColorFilter, [{
+            key: "h",
+            get: function get() {
+                return this.__h;
+            },
+            set: function set(val) {
+                if (val > 180) {
+                    val = 180;
+                }
+                if (val < -180) {
+                    val = -180;
+                }
+                this._h = val;
+            }
+        }, {
+            key: "s",
+            get: function get() {
+                return this.__s;
+            },
+            set: function set(val) {
+                if (val > 100) {
+                    val = 100;
+                } else if (val < -100) {
+                    val = -100;
+                }
+                this.__s = val;
+            }
+        }, {
+            key: "l",
+            get: function get() {
+                return this.__l;
+            },
+            set: function set(val) {
+                if (val > 100) {
+                    val = 100;
+                } else if (val < -100) {
+                    val = -100;
+                }
+                this.__l = val;
+            }
+        }]);
+
+        return ColorFilter;
+    }();
+
+    _exports.ColorFilter = ColorFilter;
+    //////////////////////////End File:flower/filters/ColorFilter.js///////////////////////////
 
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
 
@@ -2577,11 +2684,16 @@ var _exports = {};
 
             _this6.$nativeShow = Platform.create("Bitmap");
             _this6.texture = texture;
+            _this6.$Bitmap = {
+                0: null, //scale9Grid
+                100: null, //colorMatrix
+                200: null };
             return _this6;
         }
 
         _createClass(Bitmap, [{
             key: "$setTexture",
+            //parentColorMatrix
             value: function $setTexture(val) {
                 if (val == this.__texture) {
                     return false;
@@ -2615,12 +2727,23 @@ var _exports = {};
         }, {
             key: "$setScale9Grid",
             value: function $setScale9Grid(val) {
-                if (this.__scale9Grid == val) {
+                var p = this.$Bitmap;
+                if (p[0] == val) {
                     return false;
                 }
-                this.__scale9Grid = val;
+                p[0] = val;
                 this.$nativeShow.setScale9Grid(val);
                 return true;
+            }
+        }, {
+            key: "$setColorFilter",
+            value: function $setColorFilter(filter) {
+                var p = this.$Bitmap;
+                if (p[100] == filter) {
+                    return;
+                }
+                p[100] = filter;
+                this.$nativeShow.setColorFilter(filter);
             }
         }, {
             key: "dispose",
@@ -2638,8 +2761,21 @@ var _exports = {};
             }
         }, {
             key: "scale9Grid",
+            get: function get() {
+                var p = this.$Bitmap;
+                return p[0];
+            },
             set: function set(val) {
                 this.$setScale9Grid(val);
+            }
+        }, {
+            key: "colorFilter",
+            get: function get() {
+                var p = this.$Bitmap;
+                return p[100];
+            },
+            set: function set(val) {
+                this.$setColorFilter(val);
             }
         }]);
 

@@ -10,6 +10,7 @@ class PlatformBitmap {
     __shaderFlagChange = false;
     __shaderFlag = 0;
     __scale9Grid;
+    __colorFilter;
     __scaleX = 1;
     __scaleY = 1;
     __textureScaleX = 1;
@@ -66,6 +67,28 @@ class PlatformBitmap {
         this._changeShader();
     }
 
+    setColorFilter(colorFilter) {
+        var hasMatrix = this.__colorFilter;
+        this.__colorFilter = colorFilter;
+        this.__shaderFlag |= PlatformShaderType.COLOR_FILTER;
+        this.__shaderFlagChange = true;
+        if (this.__colorFilter) {
+            if (hasMatrix == null) {
+                if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
+                    this.__programmer = PlatformProgrammer.createProgrammer();
+                    this.__programmerChange = true;
+                }
+            }
+        } else {
+            if (Platform.native) {
+                this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+            } else {
+                this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+            }
+        }
+        this._changeShader();
+    }
+
     _changeShader() {
         if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
             if (Platform.native) {
@@ -85,6 +108,18 @@ class PlatformBitmap {
             if (this.__scale9Grid) {
                 this._changeScale9Grid(this.__texture.width, this.__texture.height, this.__scale9Grid,
                     this.__texture.width * this.__scaleX, this.__texture.height * this.__scaleY);
+            }
+            if (this.__colorFilter) {
+                var programmer = this.__programmer.$nativeProgrammer;
+                if (Platform.native) {
+                    programmer.setUniformFloat("colorFilterH", this.__colorFilter.h);
+                    programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
+                    programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
+                } else {
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                }
             }
         }
     }
@@ -187,6 +222,8 @@ class PlatformBitmap {
             PlatformProgrammer.release(this.__programmer);
             this.show.setGLProgramState(PlatformProgrammer.getInstance());
         }
+        this.__scale9Grid = null;
+        this.__colorFilter = null;
         this.__programmer = null;
         this.__shaderFlagChange = false;
         this.__shaderFlag = 0;

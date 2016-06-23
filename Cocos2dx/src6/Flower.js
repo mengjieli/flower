@@ -309,6 +309,7 @@ class PlatformBitmap {
     __shaderFlagChange = false;
     __shaderFlag = 0;
     __scale9Grid;
+    __colorFilter;
     __scaleX = 1;
     __scaleY = 1;
     __textureScaleX = 1;
@@ -365,6 +366,28 @@ class PlatformBitmap {
         this._changeShader();
     }
 
+    setColorFilter(colorFilter) {
+        var hasMatrix = this.__colorFilter;
+        this.__colorFilter = colorFilter;
+        this.__shaderFlag |= PlatformShaderType.COLOR_FILTER;
+        this.__shaderFlagChange = true;
+        if (this.__colorFilter) {
+            if (hasMatrix == null) {
+                if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
+                    this.__programmer = PlatformProgrammer.createProgrammer();
+                    this.__programmerChange = true;
+                }
+            }
+        } else {
+            if (Platform.native) {
+                this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+            } else {
+                this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+            }
+        }
+        this._changeShader();
+    }
+
     _changeShader() {
         if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
             if (Platform.native) {
@@ -384,6 +407,18 @@ class PlatformBitmap {
             if (this.__scale9Grid) {
                 this._changeScale9Grid(this.__texture.width, this.__texture.height, this.__scale9Grid,
                     this.__texture.width * this.__scaleX, this.__texture.height * this.__scaleY);
+            }
+            if (this.__colorFilter) {
+                var programmer = this.__programmer.$nativeProgrammer;
+                if (Platform.native) {
+                    programmer.setUniformFloat("colorFilterH", this.__colorFilter.h);
+                    programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
+                    programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
+                } else {
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                }
             }
         }
     }
@@ -486,6 +521,8 @@ class PlatformBitmap {
             PlatformProgrammer.release(this.__programmer);
             this.show.setGLProgramState(PlatformProgrammer.getInstance());
         }
+        this.__scale9Grid = null;
+        this.__colorFilter = null;
         this.__programmer = null;
         this.__shaderFlagChange = false;
         this.__shaderFlag = 0;
@@ -639,9 +676,11 @@ class PlatformProgrammer {
 
     set shaderFlag(type) {
         if (Platform.native) {
-            this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID);
+            this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID?1:0);
+            this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER?1:0);
         } else {
-            this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID);
+            this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID?1:0);
+            this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER?1:0);
         }
     }
 
@@ -675,6 +714,7 @@ class PlatformProgrammer {
 class PlatformShaderType {
     static TEXTURE_CHANGE = 0x0001;
     static SCALE_9_GRID = 0x0002;
+    static COLOR_FILTER = 0x0004;
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformShaderType.js///////////////////////////
 
@@ -1120,6 +1160,64 @@ class IOErrorEvent extends Event {
 
 exports.IOErrorEvent = IOErrorEvent;
 //////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
+
+
+
+//////////////////////////File:flower/filters/ColorFilter.js///////////////////////////
+class ColorFilter {
+    __h = 0;
+    __s = 0;
+    __l = 0;
+
+    constructor(h = 0, s = 0, l = 0) {
+        this.__h = h;
+        this.__s = s;
+        this.__l = l;
+    }
+
+    get h() {
+        return this.__h;
+    }
+
+    set h(val) {
+        if (val > 180) {
+            val = 180;
+        }
+        if (val < -180) {
+            val = -180;
+        }
+        this._h = val;
+    }
+
+    get s() {
+        return this.__s;
+    }
+
+    set s(val) {
+        if (val > 100) {
+            val = 100;
+        } else if (val < -100) {
+            val = -100;
+        }
+        this.__s = val;
+    }
+
+    get l() {
+        return this.__l;
+    }
+
+    set l(val) {
+        if (val > 100) {
+            val = 100;
+        } else if (val < -100) {
+            val = -100;
+        }
+        this.__l = val;
+    }
+}
+
+exports.ColorFilter = ColorFilter;
+//////////////////////////End File:flower/filters/ColorFilter.js///////////////////////////
 
 
 
@@ -2323,12 +2421,17 @@ exports.Sprite = Sprite;
 class Bitmap extends DisplayObject {
 
     __texture;
-    __scale9Grid;
+    $Bitmap;
 
     constructor(texture) {
         super();
         this.$nativeShow = Platform.create("Bitmap");
         this.texture = texture;
+        this.$Bitmap = {
+            0: null,    //scale9Grid
+            100: null,  //colorMatrix
+            200: null,  //parentColorMatrix
+        }
     }
 
     $setTexture(val) {
@@ -2359,16 +2462,26 @@ class Bitmap extends DisplayObject {
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
-        flower.trace("BitmapSize",rect.width,rect.height);
+        flower.trace("BitmapSize", rect.width, rect.height);
     }
 
     $setScale9Grid(val) {
-        if (this.__scale9Grid == val) {
+        var p = this.$Bitmap;
+        if (p[0] == val) {
             return false;
         }
-        this.__scale9Grid = val;
+        p[0] = val;
         this.$nativeShow.setScale9Grid(val);
         return true;
+    }
+
+    $setColorFilter(filter) {
+        var p = this.$Bitmap;
+        if (p[100] == filter) {
+            return;
+        }
+        p[100] = filter;
+        this.$nativeShow.setColorFilter(filter);
     }
 
     get texture() {
@@ -2379,8 +2492,22 @@ class Bitmap extends DisplayObject {
         this.$setTexture(val);
     }
 
+    get scale9Grid() {
+        var p = this.$Bitmap;
+        return p[0];
+    }
+
     set scale9Grid(val) {
         this.$setScale9Grid(val);
+    }
+
+    get colorFilter() {
+        var p = this.$Bitmap;
+        return p[100];
+    }
+
+    set colorFilter(val) {
+        this.$setColorFilter(val);
     }
 
     dispose() {

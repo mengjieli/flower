@@ -17,7 +17,7 @@ class Main {
         res.addURL("res/font@100x100@en.png");
         flower.Res.addRes(res);
 
-        var load = new flower.URLLoaderList(["Close.json", "Image.png", "res/qq.png"]);
+        var load = new flower.URLLoaderList(["Close.json", "Image.png", "res/qq.png", "res/color.png"]);
         load.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
         load.load();
 
@@ -39,8 +39,8 @@ class Main {
         //flower.trace(e.data[0].desc);
 
         var container = new flower.Sprite();
-        container.width = 150;
-        container.height = 200;
+        //container.width = 150;
+        //container.height = 200;
         flower.Stage.getInstance().addChild(container);
         container.addListener(flower.MouseEvent.MOUSE_OVER, function (e) {
             flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
@@ -86,8 +86,10 @@ class Main {
         }, 1500);
 
         var qq = new flower.Bitmap();
-        qq.x = qq.y = 300;
-        qq.texture = e.data[2];
+        qq.x = -20;
+        qq.y = 250;
+        qq.scaleX = qq.scaleY = 0.5;
+        qq.texture = e.data[3];
         container.addChild(qq);
         qq.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
             flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
@@ -102,5 +104,6 @@ class Main {
             flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         flower.trace(container.width, container.height);
+        qq.colorFilter = new flower.ColorFilter(0,-100,0);
     }
 }

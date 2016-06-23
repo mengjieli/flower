@@ -181,6 +181,8 @@ var list = [
     "MouseEvent",
     "IOErrorEvent",
 
+    "ColorFilter",
+
     "Matrix",
     "Point",
     "Rectangle",
