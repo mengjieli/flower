@@ -415,9 +415,9 @@ class PlatformBitmap {
                     programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
                     programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
                 } else {
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
+                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
+                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
                 }
             }
         }
@@ -648,10 +648,11 @@ class PlatformProgrammer {
 
     $nativeProgrammer;
     _scale9Grid;
+    __uniforms = {};
 
     constructor(vsh = "", fsh = "res/shaders/Bitmap.fsh") {
-        if(vsh == "") {
-            if(Platform.native) {
+        if (vsh == "") {
+            if (Platform.native) {
                 vsh = "res/shaders/Bitmap.vsh";
             } else {
                 vsh = "res/shaders/BitmapWeb.vsh";
@@ -660,7 +661,7 @@ class PlatformProgrammer {
         var shader;// = Programmer.shader;
         shader = new cc.GLProgram(vsh, fsh);
         shader.retain();
-        if(!Platform.native) {
+        if (!Platform.native) {
             shader.addAttribute(cc.ATTRIBUTE_NAME_POSITION, cc.VERTEX_ATTRIB_POSITION);
             shader.addAttribute(cc.ATTRIBUTE_NAME_COLOR, cc.VERTEX_ATTRIB_COLOR);
             shader.addAttribute(cc.ATTRIBUTE_NAME_TEX_COORD, cc.VERTEX_ATTRIB_TEX_COORDS);
@@ -676,12 +677,21 @@ class PlatformProgrammer {
 
     set shaderFlag(type) {
         if (Platform.native) {
-            this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID?1:0);
-            this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER?1:0);
+            this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
+            this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
         } else {
-            this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID?1:0);
-            this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER?1:0);
+            this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
+            this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
         }
+    }
+
+    getUniformLocationForName(name) {
+        var uniforms = this.__uniforms;
+        if (uniforms[name]) {
+            return uniforms[name];
+        }
+        uniforms[name] = this.$nativeProgrammer.getUniformLocationForName(name);
+        return uniforms[name];
     }
 
     static programmers = [];
@@ -701,7 +711,7 @@ class PlatformProgrammer {
 
     static getInstance() {
         if (PlatformProgrammer.instance == null) {
-            PlatformProgrammer.instance = new PlatformProgrammer(Platform.native?"res/shaders/Bitmap.vsh":"res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
+            PlatformProgrammer.instance = new PlatformProgrammer(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
         }
         return PlatformProgrammer.instance;
     }

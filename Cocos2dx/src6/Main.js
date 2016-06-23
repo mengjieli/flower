@@ -104,6 +104,12 @@ class Main {
             flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
         flower.trace(container.width, container.height);
-        qq.colorFilter = new flower.ColorFilter(0,-100,0);
+        var h = 0;
+        var s = 0;
+        var l = 0;
+        setInterval(function(){
+            s -= 10;
+            qq.colorFilter = new flower.ColorFilter(h,s,l);
+        },1000);
     }
 }

@@ -116,9 +116,9 @@ class PlatformBitmap {
                     programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
                     programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
                 } else {
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
+                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
+                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
                 }
             }
         }

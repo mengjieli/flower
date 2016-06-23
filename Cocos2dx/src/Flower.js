@@ -452,9 +452,9 @@ var _exports = {};
                             programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
                             programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
                         } else {
-                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
-                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
-                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                            programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
+                            programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
+                            programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
                         }
                     }
                 }
@@ -703,6 +703,8 @@ var _exports = {};
 
             _classCallCheck(this, PlatformProgrammer);
 
+            this.__uniforms = {};
+
             if (vsh == "") {
                 if (Platform.native) {
                     vsh = "res/shaders/Bitmap.vsh";
@@ -728,14 +730,24 @@ var _exports = {};
         }
 
         _createClass(PlatformProgrammer, [{
+            key: "getUniformLocationForName",
+            value: function getUniformLocationForName(name) {
+                var uniforms = this.__uniforms;
+                if (uniforms[name]) {
+                    return uniforms[name];
+                }
+                uniforms[name] = this.$nativeProgrammer.getUniformLocationForName(name);
+                return uniforms[name];
+            }
+        }, {
             key: "shaderFlag",
             set: function set(type) {
                 if (Platform.native) {
                     this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
                     this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
                 } else {
-                    this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
-                    this.$nativeProgrammer.setUniformLocationI32(this.$nativeProgrammer.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
+                    this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
+                    this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
                 }
             }
         }], [{
