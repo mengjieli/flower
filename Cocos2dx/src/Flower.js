@@ -242,6 +242,8 @@ var _exports = {};
             this.__scaleX = 1;
             this.__scaleY = 1;
             this.__rotation = 0;
+            this.__width = 0;
+            this.__height = 0;
             this.__programmer = null;
             this.__programmerFlag = 0;
         }
@@ -265,6 +267,34 @@ var _exports = {};
             value: function setY(val) {
                 this.__y = val;
                 this.show.setPositionY(val);
+            }
+        }, {
+            key: "setWidth",
+            value: function setWidth(val) {
+                this.__width = val;
+                var programmer = this.__programmer;
+                if (programmer) {
+                    if (Platform.native) {
+                        programmer.setUniformFloat("width", this.__width);
+                    } else {
+                        programmer.use();
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                    }
+                }
+            }
+        }, {
+            key: "setHeight",
+            value: function setHeight(val) {
+                this.__height = val;
+                var programmer = this.__programmer;
+                if (programmer) {
+                    if (Platform.native) {
+                        programmer.setUniformFloat("height", this.__height);
+                    } else {
+                        programmer.use();
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
+                    }
+                }
             }
         }, {
             key: "setScaleX",
@@ -307,10 +337,15 @@ var _exports = {};
                 if (flag) {
                     if (!this.__programmer) {
                         this.__programmer = PlatformProgrammer.createProgrammer();
+                        var programmer = this.__programmer.$nativeProgrammer;
                         if (Platform.native) {
                             this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+                            programmer.setUniformFloat("width", this.__width);
+                            programmer.setUniformFloat("height", this.__height);
                         } else {
                             this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                         }
                     }
                 } else {
@@ -338,6 +373,8 @@ var _exports = {};
                 this.__scaleX = 1;
                 this.__scaleY = 1;
                 this.__rotation = 0;
+                this.__width = 0;
+                this.__height = 0;
                 this.__programmer = null;
                 this.__programmerFlag = 0;
                 if (this.__programmer) {
@@ -444,6 +481,9 @@ var _exports = {};
                     children[i].$nativeShow.show.setLocalZOrder(i);
                 }
             }
+        }, {
+            key: "setFilters",
+            value: function setFilters(filters) {}
         }]);
 
         return PlatformSprite;
@@ -595,9 +635,13 @@ var _exports = {};
                         var programmer = this.__programmer.$nativeProgrammer;
                         if (Platform.native) {
                             programmer.setUniformInt("scale9", 0);
+                            programmer.setUniformFloat("width", this.__width);
+                            programmer.setUniformFloat("height", this.__height);
                         } else {
                             this.__programmer.use();
                             programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 0);
+                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                            programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                         }
                     }
                 }
@@ -1395,10 +1439,11 @@ var _exports = {};
 
         return Filter;
     }();
+
+    _exports.Filter = Filter;
     //////////////////////////End File:flower/filters/Filter.js///////////////////////////
 
     //////////////////////////File:flower/filters/ColorFilter.js///////////////////////////
-
 
     var ColorFilter = function (_Filter) {
         _inherits(ColorFilter, _Filter);
@@ -1475,6 +1520,64 @@ var _exports = {};
 
     _exports.ColorFilter = ColorFilter;
     //////////////////////////End File:flower/filters/ColorFilter.js///////////////////////////
+
+    //////////////////////////File:flower/filters/StrokeFilter.js///////////////////////////
+
+    var StrokeFilter = function (_Filter2) {
+        _inherits(StrokeFilter, _Filter2);
+
+        /**
+         * 描边滤镜
+         * @param size 描边大小
+         * @param color 描边颜色
+         */
+
+        function StrokeFilter(size, color) {
+            _classCallCheck(this, StrokeFilter);
+
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
+
+            _this7.__size = 0;
+            _this7.__r = 0;
+            _this7.__g = 0;
+            _this7.__b = 0;
+
+            _this7.size = size;
+            _this7.color = color;
+            return _this7;
+        }
+
+        _createClass(StrokeFilter, [{
+            key: "$getParams",
+            value: function $getParams() {
+                return [this.__size, this.__r / 255, this.__g / 255, this.__b / 255];
+            }
+        }, {
+            key: "size",
+            set: function set(val) {
+                this.__size = val;
+            },
+            get: function get() {
+                return this.__size;
+            }
+        }, {
+            key: "color",
+            set: function set(val) {
+                val = +val || 0;
+                this.__r = val >> 16 & 0xFF;
+                this.__g = val >> 8 & 0xFF;
+                this.__b = val & 0xFF;
+            },
+            get: function get() {
+                return this.__r << 16 | this.__g << 8 | this.__b;
+            }
+        }]);
+
+        return StrokeFilter;
+    }(Filter);
+
+    _exports.StrokeFilter = StrokeFilter;
+    //////////////////////////End File:flower/filters/StrokeFilter.js///////////////////////////
 
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
 
@@ -1944,15 +2047,15 @@ var _exports = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this7.__x = 0;
-            _this7.__y = 0;
-            _this7.__flags = 0;
-            _this7.__alpha = 1;
-            _this7.__concatAlpha = 1;
+            _this8.__x = 0;
+            _this8.__y = 0;
+            _this8.__flags = 0;
+            _this8.__alpha = 1;
+            _this8.__concatAlpha = 1;
 
-            _this7.$DisplayObject = {
+            _this8.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -1967,7 +2070,7 @@ var _exports = {};
                 11: 0, //lastTouchY
                 60: [], //filters
                 61: [] };
-            return _this7;
+            return _this8;
         }
 
         /**
@@ -2599,11 +2702,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this8.__children = [];
-            _this8.$nativeShow = Platform.create("Sprite");
-            return _this8;
+            _this9.__children = [];
+            _this9.$nativeShow = Platform.create("Sprite");
+            return _this9;
         }
 
         _createClass(Sprite, [{
@@ -2848,13 +2951,13 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this9.$nativeShow = Platform.create("Bitmap");
-            _this9.texture = texture;
-            _this9.$Bitmap = {
+            _this10.$nativeShow = Platform.create("Bitmap");
+            _this10.texture = texture;
+            _this10.$Bitmap = {
                 0: null };
-            return _this9;
+            return _this10;
         }
 
         _createClass(Bitmap, [{
@@ -2870,6 +2973,8 @@ var _exports = {};
                 this.__texture = val;
                 if (val) {
                     this.__texture.$addCount();
+                    this.$nativeShow.setWidth(this.__texture.width);
+                    this.$nativeShow.setHeight(this.__texture.height);
                     this.$nativeShow.setTexture(this.__texture);
                 } else {
                     this.$nativeShow.setTexture(Texture.$blank);
@@ -2940,18 +3045,18 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this10.__nativeMouseMoveEvent = [];
-            _this10.__nativeTouchEvent = [];
-            _this10.__mouseOverList = [_this10];
-            _this10.__touchList = [];
-            _this10.__lastMouseX = -1;
-            _this10.__lastMouseY = -1;
+            _this11.__nativeMouseMoveEvent = [];
+            _this11.__nativeTouchEvent = [];
+            _this11.__mouseOverList = [_this11];
+            _this11.__touchList = [];
+            _this11.__lastMouseX = -1;
+            _this11.__lastMouseY = -1;
 
-            _this10.__stage = _this10;
-            Stage.stages.push(_this10);
-            return _this10;
+            _this11.__stage = _this11;
+            Stage.stages.push(_this11);
+            return _this11;
         }
 
         _createClass(Stage, [{
@@ -3453,26 +3558,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this11._createRes = false;
-            _this11._isLoading = false;
-            _this11._selfDispose = false;
+            _this12._createRes = false;
+            _this12._isLoading = false;
+            _this12._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this11._createRes = true;
+                    _this12._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this11._res = res;
-            _this11._type = _this11._res.type;
-            _this11._language = LANGUAGE;
-            _this11._scale = SCALE ? SCALE : null;
-            return _this11;
+            _this12._res = res;
+            _this12._type = _this12._res.type;
+            _this12._language = LANGUAGE;
+            _this12._scale = SCALE ? SCALE : null;
+            return _this12;
         }
 
         _createClass(URLLoader, [{
@@ -3685,12 +3790,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this12.__list = list;
-            _this12.__dataList = [];
-            _this12.__index = 0;
-            return _this12;
+            _this13.__list = list;
+            _this13.__dataList = [];
+            _this13.__index = 0;
+            return _this13;
         }
 
         _createClass(URLLoaderList, [{

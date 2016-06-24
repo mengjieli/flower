@@ -6,6 +6,8 @@ class PlatformDisplayObject {
     __scaleX = 1;
     __scaleY = 1;
     __rotation = 0;
+    __width = 0;
+    __height = 0;
     __programmer = null;
 
     /**
@@ -27,6 +29,32 @@ class PlatformDisplayObject {
     setY(val) {
         this.__y = val;
         this.show.setPositionY(val);
+    }
+
+    setWidth(val) {
+        this.__width = val;
+        var programmer = this.__programmer;
+        if(programmer) {
+            if (Platform.native) {
+                programmer.setUniformFloat("width", this.__width);
+            } else {
+                programmer.use();
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+            }
+        }
+    }
+
+    setHeight(val) {
+        this.__height = val;
+        var programmer = this.__programmer;
+        if(programmer) {
+            if (Platform.native) {
+                programmer.setUniformFloat("height", this.__height);
+            } else {
+                programmer.use();
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
+            }
+        }
     }
 
     setScaleX(val) {
@@ -62,10 +90,15 @@ class PlatformDisplayObject {
         if (flag) {
             if (!this.__programmer) {
                 this.__programmer = PlatformProgrammer.createProgrammer();
+                var programmer = this.__programmer.$nativeProgrammer;
                 if (Platform.native) {
                     this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+                    programmer.setUniformFloat("width", this.__width);
+                    programmer.setUniformFloat("height", this.__height);
                 } else {
                     this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                 }
             }
         } else {
@@ -92,6 +125,8 @@ class PlatformDisplayObject {
         this.__scaleX = 1;
         this.__scaleY = 1;
         this.__rotation = 0;
+        this.__width = 0;
+        this.__height = 0;
         this.__programmer = null;
         this.__programmerFlag = 0;
         if (this.__programmer) {

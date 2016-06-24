@@ -220,6 +220,8 @@ class PlatformDisplayObject {
     __scaleX = 1;
     __scaleY = 1;
     __rotation = 0;
+    __width = 0;
+    __height = 0;
     __programmer = null;
 
     /**
@@ -241,6 +243,32 @@ class PlatformDisplayObject {
     setY(val) {
         this.__y = val;
         this.show.setPositionY(val);
+    }
+
+    setWidth(val) {
+        this.__width = val;
+        var programmer = this.__programmer;
+        if(programmer) {
+            if (Platform.native) {
+                programmer.setUniformFloat("width", this.__width);
+            } else {
+                programmer.use();
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+            }
+        }
+    }
+
+    setHeight(val) {
+        this.__height = val;
+        var programmer = this.__programmer;
+        if(programmer) {
+            if (Platform.native) {
+                programmer.setUniformFloat("height", this.__height);
+            } else {
+                programmer.use();
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
+            }
+        }
     }
 
     setScaleX(val) {
@@ -276,10 +304,15 @@ class PlatformDisplayObject {
         if (flag) {
             if (!this.__programmer) {
                 this.__programmer = PlatformProgrammer.createProgrammer();
+                var programmer = this.__programmer.$nativeProgrammer;
                 if (Platform.native) {
                     this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+                    programmer.setUniformFloat("width", this.__width);
+                    programmer.setUniformFloat("height", this.__height);
                 } else {
                     this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                 }
             }
         } else {
@@ -306,6 +339,8 @@ class PlatformDisplayObject {
         this.__scaleX = 1;
         this.__scaleY = 1;
         this.__rotation = 0;
+        this.__width = 0;
+        this.__height = 0;
         this.__programmer = null;
         this.__programmerFlag = 0;
         if (this.__programmer) {
@@ -398,6 +433,10 @@ class PlatformSprite extends PlatformDisplayObject {
         for (var i = 0, len = children.length; i < len; i++) {
             children[i].$nativeShow.show.setLocalZOrder(i);
         }
+    }
+
+    setFilters(filters) {
+
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
@@ -537,9 +576,13 @@ class PlatformBitmap extends PlatformDisplayObject {
                 var programmer = this.__programmer.$nativeProgrammer;
                 if(Platform.native) {
                     programmer.setUniformInt("scale9", 0);
+                    programmer.setUniformFloat("width", this.__width);
+                    programmer.setUniformFloat("height", this.__height);
                 } else {
                     this.__programmer.use();
                     programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 0);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                 }
             }
         }
@@ -1236,6 +1279,8 @@ class Filter {
 
     }
 }
+
+exports.Filter = Filter;
 //////////////////////////End File:flower/filters/Filter.js///////////////////////////
 
 
@@ -1301,6 +1346,54 @@ class ColorFilter extends Filter {
 
 exports.ColorFilter = ColorFilter;
 //////////////////////////End File:flower/filters/ColorFilter.js///////////////////////////
+
+
+
+//////////////////////////File:flower/filters/StrokeFilter.js///////////////////////////
+class StrokeFilter extends Filter {
+
+    __size = 0;
+    __r = 0;
+    __g = 0;
+    __b = 0;
+
+    /**
+     * 描边滤镜
+     * @param size 描边大小
+     * @param color 描边颜色
+     */
+    constructor(size, color) {
+        super(2);
+        this.size = size;
+        this.color = color;
+    }
+
+    set size(val) {
+        this.__size = val;
+    }
+
+    get size() {
+        return this.__size;
+    }
+
+    set color(val) {
+        val = +val || 0;
+        this.__r = val >> 16 & 0xFF;
+        this.__g = val >> 8 & 0xFF;
+        this.__b = val & 0xFF;
+    }
+
+    get color() {
+        return this.__r << 16 | this.__g << 8 | this.__b;
+    }
+
+    $getParams() {
+        return [this.__size, this.__r/255, this.__g/255, this.__b/255];
+    }
+}
+
+exports.StrokeFilter = StrokeFilter;
+//////////////////////////End File:flower/filters/StrokeFilter.js///////////////////////////
 
 
 
@@ -2573,6 +2666,8 @@ class Bitmap extends DisplayObject {
         this.__texture = val;
         if (val) {
             this.__texture.$addCount();
+            this.$nativeShow.setWidth(this.__texture.width);
+            this.$nativeShow.setHeight(this.__texture.height);
             this.$nativeShow.setTexture(this.__texture);
         }
         else {

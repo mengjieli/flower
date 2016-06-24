@@ -51,10 +51,10 @@ class Main {
 
         var bm = new flower.Bitmap();
         bm.x = bm.y = 100;
-        bm.width = bm.height = 200;
-        //bm.scaleX = bm.scaleY = 2;
+        //bm.width = bm.height = 200;
+        bm.scaleX = bm.scaleY = 2;
         bm.texture = e.data[1];
-        bm.rotation = 30;
+        //bm.rotation = 30;
         bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
             flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
@@ -93,7 +93,7 @@ class Main {
         qq.y = 250;
         qq.scaleX = qq.scaleY = 0.25;
         qq.texture = e.data[3];
-        container.addChild(qq);
+        //container.addChild(qq);
         qq.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
             flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
@@ -110,13 +110,22 @@ class Main {
         var h = 0;
         var s = 0;
         var l = 0;
+        var r = 0;
+        var g = 0;
+        var b = 0;
+        var color = 0;
+        container.filters = [new flower.ColorFilter(h, s, l),new flower.StrokeFilter(1,color)];
         setInterval(function () {
             h += 5;
+            r += 1;
+            g += 2;
+            b += 3;
+            color = r<<16|g<<8|b;
             //flower.trace(h,s,l);
             if (h > 270000) {
                 container.filters = null;
             } else {
-                container.filters = [new flower.ColorFilter(h, s, l)];
+                container.filters = [new flower.ColorFilter(h, s, l),new flower.StrokeFilter(1,color)];
             }
         }, 50);
     }

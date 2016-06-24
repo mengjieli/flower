@@ -22,6 +22,8 @@ class Bitmap extends DisplayObject {
         this.__texture = val;
         if (val) {
             this.__texture.$addCount();
+            this.$nativeShow.setWidth(this.__texture.width);
+            this.$nativeShow.setHeight(this.__texture.height);
             this.$nativeShow.setTexture(this.__texture);
         }
         else {

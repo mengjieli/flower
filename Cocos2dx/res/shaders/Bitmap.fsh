@@ -5,6 +5,9 @@ precision lowp float;
 varying vec4 v_fragmentColor;
 varying vec2 v_texCoord;
 
+uniform float width;
+uniform float height;
+
 uniform int scale9;
 uniform float left;
 uniform float top;
@@ -31,51 +34,17 @@ uniform vec4 filtersParams6;
 uniform vec4 filtersParams7;
 
 vec4 getColor(float posx,float posy);
-vec4 filter(vec4 color);
-vec4 getColorFilter(vec4 color,float colorH,float colorS,float colorL);
+vec4 filter(vec4 color,float posx,float posy);
+vec4 colorFilter(vec4 color,float colorH,float colorS,float colorL);
+vec4 strokeFilter(float strokeWidth,float r,float g,float b,float posx,float posy, vec4 color);
 
 void main()
 {
     float posx = v_texCoord[0];
     float posy = v_texCoord[1];
     vec4 color = getColor(posx,posy);
-    color = filter(color);
+    color = filter(color,posx,posy);
     gl_FragColor = color;
-}
-
-vec4 filter(vec4 color) {
-    int pindex = 0;
-    for(int f = 0; f < 8; f++) {
-        float filterType;
-        if(f < 4) {
-            filterType = filters1[f];
-        } else {
-            filterType = filters2[f];
-        }
-        vec4 params;
-        if(pindex == 0) {
-            params = filtersParams0;
-        } else if(pindex == 1) {
-            params = filtersParams1;
-        } else if(pindex == 2) {
-            params = filtersParams2;
-        } else if(pindex == 3) {
-            params = filtersParams3;
-        } else if(pindex == 4) {
-            params = filtersParams4;
-        } else if(pindex == 5) {
-            params = filtersParams5;
-        } else if(pindex == 6) {
-            params = filtersParams6;
-        } else if(pindex == 7) {
-            params = filtersParams7;
-        }
-        if(filterType == 1.0) {
-            color = getColorFilter(color,params[0],params[1],params[2]);
-            pindex++;
-        }
-    }
-    return color;
 }
 
 vec4 getColor(float posx,float posy) {
@@ -112,7 +81,45 @@ vec4 getColor(float posx,float posy) {
     return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));
 }
 
-vec4 getColorFilter(vec4 color,float colorH,float colorS,float colorL) {
+vec4 filter(vec4 color,float posx,float posy) {
+    int pindex = 0;
+    for(int f = 0; f < 8; f++) {
+        float filterType;
+        if(f < 4) {
+            filterType = filters1[f];
+        } else {
+            filterType = filters2[f];
+        }
+        vec4 params;
+        if(pindex == 0) {
+            params = filtersParams0;
+        } else if(pindex == 1) {
+            params = filtersParams1;
+        } else if(pindex == 2) {
+            params = filtersParams2;
+        } else if(pindex == 3) {
+            params = filtersParams3;
+        } else if(pindex == 4) {
+            params = filtersParams4;
+        } else if(pindex == 5) {
+            params = filtersParams5;
+        } else if(pindex == 6) {
+            params = filtersParams6;
+        } else if(pindex == 7) {
+            params = filtersParams7;
+        }
+        if(filterType == 1.0) {
+            color = colorFilter(color,params[0],params[1],params[2]);
+            pindex++;
+        } else if(filterType == 2.0) {
+            color = strokeFilter(params[0],params[1],params[2],params[3],posx,posy,color);
+            pindex++;
+        }
+    }
+    return color;
+}
+
+vec4 colorFilter(vec4 color,float colorH,float colorS,float colorL) {
     //rgb -> hsl
 	float r = color[0];
 	float g = color[1];
@@ -246,6 +253,29 @@ vec4 getColorFilter(vec4 color,float colorH,float colorS,float colorL) {
         color[0] = tr;
         color[1] = tg;
         color[2] = tb;
+    }
+    return color;
+}
+
+vec4 strokeFilter(float strokeWidth, float r, float g, float b,float posx,float posy, vec4 color) {
+    if(color[3] == 0.0) {
+        const int max = 10;
+        int size = int(strokeWidth);
+        for(int x = -max; x < max; x++) {
+            if(x < -size || x > size) continue;
+            for(int y = -max; y < max; y++) {
+                if(y < -size || y > size) continue;
+                if(x == 0 && y == 0) continue;
+                vec4 jcolor = getColor(posx + float(x)/width,posy + float(y)/height);
+                if(jcolor[3] != 0.0) {
+                    color[0] = r;
+                    color[1] = g;
+                    color[2] = b;
+                    color[3] = 1.0;
+                    return color;
+                }
+            }
+        }
     }
     return color;
 }

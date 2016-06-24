@@ -20,4 +20,8 @@ class PlatformSprite extends PlatformDisplayObject {
             children[i].$nativeShow.show.setLocalZOrder(i);
         }
     }
+
+    setFilters(filters) {
+
+    }
 }

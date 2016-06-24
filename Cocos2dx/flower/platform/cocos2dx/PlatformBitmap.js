@@ -103,9 +103,13 @@ class PlatformBitmap extends PlatformDisplayObject {
                 var programmer = this.__programmer.$nativeProgrammer;
                 if(Platform.native) {
                     programmer.setUniformInt("scale9", 0);
+                    programmer.setUniformFloat("width", this.__width);
+                    programmer.setUniformFloat("height", this.__height);
                 } else {
                     this.__programmer.use();
                     programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 0);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                 }
             }
         }
