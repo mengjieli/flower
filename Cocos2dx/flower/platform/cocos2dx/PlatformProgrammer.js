@@ -30,7 +30,9 @@ class PlatformProgrammer {
     }
 
     use() {
-        this.$nativeProgrammer.use();
+        if(!Platform.native) {
+            this.$nativeProgrammer.use();
+        }
     }
 
     getUniformLocationForName(name) {

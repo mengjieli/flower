@@ -805,7 +805,9 @@ var _exports = {};
         _createClass(PlatformProgrammer, [{
             key: "use",
             value: function use() {
-                this.$nativeProgrammer.use();
+                if (!Platform.native) {
+                    this.$nativeProgrammer.use();
+                }
             }
         }, {
             key: "getUniformLocationForName",
