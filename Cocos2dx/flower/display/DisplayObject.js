@@ -480,7 +480,7 @@ class DisplayObject extends EventDispatcher {
         return this.__parent;
     }
 
-    get tage() {
+    get stage() {
         return this.__stage;
     }
 

@@ -535,8 +535,6 @@ var _exports = {};
                 this.__scale9Grid = scale9Grid;
                 if (scale9Grid) {
                     this.addProgrammerFlag(0x0001);
-                    this.__programmer.use();
-                    var nativeProgrammer = this.__programmer.$nativeProgrammer;
                     var width = this.__texture.width;
                     var height = this.__texture.height;
                     var setWidth = this.__texture.width * this.__scaleX;
@@ -565,6 +563,7 @@ var _exports = {};
                     if (Platform.native) {
                         programmer.setUniformInt("scale9", 1);
                     } else {
+                        programmer.use();
                         programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 1);
                     }
                     if (Platform.native) {
@@ -579,7 +578,6 @@ var _exports = {};
                         programmer.setUniformFloat("scaleX", scaleX);
                         programmer.setUniformFloat("scaleY", scaleY);
                     } else {
-                        this.__programmer.use();
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("tleft"), tleft);
@@ -594,11 +592,11 @@ var _exports = {};
                 } else {
                     this.removeProgrammerFlag(0x0001);
                     if (this.__programmer) {
-                        this.__programmer.use();
                         var programmer = this.__programmer.$nativeProgrammer;
                         if (Platform.native) {
                             programmer.setUniformInt("scale9", 0);
                         } else {
+                            this.__programmer.use();
                             programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 0);
                         }
                     }
@@ -2534,7 +2532,7 @@ var _exports = {};
                 return this.__parent;
             }
         }, {
-            key: "tage",
+            key: "stage",
             get: function get() {
                 return this.__stage;
             }
@@ -3104,7 +3102,7 @@ var _exports = {};
                 if (!mouse.target) {
                     mouse.target = this;
                 }
-                this.getMouseTarget(x, y, mouse.mutiply);
+                //this.getMouseTarget(x, y, mouse.mutiply);
                 var target = mouse.target; //this.getMouseTarget(x, y, mouse.mutiply);
                 mouse.moveX = x;
                 mouse.moveY = y;
