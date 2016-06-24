@@ -211,12 +211,176 @@ class Platform {
 
 
 
-//////////////////////////File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
-class PlatformSprite {
+//////////////////////////File:flower/platform/cocos2dx/PlatformDisplayObject.js///////////////////////////
+class PlatformDisplayObject {
 
     show;
+    __x = 0;
+    __y = 0;
+    __scaleX = 1;
+    __scaleY = 1;
+    __rotation = 0;
+    __programmer = null;
+
+    /**
+     * 0x0001 scale9Grid
+     * 0x0002 filters
+     * @type {number}
+     * @private
+     */
+    __programmerFlag = 0;
 
     constructor() {
+    }
+
+    setX(val) {
+        this.__x = val;
+        this.show.setPositionX(val);
+    }
+
+    setY(val) {
+        this.__y = val;
+        this.show.setPositionY(val);
+    }
+
+    setScaleX(val) {
+        this.__scaleX = val;
+        this.show.setScaleX(val);
+    }
+
+    setScaleY(val) {
+        this.__scaleY = val;
+        this.show.setScaleY(val);
+    }
+
+    setRotation(val) {
+        this.__rotation = val;
+        this.show.setRotation(val);
+    }
+
+    setAlpha(val) {
+        this.show.setOpacity(val * 255);
+    }
+
+    addProgrammerFlag(flag) {
+        this.__programmerFlag |= flag;
+        this.programmerFlagChange(this.__programmerFlag);
+    }
+
+    removeProgrammerFlag(flag) {
+        this.__programmerFlag &= ~flag;
+        this.programmerFlagChange(this.__programmerFlag);
+    }
+
+    programmerFlagChange(flag) {
+        if (flag) {
+            if (!this.__programmer) {
+                this.__programmer = PlatformProgrammer.createProgrammer();
+                if (Platform.native) {
+                    this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+                } else {
+                    this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                }
+            }
+        } else {
+            if (this.__programmer) {
+                this.__programmer = null;
+                if (Platform.native) {
+                    this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+                } else {
+                    this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+                }
+            }
+        }
+    }
+
+    release() {
+        var show = this.show;
+        show.setPosition(0, 0);
+        show.setScale(1);
+        show.setOpacity(255);
+        show.setRotation(0);
+        show.setVisible(true);
+        this.__x = 0;
+        this.__y = 0;
+        this.__scaleX = 1;
+        this.__scaleY = 1;
+        this.__rotation = 0;
+        this.__programmer = null;
+        this.__programmerFlag = 0;
+        if (this.__programmer) {
+            PlatformProgrammer.release(this.__programmer);
+            if (Platform.native) {
+                this.show.setGLProgramState(PlatformProgrammer.getInstance());
+            } else {
+                this.show.setShaderProgram(PlatformProgrammer.getInstance());
+            }
+        }
+    }
+
+    setFilters(filters) {
+        var types1 = [0, 0, 0, 0];
+        var types2 = [0, 0, 0, 0];
+        if (filters && filters.length) {
+            this.addProgrammerFlag(0x0002);
+            var nativeProgrammer = this.__programmer.$nativeProgrammer;
+            if (!Platform.native) {
+                this.__programmer.use();
+            }
+            var paramsIndex = 0;
+            for (var i = 0; i < filters.length; i++) {
+                if (i < 4) {
+                    types1[i] = filters[i].type;
+                } else {
+                    types2[i - 4] = filters[i].type;
+                }
+                var params = filters[i].params;
+                if (params.length <= 4) {
+                    if (Platform.native) {
+                        nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params));
+                    } else {
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params));
+                    }
+                    paramsIndex++;
+                } else {
+                    if (Platform.native) {
+                        nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(0, 4)));
+                        paramsIndex++;
+                        nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(4, params.length)));
+                        paramsIndex++;
+                    } else {
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(0, 4)));
+                        paramsIndex++;
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(4, params.length)));
+                        paramsIndex++;
+                    }
+                }
+            }
+        } else {
+            this.removeProgrammerFlag(0x0002);
+        }
+        if (this.__programmer) {
+            var nativeProgrammer = this.__programmer.$nativeProgrammer;
+            if (Platform.native) {
+                nativeProgrammer.setUniformVec4("filters1", cc.math.vec4.apply(null, types1));
+                nativeProgrammer.setUniformVec4("filters2", cc.math.vec4.apply(null, types2));
+            } else {
+                this.__programmer.use();
+                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters1")].concat(types1));
+                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters2")].concat(types2));
+            }
+        }
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformDisplayObject.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
+class PlatformSprite extends PlatformDisplayObject {
+
+    constructor() {
+        super();
         this.show = new cc.Node();
         this.show.setAnchorPoint(0, 0);
         this.show.retain();
@@ -234,35 +398,6 @@ class PlatformSprite {
         for (var i = 0, len = children.length; i < len; i++) {
             children[i].$nativeShow.show.setLocalZOrder(i);
         }
-    }
-
-    set x(val) {
-        this.show.setPositionX(val);
-    }
-
-    set y(val) {
-        this.show.setPositionY(-val);
-    }
-
-    set scaleX(val) {
-        this.show.setScaleX(val);
-    }
-
-    set scaleY(val) {
-        this.show.setScaleY(val);
-    }
-
-    set rotation(val) {
-        this.show.setRotation(val);
-    }
-
-    release() {
-        var show = this.show;
-        show.setPosition(0, 0);
-        show.setScale(1);
-        show.setOpacity(255);
-        show.setRotation(0);
-        show.setVisible(true);
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
@@ -297,25 +432,15 @@ class PlatformTextField {
 
 
 //////////////////////////File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
-class PlatformBitmap {
+class PlatformBitmap extends PlatformDisplayObject {
 
-    show;
-    __textureChange = false;
     __texture;
-    __x = 0;
-    __y = 0;
-    __programmer;
-    __programmerChange = false;
-    __shaderFlagChange = false;
-    __shaderFlag = 0;
-    __scale9Grid;
-    __colorFilter;
-    __scaleX = 1;
-    __scaleY = 1;
     __textureScaleX = 1;
     __textureScaleY = 1;
+    __scale9Grid;
 
     constructor() {
+        super();
         this.show = new cc.Sprite();
         this.show.setAnchorPoint(0, 1);
         this.show.retain();
@@ -323,9 +448,6 @@ class PlatformBitmap {
 
     setTexture(texture) {
         this.__texture = texture;
-        if (this.__texture) {
-            this.__textureChange = true;
-        }
         this.show.initWithTexture(texture.$nativeTexture);
         var source = texture.source;
         if (source) {
@@ -337,198 +459,129 @@ class PlatformBitmap {
         this.__textureScaleX = texture.scaleX;
         this.__textureScaleY = texture.scaleY;
         this.show.setAnchorPoint(0, 1);
-        this.x = this.__x;
-        this.y = this.__y;
-        this.scaleX = this.__scaleX;
-        this.scaleY = this.__scaleY;
-        this._changeShader();
-    }
-
-    setScale9Grid(scale9Grid) {
-        var hasScale9 = this.__scale9Grid;
-        this.__scale9Grid = scale9Grid;
-        this.__shaderFlag |= PlatformShaderType.SCALE_9_GRID;
-        this.__shaderFlagChange = true;
-        if (this.__scale9Grid) {
-            if (hasScale9 == null) {
-                if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
-                    this.__programmer = PlatformProgrammer.createProgrammer();
-                    this.__programmerChange = true;
-                }
-            }
-        } else {
-            if (Platform.native) {
-                this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
-            } else {
-                this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
-            }
-        }
-        this._changeShader();
-    }
-
-    setColorFilter(colorFilter) {
-        var hasMatrix = this.__colorFilter;
-        this.__colorFilter = colorFilter;
-        this.__shaderFlag |= PlatformShaderType.COLOR_FILTER;
-        this.__shaderFlagChange = true;
-        if (this.__colorFilter) {
-            if (hasMatrix == null) {
-                if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
-                    this.__programmer = PlatformProgrammer.createProgrammer();
-                    this.__programmerChange = true;
-                }
-            }
-        } else {
-            if (Platform.native) {
-                this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
-            } else {
-                this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
-            }
-        }
-        this._changeShader();
-    }
-
-    _changeShader() {
-        if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
+        this.setX(this.__x);
+        this.setY(this.__y);
+        this.setScaleX(this.__scaleX);
+        this.setScaleY(this.__scaleY);
+        this.setScale9Grid(this.__scale9Grid);
+        if (this.__programmer) {
             if (Platform.native) {
                 this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
             } else {
                 this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
             }
-            this.__textureChange = false;
-            this.__programmerChange = false;
         }
-        if (this.__shaderFlagChange && this.__programmer) {
-            this.__programmer.shaderFlag = this.__shaderFlag;
-            this.__shaderFlag &= ~PlatformShaderType.SCALE_9_GRID;
-            this.__shaderFlagChange = false;
-        }
-        if (this.__texture) {
-            if (this.__scale9Grid) {
-                this._changeScale9Grid(this.__texture.width, this.__texture.height, this.__scale9Grid,
-                    this.__texture.width * this.__scaleX, this.__texture.height * this.__scaleY);
+    }
+
+    setScale9Grid(scale9Grid) {
+        this.__scale9Grid = scale9Grid;
+        if (scale9Grid) {
+            this.addProgrammerFlag(0x0001);
+            this.__programmer.use();
+            var nativeProgrammer = this.__programmer.$nativeProgrammer;
+            var width = this.__texture.width;
+            var height = this.__texture.height;
+            var setWidth = this.__texture.width * this.__scaleX;
+            var setHeight = this.__texture.height * this.__scaleY;
+
+            //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
+            //width /= this.__textureScaleX;
+            //height /= this.__textureScaleY;
+            //scale9Grid.x /= this.__textureScaleX;
+            //scale9Grid.y /= this.__textureScaleY;
+            //scale9Grid.width /= this.__textureScaleX;
+            //scale9Grid.height /= this.__textureScaleY;
+            var scaleX = setWidth / width;
+            var scaleY = setHeight / height;
+            var left = scale9Grid.x / width;
+            var top = scale9Grid.y / height;
+            var right = (scale9Grid.x + scale9Grid.width) / width;
+            var bottom = (scale9Grid.y + scale9Grid.height) / height;
+            var tleft = left / scaleX;
+            var ttop = top / scaleY;
+            var tright = 1.0 - (1.0 - right) / scaleX;
+            var tbottom = 1.0 - (1.0 - bottom) / scaleY;
+            var scaleGapX = (right - left) / (tright - tleft);
+            var scaleGapY = (bottom - top) / (tbottom - ttop);
+            var programmer = this.__programmer.$nativeProgrammer;
+            if(Platform.native) {
+                programmer.setUniformInt("scale9", 1);
+            } else {
+                programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 1);
             }
-            if (this.__colorFilter) {
+            if (Platform.native) {
+                programmer.setUniformFloat("left", left);
+                programmer.setUniformFloat("top", top);
+                programmer.setUniformFloat("tleft", tleft);
+                programmer.setUniformFloat("ttop", ttop);
+                programmer.setUniformFloat("tright", tright);
+                programmer.setUniformFloat("tbottom", tbottom);
+                programmer.setUniformFloat("scaleGapX", scaleGapX);
+                programmer.setUniformFloat("scaleGapY", scaleGapY);
+                programmer.setUniformFloat("scaleX", scaleX);
+                programmer.setUniformFloat("scaleY", scaleY);
+            } else {
+                this.__programmer.use();
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("tleft"), tleft);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("ttop"), ttop);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("tright"), tright);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("tbottom"), tbottom);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapX"), scaleGapX);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapY"), scaleGapY);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
+                programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
+            }
+        } else {
+            this.removeProgrammerFlag(0x0001);
+            if(this.__programmer) {
+                this.__programmer.use();
                 var programmer = this.__programmer.$nativeProgrammer;
-                if (Platform.native) {
-                    programmer.setUniformFloat("colorFilterH", this.__colorFilter.h);
-                    programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
-                    programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
+                if(Platform.native) {
+                    programmer.setUniformInt("scale9", 0);
                 } else {
-                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
-                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
-                    programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                    programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 0);
                 }
             }
         }
     }
 
-    _changeScale9Grid(width, height, scale9Grid, setWidth, setHeight) {
-        //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
-        //width /= this.__textureScaleX;
-        //height /= this.__textureScaleY;
-        //scale9Grid.x /= this.__textureScaleX;
-        //scale9Grid.y /= this.__textureScaleY;
-        //scale9Grid.width /= this.__textureScaleX;
-        //scale9Grid.height /= this.__textureScaleY;
-        var scaleX = setWidth / width;
-        var scaleY = setHeight / height;
-        var left = scale9Grid.x / width;
-        var top = scale9Grid.y / height;
-        var right = (scale9Grid.x + scale9Grid.width) / width;
-        var bottom = (scale9Grid.y + scale9Grid.height) / height;
-        var tleft = left / scaleX;
-        var ttop = top / scaleY;
-        var tright = 1.0 - (1.0 - right) / scaleX;
-        var tbottom = 1.0 - (1.0 - bottom) / scaleY;
-        var scaleGapX = (right - left) / (tright - tleft);
-        var scaleGapY = (bottom - top) / (tbottom - ttop);
-        var programmer = this.__programmer.$nativeProgrammer;
-        if (!Platform.native) {
-            this.__programmer.use();
-        }
-        if (Platform.native) {
-            programmer.setUniformFloat("left", left);
-            programmer.setUniformFloat("top", top);
-            programmer.setUniformFloat("tleft", tleft);
-            programmer.setUniformFloat("ttop", ttop);
-            programmer.setUniformFloat("tright", tright);
-            programmer.setUniformFloat("tbottom", tbottom);
-            programmer.setUniformFloat("scaleGapX", scaleGapX);
-            programmer.setUniformFloat("scaleGapY", scaleGapY);
-            programmer.setUniformFloat("scaleX", scaleX);
-            programmer.setUniformFloat("scaleY", scaleY);
-        } else {
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("tleft"), tleft);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("ttop"), ttop);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("tright"), tright);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("tbottom"), tbottom);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapX"), scaleGapX);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapY"), scaleGapY);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
-            programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
-        }
-    }
-
-    set x(val) {
+    setX(val) {
         this.__x = val;
         this.show.setPositionX(this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX);
     }
 
-    set y(val) {
+    setY(val) {
         this.__y = val;
         this.show.setPositionY(-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY);
     }
 
-    set scaleX(val) {
+    setScaleX(val) {
         this.__scaleX = val;
         this.show.setScaleX(val * this.__textureScaleX);
         if (this.__texture && this.__texture.offX) {
             this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
         }
-        this._changeShader();
+        this.setScale9Grid(this.__scale9Grid);
     }
 
-    set scaleY(val) {
+    setScaleY(val) {
         this.__scaleY = val;
         this.show.setScaleY(val * this.__textureScaleY);
         if (this.__texture && this.__texture.offY) {
             this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
         }
-        this._changeShader();
-    }
-
-    set rotation(val) {
-        this.show.setRotation(val);
+        this.setScale9Grid(this.__scale9Grid);
     }
 
     release() {
-        var show = this.show;
-        show.setPosition(0, 0);
-        show.setScale(1);
-        show.setOpacity(255);
-        show.setRotation(0);
-        show.setVisible(true);
-        this.__scaleX = 1;
-        this.__scaleY = 1;
-        this.__textureChange = false;
         this.__texture = null;
-        this.__x = 0;
-        this.__y = 0;
         this.__textureScaleX = 1;
         this.__textureScaleY = 1;
-        this.__programmerChange = false;
-        if (this.__programmer) {
-            PlatformProgrammer.release(this.__programmer);
-            this.show.setGLProgramState(PlatformProgrammer.getInstance());
-        }
         this.__scale9Grid = null;
         this.__colorFilter = null;
-        this.__programmer = null;
-        this.__shaderFlagChange = false;
-        this.__shaderFlag = 0;
+        super.release();
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
@@ -678,17 +731,6 @@ class PlatformProgrammer {
         }
     }
 
-    set shaderFlag(type) {
-        if (Platform.native) {
-            this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
-            this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
-        } else {
-            this.use();
-            this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
-            this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
-        }
-    }
-
     use() {
         this.$nativeProgrammer.use();
     }
@@ -725,16 +767,6 @@ class PlatformProgrammer {
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformProgrammer.js///////////////////////////
-
-
-
-//////////////////////////File:flower/platform/cocos2dx/PlatformShaderType.js///////////////////////////
-class PlatformShaderType {
-    static TEXTURE_CHANGE = 0x0001;
-    static SCALE_9_GRID = 0x0002;
-    static COLOR_FILTER = 0x0004;
-}
-//////////////////////////End File:flower/platform/cocos2dx/PlatformShaderType.js///////////////////////////
 
 
 
@@ -1181,16 +1213,48 @@ exports.IOErrorEvent = IOErrorEvent;
 
 
 
+//////////////////////////File:flower/filters/Filter.js///////////////////////////
+class Filter {
+
+    //滤镜类型，在 shader 中与之对应
+    //1 为 ColorFilter
+    __type = 0;
+
+    constructor(type) {
+        this.__type = type;
+    }
+
+    get type() {
+        return this.__type;
+    }
+
+    get params() {
+        return this.$getParams();
+    }
+
+    $getParams() {
+
+    }
+}
+//////////////////////////End File:flower/filters/Filter.js///////////////////////////
+
+
+
 //////////////////////////File:flower/filters/ColorFilter.js///////////////////////////
-class ColorFilter {
+class ColorFilter extends Filter {
     __h = 0;
     __s = 0;
     __l = 0;
 
     constructor(h = 0, s = 0, l = 0) {
+        super(1);
         this.h = h;
         this.s = s;
         this.l = l;
+    }
+
+    $getParams() {
+        return [this.h, this.s, this.l];
     }
 
     get h() {
@@ -1693,7 +1757,9 @@ class DisplayObject extends EventDispatcher {
             8: true, //touchEnabeld
             9: true, //multiplyTouchEnabled
             10: 0, //lastTouchX
-            11: 0 //lastTouchY
+            11: 0, //lastTouchY
+            60: [], //filters
+            61: [], //parentFilters
         }
     }
 
@@ -1754,7 +1820,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__x = val;
-        this.$nativeShow.x = val;
+        this.$nativeShow.setX(val);
         this.$invalidatePosition();
     }
 
@@ -1764,7 +1830,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__y = val;
-        this.$nativeShow.y = val;
+        this.$nativeShow.setY(val);
         this.$invalidatePosition();
     }
 
@@ -1775,7 +1841,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[0] = val;
-        this.$nativeShow.scaleX = val;
+        this.$nativeShow.setScaleX(val);
         this.$invalidatePosition();
     }
 
@@ -1794,7 +1860,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[1] = val;
-        this.$nativeShow.scaleY = val;
+        this.$nativeShow.setScaleY(val);
         this.$invalidatePosition();
     }
 
@@ -1813,7 +1879,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[2] = val;
-        this.$nativeShow.rotation = val;
+        this.$nativeShow.setRotation(val);
         this.$invalidatePosition();
     }
 
@@ -1993,8 +2059,10 @@ class DisplayObject extends EventDispatcher {
         this.__stage = stage;
         this.$addFlagsDown(0x0002);
         if (this.__parent) {
+            this.$setParentFilters(this.__parent.$getAllFilters());
             this.dispatchWidth(Event.ADDED);
         } else {
+            this.$setParentFilters(null);
             this.dispatchWidth(Event.REMOVED);
         }
     }
@@ -2009,6 +2077,34 @@ class DisplayObject extends EventDispatcher {
         if (!this.__stage) {
             this.dispatchWidth(Event.REMOVED_FROM_STAGE);
         }
+    }
+
+    $setFilters(val) {
+        if (val == null) {
+            val = [];
+        }
+        var p = this.$DisplayObject;
+        p[60] = val;
+        this.$changeAllFilters();
+        return true;
+    }
+
+    $setParentFilters(val) {
+        if (val == null) {
+            val = [];
+        }
+        var p = this.$DisplayObject;
+        p[61] = val;
+        this.$changeAllFilters();
+    }
+
+    $changeAllFilters() {
+        this.$nativeShow.setFilters(this.$getAllFilters());
+    }
+
+    $getAllFilters() {
+        var p = this.$DisplayObject;
+        return [].concat(p[60]).concat(p[61]);
     }
 
     dispatch(e) {
@@ -2093,7 +2189,7 @@ class DisplayObject extends EventDispatcher {
         return this.__parent;
     }
 
-    get stage() {
+    get tage() {
         return this.__stage;
     }
 
@@ -2128,6 +2224,14 @@ class DisplayObject extends EventDispatcher {
     get lastTouchY() {
         var p = this.$DisplayObject;
         return p[11];
+    }
+
+    get filters() {
+        return this.$getAllFilters();
+    }
+
+    set filters(val) {
+        this.$setFilters(val);
     }
 
     /**
@@ -2197,7 +2301,7 @@ class DisplayObject extends EventDispatcher {
     $onFrameEnd() {
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
-            this.$nativeShow.alpha = this.$getConcatAlpha();
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
         }
         if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
             this.$getContentBounds();
@@ -2331,6 +2435,14 @@ class Sprite extends DisplayObject {
         return -1;
     }
 
+    $changeAllFilters() {
+        super.$changeAllFilters();
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$setParentFilters(this.$getAllFilters());
+        }
+    }
+
     /**
      * 测量子对象的区域
      * @param rect
@@ -2448,8 +2560,6 @@ class Bitmap extends DisplayObject {
         this.texture = texture;
         this.$Bitmap = {
             0: null,    //scale9Grid
-            100: null,  //colorMatrix
-            200: null,  //parentColorMatrix
         }
     }
 
@@ -2494,15 +2604,6 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
-    $setColorFilter(filter) {
-        var p = this.$Bitmap;
-        if (p[100] == filter) {
-            return;
-        }
-        p[100] = filter;
-        this.$nativeShow.setColorFilter(filter);
-    }
-
     get texture() {
         return this.__texture;
     }
@@ -2518,15 +2619,6 @@ class Bitmap extends DisplayObject {
 
     set scale9Grid(val) {
         this.$setScale9Grid(val);
-    }
-
-    get colorFilter() {
-        var p = this.$Bitmap;
-        return p[100];
-    }
-
-    set colorFilter(val) {
-        this.$setColorFilter(val);
     }
 
     dispose() {

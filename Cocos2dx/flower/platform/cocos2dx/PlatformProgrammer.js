@@ -29,17 +29,6 @@ class PlatformProgrammer {
         }
     }
 
-    set shaderFlag(type) {
-        if (Platform.native) {
-            this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
-            this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
-        } else {
-            this.use();
-            this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
-            this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
-        }
-    }
-
     use() {
         this.$nativeProgrammer.use();
     }

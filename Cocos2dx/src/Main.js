@@ -62,7 +62,8 @@ var Main = function () {
 
             var bm = new flower.Bitmap();
             bm.x = bm.y = 100;
-            bm.scaleX = bm.scaleY = 2;
+            bm.width = bm.height = 200;
+            //bm.scaleX = bm.scaleY = 2;
             bm.texture = e.data[1];
             bm.rotation = 30;
             bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
@@ -81,25 +82,27 @@ var Main = function () {
             //                 flower.trace(e.currentTarget.name,e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             //}, this);
             bm.addListener(flower.MouseEvent.MOUSE_OVER, function (e) {
+                bm.scale9Grid = new flower.Rectangle(30, 25, 40, 50);
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             bm.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
+                bm.scale9Grid = null;
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             container.addChild(bm);
 
             flower.trace(container.width, container.height);
 
-            setTimeout(function () {
-                bm.texture = list[2];
-                flower.trace(bm.scaleX, bm.scaleY);
-                flower.trace(container.width, container.height);
-            }, 1500);
+            //setTimeout(function () {
+            //    bm.texture = list[2];
+            //    flower.trace(bm.scaleX, bm.scaleY);
+            //    flower.trace(container.width, container.height);
+            //}, 1500);
 
             var qq = new flower.Bitmap();
             qq.x = -20;
             qq.y = 250;
-            qq.scaleX = qq.scaleY = 0.5;
+            qq.scaleX = qq.scaleY = 0.25;
             qq.texture = e.data[3];
             container.addChild(qq);
             qq.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
@@ -120,8 +123,12 @@ var Main = function () {
             var l = 0;
             setInterval(function () {
                 h += 5;
-                qq.colorFilter = new flower.ColorFilter(h, s, l);
                 //flower.trace(h,s,l);
+                if (h > 270000) {
+                    container.filters = null;
+                } else {
+                    container.filters = [new flower.ColorFilter(h, s, l)];
+                }
             }, 50);
         }
     }]);

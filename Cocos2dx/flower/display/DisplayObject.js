@@ -48,7 +48,9 @@ class DisplayObject extends EventDispatcher {
             8: true, //touchEnabeld
             9: true, //multiplyTouchEnabled
             10: 0, //lastTouchX
-            11: 0 //lastTouchY
+            11: 0, //lastTouchY
+            60: [], //filters
+            61: [], //parentFilters
         }
     }
 
@@ -109,7 +111,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__x = val;
-        this.$nativeShow.x = val;
+        this.$nativeShow.setX(val);
         this.$invalidatePosition();
     }
 
@@ -119,7 +121,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.__y = val;
-        this.$nativeShow.y = val;
+        this.$nativeShow.setY(val);
         this.$invalidatePosition();
     }
 
@@ -130,7 +132,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[0] = val;
-        this.$nativeShow.scaleX = val;
+        this.$nativeShow.setScaleX(val);
         this.$invalidatePosition();
     }
 
@@ -149,7 +151,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[1] = val;
-        this.$nativeShow.scaleY = val;
+        this.$nativeShow.setScaleY(val);
         this.$invalidatePosition();
     }
 
@@ -168,7 +170,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[2] = val;
-        this.$nativeShow.rotation = val;
+        this.$nativeShow.setRotation(val);
         this.$invalidatePosition();
     }
 
@@ -348,8 +350,10 @@ class DisplayObject extends EventDispatcher {
         this.__stage = stage;
         this.$addFlagsDown(0x0002);
         if (this.__parent) {
+            this.$setParentFilters(this.__parent.$getAllFilters());
             this.dispatchWidth(Event.ADDED);
         } else {
+            this.$setParentFilters(null);
             this.dispatchWidth(Event.REMOVED);
         }
     }
@@ -364,6 +368,34 @@ class DisplayObject extends EventDispatcher {
         if (!this.__stage) {
             this.dispatchWidth(Event.REMOVED_FROM_STAGE);
         }
+    }
+
+    $setFilters(val) {
+        if (val == null) {
+            val = [];
+        }
+        var p = this.$DisplayObject;
+        p[60] = val;
+        this.$changeAllFilters();
+        return true;
+    }
+
+    $setParentFilters(val) {
+        if (val == null) {
+            val = [];
+        }
+        var p = this.$DisplayObject;
+        p[61] = val;
+        this.$changeAllFilters();
+    }
+
+    $changeAllFilters() {
+        this.$nativeShow.setFilters(this.$getAllFilters());
+    }
+
+    $getAllFilters() {
+        var p = this.$DisplayObject;
+        return [].concat(p[60]).concat(p[61]);
     }
 
     dispatch(e) {
@@ -448,7 +480,7 @@ class DisplayObject extends EventDispatcher {
         return this.__parent;
     }
 
-    get stage() {
+    get tage() {
         return this.__stage;
     }
 
@@ -483,6 +515,14 @@ class DisplayObject extends EventDispatcher {
     get lastTouchY() {
         var p = this.$DisplayObject;
         return p[11];
+    }
+
+    get filters() {
+        return this.$getAllFilters();
+    }
+
+    set filters(val) {
+        this.$setFilters(val);
     }
 
     /**
@@ -552,7 +592,7 @@ class DisplayObject extends EventDispatcher {
     $onFrameEnd() {
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
-            this.$nativeShow.alpha = this.$getConcatAlpha();
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
         }
         if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
             this.$getContentBounds();

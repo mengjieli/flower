@@ -1,12 +1,17 @@
-class ColorFilter {
+class ColorFilter extends Filter {
     __h = 0;
     __s = 0;
     __l = 0;
 
     constructor(h = 0, s = 0, l = 0) {
+        super(1);
         this.h = h;
         this.s = s;
         this.l = l;
+    }
+
+    $getParams() {
+        return [this.h, this.s, this.l];
     }
 
     get h() {

@@ -17,17 +17,21 @@ uniform float scaleGapY;
 uniform float scaleX;
 uniform float scaleY;
 
-uniform int glowFilter;
-uniform float width;
-uniform float height;
 
-uniform int colorFilter;
-uniform float colorFilterH;
-uniform float colorFilterS;
-uniform float colorFilterL;
+uniform vec4 filters1;
+uniform vec4 filters2;
+
+uniform vec4 filtersParams0;
+uniform vec4 filtersParams1;
+uniform vec4 filtersParams2;
+uniform vec4 filtersParams3;
+uniform vec4 filtersParams4;
+uniform vec4 filtersParams5;
+uniform vec4 filtersParams6;
+uniform vec4 filtersParams7;
 
 vec4 getColor(float posx,float posy);
-vec4 filter(float posx,float posy, vec4 color);
+vec4 filter(vec4 color);
 vec4 getColorFilter(vec4 color,float colorH,float colorS,float colorL);
 
 void main()
@@ -35,33 +39,40 @@ void main()
     float posx = v_texCoord[0];
     float posy = v_texCoord[1];
     vec4 color = getColor(posx,posy);
-    if(colorFilter == 1) {
-        color = getColorFilter(color,colorFilterH,colorFilterS,colorFilterL);
-    }
+    color = filter(color);
     gl_FragColor = color;
 }
 
-vec4 filter(float posx,float posy, vec4 color) {
-    if(color[3] == 0.0 && glowFilter == 1) {
-        vec4 pointColor = getColor((posx*width-1.0/scaleX)/width,(posy*height)/height);
-        if(pointColor[3] != 0.0) {
-            color[3] = 1.0;
+vec4 filter(vec4 color) {
+    int pindex = 0;
+    for(int f = 0; f < 8; f++) {
+        float filterType;
+        if(f < 4) {
+            filterType = filters1[f];
         } else {
-            pointColor = getColor((posx*width+1.0/scaleX)/width,(posy*height)/height);
-            if(pointColor[3] != 0.0) {
-                color[3] = 1.0;
-            }
-            else {
-                pointColor = getColor((posx*width)/width,(posy*height+1.0/scaleY)/height);
-                if(pointColor[3] != 0.0) {
-                   color[3] = 1.0;
-                } else {
-                    pointColor = getColor((posx*width)/width,(posy*height-1.0/scaleY)/height);
-                    if(pointColor[3] != 0.0) {
-                        color[3] = 1.0;
-                    }
-                }
-            }
+            filterType = filters2[f];
+        }
+        vec4 params;
+        if(pindex == 0) {
+            params = filtersParams0;
+        } else if(pindex == 1) {
+            params = filtersParams1;
+        } else if(pindex == 2) {
+            params = filtersParams2;
+        } else if(pindex == 3) {
+            params = filtersParams3;
+        } else if(pindex == 4) {
+            params = filtersParams4;
+        } else if(pindex == 5) {
+            params = filtersParams5;
+        } else if(pindex == 6) {
+            params = filtersParams6;
+        } else if(pindex == 7) {
+            params = filtersParams7;
+        }
+        if(filterType == 1.0) {
+            color = getColorFilter(color,params[0],params[1],params[2]);
+            pindex++;
         }
     }
     return color;

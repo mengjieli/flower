@@ -162,6 +162,7 @@ var files = file.readFilesWidthEnd("js");
 var list = [
     "Flower",
     "Platform",
+    "PlatformDisplayObject",
     "PlatformSprite",
     "PlatformTextField",
     "PlatformBitmap",
@@ -181,6 +182,7 @@ var list = [
     "MouseEvent",
     "IOErrorEvent",
 
+    "Filter",
     "ColorFilter",
 
     "Matrix",

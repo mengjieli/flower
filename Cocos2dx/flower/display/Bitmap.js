@@ -9,8 +9,6 @@ class Bitmap extends DisplayObject {
         this.texture = texture;
         this.$Bitmap = {
             0: null,    //scale9Grid
-            100: null,  //colorMatrix
-            200: null,  //parentColorMatrix
         }
     }
 
@@ -55,15 +53,6 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
-    $setColorFilter(filter) {
-        var p = this.$Bitmap;
-        if (p[100] == filter) {
-            return;
-        }
-        p[100] = filter;
-        this.$nativeShow.setColorFilter(filter);
-    }
-
     get texture() {
         return this.__texture;
     }
@@ -79,15 +68,6 @@ class Bitmap extends DisplayObject {
 
     set scale9Grid(val) {
         this.$setScale9Grid(val);
-    }
-
-    get colorFilter() {
-        var p = this.$Bitmap;
-        return p[100];
-    }
-
-    set colorFilter(val) {
-        this.$setColorFilter(val);
     }
 
     dispose() {

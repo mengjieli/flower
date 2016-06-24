@@ -113,6 +113,14 @@ class Sprite extends DisplayObject {
         return -1;
     }
 
+    $changeAllFilters() {
+        super.$changeAllFilters();
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$setParentFilters(this.$getAllFilters());
+        }
+    }
+
     /**
      * 测量子对象的区域
      * @param rect

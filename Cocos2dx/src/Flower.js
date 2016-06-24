@@ -225,7 +225,7 @@ var _exports = {};
     }();
     //////////////////////////End File:flower/platform/cocos2dx/Platform.js///////////////////////////
 
-    //////////////////////////File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
+    //////////////////////////File:flower/platform/cocos2dx/PlatformDisplayObject.js///////////////////////////
 
 
     Platform.type = "cocos2dx";
@@ -233,13 +233,198 @@ var _exports = {};
     Platform.frame = 0;
     Platform.pools = {};
 
-    var PlatformSprite = function () {
+    var PlatformDisplayObject = function () {
+        function PlatformDisplayObject() {
+            _classCallCheck(this, PlatformDisplayObject);
+
+            this.__x = 0;
+            this.__y = 0;
+            this.__scaleX = 1;
+            this.__scaleY = 1;
+            this.__rotation = 0;
+            this.__programmer = null;
+            this.__programmerFlag = 0;
+        }
+
+        /**
+         * 0x0001 scale9Grid
+         * 0x0002 filters
+         * @type {number}
+         * @private
+         */
+
+
+        _createClass(PlatformDisplayObject, [{
+            key: "setX",
+            value: function setX(val) {
+                this.__x = val;
+                this.show.setPositionX(val);
+            }
+        }, {
+            key: "setY",
+            value: function setY(val) {
+                this.__y = val;
+                this.show.setPositionY(val);
+            }
+        }, {
+            key: "setScaleX",
+            value: function setScaleX(val) {
+                this.__scaleX = val;
+                this.show.setScaleX(val);
+            }
+        }, {
+            key: "setScaleY",
+            value: function setScaleY(val) {
+                this.__scaleY = val;
+                this.show.setScaleY(val);
+            }
+        }, {
+            key: "setRotation",
+            value: function setRotation(val) {
+                this.__rotation = val;
+                this.show.setRotation(val);
+            }
+        }, {
+            key: "setAlpha",
+            value: function setAlpha(val) {
+                this.show.setOpacity(val * 255);
+            }
+        }, {
+            key: "addProgrammerFlag",
+            value: function addProgrammerFlag(flag) {
+                this.__programmerFlag |= flag;
+                this.programmerFlagChange(this.__programmerFlag);
+            }
+        }, {
+            key: "removeProgrammerFlag",
+            value: function removeProgrammerFlag(flag) {
+                this.__programmerFlag &= ~flag;
+                this.programmerFlagChange(this.__programmerFlag);
+            }
+        }, {
+            key: "programmerFlagChange",
+            value: function programmerFlagChange(flag) {
+                if (flag) {
+                    if (!this.__programmer) {
+                        this.__programmer = PlatformProgrammer.createProgrammer();
+                        if (Platform.native) {
+                            this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+                        } else {
+                            this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                        }
+                    }
+                } else {
+                    if (this.__programmer) {
+                        this.__programmer = null;
+                        if (Platform.native) {
+                            this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+                        } else {
+                            this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+                        }
+                    }
+                }
+            }
+        }, {
+            key: "release",
+            value: function release() {
+                var show = this.show;
+                show.setPosition(0, 0);
+                show.setScale(1);
+                show.setOpacity(255);
+                show.setRotation(0);
+                show.setVisible(true);
+                this.__x = 0;
+                this.__y = 0;
+                this.__scaleX = 1;
+                this.__scaleY = 1;
+                this.__rotation = 0;
+                this.__programmer = null;
+                this.__programmerFlag = 0;
+                if (this.__programmer) {
+                    PlatformProgrammer.release(this.__programmer);
+                    if (Platform.native) {
+                        this.show.setGLProgramState(PlatformProgrammer.getInstance());
+                    } else {
+                        this.show.setShaderProgram(PlatformProgrammer.getInstance());
+                    }
+                }
+            }
+        }, {
+            key: "setFilters",
+            value: function setFilters(filters) {
+                var types1 = [0, 0, 0, 0];
+                var types2 = [0, 0, 0, 0];
+                if (filters && filters.length) {
+                    this.addProgrammerFlag(0x0002);
+                    var nativeProgrammer = this.__programmer.$nativeProgrammer;
+                    if (!Platform.native) {
+                        this.__programmer.use();
+                    }
+                    var paramsIndex = 0;
+                    for (var i = 0; i < filters.length; i++) {
+                        if (i < 4) {
+                            types1[i] = filters[i].type;
+                        } else {
+                            types2[i - 4] = filters[i].type;
+                        }
+                        var params = filters[i].params;
+                        if (params.length <= 4) {
+                            if (Platform.native) {
+                                nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params));
+                            } else {
+                                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params));
+                            }
+                            paramsIndex++;
+                        } else {
+                            if (Platform.native) {
+                                nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(0, 4)));
+                                paramsIndex++;
+                                nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(4, params.length)));
+                                paramsIndex++;
+                            } else {
+                                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(0, 4)));
+                                paramsIndex++;
+                                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(4, params.length)));
+                                paramsIndex++;
+                            }
+                        }
+                    }
+                } else {
+                    this.removeProgrammerFlag(0x0002);
+                }
+                if (this.__programmer) {
+                    var nativeProgrammer = this.__programmer.$nativeProgrammer;
+                    if (Platform.native) {
+                        nativeProgrammer.setUniformVec4("filters1", cc.math.vec4.apply(null, types1));
+                        nativeProgrammer.setUniformVec4("filters2", cc.math.vec4.apply(null, types2));
+                    } else {
+                        this.__programmer.use();
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters1")].concat(types1));
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters2")].concat(types2));
+                    }
+                }
+            }
+        }]);
+
+        return PlatformDisplayObject;
+    }();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformDisplayObject.js///////////////////////////
+
+    //////////////////////////File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
+
+
+    var PlatformSprite = function (_PlatformDisplayObjec) {
+        _inherits(PlatformSprite, _PlatformDisplayObjec);
+
         function PlatformSprite() {
             _classCallCheck(this, PlatformSprite);
 
-            this.show = new cc.Node();
-            this.show.setAnchorPoint(0, 0);
-            this.show.retain();
+            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformSprite).call(this));
+
+            _this.show = new cc.Node();
+            _this.show.setAnchorPoint(0, 0);
+            _this.show.retain();
+            return _this;
         }
 
         _createClass(PlatformSprite, [{
@@ -259,45 +444,10 @@ var _exports = {};
                     children[i].$nativeShow.show.setLocalZOrder(i);
                 }
             }
-        }, {
-            key: "release",
-            value: function release() {
-                var show = this.show;
-                show.setPosition(0, 0);
-                show.setScale(1);
-                show.setOpacity(255);
-                show.setRotation(0);
-                show.setVisible(true);
-            }
-        }, {
-            key: "x",
-            set: function set(val) {
-                this.show.setPositionX(val);
-            }
-        }, {
-            key: "y",
-            set: function set(val) {
-                this.show.setPositionY(-val);
-            }
-        }, {
-            key: "scaleX",
-            set: function set(val) {
-                this.show.setScaleX(val);
-            }
-        }, {
-            key: "scaleY",
-            set: function set(val) {
-                this.show.setScaleY(val);
-            }
-        }, {
-            key: "rotation",
-            set: function set(val) {
-                this.show.setRotation(val);
-            }
         }]);
 
         return PlatformSprite;
-    }();
+    }(PlatformDisplayObject);
     //////////////////////////End File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
@@ -334,33 +484,27 @@ var _exports = {};
     //////////////////////////File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
 
 
-    var PlatformBitmap = function () {
+    var PlatformBitmap = function (_PlatformDisplayObjec2) {
+        _inherits(PlatformBitmap, _PlatformDisplayObjec2);
+
         function PlatformBitmap() {
             _classCallCheck(this, PlatformBitmap);
 
-            this.__textureChange = false;
-            this.__x = 0;
-            this.__y = 0;
-            this.__programmerChange = false;
-            this.__shaderFlagChange = false;
-            this.__shaderFlag = 0;
-            this.__scaleX = 1;
-            this.__scaleY = 1;
-            this.__textureScaleX = 1;
-            this.__textureScaleY = 1;
+            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformBitmap).call(this));
 
-            this.show = new cc.Sprite();
-            this.show.setAnchorPoint(0, 1);
-            this.show.retain();
+            _this2.__textureScaleX = 1;
+            _this2.__textureScaleY = 1;
+
+            _this2.show = new cc.Sprite();
+            _this2.show.setAnchorPoint(0, 1);
+            _this2.show.retain();
+            return _this2;
         }
 
         _createClass(PlatformBitmap, [{
             key: "setTexture",
             value: function setTexture(texture) {
                 this.__texture = texture;
-                if (this.__texture) {
-                    this.__textureChange = true;
-                }
                 this.show.initWithTexture(texture.$nativeTexture);
                 var source = texture.source;
                 if (source) {
@@ -372,212 +516,140 @@ var _exports = {};
                 this.__textureScaleX = texture.scaleX;
                 this.__textureScaleY = texture.scaleY;
                 this.show.setAnchorPoint(0, 1);
-                this.x = this.__x;
-                this.y = this.__y;
-                this.scaleX = this.__scaleX;
-                this.scaleY = this.__scaleY;
-                this._changeShader();
-            }
-        }, {
-            key: "setScale9Grid",
-            value: function setScale9Grid(scale9Grid) {
-                var hasScale9 = this.__scale9Grid;
-                this.__scale9Grid = scale9Grid;
-                this.__shaderFlag |= PlatformShaderType.SCALE_9_GRID;
-                this.__shaderFlagChange = true;
-                if (this.__scale9Grid) {
-                    if (hasScale9 == null) {
-                        if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
-                            this.__programmer = PlatformProgrammer.createProgrammer();
-                            this.__programmerChange = true;
-                        }
-                    }
-                } else {
-                    if (Platform.native) {
-                        this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
-                    } else {
-                        this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
-                    }
-                }
-                this._changeShader();
-            }
-        }, {
-            key: "setColorFilter",
-            value: function setColorFilter(colorFilter) {
-                var hasMatrix = this.__colorFilter;
-                this.__colorFilter = colorFilter;
-                this.__shaderFlag |= PlatformShaderType.COLOR_FILTER;
-                this.__shaderFlagChange = true;
-                if (this.__colorFilter) {
-                    if (hasMatrix == null) {
-                        if (!this.__programmer || this.__programmer == PlatformProgrammer.instance) {
-                            this.__programmer = PlatformProgrammer.createProgrammer();
-                            this.__programmerChange = true;
-                        }
-                    }
-                } else {
-                    if (Platform.native) {
-                        this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
-                    } else {
-                        this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
-                    }
-                }
-                this._changeShader();
-            }
-        }, {
-            key: "_changeShader",
-            value: function _changeShader() {
-                if ((this.__textureChange || this.__programmerChange) && this.__programmer) {
+                this.setX(this.__x);
+                this.setY(this.__y);
+                this.setScaleX(this.__scaleX);
+                this.setScaleY(this.__scaleY);
+                this.setScale9Grid(this.__scale9Grid);
+                if (this.__programmer) {
                     if (Platform.native) {
                         this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
                     } else {
                         this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
                     }
-                    this.__textureChange = false;
-                    this.__programmerChange = false;
                 }
-                if (this.__shaderFlagChange && this.__programmer) {
-                    this.__programmer.shaderFlag = this.__shaderFlag;
-                    this.__shaderFlag &= ~PlatformShaderType.SCALE_9_GRID;
-                    this.__shaderFlagChange = false;
-                }
-                if (this.__texture) {
-                    if (this.__scale9Grid) {
-                        this._changeScale9Grid(this.__texture.width, this.__texture.height, this.__scale9Grid, this.__texture.width * this.__scaleX, this.__texture.height * this.__scaleY);
+            }
+        }, {
+            key: "setScale9Grid",
+            value: function setScale9Grid(scale9Grid) {
+                this.__scale9Grid = scale9Grid;
+                if (scale9Grid) {
+                    this.addProgrammerFlag(0x0001);
+                    this.__programmer.use();
+                    var nativeProgrammer = this.__programmer.$nativeProgrammer;
+                    var width = this.__texture.width;
+                    var height = this.__texture.height;
+                    var setWidth = this.__texture.width * this.__scaleX;
+                    var setHeight = this.__texture.height * this.__scaleY;
+
+                    //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
+                    //width /= this.__textureScaleX;
+                    //height /= this.__textureScaleY;
+                    //scale9Grid.x /= this.__textureScaleX;
+                    //scale9Grid.y /= this.__textureScaleY;
+                    //scale9Grid.width /= this.__textureScaleX;
+                    //scale9Grid.height /= this.__textureScaleY;
+                    var scaleX = setWidth / width;
+                    var scaleY = setHeight / height;
+                    var left = scale9Grid.x / width;
+                    var top = scale9Grid.y / height;
+                    var right = (scale9Grid.x + scale9Grid.width) / width;
+                    var bottom = (scale9Grid.y + scale9Grid.height) / height;
+                    var tleft = left / scaleX;
+                    var ttop = top / scaleY;
+                    var tright = 1.0 - (1.0 - right) / scaleX;
+                    var tbottom = 1.0 - (1.0 - bottom) / scaleY;
+                    var scaleGapX = (right - left) / (tright - tleft);
+                    var scaleGapY = (bottom - top) / (tbottom - ttop);
+                    var programmer = this.__programmer.$nativeProgrammer;
+                    if (Platform.native) {
+                        programmer.setUniformInt("scale9", 1);
+                    } else {
+                        programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 1);
                     }
-                    if (this.__colorFilter) {
+                    if (Platform.native) {
+                        programmer.setUniformFloat("left", left);
+                        programmer.setUniformFloat("top", top);
+                        programmer.setUniformFloat("tleft", tleft);
+                        programmer.setUniformFloat("ttop", ttop);
+                        programmer.setUniformFloat("tright", tright);
+                        programmer.setUniformFloat("tbottom", tbottom);
+                        programmer.setUniformFloat("scaleGapX", scaleGapX);
+                        programmer.setUniformFloat("scaleGapY", scaleGapY);
+                        programmer.setUniformFloat("scaleX", scaleX);
+                        programmer.setUniformFloat("scaleY", scaleY);
+                    } else {
+                        this.__programmer.use();
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("tleft"), tleft);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("ttop"), ttop);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("tright"), tright);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("tbottom"), tbottom);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapX"), scaleGapX);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapY"), scaleGapY);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
+                    }
+                } else {
+                    this.removeProgrammerFlag(0x0001);
+                    if (this.__programmer) {
+                        this.__programmer.use();
                         var programmer = this.__programmer.$nativeProgrammer;
                         if (Platform.native) {
-                            programmer.setUniformFloat("colorFilterH", this.__colorFilter.h);
-                            programmer.setUniformFloat("colorFilterS", this.__colorFilter.s);
-                            programmer.setUniformFloat("colorFilterL", this.__colorFilter.l);
+                            programmer.setUniformInt("scale9", 0);
                         } else {
-                            programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterH"), this.__colorFilter.h);
-                            programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterS"), this.__colorFilter.s);
-                            programmer.setUniformLocationF32(this.__programmer.getUniformLocationForName("colorFilterL"), this.__colorFilter.l);
+                            programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 0);
                         }
                     }
                 }
             }
         }, {
-            key: "_changeScale9Grid",
-            value: function _changeScale9Grid(width, height, scale9Grid, setWidth, setHeight) {
-                //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
-                //width /= this.__textureScaleX;
-                //height /= this.__textureScaleY;
-                //scale9Grid.x /= this.__textureScaleX;
-                //scale9Grid.y /= this.__textureScaleY;
-                //scale9Grid.width /= this.__textureScaleX;
-                //scale9Grid.height /= this.__textureScaleY;
-                var scaleX = setWidth / width;
-                var scaleY = setHeight / height;
-                var left = scale9Grid.x / width;
-                var top = scale9Grid.y / height;
-                var right = (scale9Grid.x + scale9Grid.width) / width;
-                var bottom = (scale9Grid.y + scale9Grid.height) / height;
-                var tleft = left / scaleX;
-                var ttop = top / scaleY;
-                var tright = 1.0 - (1.0 - right) / scaleX;
-                var tbottom = 1.0 - (1.0 - bottom) / scaleY;
-                var scaleGapX = (right - left) / (tright - tleft);
-                var scaleGapY = (bottom - top) / (tbottom - ttop);
-                var programmer = this.__programmer.$nativeProgrammer;
-                if (!Platform.native) {
-                    this.__programmer.use();
-                }
-                if (Platform.native) {
-                    programmer.setUniformFloat("left", left);
-                    programmer.setUniformFloat("top", top);
-                    programmer.setUniformFloat("tleft", tleft);
-                    programmer.setUniformFloat("ttop", ttop);
-                    programmer.setUniformFloat("tright", tright);
-                    programmer.setUniformFloat("tbottom", tbottom);
-                    programmer.setUniformFloat("scaleGapX", scaleGapX);
-                    programmer.setUniformFloat("scaleGapY", scaleGapY);
-                    programmer.setUniformFloat("scaleX", scaleX);
-                    programmer.setUniformFloat("scaleY", scaleY);
-                } else {
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("tleft"), tleft);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("ttop"), ttop);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("tright"), tright);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("tbottom"), tbottom);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapX"), scaleGapX);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapY"), scaleGapY);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
-                    programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
-                }
-            }
-        }, {
-            key: "release",
-            value: function release() {
-                var show = this.show;
-                show.setPosition(0, 0);
-                show.setScale(1);
-                show.setOpacity(255);
-                show.setRotation(0);
-                show.setVisible(true);
-                this.__scaleX = 1;
-                this.__scaleY = 1;
-                this.__textureChange = false;
-                this.__texture = null;
-                this.__x = 0;
-                this.__y = 0;
-                this.__textureScaleX = 1;
-                this.__textureScaleY = 1;
-                this.__programmerChange = false;
-                if (this.__programmer) {
-                    PlatformProgrammer.release(this.__programmer);
-                    this.show.setGLProgramState(PlatformProgrammer.getInstance());
-                }
-                this.__scale9Grid = null;
-                this.__colorFilter = null;
-                this.__programmer = null;
-                this.__shaderFlagChange = false;
-                this.__shaderFlag = 0;
-            }
-        }, {
-            key: "x",
-            set: function set(val) {
+            key: "setX",
+            value: function setX(val) {
                 this.__x = val;
                 this.show.setPositionX(this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX);
             }
         }, {
-            key: "y",
-            set: function set(val) {
+            key: "setY",
+            value: function setY(val) {
                 this.__y = val;
                 this.show.setPositionY(-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY);
             }
         }, {
-            key: "scaleX",
-            set: function set(val) {
+            key: "setScaleX",
+            value: function setScaleX(val) {
                 this.__scaleX = val;
                 this.show.setScaleX(val * this.__textureScaleX);
                 if (this.__texture && this.__texture.offX) {
                     this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
                 }
-                this._changeShader();
+                this.setScale9Grid(this.__scale9Grid);
             }
         }, {
-            key: "scaleY",
-            set: function set(val) {
+            key: "setScaleY",
+            value: function setScaleY(val) {
                 this.__scaleY = val;
                 this.show.setScaleY(val * this.__textureScaleY);
                 if (this.__texture && this.__texture.offY) {
                     this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
                 }
-                this._changeShader();
+                this.setScale9Grid(this.__scale9Grid);
             }
         }, {
-            key: "rotation",
-            set: function set(val) {
-                this.show.setRotation(val);
+            key: "release",
+            value: function release() {
+                this.__texture = null;
+                this.__textureScaleX = 1;
+                this.__textureScaleY = 1;
+                this.__scale9Grid = null;
+                this.__colorFilter = null;
+                _get(Object.getPrototypeOf(PlatformBitmap.prototype), "release", this).call(this);
             }
         }]);
 
         return PlatformBitmap;
-    }();
+    }(PlatformDisplayObject);
     //////////////////////////End File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
@@ -747,18 +819,6 @@ var _exports = {};
                 uniforms[name] = this.$nativeProgrammer.getUniformLocationForName(name);
                 return uniforms[name];
             }
-        }, {
-            key: "shaderFlag",
-            set: function set(type) {
-                if (Platform.native) {
-                    this.$nativeProgrammer.setUniformInt("scale9", type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
-                    this.$nativeProgrammer.setUniformInt("colorFilter", type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
-                } else {
-                    this.use();
-                    this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("scale9"), type & PlatformShaderType.SCALE_9_GRID ? 1 : 0);
-                    this.$nativeProgrammer.setUniformLocationI32(this.getUniformLocationForName("colorFilter"), type & PlatformShaderType.COLOR_FILTER ? 1 : 0);
-                }
-            }
         }], [{
             key: "createProgrammer",
             value: function createProgrammer() {
@@ -786,22 +846,10 @@ var _exports = {};
     }();
     //////////////////////////End File:flower/platform/cocos2dx/PlatformProgrammer.js///////////////////////////
 
-    //////////////////////////File:flower/platform/cocos2dx/PlatformShaderType.js///////////////////////////
-
-
-    PlatformProgrammer.programmers = [];
-
-    var PlatformShaderType = function PlatformShaderType() {
-        _classCallCheck(this, PlatformShaderType);
-    };
-    //////////////////////////End File:flower/platform/cocos2dx/PlatformShaderType.js///////////////////////////
-
     //////////////////////////File:flower/core/CoreTime.js///////////////////////////
 
 
-    PlatformShaderType.TEXTURE_CHANGE = 0x0001;
-    PlatformShaderType.SCALE_9_GRID = 0x0002;
-    PlatformShaderType.COLOR_FILTER = 0x0004;
+    PlatformProgrammer.programmers = [];
 
     var CoreTime = function () {
         function CoreTime() {
@@ -1181,14 +1229,14 @@ var _exports = {};
 
             _classCallCheck(this, TouchEvent);
 
-            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
 
-            _this.$touchId = 0;
-            _this.$touchX = 0;
-            _this.$touchY = 0;
-            _this.$stageX = 0;
-            _this.$stageY = 0;
-            return _this;
+            _this3.$touchId = 0;
+            _this3.$touchX = 0;
+            _this3.$touchY = 0;
+            _this3.$stageX = 0;
+            _this3.$stageY = 0;
+            return _this3;
         }
 
         _createClass(TouchEvent, [{
@@ -1315,9 +1363,46 @@ var _exports = {};
     _exports.IOErrorEvent = IOErrorEvent;
     //////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
 
+    //////////////////////////File:flower/filters/Filter.js///////////////////////////
+
+    var Filter = function () {
+        function Filter(type) {
+            _classCallCheck(this, Filter);
+
+            this.__type = 0;
+
+            this.__type = type;
+        }
+
+        //滤镜类型，在 shader 中与之对应
+        //1 为 ColorFilter
+
+
+        _createClass(Filter, [{
+            key: "$getParams",
+            value: function $getParams() {}
+        }, {
+            key: "type",
+            get: function get() {
+                return this.__type;
+            }
+        }, {
+            key: "params",
+            get: function get() {
+                return this.$getParams();
+            }
+        }]);
+
+        return Filter;
+    }();
+    //////////////////////////End File:flower/filters/Filter.js///////////////////////////
+
     //////////////////////////File:flower/filters/ColorFilter.js///////////////////////////
 
-    var ColorFilter = function () {
+
+    var ColorFilter = function (_Filter) {
+        _inherits(ColorFilter, _Filter);
+
         function ColorFilter() {
             var h = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
             var s = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
@@ -1325,16 +1410,24 @@ var _exports = {};
 
             _classCallCheck(this, ColorFilter);
 
-            this.__h = 0;
-            this.__s = 0;
-            this.__l = 0;
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
 
-            this.h = h;
-            this.s = s;
-            this.l = l;
+            _this6.__h = 0;
+            _this6.__s = 0;
+            _this6.__l = 0;
+
+            _this6.h = h;
+            _this6.s = s;
+            _this6.l = l;
+            return _this6;
         }
 
         _createClass(ColorFilter, [{
+            key: "$getParams",
+            value: function $getParams() {
+                return [this.h, this.s, this.l];
+            }
+        }, {
             key: "h",
             get: function get() {
                 return this.__h;
@@ -1378,7 +1471,7 @@ var _exports = {};
         }]);
 
         return ColorFilter;
-    }();
+    }(Filter);
 
     _exports.ColorFilter = ColorFilter;
     //////////////////////////End File:flower/filters/ColorFilter.js///////////////////////////
@@ -1851,15 +1944,15 @@ var _exports = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this4.__x = 0;
-            _this4.__y = 0;
-            _this4.__flags = 0;
-            _this4.__alpha = 1;
-            _this4.__concatAlpha = 1;
+            _this7.__x = 0;
+            _this7.__y = 0;
+            _this7.__flags = 0;
+            _this7.__alpha = 1;
+            _this7.__concatAlpha = 1;
 
-            _this4.$DisplayObject = {
+            _this7.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -1871,9 +1964,10 @@ var _exports = {};
                 8: true, //touchEnabeld
                 9: true, //multiplyTouchEnabled
                 10: 0, //lastTouchX
-                11: 0 //lastTouchY
-            };
-            return _this4;
+                11: 0, //lastTouchY
+                60: [], //filters
+                61: [] };
+            return _this7;
         }
 
         /**
@@ -1895,6 +1989,7 @@ var _exports = {};
 
         _createClass(DisplayObject, [{
             key: "$hasFlags",
+            //parentFilters
             value: function $hasFlags(flags) {
                 return (this.__flags & flags) == flags ? true : false;
             }
@@ -1954,7 +2049,7 @@ var _exports = {};
                     return;
                 }
                 this.__x = val;
-                this.$nativeShow.x = val;
+                this.$nativeShow.setX(val);
                 this.$invalidatePosition();
             }
         }, {
@@ -1965,7 +2060,7 @@ var _exports = {};
                     return;
                 }
                 this.__y = val;
-                this.$nativeShow.y = val;
+                this.$nativeShow.setY(val);
                 this.$invalidatePosition();
             }
         }, {
@@ -1977,7 +2072,7 @@ var _exports = {};
                     return;
                 }
                 p[0] = val;
-                this.$nativeShow.scaleX = val;
+                this.$nativeShow.setScaleX(val);
                 this.$invalidatePosition();
             }
         }, {
@@ -1998,7 +2093,7 @@ var _exports = {};
                     return;
                 }
                 p[1] = val;
-                this.$nativeShow.scaleY = val;
+                this.$nativeShow.setScaleY(val);
                 this.$invalidatePosition();
             }
         }, {
@@ -2019,7 +2114,7 @@ var _exports = {};
                     return;
                 }
                 p[2] = val;
-                this.$nativeShow.rotation = val;
+                this.$nativeShow.setRotation(val);
                 this.$invalidatePosition();
             }
         }, {
@@ -2210,8 +2305,10 @@ var _exports = {};
                 this.__stage = stage;
                 this.$addFlagsDown(0x0002);
                 if (this.__parent) {
+                    this.$setParentFilters(this.__parent.$getAllFilters());
                     this.dispatchWidth(Event.ADDED);
                 } else {
+                    this.$setParentFilters(null);
                     this.dispatchWidth(Event.REMOVED);
                 }
             }
@@ -2228,6 +2325,38 @@ var _exports = {};
                 if (!this.__stage) {
                     this.dispatchWidth(Event.REMOVED_FROM_STAGE);
                 }
+            }
+        }, {
+            key: "$setFilters",
+            value: function $setFilters(val) {
+                if (val == null) {
+                    val = [];
+                }
+                var p = this.$DisplayObject;
+                p[60] = val;
+                this.$changeAllFilters();
+                return true;
+            }
+        }, {
+            key: "$setParentFilters",
+            value: function $setParentFilters(val) {
+                if (val == null) {
+                    val = [];
+                }
+                var p = this.$DisplayObject;
+                p[61] = val;
+                this.$changeAllFilters();
+            }
+        }, {
+            key: "$changeAllFilters",
+            value: function $changeAllFilters() {
+                this.$nativeShow.setFilters(this.$getAllFilters());
+            }
+        }, {
+            key: "$getAllFilters",
+            value: function $getAllFilters() {
+                var p = this.$DisplayObject;
+                return [].concat(p[60]).concat(p[61]);
             }
         }, {
             key: "dispatch",
@@ -2313,7 +2442,7 @@ var _exports = {};
             value: function $onFrameEnd() {
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
-                    this.$nativeShow.alpha = this.$getConcatAlpha();
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
                 }
                 if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
                     this.$getContentBounds();
@@ -2405,7 +2534,7 @@ var _exports = {};
                 return this.__parent;
             }
         }, {
-            key: "stage",
+            key: "tage",
             get: function get() {
                 return this.__stage;
             }
@@ -2445,6 +2574,14 @@ var _exports = {};
                 var p = this.$DisplayObject;
                 return p[11];
             }
+        }, {
+            key: "filters",
+            get: function get() {
+                return this.$getAllFilters();
+            },
+            set: function set(val) {
+                this.$setFilters(val);
+            }
         }]);
 
         return DisplayObject;
@@ -2462,11 +2599,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this5.__children = [];
-            _this5.$nativeShow = Platform.create("Sprite");
-            return _this5;
+            _this8.__children = [];
+            _this8.$nativeShow = Platform.create("Sprite");
+            return _this8;
         }
 
         _createClass(Sprite, [{
@@ -2582,6 +2719,15 @@ var _exports = {};
                     }
                 }
                 return -1;
+            }
+        }, {
+            key: "$changeAllFilters",
+            value: function $changeAllFilters() {
+                _get(Object.getPrototypeOf(Sprite.prototype), "$changeAllFilters", this).call(this);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$setParentFilters(this.$getAllFilters());
+                }
             }
 
             /**
@@ -2702,20 +2848,18 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this6.$nativeShow = Platform.create("Bitmap");
-            _this6.texture = texture;
-            _this6.$Bitmap = {
-                0: null, //scale9Grid
-                100: null, //colorMatrix
-                200: null };
-            return _this6;
+            _this9.$nativeShow = Platform.create("Bitmap");
+            _this9.texture = texture;
+            _this9.$Bitmap = {
+                0: null };
+            return _this9;
         }
 
         _createClass(Bitmap, [{
             key: "$setTexture",
-            //parentColorMatrix
+            //scale9Grid
             value: function $setTexture(val) {
                 if (val == this.__texture) {
                     return false;
@@ -2758,16 +2902,6 @@ var _exports = {};
                 return true;
             }
         }, {
-            key: "$setColorFilter",
-            value: function $setColorFilter(filter) {
-                var p = this.$Bitmap;
-                if (p[100] == filter) {
-                    return;
-                }
-                p[100] = filter;
-                this.$nativeShow.setColorFilter(filter);
-            }
-        }, {
             key: "dispose",
             value: function dispose() {
                 _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
@@ -2790,15 +2924,6 @@ var _exports = {};
             set: function set(val) {
                 this.$setScale9Grid(val);
             }
-        }, {
-            key: "colorFilter",
-            get: function get() {
-                var p = this.$Bitmap;
-                return p[100];
-            },
-            set: function set(val) {
-                this.$setColorFilter(val);
-            }
         }]);
 
         return Bitmap;
@@ -2815,18 +2940,18 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this7.__nativeMouseMoveEvent = [];
-            _this7.__nativeTouchEvent = [];
-            _this7.__mouseOverList = [_this7];
-            _this7.__touchList = [];
-            _this7.__lastMouseX = -1;
-            _this7.__lastMouseY = -1;
+            _this10.__nativeMouseMoveEvent = [];
+            _this10.__nativeTouchEvent = [];
+            _this10.__mouseOverList = [_this10];
+            _this10.__touchList = [];
+            _this10.__lastMouseX = -1;
+            _this10.__lastMouseY = -1;
 
-            _this7.__stage = _this7;
-            Stage.stages.push(_this7);
-            return _this7;
+            _this10.__stage = _this10;
+            Stage.stages.push(_this10);
+            return _this10;
         }
 
         _createClass(Stage, [{
@@ -3328,26 +3453,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this8._createRes = false;
-            _this8._isLoading = false;
-            _this8._selfDispose = false;
+            _this11._createRes = false;
+            _this11._isLoading = false;
+            _this11._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this8._createRes = true;
+                    _this11._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this8._res = res;
-            _this8._type = _this8._res.type;
-            _this8._language = LANGUAGE;
-            _this8._scale = SCALE ? SCALE : null;
-            return _this8;
+            _this11._res = res;
+            _this11._type = _this11._res.type;
+            _this11._language = LANGUAGE;
+            _this11._scale = SCALE ? SCALE : null;
+            return _this11;
         }
 
         _createClass(URLLoader, [{
@@ -3560,12 +3685,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this9.__list = list;
-            _this9.__dataList = [];
-            _this9.__index = 0;
-            return _this9;
+            _this12.__list = list;
+            _this12.__dataList = [];
+            _this12.__index = 0;
+            return _this12;
         }
 
         _createClass(URLLoaderList, [{
