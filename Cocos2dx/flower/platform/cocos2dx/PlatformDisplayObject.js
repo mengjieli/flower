@@ -35,11 +35,12 @@ class PlatformDisplayObject {
         this.__width = val;
         var programmer = this.__programmer;
         if(programmer) {
+            var nativeProgrammer = programmer.$nativeProgrammer;
             if (Platform.native) {
-                programmer.setUniformFloat("width", this.__width);
+                nativeProgrammer.setUniformFloat("width", this.__width);
             } else {
                 programmer.use();
-                programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                nativeProgrammer.setUniformLocationF32(nativeProgrammer.getUniformLocationForName("width"), this.__width);
             }
         }
     }
@@ -48,11 +49,12 @@ class PlatformDisplayObject {
         this.__height = val;
         var programmer = this.__programmer;
         if(programmer) {
+            var nativeProgrammer = programmer.$nativeProgrammer;
             if (Platform.native) {
-                programmer.setUniformFloat("height", this.__height);
+                nativeProgrammer.setUniformFloat("height", this.__height);
             } else {
                 programmer.use();
-                programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
+                nativeProgrammer.setUniformLocationF32(nativeProgrammer.getUniformLocationForName("height"), this.__height);
             }
         }
     }

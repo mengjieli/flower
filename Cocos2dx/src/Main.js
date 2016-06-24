@@ -65,7 +65,7 @@ var Main = function () {
             //bm.width = bm.height = 200;
             bm.scaleX = bm.scaleY = 2;
             bm.texture = e.data[1];
-            //bm.rotation = 30;
+            bm.rotation = 30;
             bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
@@ -93,18 +93,18 @@ var Main = function () {
 
             flower.trace(container.width, container.height);
 
-            //setTimeout(function () {
-            //    bm.texture = list[2];
-            //    flower.trace(bm.scaleX, bm.scaleY);
-            //    flower.trace(container.width, container.height);
-            //}, 1500);
+            setTimeout(function () {
+                bm.texture = list[2];
+                flower.trace(bm.scaleX, bm.scaleY);
+                flower.trace(container.width, container.height);
+            }, 5000);
 
             var qq = new flower.Bitmap();
             qq.x = -20;
             qq.y = 250;
             qq.scaleX = qq.scaleY = 0.25;
             qq.texture = e.data[3];
-            //container.addChild(qq);
+            container.addChild(qq);
             qq.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
