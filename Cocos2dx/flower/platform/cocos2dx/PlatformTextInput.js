@@ -24,7 +24,7 @@ class PlatformTextInput extends PlatformDisplayObject {
         }
     }
 
-    setChangeBack(changeBack,thisObj) {
+    setChangeBack(changeBack, thisObj) {
         this.__changeBack = changeBack;
         this.__changeBackThis = thisObj;
     }
@@ -39,9 +39,13 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     onTextFieldInsertText(sender, text, len) {
         //console.log(text + " : " + len);
-        if(this.__changeBack) {
+        if (this.__changeBack) {
             this.__changeBack.call(this.__changeBackThis);
         }
+    }
+
+    onTextFieldDeleteBackward() {
+
     }
 
     setFontColor(color) {

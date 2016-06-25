@@ -725,6 +725,9 @@ var _exports = {};
                 }
             }
         }, {
+            key: "onTextFieldDeleteBackward",
+            value: function onTextFieldDeleteBackward() {}
+        }, {
             key: "setFontColor",
             value: function setFontColor(color) {
                 this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
