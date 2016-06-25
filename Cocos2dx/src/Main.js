@@ -146,10 +146,10 @@ var Main = function () {
             }, this);
             flower.trace(container.width, container.height);
 
-            var txt = new flower.TextField();
-            txt.x = 100;
-            txt.y = 360;
-            txt.text = "what? who? how?";
+            var txt = new flower.TextInput();
+            txt.x = 0;
+            txt.y = 0;
+            txt.text = "你好啊，笨蛋12321321";
             txt.fontColor = 0x00ff00;
             container.addChild(txt);
         }

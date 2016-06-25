@@ -50,6 +50,7 @@ class DisplayObject extends EventDispatcher {
             9: true, //multiplyTouchEnabled
             10: 0, //lastTouchX
             11: 0, //lastTouchY
+            50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
         }
@@ -206,10 +207,11 @@ class DisplayObject extends EventDispatcher {
         val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
         if (p[3] == val) {
-            return;
+            return false;
         }
         p[3] = val;
         this.$invalidatePosition();
+        return true;
     }
 
     $getWidth() {
@@ -222,10 +224,11 @@ class DisplayObject extends EventDispatcher {
         val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
         if (p[4] == val) {
-            return;
+            return false;
         }
         p[4] = val;
         this.$invalidatePosition();
+        return true;
     }
 
     $getHeight() {
@@ -294,7 +297,7 @@ class DisplayObject extends EventDispatcher {
                 this.$measureContentBounds(rect);
                 this.$measureChildrenBounds(rect);
             }
-            this.__checkSettingSize(rect);
+            this.$checkSettingSize(rect);
         }
         return rect;
     }
@@ -317,7 +320,7 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
-    __checkSettingSize(rect) {
+    $checkSettingSize(rect) {
         var p = this.$DisplayObject;
         /**
          * 尺寸失效， 并且约定过 宽 或者 高
@@ -524,6 +527,16 @@ class DisplayObject extends EventDispatcher {
 
     set filters(val) {
         this.$setFilters(val);
+    }
+
+    get $focusEnabled() {
+        var p = this.$DisplayObject;
+        return p[50];
+    }
+
+    set $focusEnabled(val) {
+        var p = this.$DisplayObject;
+        p[50] = val;
     }
 
     /**

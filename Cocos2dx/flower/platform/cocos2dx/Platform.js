@@ -95,6 +95,12 @@ class Platform {
             }
             return new PlatformTextField();
         }
+        if (name == "TextInput") {
+            if (pools.TextInput && pools.TextInput.length) {
+                return pools.TextInput.pop();
+            }
+            return new PlatformTextInput();
+        }
         return null;
     }
 

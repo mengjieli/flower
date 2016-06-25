@@ -207,6 +207,12 @@ var _exports = {};
                     }
                     return new PlatformTextField();
                 }
+                if (name == "TextInput") {
+                    if (pools.TextInput && pools.TextInput.length) {
+                        return pools.TextInput.pop();
+                    }
+                    return new PlatformTextInput();
+                }
                 return null;
             }
         }, {
@@ -649,23 +655,128 @@ var _exports = {};
     PlatformTextField.$mesureTxt.retain();
     //////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
 
+    //////////////////////////File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
+
+    var PlatformTextInput = function (_PlatformDisplayObjec3) {
+        _inherits(PlatformTextInput, _PlatformDisplayObjec3);
+
+        function PlatformTextInput() {
+            _classCallCheck(this, PlatformTextInput);
+
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformTextInput).call(this));
+
+            _this3.show = new cc.TextFieldTTF();
+            _this3.show.setAnchorPoint(0, 1);
+            _this3.show.retain();
+            return _this3;
+        }
+
+        _createClass(PlatformTextInput, [{
+            key: "setFontColor",
+            value: function setFontColor(color) {
+                this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
+            }
+        }, {
+            key: "getNativeText",
+            value: function getNativeText() {
+                return this.show.getString();
+            }
+        }, {
+            key: "changeText",
+            value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+                var $mesureTxt = PlatformTextInput.$mesureTxt;
+                $mesureTxt.setFontSize(size);
+                var txt = this.show;
+                txt.text = "";
+                var txtText = "";
+                var start = 0;
+                for (var i = 0; i < text.length; i++) {
+                    //取一行文字进行处理
+                    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+                        var str = text.slice(start, i);
+                        $mesureTxt.setString(str);
+                        var lineWidth = $mesureTxt.getContentSize().width;
+                        var findEnd = i;
+                        var changeLine = false;
+                        //如果这一行的文字宽大于设定宽
+                        while (!autoSize && width && lineWidth > width) {
+                            changeLine = true;
+                            findEnd--;
+                            $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                            lineWidth = $mesureTxt.getContentSize().width;
+                        }
+                        if (wordWrap && changeLine) {
+                            i = findEnd;
+                            txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                        } else {
+                            txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                        }
+                        //如果文字的高度已经大于设定的高，回退一次
+                        if (!autoSize && height && txt.getContentSize().height > height) {
+                            txt.setString(txtText);
+                            break;
+                        } else {
+                            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                            if (wordWrap && changeLine) {
+                                txtText += "\n";
+                            }
+                        }
+                        start = i;
+                        if (multiline == false) {
+                            break;
+                        }
+                    }
+                }
+                return txt.getContentSize();
+            }
+        }, {
+            key: "setFilters",
+            value: function setFilters(filters) {}
+        }, {
+            key: "startInput",
+            value: function startInput() {
+                this.show.attachWithIME();
+            }
+        }, {
+            key: "stopInput",
+            value: function stopInput() {
+                this.show.detachWithIME();
+            }
+        }, {
+            key: "release",
+            value: function release() {
+                var show = this.show;
+                show.setString("");
+                show.setFontSize(12);
+                show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
+                _get(Object.getPrototypeOf(PlatformTextInput.prototype), "release", this).call(this);
+            }
+        }]);
+
+        return PlatformTextInput;
+    }(PlatformDisplayObject);
+
+    PlatformTextInput.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
+    PlatformTextInput.$mesureTxt.retain();
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
+
     //////////////////////////File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
 
-    var PlatformBitmap = function (_PlatformDisplayObjec3) {
-        _inherits(PlatformBitmap, _PlatformDisplayObjec3);
+    var PlatformBitmap = function (_PlatformDisplayObjec4) {
+        _inherits(PlatformBitmap, _PlatformDisplayObjec4);
 
         function PlatformBitmap() {
             _classCallCheck(this, PlatformBitmap);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformBitmap).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformBitmap).call(this));
 
-            _this3.__textureScaleX = 1;
-            _this3.__textureScaleY = 1;
+            _this4.__textureScaleX = 1;
+            _this4.__textureScaleY = 1;
 
-            _this3.show = new cc.Sprite();
-            _this3.show.setAnchorPoint(0, 1);
-            _this3.show.retain();
-            return _this3;
+            _this4.show = new cc.Sprite();
+            _this4.show.setAnchorPoint(0, 1);
+            _this4.show.retain();
+            return _this4;
         }
 
         _createClass(PlatformBitmap, [{
@@ -1384,6 +1495,8 @@ var _exports = {};
     Event.CHANGE = "change";
     Event.ERROR = "error";
     Event.UPDATE = "update";
+    Event.FOCUS_IN = "focus_in";
+    Event.FOCUS_OUT = "focus_out";
     Event._eventPool = [];
 
 
@@ -1400,14 +1513,14 @@ var _exports = {};
 
             _classCallCheck(this, TouchEvent);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
 
-            _this4.$touchId = 0;
-            _this4.$touchX = 0;
-            _this4.$touchY = 0;
-            _this4.$stageX = 0;
-            _this4.$stageY = 0;
-            return _this4;
+            _this5.$touchId = 0;
+            _this5.$touchX = 0;
+            _this5.$touchY = 0;
+            _this5.$stageX = 0;
+            _this5.$stageY = 0;
+            return _this5;
         }
 
         _createClass(TouchEvent, [{
@@ -1582,16 +1695,16 @@ var _exports = {};
 
             _classCallCheck(this, ColorFilter);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
 
-            _this7.__h = 0;
-            _this7.__s = 0;
-            _this7.__l = 0;
+            _this8.__h = 0;
+            _this8.__s = 0;
+            _this8.__l = 0;
 
-            _this7.h = h;
-            _this7.s = s;
-            _this7.l = l;
-            return _this7;
+            _this8.h = h;
+            _this8.s = s;
+            _this8.l = l;
+            return _this8;
         }
 
         _createClass(ColorFilter, [{
@@ -1665,16 +1778,16 @@ var _exports = {};
 
             _classCallCheck(this, StrokeFilter);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
 
-            _this8.__size = 0;
-            _this8.__r = 0;
-            _this8.__g = 0;
-            _this8.__b = 0;
+            _this9.__size = 0;
+            _this9.__r = 0;
+            _this9.__g = 0;
+            _this9.__b = 0;
 
-            _this8.size = size;
-            _this8.color = color;
-            return _this8;
+            _this9.size = size;
+            _this9.color = color;
+            return _this9;
         }
 
         _createClass(StrokeFilter, [{
@@ -1720,14 +1833,14 @@ var _exports = {};
 
             _classCallCheck(this, BlurFilter);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
 
-            _this9.__blurX = 0;
-            _this9.__blurY = 0;
+            _this10.__blurX = 0;
+            _this10.__blurY = 0;
 
-            _this9.blurX = blurX;
-            _this9.blurY = blurY;
-            return _this9;
+            _this10.blurX = blurX;
+            _this10.blurY = blurY;
+            return _this10;
         }
 
         _createClass(BlurFilter, [{
@@ -2236,15 +2349,15 @@ var _exports = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this10.__x = 0;
-            _this10.__y = 0;
-            _this10.__flags = 0;
-            _this10.__alpha = 1;
-            _this10.__concatAlpha = 1;
+            _this11.__x = 0;
+            _this11.__y = 0;
+            _this11.__flags = 0;
+            _this11.__alpha = 1;
+            _this11.__concatAlpha = 1;
 
-            _this10.$DisplayObject = {
+            _this11.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -2257,9 +2370,10 @@ var _exports = {};
                 9: true, //multiplyTouchEnabled
                 10: 0, //lastTouchX
                 11: 0, //lastTouchY
+                50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
-            return _this10;
+            return _this11;
         }
 
         /**
@@ -2444,10 +2558,11 @@ var _exports = {};
                 val = val < 0 ? 0 : val;
                 var p = this.$DisplayObject;
                 if (p[3] == val) {
-                    return;
+                    return false;
                 }
                 p[3] = val;
                 this.$invalidatePosition();
+                return true;
             }
         }, {
             key: "$getWidth",
@@ -2462,10 +2577,11 @@ var _exports = {};
                 val = val < 0 ? 0 : val;
                 var p = this.$DisplayObject;
                 if (p[4] == val) {
-                    return;
+                    return false;
                 }
                 p[4] = val;
                 this.$invalidatePosition();
+                return true;
             }
         }, {
             key: "$getHeight",
@@ -2536,7 +2652,7 @@ var _exports = {};
                         this.$measureContentBounds(rect);
                         this.$measureChildrenBounds(rect);
                     }
-                    this.__checkSettingSize(rect);
+                    this.$checkSettingSize(rect);
                 }
                 return rect;
             }
@@ -2561,8 +2677,8 @@ var _exports = {};
                 return true;
             }
         }, {
-            key: "__checkSettingSize",
-            value: function __checkSettingSize(rect) {
+            key: "$checkSettingSize",
+            value: function $checkSettingSize(rect) {
                 var p = this.$DisplayObject;
                 /**
                  * 尺寸失效， 并且约定过 宽 或者 高
@@ -2874,6 +2990,16 @@ var _exports = {};
             set: function set(val) {
                 this.$setFilters(val);
             }
+        }, {
+            key: "$focusEnabled",
+            get: function get() {
+                var p = this.$DisplayObject;
+                return p[50];
+            },
+            set: function set(val) {
+                var p = this.$DisplayObject;
+                p[50] = val;
+            }
         }]);
 
         return DisplayObject;
@@ -2891,11 +3017,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this11.__children = [];
-            _this11.$nativeShow = Platform.create("Sprite");
-            return _this11;
+            _this12.__children = [];
+            _this12.$nativeShow = Platform.create("Sprite");
+            return _this12;
         }
 
         _createClass(Sprite, [{
@@ -3140,13 +3266,13 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this12.$nativeShow = Platform.create("Bitmap");
-            _this12.texture = texture;
-            _this12.$Bitmap = {
+            _this13.$nativeShow = Platform.create("Bitmap");
+            _this13.texture = texture;
+            _this13.$Bitmap = {
                 0: null };
-            return _this12;
+            return _this13;
         }
 
         _createClass(Bitmap, [{
@@ -3232,23 +3358,31 @@ var _exports = {};
         _inherits(TextField, _DisplayObject3);
 
         function TextField() {
+            var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+
             _classCallCheck(this, TextField);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
 
-            _this13.$nativeShow = Platform.create("TextField");
-            _this13.$TextField = {
+            _this14.$nativeShow = Platform.create("TextField");
+            _this14.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
-                3: false, //wordWrap
+                3: true, //wordWrap
                 4: true, //multiline
                 5: true //autoSize
             };
-            return _this13;
+            if (text != "") {
+                _this14.text = text;
+            }
+            return _this14;
         }
 
         _createClass(TextField, [{
+            key: "$checkSettingSize",
+            value: function $checkSettingSize(rect) {}
+        }, {
             key: "$setText",
             value: function $setText(val) {
                 val = "" + val;
@@ -3282,6 +3416,18 @@ var _exports = {};
                 this.$measureText(rect);
             }
         }, {
+            key: "$setFontSize",
+            value: function $setFontSize(val) {
+                var p = this.$TextField;
+                if (p[1] == val) {
+                    return false;
+                }
+                p[1] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
             key: "$setFontColor",
             value: function $setFontColor(val) {
                 val = +val || 0;
@@ -3292,6 +3438,38 @@ var _exports = {};
                 p[2] = val;
                 this.$nativeShow.setFontColor(val);
                 return true;
+            }
+        }, {
+            key: "$setWidth",
+            value: function $setWidth(val) {
+                var flag = _get(Object.getPrototypeOf(TextField.prototype), "$setWidth", this).call(this, val);
+                if (!flag) {
+                    return;
+                }
+                var d = this.$DisplayObject;
+                if (d[3] != null || d[4] != null) {
+                    this.$TextField[5] = false;
+                } else {
+                    this.$TextField[5] = true;
+                }
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+            }
+        }, {
+            key: "$setHeight",
+            value: function $setHeight(val) {
+                var flag = _get(Object.getPrototypeOf(TextField.prototype), "$setHeight", this).call(this, val);
+                if (!flag) {
+                    return;
+                }
+                var d = this.$DisplayObject;
+                if (d[3] != null || d[4] != null) {
+                    this.$TextField[5] = false;
+                } else {
+                    this.$TextField[5] = true;
+                }
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
             }
         }, {
             key: "$onFrameEnd",
@@ -3325,6 +3503,21 @@ var _exports = {};
             set: function set(val) {
                 this.$setFontColor(val);
             }
+        }, {
+            key: "fontSize",
+            get: function get() {
+                var p = this.$TextField;
+                return p[1];
+            },
+            set: function set(val) {
+                this.$setFontSize(val);
+            }
+        }, {
+            key: "autoSize",
+            get: function get() {
+                var p = this.$TextField;
+                return p[5];
+            }
         }]);
 
         return TextField;
@@ -3332,6 +3525,201 @@ var _exports = {};
 
     _exports.TextField = TextField;
     //////////////////////////End File:flower/display/TextField.js///////////////////////////
+
+    //////////////////////////File:flower/display/TextInput.js///////////////////////////
+
+    var TextInput = function (_DisplayObject4) {
+        _inherits(TextInput, _DisplayObject4);
+
+        function TextInput() {
+            var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+
+            _classCallCheck(this, TextInput);
+
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
+
+            _this15.$nativeShow = Platform.create("TextInput");
+            _this15.$TextField = {
+                0: "", //text
+                1: 12, //fontSize
+                2: 0x000000, //fontColor
+                3: true, //editEnabled
+                4: false //inputing
+            };
+            _this15.addListener(Event.FOCUS_IN, _this15.$onFocusIn, _this15);
+            _this15.addListener(Event.FOCUS_OUT, _this15.$onFocusOut, _this15);
+            if (text != "") {
+                _this15.text = text;
+            }
+            _this15.$focusEnabled = true;
+            return _this15;
+        }
+
+        _createClass(TextInput, [{
+            key: "$checkSettingSize",
+            value: function $checkSettingSize(rect) {}
+        }, {
+            key: "$setText",
+            value: function $setText(val) {
+                val = "" + val;
+                var p = this.$TextField;
+                if (p[0] == val) {
+                    return false;
+                }
+                p[0] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$measureText",
+            value: function $measureText(rect) {
+                if (this.$hasFlags(0x0800)) {
+                    var d = this.$DisplayObject;
+                    var p = this.$TextField;
+                    //text, width, height, size, wordWrap, multiline, autoSize
+                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, true);
+                    rect.x = 0;
+                    rect.y = 0;
+                    rect.width = size.width;
+                    rect.height = size.height;
+                    this.$removeFlags(0x0800);
+                }
+            }
+        }, {
+            key: "$measureContentBounds",
+            value: function $measureContentBounds(rect) {
+                this.$measureText(rect);
+            }
+        }, {
+            key: "$setFontColor",
+            value: function $setFontColor(val) {
+                val = +val || 0;
+                var p = this.$TextField;
+                if (p[2] == val) {
+                    return false;
+                }
+                p[2] = val;
+                this.$nativeShow.setFontColor(val);
+                return true;
+            }
+        }, {
+            key: "$setAutoSize",
+            value: function $setAutoSize(val) {
+                var p = this.$TextField;
+                if (p[5] == val) {
+                    return false;
+                }
+                p[5] = val;
+            }
+        }, {
+            key: "$setWidth",
+            value: function $setWidth(val) {
+                var flag = _get(Object.getPrototypeOf(TextInput.prototype), "$setWidth", this).call(this, val);
+                if (!flag) {
+                    return;
+                }
+                var d = this.$DisplayObject;
+                if (d[3] != null || d[4] != null) {
+                    this.$TextField[5] = false;
+                } else {
+                    this.$TextField[5] = true;
+                }
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+            }
+        }, {
+            key: "$setHeight",
+            value: function $setHeight(val) {
+                var flag = _get(Object.getPrototypeOf(TextInput.prototype), "$setHeight", this).call(this, val);
+                if (!flag) {
+                    return;
+                }
+                var d = this.$DisplayObject;
+                if (d[3] != null || d[4] != null) {
+                    this.$TextField[5] = false;
+                } else {
+                    this.$TextField[5] = true;
+                }
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+            }
+        }, {
+            key: "$setEditEnabled",
+            value: function $setEditEnabled(val) {
+                var p = this.$TextField;
+                if (p[6] == val) {
+                    return false;
+                }
+                p[6] = val;
+                return true;
+            }
+        }, {
+            key: "$onFocusIn",
+            value: function $onFocusIn(e) {
+                if (this.editEnabled) {
+                    var p = this.$TextField;
+                    this.$nativeShow.startInput();
+                    p[4] = true;
+                }
+            }
+        }, {
+            key: "$onFocusOut",
+            value: function $onFocusOut() {
+                var p = this.$TextField;
+                if (p[4]) {
+                    this.$nativeShow.stopInput();
+                }
+                this.text = this.$nativeShow.getNativeText();
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                if (this.$hasFlags(0x0800)) {
+                    var width = this.width;
+                }
+                _get(Object.getPrototypeOf(TextInput.prototype), "$onFrameEnd", this).call(this);
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                _get(Object.getPrototypeOf(TextInput.prototype), "dispose", this).call(this);
+                Platform.release("TextInput", this.$nativeShow);
+            }
+        }, {
+            key: "text",
+            get: function get() {
+                var p = this.$TextField;
+                return p[0];
+            },
+            set: function set(val) {
+                this.$setText(val);
+            }
+        }, {
+            key: "fontColor",
+            get: function get() {
+                var p = this.$TextField;
+                return p[2];
+            },
+            set: function set(val) {
+                this.$setFontColor(val);
+            }
+        }, {
+            key: "editEnabled",
+            get: function get() {
+                var p = this.$TextField;
+                return p[3];
+            },
+            set: function set(val) {
+                this.$setEditEnabled(val);
+            }
+        }]);
+
+        return TextInput;
+    }(DisplayObject);
+
+    _exports.TextInput = TextInput;
+    //////////////////////////End File:flower/display/TextInput.js///////////////////////////
 
     //////////////////////////File:flower/display/Stage.js///////////////////////////
 
@@ -3341,21 +3729,42 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this14.__nativeMouseMoveEvent = [];
-            _this14.__nativeTouchEvent = [];
-            _this14.__mouseOverList = [_this14];
-            _this14.__touchList = [];
-            _this14.__lastMouseX = -1;
-            _this14.__lastMouseY = -1;
+            _this16.__nativeMouseMoveEvent = [];
+            _this16.__nativeTouchEvent = [];
+            _this16.__mouseOverList = [_this16];
+            _this16.__touchList = [];
+            _this16.__lastMouseX = -1;
+            _this16.__lastMouseY = -1;
+            _this16.__focus = null;
 
-            _this14.__stage = _this14;
-            Stage.stages.push(_this14);
-            return _this14;
+            _this16.__stage = _this16;
+            Stage.stages.push(_this16);
+            return _this16;
         }
 
         _createClass(Stage, [{
+            key: "$setFocus",
+            value: function $setFocus(val) {
+                if (val && !val.$focusEnabled) {
+                    val = null;
+                }
+                if (this.__focus == val) {
+                    return;
+                }
+                var event;
+                if (this.__focus) {
+                    event = new flower.Event(Event.FOCUS_OUT, true);
+                    this.__focus.dispatch(event);
+                }
+                this.__focus = val;
+                if (this.__focus) {
+                    event = new flower.Event(Event.FOCUS_IN, true);
+                    this.__focus.dispatch(event);
+                }
+            }
+        }, {
             key: "$addMouseMoveEvent",
             value: function $addMouseMoveEvent(x, y) {
                 this.__lastMouseX = x;
@@ -3408,6 +3817,9 @@ var _exports = {};
                 while (parent && parent != this) {
                     mouse.parents.push(parent);
                     parent = parent.parent;
+                }
+                if (target) {
+                    this.$setFocus(target);
                 }
                 //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
                 if (target) {
@@ -3604,6 +4016,14 @@ var _exports = {};
 
             ///////////////////////////////////////触摸事件处理///////////////////////////////////////
 
+        }, {
+            key: "focus",
+            get: function get() {
+                return this.__focus;
+            },
+            set: function set(val) {
+                this.$setFocus(val);
+            }
         }], [{
             key: "getInstance",
             value: function getInstance() {
@@ -3854,26 +4274,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this15._createRes = false;
-            _this15._isLoading = false;
-            _this15._selfDispose = false;
+            _this17._createRes = false;
+            _this17._isLoading = false;
+            _this17._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this15._createRes = true;
+                    _this17._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this15._res = res;
-            _this15._type = _this15._res.type;
-            _this15._language = LANGUAGE;
-            _this15._scale = SCALE ? SCALE : null;
-            return _this15;
+            _this17._res = res;
+            _this17._type = _this17._res.type;
+            _this17._language = LANGUAGE;
+            _this17._scale = SCALE ? SCALE : null;
+            return _this17;
         }
 
         _createClass(URLLoader, [{
@@ -4086,12 +4506,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this16.__list = list;
-            _this16.__dataList = [];
-            _this16.__index = 0;
-            return _this16;
+            _this18.__list = list;
+            _this18.__dataList = [];
+            _this18.__index = 0;
+            return _this18;
         }
 
         _createClass(URLLoaderList, [{

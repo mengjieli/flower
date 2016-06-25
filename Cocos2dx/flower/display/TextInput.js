@@ -1,21 +1,23 @@
-class TextField extends DisplayObject {
+class TextInput extends DisplayObject {
 
     $TextField;
 
     constructor(text = "") {
         super();
-        this.$nativeShow = Platform.create("TextField");
+        this.$nativeShow = Platform.create("TextInput");
         this.$TextField = {
             0: "", //text
             1: 12, //fontSize
             2: 0x000000, //fontColor
-            3: true, //wordWrap
-            4: true, //multiline
-            5: true //autoSize
+            3: true, //editEnabled
+            4: false //inputing
         };
-        if(text != "") {
+        this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
+        this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
+        if (text != "") {
             this.text = text;
         }
+        this.$focusEnabled = true;
     }
 
     $checkSettingSize(rect) {
@@ -39,7 +41,7 @@ class TextField extends DisplayObject {
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
-            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[3], p[4], p[5]);
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, true);
             rect.x = 0;
             rect.y = 0;
             rect.width = size.width;
@@ -52,17 +54,6 @@ class TextField extends DisplayObject {
         this.$measureText(rect);
     }
 
-    $setFontSize(val) {
-        var p = this.$TextField;
-        if (p[1] == val) {
-            return false;
-        }
-        p[1] = val;
-        this.$addFlags(0x0800);
-        this.$invalidateContentBounds();
-        return true;
-    }
-
     $setFontColor(val) {
         val = +val || 0;
         var p = this.$TextField;
@@ -72,6 +63,14 @@ class TextField extends DisplayObject {
         p[2] = val;
         this.$nativeShow.setFontColor(val);
         return true;
+    }
+
+    $setAutoSize(val) {
+        var p = this.$TextField;
+        if (p[5] == val) {
+            return false;
+        }
+        p[5] = val;
     }
 
     $setWidth(val) {
@@ -104,6 +103,31 @@ class TextField extends DisplayObject {
         this.$invalidateContentBounds();
     }
 
+    $setEditEnabled(val) {
+        var p = this.$TextField;
+        if (p[6] == val) {
+            return false;
+        }
+        p[6] = val;
+        return true;
+    }
+
+    $onFocusIn(e) {
+        if (this.editEnabled) {
+            var p = this.$TextField;
+            this.$nativeShow.startInput();
+            p[4] = true;
+        }
+    }
+
+    $onFocusOut() {
+        var p = this.$TextField;
+        if (p[4]) {
+            this.$nativeShow.stopInput();
+        }
+        this.text = this.$nativeShow.getNativeText();
+    }
+
     get text() {
         var p = this.$TextField;
         return p[0];
@@ -122,18 +146,13 @@ class TextField extends DisplayObject {
         this.$setFontColor(val);
     }
 
-    get fontSize() {
+    get editEnabled() {
         var p = this.$TextField;
-        return p[1];
+        return p[3];
     }
 
-    set fontSize(val) {
-        this.$setFontSize(val);
-    }
-
-    get autoSize() {
-        var p = this.$TextField;
-        return p[5];
+    set editEnabled(val) {
+        this.$setEditEnabled(val);
     }
 
     $onFrameEnd() {
@@ -145,8 +164,8 @@ class TextField extends DisplayObject {
 
     dispose() {
         super.dispose();
-        Platform.release("TextField", this.$nativeShow);
+        Platform.release("TextInput", this.$nativeShow);
     }
 }
 
-exports.TextField = TextField;
+exports.TextInput = TextInput;

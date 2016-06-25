@@ -194,6 +194,12 @@ class Platform {
             }
             return new PlatformTextField();
         }
+        if (name == "TextInput") {
+            if (pools.TextInput && pools.TextInput.length) {
+                return pools.TextInput.pop();
+            }
+            return new PlatformTextInput();
+        }
         return null;
     }
 
@@ -591,6 +597,102 @@ class PlatformTextField extends PlatformDisplayObject {
 PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
 PlatformTextField.$mesureTxt.retain();
 //////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
+class PlatformTextInput extends PlatformDisplayObject {
+
+    static $mesureTxt;
+
+    show;
+
+    constructor() {
+        super();
+        this.show = new cc.TextFieldTTF();
+        this.show.setAnchorPoint(0, 1);
+        this.show.retain();
+    }
+
+    setFontColor(color) {
+        this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
+    }
+
+    getNativeText() {
+        return this.show.getString();
+    }
+
+    changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+        var $mesureTxt = PlatformTextInput.$mesureTxt;
+        $mesureTxt.setFontSize(size);
+        var txt = this.show;
+        txt.text = "";
+        var txtText = "";
+        var start = 0;
+        for (var i = 0; i < text.length; i++) {
+            //取一行文字进行处理
+            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+                var str = text.slice(start, i);
+                $mesureTxt.setString(str);
+                var lineWidth = $mesureTxt.getContentSize().width;
+                var findEnd = i;
+                var changeLine = false;
+                //如果这一行的文字宽大于设定宽
+                while (!autoSize && width && lineWidth > width) {
+                    changeLine = true;
+                    findEnd--;
+                    $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    lineWidth = $mesureTxt.getContentSize().width;
+                }
+                if (wordWrap && changeLine) {
+                    i = findEnd;
+                    txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                } else {
+                    txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                }
+                //如果文字的高度已经大于设定的高，回退一次
+                if (!autoSize && height && txt.getContentSize().height > height) {
+                    txt.setString(txtText);
+                    break;
+                } else {
+                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                    if (wordWrap && changeLine) {
+                        txtText += "\n";
+                    }
+                }
+                start = i;
+                if (multiline == false) {
+                    break;
+                }
+            }
+        }
+        return txt.getContentSize();
+    }
+
+    setFilters(filters) {
+
+    }
+
+    startInput() {
+        this.show.attachWithIME();
+    }
+
+    stopInput() {
+        this.show.detachWithIME();
+    }
+
+    release() {
+        var show = this.show;
+        show.setString("");
+        show.setFontSize(12);
+        show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        super.release();
+    }
+}
+
+PlatformTextInput.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
+PlatformTextInput.$mesureTxt.retain();
+//////////////////////////End File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
 
 
 
@@ -1234,6 +1336,8 @@ class Event {
     static CHANGE = "change";
     static ERROR = "error";
     static UPDATE = "update";
+    static FOCUS_IN = "focus_in";
+    static FOCUS_OUT = "focus_out";
 
     static _eventPool = [];
 
@@ -2022,6 +2126,7 @@ class DisplayObject extends EventDispatcher {
             9: true, //multiplyTouchEnabled
             10: 0, //lastTouchX
             11: 0, //lastTouchY
+            50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
         }
@@ -2178,10 +2283,11 @@ class DisplayObject extends EventDispatcher {
         val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
         if (p[3] == val) {
-            return;
+            return false;
         }
         p[3] = val;
         this.$invalidatePosition();
+        return true;
     }
 
     $getWidth() {
@@ -2194,10 +2300,11 @@ class DisplayObject extends EventDispatcher {
         val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
         if (p[4] == val) {
-            return;
+            return false;
         }
         p[4] = val;
         this.$invalidatePosition();
+        return true;
     }
 
     $getHeight() {
@@ -2266,7 +2373,7 @@ class DisplayObject extends EventDispatcher {
                 this.$measureContentBounds(rect);
                 this.$measureChildrenBounds(rect);
             }
-            this.__checkSettingSize(rect);
+            this.$checkSettingSize(rect);
         }
         return rect;
     }
@@ -2289,7 +2396,7 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
-    __checkSettingSize(rect) {
+    $checkSettingSize(rect) {
         var p = this.$DisplayObject;
         /**
          * 尺寸失效， 并且约定过 宽 或者 高
@@ -2496,6 +2603,16 @@ class DisplayObject extends EventDispatcher {
 
     set filters(val) {
         this.$setFilters(val);
+    }
+
+    get $focusEnabled() {
+        var p = this.$DisplayObject;
+        return p[50];
+    }
+
+    set $focusEnabled(val) {
+        var p = this.$DisplayObject;
+        p[50] = val;
     }
 
     /**
@@ -2903,17 +3020,24 @@ class TextField extends DisplayObject {
 
     $TextField;
 
-    constructor() {
+    constructor(text = "") {
         super();
         this.$nativeShow = Platform.create("TextField");
         this.$TextField = {
             0: "", //text
             1: 12, //fontSize
             2: 0x000000, //fontColor
-            3: false, //wordWrap
+            3: true, //wordWrap
             4: true, //multiline
             5: true //autoSize
+        };
+        if(text != "") {
+            this.text = text;
         }
+    }
+
+    $checkSettingSize(rect) {
+
     }
 
     $setText(val) {
@@ -2946,6 +3070,17 @@ class TextField extends DisplayObject {
         this.$measureText(rect);
     }
 
+    $setFontSize(val) {
+        var p = this.$TextField;
+        if (p[1] == val) {
+            return false;
+        }
+        p[1] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
     $setFontColor(val) {
         val = +val || 0;
         var p = this.$TextField;
@@ -2955,6 +3090,36 @@ class TextField extends DisplayObject {
         p[2] = val;
         this.$nativeShow.setFontColor(val);
         return true;
+    }
+
+    $setWidth(val) {
+        var flag = super.$setWidth(val);
+        if (!flag) {
+            return;
+        }
+        var d = this.$DisplayObject;
+        if (d[3] != null || d[4] != null) {
+            this.$TextField[5] = false;
+        } else {
+            this.$TextField[5] = true;
+        }
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+    }
+
+    $setHeight(val) {
+        var flag = super.$setHeight(val);
+        if (!flag) {
+            return;
+        }
+        var d = this.$DisplayObject;
+        if (d[3] != null || d[4] != null) {
+            this.$TextField[5] = false;
+        } else {
+            this.$TextField[5] = true;
+        }
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
     }
 
     get text() {
@@ -2975,6 +3140,20 @@ class TextField extends DisplayObject {
         this.$setFontColor(val);
     }
 
+    get fontSize() {
+        var p = this.$TextField;
+        return p[1];
+    }
+
+    set fontSize(val) {
+        this.$setFontSize(val);
+    }
+
+    get autoSize() {
+        var p = this.$TextField;
+        return p[5];
+    }
+
     $onFrameEnd() {
         if (this.$hasFlags(0x0800)) {
             var width = this.width;
@@ -2990,6 +3169,182 @@ class TextField extends DisplayObject {
 
 exports.TextField = TextField;
 //////////////////////////End File:flower/display/TextField.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/TextInput.js///////////////////////////
+class TextInput extends DisplayObject {
+
+    $TextField;
+
+    constructor(text = "") {
+        super();
+        this.$nativeShow = Platform.create("TextInput");
+        this.$TextField = {
+            0: "", //text
+            1: 12, //fontSize
+            2: 0x000000, //fontColor
+            3: true, //editEnabled
+            4: false //inputing
+        };
+        this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
+        this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
+        if (text != "") {
+            this.text = text;
+        }
+        this.$focusEnabled = true;
+    }
+
+    $checkSettingSize(rect) {
+
+    }
+
+    $setText(val) {
+        val = "" + val;
+        var p = this.$TextField;
+        if (p[0] == val) {
+            return false;
+        }
+        p[0] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $measureText(rect) {
+        if (this.$hasFlags(0x0800)) {
+            var d = this.$DisplayObject;
+            var p = this.$TextField;
+            //text, width, height, size, wordWrap, multiline, autoSize
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, true);
+            rect.x = 0;
+            rect.y = 0;
+            rect.width = size.width;
+            rect.height = size.height;
+            this.$removeFlags(0x0800);
+        }
+    }
+
+    $measureContentBounds(rect) {
+        this.$measureText(rect);
+    }
+
+    $setFontColor(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (p[2] == val) {
+            return false;
+        }
+        p[2] = val;
+        this.$nativeShow.setFontColor(val);
+        return true;
+    }
+
+    $setAutoSize(val) {
+        var p = this.$TextField;
+        if (p[5] == val) {
+            return false;
+        }
+        p[5] = val;
+    }
+
+    $setWidth(val) {
+        var flag = super.$setWidth(val);
+        if (!flag) {
+            return;
+        }
+        var d = this.$DisplayObject;
+        if (d[3] != null || d[4] != null) {
+            this.$TextField[5] = false;
+        } else {
+            this.$TextField[5] = true;
+        }
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+    }
+
+    $setHeight(val) {
+        var flag = super.$setHeight(val);
+        if (!flag) {
+            return;
+        }
+        var d = this.$DisplayObject;
+        if (d[3] != null || d[4] != null) {
+            this.$TextField[5] = false;
+        } else {
+            this.$TextField[5] = true;
+        }
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+    }
+
+    $setEditEnabled(val) {
+        var p = this.$TextField;
+        if (p[6] == val) {
+            return false;
+        }
+        p[6] = val;
+        return true;
+    }
+
+    $onFocusIn(e) {
+        if (this.editEnabled) {
+            var p = this.$TextField;
+            this.$nativeShow.startInput();
+            p[4] = true;
+        }
+    }
+
+    $onFocusOut() {
+        var p = this.$TextField;
+        if (p[4]) {
+            this.$nativeShow.stopInput();
+        }
+        this.text = this.$nativeShow.getNativeText();
+    }
+
+    get text() {
+        var p = this.$TextField;
+        return p[0];
+    }
+
+    set text(val) {
+        this.$setText(val);
+    }
+
+    get fontColor() {
+        var p = this.$TextField;
+        return p[2];
+    }
+
+    set fontColor(val) {
+        this.$setFontColor(val);
+    }
+
+    get editEnabled() {
+        var p = this.$TextField;
+        return p[3];
+    }
+
+    set editEnabled(val) {
+        this.$setEditEnabled(val);
+    }
+
+    $onFrameEnd() {
+        if (this.$hasFlags(0x0800)) {
+            var width = this.width;
+        }
+        super.$onFrameEnd();
+    }
+
+    dispose() {
+        super.dispose();
+        Platform.release("TextInput", this.$nativeShow);
+    }
+}
+
+exports.TextInput = TextInput;
+//////////////////////////End File:flower/display/TextInput.js///////////////////////////
 
 
 
@@ -3016,6 +3371,26 @@ class Stage extends Sprite {
     __touchList = [];
     __lastMouseX = -1;
     __lastMouseY = -1;
+    __focus = null;
+
+    $setFocus(val) {
+        if (val && !val.$focusEnabled) {
+            val = null;
+        }
+        if (this.__focus == val) {
+            return;
+        }
+        var event;
+        if (this.__focus) {
+            event = new flower.Event(Event.FOCUS_OUT, true);
+            this.__focus.dispatch(event);
+        }
+        this.__focus = val;
+        if (this.__focus) {
+            event = new flower.Event(Event.FOCUS_IN, true);
+            this.__focus.dispatch(event);
+        }
+    }
 
     $addMouseMoveEvent(x, y) {
         this.__lastMouseX = x;
@@ -3065,6 +3440,9 @@ class Stage extends Sprite {
         while (parent && parent != this) {
             mouse.parents.push(parent);
             parent = parent.parent;
+        }
+        if (target) {
+            this.$setFocus(target);
         }
         //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
         if (target) {
@@ -3242,6 +3620,14 @@ class Stage extends Sprite {
         }
         mouseMoveList.length = 0;
         super.$onFrameEnd();
+    }
+
+    get focus() {
+        return this.__focus;
+    }
+
+    set focus(val) {
+        this.$setFocus(val);
     }
 
     static stages = [];

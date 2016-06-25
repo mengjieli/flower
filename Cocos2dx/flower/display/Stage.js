@@ -20,6 +20,26 @@ class Stage extends Sprite {
     __touchList = [];
     __lastMouseX = -1;
     __lastMouseY = -1;
+    __focus = null;
+
+    $setFocus(val) {
+        if (val && !val.$focusEnabled) {
+            val = null;
+        }
+        if (this.__focus == val) {
+            return;
+        }
+        var event;
+        if (this.__focus) {
+            event = new flower.Event(Event.FOCUS_OUT, true);
+            this.__focus.dispatch(event);
+        }
+        this.__focus = val;
+        if (this.__focus) {
+            event = new flower.Event(Event.FOCUS_IN, true);
+            this.__focus.dispatch(event);
+        }
+    }
 
     $addMouseMoveEvent(x, y) {
         this.__lastMouseX = x;
@@ -69,6 +89,9 @@ class Stage extends Sprite {
         while (parent && parent != this) {
             mouse.parents.push(parent);
             parent = parent.parent;
+        }
+        if (target) {
+            this.$setFocus(target);
         }
         //target.addListener(flower.Event.REMOVED, this.onMouseTargetRemove, this);
         if (target) {
@@ -246,6 +269,14 @@ class Stage extends Sprite {
         }
         mouseMoveList.length = 0;
         super.$onFrameEnd();
+    }
+
+    get focus() {
+        return this.__focus;
+    }
+
+    set focus(val) {
+        this.$setFocus(val);
     }
 
     static stages = [];
