@@ -63,7 +63,7 @@ var Main = function () {
             var bm = new flower.Bitmap();
             bm.x = bm.y = 100;
             //bm.width = bm.height = 200;
-            bm.scaleX = bm.scaleY = 2;
+            bm.scaleX = bm.scaleY = 4;
             bm.texture = e.data[1];
             bm.rotation = 30;
             bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
@@ -93,11 +93,11 @@ var Main = function () {
 
             flower.trace(container.width, container.height);
 
-            setTimeout(function () {
-                bm.texture = list[2];
-                flower.trace(bm.scaleX, bm.scaleY);
-                flower.trace(container.width, container.height);
-            }, 5000);
+            //setTimeout(function () {
+            //    bm.texture = list[2];
+            //    flower.trace(bm.scaleX, bm.scaleY);
+            //    flower.trace(container.width, container.height);
+            //}, 5000);
 
             var qq = new flower.Bitmap();
             qq.x = -20;
@@ -124,6 +124,8 @@ var Main = function () {
             var r = 0;
             var g = 0;
             var b = 0;
+            var blurX = 0;
+            var blurY = 0;
             var color = 0;
             container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
             setInterval(function () {
@@ -131,12 +133,14 @@ var Main = function () {
                 r += 1;
                 g += 2;
                 b += 3;
+                blurX += 0.1;
+                blurY += 0.1;
                 color = r << 16 | g << 8 | b;
                 //flower.trace(h,s,l);
                 if (h > 270000) {
                     container.filters = null;
                 } else {
-                    container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
+                    container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
                 }
             }, 50);
         }

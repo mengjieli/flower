@@ -248,7 +248,7 @@ class PlatformDisplayObject {
     setWidth(val) {
         this.__width = val;
         var programmer = this.__programmer;
-        if(programmer) {
+        if (programmer) {
             var nativeProgrammer = programmer.$nativeProgrammer;
             if (Platform.native) {
                 nativeProgrammer.setUniformFloat("width", this.__width);
@@ -262,7 +262,7 @@ class PlatformDisplayObject {
     setHeight(val) {
         this.__height = val;
         var programmer = this.__programmer;
-        if(programmer) {
+        if (programmer) {
             var nativeProgrammer = programmer.$nativeProgrammer;
             if (Platform.native) {
                 nativeProgrammer.setUniformFloat("height", this.__height);
@@ -358,6 +358,19 @@ class PlatformDisplayObject {
     setFilters(filters) {
         var types1 = [0, 0, 0, 0];
         var types2 = [0, 0, 0, 0];
+        var bigFilters = [];
+        if (filters) {
+            filters.sort(function (filterA, filterB) {
+                return filterA.type > filterB.type ? 1 : -1;
+            });
+            for (var i = 0; i < filters.length; i++) {
+                if (filters[i].type >= 100) {
+                    bigFilters.push(filters[i]);
+                    filters.splice(i, 1);
+                    i--;
+                }
+            }
+        }
         if (filters && filters.length) {
             this.addProgrammerFlag(0x0002);
             var nativeProgrammer = this.__programmer.$nativeProgrammer;
@@ -405,6 +418,58 @@ class PlatformDisplayObject {
                 this.__programmer.use();
                 nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters1")].concat(types1));
                 nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters2")].concat(types2));
+            }
+        }
+        if(bigFilters && bigFilters.length) {
+            this.setBigFilters(bigFilters);
+        }
+    }
+
+    setBigFilters(filters) {
+        var types1 = [0, 0, 0, 0];
+        if (filters && filters.length) {
+            this.addProgrammerFlag(0x0002);
+            var nativeProgrammer = this.__programmer.$nativeProgrammer;
+            if (!Platform.native) {
+                this.__programmer.use();
+            }
+            var paramsIndex = 100;
+            for (var i = 0; i < filters.length; i++) {
+                if (i < 4) {
+                    types1[i] = filters[i].type;
+                }
+                var params = filters[i].params;
+                if (params.length <= 4) {
+                    if (Platform.native) {
+                        nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params));
+                    } else {
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params));
+                    }
+                    paramsIndex++;
+                } else {
+                    if (Platform.native) {
+                        nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(0, 4)));
+                        paramsIndex++;
+                        nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(4, params.length)));
+                        paramsIndex++;
+                    } else {
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(0, 4)));
+                        paramsIndex++;
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(4, params.length)));
+                        paramsIndex++;
+                    }
+                }
+            }
+        } else {
+            this.removeProgrammerFlag(0x0002);
+        }
+        if (this.__programmer) {
+            var nativeProgrammer = this.__programmer.$nativeProgrammer;
+            if (Platform.native) {
+                nativeProgrammer.setUniformVec4("filters100", cc.math.vec4.apply(null, types1));
+            } else {
+                this.__programmer.use();
+                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters100")].concat(types1));
             }
         }
     }
@@ -1293,7 +1358,7 @@ class ColorFilter extends Filter {
     __s = 0;
     __l = 0;
 
-    constructor(h = 0, s = 0, l = 0) {
+    constructor(h = 0, s = -100, l = 0) {
         super(1);
         this.h = h;
         this.s = s;
@@ -1364,7 +1429,7 @@ class StrokeFilter extends Filter {
      * @param size 描边大小
      * @param color 描边颜色
      */
-    constructor(size, color) {
+    constructor(size = 1, color = 0x000000) {
         super(2);
         this.size = size;
         this.color = color;
@@ -1396,6 +1461,52 @@ class StrokeFilter extends Filter {
 
 exports.StrokeFilter = StrokeFilter;
 //////////////////////////End File:flower/filters/StrokeFilter.js///////////////////////////
+
+
+
+//////////////////////////File:flower/filters/BlurFilter.js///////////////////////////
+class BlurFilter extends Filter {
+
+    __blurX = 0;
+    __blurY = 0;
+
+    constructor(blurX = 4, blurY = 4) {
+        super(100);
+        this.blurX = blurX;
+        this.blurY = blurY;
+    }
+
+    get blurX() {
+        return this.__blurX;
+    }
+
+    set blurX(val) {
+        val = +val||0;
+        if(val < 1) {
+            val = 0;
+        }
+        this.__blurX = val;
+    }
+
+    get blurY() {
+        return this.__blurY;
+    }
+
+    set blurY(val) {
+        val = +val||0;
+        if(val < 1) {
+            val = 0;
+        }
+        this.__blurY = val;
+    }
+
+    $getParams() {
+        return [this.__blurX, this.__blurY];
+    }
+}
+
+exports.BlurFilter = BlurFilter;
+//////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
 
 
 

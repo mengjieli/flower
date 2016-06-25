@@ -33,18 +33,33 @@ uniform vec4 filtersParams5;
 uniform vec4 filtersParams6;
 uniform vec4 filtersParams7;
 
+uniform vec4 filters100;
+uniform vec4 filtersParams100;
+uniform vec4 filtersParams101;
+uniform vec4 filtersParams102;
+uniform vec4 filtersParams103;
+
+vec4 getColorBeforeBlur(float posx,float posy);
 vec4 getColor(float posx,float posy);
 vec4 filter(vec4 color,float posx,float posy);
+vec4 filter100(vec4 color,float posx,float posy);
 vec4 colorFilter(vec4 color,float colorH,float colorS,float colorL);
 vec4 strokeFilter(float strokeWidth,float r,float g,float b,float posx,float posy, vec4 color);
+vec4 blurFilter(vec4 color,float posx,float posy,float blurX,float blurY);
 
 void main()
 {
     float posx = v_texCoord[0];
     float posy = v_texCoord[1];
+    vec4 color = getColorBeforeBlur(posx,posy);
+    //color = filter100(color,posx,posy);
+    gl_FragColor = color;
+}
+
+vec4 getColorBeforeBlur(float posx,float posy) {
     vec4 color = getColor(posx,posy);
     color = filter(color,posx,posy);
-    gl_FragColor = color;
+    return color;
 }
 
 vec4 getColor(float posx,float posy) {
@@ -113,6 +128,29 @@ vec4 filter(vec4 color,float posx,float posy) {
             pindex++;
         } else if(filterType == 2.0) {
             color = strokeFilter(params[0],params[1],params[2],params[3],posx,posy,color);
+            pindex++;
+        }
+    }
+    return color;
+}
+
+vec4 filter100(vec4 color,float posx,float posy) {
+    int pindex = 0;
+    for(int f = 0; f < 4; f++) {
+        float filterType;
+        filterType = filters100[f];
+        vec4 params;
+        if(pindex == 0) {
+            params = filtersParams100;
+        } else if(pindex == 1) {
+            params = filtersParams101;
+        } else if(pindex == 2) {
+            params = filtersParams102;
+        } else if(pindex == 3) {
+            params = filtersParams103;
+        }
+        if(filterType == 100.0) {
+            color = blurFilter(color,posx,posy,params[0],params[1]);
             pindex++;
         }
     }
@@ -277,5 +315,35 @@ vec4 strokeFilter(float strokeWidth, float r, float g, float b,float posx,float 
             }
         }
     }
+    return color;
+}
+
+vec4 blurFilter(vec4 color,float posx,float posy,float blurX,float blurY) {
+    const int max = 10;
+    if(blurX == 0.0 && blurY == 0.0) {
+        return color;
+    }
+    color[0] = 0.0;
+    color[1] = 0.0;
+    color[2] = 0.0;
+    color[3] = 0.0;
+    float count = 0.0;
+    for(int x = -max; x < max; x++) {
+        if(x < -int(blurX) || x > int(blurX)) continue;
+        for(int y = -max; y < max; y++) {
+        if(y < -int(blurY) || y > int(blurY)) continue;
+            if(x == 0 && y == 0) continue;
+            vec4 jcolor = getColorBeforeBlur(posx + float(x)/width,posy + float(y)/height);
+            color[0] += jcolor[0];
+            color[1] += jcolor[1];
+            color[2] += jcolor[2];
+            color[3] += jcolor[3];
+            count++;
+        }
+    }
+    color[0] /= count;
+    color[1] /= count;
+    color[2] /= count;
+    color[3] /= count;
     return color;
 }

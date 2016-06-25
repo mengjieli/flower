@@ -185,6 +185,7 @@ var list = [
     "Filter",
     "ColorFilter",
     "StrokeFilter",
+    "BlurFilter",
 
     "Matrix",
     "Point",

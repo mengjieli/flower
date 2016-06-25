@@ -10,7 +10,7 @@ class StrokeFilter extends Filter {
      * @param size 描边大小
      * @param color 描边颜色
      */
-    constructor(size, color) {
+    constructor(size = 1, color = 0x000000) {
         super(2);
         this.size = size;
         this.color = color;

@@ -3,7 +3,7 @@ class ColorFilter extends Filter {
     __s = 0;
     __l = 0;
 
-    constructor(h = 0, s = 0, l = 0) {
+    constructor(h = 0, s = -100, l = 0) {
         super(1);
         this.h = h;
         this.s = s;

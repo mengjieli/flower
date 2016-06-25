@@ -393,6 +393,19 @@ var _exports = {};
             value: function setFilters(filters) {
                 var types1 = [0, 0, 0, 0];
                 var types2 = [0, 0, 0, 0];
+                var bigFilters = [];
+                if (filters) {
+                    filters.sort(function (filterA, filterB) {
+                        return filterA.type > filterB.type ? 1 : -1;
+                    });
+                    for (var i = 0; i < filters.length; i++) {
+                        if (filters[i].type >= 100) {
+                            bigFilters.push(filters[i]);
+                            filters.splice(i, 1);
+                            i--;
+                        }
+                    }
+                }
                 if (filters && filters.length) {
                     this.addProgrammerFlag(0x0002);
                     var nativeProgrammer = this.__programmer.$nativeProgrammer;
@@ -440,6 +453,59 @@ var _exports = {};
                         this.__programmer.use();
                         nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters1")].concat(types1));
                         nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters2")].concat(types2));
+                    }
+                }
+                if (bigFilters && bigFilters.length) {
+                    this.setBigFilters(bigFilters);
+                }
+            }
+        }, {
+            key: "setBigFilters",
+            value: function setBigFilters(filters) {
+                var types1 = [0, 0, 0, 0];
+                if (filters && filters.length) {
+                    this.addProgrammerFlag(0x0002);
+                    var nativeProgrammer = this.__programmer.$nativeProgrammer;
+                    if (!Platform.native) {
+                        this.__programmer.use();
+                    }
+                    var paramsIndex = 100;
+                    for (var i = 0; i < filters.length; i++) {
+                        if (i < 4) {
+                            types1[i] = filters[i].type;
+                        }
+                        var params = filters[i].params;
+                        if (params.length <= 4) {
+                            if (Platform.native) {
+                                nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params));
+                            } else {
+                                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params));
+                            }
+                            paramsIndex++;
+                        } else {
+                            if (Platform.native) {
+                                nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(0, 4)));
+                                paramsIndex++;
+                                nativeProgrammer.setUniformVec4("filtersParams" + paramsIndex, cc.math.vec4.apply(null, params.slice(4, params.length)));
+                                paramsIndex++;
+                            } else {
+                                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(0, 4)));
+                                paramsIndex++;
+                                nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filtersParams" + paramsIndex)].concat(params.slice(4, params.length)));
+                                paramsIndex++;
+                            }
+                        }
+                    }
+                } else {
+                    this.removeProgrammerFlag(0x0002);
+                }
+                if (this.__programmer) {
+                    var nativeProgrammer = this.__programmer.$nativeProgrammer;
+                    if (Platform.native) {
+                        nativeProgrammer.setUniformVec4("filters100", cc.math.vec4.apply(null, types1));
+                    } else {
+                        this.__programmer.use();
+                        nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters100")].concat(types1));
                     }
                 }
             }
@@ -1452,7 +1518,7 @@ var _exports = {};
 
         function ColorFilter() {
             var h = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-            var s = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+            var s = arguments.length <= 1 || arguments[1] === undefined ? -100 : arguments[1];
             var l = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
             _classCallCheck(this, ColorFilter);
@@ -1534,7 +1600,10 @@ var _exports = {};
          * @param color 描边颜色
          */
 
-        function StrokeFilter(size, color) {
+        function StrokeFilter() {
+            var size = arguments.length <= 0 || arguments[0] === undefined ? 1 : arguments[0];
+            var color = arguments.length <= 1 || arguments[1] === undefined ? 0x000000 : arguments[1];
+
             _classCallCheck(this, StrokeFilter);
 
             var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
@@ -1580,6 +1649,64 @@ var _exports = {};
 
     _exports.StrokeFilter = StrokeFilter;
     //////////////////////////End File:flower/filters/StrokeFilter.js///////////////////////////
+
+    //////////////////////////File:flower/filters/BlurFilter.js///////////////////////////
+
+    var BlurFilter = function (_Filter3) {
+        _inherits(BlurFilter, _Filter3);
+
+        function BlurFilter() {
+            var blurX = arguments.length <= 0 || arguments[0] === undefined ? 4 : arguments[0];
+            var blurY = arguments.length <= 1 || arguments[1] === undefined ? 4 : arguments[1];
+
+            _classCallCheck(this, BlurFilter);
+
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
+
+            _this8.__blurX = 0;
+            _this8.__blurY = 0;
+
+            _this8.blurX = blurX;
+            _this8.blurY = blurY;
+            return _this8;
+        }
+
+        _createClass(BlurFilter, [{
+            key: "$getParams",
+            value: function $getParams() {
+                return [this.__blurX, this.__blurY];
+            }
+        }, {
+            key: "blurX",
+            get: function get() {
+                return this.__blurX;
+            },
+            set: function set(val) {
+                val = +val || 0;
+                if (val < 1) {
+                    val = 0;
+                }
+                this.__blurX = val;
+            }
+        }, {
+            key: "blurY",
+            get: function get() {
+                return this.__blurY;
+            },
+            set: function set(val) {
+                val = +val || 0;
+                if (val < 1) {
+                    val = 0;
+                }
+                this.__blurY = val;
+            }
+        }]);
+
+        return BlurFilter;
+    }(Filter);
+
+    _exports.BlurFilter = BlurFilter;
+    //////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
 
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
 
@@ -2049,15 +2176,15 @@ var _exports = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this8.__x = 0;
-            _this8.__y = 0;
-            _this8.__flags = 0;
-            _this8.__alpha = 1;
-            _this8.__concatAlpha = 1;
+            _this9.__x = 0;
+            _this9.__y = 0;
+            _this9.__flags = 0;
+            _this9.__alpha = 1;
+            _this9.__concatAlpha = 1;
 
-            _this8.$DisplayObject = {
+            _this9.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -2072,7 +2199,7 @@ var _exports = {};
                 11: 0, //lastTouchY
                 60: [], //filters
                 61: [] };
-            return _this8;
+            return _this9;
         }
 
         /**
@@ -2704,11 +2831,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this9.__children = [];
-            _this9.$nativeShow = Platform.create("Sprite");
-            return _this9;
+            _this10.__children = [];
+            _this10.$nativeShow = Platform.create("Sprite");
+            return _this10;
         }
 
         _createClass(Sprite, [{
@@ -2953,13 +3080,13 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this10.$nativeShow = Platform.create("Bitmap");
-            _this10.texture = texture;
-            _this10.$Bitmap = {
+            _this11.$nativeShow = Platform.create("Bitmap");
+            _this11.texture = texture;
+            _this11.$Bitmap = {
                 0: null };
-            return _this10;
+            return _this11;
         }
 
         _createClass(Bitmap, [{
@@ -3047,18 +3174,18 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this11.__nativeMouseMoveEvent = [];
-            _this11.__nativeTouchEvent = [];
-            _this11.__mouseOverList = [_this11];
-            _this11.__touchList = [];
-            _this11.__lastMouseX = -1;
-            _this11.__lastMouseY = -1;
+            _this12.__nativeMouseMoveEvent = [];
+            _this12.__nativeTouchEvent = [];
+            _this12.__mouseOverList = [_this12];
+            _this12.__touchList = [];
+            _this12.__lastMouseX = -1;
+            _this12.__lastMouseY = -1;
 
-            _this11.__stage = _this11;
-            Stage.stages.push(_this11);
-            return _this11;
+            _this12.__stage = _this12;
+            Stage.stages.push(_this12);
+            return _this12;
         }
 
         _createClass(Stage, [{
@@ -3560,26 +3687,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this12._createRes = false;
-            _this12._isLoading = false;
-            _this12._selfDispose = false;
+            _this13._createRes = false;
+            _this13._isLoading = false;
+            _this13._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this12._createRes = true;
+                    _this13._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this12._res = res;
-            _this12._type = _this12._res.type;
-            _this12._language = LANGUAGE;
-            _this12._scale = SCALE ? SCALE : null;
-            return _this12;
+            _this13._res = res;
+            _this13._type = _this13._res.type;
+            _this13._language = LANGUAGE;
+            _this13._scale = SCALE ? SCALE : null;
+            return _this13;
         }
 
         _createClass(URLLoader, [{
@@ -3792,12 +3919,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this13.__list = list;
-            _this13.__dataList = [];
-            _this13.__index = 0;
-            return _this13;
+            _this14.__list = list;
+            _this14.__dataList = [];
+            _this14.__index = 0;
+            return _this14;
         }
 
         _createClass(URLLoaderList, [{
