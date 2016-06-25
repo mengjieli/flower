@@ -1,4 +1,4 @@
-class PlatformProgrammer {
+class PlatformProgram {
 
     $nativeProgrammer;
     _scale9Grid;
@@ -46,23 +46,23 @@ class PlatformProgrammer {
 
     static programmers = [];
 
-    static createProgrammer() {
-        if (PlatformProgrammer.programmers.length) {
-            return PlatformProgrammer.programmers.pop();
+    static create() {
+        if (PlatformProgram.programmers.length) {
+            return PlatformProgram.programmers.pop();
         }
-        return new PlatformProgrammer();
+        return new PlatformProgram();
     }
 
-    static releaseProgrammer(programmer) {
-        PlatformProgrammer.programmers.push(programmer);
+    static release(programmer) {
+        PlatformProgram.programmers.push(programmer);
     }
 
     static instance;
 
     static getInstance() {
-        if (PlatformProgrammer.instance == null) {
-            PlatformProgrammer.instance = new PlatformProgrammer(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
+        if (PlatformProgram.instance == null) {
+            PlatformProgram.instance = new PlatformProgram(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
         }
-        return PlatformProgrammer.instance;
+        return PlatformProgram.instance;
     }
 }

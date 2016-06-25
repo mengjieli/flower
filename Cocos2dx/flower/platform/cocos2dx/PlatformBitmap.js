@@ -68,7 +68,7 @@ class PlatformBitmap extends PlatformDisplayObject {
             var scaleGapX = (right - left) / (tright - tleft);
             var scaleGapY = (bottom - top) / (tbottom - ttop);
             var programmer = this.__programmer.$nativeProgrammer;
-            if(Platform.native) {
+            if (Platform.native) {
                 programmer.setUniformInt("scale9", 1);
             } else {
                 programmer.use();
@@ -99,9 +99,9 @@ class PlatformBitmap extends PlatformDisplayObject {
             }
         } else {
             this.removeProgrammerFlag(0x0001);
-            if(this.__programmer) {
+            if (this.__programmer) {
                 var programmer = this.__programmer.$nativeProgrammer;
-                if(Platform.native) {
+                if (Platform.native) {
                     programmer.setUniformInt("scale9", 0);
                     programmer.setUniformFloat("width", this.__width);
                     programmer.setUniformFloat("height", this.__height);

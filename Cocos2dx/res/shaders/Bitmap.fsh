@@ -105,6 +105,9 @@ vec4 filter(vec4 color,float posx,float posy) {
         } else {
             filterType = filters2[f];
         }
+        if(filterType == 0.0) {
+            break;
+        }
         vec4 params;
         if(pindex == 0) {
             params = filtersParams0;
@@ -297,7 +300,7 @@ vec4 colorFilter(vec4 color,float colorH,float colorS,float colorL) {
 
 vec4 strokeFilter(float strokeWidth, float r, float g, float b,float posx,float posy, vec4 color) {
     if(color[3] == 0.0) {
-        const int max = 10;
+        const int max = 3;
         int size = int(strokeWidth);
         for(int x = -max; x < max; x++) {
             if(x < -size || x > size) continue;

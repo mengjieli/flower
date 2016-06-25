@@ -242,7 +242,7 @@ class PlatformDisplayObject {
 
     setY(val) {
         this.__y = val;
-        this.show.setPositionY(val);
+        this.show.setPositionY(-val);
     }
 
     setWidth(val) {
@@ -305,7 +305,7 @@ class PlatformDisplayObject {
     programmerFlagChange(flag) {
         if (flag) {
             if (!this.__programmer) {
-                this.__programmer = PlatformProgrammer.createProgrammer();
+                this.__programmer = PlatformProgram.create();
                 var programmer = this.__programmer.$nativeProgrammer;
                 if (Platform.native) {
                     this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
@@ -321,36 +321,10 @@ class PlatformDisplayObject {
             if (this.__programmer) {
                 this.__programmer = null;
                 if (Platform.native) {
-                    this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    this.show.setGLProgramState(PlatformProgram.getInstance().$nativeProgrammer);
                 } else {
-                    this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    this.show.setShaderProgram(PlatformProgram.getInstance().$nativeProgrammer);
                 }
-            }
-        }
-    }
-
-    release() {
-        var show = this.show;
-        show.setPosition(0, 0);
-        show.setScale(1);
-        show.setOpacity(255);
-        show.setRotation(0);
-        show.setVisible(true);
-        this.__x = 0;
-        this.__y = 0;
-        this.__scaleX = 1;
-        this.__scaleY = 1;
-        this.__rotation = 0;
-        this.__width = 0;
-        this.__height = 0;
-        this.__programmer = null;
-        this.__programmerFlag = 0;
-        if (this.__programmer) {
-            PlatformProgrammer.release(this.__programmer);
-            if (Platform.native) {
-                this.show.setGLProgramState(PlatformProgrammer.getInstance());
-            } else {
-                this.show.setShaderProgram(PlatformProgrammer.getInstance());
             }
         }
     }
@@ -473,6 +447,32 @@ class PlatformDisplayObject {
             }
         }
     }
+
+    release() {
+        var show = this.show;
+        show.setPosition(0, 0);
+        show.setScale(1);
+        show.setOpacity(255);
+        show.setRotation(0);
+        show.setVisible(true);
+        this.__x = 0;
+        this.__y = 0;
+        this.__scaleX = 1;
+        this.__scaleY = 1;
+        this.__rotation = 0;
+        this.__width = 0;
+        this.__height = 0;
+        this.__programmer = null;
+        this.__programmerFlag = 0;
+        if (this.__programmer) {
+            PlatformProgram.release(this.__programmer);
+            if (Platform.native) {
+                this.show.setGLProgramState(PlatformProgram.getInstance());
+            } else {
+                this.show.setShaderProgram(PlatformProgram.getInstance());
+            }
+        }
+    }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformDisplayObject.js///////////////////////////
 
@@ -511,28 +511,85 @@ class PlatformSprite extends PlatformDisplayObject {
 
 
 //////////////////////////File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
-class PlatformTextField {
+class PlatformTextField extends PlatformDisplayObject {
+
+    static $mesureTxt;
 
     show;
 
     constructor() {
+        super();
         this.show = new cc.LabelTTF("", "Times Roman", 12);
         this.show.setAnchorPoint(0, 1);
         this.show.retain();
     }
 
+    setFontColor(color) {
+        this.show.setFontFillColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF}, true);
+    }
+
+    changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.setFontSize(size);
+        var txt = this.show;
+        txt.text = "";
+        var txtText = "";
+        var start = 0;
+        for (var i = 0; i < text.length; i++) {
+            //取一行文字进行处理
+            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+                var str = text.slice(start, i);
+                $mesureTxt.setString(str);
+                var lineWidth = $mesureTxt.getContentSize().width;
+                var findEnd = i;
+                var changeLine = false;
+                //如果这一行的文字宽大于设定宽
+                while (!autoSize && width && lineWidth > width) {
+                    changeLine = true;
+                    findEnd--;
+                    $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    lineWidth = $mesureTxt.getContentSize().width;
+                }
+                if (wordWrap && changeLine) {
+                    i = findEnd;
+                    txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                } else {
+                    txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                }
+                //如果文字的高度已经大于设定的高，回退一次
+                if (!autoSize && height && txt.getContentSize().height > height) {
+                    txt.setString(txtText);
+                    break;
+                } else {
+                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                    if (wordWrap && changeLine) {
+                        txtText += "\n";
+                    }
+                }
+                start = i;
+                if (multiline == false) {
+                    break;
+                }
+            }
+        }
+        return txt.getContentSize();
+    }
+
+    setFilters(filters) {
+
+    }
+
     release() {
         var show = this.show;
-        show.setPosition(0, 0);
-        show.setScale(1);
-        show.setOpacity(255);
-        show.setRotation(0);
-        show.setVisible(true);
         show.setString("");
         show.setFontSize(12);
         show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        super.release();
     }
 }
+
+PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
+PlatformTextField.$mesureTxt.retain();
 //////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
 
 
@@ -608,7 +665,7 @@ class PlatformBitmap extends PlatformDisplayObject {
             var scaleGapX = (right - left) / (tright - tleft);
             var scaleGapY = (bottom - top) / (tbottom - ttop);
             var programmer = this.__programmer.$nativeProgrammer;
-            if(Platform.native) {
+            if (Platform.native) {
                 programmer.setUniformInt("scale9", 1);
             } else {
                 programmer.use();
@@ -639,9 +696,9 @@ class PlatformBitmap extends PlatformDisplayObject {
             }
         } else {
             this.removeProgrammerFlag(0x0001);
-            if(this.__programmer) {
+            if (this.__programmer) {
                 var programmer = this.__programmer.$nativeProgrammer;
-                if(Platform.native) {
+                if (Platform.native) {
                     programmer.setUniformInt("scale9", 0);
                     programmer.setUniformFloat("width", this.__width);
                     programmer.setUniformFloat("height", this.__height);
@@ -807,8 +864,8 @@ class PlatformURLLoader {
 
 
 
-//////////////////////////File:flower/platform/cocos2dx/PlatformProgrammer.js///////////////////////////
-class PlatformProgrammer {
+//////////////////////////File:flower/platform/cocos2dx/PlatformProgram.js///////////////////////////
+class PlatformProgram {
 
     $nativeProgrammer;
     _scale9Grid;
@@ -856,27 +913,27 @@ class PlatformProgrammer {
 
     static programmers = [];
 
-    static createProgrammer() {
-        if (PlatformProgrammer.programmers.length) {
-            return PlatformProgrammer.programmers.pop();
+    static create() {
+        if (PlatformProgram.programmers.length) {
+            return PlatformProgram.programmers.pop();
         }
-        return new PlatformProgrammer();
+        return new PlatformProgram();
     }
 
-    static releaseProgrammer(programmer) {
-        PlatformProgrammer.programmers.push(programmer);
+    static release(programmer) {
+        PlatformProgram.programmers.push(programmer);
     }
 
     static instance;
 
     static getInstance() {
-        if (PlatformProgrammer.instance == null) {
-            PlatformProgrammer.instance = new PlatformProgrammer(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
+        if (PlatformProgram.instance == null) {
+            PlatformProgram.instance = new PlatformProgram(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh", "res/shaders/Source.fsh");
         }
-        return PlatformProgrammer.instance;
+        return PlatformProgram.instance;
     }
 }
-//////////////////////////End File:flower/platform/cocos2dx/PlatformProgrammer.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformProgram.js///////////////////////////
 
 
 
@@ -1928,6 +1985,7 @@ class DisplayObject extends EventDispatcher {
      * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
      * 0x0004 bounds 在父类中的尺寸失效
      * 0x0100 重排子对象顺序
+     * 0x0800 文字内容改变
      */
     __flags = 0;
 
@@ -2837,6 +2895,101 @@ class Bitmap extends DisplayObject {
 
 exports.Bitmap = Bitmap;
 //////////////////////////End File:flower/display/Bitmap.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/TextField.js///////////////////////////
+class TextField extends DisplayObject {
+
+    $TextField;
+
+    constructor() {
+        super();
+        this.$nativeShow = Platform.create("TextField");
+        this.$TextField = {
+            0: "", //text
+            1: 12, //fontSize
+            2: 0x000000, //fontColor
+            3: false, //wordWrap
+            4: true, //multiline
+            5: true //autoSize
+        }
+    }
+
+    $setText(val) {
+        val = "" + val;
+        var p = this.$TextField;
+        if (p[0] == val) {
+            return false;
+        }
+        p[0] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $measureText(rect) {
+        if (this.$hasFlags(0x0800)) {
+            var d = this.$DisplayObject;
+            var p = this.$TextField;
+            //text, width, height, size, wordWrap, multiline, autoSize
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[3], p[4], p[5]);
+            rect.x = 0;
+            rect.y = 0;
+            rect.width = size.width;
+            rect.height = size.height;
+            this.$removeFlags(0x0800);
+        }
+    }
+
+    $measureContentBounds(rect) {
+        this.$measureText(rect);
+    }
+
+    $setFontColor(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (p[2] == val) {
+            return false;
+        }
+        p[2] = val;
+        this.$nativeShow.setFontColor(val);
+        return true;
+    }
+
+    get text() {
+        var p = this.$TextField;
+        return p[0];
+    }
+
+    set text(val) {
+        this.$setText(val);
+    }
+
+    get fontColor() {
+        var p = this.$TextField;
+        return p[2];
+    }
+
+    set fontColor(val) {
+        this.$setFontColor(val);
+    }
+
+    $onFrameEnd() {
+        if (this.$hasFlags(0x0800)) {
+            var width = this.width;
+        }
+        super.$onFrameEnd();
+    }
+
+    dispose() {
+        super.dispose();
+        Platform.release("TextField", this.$nativeShow);
+    }
+}
+
+exports.TextField = TextField;
+//////////////////////////End File:flower/display/TextField.js///////////////////////////
 
 
 

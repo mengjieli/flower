@@ -13,6 +13,7 @@ class DisplayObject extends EventDispatcher {
      * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
      * 0x0004 bounds 在父类中的尺寸失效
      * 0x0100 重排子对象顺序
+     * 0x0800 文字内容改变
      */
     __flags = 0;
 

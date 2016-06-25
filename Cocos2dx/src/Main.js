@@ -60,6 +60,33 @@ var Main = function () {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
 
+            var h = 0;
+            var s = 0;
+            var l = 0;
+            var r = 0;
+            var g = 0;
+            var b = 0;
+            var blurX = 0;
+            var blurY = 0;
+            var color = 0;
+            container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
+            setInterval(function () {
+                h += 5;
+                r += 1;
+                g += 2;
+                b += 3;
+                blurX += 0.1;
+                blurY += 0.1;
+                color = r << 16 | g << 8 | b;
+                //flower.trace(h,s,l);
+                if (h > 2700) {
+                    container.filters = null;
+                } else {
+                    container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
+                }
+            }, 50);
+            //return;
+
             var bm = new flower.Bitmap();
             bm.x = bm.y = 100;
             //bm.width = bm.height = 200;
@@ -118,31 +145,13 @@ var Main = function () {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             flower.trace(container.width, container.height);
-            var h = 0;
-            var s = 0;
-            var l = 0;
-            var r = 0;
-            var g = 0;
-            var b = 0;
-            var blurX = 0;
-            var blurY = 0;
-            var color = 0;
-            container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
-            setInterval(function () {
-                h += 5;
-                r += 1;
-                g += 2;
-                b += 3;
-                blurX += 0.1;
-                blurY += 0.1;
-                color = r << 16 | g << 8 | b;
-                //flower.trace(h,s,l);
-                if (h > 270000) {
-                    container.filters = null;
-                } else {
-                    container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
-                }
-            }, 50);
+
+            var txt = new flower.TextField();
+            txt.x = 100;
+            txt.y = 360;
+            txt.text = "what? who? how?";
+            txt.fontColor = 0x00ff00;
+            container.addChild(txt);
         }
     }]);
 

@@ -168,7 +168,7 @@ var list = [
     "PlatformBitmap",
     "PlatformTexture",
     "PlatformURLLoader",
-    "PlatformProgrammer",
+    "PlatformProgram",
     "PlatformShaderType",
 
     "CoreTime",
@@ -197,6 +197,7 @@ var list = [
     "DisplayObject",
     "Sprite",
     "Bitmap",
+    "TextField",
     "Stage",
 
     "Texture",

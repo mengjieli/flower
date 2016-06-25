@@ -28,7 +28,7 @@ class PlatformDisplayObject {
 
     setY(val) {
         this.__y = val;
-        this.show.setPositionY(val);
+        this.show.setPositionY(-val);
     }
 
     setWidth(val) {
@@ -91,7 +91,7 @@ class PlatformDisplayObject {
     programmerFlagChange(flag) {
         if (flag) {
             if (!this.__programmer) {
-                this.__programmer = PlatformProgrammer.createProgrammer();
+                this.__programmer = PlatformProgram.create();
                 var programmer = this.__programmer.$nativeProgrammer;
                 if (Platform.native) {
                     this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
@@ -107,36 +107,10 @@ class PlatformDisplayObject {
             if (this.__programmer) {
                 this.__programmer = null;
                 if (Platform.native) {
-                    this.show.setGLProgramState(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    this.show.setGLProgramState(PlatformProgram.getInstance().$nativeProgrammer);
                 } else {
-                    this.show.setShaderProgram(PlatformProgrammer.getInstance().$nativeProgrammer);
+                    this.show.setShaderProgram(PlatformProgram.getInstance().$nativeProgrammer);
                 }
-            }
-        }
-    }
-
-    release() {
-        var show = this.show;
-        show.setPosition(0, 0);
-        show.setScale(1);
-        show.setOpacity(255);
-        show.setRotation(0);
-        show.setVisible(true);
-        this.__x = 0;
-        this.__y = 0;
-        this.__scaleX = 1;
-        this.__scaleY = 1;
-        this.__rotation = 0;
-        this.__width = 0;
-        this.__height = 0;
-        this.__programmer = null;
-        this.__programmerFlag = 0;
-        if (this.__programmer) {
-            PlatformProgrammer.release(this.__programmer);
-            if (Platform.native) {
-                this.show.setGLProgramState(PlatformProgrammer.getInstance());
-            } else {
-                this.show.setShaderProgram(PlatformProgrammer.getInstance());
             }
         }
     }
@@ -256,6 +230,32 @@ class PlatformDisplayObject {
             } else {
                 this.__programmer.use();
                 nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters100")].concat(types1));
+            }
+        }
+    }
+
+    release() {
+        var show = this.show;
+        show.setPosition(0, 0);
+        show.setScale(1);
+        show.setOpacity(255);
+        show.setRotation(0);
+        show.setVisible(true);
+        this.__x = 0;
+        this.__y = 0;
+        this.__scaleX = 1;
+        this.__scaleY = 1;
+        this.__rotation = 0;
+        this.__width = 0;
+        this.__height = 0;
+        this.__programmer = null;
+        this.__programmerFlag = 0;
+        if (this.__programmer) {
+            PlatformProgram.release(this.__programmer);
+            if (Platform.native) {
+                this.show.setGLProgramState(PlatformProgram.getInstance());
+            } else {
+                this.show.setShaderProgram(PlatformProgram.getInstance());
             }
         }
     }
