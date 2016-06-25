@@ -15,3 +15,5 @@ class CoreTime {
         return CoreTime.getTime();
     }
 }
+
+exports.CoreTime = CoreTime;

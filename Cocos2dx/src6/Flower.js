@@ -206,6 +206,12 @@ class Platform {
             }
             return new PlatformShape();
         }
+        if (name == "Mask") {
+            if (pools.Mask && pools.Mask.length) {
+                return pools.Mask.pop();
+            }
+            return new PlatformMask();
+        }
         return null;
     }
 
@@ -495,6 +501,10 @@ class PlatformSprite extends PlatformDisplayObject {
 
     constructor() {
         super();
+        this.initShow();
+    }
+
+    initShow() {
         this.show = new cc.Node();
         this.show.setAnchorPoint(0, 0);
         this.show.retain();
@@ -956,6 +966,27 @@ class PlatformShape extends PlatformDisplayObject {
 
 
 
+//////////////////////////File:flower/platform/cocos2dx/PlatformMask.js///////////////////////////
+class PlatformMask extends PlatformSprite {
+
+    constructor() {
+        super();
+    }
+
+    initShow() {
+        this.show = new cc.ClippingNode();
+        this.show.setAnchorPoint(0, 0);
+        this.show.retain();
+    }
+
+    setShape(shape) {
+        this.show.setStencil(shape.show);
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformMask.js///////////////////////////
+
+
+
 //////////////////////////File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
 class PlatformTexture {
 
@@ -1158,6 +1189,8 @@ class CoreTime {
         return CoreTime.getTime();
     }
 }
+
+exports.CoreTime = CoreTime;
 //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
 
@@ -2346,6 +2379,11 @@ class DisplayObject extends EventDispatcher {
 
     $setRotation(val) {
         val = +val || 0;
+        if (val < 0) {
+            val = 360 - (-val)%360;
+        } else {
+            val = val % 360;
+        }
         var p = this.$DisplayObject;
         if (p[2] == val) {
             return;
@@ -2814,6 +2852,10 @@ class Sprite extends DisplayObject {
 
     constructor() {
         super();
+        this.$initContainer();
+    }
+
+    $initContainer() {
         this.__children = [];
         this.$nativeShow = Platform.create("Sprite");
     }
@@ -3020,6 +3062,10 @@ class Sprite extends DisplayObject {
         return this.__children.length;
     }
 
+    $releaseContainer() {
+        Platform.release("Sprite", this.$nativeShow);
+    }
+
     dispose() {
         var children = this.__children;
         while (children.length) {
@@ -3027,12 +3073,78 @@ class Sprite extends DisplayObject {
             child.dispose();
         }
         super.dispose();
-        Platform.release("Sprite", this.$nativeShow);
+        this.$releaseContainer();
     }
 }
 
 exports.Sprite = Sprite;
 //////////////////////////End File:flower/display/Sprite.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/Mask.js///////////////////////////
+class Mask extends Sprite {
+
+    __shape;
+
+    constructor() {
+        super();
+    }
+
+    $initContainer() {
+        this.__children = [];
+        this.$nativeShow = Platform.create("Mask");
+        this.__shape = new Shape();
+        this.$nativeShow.setShape(this.__shape.$nativeShow);
+    }
+
+    $getMouseTarget(matrix, multiply) {
+        if (this.touchEnabled == false || this.visible == false)
+            return null;
+        if (multiply == true && this.multiplyTouchEnabled == false)
+            return null;
+        matrix.save();
+        matrix.translate(-this.x, -this.y);
+        if (this.rotation)
+            matrix.rotate(-this.radian);
+        if (this.scaleX != 1 || this.scaleY != 1) {
+            matrix.scale(1 / this.scaleX, 1 / this.scaleY);
+        }
+        var touchX = Math.floor(matrix.tx);
+        var touchY = Math.floor(matrix.ty);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        var bounds = this.shape.$getContentBounds();
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+            var target;
+            var childs = this.__children;
+            var len = childs.length;
+            for (var i = len - 1; i >= 0; i--) {
+                if (childs[i].touchEnabled && (multiply == false || (multiply == true && childs[i].multiplyTouchEnabled == true))) {
+                    target = childs[i].$getMouseTarget(matrix, multiply);
+                    if (target) {
+                        break;
+                    }
+                }
+            }
+            matrix.restore();
+            return target;
+        }
+        return null;
+    }
+
+    get shape() {
+        return this.__shape;
+    }
+
+    $releaseContainer() {
+        Platform.release("Mask", this.$nativeShow);
+    }
+}
+
+exports.Mask = Mask;
+//////////////////////////End File:flower/display/Mask.js///////////////////////////
 
 
 
@@ -3918,7 +4030,7 @@ class Stage extends Sprite {
         if (!mouse.target) {
             mouse.target = this;
         }
-        //this.getMouseTarget(x, y, mouse.mutiply);
+        this.getMouseTarget(x, y, mouse.mutiply);
         var target = mouse.target;//this.getMouseTarget(x, y, mouse.mutiply);
         mouse.moveX = x;
         mouse.moveY = y;
@@ -4793,6 +4905,1186 @@ class ResType {
 
 exports.ResType = ResType;
 //////////////////////////End File:flower/res/ResType.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/plugins/TweenCenter.js///////////////////////////
+class TweenCenter {
+    constructor() {
+    }
+
+    init(tween, propertiesTo, propertiesFrom) {
+        this.tween = tween;
+        var target = tween.target;
+        this.centerX = target.width / 2;
+        this.centerY = target.height / 2;
+        this.centerLength = Math.sqrt(target.width * target.width + target.height * target.height) * .5;
+        this.rotationStart = Math.atan2(target.height, target.width) * 180 / Math.PI;
+        if (target.rotation) {
+            this.lastMoveX = this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
+            this.lastMoveY = this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+        } else {
+            this.lastMoveX = 0;
+            this.lastMoveY = 0;
+        }
+        var useAttributes = [];
+        useAttributes.push("center");
+        if ("scaleX" in propertiesTo) {
+            this.scaleXTo = +propertiesTo["scaleX"];
+            useAttributes.push("scaleX");
+            if (propertiesFrom && "scaleX" in propertiesFrom) {
+                this.scaleXFrom = +propertiesFrom["scaleX"];
+            }
+            else {
+                this.scaleXFrom = target["scaleX"];
+            }
+        }
+        if ("scaleY" in propertiesTo) {
+            this.scaleYTo = +propertiesTo["scaleY"];
+            useAttributes.push("scaleY");
+            if (propertiesFrom && "scaleY" in propertiesFrom) {
+                this.scaleYFrom = +propertiesFrom["scaleY"];
+            }
+            else {
+                this.scaleYFrom = target["scaleY"];
+            }
+        }
+        if ("rotation" in propertiesTo) {
+            this.rotationTo = +propertiesTo["rotation"];
+            useAttributes.push("rotation");
+            if (propertiesFrom && "rotation" in propertiesFrom) {
+                this.rotationFrom = +propertiesFrom["rotation"];
+            }
+            else {
+                this.rotationFrom = target["rotation"];
+            }
+        }
+        return useAttributes;
+    }
+
+    tween;
+    scaleXFrom;
+    scaleYFrom;
+    scaleXTo;
+    scaleYTo;
+    rotationFrom;
+    rotationStart;
+    rotationTo;
+    centerX;
+    centerY;
+    centerLength;
+    lastMoveX;
+    lastMoveY;
+
+    update(value) {
+        var target = this.tween.target;
+        var moveX = 0;
+        var moveY = 0;
+        if (this.scaleXTo) {
+            target.scaleX = this.scaleXFrom + (this.scaleXTo - this.scaleXFrom) * value;
+            target.x = this.centerX - target.width / 2;
+        }
+        if (this.scaleYTo) {
+            target.scaleY = this.scaleYFrom + (this.scaleYTo - this.scaleYFrom) * value;
+            target.y = this.centerY - target.height / 2;
+        }
+        if (this.rotationTo) {
+            target.rotation = this.rotationFrom + (this.rotationTo - this.rotationFrom) * value;
+            moveX += this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
+            moveY += this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+            target.x += moveX - this.lastMoveX;
+            target.y += moveY - this.lastMoveY;
+        }
+        this.lastMoveX = moveX;
+        this.lastMoveY = moveY;
+    }
+
+    static scaleTo(target, time, scaleTo, scaleFrom = null, ease = "None") {
+        return flower.Tween.to(target, time, {
+            "center": true,
+            "scaleX": scaleTo,
+            "scaleY": scaleTo
+        }, ease, scaleFrom == null ? null : {"scaleX": scaleFrom, "scaleY": scaleFrom});
+    }
+
+    static rotationTo(target, time, rotationTo, rotationFrom = null, ease = "None") {
+        return flower.Tween.to(target, time, {
+            "center": true,
+            "rotation": rotationTo
+        }, ease, rotationFrom == null ? null : {"rotation": rotationFrom});
+    }
+}
+
+exports.TweenCenter = TweenCenter;
+//////////////////////////End File:flower/tween/plugins/TweenCenter.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/plugins/TweenPath.js///////////////////////////
+class TweenPath {
+
+    constructor() {
+    }
+
+    init(tween, propertiesTo, propertiesFrom) {
+        this.tween = tween;
+        var useAttributes = [];
+        useAttributes.push("path");
+        var path = propertiesTo["path"];
+        var target = tween.target;
+        var start = flower.Point.create(target.x, target.y);
+        path.splice(0, 0, start);
+        if (propertiesFrom) {
+            if ("x" in propertiesFrom) {
+                start.x = +propertiesFrom["x"];
+            }
+            if ("y" in propertiesFrom) {
+                start.y = +propertiesFrom["y"];
+            }
+        }
+        if ("x" in propertiesTo && "y" in propertiesTo) {
+            useAttributes.push("x");
+            useAttributes.push("y");
+            path.push(flower.Point.create(+propertiesTo["x"], +propertiesTo["y"]));
+        }
+        this.path = path;
+        this.pathSum = [];
+        this.pathSum.push(0);
+        for (var i = 1, len = path.length; i < len; i++) {
+            this.pathSum[i] = this.pathSum[i - 1] + Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+        }
+        var sum = this.pathSum[len - 1];
+        for (i = 1; i < len; i++) {
+            this.pathSum[i] = this.pathSum[i] / sum;
+        }
+        return useAttributes;
+    }
+
+    tween;
+    pathSum;
+    path;
+
+    update(value) {
+        var path = this.path;
+        var target = this.tween.target;
+        var pathSum = this.pathSum;
+        var i, len = pathSum.length;
+        for (i = 1; i < len; i++) {
+            if (value > pathSum[i - 1] && value <= pathSum[i]) {
+                break;
+            }
+        }
+        if (value <= 0) {
+            i = 1;
+        }
+        else if (value >= 1) {
+            i = len - 1;
+        }
+        value = (value - pathSum[i - 1]) / (pathSum[i] - pathSum[i - 1]);
+        target.x = value * (path[i].x - path[i - 1].x) + path[i - 1].x;
+        target.y = value * (path[i].y - path[i - 1].y) + path[i - 1].y;
+    }
+
+    static to(target, time, path, ease = "None") {
+        return flower.Tween.to(target, time, {"path": path}, ease);
+    }
+
+    static vto(target, v, path, ease = "None") {
+        var sum = 0;
+        for (var i = 1, len = path.length; i < len; i++) {
+            sum += Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+        }
+        var time = sum / v;
+        return flower.Tween.to(target, time, {"path": path}, ease);
+    }
+
+}
+
+exports.TweenPath = TweenPath;
+//////////////////////////End File:flower/tween/plugins/TweenPath.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/plugins/TweenPhysicMove.js///////////////////////////
+class TweenPhysicMove {
+
+    constructor() {
+        if (!flower.Tween.hasPlugin("physicMove")) {
+            flower.Tween.registerPlugin("physicMove", flower.TweenPhysicMove);
+        }
+    }
+
+    init(tween, propertiesTo, propertiesFrom) {
+        this.tween = tween;
+        var useAttributes = [];
+        useAttributes.push("physicMove");
+        var target = tween.target;
+        var startX = target.x;
+        var startY = target.y;
+        if (propertiesFrom) {
+            if ("x" in propertiesFrom) {
+                startX = +propertiesFrom["x"];
+            }
+            if ("y" in propertiesFrom) {
+                startY = +propertiesFrom["y"];
+            }
+        }
+        this.startX = startX;
+        this.startY = startY;
+        var endX = startX;
+        var endY = startY;
+        if ("x" in propertiesTo) {
+            endX = +propertiesTo["x"];
+            useAttributes.push("x");
+        }
+        if ("y" in propertiesTo) {
+            endY = +propertiesTo["y"];
+            useAttributes.push("y");
+        }
+        var vx = 0;
+        var vy = 0;
+        var t = tween.time;
+        if ("vx" in propertiesTo) {
+            vx = +propertiesTo["vx"];
+            useAttributes.push("vx");
+            if (!("x" in propertiesTo)) {
+                endX = startX + t * vx;
+            }
+        }
+        if ("vy" in propertiesTo) {
+            vy = +propertiesTo["vy"];
+            useAttributes.push("vy");
+            if (!("y" in propertiesTo)) {
+                endY = startY + t * vy;
+            }
+        }
+        this.vx = vx;
+        this.vy = vy;
+        this.ax = (endX - startX - vx * t) * 2 / (t * t);
+        this.ay = (endY - startY - vy * t) * 2 / (t * t);
+        this.time = t;
+        return useAttributes;
+    }
+
+    tween;
+    startX;
+    vx;
+    ax;
+    startY;
+    vy;
+    ay;
+    time;
+
+    update(value) {
+        var target = this.tween.target;
+        var t = this.time * value;
+        target.x = this.startX + this.vx * t + .5 * this.ax * t * t;
+        target.y = this.startY + this.vy * t + .5 * this.ay * t * t;
+    }
+
+    static freeFallTo(target, time, groundY) {
+        return flower.Tween.to(target, time, {"y": groundY, "physicMove": true});
+    }
+
+    static freeFallToWithG(target, g, groundY) {
+        return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g), {"y": groundY, "physicMove": true});
+    }
+
+    static fallTo(target, time, groundY, vX = null, vY = null) {
+        return flower.Tween.to(target, time, {"y": groundY, "physicMove": true, "vx": vX, "vy": vY});
+    }
+
+    static fallToWithG(target, g, groundY, vX = null, vY = null) {
+        vX = +vX;
+        vY = +vY;
+        return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g + (vY * vY / (g * g))) - vY / g, {
+            "y": groundY,
+            "physicMove": true,
+            "vx": vX,
+            "vy": vY
+        });
+    }
+
+    static to(target, time, xTo, yTo, vX = 0, vY = 0) {
+        return flower.Tween.to(target, time, {"x": xTo, "y": yTo, "vx": vX, "vy": vY, "physicMove": true});
+    }
+
+}
+
+exports.TweenPhysicMove = TweenPhysicMove;
+//////////////////////////End File:flower/tween/plugins/TweenPhysicMove.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/BasicPlugin.js///////////////////////////
+class BasicPlugin {
+    constructor() {
+
+    }
+
+    init(tween, propertiesTo, propertiesFrom) {
+        this.tween = tween;
+        this._attributes = propertiesTo;
+        this.keys = flower.ObjectDo.keys(propertiesTo);
+        var target = tween.target;
+        var startAttributes = {};
+        var keys = this.keys;
+        var length = keys.length;
+        for (var i = 0; i < length; i++) {
+            var key = keys[i];
+            if (propertiesFrom && key in propertiesFrom) {
+                startAttributes[key] = propertiesFrom[key];
+            }
+            else {
+                startAttributes[key] = target[key];
+            }
+        }
+        this.startAttributes = startAttributes;
+        return null;
+    }
+
+    tween;
+    keys;
+    startAttributes;
+    _attributes;
+
+    update(value) {
+        var target = this.tween.target;
+        var keys = this.keys;
+        var length = keys.length;
+        var startAttributes = this.startAttributes;
+        for (var i = 0; i < length; i++) {
+            var key = keys[i];
+            target[key] = (this._attributes[key] - startAttributes[key]) * value + startAttributes[key];
+        }
+    }
+}
+
+exports.BasicPlugin = BasicPlugin;
+//////////////////////////End File:flower/tween/BasicPlugin.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/Ease.js///////////////////////////
+class Ease {
+
+    static NONE = "None";
+    static SINE_EASE_IN = "SineEaseIn";
+    static SineEaseOut = "SineEaseOut";
+    static SINE_EASE_IN_OUT = "SineEaseInOut";
+    static SineEaseOutIn = "SineEaseOutIn";
+    static QUAD_EASE_IN = "QuadEaseIn";
+    static QUAD_EASE_OUT = "QuadEaseOut";
+    static QUAD_EASE_IN_OUT = "QuadEaseInOut";
+    static QUAD_EASE_OUT_IN = "QuadEaseOutIn";
+    static CUBIC_EASE_IN = "CubicEaseIn";
+    static CUBIC_EASE_OUT = "CubicEaseOut";
+    static CUBIC_EASE_IN_OUT = "CubicEaseInOut";
+    static CUBIC_EASE_OUT_IN = "CubicEaseOutIn";
+    static QUART_EASE_IN = "QuartEaseIn";
+    static QUART_EASE_OUT = "QuartEaseOut";
+    static QUART_EASE_IN_OUT = "QuartEaseInOut";
+    static QUART_EASE_OUT_IN = "QuartEaseOutIn";
+    static QUINT_EASE_IN = "QuintEaseIn";
+    static QUINT_EASE_OUT = "QuintEaseOut";
+    static QUINT_EASE_IN_OUT = "QuintEaseInOut";
+    static QUINT_EASE_OUT_IN = "QuintEaseOutIn";
+    static EXPO_EASE_IN = "ExpoEaseIn";
+    static EXPO_EASE_OUT = "ExpoEaseOut";
+    static EXPO_EASE_IN_OUT = "ExpoEaseInOut";
+    static EXPO_EASE_OUT_IN = "ExpoEaseOutIn";
+    static CIRC_EASE_IN = "CircEaseIn";
+    static CIRC_EASE_OUT = "CircEaseOut";
+    static CIRC_EASE_IN_OUT = "CircEaseInOut";
+    static CIRC_EASE_OUT_IN = "CircEaseOutIn";
+    static BACK_EASE_IN = "BackEaseIn";
+    static BACK_EASE_OUT = "BackEaseOut";
+    static BACK_EASE_IN_OUT = "BackEaseInOut";
+    static BACK_EASE_OUT_IN = "BackEaseOutIn";
+    static ELASTIC_EASE_IN = "ElasticEaseIn";
+    static ELASTIC_EASE_OUT = "ElasticEaseOut";
+    static ELASTIC_EASE_IN_OUT = "ElasticEaseInOut";
+    static ELASTIC_EASE_OUT_IN = "ElasticEaseOutIn";
+    static BOUNCE_EASE_IN = "BounceEaseIn";
+    static BounceEaseOut = "BounceEaseOut";
+    static BOUNCE_EASE_IN_OUT = "BounceEaseInOut";
+    static BOUNCE_EASE_OUT_IN = "BounceEaseOutIn";
+
+    static registerEaseFunction(name, ease) {
+        EaseFunction[name] = ease;
+    }
+}
+
+exports.Ease = Ease;
+//////////////////////////End File:flower/tween/Ease.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/EaseFunction.js///////////////////////////
+class EaseFunction {
+    static None(t) {
+        return t;
+    }
+
+    static SineEaseIn(t) {
+        return Math.sin((t - 1) * Math.PI * .5) + 1;
+    }
+
+    static SineEaseOut(t) {
+        return Math.sin(t * Math.PI * .5);
+    }
+
+    static SineEaseInOut(t) {
+        return Math.sin((t - .5) * Math.PI) * .5 + .5;
+    }
+
+    static SineEaseOutIn(t) {
+        if (t < 0.5) {
+            return Math.sin(t * Math.PI) * .5;
+        }
+        return Math.sin((t - 1) * Math.PI) * .5 + 1;
+    }
+
+    static QuadEaseIn(t) {
+        return t * t;
+    }
+
+    static QuadEaseOut(t) {
+        return -(t - 1) * (t - 1) + 1;
+    }
+
+    static QuadEaseInOut(t) {
+        if (t < .5) {
+            return t * t * 2;
+        }
+        return -(t - 1) * (t - 1) * 2 + 1;
+    }
+
+    static QuadEaseOutIn(t) {
+        var s = (t - .5) * (t - .5) * 2;
+        if (t < .5) {
+            return .5 - s;
+        }
+        return .5 + s;
+    }
+
+    static CubicEaseIn(t) {
+        return t * t * t;
+    }
+
+    static CubicEaseOut(t) {
+        return (t - 1) * (t - 1) * (t - 1) + 1;
+    }
+
+    static CubicEaseInOut(t) {
+        if (t < .5) {
+            return t * t * t * 4;
+        }
+        return (t - 1) * (t - 1) * (t - 1) * 4 + 1;
+    }
+
+    static CubicEaseOutIn(t) {
+        return (t - .5) * (t - .5) * (t - .5) * 4 + .5;
+    }
+
+    static QuartEaseIn(t) {
+        return t * t * t * t;
+    }
+
+    static QuartEaseOut(t) {
+        var a = (t - 1);
+        return -a * a * a * a + 1;
+    }
+
+    static QuartEaseInOut(t) {
+        if (t < .5) {
+            return t * t * t * t * 8;
+        }
+        var a = (t - 1);
+        return -a * a * a * a * 8 + 1;
+    }
+
+    static QuartEaseOutIn(t) {
+        var s = (t - .5) * (t - .5) * (t - .5) * (t - .5) * 8;
+        if (t < .5) {
+            return .5 - s;
+        }
+        return .5 + s;
+    }
+
+    static QuintEaseIn(t) {
+        return t * t * t * t * t;
+    }
+
+    static QuintEaseOut(t) {
+        var a = t - 1;
+        return a * a * a * a * a + 1;
+    }
+
+    static QuintEaseInOut(t) {
+        if (t < .5) {
+            return t * t * t * t * t * 16;
+        }
+        var a = t - 1;
+        return a * a * a * a * a * 16 + 1;
+    }
+
+    static QuintEaseOutIn(t) {
+        var a = t - .5;
+        return a * a * a * a * a * 16 + 0.5;
+    }
+
+    static ExpoEaseIn(t) {
+        return Math.pow(2, 10 * (t - 1));
+    }
+
+    static ExpoEaseOut(t) {
+        return -Math.pow(2, -10 * t) + 1;
+    }
+
+    static ExpoEaseInOut(t) {
+        if (t < .5) {
+            return Math.pow(2, 10 * (t * 2 - 1)) * .5;
+        }
+        return -Math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
+    }
+
+    static ExpoEaseOutIn(t) {
+        if (t < .5) {
+            return -Math.pow(2, -20 * t) * .5 + .5;
+        }
+        return Math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
+    }
+
+    static CircEaseIn(t) {
+        return 1 - Math.sqrt(1 - t * t);
+    }
+
+    static CircEaseOut(t) {
+        return Math.sqrt(1 - (1 - t) * (1 - t));
+    }
+
+    static CircEaseInOut(t) {
+        if (t < .5) {
+            return .5 - Math.sqrt(.25 - t * t);
+        }
+        return Math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
+    }
+
+    static CircEaseOutIn(t) {
+        var s = Math.sqrt(.25 - (.5 - t) * (.5 - t));
+        if (t < .5) {
+            return s;
+        }
+        return 1 - s;
+    }
+
+    static BackEaseIn(t) {
+        return 2.70158 * t * t * t - 1.70158 * t * t;
+    }
+
+    static BackEaseOut(t) {
+        var a = t - 1;
+        return 2.70158 * a * a * a + 1.70158 * a * a + 1;
+    }
+
+    static BackEaseInOut(t) {
+        var a = t - 1;
+        if (t < .5) {
+            return 10.80632 * t * t * t - 3.40316 * t * t;
+        }
+        return 10.80632 * a * a * a + 3.40316 * a * a + 1;
+    }
+
+    static BackEaseOutIn(t) {
+        var a = t - .5;
+        if (t < .5) {
+            return 10.80632 * a * a * a + 3.40316 * a * a + .5;
+        }
+        return 10.80632 * a * a * a - 3.40316 * a * a + .5;
+    }
+
+    static ElasticEaseIn(t) {
+        if (t == 0 || t == 1)
+            return t;
+        return -(Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.075) * 2 * Math.PI / .3));
+    }
+
+    static ElasticEaseOut(t) {
+        if (t == 0 || t == .5 || t == 1)
+            return t;
+        return (Math.pow(2, 10 * -t) * Math.sin((-t - .075) * 2 * Math.PI / .3)) + 1;
+    }
+
+    static ElasticEaseInOut(t) {
+        if (t == 0 || t == .5 || t == 1)
+            return t;
+        if (t < .5) {
+            return -(Math.pow(2, 10 * t - 10) * Math.sin((t * 2 - 2.15) * Math.PI / .3));
+        }
+        return (Math.pow(2, 10 - 20 * t) * Math.sin((-4 * t + 1.85) * Math.PI / .3)) * .5 + 1;
+    }
+
+    static ElasticEaseOutIn(t) {
+        if (t == 0 || t == .5 || t == 1)
+            return t;
+        if (t < .5) {
+            return (Math.pow(2, -20 * t) * Math.sin((-t * 4 - .15) * Math.PI / .3)) * .5 + .5;
+        }
+        return -(Math.pow(2, 20 * (t - 1)) * Math.sin((t * 4 - 4.15) * Math.PI / .3)) * .5 + .5;
+    }
+
+    static bounceEaseIn(t) {
+        return 1 - flower.EaseFunction.bounceEaseOut(1 - t);
+    }
+
+    static bounceEaseOut(t) {
+        var s;
+        var a = 7.5625;
+        var b = 2.75;
+        if (t < (1 / 2.75)) {
+            s = a * t * t;
+        }
+        else if (t < (2 / b)) {
+            s = (a * (t - (1.5 / b)) * (t - (1.5 / b)) + .75);
+        }
+        else if (t < (2.5 / b)) {
+            s = (a * (t - (2.25 / b)) * (t - (2.25 / b)) + .9375);
+        }
+        else {
+            s = (a * (t - (2.625 / b)) * (t - (2.625 / b)) + .984375);
+        }
+        return s;
+    }
+
+
+    static BounceEaseInOut(t) {
+        if (t < .5)
+            return flower.EaseFunction.bounceEaseIn(t * 2) * .5;
+        else
+            return flower.EaseFunction.bounceEaseOut(t * 2 - 1) * .5 + .5;
+    }
+
+    static BounceEaseOutIn(t) {
+        if (t < .5)
+            return flower.EaseFunction.bounceEaseOut(t * 2) * .5;
+        else
+            return flower.EaseFunction.bounceEaseIn(t * 2 - 1) * .5 + .5;
+    }
+
+    static BounceEaseIn = EaseFunction.bounceEaseIn;
+    static BounceEaseOut = EaseFunction.bounceEaseOut;
+}
+//////////////////////////End File:flower/tween/EaseFunction.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/TimeLine.js///////////////////////////
+class TimeLine {
+    tweens;
+
+    constructor() {
+        this.tweens = [];
+    }
+
+    lastTime = -1;
+    _currentTime = 0;
+
+    get totalTime() {
+        return this.getTotalTime();
+    }
+
+    getTotalTime() {
+        if (this.invalidTotalTime == true) {
+            return this._totalTime;
+        }
+        this.invalidTotalTime = true;
+        var tweens = this.tweens;
+        var endTime = 0;
+        var time;
+        for (var i = 0, len = tweens.length; i < len; i++) {
+            time = tweens[i].startTime + tweens[i].time;
+            if (time > endTime) {
+                endTime = time;
+            }
+        }
+        this._totalTime = endTime * 1000;
+        return this._totalTime;
+    }
+
+    _totalTime = 0;
+    invalidTotalTime = true;
+
+    $invalidateTotalTime() {
+        if (this.invalidTotalTime == false) {
+            return;
+        }
+        this.invalidTotalTime = false;
+    }
+
+    _loop = false;
+    get loop() {
+        return this._loop;
+    }
+
+    set loop(value) {
+        this._loop = value;
+    }
+
+    _isPlaying = false;
+    get isPlaying() {
+        return this._isPlaying;
+    }
+
+    update(timeStamp, gap) {
+        var totalTime = this.getTotalTime();
+        var lastTime = this._currentTime;
+        this._currentTime += timeStamp - this.lastTime;
+        var currentTime = -1;
+        var loopTime = 0;
+        if (this._currentTime >= totalTime) {
+            currentTime = this._currentTime % totalTime;
+            loopTime = Math.floor(this._currentTime / totalTime);
+            if (!this._loop) {
+                this.$setPlaying(false);
+            }
+        }
+        while (loopTime > -1) {
+            if (loopTime && currentTime != -1) {
+                this._currentTime = totalTime;
+            }
+            var calls = this.calls;
+            var call;
+            var len = calls.length;
+            for (i = 0; i < len; i++) {
+                call = calls[i];
+                if (call.time > lastTime && call.time <= this._currentTime || (call.time == 0 && lastTime == 0 && this._currentTime)) {
+                    call.callBack.apply(call.thisObj, call.args);
+                }
+            }
+            var tweens = this.tweens;
+            var tween;
+            len = tweens.length;
+            for (var i = 0; i < len; i++) {
+                tween = tweens[i];
+                if (tween.$startTime + tween.$time > lastTime && tween.$startTime <= this._currentTime || (tween.$startTime == 0 && lastTime == 0 && this._currentTime)) {
+                    tween.$update(this._currentTime);
+                }
+            }
+            loopTime--;
+            if (loopTime == 0) {
+                if (currentTime != -1) {
+                    lastTime = 0;
+                    this._currentTime = currentTime;
+                }
+            }
+            else {
+                if (loopTime) {
+                    lastTime = 0;
+                }
+            }
+            if (this._loop == false) {
+                break;
+            }
+        }
+        this.lastTime = timeStamp;
+        return true;
+    }
+
+    play() {
+        var now = flower.CoreTime.currentTime;
+        this.$setPlaying(true, now);
+    }
+
+    stop() {
+        this.$setPlaying(false);
+    }
+
+    $setPlaying(value, time = 0) {
+        if (value) {
+            this.lastTime = time;
+        }
+        if (this._isPlaying == value) {
+            return;
+        }
+        this._isPlaying = value;
+        if (value) {
+            flower.EnterFrame.add(this.update, this);
+        }
+        else {
+            flower.EnterFrame.del(this.update, this);
+        }
+    }
+
+    gotoAndPlay(time) {
+        if (!this.tweens.length) {
+            return;
+        }
+        time = +time | 0;
+        time = time < 0 ? 0 : time;
+        if (time > this.totalTime) {
+            time = this.totalTime;
+        }
+        this._currentTime = time;
+        var now = flower.CoreTime.currentTime;
+        this.$setPlaying(true, now);
+    }
+
+    gotoAndStop(time) {
+        if (!this.tweens.length) {
+            return;
+        }
+        time = +time | 0;
+        time = time < 0 ? 0 : time;
+        if (time > this.totalTime) {
+            time = this.totalTime;
+        }
+        this._currentTime = time;
+        var now = flower.CoreTime.currentTime;
+        this.$setPlaying(false);
+    }
+
+    addTween(tween) {
+        this.tweens.push(tween);
+        tween.$setTimeLine(this);
+        this.$invalidateTotalTime();
+        return tween;
+    }
+
+    removeTween(tween) {
+        var tweens = this.tweens;
+        for (var i = 0, len = tweens.length; i < len; i++) {
+            if (tweens[i] == tween) {
+                tweens.splice(i, 1)[0].$setTimeLine(null);
+                this.$invalidateTotalTime();
+                break;
+            }
+        }
+        if (tweens.length == 0) {
+            this.$setPlaying(false);
+        }
+    }
+
+    calls = [];
+
+    call(time, callBack, thisObj = null, ...args) {
+        this.calls.push({"time": time, "callBack": callBack, "thisObj": thisObj, "args": args});
+    }
+}
+
+exports.TimeLine = TimeLine;
+//////////////////////////End File:flower/tween/TimeLine.js///////////////////////////
+
+
+
+//////////////////////////File:flower/tween/Tween.js///////////////////////////
+class Tween {
+    constructor(target, time, propertiesTo, ease = "None", propertiesFrom = null) {
+        if (flower.Tween.plugins == null) {
+            flower.Tween.registerPlugin("center", flower.TweenCenter);
+            flower.Tween.registerPlugin("path", flower.TweenPath);
+            flower.Tween.registerPlugin("physicMove", flower.TweenPhysicMove);
+        }
+        time = +time;
+        if (time < 0) {
+            time = 0;
+        }
+        this.$time = time * 1000;
+        this._target = target;
+        this._propertiesTo = propertiesTo;
+        this._propertiesFrom = propertiesFrom;
+        this.ease = ease || "None";
+        var timeLine = new flower.TimeLine();
+        timeLine.addTween(this);
+    }
+
+    invalidProperty = false;
+    _propertiesTo;
+    set propertiesTo(value) {
+        if (value == this._propertiesTo) {
+            return;
+        }
+        this._propertiesTo = value;
+        this.invalidProperty = false;
+    }
+
+    _propertiesFrom;
+    set propertiesFrom(value) {
+        if (value == this._propertiesFrom) {
+            return;
+        }
+        this._propertiesFrom = value;
+        this.invalidProperty = false;
+    }
+
+    $time;
+
+    get time() {
+        return this.$time / 1000;
+    }
+
+    set time(value) {
+        value = +value | 0;
+        this.$time = (+value) * 1000;
+        if (this._timeLine) {
+            this._timeLine.$invalidateTotalTime();
+        }
+    }
+
+    $startTime = 0;
+
+    get startTime() {
+        return this.$startTime / 1000;
+    }
+
+    set startTime(value) {
+        value = +value | 0;
+        if (value < 0) {
+            value = 0;
+        }
+        if (value == this.$startTime) {
+            return;
+        }
+        this.$startTime = value * 1000;
+        if (this._timeLine) {
+            this._timeLine.$invalidateTotalTime();
+        }
+        this.invalidProperty = false;
+    }
+
+    _currentTime = 0;
+    _target;
+    get target() {
+        return this._target;
+    }
+
+    set target(value) {
+        if (value == this.target) {
+            return;
+        }
+        this.removeTargetEvent();
+        this._target = value;
+        this.invalidProperty = false;
+        this.addTargetEvent();
+    }
+
+    _ease;
+    _easeData;
+
+    get ease() {
+        return this._ease;
+    }
+
+    set ease(val) {
+        if (!flower.Tween.easeCache[val]) {
+            var func = EaseFunction[val];
+            if (func == null) {
+                return;
+            }
+            var cache = [];
+            for (var i = 0; i <= 2000; i++) {
+                cache[i] = func(i / 2000);
+            }
+            flower.Tween.easeCache[val] = cache;
+        }
+        this._ease = val;
+        this._easeData = flower.Tween.easeCache[val];
+    }
+
+    _startEvent = "";
+    get startEvent() {
+        return this._startEvent;
+    }
+
+    set startEvent(type) {
+        this.removeTargetEvent();
+        this._startEvent = type;
+        this.addTargetEvent();
+    }
+
+    _startTarget;
+    get startTarget() {
+        return this._startTarget;
+    }
+
+    set startTarget(value) {
+        this.removeTargetEvent();
+        this._startTarget = value;
+        this.addTargetEvent();
+    }
+
+    removeTargetEvent() {
+        var target;
+        if (this._startTarget) {
+            target = this._startTarget;
+        }
+        else {
+            target = this._target;
+        }
+        if (target && this._startEvent && this._startEvent != "") {
+            target.removeListener(this._startEvent, this.startByEvent, this);
+        }
+    }
+
+    addTargetEvent() {
+        var target;
+        if (this._startTarget) {
+            target = this._startTarget;
+        }
+        else {
+            target = this._target;
+        }
+        if (target && this._startEvent && this._startEvent != "") {
+            target.addListener(this._startEvent, this.startByEvent, this);
+        }
+    }
+
+    startByEvent() {
+        this._timeLine.gotoAndPlay(0);
+    }
+
+    _timeLine;
+    get timeLine() {
+        if (!this._timeLine) {
+            this._timeLine = new flower.TimeLine();
+            this._timeLine.addTween(this);
+        }
+        return this._timeLine;
+    }
+
+    $setTimeLine(value) {
+        if (this._timeLine) {
+            this._timeLine.removeTween(this);
+        }
+        this._timeLine = value;
+    }
+
+    pugins = [];
+
+    initParmas() {
+        var controller;
+        var params = this._propertiesTo;
+        var allPlugins = flower.Tween.plugins;
+        if (params) {
+            var keys = flower.ObjectDo.keys(allPlugins);
+            var deletes = [];
+            for (var i = 0, len = keys.length; i < len; i++) {
+                if (keys[i] in params) {
+                    var plugin = allPlugins[keys[i]];
+                    controller = new plugin();
+                    deletes = deletes.concat(controller.init(this, params, this._propertiesFrom));
+                    this.pugins.push(controller);
+                }
+            }
+            for (i = 0; i < deletes.length; i++) {
+                delete params[deletes[i]];
+            }
+            keys = flower.ObjectDo.keys(params);
+            for (i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (!(typeof(key) == "string")) {
+                    delete params[key];
+                    keys.splice(i, 1);
+                    i--;
+                    continue;
+                }
+                var attribute = params[key];
+                if (!(typeof(attribute) == "number") || !(key in this._target)) {
+                    delete params[key];
+                    keys.splice(i, 1);
+                    i--;
+                    continue;
+                }
+            }
+            if (keys.length) {
+                controller = new flower.BasicPlugin();
+                controller.init(this, params, this._propertiesFrom);
+                this.pugins.push(controller);
+            }
+        }
+        this.invalidProperty = true;
+    }
+
+    invalidate() {
+        this.invalidProperty = false;
+    }
+
+    _complete;
+    _completeThis;
+    _completeParams;
+
+    call(callBack, thisObj = null, ...args) {
+        this._complete = callBack;
+        this._completeThis = thisObj;
+        this._completeParams = args;
+        return this;
+    }
+
+    _update;
+    _updateThis;
+    _updateParams;
+
+    update(callBack, thisObj = null, ...args) {
+        this._update = callBack;
+        this._updateThis = thisObj;
+        this._updateParams = args;
+        return this;
+    }
+
+    $update(time) {
+        if (!this.invalidProperty) {
+            this.initParmas();
+        }
+        this._currentTime = time - this.$startTime;
+        if (this._currentTime > this.$time) {
+            this._currentTime = this.$time;
+        }
+        var length = this.pugins.length;
+        var s = this._easeData[2000 * (this._currentTime / this.$time) | 0];
+        for (var i = 0; i < length; i++) {
+            this.pugins[i].update(s);
+        }
+        if (this._update != null) {
+            this._update.apply(this._updateThis, this._updateParams);
+        }
+        if (this._currentTime == this.$time) {
+            if (this._complete != null) {
+                this._complete.apply(this._completeThis, this._completeParams);
+            }
+        }
+        return true;
+    }
+
+    dispose() {
+        if (this.timeLine) {
+            this.timeLine.removeTween(this);
+        }
+    }
+
+    static to(target, time, propertiesTo, ease = "None", propertiesFrom = null) {
+        var tween = new flower.Tween(target, time, propertiesTo, ease, propertiesFrom);
+        tween.timeLine.play();
+        return tween;
+    }
+
+    static plugins;
+    static easeCache = {};
+
+    static registerPlugin(paramName, plugin) {
+        if (flower.Tween.plugins == null) {
+            flower.Tween.plugins = {};
+        }
+        flower.Tween.plugins[paramName] = plugin;
+    }
+
+    static hasPlugin(paramName) {
+        return flower.Tween.plugins[paramName] ? true : false;
+    }
+
+}
+
+exports.Tween = Tween;
+//////////////////////////End File:flower/tween/Tween.js///////////////////////////
 
 
 

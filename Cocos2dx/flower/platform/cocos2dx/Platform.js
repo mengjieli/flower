@@ -107,6 +107,12 @@ class Platform {
             }
             return new PlatformShape();
         }
+        if (name == "Mask") {
+            if (pools.Mask && pools.Mask.length) {
+                return pools.Mask.pop();
+            }
+            return new PlatformMask();
+        }
         return null;
     }
 

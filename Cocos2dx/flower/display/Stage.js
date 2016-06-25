@@ -187,7 +187,7 @@ class Stage extends Sprite {
         if (!mouse.target) {
             mouse.target = this;
         }
-        //this.getMouseTarget(x, y, mouse.mutiply);
+        this.getMouseTarget(x, y, mouse.mutiply);
         var target = mouse.target;//this.getMouseTarget(x, y, mouse.mutiply);
         mouse.moveX = x;
         mouse.moveY = y;

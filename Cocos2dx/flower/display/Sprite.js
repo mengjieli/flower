@@ -4,6 +4,10 @@ class Sprite extends DisplayObject {
 
     constructor() {
         super();
+        this.$initContainer();
+    }
+
+    $initContainer() {
         this.__children = [];
         this.$nativeShow = Platform.create("Sprite");
     }
@@ -210,6 +214,10 @@ class Sprite extends DisplayObject {
         return this.__children.length;
     }
 
+    $releaseContainer() {
+        Platform.release("Sprite", this.$nativeShow);
+    }
+
     dispose() {
         var children = this.__children;
         while (children.length) {
@@ -217,7 +225,7 @@ class Sprite extends DisplayObject {
             child.dispose();
         }
         super.dispose();
-        Platform.release("Sprite", this.$nativeShow);
+        this.$releaseContainer();
     }
 }
 

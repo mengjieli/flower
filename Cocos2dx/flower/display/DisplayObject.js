@@ -169,6 +169,11 @@ class DisplayObject extends EventDispatcher {
 
     $setRotation(val) {
         val = +val || 0;
+        if (val < 0) {
+            val = 360 - (-val)%360;
+        } else {
+            val = val % 360;
+        }
         var p = this.$DisplayObject;
         if (p[2] == val) {
             return;

@@ -219,6 +219,12 @@ var _exports = {};
                     }
                     return new PlatformShape();
                 }
+                if (name == "Mask") {
+                    if (pools.Mask && pools.Mask.length) {
+                        return pools.Mask.pop();
+                    }
+                    return new PlatformMask();
+                }
                 return null;
             }
         }, {
@@ -538,13 +544,18 @@ var _exports = {};
 
             var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformSprite).call(this));
 
-            _this.show = new cc.Node();
-            _this.show.setAnchorPoint(0, 0);
-            _this.show.retain();
+            _this.initShow();
             return _this;
         }
 
         _createClass(PlatformSprite, [{
+            key: "initShow",
+            value: function initShow() {
+                this.show = new cc.Node();
+                this.show.setAnchorPoint(0, 0);
+                this.show.retain();
+            }
+        }, {
             key: "addChild",
             value: function addChild(child) {
                 this.show.addChild(child.show);
@@ -1047,6 +1058,36 @@ var _exports = {};
     }(PlatformDisplayObject);
     //////////////////////////End File:flower/platform/cocos2dx/PlatformShape.js///////////////////////////
 
+    //////////////////////////File:flower/platform/cocos2dx/PlatformMask.js///////////////////////////
+
+
+    var PlatformMask = function (_PlatformSprite) {
+        _inherits(PlatformMask, _PlatformSprite);
+
+        function PlatformMask() {
+            _classCallCheck(this, PlatformMask);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformMask).call(this));
+        }
+
+        _createClass(PlatformMask, [{
+            key: "initShow",
+            value: function initShow() {
+                this.show = new cc.ClippingNode();
+                this.show.setAnchorPoint(0, 0);
+                this.show.retain();
+            }
+        }, {
+            key: "setShape",
+            value: function setShape(shape) {
+                this.show.setStencil(shape.show);
+            }
+        }]);
+
+        return PlatformMask;
+    }(PlatformSprite);
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformMask.js///////////////////////////
+
     //////////////////////////File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
 
 
@@ -1271,12 +1312,14 @@ var _exports = {};
 
         return CoreTime;
     }();
+
+    CoreTime.currentTime = 0;
+
+
+    _exports.CoreTime = CoreTime;
     //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
     //////////////////////////File:flower/language/Language.js///////////////////////////
-
-
-    CoreTime.currentTime = 0;
     var $locale_strings = {};
 
     /**
@@ -1628,14 +1671,14 @@ var _exports = {};
 
             _classCallCheck(this, TouchEvent);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
 
-            _this6.$touchId = 0;
-            _this6.$touchX = 0;
-            _this6.$touchY = 0;
-            _this6.$stageX = 0;
-            _this6.$stageY = 0;
-            return _this6;
+            _this7.$touchId = 0;
+            _this7.$touchX = 0;
+            _this7.$touchY = 0;
+            _this7.$stageX = 0;
+            _this7.$stageY = 0;
+            return _this7;
         }
 
         _createClass(TouchEvent, [{
@@ -1810,16 +1853,16 @@ var _exports = {};
 
             _classCallCheck(this, ColorFilter);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
 
-            _this9.__h = 0;
-            _this9.__s = 0;
-            _this9.__l = 0;
+            _this10.__h = 0;
+            _this10.__s = 0;
+            _this10.__l = 0;
 
-            _this9.h = h;
-            _this9.s = s;
-            _this9.l = l;
-            return _this9;
+            _this10.h = h;
+            _this10.s = s;
+            _this10.l = l;
+            return _this10;
         }
 
         _createClass(ColorFilter, [{
@@ -1893,16 +1936,16 @@ var _exports = {};
 
             _classCallCheck(this, StrokeFilter);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
 
-            _this10.__size = 0;
-            _this10.__r = 0;
-            _this10.__g = 0;
-            _this10.__b = 0;
+            _this11.__size = 0;
+            _this11.__r = 0;
+            _this11.__g = 0;
+            _this11.__b = 0;
 
-            _this10.size = size;
-            _this10.color = color;
-            return _this10;
+            _this11.size = size;
+            _this11.color = color;
+            return _this11;
         }
 
         _createClass(StrokeFilter, [{
@@ -1948,14 +1991,14 @@ var _exports = {};
 
             _classCallCheck(this, BlurFilter);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
 
-            _this11.__blurX = 0;
-            _this11.__blurY = 0;
+            _this12.__blurX = 0;
+            _this12.__blurY = 0;
 
-            _this11.blurX = blurX;
-            _this11.blurY = blurY;
-            return _this11;
+            _this12.blurX = blurX;
+            _this12.blurY = blurY;
+            return _this12;
         }
 
         _createClass(BlurFilter, [{
@@ -2454,16 +2497,16 @@ var _exports = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this12.__x = 0;
-            _this12.__y = 0;
-            _this12.__flags = 0;
-            _this12.__alpha = 1;
-            _this12.__parentAlpha = 1;
-            _this12.__concatAlpha = 1;
+            _this13.__x = 0;
+            _this13.__y = 0;
+            _this13.__flags = 0;
+            _this13.__alpha = 1;
+            _this13.__parentAlpha = 1;
+            _this13.__concatAlpha = 1;
 
-            _this12.$DisplayObject = {
+            _this13.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -2479,7 +2522,7 @@ var _exports = {};
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
-            return _this12;
+            return _this13;
         }
 
         /**
@@ -2632,6 +2675,11 @@ var _exports = {};
             key: "$setRotation",
             value: function $setRotation(val) {
                 val = +val || 0;
+                if (val < 0) {
+                    val = 360 - -val % 360;
+                } else {
+                    val = val % 360;
+                }
                 var p = this.$DisplayObject;
                 if (p[2] == val) {
                     return;
@@ -3138,14 +3186,19 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this13.__children = [];
-            _this13.$nativeShow = Platform.create("Sprite");
-            return _this13;
+            _this14.$initContainer();
+            return _this14;
         }
 
         _createClass(Sprite, [{
+            key: "$initContainer",
+            value: function $initContainer() {
+                this.__children = [];
+                this.$nativeShow = Platform.create("Sprite");
+            }
+        }, {
             key: "$addFlagsDown",
             value: function $addFlagsDown(flags) {
                 if (this.$hasFlags(flags)) {
@@ -3356,6 +3409,11 @@ var _exports = {};
                 _get(Object.getPrototypeOf(Sprite.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
+            key: "$releaseContainer",
+            value: function $releaseContainer() {
+                Platform.release("Sprite", this.$nativeShow);
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 var children = this.__children;
@@ -3364,7 +3422,7 @@ var _exports = {};
                     child.dispose();
                 }
                 _get(Object.getPrototypeOf(Sprite.prototype), "dispose", this).call(this);
-                Platform.release("Sprite", this.$nativeShow);
+                this.$releaseContainer();
             }
         }, {
             key: "numChildren",
@@ -3379,6 +3437,77 @@ var _exports = {};
     _exports.Sprite = Sprite;
     //////////////////////////End File:flower/display/Sprite.js///////////////////////////
 
+    //////////////////////////File:flower/display/Mask.js///////////////////////////
+
+    var Mask = function (_Sprite) {
+        _inherits(Mask, _Sprite);
+
+        function Mask() {
+            _classCallCheck(this, Mask);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(Mask).call(this));
+        }
+
+        _createClass(Mask, [{
+            key: "$initContainer",
+            value: function $initContainer() {
+                this.__children = [];
+                this.$nativeShow = Platform.create("Mask");
+                this.__shape = new Shape();
+                this.$nativeShow.setShape(this.__shape.$nativeShow);
+            }
+        }, {
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(matrix, multiply) {
+                if (this.touchEnabled == false || this.visible == false) return null;
+                if (multiply == true && this.multiplyTouchEnabled == false) return null;
+                matrix.save();
+                matrix.translate(-this.x, -this.y);
+                if (this.rotation) matrix.rotate(-this.radian);
+                if (this.scaleX != 1 || this.scaleY != 1) {
+                    matrix.scale(1 / this.scaleX, 1 / this.scaleY);
+                }
+                var touchX = Math.floor(matrix.tx);
+                var touchY = Math.floor(matrix.ty);
+                var p = this.$DisplayObject;
+                p[10] = touchX;
+                p[11] = touchY;
+                var bounds = this.shape.$getContentBounds();
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+                    var target;
+                    var childs = this.__children;
+                    var len = childs.length;
+                    for (var i = len - 1; i >= 0; i--) {
+                        if (childs[i].touchEnabled && (multiply == false || multiply == true && childs[i].multiplyTouchEnabled == true)) {
+                            target = childs[i].$getMouseTarget(matrix, multiply);
+                            if (target) {
+                                break;
+                            }
+                        }
+                    }
+                    matrix.restore();
+                    return target;
+                }
+                return null;
+            }
+        }, {
+            key: "$releaseContainer",
+            value: function $releaseContainer() {
+                Platform.release("Mask", this.$nativeShow);
+            }
+        }, {
+            key: "shape",
+            get: function get() {
+                return this.__shape;
+            }
+        }]);
+
+        return Mask;
+    }(Sprite);
+
+    _exports.Mask = Mask;
+    //////////////////////////End File:flower/display/Mask.js///////////////////////////
+
     //////////////////////////File:flower/display/Bitmap.js///////////////////////////
 
     var Bitmap = function (_DisplayObject2) {
@@ -3387,13 +3516,13 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this14.$nativeShow = Platform.create("Bitmap");
-            _this14.texture = texture;
-            _this14.$Bitmap = {
+            _this16.$nativeShow = Platform.create("Bitmap");
+            _this16.texture = texture;
+            _this16.$Bitmap = {
                 0: null };
-            return _this14;
+            return _this16;
         }
 
         _createClass(Bitmap, [{
@@ -3483,10 +3612,10 @@ var _exports = {};
 
             _classCallCheck(this, TextField);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
 
-            _this15.$nativeShow = Platform.create("TextField");
-            _this15.$TextField = {
+            _this17.$nativeShow = Platform.create("TextField");
+            _this17.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -3495,9 +3624,9 @@ var _exports = {};
                 5: true //autoSize
             };
             if (text != "") {
-                _this15.text = text;
+                _this17.text = text;
             }
-            return _this15;
+            return _this17;
         }
 
         _createClass(TextField, [{
@@ -3678,10 +3807,10 @@ var _exports = {};
 
             _classCallCheck(this, TextInput);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
 
-            _this16.$nativeShow = Platform.create("TextInput");
-            _this16.$TextField = {
+            _this18.$nativeShow = Platform.create("TextInput");
+            _this18.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -3689,14 +3818,14 @@ var _exports = {};
                 4: false, //inputing
                 5: false //autoSize
             };
-            _this16.addListener(Event.FOCUS_IN, _this16.$onFocusIn, _this16);
-            _this16.addListener(Event.FOCUS_OUT, _this16.$onFocusOut, _this16);
+            _this18.addListener(Event.FOCUS_IN, _this18.$onFocusIn, _this18);
+            _this18.addListener(Event.FOCUS_OUT, _this18.$onFocusOut, _this18);
             if (text != "") {
-                _this16.text = text;
+                _this18.text = text;
             }
-            _this16.$focusEnabled = true;
-            _this16.$nativeShow.setChangeBack(_this16.$onTextChange, _this16);
-            return _this16;
+            _this18.$focusEnabled = true;
+            _this18.$nativeShow.setChangeBack(_this18.$onTextChange, _this18);
+            return _this18;
         }
 
         _createClass(TextInput, [{
@@ -3878,10 +4007,10 @@ var _exports = {};
         function Shape() {
             _classCallCheck(this, Shape);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
 
-            _this17.$nativeShow = Platform.create("Shape");
-            _this17.$Shape = {
+            _this19.$nativeShow = Platform.create("Shape");
+            _this19.$Shape = {
                 0: 0xffffff, //fillColor
                 1: 1, //fillAlpha
                 2: 0, //lineWidth
@@ -3893,8 +4022,8 @@ var _exports = {};
                 8: null, //maxY
                 9: [] //record
             };
-            _this17.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
-            return _this17;
+            _this19.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            return _this19;
         }
 
         _createClass(Shape, [{
@@ -4131,25 +4260,25 @@ var _exports = {};
 
     //////////////////////////File:flower/display/Stage.js///////////////////////////
 
-    var Stage = function (_Sprite) {
-        _inherits(Stage, _Sprite);
+    var Stage = function (_Sprite2) {
+        _inherits(Stage, _Sprite2);
 
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this18.__nativeMouseMoveEvent = [];
-            _this18.__nativeTouchEvent = [];
-            _this18.__mouseOverList = [_this18];
-            _this18.__touchList = [];
-            _this18.__lastMouseX = -1;
-            _this18.__lastMouseY = -1;
-            _this18.__focus = null;
+            _this20.__nativeMouseMoveEvent = [];
+            _this20.__nativeTouchEvent = [];
+            _this20.__mouseOverList = [_this20];
+            _this20.__touchList = [];
+            _this20.__lastMouseX = -1;
+            _this20.__lastMouseY = -1;
+            _this20.__focus = null;
 
-            _this18.__stage = _this18;
-            Stage.stages.push(_this18);
-            return _this18;
+            _this20.__stage = _this20;
+            Stage.stages.push(_this20);
+            return _this20;
         }
 
         _createClass(Stage, [{
@@ -4325,7 +4454,7 @@ var _exports = {};
                 if (!mouse.target) {
                     mouse.target = this;
                 }
-                //this.getMouseTarget(x, y, mouse.mutiply);
+                this.getMouseTarget(x, y, mouse.mutiply);
                 var target = mouse.target; //this.getMouseTarget(x, y, mouse.mutiply);
                 mouse.moveX = x;
                 mouse.moveY = y;
@@ -4682,26 +4811,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this19._createRes = false;
-            _this19._isLoading = false;
-            _this19._selfDispose = false;
+            _this21._createRes = false;
+            _this21._isLoading = false;
+            _this21._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this19._createRes = true;
+                    _this21._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this19._res = res;
-            _this19._type = _this19._res.type;
-            _this19._language = LANGUAGE;
-            _this19._scale = SCALE ? SCALE : null;
-            return _this19;
+            _this21._res = res;
+            _this21._type = _this21._res.type;
+            _this21._language = LANGUAGE;
+            _this21._scale = SCALE ? SCALE : null;
+            return _this21;
         }
 
         _createClass(URLLoader, [{
@@ -4914,12 +5043,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this20.__list = list;
-            _this20.__dataList = [];
-            _this20.__index = 0;
-            return _this20;
+            _this22.__list = list;
+            _this22.__dataList = [];
+            _this22.__index = 0;
+            return _this22;
         }
 
         _createClass(URLLoaderList, [{
@@ -5310,6 +5439,1280 @@ var _exports = {};
 
     _exports.ResType = ResType;
     //////////////////////////End File:flower/res/ResType.js///////////////////////////
+
+    //////////////////////////File:flower/tween/plugins/TweenCenter.js///////////////////////////
+
+    var TweenCenter = function () {
+        function TweenCenter() {
+            _classCallCheck(this, TweenCenter);
+        }
+
+        _createClass(TweenCenter, [{
+            key: "init",
+            value: function init(tween, propertiesTo, propertiesFrom) {
+                this.tween = tween;
+                var target = tween.target;
+                this.centerX = target.width / 2;
+                this.centerY = target.height / 2;
+                this.centerLength = Math.sqrt(target.width * target.width + target.height * target.height) * .5;
+                this.rotationStart = Math.atan2(target.height, target.width) * 180 / Math.PI;
+                if (target.rotation) {
+                    this.lastMoveX = this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
+                    this.lastMoveY = this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                } else {
+                    this.lastMoveX = 0;
+                    this.lastMoveY = 0;
+                }
+                var useAttributes = [];
+                useAttributes.push("center");
+                if ("scaleX" in propertiesTo) {
+                    this.scaleXTo = +propertiesTo["scaleX"];
+                    useAttributes.push("scaleX");
+                    if (propertiesFrom && "scaleX" in propertiesFrom) {
+                        this.scaleXFrom = +propertiesFrom["scaleX"];
+                    } else {
+                        this.scaleXFrom = target["scaleX"];
+                    }
+                }
+                if ("scaleY" in propertiesTo) {
+                    this.scaleYTo = +propertiesTo["scaleY"];
+                    useAttributes.push("scaleY");
+                    if (propertiesFrom && "scaleY" in propertiesFrom) {
+                        this.scaleYFrom = +propertiesFrom["scaleY"];
+                    } else {
+                        this.scaleYFrom = target["scaleY"];
+                    }
+                }
+                if ("rotation" in propertiesTo) {
+                    this.rotationTo = +propertiesTo["rotation"];
+                    useAttributes.push("rotation");
+                    if (propertiesFrom && "rotation" in propertiesFrom) {
+                        this.rotationFrom = +propertiesFrom["rotation"];
+                    } else {
+                        this.rotationFrom = target["rotation"];
+                    }
+                }
+                return useAttributes;
+            }
+        }, {
+            key: "update",
+            value: function update(value) {
+                var target = this.tween.target;
+                var moveX = 0;
+                var moveY = 0;
+                if (this.scaleXTo) {
+                    target.scaleX = this.scaleXFrom + (this.scaleXTo - this.scaleXFrom) * value;
+                    target.x = this.centerX - target.width / 2;
+                }
+                if (this.scaleYTo) {
+                    target.scaleY = this.scaleYFrom + (this.scaleYTo - this.scaleYFrom) * value;
+                    target.y = this.centerY - target.height / 2;
+                }
+                if (this.rotationTo) {
+                    target.rotation = this.rotationFrom + (this.rotationTo - this.rotationFrom) * value;
+                    moveX += this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
+                    moveY += this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                    target.x += moveX - this.lastMoveX;
+                    target.y += moveY - this.lastMoveY;
+                }
+                this.lastMoveX = moveX;
+                this.lastMoveY = moveY;
+            }
+        }], [{
+            key: "scaleTo",
+            value: function scaleTo(target, time, _scaleTo) {
+                var scaleFrom = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+                var ease = arguments.length <= 4 || arguments[4] === undefined ? "None" : arguments[4];
+
+                return flower.Tween.to(target, time, {
+                    "center": true,
+                    "scaleX": _scaleTo,
+                    "scaleY": _scaleTo
+                }, ease, scaleFrom == null ? null : { "scaleX": scaleFrom, "scaleY": scaleFrom });
+            }
+        }, {
+            key: "rotationTo",
+            value: function rotationTo(target, time, _rotationTo) {
+                var rotationFrom = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+                var ease = arguments.length <= 4 || arguments[4] === undefined ? "None" : arguments[4];
+
+                return flower.Tween.to(target, time, {
+                    "center": true,
+                    "rotation": _rotationTo
+                }, ease, rotationFrom == null ? null : { "rotation": rotationFrom });
+            }
+        }]);
+
+        return TweenCenter;
+    }();
+
+    _exports.TweenCenter = TweenCenter;
+    //////////////////////////End File:flower/tween/plugins/TweenCenter.js///////////////////////////
+
+    //////////////////////////File:flower/tween/plugins/TweenPath.js///////////////////////////
+
+    var TweenPath = function () {
+        function TweenPath() {
+            _classCallCheck(this, TweenPath);
+        }
+
+        _createClass(TweenPath, [{
+            key: "init",
+            value: function init(tween, propertiesTo, propertiesFrom) {
+                this.tween = tween;
+                var useAttributes = [];
+                useAttributes.push("path");
+                var path = propertiesTo["path"];
+                var target = tween.target;
+                var start = flower.Point.create(target.x, target.y);
+                path.splice(0, 0, start);
+                if (propertiesFrom) {
+                    if ("x" in propertiesFrom) {
+                        start.x = +propertiesFrom["x"];
+                    }
+                    if ("y" in propertiesFrom) {
+                        start.y = +propertiesFrom["y"];
+                    }
+                }
+                if ("x" in propertiesTo && "y" in propertiesTo) {
+                    useAttributes.push("x");
+                    useAttributes.push("y");
+                    path.push(flower.Point.create(+propertiesTo["x"], +propertiesTo["y"]));
+                }
+                this.path = path;
+                this.pathSum = [];
+                this.pathSum.push(0);
+                for (var i = 1, len = path.length; i < len; i++) {
+                    this.pathSum[i] = this.pathSum[i - 1] + Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                }
+                var sum = this.pathSum[len - 1];
+                for (i = 1; i < len; i++) {
+                    this.pathSum[i] = this.pathSum[i] / sum;
+                }
+                return useAttributes;
+            }
+        }, {
+            key: "update",
+            value: function update(value) {
+                var path = this.path;
+                var target = this.tween.target;
+                var pathSum = this.pathSum;
+                var i,
+                    len = pathSum.length;
+                for (i = 1; i < len; i++) {
+                    if (value > pathSum[i - 1] && value <= pathSum[i]) {
+                        break;
+                    }
+                }
+                if (value <= 0) {
+                    i = 1;
+                } else if (value >= 1) {
+                    i = len - 1;
+                }
+                value = (value - pathSum[i - 1]) / (pathSum[i] - pathSum[i - 1]);
+                target.x = value * (path[i].x - path[i - 1].x) + path[i - 1].x;
+                target.y = value * (path[i].y - path[i - 1].y) + path[i - 1].y;
+            }
+        }], [{
+            key: "to",
+            value: function to(target, time, path) {
+                var ease = arguments.length <= 3 || arguments[3] === undefined ? "None" : arguments[3];
+
+                return flower.Tween.to(target, time, { "path": path }, ease);
+            }
+        }, {
+            key: "vto",
+            value: function vto(target, v, path) {
+                var ease = arguments.length <= 3 || arguments[3] === undefined ? "None" : arguments[3];
+
+                var sum = 0;
+                for (var i = 1, len = path.length; i < len; i++) {
+                    sum += Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                }
+                var time = sum / v;
+                return flower.Tween.to(target, time, { "path": path }, ease);
+            }
+        }]);
+
+        return TweenPath;
+    }();
+
+    _exports.TweenPath = TweenPath;
+    //////////////////////////End File:flower/tween/plugins/TweenPath.js///////////////////////////
+
+    //////////////////////////File:flower/tween/plugins/TweenPhysicMove.js///////////////////////////
+
+    var TweenPhysicMove = function () {
+        function TweenPhysicMove() {
+            _classCallCheck(this, TweenPhysicMove);
+
+            if (!flower.Tween.hasPlugin("physicMove")) {
+                flower.Tween.registerPlugin("physicMove", flower.TweenPhysicMove);
+            }
+        }
+
+        _createClass(TweenPhysicMove, [{
+            key: "init",
+            value: function init(tween, propertiesTo, propertiesFrom) {
+                this.tween = tween;
+                var useAttributes = [];
+                useAttributes.push("physicMove");
+                var target = tween.target;
+                var startX = target.x;
+                var startY = target.y;
+                if (propertiesFrom) {
+                    if ("x" in propertiesFrom) {
+                        startX = +propertiesFrom["x"];
+                    }
+                    if ("y" in propertiesFrom) {
+                        startY = +propertiesFrom["y"];
+                    }
+                }
+                this.startX = startX;
+                this.startY = startY;
+                var endX = startX;
+                var endY = startY;
+                if ("x" in propertiesTo) {
+                    endX = +propertiesTo["x"];
+                    useAttributes.push("x");
+                }
+                if ("y" in propertiesTo) {
+                    endY = +propertiesTo["y"];
+                    useAttributes.push("y");
+                }
+                var vx = 0;
+                var vy = 0;
+                var t = tween.time;
+                if ("vx" in propertiesTo) {
+                    vx = +propertiesTo["vx"];
+                    useAttributes.push("vx");
+                    if (!("x" in propertiesTo)) {
+                        endX = startX + t * vx;
+                    }
+                }
+                if ("vy" in propertiesTo) {
+                    vy = +propertiesTo["vy"];
+                    useAttributes.push("vy");
+                    if (!("y" in propertiesTo)) {
+                        endY = startY + t * vy;
+                    }
+                }
+                this.vx = vx;
+                this.vy = vy;
+                this.ax = (endX - startX - vx * t) * 2 / (t * t);
+                this.ay = (endY - startY - vy * t) * 2 / (t * t);
+                this.time = t;
+                return useAttributes;
+            }
+        }, {
+            key: "update",
+            value: function update(value) {
+                var target = this.tween.target;
+                var t = this.time * value;
+                target.x = this.startX + this.vx * t + .5 * this.ax * t * t;
+                target.y = this.startY + this.vy * t + .5 * this.ay * t * t;
+            }
+        }], [{
+            key: "freeFallTo",
+            value: function freeFallTo(target, time, groundY) {
+                return flower.Tween.to(target, time, { "y": groundY, "physicMove": true });
+            }
+        }, {
+            key: "freeFallToWithG",
+            value: function freeFallToWithG(target, g, groundY) {
+                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g), { "y": groundY, "physicMove": true });
+            }
+        }, {
+            key: "fallTo",
+            value: function fallTo(target, time, groundY) {
+                var vX = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+                var vY = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
+                return flower.Tween.to(target, time, { "y": groundY, "physicMove": true, "vx": vX, "vy": vY });
+            }
+        }, {
+            key: "fallToWithG",
+            value: function fallToWithG(target, g, groundY) {
+                var vX = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+                var vY = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
+                vX = +vX;
+                vY = +vY;
+                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g + vY * vY / (g * g)) - vY / g, {
+                    "y": groundY,
+                    "physicMove": true,
+                    "vx": vX,
+                    "vy": vY
+                });
+            }
+        }, {
+            key: "to",
+            value: function to(target, time, xTo, yTo) {
+                var vX = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
+                var vY = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
+
+                return flower.Tween.to(target, time, { "x": xTo, "y": yTo, "vx": vX, "vy": vY, "physicMove": true });
+            }
+        }]);
+
+        return TweenPhysicMove;
+    }();
+
+    _exports.TweenPhysicMove = TweenPhysicMove;
+    //////////////////////////End File:flower/tween/plugins/TweenPhysicMove.js///////////////////////////
+
+    //////////////////////////File:flower/tween/BasicPlugin.js///////////////////////////
+
+    var BasicPlugin = function () {
+        function BasicPlugin() {
+            _classCallCheck(this, BasicPlugin);
+        }
+
+        _createClass(BasicPlugin, [{
+            key: "init",
+            value: function init(tween, propertiesTo, propertiesFrom) {
+                this.tween = tween;
+                this._attributes = propertiesTo;
+                this.keys = flower.ObjectDo.keys(propertiesTo);
+                var target = tween.target;
+                var startAttributes = {};
+                var keys = this.keys;
+                var length = keys.length;
+                for (var i = 0; i < length; i++) {
+                    var key = keys[i];
+                    if (propertiesFrom && key in propertiesFrom) {
+                        startAttributes[key] = propertiesFrom[key];
+                    } else {
+                        startAttributes[key] = target[key];
+                    }
+                }
+                this.startAttributes = startAttributes;
+                return null;
+            }
+        }, {
+            key: "update",
+            value: function update(value) {
+                var target = this.tween.target;
+                var keys = this.keys;
+                var length = keys.length;
+                var startAttributes = this.startAttributes;
+                for (var i = 0; i < length; i++) {
+                    var key = keys[i];
+                    target[key] = (this._attributes[key] - startAttributes[key]) * value + startAttributes[key];
+                }
+            }
+        }]);
+
+        return BasicPlugin;
+    }();
+
+    _exports.BasicPlugin = BasicPlugin;
+    //////////////////////////End File:flower/tween/BasicPlugin.js///////////////////////////
+
+    //////////////////////////File:flower/tween/Ease.js///////////////////////////
+
+    var Ease = function () {
+        function Ease() {
+            _classCallCheck(this, Ease);
+        }
+
+        _createClass(Ease, null, [{
+            key: "registerEaseFunction",
+            value: function registerEaseFunction(name, ease) {
+                EaseFunction[name] = ease;
+            }
+        }]);
+
+        return Ease;
+    }();
+
+    Ease.NONE = "None";
+    Ease.SINE_EASE_IN = "SineEaseIn";
+    Ease.SineEaseOut = "SineEaseOut";
+    Ease.SINE_EASE_IN_OUT = "SineEaseInOut";
+    Ease.SineEaseOutIn = "SineEaseOutIn";
+    Ease.QUAD_EASE_IN = "QuadEaseIn";
+    Ease.QUAD_EASE_OUT = "QuadEaseOut";
+    Ease.QUAD_EASE_IN_OUT = "QuadEaseInOut";
+    Ease.QUAD_EASE_OUT_IN = "QuadEaseOutIn";
+    Ease.CUBIC_EASE_IN = "CubicEaseIn";
+    Ease.CUBIC_EASE_OUT = "CubicEaseOut";
+    Ease.CUBIC_EASE_IN_OUT = "CubicEaseInOut";
+    Ease.CUBIC_EASE_OUT_IN = "CubicEaseOutIn";
+    Ease.QUART_EASE_IN = "QuartEaseIn";
+    Ease.QUART_EASE_OUT = "QuartEaseOut";
+    Ease.QUART_EASE_IN_OUT = "QuartEaseInOut";
+    Ease.QUART_EASE_OUT_IN = "QuartEaseOutIn";
+    Ease.QUINT_EASE_IN = "QuintEaseIn";
+    Ease.QUINT_EASE_OUT = "QuintEaseOut";
+    Ease.QUINT_EASE_IN_OUT = "QuintEaseInOut";
+    Ease.QUINT_EASE_OUT_IN = "QuintEaseOutIn";
+    Ease.EXPO_EASE_IN = "ExpoEaseIn";
+    Ease.EXPO_EASE_OUT = "ExpoEaseOut";
+    Ease.EXPO_EASE_IN_OUT = "ExpoEaseInOut";
+    Ease.EXPO_EASE_OUT_IN = "ExpoEaseOutIn";
+    Ease.CIRC_EASE_IN = "CircEaseIn";
+    Ease.CIRC_EASE_OUT = "CircEaseOut";
+    Ease.CIRC_EASE_IN_OUT = "CircEaseInOut";
+    Ease.CIRC_EASE_OUT_IN = "CircEaseOutIn";
+    Ease.BACK_EASE_IN = "BackEaseIn";
+    Ease.BACK_EASE_OUT = "BackEaseOut";
+    Ease.BACK_EASE_IN_OUT = "BackEaseInOut";
+    Ease.BACK_EASE_OUT_IN = "BackEaseOutIn";
+    Ease.ELASTIC_EASE_IN = "ElasticEaseIn";
+    Ease.ELASTIC_EASE_OUT = "ElasticEaseOut";
+    Ease.ELASTIC_EASE_IN_OUT = "ElasticEaseInOut";
+    Ease.ELASTIC_EASE_OUT_IN = "ElasticEaseOutIn";
+    Ease.BOUNCE_EASE_IN = "BounceEaseIn";
+    Ease.BounceEaseOut = "BounceEaseOut";
+    Ease.BOUNCE_EASE_IN_OUT = "BounceEaseInOut";
+    Ease.BOUNCE_EASE_OUT_IN = "BounceEaseOutIn";
+
+
+    _exports.Ease = Ease;
+    //////////////////////////End File:flower/tween/Ease.js///////////////////////////
+
+    //////////////////////////File:flower/tween/EaseFunction.js///////////////////////////
+
+    var EaseFunction = function () {
+        function EaseFunction() {
+            _classCallCheck(this, EaseFunction);
+        }
+
+        _createClass(EaseFunction, null, [{
+            key: "None",
+            value: function None(t) {
+                return t;
+            }
+        }, {
+            key: "SineEaseIn",
+            value: function SineEaseIn(t) {
+                return Math.sin((t - 1) * Math.PI * .5) + 1;
+            }
+        }, {
+            key: "SineEaseOut",
+            value: function SineEaseOut(t) {
+                return Math.sin(t * Math.PI * .5);
+            }
+        }, {
+            key: "SineEaseInOut",
+            value: function SineEaseInOut(t) {
+                return Math.sin((t - .5) * Math.PI) * .5 + .5;
+            }
+        }, {
+            key: "SineEaseOutIn",
+            value: function SineEaseOutIn(t) {
+                if (t < 0.5) {
+                    return Math.sin(t * Math.PI) * .5;
+                }
+                return Math.sin((t - 1) * Math.PI) * .5 + 1;
+            }
+        }, {
+            key: "QuadEaseIn",
+            value: function QuadEaseIn(t) {
+                return t * t;
+            }
+        }, {
+            key: "QuadEaseOut",
+            value: function QuadEaseOut(t) {
+                return -(t - 1) * (t - 1) + 1;
+            }
+        }, {
+            key: "QuadEaseInOut",
+            value: function QuadEaseInOut(t) {
+                if (t < .5) {
+                    return t * t * 2;
+                }
+                return -(t - 1) * (t - 1) * 2 + 1;
+            }
+        }, {
+            key: "QuadEaseOutIn",
+            value: function QuadEaseOutIn(t) {
+                var s = (t - .5) * (t - .5) * 2;
+                if (t < .5) {
+                    return .5 - s;
+                }
+                return .5 + s;
+            }
+        }, {
+            key: "CubicEaseIn",
+            value: function CubicEaseIn(t) {
+                return t * t * t;
+            }
+        }, {
+            key: "CubicEaseOut",
+            value: function CubicEaseOut(t) {
+                return (t - 1) * (t - 1) * (t - 1) + 1;
+            }
+        }, {
+            key: "CubicEaseInOut",
+            value: function CubicEaseInOut(t) {
+                if (t < .5) {
+                    return t * t * t * 4;
+                }
+                return (t - 1) * (t - 1) * (t - 1) * 4 + 1;
+            }
+        }, {
+            key: "CubicEaseOutIn",
+            value: function CubicEaseOutIn(t) {
+                return (t - .5) * (t - .5) * (t - .5) * 4 + .5;
+            }
+        }, {
+            key: "QuartEaseIn",
+            value: function QuartEaseIn(t) {
+                return t * t * t * t;
+            }
+        }, {
+            key: "QuartEaseOut",
+            value: function QuartEaseOut(t) {
+                var a = t - 1;
+                return -a * a * a * a + 1;
+            }
+        }, {
+            key: "QuartEaseInOut",
+            value: function QuartEaseInOut(t) {
+                if (t < .5) {
+                    return t * t * t * t * 8;
+                }
+                var a = t - 1;
+                return -a * a * a * a * 8 + 1;
+            }
+        }, {
+            key: "QuartEaseOutIn",
+            value: function QuartEaseOutIn(t) {
+                var s = (t - .5) * (t - .5) * (t - .5) * (t - .5) * 8;
+                if (t < .5) {
+                    return .5 - s;
+                }
+                return .5 + s;
+            }
+        }, {
+            key: "QuintEaseIn",
+            value: function QuintEaseIn(t) {
+                return t * t * t * t * t;
+            }
+        }, {
+            key: "QuintEaseOut",
+            value: function QuintEaseOut(t) {
+                var a = t - 1;
+                return a * a * a * a * a + 1;
+            }
+        }, {
+            key: "QuintEaseInOut",
+            value: function QuintEaseInOut(t) {
+                if (t < .5) {
+                    return t * t * t * t * t * 16;
+                }
+                var a = t - 1;
+                return a * a * a * a * a * 16 + 1;
+            }
+        }, {
+            key: "QuintEaseOutIn",
+            value: function QuintEaseOutIn(t) {
+                var a = t - .5;
+                return a * a * a * a * a * 16 + 0.5;
+            }
+        }, {
+            key: "ExpoEaseIn",
+            value: function ExpoEaseIn(t) {
+                return Math.pow(2, 10 * (t - 1));
+            }
+        }, {
+            key: "ExpoEaseOut",
+            value: function ExpoEaseOut(t) {
+                return -Math.pow(2, -10 * t) + 1;
+            }
+        }, {
+            key: "ExpoEaseInOut",
+            value: function ExpoEaseInOut(t) {
+                if (t < .5) {
+                    return Math.pow(2, 10 * (t * 2 - 1)) * .5;
+                }
+                return -Math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
+            }
+        }, {
+            key: "ExpoEaseOutIn",
+            value: function ExpoEaseOutIn(t) {
+                if (t < .5) {
+                    return -Math.pow(2, -20 * t) * .5 + .5;
+                }
+                return Math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
+            }
+        }, {
+            key: "CircEaseIn",
+            value: function CircEaseIn(t) {
+                return 1 - Math.sqrt(1 - t * t);
+            }
+        }, {
+            key: "CircEaseOut",
+            value: function CircEaseOut(t) {
+                return Math.sqrt(1 - (1 - t) * (1 - t));
+            }
+        }, {
+            key: "CircEaseInOut",
+            value: function CircEaseInOut(t) {
+                if (t < .5) {
+                    return .5 - Math.sqrt(.25 - t * t);
+                }
+                return Math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
+            }
+        }, {
+            key: "CircEaseOutIn",
+            value: function CircEaseOutIn(t) {
+                var s = Math.sqrt(.25 - (.5 - t) * (.5 - t));
+                if (t < .5) {
+                    return s;
+                }
+                return 1 - s;
+            }
+        }, {
+            key: "BackEaseIn",
+            value: function BackEaseIn(t) {
+                return 2.70158 * t * t * t - 1.70158 * t * t;
+            }
+        }, {
+            key: "BackEaseOut",
+            value: function BackEaseOut(t) {
+                var a = t - 1;
+                return 2.70158 * a * a * a + 1.70158 * a * a + 1;
+            }
+        }, {
+            key: "BackEaseInOut",
+            value: function BackEaseInOut(t) {
+                var a = t - 1;
+                if (t < .5) {
+                    return 10.80632 * t * t * t - 3.40316 * t * t;
+                }
+                return 10.80632 * a * a * a + 3.40316 * a * a + 1;
+            }
+        }, {
+            key: "BackEaseOutIn",
+            value: function BackEaseOutIn(t) {
+                var a = t - .5;
+                if (t < .5) {
+                    return 10.80632 * a * a * a + 3.40316 * a * a + .5;
+                }
+                return 10.80632 * a * a * a - 3.40316 * a * a + .5;
+            }
+        }, {
+            key: "ElasticEaseIn",
+            value: function ElasticEaseIn(t) {
+                if (t == 0 || t == 1) return t;
+                return -(Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.075) * 2 * Math.PI / .3));
+            }
+        }, {
+            key: "ElasticEaseOut",
+            value: function ElasticEaseOut(t) {
+                if (t == 0 || t == .5 || t == 1) return t;
+                return Math.pow(2, 10 * -t) * Math.sin((-t - .075) * 2 * Math.PI / .3) + 1;
+            }
+        }, {
+            key: "ElasticEaseInOut",
+            value: function ElasticEaseInOut(t) {
+                if (t == 0 || t == .5 || t == 1) return t;
+                if (t < .5) {
+                    return -(Math.pow(2, 10 * t - 10) * Math.sin((t * 2 - 2.15) * Math.PI / .3));
+                }
+                return Math.pow(2, 10 - 20 * t) * Math.sin((-4 * t + 1.85) * Math.PI / .3) * .5 + 1;
+            }
+        }, {
+            key: "ElasticEaseOutIn",
+            value: function ElasticEaseOutIn(t) {
+                if (t == 0 || t == .5 || t == 1) return t;
+                if (t < .5) {
+                    return Math.pow(2, -20 * t) * Math.sin((-t * 4 - .15) * Math.PI / .3) * .5 + .5;
+                }
+                return -(Math.pow(2, 20 * (t - 1)) * Math.sin((t * 4 - 4.15) * Math.PI / .3)) * .5 + .5;
+            }
+        }, {
+            key: "bounceEaseIn",
+            value: function bounceEaseIn(t) {
+                return 1 - flower.EaseFunction.bounceEaseOut(1 - t);
+            }
+        }, {
+            key: "bounceEaseOut",
+            value: function bounceEaseOut(t) {
+                var s;
+                var a = 7.5625;
+                var b = 2.75;
+                if (t < 1 / 2.75) {
+                    s = a * t * t;
+                } else if (t < 2 / b) {
+                    s = a * (t - 1.5 / b) * (t - 1.5 / b) + .75;
+                } else if (t < 2.5 / b) {
+                    s = a * (t - 2.25 / b) * (t - 2.25 / b) + .9375;
+                } else {
+                    s = a * (t - 2.625 / b) * (t - 2.625 / b) + .984375;
+                }
+                return s;
+            }
+        }, {
+            key: "BounceEaseInOut",
+            value: function BounceEaseInOut(t) {
+                if (t < .5) return flower.EaseFunction.bounceEaseIn(t * 2) * .5;else return flower.EaseFunction.bounceEaseOut(t * 2 - 1) * .5 + .5;
+            }
+        }, {
+            key: "BounceEaseOutIn",
+            value: function BounceEaseOutIn(t) {
+                if (t < .5) return flower.EaseFunction.bounceEaseOut(t * 2) * .5;else return flower.EaseFunction.bounceEaseIn(t * 2 - 1) * .5 + .5;
+            }
+        }]);
+
+        return EaseFunction;
+    }();
+    //////////////////////////End File:flower/tween/EaseFunction.js///////////////////////////
+
+    //////////////////////////File:flower/tween/TimeLine.js///////////////////////////
+
+
+    EaseFunction.BounceEaseIn = EaseFunction.bounceEaseIn;
+    EaseFunction.BounceEaseOut = EaseFunction.bounceEaseOut;
+
+    var TimeLine = function () {
+        function TimeLine() {
+            _classCallCheck(this, TimeLine);
+
+            this.lastTime = -1;
+            this._currentTime = 0;
+            this._totalTime = 0;
+            this.invalidTotalTime = true;
+            this._loop = false;
+            this._isPlaying = false;
+            this.calls = [];
+
+            this.tweens = [];
+        }
+
+        _createClass(TimeLine, [{
+            key: "getTotalTime",
+            value: function getTotalTime() {
+                if (this.invalidTotalTime == true) {
+                    return this._totalTime;
+                }
+                this.invalidTotalTime = true;
+                var tweens = this.tweens;
+                var endTime = 0;
+                var time;
+                for (var i = 0, len = tweens.length; i < len; i++) {
+                    time = tweens[i].startTime + tweens[i].time;
+                    if (time > endTime) {
+                        endTime = time;
+                    }
+                }
+                this._totalTime = endTime * 1000;
+                return this._totalTime;
+            }
+        }, {
+            key: "$invalidateTotalTime",
+            value: function $invalidateTotalTime() {
+                if (this.invalidTotalTime == false) {
+                    return;
+                }
+                this.invalidTotalTime = false;
+            }
+        }, {
+            key: "update",
+            value: function update(timeStamp, gap) {
+                var totalTime = this.getTotalTime();
+                var lastTime = this._currentTime;
+                this._currentTime += timeStamp - this.lastTime;
+                var currentTime = -1;
+                var loopTime = 0;
+                if (this._currentTime >= totalTime) {
+                    currentTime = this._currentTime % totalTime;
+                    loopTime = Math.floor(this._currentTime / totalTime);
+                    if (!this._loop) {
+                        this.$setPlaying(false);
+                    }
+                }
+                while (loopTime > -1) {
+                    if (loopTime && currentTime != -1) {
+                        this._currentTime = totalTime;
+                    }
+                    var calls = this.calls;
+                    var call;
+                    var len = calls.length;
+                    for (i = 0; i < len; i++) {
+                        call = calls[i];
+                        if (call.time > lastTime && call.time <= this._currentTime || call.time == 0 && lastTime == 0 && this._currentTime) {
+                            call.callBack.apply(call.thisObj, call.args);
+                        }
+                    }
+                    var tweens = this.tweens;
+                    var tween;
+                    len = tweens.length;
+                    for (var i = 0; i < len; i++) {
+                        tween = tweens[i];
+                        if (tween.$startTime + tween.$time > lastTime && tween.$startTime <= this._currentTime || tween.$startTime == 0 && lastTime == 0 && this._currentTime) {
+                            tween.$update(this._currentTime);
+                        }
+                    }
+                    loopTime--;
+                    if (loopTime == 0) {
+                        if (currentTime != -1) {
+                            lastTime = 0;
+                            this._currentTime = currentTime;
+                        }
+                    } else {
+                        if (loopTime) {
+                            lastTime = 0;
+                        }
+                    }
+                    if (this._loop == false) {
+                        break;
+                    }
+                }
+                this.lastTime = timeStamp;
+                return true;
+            }
+        }, {
+            key: "play",
+            value: function play() {
+                var now = flower.CoreTime.currentTime;
+                this.$setPlaying(true, now);
+            }
+        }, {
+            key: "stop",
+            value: function stop() {
+                this.$setPlaying(false);
+            }
+        }, {
+            key: "$setPlaying",
+            value: function $setPlaying(value) {
+                var time = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+                if (value) {
+                    this.lastTime = time;
+                }
+                if (this._isPlaying == value) {
+                    return;
+                }
+                this._isPlaying = value;
+                if (value) {
+                    flower.EnterFrame.add(this.update, this);
+                } else {
+                    flower.EnterFrame.del(this.update, this);
+                }
+            }
+        }, {
+            key: "gotoAndPlay",
+            value: function gotoAndPlay(time) {
+                if (!this.tweens.length) {
+                    return;
+                }
+                time = +time | 0;
+                time = time < 0 ? 0 : time;
+                if (time > this.totalTime) {
+                    time = this.totalTime;
+                }
+                this._currentTime = time;
+                var now = flower.CoreTime.currentTime;
+                this.$setPlaying(true, now);
+            }
+        }, {
+            key: "gotoAndStop",
+            value: function gotoAndStop(time) {
+                if (!this.tweens.length) {
+                    return;
+                }
+                time = +time | 0;
+                time = time < 0 ? 0 : time;
+                if (time > this.totalTime) {
+                    time = this.totalTime;
+                }
+                this._currentTime = time;
+                var now = flower.CoreTime.currentTime;
+                this.$setPlaying(false);
+            }
+        }, {
+            key: "addTween",
+            value: function addTween(tween) {
+                this.tweens.push(tween);
+                tween.$setTimeLine(this);
+                this.$invalidateTotalTime();
+                return tween;
+            }
+        }, {
+            key: "removeTween",
+            value: function removeTween(tween) {
+                var tweens = this.tweens;
+                for (var i = 0, len = tweens.length; i < len; i++) {
+                    if (tweens[i] == tween) {
+                        tweens.splice(i, 1)[0].$setTimeLine(null);
+                        this.$invalidateTotalTime();
+                        break;
+                    }
+                }
+                if (tweens.length == 0) {
+                    this.$setPlaying(false);
+                }
+            }
+        }, {
+            key: "call",
+            value: function call(time, callBack) {
+                for (var _len3 = arguments.length, args = Array(_len3 > 3 ? _len3 - 3 : 0), _key3 = 3; _key3 < _len3; _key3++) {
+                    args[_key3 - 3] = arguments[_key3];
+                }
+
+                var thisObj = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+                this.calls.push({ "time": time, "callBack": callBack, "thisObj": thisObj, "args": args });
+            }
+        }, {
+            key: "totalTime",
+            get: function get() {
+                return this.getTotalTime();
+            }
+        }, {
+            key: "loop",
+            get: function get() {
+                return this._loop;
+            },
+            set: function set(value) {
+                this._loop = value;
+            }
+        }, {
+            key: "isPlaying",
+            get: function get() {
+                return this._isPlaying;
+            }
+        }]);
+
+        return TimeLine;
+    }();
+
+    _exports.TimeLine = TimeLine;
+    //////////////////////////End File:flower/tween/TimeLine.js///////////////////////////
+
+    //////////////////////////File:flower/tween/Tween.js///////////////////////////
+
+    var Tween = function () {
+        function Tween(target, time, propertiesTo) {
+            var ease = arguments.length <= 3 || arguments[3] === undefined ? "None" : arguments[3];
+            var propertiesFrom = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
+            _classCallCheck(this, Tween);
+
+            this.invalidProperty = false;
+            this.$startTime = 0;
+            this._currentTime = 0;
+            this._startEvent = "";
+            this.pugins = [];
+
+            if (flower.Tween.plugins == null) {
+                flower.Tween.registerPlugin("center", flower.TweenCenter);
+                flower.Tween.registerPlugin("path", flower.TweenPath);
+                flower.Tween.registerPlugin("physicMove", flower.TweenPhysicMove);
+            }
+            time = +time;
+            if (time < 0) {
+                time = 0;
+            }
+            this.$time = time * 1000;
+            this._target = target;
+            this._propertiesTo = propertiesTo;
+            this._propertiesFrom = propertiesFrom;
+            this.ease = ease || "None";
+            var timeLine = new flower.TimeLine();
+            timeLine.addTween(this);
+        }
+
+        _createClass(Tween, [{
+            key: "removeTargetEvent",
+            value: function removeTargetEvent() {
+                var target;
+                if (this._startTarget) {
+                    target = this._startTarget;
+                } else {
+                    target = this._target;
+                }
+                if (target && this._startEvent && this._startEvent != "") {
+                    target.removeListener(this._startEvent, this.startByEvent, this);
+                }
+            }
+        }, {
+            key: "addTargetEvent",
+            value: function addTargetEvent() {
+                var target;
+                if (this._startTarget) {
+                    target = this._startTarget;
+                } else {
+                    target = this._target;
+                }
+                if (target && this._startEvent && this._startEvent != "") {
+                    target.addListener(this._startEvent, this.startByEvent, this);
+                }
+            }
+        }, {
+            key: "startByEvent",
+            value: function startByEvent() {
+                this._timeLine.gotoAndPlay(0);
+            }
+        }, {
+            key: "$setTimeLine",
+            value: function $setTimeLine(value) {
+                if (this._timeLine) {
+                    this._timeLine.removeTween(this);
+                }
+                this._timeLine = value;
+            }
+        }, {
+            key: "initParmas",
+            value: function initParmas() {
+                var controller;
+                var params = this._propertiesTo;
+                var allPlugins = flower.Tween.plugins;
+                if (params) {
+                    var keys = flower.ObjectDo.keys(allPlugins);
+                    var deletes = [];
+                    for (var i = 0, len = keys.length; i < len; i++) {
+                        if (keys[i] in params) {
+                            var plugin = allPlugins[keys[i]];
+                            controller = new plugin();
+                            deletes = deletes.concat(controller.init(this, params, this._propertiesFrom));
+                            this.pugins.push(controller);
+                        }
+                    }
+                    for (i = 0; i < deletes.length; i++) {
+                        delete params[deletes[i]];
+                    }
+                    keys = flower.ObjectDo.keys(params);
+                    for (i = 0; i < keys.length; i++) {
+                        var key = keys[i];
+                        if (!(typeof key == "string")) {
+                            delete params[key];
+                            keys.splice(i, 1);
+                            i--;
+                            continue;
+                        }
+                        var attribute = params[key];
+                        if (!(typeof attribute == "number") || !(key in this._target)) {
+                            delete params[key];
+                            keys.splice(i, 1);
+                            i--;
+                            continue;
+                        }
+                    }
+                    if (keys.length) {
+                        controller = new flower.BasicPlugin();
+                        controller.init(this, params, this._propertiesFrom);
+                        this.pugins.push(controller);
+                    }
+                }
+                this.invalidProperty = true;
+            }
+        }, {
+            key: "invalidate",
+            value: function invalidate() {
+                this.invalidProperty = false;
+            }
+        }, {
+            key: "call",
+            value: function call(callBack) {
+                var thisObj = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+                this._complete = callBack;
+                this._completeThis = thisObj;
+
+                for (var _len4 = arguments.length, args = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+                    args[_key4 - 2] = arguments[_key4];
+                }
+
+                this._completeParams = args;
+                return this;
+            }
+        }, {
+            key: "update",
+            value: function update(callBack) {
+                var thisObj = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+                this._update = callBack;
+                this._updateThis = thisObj;
+
+                for (var _len5 = arguments.length, args = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
+                    args[_key5 - 2] = arguments[_key5];
+                }
+
+                this._updateParams = args;
+                return this;
+            }
+        }, {
+            key: "$update",
+            value: function $update(time) {
+                if (!this.invalidProperty) {
+                    this.initParmas();
+                }
+                this._currentTime = time - this.$startTime;
+                if (this._currentTime > this.$time) {
+                    this._currentTime = this.$time;
+                }
+                var length = this.pugins.length;
+                var s = this._easeData[2000 * (this._currentTime / this.$time) | 0];
+                for (var i = 0; i < length; i++) {
+                    this.pugins[i].update(s);
+                }
+                if (this._update != null) {
+                    this._update.apply(this._updateThis, this._updateParams);
+                }
+                if (this._currentTime == this.$time) {
+                    if (this._complete != null) {
+                        this._complete.apply(this._completeThis, this._completeParams);
+                    }
+                }
+                return true;
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                if (this.timeLine) {
+                    this.timeLine.removeTween(this);
+                }
+            }
+        }, {
+            key: "propertiesTo",
+            set: function set(value) {
+                if (value == this._propertiesTo) {
+                    return;
+                }
+                this._propertiesTo = value;
+                this.invalidProperty = false;
+            }
+        }, {
+            key: "propertiesFrom",
+            set: function set(value) {
+                if (value == this._propertiesFrom) {
+                    return;
+                }
+                this._propertiesFrom = value;
+                this.invalidProperty = false;
+            }
+        }, {
+            key: "time",
+            get: function get() {
+                return this.$time / 1000;
+            },
+            set: function set(value) {
+                value = +value | 0;
+                this.$time = +value * 1000;
+                if (this._timeLine) {
+                    this._timeLine.$invalidateTotalTime();
+                }
+            }
+        }, {
+            key: "startTime",
+            get: function get() {
+                return this.$startTime / 1000;
+            },
+            set: function set(value) {
+                value = +value | 0;
+                if (value < 0) {
+                    value = 0;
+                }
+                if (value == this.$startTime) {
+                    return;
+                }
+                this.$startTime = value * 1000;
+                if (this._timeLine) {
+                    this._timeLine.$invalidateTotalTime();
+                }
+                this.invalidProperty = false;
+            }
+        }, {
+            key: "target",
+            get: function get() {
+                return this._target;
+            },
+            set: function set(value) {
+                if (value == this.target) {
+                    return;
+                }
+                this.removeTargetEvent();
+                this._target = value;
+                this.invalidProperty = false;
+                this.addTargetEvent();
+            }
+        }, {
+            key: "ease",
+            get: function get() {
+                return this._ease;
+            },
+            set: function set(val) {
+                if (!flower.Tween.easeCache[val]) {
+                    var func = EaseFunction[val];
+                    if (func == null) {
+                        return;
+                    }
+                    var cache = [];
+                    for (var i = 0; i <= 2000; i++) {
+                        cache[i] = func(i / 2000);
+                    }
+                    flower.Tween.easeCache[val] = cache;
+                }
+                this._ease = val;
+                this._easeData = flower.Tween.easeCache[val];
+            }
+        }, {
+            key: "startEvent",
+            get: function get() {
+                return this._startEvent;
+            },
+            set: function set(type) {
+                this.removeTargetEvent();
+                this._startEvent = type;
+                this.addTargetEvent();
+            }
+        }, {
+            key: "startTarget",
+            get: function get() {
+                return this._startTarget;
+            },
+            set: function set(value) {
+                this.removeTargetEvent();
+                this._startTarget = value;
+                this.addTargetEvent();
+            }
+        }, {
+            key: "timeLine",
+            get: function get() {
+                if (!this._timeLine) {
+                    this._timeLine = new flower.TimeLine();
+                    this._timeLine.addTween(this);
+                }
+                return this._timeLine;
+            }
+        }], [{
+            key: "to",
+            value: function to(target, time, propertiesTo) {
+                var ease = arguments.length <= 3 || arguments[3] === undefined ? "None" : arguments[3];
+                var propertiesFrom = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
+                var tween = new flower.Tween(target, time, propertiesTo, ease, propertiesFrom);
+                tween.timeLine.play();
+                return tween;
+            }
+        }, {
+            key: "registerPlugin",
+            value: function registerPlugin(paramName, plugin) {
+                if (flower.Tween.plugins == null) {
+                    flower.Tween.plugins = {};
+                }
+                flower.Tween.plugins[paramName] = plugin;
+            }
+        }, {
+            key: "hasPlugin",
+            value: function hasPlugin(paramName) {
+                return flower.Tween.plugins[paramName] ? true : false;
+            }
+        }]);
+
+        return Tween;
+    }();
+
+    Tween.easeCache = {};
+
+
+    _exports.Tween = Tween;
+    //////////////////////////End File:flower/tween/Tween.js///////////////////////////
 
     //////////////////////////File:flower/utils/EnterFrame.js///////////////////////////
 

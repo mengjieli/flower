@@ -2,6 +2,10 @@ class PlatformSprite extends PlatformDisplayObject {
 
     constructor() {
         super();
+        this.initShow();
+    }
+
+    initShow() {
         this.show = new cc.Node();
         this.show.setAnchorPoint(0, 0);
         this.show.retain();

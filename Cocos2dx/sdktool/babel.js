@@ -168,6 +168,7 @@ var list = [
     "PlatformTextInput",
     "PlatformBitmap",
     "PlatformShape",
+    "PlatformMask",
     "PlatformTexture",
     "PlatformURLLoader",
     "PlatformProgram",
@@ -198,6 +199,7 @@ var list = [
 
     "DisplayObject",
     "Sprite",
+    "Mask",
     "Bitmap",
     "TextField",
     "TextInput",
@@ -214,6 +216,15 @@ var list = [
     "ResItem",
     "ResItemInfo",
     "ResType",
+
+    "TweenCenter",
+    "TweenPath",
+    "TweenPhysicMove",
+    "BasicPlugin",
+    "Ease",
+    "EaseFunction",
+    "TimeLine",
+    "Tween",
 
     "EnterFrame",
     "CallLater",

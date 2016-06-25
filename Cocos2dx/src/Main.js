@@ -49,7 +49,7 @@ var Main = function () {
             //flower.trace("纹理列表", list);
             //flower.trace(e.data[0].desc);
 
-            var container = new flower.Sprite();
+            var container = new flower.Mask();
             //container.width = 150;
             //container.height = 200;
             flower.Stage.getInstance().addChild(container);
@@ -59,6 +59,7 @@ var Main = function () {
             container.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
+            container.shape.drawRect(0, 0, 250, 500);
 
             var h = 0;
             var s = 0;
@@ -69,22 +70,22 @@ var Main = function () {
             var blurX = 0;
             var blurY = 0;
             var color = 0;
-            //container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
-            //setInterval(function () {
-            //    h += 5;
-            //    r += 1;
-            //    g += 2;
-            //    b += 3;
-            //    blurX += 0.1;
-            //    blurY += 0.1;
-            //    color = r << 16 | g << 8 | b;
-            //    //flower.trace(h,s,l);
-            //    if (h > 2700) {
-            //        container.filters = null;
-            //    } else {
-            //        container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
-            //    }
-            //}, 50);
+            container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
+            setInterval(function () {
+                h += 5;
+                r += 1;
+                g += 2;
+                b += 3;
+                blurX += 0.1;
+                blurY += 0.1;
+                color = r << 16 | g << 8 | b;
+                //flower.trace(h,s,l);
+                if (h > 2700) {
+                    container.filters = null;
+                } else {
+                    container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
+                }
+            }, 50);
             //return;
 
             var bm = new flower.Bitmap();
@@ -172,8 +173,15 @@ var Main = function () {
             shape.fillColor = 0x0000ff;
             shape.lineWidth = 1;
             shape.lineColor = 0xff0000;
-            shape.drawRect(50, 70, 100, 200);
+            shape.x = 50;
+            shape.y = 100;
+            shape.drawRect(0, 0, 150, 50);
             container.addChild(shape);
+            shape.addListener(flower.TouchEvent.TOUCH_END, function () {
+                flower.Tween.to(shape, 2, { rotation: 1000, center: true }, null, {
+                    rotation: 0
+                });
+            }, this);
 
             //var rect = new cc.DrawNode();
             //var vertices = [{x:0,y:0}, {x:100,y:10},{x:100,y:100}, {x:0,y:100} ];
