@@ -10,7 +10,8 @@ class TextInput extends DisplayObject {
             1: 12, //fontSize
             2: 0x000000, //fontColor
             3: true, //editEnabled
-            4: false //inputing
+            4: false, //inputing
+            5: false //autoSize
         };
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
@@ -18,6 +19,11 @@ class TextInput extends DisplayObject {
             this.text = text;
         }
         this.$focusEnabled = true;
+        this.$nativeShow.setChangeBack(this.$onTextChange, this);
+    }
+
+    $onTextChange() {
+        this.text = this.$nativeShow.getNativeText();
     }
 
     $checkSettingSize(rect) {
@@ -41,7 +47,7 @@ class TextInput extends DisplayObject {
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
-            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, true);
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
             rect.x = 0;
             rect.y = 0;
             rect.width = size.width;

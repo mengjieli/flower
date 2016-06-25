@@ -69,22 +69,22 @@ var Main = function () {
             var blurX = 0;
             var blurY = 0;
             var color = 0;
-            container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
-            setInterval(function () {
-                h += 5;
-                r += 1;
-                g += 2;
-                b += 3;
-                blurX += 0.1;
-                blurY += 0.1;
-                color = r << 16 | g << 8 | b;
-                //flower.trace(h,s,l);
-                if (h > 2700) {
-                    container.filters = null;
-                } else {
-                    container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
-                }
-            }, 50);
+            //container.filters = [new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
+            //setInterval(function () {
+            //    h += 5;
+            //    r += 1;
+            //    g += 2;
+            //    b += 3;
+            //    blurX += 0.1;
+            //    blurY += 0.1;
+            //    color = r << 16 | g << 8 | b;
+            //    //flower.trace(h,s,l);
+            //    if (h > 2700) {
+            //        container.filters = null;
+            //    } else {
+            //        container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
+            //    }
+            //}, 50);
             //return;
 
             var bm = new flower.Bitmap();
@@ -146,12 +146,40 @@ var Main = function () {
             }, this);
             flower.trace(container.width, container.height);
 
+            var label = new flower.TextField("什么情况啊，我根本不知道!!!");
+            label.fontColor = 0xffff00;
+            label.y = 30;
+            label.width = 100;
+            label.multiLine = false;
+            label.fontSize = 30;
+            container.addChild(label);
+
             var txt = new flower.TextInput();
             txt.x = 0;
             txt.y = 0;
-            txt.text = "你好啊，笨蛋12321321";
+            //txt.fontSize = 30;
+            //txt.text = "你好啊，笨蛋12321321";
             txt.fontColor = 0x00ff00;
+            txt.width = 100;
+            txt.height = 50;
             container.addChild(txt);
+
+            //for(var key in txt.$nativeShow.show) {
+            //    console.log(key);
+            //}
+
+            var shape = new flower.Shape();
+            shape.fillColor = 0x0000ff;
+            shape.lineWidth = 1;
+            shape.lineColor = 0xff0000;
+            shape.drawRect(50, 70, 100, 200);
+            container.addChild(shape);
+
+            //var rect = new cc.DrawNode();
+            //var vertices = [{x:0,y:0}, {x:100,y:10},{x:100,y:100}, {x:0,y:100} ];
+            //rect.drawPoly(vertices, null, 5, {r:255,g:0,b:0,a:255});
+            //rect.setPosition(100,-100);
+            //container.$nativeShow.show.addChild(rect);
         }
     }]);
 

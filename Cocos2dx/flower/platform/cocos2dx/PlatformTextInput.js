@@ -4,11 +4,44 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     show;
 
+    __changeBack = null;
+    __changeBackThis = null;
+
+
     constructor() {
         super();
         this.show = new cc.TextFieldTTF();
+        if (Platform.native) {
+            this.show.setSystemFontSize(12);
+        } else {
+            this.show.setFontSize(12);
+        }
         this.show.setAnchorPoint(0, 1);
         this.show.retain();
+        if (Platform.native) {
+        } else {
+            this.show.setDelegate(this);
+        }
+    }
+
+    setChangeBack(changeBack,thisObj) {
+        this.__changeBack = changeBack;
+        this.__changeBackThis = thisObj;
+    }
+
+    onTextFieldAttachWithIME(sender) {
+        console.log("start input");
+    }
+
+    onTextFieldDetachWithIME(sender) {
+        console.log("stop input");
+    }
+
+    onTextFieldInsertText(sender, text, len) {
+        //console.log(text + " : " + len);
+        if(this.__changeBack) {
+            this.__changeBack.call(this.__changeBackThis);
+        }
     }
 
     setFontColor(color) {
@@ -21,7 +54,13 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextInput.$mesureTxt;
-        $mesureTxt.setFontSize(size);
+        if (Platform.native) {
+            $mesureTxt.setFontSize(size);
+            this.show.setSystemFontSize(size);
+        } else {
+            $mesureTxt.setFontSize(size);
+            this.show.setFontSize(size);
+        }
         var txt = this.show;
         txt.text = "";
         var txtText = "";
@@ -79,10 +118,16 @@ class PlatformTextInput extends PlatformDisplayObject {
     }
 
     release() {
+        this.__changeBack = null;
+        this.__changeBackThis = null;
         var show = this.show;
         show.setString("");
-        show.setFontSize(12);
-        show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        if (Platform.native) {
+            this.show.setSystemFontSize(12);
+        } else {
+            this.show.setFontSize(12);
+        }
+        show.setTextColor({r: 0, g: 0, b: 0, a: 255});
         super.release();
     }
 }

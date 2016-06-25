@@ -14,6 +14,7 @@ class DisplayObject extends EventDispatcher {
      * 0x0004 bounds 在父类中的尺寸失效
      * 0x0100 重排子对象顺序
      * 0x0800 文字内容改变
+     * 0x1000 shape需要重绘
      */
     __flags = 0;
 
@@ -28,6 +29,7 @@ class DisplayObject extends EventDispatcher {
     __stage;
 
     __alpha = 1;
+    __parentAlpha = 1;
     __concatAlpha = 1;
 
     /**
@@ -352,7 +354,11 @@ class DisplayObject extends EventDispatcher {
     $setParent(parent, stage) {
         this.__parent = parent;
         this.__stage = stage;
-        this.$addFlagsDown(0x0002);
+        var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
+        if (this.__parentAlpha != parentAlpha) {
+            this.__parentAlpha = parentAlpha;
+            this.$addFlagsDown(0x0002);
+        }
         if (this.__parent) {
             this.$setParentFilters(this.__parent.$getAllFilters());
             this.dispatchWidth(Event.ADDED);
@@ -596,7 +602,7 @@ class DisplayObject extends EventDispatcher {
         p[10] = touchX;
         p[11] = touchY;
         var bounds = this.$getContentBounds();
-        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.width && touchY < bounds.height) {
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
             return this;
         }
         matrix.restore();

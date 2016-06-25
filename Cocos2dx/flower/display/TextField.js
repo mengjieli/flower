@@ -13,7 +13,7 @@ class TextField extends DisplayObject {
             4: true, //multiline
             5: true //autoSize
         };
-        if(text != "") {
+        if (text != "") {
             this.text = text;
         }
     }
@@ -58,6 +58,17 @@ class TextField extends DisplayObject {
             return false;
         }
         p[1] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setMultiLine(val) {
+        var p = this.$TextField;
+        if (p[4] == val) {
+            return false;
+        }
+        p[4] = val;
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
         return true;
@@ -134,6 +145,15 @@ class TextField extends DisplayObject {
     get autoSize() {
         var p = this.$TextField;
         return p[5];
+    }
+
+    get multiLine() {
+        var p = this.$TextField;
+        return p[4];
+    }
+
+    set multiLine(val) {
+        this.$setMultiLine(val);
     }
 
     $onFrameEnd() {

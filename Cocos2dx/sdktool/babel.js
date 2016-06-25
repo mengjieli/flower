@@ -167,6 +167,7 @@ var list = [
     "PlatformTextField",
     "PlatformTextInput",
     "PlatformBitmap",
+    "PlatformShape",
     "PlatformTexture",
     "PlatformURLLoader",
     "PlatformProgram",
@@ -200,6 +201,7 @@ var list = [
     "Bitmap",
     "TextField",
     "TextInput",
+    "Shape",
     "Stage",
 
     "Texture",

@@ -101,6 +101,12 @@ class Platform {
             }
             return new PlatformTextInput();
         }
+        if (name == "Shape") {
+            if (pools.Shape && pools.Shape.length) {
+                return pools.Shape.pop();
+            }
+            return new PlatformShape();
+        }
         return null;
     }
 

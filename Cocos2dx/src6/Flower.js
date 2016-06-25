@@ -200,6 +200,12 @@ class Platform {
             }
             return new PlatformTextInput();
         }
+        if (name == "Shape") {
+            if (pools.Shape && pools.Shape.length) {
+                return pools.Shape.pop();
+            }
+            return new PlatformShape();
+        }
         return null;
     }
 
@@ -537,6 +543,7 @@ class PlatformTextField extends PlatformDisplayObject {
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.setFontSize(size);
+        this.show.setFontSize(size);
         var txt = this.show;
         txt.text = "";
         var txtText = "";
@@ -607,11 +614,44 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     show;
 
+    __changeBack = null;
+    __changeBackThis = null;
+
+
     constructor() {
         super();
         this.show = new cc.TextFieldTTF();
+        if (Platform.native) {
+            this.show.setSystemFontSize(12);
+        } else {
+            this.show.setFontSize(12);
+        }
         this.show.setAnchorPoint(0, 1);
         this.show.retain();
+        if (Platform.native) {
+        } else {
+            this.show.setDelegate(this);
+        }
+    }
+
+    setChangeBack(changeBack,thisObj) {
+        this.__changeBack = changeBack;
+        this.__changeBackThis = thisObj;
+    }
+
+    onTextFieldAttachWithIME(sender) {
+        console.log("start input");
+    }
+
+    onTextFieldDetachWithIME(sender) {
+        console.log("stop input");
+    }
+
+    onTextFieldInsertText(sender, text, len) {
+        //console.log(text + " : " + len);
+        if(this.__changeBack) {
+            this.__changeBack.call(this.__changeBackThis);
+        }
     }
 
     setFontColor(color) {
@@ -624,7 +664,13 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextInput.$mesureTxt;
-        $mesureTxt.setFontSize(size);
+        if (Platform.native) {
+            $mesureTxt.setFontSize(size);
+            this.show.setSystemFontSize(size);
+        } else {
+            $mesureTxt.setFontSize(size);
+            this.show.setFontSize(size);
+        }
         var txt = this.show;
         txt.text = "";
         var txtText = "";
@@ -682,10 +728,16 @@ class PlatformTextInput extends PlatformDisplayObject {
     }
 
     release() {
+        this.__changeBack = null;
+        this.__changeBackThis = null;
         var show = this.show;
         show.setString("");
-        show.setFontSize(12);
-        show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        if (Platform.native) {
+            this.show.setSystemFontSize(12);
+        } else {
+            this.show.setFontSize(12);
+        }
+        show.setTextColor({r: 0, g: 0, b: 0, a: 255});
         super.release();
     }
 }
@@ -852,6 +904,55 @@ class PlatformBitmap extends PlatformDisplayObject {
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformShape.js///////////////////////////
+class PlatformShape extends PlatformDisplayObject {
+    constructor() {
+        super();
+        this.show = new cc.DrawNode();
+        this.show.retain();
+    }
+
+    draw(points, fillColor, fillAlpha, lineWidth, lineColor, lineAlpha) {
+        var shape = this.show;
+        for (var i = 0; i < points.length; i++) {
+            points[i].y = -points[i].y;
+        }
+        shape.drawPoly(points, {
+            r: fillColor >> 16,
+            g: fillColor >> 8 & 0xFF,
+            b: fillColor & 0xFF,
+            a: fillAlpha * 255
+        }, lineWidth, {
+            r: lineColor >> 16,
+            g: lineColor >> 8 & 0xFF,
+            b: lineColor & 0xFF,
+            a: lineAlpha * 255
+        });
+        for (var i = 0; i < points.length; i++) {
+            points[i].y = -points[i].y;
+        }
+    }
+
+    clear() {
+        this.show.clear();
+    }
+
+    setAlpha(val) {
+    }
+
+
+    setFilters(filters) {
+
+    }
+    release() {
+        this.clear();
+        super.release();
+    }
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformShape.js///////////////////////////
 
 
 
@@ -2090,6 +2191,7 @@ class DisplayObject extends EventDispatcher {
      * 0x0004 bounds 在父类中的尺寸失效
      * 0x0100 重排子对象顺序
      * 0x0800 文字内容改变
+     * 0x1000 shape需要重绘
      */
     __flags = 0;
 
@@ -2104,6 +2206,7 @@ class DisplayObject extends EventDispatcher {
     __stage;
 
     __alpha = 1;
+    __parentAlpha = 1;
     __concatAlpha = 1;
 
     /**
@@ -2428,7 +2531,11 @@ class DisplayObject extends EventDispatcher {
     $setParent(parent, stage) {
         this.__parent = parent;
         this.__stage = stage;
-        this.$addFlagsDown(0x0002);
+        var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
+        if (this.__parentAlpha != parentAlpha) {
+            this.__parentAlpha = parentAlpha;
+            this.$addFlagsDown(0x0002);
+        }
         if (this.__parent) {
             this.$setParentFilters(this.__parent.$getAllFilters());
             this.dispatchWidth(Event.ADDED);
@@ -2672,7 +2779,7 @@ class DisplayObject extends EventDispatcher {
         p[10] = touchX;
         p[11] = touchY;
         var bounds = this.$getContentBounds();
-        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.width && touchY < bounds.height) {
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
             return this;
         }
         matrix.restore();
@@ -3031,7 +3138,7 @@ class TextField extends DisplayObject {
             4: true, //multiline
             5: true //autoSize
         };
-        if(text != "") {
+        if (text != "") {
             this.text = text;
         }
     }
@@ -3076,6 +3183,17 @@ class TextField extends DisplayObject {
             return false;
         }
         p[1] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setMultiLine(val) {
+        var p = this.$TextField;
+        if (p[4] == val) {
+            return false;
+        }
+        p[4] = val;
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
         return true;
@@ -3154,6 +3272,15 @@ class TextField extends DisplayObject {
         return p[5];
     }
 
+    get multiLine() {
+        var p = this.$TextField;
+        return p[4];
+    }
+
+    set multiLine(val) {
+        this.$setMultiLine(val);
+    }
+
     $onFrameEnd() {
         if (this.$hasFlags(0x0800)) {
             var width = this.width;
@@ -3185,7 +3312,8 @@ class TextInput extends DisplayObject {
             1: 12, //fontSize
             2: 0x000000, //fontColor
             3: true, //editEnabled
-            4: false //inputing
+            4: false, //inputing
+            5: false //autoSize
         };
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
@@ -3193,6 +3321,11 @@ class TextInput extends DisplayObject {
             this.text = text;
         }
         this.$focusEnabled = true;
+        this.$nativeShow.setChangeBack(this.$onTextChange, this);
+    }
+
+    $onTextChange() {
+        this.text = this.$nativeShow.getNativeText();
     }
 
     $checkSettingSize(rect) {
@@ -3216,7 +3349,7 @@ class TextInput extends DisplayObject {
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
-            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, true);
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
             rect.x = 0;
             rect.y = 0;
             rect.width = size.width;
@@ -3345,6 +3478,253 @@ class TextInput extends DisplayObject {
 
 exports.TextInput = TextInput;
 //////////////////////////End File:flower/display/TextInput.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/Shape.js///////////////////////////
+class Shape extends DisplayObject {
+
+    $Shape;
+
+    constructor() {
+        super();
+        this.$nativeShow = Platform.create("Shape");
+        this.$Shape = {
+            0: 0xffffff, //fillColor
+            1: 1,        //fillAlpha
+            2: 0,        //lineWidth
+            3: 0x000000, //lineColor
+            4: 1,        //lineAlpha
+            5: null,     //minX
+            6: null,     //minY
+            7: null,     //maxX
+            8: null,     //maxY
+            9: []       //record
+        };
+        this.$nativeShow.draw([{x: 0, y: 0}, {x: 1, y: 0}], 0, 0, 0, 0, 0);
+    }
+
+    drawRect(x, y, width, height) {
+        this.$drawPolygon([
+            {x: x, y: y},
+            {x: x + width, y: y},
+            {x: x + width, y: y + height},
+            {x: x, y: y + height},
+            {x: x, y: y}]);
+    }
+
+    clear() {
+        this.$nativeShow.clear();
+        var p = this.$Shape;
+        p[5] = p[6] = p[7] = p[8] = null;
+        p[9] = [];
+        this.$nativeShow.draw([{x: 0, y: 0}, {x: 1, y: 0}], 0, 0, 0, 0, 0);
+    }
+
+    $addFlags(flags) {
+        if (flags == 0x0002) {
+            this.$addFlags(0x1000);
+        }
+        super.$addFlags(flags);
+    }
+
+    $drawPolygon(points) {
+        var p = this.$Shape;
+        for (var i = 0; i < points.length; i++) {
+            if (p[5] == null) {
+                p[5] = points[i].x;
+                p[7] = points[i].x;
+                p[6] = points[i].y;
+                p[8] = points[i].y;
+                continue;
+            }
+            if (points[i].x < p[5]) {
+                p[5] = points[i].x;
+            }
+            if (points[i].x > p[7]) {
+                p[7] = points[i].x;
+            }
+            if (points[i].y < p[6]) {
+                p[6] = points[i].y;
+            }
+            if (points[i].y > p[8]) {
+                p[8] = points[i].y;
+            }
+        }
+        this.$invalidateContentBounds();
+        p[9].push(
+            {
+                points: points,
+                fillColor: p[0],
+                fillAlpha: p[1],
+                lineWidth: p[2],
+                lineColor: p[3],
+                lineAlpha: p[4]
+            }
+        );
+        this.$nativeShow.draw(points, p[0], p[1] * this.$getConcatAlpha(), p[2], p[3], p[4] * this.$getConcatAlpha());
+    }
+
+    $measureContentBounds(rect) {
+        this.$redraw();
+        var p = this.$Shape;
+        if (p[5] != null) {
+            rect.x = p[5];
+            rect.y = p[6];
+            rect.width = p[7] - p[5];
+            rect.height = p[8] - p[6];
+        } else {
+            rect.x = 0;
+            rect.y = 0;
+            rect.width = 0;
+            rect.height = 0;
+        }
+    }
+
+    $redraw() {
+        if (this.$hasFlags(0x1000)) {
+            var p = this.$Shape;
+            var record = p[9];
+            var fillColor = p[0];
+            var fillAlpha = p[1];
+            var lineWidth = p[2];
+            var lineColor = p[3];
+            var lineAlpha = p[4];
+            this.clear();
+            for (var i = 0; i < record.length; i++) {
+                var item = record[i];
+                p[0] = item.fillColor;
+                p[1] = item.fillAlpha;
+                p[2] = item.lineWidth;
+                p[3] = item.lineColor;
+                p[4] = item.lineAlpha;
+                this.$drawPolygon(item.points);
+            }
+            p[0] = fillColor;
+            p[1] = fillAlpha;
+            p[2] = lineWidth;
+            p[3] = lineColor;
+            p[4] = lineAlpha;
+            this.$removeFlags(0x1000);
+        }
+    }
+
+    $setFillColor(val) {
+        var p = this.$Shape;
+        if (p[0] == val) {
+            return false;
+        }
+        p[0] = val;
+        return true;
+    }
+
+    $setFillAlpha(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        if (val > 1) {
+            val = 1;
+        }
+        var p = this.$Shape;
+        if (p[1] == val) {
+            return false;
+        }
+        p[1] = val;
+        return true;
+    }
+
+    $setLineWidth(val) {
+        var p = this.$Shape;
+        if (p[2] == val) {
+            return false;
+        }
+        p[2] = val;
+        return true;
+    }
+
+    $setLineColor(val) {
+        var p = this.$Shape;
+        if (p[3] == val) {
+            return false;
+        }
+        p[3] = val;
+        return true;
+    }
+
+    $setLineAlpha(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        if (val > 1) {
+            val = 1;
+        }
+        var p = this.$Shape;
+        if (p[4] == val) {
+            return false;
+        }
+        p[4] = val;
+        return true;
+    }
+
+    get fillColor() {
+        var p = this.$Shape;
+        return p[0];
+    }
+
+    set fillColor(val) {
+        this.$setFillColor(val);
+    }
+
+    get fillAlpha() {
+        var p = this.$Shape;
+        return p[1];
+    }
+
+    set fillAlpha(val) {
+        this.$setFillAlpha(val);
+    }
+
+    get lineWidth() {
+        var p = this.$Shape;
+        return p[2];
+    }
+
+    set lineWidth(val) {
+        this.$setLineWidth(val);
+    }
+
+    get lineColor() {
+        var p = this.$Shape;
+        return p[3];
+    }
+
+    set lineColor(val) {
+        this.$setLineColor(val);
+    }
+
+    get lineAlpha() {
+        var p = this.$Shape;
+        return p[4];
+    }
+
+    set lineAlpha(val) {
+        this.$setLineAlpha(val);
+    }
+
+    $onFrameEnd() {
+        this.$redraw();
+    }
+
+    dispose() {
+        super.dispose();
+        Platform.release("Shape", this.$nativeShow);
+    }
+}
+
+exports.Shape = Shape;
+//////////////////////////End File:flower/display/Shape.js///////////////////////////
 
 
 

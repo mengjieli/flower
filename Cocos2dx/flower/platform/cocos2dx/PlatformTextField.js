@@ -18,6 +18,7 @@ class PlatformTextField extends PlatformDisplayObject {
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.setFontSize(size);
+        this.show.setFontSize(size);
         var txt = this.show;
         txt.text = "";
         var txtText = "";

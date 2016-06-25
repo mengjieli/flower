@@ -213,6 +213,12 @@ var _exports = {};
                     }
                     return new PlatformTextInput();
                 }
+                if (name == "Shape") {
+                    if (pools.Shape && pools.Shape.length) {
+                        return pools.Shape.pop();
+                    }
+                    return new PlatformShape();
+                }
                 return null;
             }
         }, {
@@ -591,6 +597,7 @@ var _exports = {};
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
                 var $mesureTxt = PlatformTextField.$mesureTxt;
                 $mesureTxt.setFontSize(size);
+                this.show.setFontSize(size);
                 var txt = this.show;
                 txt.text = "";
                 var txtText = "";
@@ -665,13 +672,48 @@ var _exports = {};
 
             var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformTextInput).call(this));
 
+            _this3.__changeBack = null;
+            _this3.__changeBackThis = null;
+
             _this3.show = new cc.TextFieldTTF();
+            if (Platform.native) {
+                _this3.show.setSystemFontSize(12);
+            } else {
+                _this3.show.setFontSize(12);
+            }
             _this3.show.setAnchorPoint(0, 1);
             _this3.show.retain();
+            if (Platform.native) {} else {
+                _this3.show.setDelegate(_this3);
+            }
             return _this3;
         }
 
         _createClass(PlatformTextInput, [{
+            key: "setChangeBack",
+            value: function setChangeBack(changeBack, thisObj) {
+                this.__changeBack = changeBack;
+                this.__changeBackThis = thisObj;
+            }
+        }, {
+            key: "onTextFieldAttachWithIME",
+            value: function onTextFieldAttachWithIME(sender) {
+                console.log("start input");
+            }
+        }, {
+            key: "onTextFieldDetachWithIME",
+            value: function onTextFieldDetachWithIME(sender) {
+                console.log("stop input");
+            }
+        }, {
+            key: "onTextFieldInsertText",
+            value: function onTextFieldInsertText(sender, text, len) {
+                //console.log(text + " : " + len);
+                if (this.__changeBack) {
+                    this.__changeBack.call(this.__changeBackThis);
+                }
+            }
+        }, {
             key: "setFontColor",
             value: function setFontColor(color) {
                 this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
@@ -685,7 +727,13 @@ var _exports = {};
             key: "changeText",
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
                 var $mesureTxt = PlatformTextInput.$mesureTxt;
-                $mesureTxt.setFontSize(size);
+                if (Platform.native) {
+                    $mesureTxt.setFontSize(size);
+                    this.show.setSystemFontSize(size);
+                } else {
+                    $mesureTxt.setFontSize(size);
+                    this.show.setFontSize(size);
+                }
                 var txt = this.show;
                 txt.text = "";
                 var txtText = "";
@@ -745,10 +793,16 @@ var _exports = {};
         }, {
             key: "release",
             value: function release() {
+                this.__changeBack = null;
+                this.__changeBackThis = null;
                 var show = this.show;
                 show.setString("");
-                show.setFontSize(12);
-                show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
+                if (Platform.native) {
+                    this.show.setSystemFontSize(12);
+                } else {
+                    this.show.setFontSize(12);
+                }
+                show.setTextColor({ r: 0, g: 0, b: 0, a: 255 });
                 _get(Object.getPrototypeOf(PlatformTextInput.prototype), "release", this).call(this);
             }
         }]);
@@ -931,6 +985,67 @@ var _exports = {};
         return PlatformBitmap;
     }(PlatformDisplayObject);
     //////////////////////////End File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
+
+    //////////////////////////File:flower/platform/cocos2dx/PlatformShape.js///////////////////////////
+
+
+    var PlatformShape = function (_PlatformDisplayObjec5) {
+        _inherits(PlatformShape, _PlatformDisplayObjec5);
+
+        function PlatformShape() {
+            _classCallCheck(this, PlatformShape);
+
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformShape).call(this));
+
+            _this5.show = new cc.DrawNode();
+            _this5.show.retain();
+            return _this5;
+        }
+
+        _createClass(PlatformShape, [{
+            key: "draw",
+            value: function draw(points, fillColor, fillAlpha, lineWidth, lineColor, lineAlpha) {
+                var shape = this.show;
+                for (var i = 0; i < points.length; i++) {
+                    points[i].y = -points[i].y;
+                }
+                shape.drawPoly(points, {
+                    r: fillColor >> 16,
+                    g: fillColor >> 8 & 0xFF,
+                    b: fillColor & 0xFF,
+                    a: fillAlpha * 255
+                }, lineWidth, {
+                    r: lineColor >> 16,
+                    g: lineColor >> 8 & 0xFF,
+                    b: lineColor & 0xFF,
+                    a: lineAlpha * 255
+                });
+                for (var i = 0; i < points.length; i++) {
+                    points[i].y = -points[i].y;
+                }
+            }
+        }, {
+            key: "clear",
+            value: function clear() {
+                this.show.clear();
+            }
+        }, {
+            key: "setAlpha",
+            value: function setAlpha(val) {}
+        }, {
+            key: "setFilters",
+            value: function setFilters(filters) {}
+        }, {
+            key: "release",
+            value: function release() {
+                this.clear();
+                _get(Object.getPrototypeOf(PlatformShape.prototype), "release", this).call(this);
+            }
+        }]);
+
+        return PlatformShape;
+    }(PlatformDisplayObject);
+    //////////////////////////End File:flower/platform/cocos2dx/PlatformShape.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
 
@@ -1513,14 +1628,14 @@ var _exports = {};
 
             _classCallCheck(this, TouchEvent);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
 
-            _this5.$touchId = 0;
-            _this5.$touchX = 0;
-            _this5.$touchY = 0;
-            _this5.$stageX = 0;
-            _this5.$stageY = 0;
-            return _this5;
+            _this6.$touchId = 0;
+            _this6.$touchX = 0;
+            _this6.$touchY = 0;
+            _this6.$stageX = 0;
+            _this6.$stageY = 0;
+            return _this6;
         }
 
         _createClass(TouchEvent, [{
@@ -1695,16 +1810,16 @@ var _exports = {};
 
             _classCallCheck(this, ColorFilter);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
 
-            _this8.__h = 0;
-            _this8.__s = 0;
-            _this8.__l = 0;
+            _this9.__h = 0;
+            _this9.__s = 0;
+            _this9.__l = 0;
 
-            _this8.h = h;
-            _this8.s = s;
-            _this8.l = l;
-            return _this8;
+            _this9.h = h;
+            _this9.s = s;
+            _this9.l = l;
+            return _this9;
         }
 
         _createClass(ColorFilter, [{
@@ -1778,16 +1893,16 @@ var _exports = {};
 
             _classCallCheck(this, StrokeFilter);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
 
-            _this9.__size = 0;
-            _this9.__r = 0;
-            _this9.__g = 0;
-            _this9.__b = 0;
+            _this10.__size = 0;
+            _this10.__r = 0;
+            _this10.__g = 0;
+            _this10.__b = 0;
 
-            _this9.size = size;
-            _this9.color = color;
-            return _this9;
+            _this10.size = size;
+            _this10.color = color;
+            return _this10;
         }
 
         _createClass(StrokeFilter, [{
@@ -1833,14 +1948,14 @@ var _exports = {};
 
             _classCallCheck(this, BlurFilter);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
 
-            _this10.__blurX = 0;
-            _this10.__blurY = 0;
+            _this11.__blurX = 0;
+            _this11.__blurY = 0;
 
-            _this10.blurX = blurX;
-            _this10.blurY = blurY;
-            return _this10;
+            _this11.blurX = blurX;
+            _this11.blurY = blurY;
+            return _this11;
         }
 
         _createClass(BlurFilter, [{
@@ -2333,31 +2448,22 @@ var _exports = {};
         _inherits(DisplayObject, _EventDispatcher);
 
         /**
-         * 舞台类
-         */
-
-
-        /**
-         * 脏标识
-         * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
-         * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
-         * 0x0004 bounds 在父类中的尺寸失效
-         * 0x0100 重排子对象顺序
-         * 0x0800 文字内容改变
+         * 父对象
          */
 
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this11.__x = 0;
-            _this11.__y = 0;
-            _this11.__flags = 0;
-            _this11.__alpha = 1;
-            _this11.__concatAlpha = 1;
+            _this12.__x = 0;
+            _this12.__y = 0;
+            _this12.__flags = 0;
+            _this12.__alpha = 1;
+            _this12.__parentAlpha = 1;
+            _this12.__concatAlpha = 1;
 
-            _this11.$DisplayObject = {
+            _this12.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -2373,7 +2479,7 @@ var _exports = {};
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
-            return _this11;
+            return _this12;
         }
 
         /**
@@ -2389,7 +2495,18 @@ var _exports = {};
 
 
         /**
-         * 父对象
+         * 舞台类
+         */
+
+
+        /**
+         * 脏标识
+         * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+         * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
+         * 0x0004 bounds 在父类中的尺寸失效
+         * 0x0100 重排子对象顺序
+         * 0x0800 文字内容改变
+         * 0x1000 shape需要重绘
          */
 
 
@@ -2711,7 +2828,11 @@ var _exports = {};
             value: function $setParent(parent, stage) {
                 this.__parent = parent;
                 this.__stage = stage;
-                this.$addFlagsDown(0x0002);
+                var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
+                if (this.__parentAlpha != parentAlpha) {
+                    this.__parentAlpha = parentAlpha;
+                    this.$addFlagsDown(0x0002);
+                }
                 if (this.__parent) {
                     this.$setParentFilters(this.__parent.$getAllFilters());
                     this.dispatchWidth(Event.ADDED);
@@ -2839,7 +2960,7 @@ var _exports = {};
                 p[10] = touchX;
                 p[11] = touchY;
                 var bounds = this.$getContentBounds();
-                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.width && touchY < bounds.height) {
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
                     return this;
                 }
                 matrix.restore();
@@ -3017,11 +3138,11 @@ var _exports = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this12.__children = [];
-            _this12.$nativeShow = Platform.create("Sprite");
-            return _this12;
+            _this13.__children = [];
+            _this13.$nativeShow = Platform.create("Sprite");
+            return _this13;
         }
 
         _createClass(Sprite, [{
@@ -3266,13 +3387,13 @@ var _exports = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this13.$nativeShow = Platform.create("Bitmap");
-            _this13.texture = texture;
-            _this13.$Bitmap = {
+            _this14.$nativeShow = Platform.create("Bitmap");
+            _this14.texture = texture;
+            _this14.$Bitmap = {
                 0: null };
-            return _this13;
+            return _this14;
         }
 
         _createClass(Bitmap, [{
@@ -3362,10 +3483,10 @@ var _exports = {};
 
             _classCallCheck(this, TextField);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
 
-            _this14.$nativeShow = Platform.create("TextField");
-            _this14.$TextField = {
+            _this15.$nativeShow = Platform.create("TextField");
+            _this15.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -3374,9 +3495,9 @@ var _exports = {};
                 5: true //autoSize
             };
             if (text != "") {
-                _this14.text = text;
+                _this15.text = text;
             }
-            return _this14;
+            return _this15;
         }
 
         _createClass(TextField, [{
@@ -3423,6 +3544,18 @@ var _exports = {};
                     return false;
                 }
                 p[1] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setMultiLine",
+            value: function $setMultiLine(val) {
+                var p = this.$TextField;
+                if (p[4] == val) {
+                    return false;
+                }
+                p[4] = val;
                 this.$addFlags(0x0800);
                 this.$invalidateContentBounds();
                 return true;
@@ -3518,6 +3651,15 @@ var _exports = {};
                 var p = this.$TextField;
                 return p[5];
             }
+        }, {
+            key: "multiLine",
+            get: function get() {
+                var p = this.$TextField;
+                return p[4];
+            },
+            set: function set(val) {
+                this.$setMultiLine(val);
+            }
         }]);
 
         return TextField;
@@ -3536,26 +3678,33 @@ var _exports = {};
 
             _classCallCheck(this, TextInput);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
 
-            _this15.$nativeShow = Platform.create("TextInput");
-            _this15.$TextField = {
+            _this16.$nativeShow = Platform.create("TextInput");
+            _this16.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
                 3: true, //editEnabled
-                4: false //inputing
+                4: false, //inputing
+                5: false //autoSize
             };
-            _this15.addListener(Event.FOCUS_IN, _this15.$onFocusIn, _this15);
-            _this15.addListener(Event.FOCUS_OUT, _this15.$onFocusOut, _this15);
+            _this16.addListener(Event.FOCUS_IN, _this16.$onFocusIn, _this16);
+            _this16.addListener(Event.FOCUS_OUT, _this16.$onFocusOut, _this16);
             if (text != "") {
-                _this15.text = text;
+                _this16.text = text;
             }
-            _this15.$focusEnabled = true;
-            return _this15;
+            _this16.$focusEnabled = true;
+            _this16.$nativeShow.setChangeBack(_this16.$onTextChange, _this16);
+            return _this16;
         }
 
         _createClass(TextInput, [{
+            key: "$onTextChange",
+            value: function $onTextChange() {
+                this.text = this.$nativeShow.getNativeText();
+            }
+        }, {
             key: "$checkSettingSize",
             value: function $checkSettingSize(rect) {}
         }, {
@@ -3578,7 +3727,7 @@ var _exports = {};
                     var d = this.$DisplayObject;
                     var p = this.$TextField;
                     //text, width, height, size, wordWrap, multiline, autoSize
-                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, true);
+                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
                     rect.x = 0;
                     rect.y = 0;
                     rect.width = size.width;
@@ -3721,6 +3870,265 @@ var _exports = {};
     _exports.TextInput = TextInput;
     //////////////////////////End File:flower/display/TextInput.js///////////////////////////
 
+    //////////////////////////File:flower/display/Shape.js///////////////////////////
+
+    var Shape = function (_DisplayObject5) {
+        _inherits(Shape, _DisplayObject5);
+
+        function Shape() {
+            _classCallCheck(this, Shape);
+
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
+
+            _this17.$nativeShow = Platform.create("Shape");
+            _this17.$Shape = {
+                0: 0xffffff, //fillColor
+                1: 1, //fillAlpha
+                2: 0, //lineWidth
+                3: 0x000000, //lineColor
+                4: 1, //lineAlpha
+                5: null, //minX
+                6: null, //minY
+                7: null, //maxX
+                8: null, //maxY
+                9: [] //record
+            };
+            _this17.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            return _this17;
+        }
+
+        _createClass(Shape, [{
+            key: "drawRect",
+            value: function drawRect(x, y, width, height) {
+                this.$drawPolygon([{ x: x, y: y }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }]);
+            }
+        }, {
+            key: "clear",
+            value: function clear() {
+                this.$nativeShow.clear();
+                var p = this.$Shape;
+                p[5] = p[6] = p[7] = p[8] = null;
+                p[9] = [];
+                this.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            }
+        }, {
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                if (flags == 0x0002) {
+                    this.$addFlags(0x1000);
+                }
+                _get(Object.getPrototypeOf(Shape.prototype), "$addFlags", this).call(this, flags);
+            }
+        }, {
+            key: "$drawPolygon",
+            value: function $drawPolygon(points) {
+                var p = this.$Shape;
+                for (var i = 0; i < points.length; i++) {
+                    if (p[5] == null) {
+                        p[5] = points[i].x;
+                        p[7] = points[i].x;
+                        p[6] = points[i].y;
+                        p[8] = points[i].y;
+                        continue;
+                    }
+                    if (points[i].x < p[5]) {
+                        p[5] = points[i].x;
+                    }
+                    if (points[i].x > p[7]) {
+                        p[7] = points[i].x;
+                    }
+                    if (points[i].y < p[6]) {
+                        p[6] = points[i].y;
+                    }
+                    if (points[i].y > p[8]) {
+                        p[8] = points[i].y;
+                    }
+                }
+                this.$invalidateContentBounds();
+                p[9].push({
+                    points: points,
+                    fillColor: p[0],
+                    fillAlpha: p[1],
+                    lineWidth: p[2],
+                    lineColor: p[3],
+                    lineAlpha: p[4]
+                });
+                this.$nativeShow.draw(points, p[0], p[1] * this.$getConcatAlpha(), p[2], p[3], p[4] * this.$getConcatAlpha());
+            }
+        }, {
+            key: "$measureContentBounds",
+            value: function $measureContentBounds(rect) {
+                this.$redraw();
+                var p = this.$Shape;
+                if (p[5] != null) {
+                    rect.x = p[5];
+                    rect.y = p[6];
+                    rect.width = p[7] - p[5];
+                    rect.height = p[8] - p[6];
+                } else {
+                    rect.x = 0;
+                    rect.y = 0;
+                    rect.width = 0;
+                    rect.height = 0;
+                }
+            }
+        }, {
+            key: "$redraw",
+            value: function $redraw() {
+                if (this.$hasFlags(0x1000)) {
+                    var p = this.$Shape;
+                    var record = p[9];
+                    var fillColor = p[0];
+                    var fillAlpha = p[1];
+                    var lineWidth = p[2];
+                    var lineColor = p[3];
+                    var lineAlpha = p[4];
+                    this.clear();
+                    for (var i = 0; i < record.length; i++) {
+                        var item = record[i];
+                        p[0] = item.fillColor;
+                        p[1] = item.fillAlpha;
+                        p[2] = item.lineWidth;
+                        p[3] = item.lineColor;
+                        p[4] = item.lineAlpha;
+                        this.$drawPolygon(item.points);
+                    }
+                    p[0] = fillColor;
+                    p[1] = fillAlpha;
+                    p[2] = lineWidth;
+                    p[3] = lineColor;
+                    p[4] = lineAlpha;
+                    this.$removeFlags(0x1000);
+                }
+            }
+        }, {
+            key: "$setFillColor",
+            value: function $setFillColor(val) {
+                var p = this.$Shape;
+                if (p[0] == val) {
+                    return false;
+                }
+                p[0] = val;
+                return true;
+            }
+        }, {
+            key: "$setFillAlpha",
+            value: function $setFillAlpha(val) {
+                val = +val || 0;
+                if (val < 0) {
+                    val = 0;
+                }
+                if (val > 1) {
+                    val = 1;
+                }
+                var p = this.$Shape;
+                if (p[1] == val) {
+                    return false;
+                }
+                p[1] = val;
+                return true;
+            }
+        }, {
+            key: "$setLineWidth",
+            value: function $setLineWidth(val) {
+                var p = this.$Shape;
+                if (p[2] == val) {
+                    return false;
+                }
+                p[2] = val;
+                return true;
+            }
+        }, {
+            key: "$setLineColor",
+            value: function $setLineColor(val) {
+                var p = this.$Shape;
+                if (p[3] == val) {
+                    return false;
+                }
+                p[3] = val;
+                return true;
+            }
+        }, {
+            key: "$setLineAlpha",
+            value: function $setLineAlpha(val) {
+                val = +val || 0;
+                if (val < 0) {
+                    val = 0;
+                }
+                if (val > 1) {
+                    val = 1;
+                }
+                var p = this.$Shape;
+                if (p[4] == val) {
+                    return false;
+                }
+                p[4] = val;
+                return true;
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                this.$redraw();
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                _get(Object.getPrototypeOf(Shape.prototype), "dispose", this).call(this);
+                Platform.release("Shape", this.$nativeShow);
+            }
+        }, {
+            key: "fillColor",
+            get: function get() {
+                var p = this.$Shape;
+                return p[0];
+            },
+            set: function set(val) {
+                this.$setFillColor(val);
+            }
+        }, {
+            key: "fillAlpha",
+            get: function get() {
+                var p = this.$Shape;
+                return p[1];
+            },
+            set: function set(val) {
+                this.$setFillAlpha(val);
+            }
+        }, {
+            key: "lineWidth",
+            get: function get() {
+                var p = this.$Shape;
+                return p[2];
+            },
+            set: function set(val) {
+                this.$setLineWidth(val);
+            }
+        }, {
+            key: "lineColor",
+            get: function get() {
+                var p = this.$Shape;
+                return p[3];
+            },
+            set: function set(val) {
+                this.$setLineColor(val);
+            }
+        }, {
+            key: "lineAlpha",
+            get: function get() {
+                var p = this.$Shape;
+                return p[4];
+            },
+            set: function set(val) {
+                this.$setLineAlpha(val);
+            }
+        }]);
+
+        return Shape;
+    }(DisplayObject);
+
+    _exports.Shape = Shape;
+    //////////////////////////End File:flower/display/Shape.js///////////////////////////
+
     //////////////////////////File:flower/display/Stage.js///////////////////////////
 
     var Stage = function (_Sprite) {
@@ -3729,19 +4137,19 @@ var _exports = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this16.__nativeMouseMoveEvent = [];
-            _this16.__nativeTouchEvent = [];
-            _this16.__mouseOverList = [_this16];
-            _this16.__touchList = [];
-            _this16.__lastMouseX = -1;
-            _this16.__lastMouseY = -1;
-            _this16.__focus = null;
+            _this18.__nativeMouseMoveEvent = [];
+            _this18.__nativeTouchEvent = [];
+            _this18.__mouseOverList = [_this18];
+            _this18.__touchList = [];
+            _this18.__lastMouseX = -1;
+            _this18.__lastMouseY = -1;
+            _this18.__focus = null;
 
-            _this16.__stage = _this16;
-            Stage.stages.push(_this16);
-            return _this16;
+            _this18.__stage = _this18;
+            Stage.stages.push(_this18);
+            return _this18;
         }
 
         _createClass(Stage, [{
@@ -4274,26 +4682,26 @@ var _exports = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this17._createRes = false;
-            _this17._isLoading = false;
-            _this17._selfDispose = false;
+            _this19._createRes = false;
+            _this19._isLoading = false;
+            _this19._selfDispose = false;
 
             if (typeof res == "string") {
                 var resItem = Res.getRes(res);
                 if (resItem) {
                     res = resItem;
                 } else {
-                    _this17._createRes = true;
+                    _this19._createRes = true;
                     res = ResItem.create(res);
                 }
             }
-            _this17._res = res;
-            _this17._type = _this17._res.type;
-            _this17._language = LANGUAGE;
-            _this17._scale = SCALE ? SCALE : null;
-            return _this17;
+            _this19._res = res;
+            _this19._type = _this19._res.type;
+            _this19._language = LANGUAGE;
+            _this19._scale = SCALE ? SCALE : null;
+            return _this19;
         }
 
         _createClass(URLLoader, [{
@@ -4506,12 +4914,12 @@ var _exports = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this18.__list = list;
-            _this18.__dataList = [];
-            _this18.__index = 0;
-            return _this18;
+            _this20.__list = list;
+            _this20.__dataList = [];
+            _this20.__index = 0;
+            return _this20;
         }
 
         _createClass(URLLoaderList, [{

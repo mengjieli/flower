@@ -1,54 +1,85 @@
+LOAD Js FILE: main.js
+------------------------------------------------
+[loadTexture] res/blank.png
+创建纹理:res/blank.png
+[loadText] res/shaders/Bitmap.fsh
+[loadText] res/shaders/Bitmap.vsh
+[loadText] res/shaders/Source.fsh
+[loadText] res/actions/display/Dispose@cn.json
+[loadTexture] res/font@100x100@cn@2.png
+创建纹理:res/font@100x100@cn@2.png
+[loadTexture] res/qq.png
+创建纹理:res/qq.png
+[loadTexture] res/color.png
+创建纹理:res/color.png
+BitmapSize		100		100		
+546.4101615137755		546.4101615137755		
+BitmapSize		1032		908		
+546.4101615137755		546.4101615137755		
+__nativeObj
+getCharCount
+setSecureTextEntry
+getColorSpaceHolder
+initWithPlaceHolder
+setColorSpaceHolder
+detachWithIME
+setPlaceHolder
+isSecureTextEntry
+getPlaceHolder
+attachWithIME
+ctor
+_ctor
+isClipMarginEnabled
 enableShadow
 setDimensions
-getFontSize
 getString
-setFlippedY
-setFlippedX
-setTextDefinition
-setFontName
-getHorizontalAlignment
-initWithStringAndTextDefinition
-setString
-initWithString
-setFontFillColor
+getHeight
+disableEffect
+getTextColor
 getBlendFunc
-enableStroke
+setWidth
+getMaxLineWidth
+getHorizontalAlignment
+setClipMarginEnabled
+setString
+setSystemFontName
+setBMFontFilePath
+setLineHeight
+setSystemFontSize
+getLineSpacing
+updateContent
+getStringLength
+setLineBreakWithoutSpace
+getStringNumLines
+enableOutline
+getAdditionalKerning
+removeAllChildrenWithCleanup
+setCharMap
 getDimensions
+setMaxLineWidth
+getSystemFontName
 setVerticalAlignment
-setFontSize
+setLineSpacing
+getLineHeight
+getTTFConfig
 getVerticalAlignment
-getTextDefinition
+setTextColor
+setHeight
+getWidth
+enableGlow
+getLetter
+setAdditionalKerning
+getSystemFontSize
 setBlendFunc
-getFontName
+getTextAlignment
+getBMFontFilePath
 setHorizontalAlignment
-disableShadow
-disableStroke
-ctor
-_setBlendFunc
-_setDimensions
-_enableShadow
-setDrawMode
-_fontStyleRE
-_getFont
-_setFont
-_getBoundingWidth
-_getBoundingHeight
-_setBoundingWidth
-_setBoundingHeight
-_getFillStyle
-_getStrokeStyle
-_setStrokeStyle
-_getLineWidth
-_setLineWidth
-_getShadowOffsetX
-_setShadowOffsetX
-_getShadowOffsetY
-_setShadowOffsetY
-_getShadowOpacity
-_setShadowOpacity
-_getShadowBlur
-_setShadowBlur
-_ctor
+setAlignment
+requestSystemFontRefresh
+setTTFConfig
+enableStroke
+setBoundingWidth
+setBoundingHeight
 addChild
 removeComponent
 setPhysicsBody
