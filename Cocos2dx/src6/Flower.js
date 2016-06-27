@@ -2227,8 +2227,12 @@ class DisplayObject extends EventDispatcher {
      * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
      * 0x0004 bounds 在父类中的尺寸失效
      * 0x0100 重排子对象顺序
+     * 0x0400 shape需要重绘
      * 0x0800 文字内容改变
-     * 0x1000 shape需要重绘
+     * 0x2000 UI位置布局改变，位置可能需要重新计算，导致这个标识出现可能有以下几种情况:
+     *        1) 自身 left、right、top、bottom、horizontalCenter、verticalCenter 属性改变
+     *        2) 自身 x、y、width、height、scaleX、scaleY、rotation 属性改变
+     *        3) 父类的 width、height 失效
      */
     __flags = 0;
 
@@ -2323,6 +2327,10 @@ class DisplayObject extends EventDispatcher {
         this.$removeFlags(flags);
     }
 
+    $getX() {
+        return this.__x;
+    }
+
     $setX(val) {
         val = +val || 0;
         if (val == this.__x) {
@@ -2331,6 +2339,10 @@ class DisplayObject extends EventDispatcher {
         this.__x = val;
         this.$nativeShow.setX(val);
         this.$invalidatePosition();
+    }
+
+    $getY() {
+        return this.__y;
     }
 
     $setY(val) {
@@ -2384,7 +2396,7 @@ class DisplayObject extends EventDispatcher {
     $setRotation(val) {
         val = +val || 0;
         if (val < 0) {
-            val = 360 - (-val)%360;
+            val = 360 - (-val) % 360;
         } else {
             val = val % 360;
         }
@@ -2635,7 +2647,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get x() {
-        return this.__x;
+        return this.$getX();
     }
 
     set x(val) {
@@ -2643,7 +2655,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get y() {
-        return this.__y;
+        return this.$getY();
     }
 
     set y(val) {
@@ -2651,8 +2663,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleX() {
-        var p = this.$DisplayObject;
-        return p[0];
+        return this.$getScaleX();
     }
 
     set scaleX(val) {
@@ -2660,8 +2671,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleY() {
-        var p = this.$DisplayObject;
-        return p[1];
+        return this.$getScaleY();
     }
 
     set scaleY(val) {
@@ -2862,6 +2872,13 @@ class Sprite extends DisplayObject {
     $initContainer() {
         this.__children = [];
         this.$nativeShow = Platform.create("Sprite");
+    }
+
+    $addFlags(flags) {
+        if (flags == 0x0001) {
+            this.$addFlagsDown()
+        }
+        //this.__flags |= flags;
     }
 
     $addFlagsDown(flags) {
@@ -3639,7 +3656,7 @@ class Shape extends DisplayObject {
 
     $addFlags(flags) {
         if (flags == 0x0002) {
-            this.$addFlags(0x1000);
+            this.$addFlags(0x0400);
         }
         super.$addFlags(flags);
     }
@@ -3698,7 +3715,7 @@ class Shape extends DisplayObject {
     }
 
     $redraw() {
-        if (this.$hasFlags(0x1000)) {
+        if (this.$hasFlags(0x0400)) {
             var p = this.$Shape;
             var record = p[9];
             var fillColor = p[0];
@@ -3721,7 +3738,7 @@ class Shape extends DisplayObject {
             p[2] = lineWidth;
             p[3] = lineColor;
             p[4] = lineAlpha;
-            this.$removeFlags(0x1000);
+            this.$removeFlags(0x0400);
         }
     }
 

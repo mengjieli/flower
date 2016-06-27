@@ -39,7 +39,7 @@ class Shape extends DisplayObject {
 
     $addFlags(flags) {
         if (flags == 0x0002) {
-            this.$addFlags(0x1000);
+            this.$addFlags(0x0400);
         }
         super.$addFlags(flags);
     }
@@ -98,7 +98,7 @@ class Shape extends DisplayObject {
     }
 
     $redraw() {
-        if (this.$hasFlags(0x1000)) {
+        if (this.$hasFlags(0x0400)) {
             var p = this.$Shape;
             var record = p[9];
             var fillColor = p[0];
@@ -121,7 +121,7 @@ class Shape extends DisplayObject {
             p[2] = lineWidth;
             p[3] = lineColor;
             p[4] = lineAlpha;
-            this.$removeFlags(0x1000);
+            this.$removeFlags(0x0400);
         }
     }
 

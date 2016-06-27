@@ -12,6 +12,13 @@ class Sprite extends DisplayObject {
         this.$nativeShow = Platform.create("Sprite");
     }
 
+    $addFlags(flags) {
+        if (flags == 0x0001) {
+            this.$addFlagsDown()
+        }
+        //this.__flags |= flags;
+    }
+
     $addFlagsDown(flags) {
         if (this.$hasFlags(flags)) {
             return;

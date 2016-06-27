@@ -10,11 +10,30 @@ class DisplayObject extends EventDispatcher {
     /**
      * 脏标识
      * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+     *        1) 父容器 contentBounds 失效 (并且设置了 percentWidth 或 percentHeight 或 left&right 或
+     *        left&horizontalCenter 或 right& horizontalCenter或 top&bottom 或 top&verticalCenter 或 bottom&verticalCenter)
      * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
      * 0x0004 bounds 在父类中的尺寸失效
      * 0x0100 重排子对象顺序
+     * 0x0400 shape需要重绘
      * 0x0800 文字内容改变
-     * 0x1000 shape需要重绘
+     * 0x1000 x 属性失效，需要重新计算，导致这个值改变的原因可能是以下几种情况:
+     *        1) 自身 left、right、horizontalCenter 属性改变
+     *        2) 自身 x(并且设置了 left、right 或 horizontalCenter)、width(并且设置了 right 或 horizontalCenter)、scaleX(并且设置了 right 或 horizontalCenter)
+     *        3) 父类的 width(并设置了 left、right 或 horizontalCenter) 属性改变
+     * 0x1000 y 属性失效，需要重新计算，导致这个值改变的原因可能是以下几种情况:
+     *        1) 自身 top、bottom、verticalCenter 属性改变
+     *        2) 自身 x(并且设置了 top、bottom 或 verticalCenter)、height(并且设置了 top 或 verticalCenter)、scaleY(并且设置了 top 或 bottom 或 verticalCenter)
+     *        3) 父类的 width(并设置了 top、bottom 或 verticalCenter) 属性改变
+     * 0x2000 scaleX 属性失效
+     *        1) 自身 percentWidth 属性改变
+     *        2) contentBounds 失效 (并且设置了 width 或者 percentWidth 或 left&width 或 right&width 或 left&horizontalCenter 或 right&horizontalCenter)
+     *        3) 父类 width(并设置了 percentWidth 属性)
+     * 0x2000 scaleY 属性失效
+     *        1) 自身 percentHeight 属性改变
+     *        2) contentBounds 失效 (并且设置了 width 或者 percentWidth 或 top&height 或 bottom&height 或 top&verticalCenter 或 bottom&verticalCenter)
+     *        3) 父类 width(并设置了 percentWidth 属性)
+     *
      */
     __flags = 0;
 
@@ -109,6 +128,10 @@ class DisplayObject extends EventDispatcher {
         this.$removeFlags(flags);
     }
 
+    $getX() {
+        return this.__x;
+    }
+
     $setX(val) {
         val = +val || 0;
         if (val == this.__x) {
@@ -117,6 +140,10 @@ class DisplayObject extends EventDispatcher {
         this.__x = val;
         this.$nativeShow.setX(val);
         this.$invalidatePosition();
+    }
+
+    $getY() {
+        return this.__y;
     }
 
     $setY(val) {
@@ -170,7 +197,7 @@ class DisplayObject extends EventDispatcher {
     $setRotation(val) {
         val = +val || 0;
         if (val < 0) {
-            val = 360 - (-val)%360;
+            val = 360 - (-val) % 360;
         } else {
             val = val % 360;
         }
@@ -246,6 +273,7 @@ class DisplayObject extends EventDispatcher {
     $getBounds() {
         var rect = this.$DisplayObject[7];
         if (this.$hasFlags(0x0004)) {
+            this.$removeFlags(0x0004);
             var contentRect = this.$getContentBounds();
             var x = this.x;
             var y = this.y;
@@ -289,7 +317,6 @@ class DisplayObject extends EventDispatcher {
             rect.y = minY;
             rect.width = maxX - minX;
             rect.height = maxY - minY;
-            this.$removeFlags(0x0004);
         }
         return rect;
     }
@@ -297,9 +324,9 @@ class DisplayObject extends EventDispatcher {
     $getContentBounds() {
         var rect = this.$DisplayObject[6];
         if (this.$hasFlags(0x0001)) {
+            this.$removeFlags(0x0001);
             this.$measureContentBounds(rect);
             this.$measureChildrenBounds(rect);
-            this.$removeFlags(0x0001);
             if (rect.width == 0) {
                 this.$measureContentBounds(rect);
                 this.$measureChildrenBounds(rect);
@@ -421,7 +448,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get x() {
-        return this.__x;
+        return this.$getX();
     }
 
     set x(val) {
@@ -429,7 +456,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get y() {
-        return this.__y;
+        return this.$getY();
     }
 
     set y(val) {
@@ -437,8 +464,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleX() {
-        var p = this.$DisplayObject;
-        return p[0];
+        return this.$getScaleX();
     }
 
     set scaleX(val) {
@@ -446,8 +472,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get scaleY() {
-        var p = this.$DisplayObject;
-        return p[1];
+        return this.$getScaleY();
     }
 
     set scaleY(val) {
