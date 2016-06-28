@@ -300,43 +300,9 @@ class DisplayObject extends EventDispatcher {
         if (this.$hasFlags(0x0004)) {
             this.$removeFlags(0x0004);
             var contentRect = this.$getContentBounds();
-            var x = this.x;
-            var y = this.y;
-            var scaleX = this.scaleX;
-            var scaleY = this.scaleY;
-            var rotation = this.radian;
-            var list = [[contentRect.x, contentRect.y], [contentRect.x + contentRect.width, contentRect.y],
-                [contentRect.x, contentRect.y + contentRect.height], [contentRect.x + contentRect.width, contentRect.y + contentRect.height]];
+            rect.copyFrom(contentRect);
             var matrix = this.$getMatrix();
-            var minX;
-            var maxX;
-            var minY;
-            var maxY;
-            var point = Point.$TempPoint;
-            for (var i = 0; i < list.length; i++) {
-                point = matrix.transformPoint(list[i][0], list[i][1], point);
-                if (i == 0) {
-                    minX = maxX = point.x;
-                    minY = maxY = point.y;
-                } else {
-                    if (point.x < minX) {
-                        minX = point.x;
-                    }
-                    if (point.y < minY) {
-                        minY = point.y;
-                    }
-                    if (point.x > maxX) {
-                        maxX = point.x;
-                    }
-                    if (point.y > maxY) {
-                        maxY = point.y;
-                    }
-                }
-            }
-            rect.x = minX;
-            rect.y = minY;
-            rect.width = maxX - minX;
-            rect.height = maxY - minY;
+            matrix.$transformRectangle(rect);
         }
         return rect;
     }
