@@ -94,6 +94,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadTextureComplete(nativeTexture, width, height) {
+        nativeTexture = new PlatformTexture(this._loadInfo.url,nativeTexture);
         var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
         this._data = texture;
         texture.$addCount();
@@ -183,7 +184,7 @@ class URLLoader extends EventDispatcher {
             super.dispose();
             return;
         }
-        if (this._data && this._type == ResType.Image) {
+        if (this._data && this._type == ResType.IMAGE) {
             this._data.$delCount();
             this._data = null;
         }

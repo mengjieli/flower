@@ -40,10 +40,14 @@ class TextureManager {
     }
 
     $check() {
+        var texture;
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i].$count == 0) {
-                this.list.splice(i, 1)[0].dispose();
-                return;
+            texture = this.list[i];
+            if (texture.$count == 0) {
+                if (texture.dispose()) {
+                    this.list.splice(i, 1);
+                    i--;
+                }
             }
         }
     }

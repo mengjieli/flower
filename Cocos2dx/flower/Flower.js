@@ -23,6 +23,7 @@ function start(completeFunc, scale, language) {
     var loader = new URLLoader("res/blank.png");
     loader.addListener(Event.COMPLETE, function (e) {
         Texture.$blank = e.data;
+        Texture.$blank.$addCount();
         loader = new URLLoader("res/shaders/Bitmap.fsh");
         loader.addListener(Event.COMPLETE, function (e) {
             loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");

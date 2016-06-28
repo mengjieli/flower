@@ -21,7 +21,7 @@ class Bitmap extends DisplayObject {
         }
         this.__texture = val;
         if (val) {
-            this.__texture.$addCount();
+            this.__texture.$useTexture();
             this.$nativeShow.setWidth(this.__texture.width);
             this.$nativeShow.setHeight(this.__texture.height);
             this.$nativeShow.setTexture(this.__texture);
@@ -73,6 +73,7 @@ class Bitmap extends DisplayObject {
     }
 
     dispose() {
+        this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);
     }

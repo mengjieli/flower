@@ -3,11 +3,17 @@ class PlatformTexture {
     textrue;
     url;
 
-    constructor() {
-
+    constructor(url,texture) {
+        this.url = url;
+        this.textrue = texture;
     }
 
     dispose() {
-        cc.TextureCache.getInstance().removeTextureForKey(this.url);
+        if(Platform.native) {
+            cc.TextureCache.getInstance().removeTextureForKey(this.url);
+        } else {
+            this.textrue.releaseTexture();
+        }
+        this.textrue = null;
     }
 }

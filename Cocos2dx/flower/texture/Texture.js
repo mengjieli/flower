@@ -10,6 +10,7 @@ class Texture {
     __settingHeight;
     __url;
     __nativeURL;
+    __use = false;
     $nativeTexture;
     $count;
     $parentTexture;
@@ -38,6 +39,18 @@ class Texture {
         sub.__offX = offX;
         sub.__offY = offY;
         return sub;
+    }
+
+    $useTexture() {
+        if(this.$parentTexture) {
+            this.$parentTexture.$useTexture();
+        } else {
+            if (!this.$nativeTexture) {
+                $error(1006, this.__nativeURL);
+            }
+            this.__use = true;
+            this.$addCount();
+        }
     }
 
     $addCount() {
@@ -108,14 +121,15 @@ class Texture {
     }
 
     dispose() {
-        if (this.$count != 0) {
-            return;
+        if (this.$count != 0 || !this.__use) {
+            return false;
         }
         this.$nativeTexture.dispose();
         this.$nativeTexture = null;
         if (TIP) {
             $tip(1005, this.__nativeURL);
         }
+        return true;
     }
 
     /**

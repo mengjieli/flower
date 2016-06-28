@@ -26,6 +26,7 @@ function start(completeFunc, scale, language) {
     var loader = new URLLoader("res/blank.png");
     loader.addListener(Event.COMPLETE, function (e) {
         Texture.$blank = e.data;
+        Texture.$blank.$addCount();
         loader = new URLLoader("res/shaders/Bitmap.fsh");
         loader.addListener(Event.COMPLETE, function (e) {
             loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
@@ -781,7 +782,7 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setTexture(texture) {
         this.__texture = texture;
-        this.show.initWithTexture(texture.$nativeTexture);
+        this.show.initWithTexture(texture.$nativeTexture.textrue);
         var source = texture.source;
         if (source) {
             this.show.setTextureRect(source, texture.sourceRotation, {
@@ -999,12 +1000,18 @@ class PlatformTexture {
     textrue;
     url;
 
-    constructor() {
-
+    constructor(url,texture) {
+        this.url = url;
+        this.textrue = texture;
     }
 
     dispose() {
-        cc.TextureCache.getInstance().removeTextureForKey(this.url);
+        if(Platform.native) {
+            cc.TextureCache.getInstance().removeTextureForKey(this.url);
+        } else {
+            this.textrue.releaseTexture();
+        }
+        this.textrue = null;
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
@@ -1239,6 +1246,7 @@ locale_strings[1002] = "对象已释放。";
 locale_strings[1003] = "重复创建纹理:{0}";
 locale_strings[1004] = "创建纹理:{0}";
 locale_strings[1005] = "释放纹理:{0}";
+locale_strings[1006] = "纹理已释放:{0} ，关于纹理释放可访问 http://flower/docs/texture.html?dispose";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
 locale_strings[2003] = "[加载纹理失败] {0}";
@@ -3221,7 +3229,7 @@ class Bitmap extends DisplayObject {
         }
         this.__texture = val;
         if (val) {
-            this.__texture.$addCount();
+            this.__texture.$useTexture();
             this.$nativeShow.setWidth(this.__texture.width);
             this.$nativeShow.setHeight(this.__texture.height);
             this.$nativeShow.setTexture(this.__texture);
@@ -3273,6 +3281,7 @@ class Bitmap extends DisplayObject {
     }
 
     dispose() {
+        this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);
     }
@@ -4198,6 +4207,7 @@ class Texture {
     __settingHeight;
     __url;
     __nativeURL;
+    __use = false;
     $nativeTexture;
     $count;
     $parentTexture;
@@ -4226,6 +4236,18 @@ class Texture {
         sub.__offX = offX;
         sub.__offY = offY;
         return sub;
+    }
+
+    $useTexture() {
+        if(this.$parentTexture) {
+            this.$parentTexture.$useTexture();
+        } else {
+            if (!this.$nativeTexture) {
+                $error(1006, this.__nativeURL);
+            }
+            this.__use = true;
+            this.$addCount();
+        }
     }
 
     $addCount() {
@@ -4296,14 +4318,15 @@ class Texture {
     }
 
     dispose() {
-        if (this.$count != 0) {
-            return;
+        if (this.$count != 0 || !this.__use) {
+            return false;
         }
         this.$nativeTexture.dispose();
         this.$nativeTexture = null;
         if (TIP) {
             $tip(1005, this.__nativeURL);
         }
+        return true;
     }
 
     /**
@@ -4358,10 +4381,14 @@ class TextureManager {
     }
 
     $check() {
+        var texture;
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i].$count == 0) {
-                this.list.splice(i, 1)[0].dispose();
-                return;
+            texture = this.list[i];
+            if (texture.$count == 0) {
+                if (texture.dispose()) {
+                    this.list.splice(i, 1);
+                    i--;
+                }
             }
         }
     }
@@ -4477,6 +4504,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadTextureComplete(nativeTexture, width, height) {
+        nativeTexture = new PlatformTexture(this._loadInfo.url,nativeTexture);
         var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
         this._data = texture;
         texture.$addCount();
@@ -4566,7 +4594,7 @@ class URLLoader extends EventDispatcher {
             super.dispose();
             return;
         }
-        if (this._data && this._type == ResType.Image) {
+        if (this._data && this._type == ResType.IMAGE) {
             this._data.$delCount();
             this._data = null;
         }

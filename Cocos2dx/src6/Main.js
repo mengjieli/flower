@@ -52,6 +52,14 @@ class Main {
         container.addListener(flower.TouchEvent.TOUCH_RELEASE,function(e){
             container.dispose();
         },this);
+        container.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
+            container.dispose();
+
+            this.onLoadComplete({data:list});
+            //setTimeout(function(){
+            //    this.onLoadComplete({data:list});
+            //}.bind(this),1000);
+        }, this);
         //container.shape.drawRect(0, 0, 350, 500);
         //container.scaleX = container.scaleY = 0.5;
 

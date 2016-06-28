@@ -14,7 +14,7 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setTexture(texture) {
         this.__texture = texture;
-        this.show.initWithTexture(texture.$nativeTexture);
+        this.show.initWithTexture(texture.$nativeTexture.textrue);
         var source = texture.source;
         if (source) {
             this.show.setTextureRect(source, texture.sourceRotation, {
