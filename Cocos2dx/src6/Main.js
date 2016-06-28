@@ -39,6 +39,7 @@ class Main {
         //flower.trace(e.data[0].desc);
 
         var container = new flower.Sprite();
+        container.x = 50;
         container.width = 150;
         container.height = 200;
         flower.Stage.getInstance().addChild(container);

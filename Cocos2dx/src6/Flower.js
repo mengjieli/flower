@@ -2532,37 +2532,42 @@ class DisplayObject extends EventDispatcher {
             var rotation = this.radian;
             var list = [[contentRect.x, contentRect.y], [contentRect.x + contentRect.width, contentRect.y],
                 [contentRect.x, contentRect.y + contentRect.height], [contentRect.x + contentRect.width, contentRect.y + contentRect.height]];
-            var matrix = Matrix.create();
+            var matrix = this.$getMatrix();
             var minX;
             var maxX;
             var minY;
             var maxY;
+            var x;
+            var y;
+            var tmpPoint = Point.$TempPoint;
             for (var i = 0; i < list.length; i++) {
-                matrix.identity();
-                matrix.tx = list[i][0];
-                matrix.ty = list[i][1];
-                matrix.scale(scaleX, scaleY);
-                matrix.rotate(rotation);
-                matrix.translate(x, y);
+                x = list[i][0];
+                y = list[i][1];
+                tmpPoint = matrix.transformPoint(x, y, tmpPoint);
+                //matrix.identity();
+                //matrix.tx = list[i][0];
+                //matrix.ty = list[i][1];
+                //matrix.scale(scaleX, scaleY);
+                //matrix.rotate(rotation);
+                //matrix.translate(x, y);
                 if (i == 0) {
-                    minX = maxX = matrix.tx;
-                    minY = maxY = matrix.ty;
+                    minX = maxX = tmpPoint.x;
+                    minY = maxY = tmpPoint.y;
                 } else {
-                    if (matrix.tx < minX) {
-                        minX = matrix.tx;
+                    if (tmpPoint.x < minX) {
+                        minX = tmpPoint.x;
                     }
-                    if (matrix.ty < minY) {
-                        minY = matrix.ty;
+                    if (tmpPoint.y < minY) {
+                        minY = tmpPoint.y;
                     }
-                    if (matrix.tx > maxX) {
-                        maxX = matrix.tx;
+                    if (tmpPoint.x > maxX) {
+                        maxX = tmpPoint.x;
                     }
-                    if (matrix.ty > maxY) {
-                        maxY = matrix.ty;
+                    if (tmpPoint.y > maxY) {
+                        maxY = tmpPoint.y;
                     }
                 }
             }
-            Matrix.release(matrix);
             rect.x = minX;
             rect.y = minY;
             rect.width = maxX - minX;
@@ -2935,12 +2940,12 @@ class Sprite extends DisplayObject {
         this.$nativeShow = Platform.create("Sprite");
     }
 
-    $addFlags(flags) {
-        if (flags == 0x0001) {
-            this.$addFlagsDown()
-        }
-        //this.__flags |= flags;
-    }
+    //$addFlags(flags) {
+    //    if (flags == 0x0001) {
+    //        this.$addFlagsDown()
+    //    }
+    //    //this.__flags |= flags;
+    //}
 
     $addFlagsDown(flags) {
         if (this.$hasFlags(flags)) {
