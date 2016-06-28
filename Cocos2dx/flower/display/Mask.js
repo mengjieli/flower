@@ -47,7 +47,12 @@ class Mask extends Sprite {
     }
 
     $releaseContainer() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         Platform.release("Mask", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 

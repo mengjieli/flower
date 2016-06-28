@@ -62,9 +62,6 @@ var Main = function () {
             }, this);
             container.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
                 container.dispose();
-            }, this);
-            container.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
-                container.dispose();
 
                 this.onLoadComplete({ data: list });
                 //setTimeout(function(){

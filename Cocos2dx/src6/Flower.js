@@ -59,6 +59,16 @@ function $error(errorCode, ...args) {
     throw msg;
 }
 
+function $warn(errorCode, ...args) {
+    var msg;
+    if (errorCode instanceof String) {
+        msg = errorCode;
+    } else {
+        msg = getLanguage(errorCode, args);
+    }
+    console.log("[警告] " + msg);
+}
+
 function $tip(errorCode, ...args) {
     console.log(getLanguage(errorCode, args));
 }
@@ -1242,7 +1252,7 @@ var locale_strings = $locale_strings["zh_CN"];
 
 //core  1000-1999
 locale_strings[1001] = "对象已经回收。";
-locale_strings[1002] = "对象已释放。";
+locale_strings[1002] = "对象已释放，对象名称:{0}";
 locale_strings[1003] = "重复创建纹理:{0}";
 locale_strings[1004] = "创建纹理:{0}";
 locale_strings[1005] = "释放纹理:{0}";
@@ -2407,6 +2417,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.tx = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setX(val);
         this.$invalidateReverseMatrix();
     }
@@ -2422,6 +2436,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.ty = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setY(val);
         this.$invalidateReverseMatrix();
     }
@@ -2433,6 +2451,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[0] = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setScaleX(val);
         this.$invalidateMatrix();
     }
@@ -2452,6 +2474,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[1] = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setScaleY(val);
         this.$invalidateMatrix();
     }
@@ -2477,6 +2503,10 @@ class DisplayObject extends EventDispatcher {
         }
         p[2] = val;
         p[14] = val * Math.PI / 180;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setRotation(val);
         this.$invalidateMatrix();
     }
@@ -2679,6 +2709,10 @@ class DisplayObject extends EventDispatcher {
     }
 
     $changeAllFilters() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setFilters(this.$getAllFilters());
     }
 
@@ -2968,6 +3002,10 @@ class Sprite extends DisplayObject {
             if (child.parent) {
                 child.parent.$removeChild(child);
             }
+            if(!this.$nativeShow) {
+                $warn(1002,this.name);
+                return;
+            }
             this.$nativeShow.addChild(child.$nativeShow);
             children.splice(index, 0, child);
             child.$setParent(this, this.stage);
@@ -2983,6 +3021,10 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
+                if(!this.$nativeShow) {
+                    $warn(1002,this.name);
+                    return;
+                }
                 this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
                 this.$invalidateContentBounds();
@@ -2996,6 +3038,10 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
+                if(!this.$nativeShow) {
+                    $warn(1002,this.name);
+                    return;
+                }
                 this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
                 child.$setParent(null, null);
@@ -3113,6 +3159,10 @@ class Sprite extends DisplayObject {
          * 子对象序列改变
          */
         if (this.$hasFlags(0x0100)) {
+            if(!this.$nativeShow) {
+                $warn(1002,this.name);
+                return;
+            }
             this.$nativeShow.resetChildIndex(children);
             this.$removeFlags(0x0100);
         }
@@ -3127,7 +3177,12 @@ class Sprite extends DisplayObject {
     }
 
     $releaseContainer() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         Platform.release("Sprite", this.$nativeShow);
+        this.$nativeShow = null;
     }
 
     dispose() {
@@ -3196,7 +3251,12 @@ class Mask extends Sprite {
     }
 
     $releaseContainer() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         Platform.release("Mask", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 
@@ -3228,6 +3288,10 @@ class Bitmap extends DisplayObject {
             this.__texture.$delCount();
         }
         this.__texture = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         if (val) {
             this.__texture.$useTexture();
             this.$nativeShow.setWidth(this.__texture.width);
@@ -3250,7 +3314,6 @@ class Bitmap extends DisplayObject {
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
-        flower.trace("BitmapSize", rect.width, rect.height);
     }
 
     $setScale9Grid(val) {
@@ -3259,6 +3322,10 @@ class Bitmap extends DisplayObject {
             return false;
         }
         p[0] = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setScale9Grid(val);
         return true;
     }
@@ -3281,9 +3348,14 @@ class Bitmap extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 
@@ -3370,6 +3442,10 @@ class TextField extends DisplayObject {
     }
 
     $setFontColor(val) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         val = +val || 0;
         var p = this.$TextField;
         if (p[2] == val) {
@@ -3459,8 +3535,13 @@ class TextField extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         super.dispose();
         Platform.release("TextField", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 
@@ -3495,6 +3576,10 @@ class TextInput extends DisplayObject {
     }
 
     $onTextChange() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.text = this.$nativeShow.getNativeText();
     }
 
@@ -3533,6 +3618,10 @@ class TextInput extends DisplayObject {
     }
 
     $setFontColor(val) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         val = +val || 0;
         var p = this.$TextField;
         if (p[2] == val) {
@@ -3591,6 +3680,10 @@ class TextInput extends DisplayObject {
     }
 
     $onFocusIn(e) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         if (this.editEnabled) {
             var p = this.$TextField;
             this.$nativeShow.startInput();
@@ -3599,6 +3692,10 @@ class TextInput extends DisplayObject {
     }
 
     $onFocusOut() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         var p = this.$TextField;
         if (p[4]) {
             this.$nativeShow.stopInput();
@@ -3641,8 +3738,13 @@ class TextInput extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         super.dispose();
         Platform.release("TextInput", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 
@@ -3684,6 +3786,10 @@ class Shape extends DisplayObject {
     }
 
     clear() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.clear();
         var p = this.$Shape;
         p[5] = p[6] = p[7] = p[8] = null;
@@ -3699,6 +3805,10 @@ class Shape extends DisplayObject {
     }
 
     $drawPolygon(points) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         var p = this.$Shape;
         for (var i = 0; i < points.length; i++) {
             if (p[5] == null) {
@@ -3888,8 +3998,13 @@ class Shape extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         super.dispose();
         Platform.release("Shape", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 

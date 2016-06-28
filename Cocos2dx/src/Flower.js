@@ -75,9 +75,23 @@ var _exports = {};
         throw msg;
     }
 
+    function $warn(errorCode) {
+        var msg;
+        if (errorCode instanceof String) {
+            msg = errorCode;
+        } else {
+            for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+                args[_key2 - 1] = arguments[_key2];
+            }
+
+            msg = getLanguage(errorCode, args);
+        }
+        console.log("[警告] " + msg);
+    }
+
     function $tip(errorCode) {
-        for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-            args[_key2 - 1] = arguments[_key2];
+        for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+            args[_key3 - 1] = arguments[_key3];
         }
 
         console.log(getLanguage(errorCode, args));
@@ -1365,7 +1379,7 @@ var _exports = {};
 
     //core  1000-1999
     locale_strings[1001] = "对象已经回收。";
-    locale_strings[1002] = "对象已释放。";
+    locale_strings[1002] = "对象已释放，对象名称:{0}";
     locale_strings[1003] = "重复创建纹理:{0}";
     locale_strings[1004] = "创建纹理:{0}";
     locale_strings[1005] = "释放纹理:{0}";
@@ -2699,6 +2713,10 @@ var _exports = {};
                     return;
                 }
                 matrix.tx = val;
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.setX(val);
                 this.$invalidateReverseMatrix();
             }
@@ -2716,6 +2734,10 @@ var _exports = {};
                     return;
                 }
                 matrix.ty = val;
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.setY(val);
                 this.$invalidateReverseMatrix();
             }
@@ -2728,6 +2750,10 @@ var _exports = {};
                     return;
                 }
                 p[0] = val;
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.setScaleX(val);
                 this.$invalidateMatrix();
             }
@@ -2749,6 +2775,10 @@ var _exports = {};
                     return;
                 }
                 p[1] = val;
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.setScaleY(val);
                 this.$invalidateMatrix();
             }
@@ -2776,6 +2806,10 @@ var _exports = {};
                 }
                 p[2] = val;
                 p[14] = val * Math.PI / 180;
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.setRotation(val);
                 this.$invalidateMatrix();
             }
@@ -2997,6 +3031,10 @@ var _exports = {};
         }, {
             key: "$changeAllFilters",
             value: function $changeAllFilters() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.setFilters(this.$getAllFilters());
             }
         }, {
@@ -3325,6 +3363,10 @@ var _exports = {};
                     if (child.parent) {
                         child.parent.$removeChild(child);
                     }
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
                     this.$nativeShow.addChild(child.$nativeShow);
                     children.splice(index, 0, child);
                     child.$setParent(this, this.stage);
@@ -3341,6 +3383,10 @@ var _exports = {};
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
                     if (children[i] == child) {
+                        if (!this.$nativeShow) {
+                            $warn(1002, this.name);
+                            return;
+                        }
                         this.$nativeShow.removeChild(child.$nativeShow);
                         children.splice(i, 1);
                         this.$invalidateContentBounds();
@@ -3355,6 +3401,10 @@ var _exports = {};
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
                     if (children[i] == child) {
+                        if (!this.$nativeShow) {
+                            $warn(1002, this.name);
+                            return;
+                        }
                         this.$nativeShow.removeChild(child.$nativeShow);
                         children.splice(i, 1);
                         child.$setParent(null, null);
@@ -3479,6 +3529,10 @@ var _exports = {};
                  * 子对象序列改变
                  */
                 if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
                     this.$nativeShow.resetChildIndex(children);
                     this.$removeFlags(0x0100);
                 }
@@ -3490,7 +3544,12 @@ var _exports = {};
         }, {
             key: "$releaseContainer",
             value: function $releaseContainer() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 Platform.release("Sprite", this.$nativeShow);
+                this.$nativeShow = null;
             }
         }, {
             key: "dispose",
@@ -3566,7 +3625,12 @@ var _exports = {};
         }, {
             key: "$releaseContainer",
             value: function $releaseContainer() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 Platform.release("Mask", this.$nativeShow);
+                this.$nativeShow = null;
             }
         }, {
             key: "shape",
@@ -3609,6 +3673,10 @@ var _exports = {};
                     this.__texture.$delCount();
                 }
                 this.__texture = val;
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 if (val) {
                     this.__texture.$useTexture();
                     this.$nativeShow.setWidth(this.__texture.width);
@@ -3631,7 +3699,6 @@ var _exports = {};
                 } else {
                     rect.x = rect.y = rect.width = rect.height = 0;
                 }
-                flower.trace("BitmapSize", rect.width, rect.height);
             }
         }, {
             key: "$setScale9Grid",
@@ -3641,15 +3708,24 @@ var _exports = {};
                     return false;
                 }
                 p[0] = val;
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.setScale9Grid(val);
                 return true;
             }
         }, {
             key: "dispose",
             value: function dispose() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.texture = null;
                 _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
                 Platform.release("Bitmap", this.$nativeShow);
+                this.$nativeShow = null;
             }
         }, {
             key: "texture",
@@ -3766,6 +3842,10 @@ var _exports = {};
         }, {
             key: "$setFontColor",
             value: function $setFontColor(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 val = +val || 0;
                 var p = this.$TextField;
                 if (p[2] == val) {
@@ -3818,8 +3898,13 @@ var _exports = {};
         }, {
             key: "dispose",
             value: function dispose() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 _get(Object.getPrototypeOf(TextField.prototype), "dispose", this).call(this);
                 Platform.release("TextField", this.$nativeShow);
+                this.$nativeShow = null;
             }
         }, {
             key: "text",
@@ -3905,6 +3990,10 @@ var _exports = {};
         _createClass(TextInput, [{
             key: "$onTextChange",
             value: function $onTextChange() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.text = this.$nativeShow.getNativeText();
             }
         }, {
@@ -3946,6 +4035,10 @@ var _exports = {};
         }, {
             key: "$setFontColor",
             value: function $setFontColor(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 val = +val || 0;
                 var p = this.$TextField;
                 if (p[2] == val) {
@@ -4009,6 +4102,10 @@ var _exports = {};
         }, {
             key: "$onFocusIn",
             value: function $onFocusIn(e) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 if (this.editEnabled) {
                     var p = this.$TextField;
                     this.$nativeShow.startInput();
@@ -4018,6 +4115,10 @@ var _exports = {};
         }, {
             key: "$onFocusOut",
             value: function $onFocusOut() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 var p = this.$TextField;
                 if (p[4]) {
                     this.$nativeShow.stopInput();
@@ -4035,8 +4136,13 @@ var _exports = {};
         }, {
             key: "dispose",
             value: function dispose() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 _get(Object.getPrototypeOf(TextInput.prototype), "dispose", this).call(this);
                 Platform.release("TextInput", this.$nativeShow);
+                this.$nativeShow = null;
             }
         }, {
             key: "text",
@@ -4108,6 +4214,10 @@ var _exports = {};
         }, {
             key: "clear",
             value: function clear() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 this.$nativeShow.clear();
                 var p = this.$Shape;
                 p[5] = p[6] = p[7] = p[8] = null;
@@ -4125,6 +4235,10 @@ var _exports = {};
         }, {
             key: "$drawPolygon",
             value: function $drawPolygon(points) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 var p = this.$Shape;
                 for (var i = 0; i < points.length; i++) {
                     if (p[5] == null) {
@@ -4276,8 +4390,13 @@ var _exports = {};
         }, {
             key: "dispose",
             value: function dispose() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 _get(Object.getPrototypeOf(Shape.prototype), "dispose", this).call(this);
                 Platform.release("Shape", this.$nativeShow);
+                this.$nativeShow = null;
             }
         }, {
             key: "fillColor",
@@ -6440,8 +6559,8 @@ var _exports = {};
         }, {
             key: "call",
             value: function call(time, callBack) {
-                for (var _len3 = arguments.length, args = Array(_len3 > 3 ? _len3 - 3 : 0), _key3 = 3; _key3 < _len3; _key3++) {
-                    args[_key3 - 3] = arguments[_key3];
+                for (var _len4 = arguments.length, args = Array(_len4 > 3 ? _len4 - 3 : 0), _key4 = 3; _key4 < _len4; _key4++) {
+                    args[_key4 - 3] = arguments[_key4];
                 }
 
                 var thisObj = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
@@ -6604,8 +6723,8 @@ var _exports = {};
                 this._complete = callBack;
                 this._completeThis = thisObj;
 
-                for (var _len4 = arguments.length, args = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
-                    args[_key4 - 2] = arguments[_key4];
+                for (var _len5 = arguments.length, args = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
+                    args[_key5 - 2] = arguments[_key5];
                 }
 
                 this._completeParams = args;
@@ -6619,8 +6738,8 @@ var _exports = {};
                 this._update = callBack;
                 this._updateThis = thisObj;
 
-                for (var _len5 = arguments.length, args = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
-                    args[_key5 - 2] = arguments[_key5];
+                for (var _len6 = arguments.length, args = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
+                    args[_key6 - 2] = arguments[_key6];
                 }
 
                 this._updateParams = args;

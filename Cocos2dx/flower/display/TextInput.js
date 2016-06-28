@@ -23,6 +23,10 @@ class TextInput extends DisplayObject {
     }
 
     $onTextChange() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.text = this.$nativeShow.getNativeText();
     }
 
@@ -61,6 +65,10 @@ class TextInput extends DisplayObject {
     }
 
     $setFontColor(val) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         val = +val || 0;
         var p = this.$TextField;
         if (p[2] == val) {
@@ -119,6 +127,10 @@ class TextInput extends DisplayObject {
     }
 
     $onFocusIn(e) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         if (this.editEnabled) {
             var p = this.$TextField;
             this.$nativeShow.startInput();
@@ -127,6 +139,10 @@ class TextInput extends DisplayObject {
     }
 
     $onFocusOut() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         var p = this.$TextField;
         if (p[4]) {
             this.$nativeShow.stopInput();
@@ -169,8 +185,13 @@ class TextInput extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         super.dispose();
         Platform.release("TextInput", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 

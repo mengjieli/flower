@@ -75,6 +75,10 @@ class TextField extends DisplayObject {
     }
 
     $setFontColor(val) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         val = +val || 0;
         var p = this.$TextField;
         if (p[2] == val) {
@@ -164,8 +168,13 @@ class TextField extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         super.dispose();
         Platform.release("TextField", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 

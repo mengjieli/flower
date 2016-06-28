@@ -49,9 +49,6 @@ class Main {
         container.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
             flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
-        container.addListener(flower.TouchEvent.TOUCH_RELEASE,function(e){
-            container.dispose();
-        },this);
         container.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
             container.dispose();
 

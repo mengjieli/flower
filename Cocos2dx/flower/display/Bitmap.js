@@ -20,6 +20,10 @@ class Bitmap extends DisplayObject {
             this.__texture.$delCount();
         }
         this.__texture = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         if (val) {
             this.__texture.$useTexture();
             this.$nativeShow.setWidth(this.__texture.width);
@@ -42,7 +46,6 @@ class Bitmap extends DisplayObject {
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
-        flower.trace("BitmapSize", rect.width, rect.height);
     }
 
     $setScale9Grid(val) {
@@ -51,6 +54,10 @@ class Bitmap extends DisplayObject {
             return false;
         }
         p[0] = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setScale9Grid(val);
         return true;
     }
@@ -73,9 +80,14 @@ class Bitmap extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 

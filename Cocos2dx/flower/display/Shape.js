@@ -30,6 +30,10 @@ class Shape extends DisplayObject {
     }
 
     clear() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.clear();
         var p = this.$Shape;
         p[5] = p[6] = p[7] = p[8] = null;
@@ -45,6 +49,10 @@ class Shape extends DisplayObject {
     }
 
     $drawPolygon(points) {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         var p = this.$Shape;
         for (var i = 0; i < points.length; i++) {
             if (p[5] == null) {
@@ -234,8 +242,13 @@ class Shape extends DisplayObject {
     }
 
     dispose() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         super.dispose();
         Platform.release("Shape", this.$nativeShow);
+        this.$nativeShow = null;
     }
 }
 

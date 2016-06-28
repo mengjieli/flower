@@ -125,6 +125,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.tx = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setX(val);
         this.$invalidateReverseMatrix();
     }
@@ -140,6 +144,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.ty = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setY(val);
         this.$invalidateReverseMatrix();
     }
@@ -151,6 +159,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[0] = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setScaleX(val);
         this.$invalidateMatrix();
     }
@@ -170,6 +182,10 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[1] = val;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setScaleY(val);
         this.$invalidateMatrix();
     }
@@ -195,6 +211,10 @@ class DisplayObject extends EventDispatcher {
         }
         p[2] = val;
         p[14] = val * Math.PI / 180;
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setRotation(val);
         this.$invalidateMatrix();
     }
@@ -397,6 +417,10 @@ class DisplayObject extends EventDispatcher {
     }
 
     $changeAllFilters() {
+        if(!this.$nativeShow) {
+            $warn(1002,this.name);
+            return;
+        }
         this.$nativeShow.setFilters(this.$getAllFilters());
     }
 

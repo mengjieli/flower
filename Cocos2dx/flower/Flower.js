@@ -56,6 +56,16 @@ function $error(errorCode, ...args) {
     throw msg;
 }
 
+function $warn(errorCode, ...args) {
+    var msg;
+    if (errorCode instanceof String) {
+        msg = errorCode;
+    } else {
+        msg = getLanguage(errorCode, args);
+    }
+    console.log("[警告] " + msg);
+}
+
 function $tip(errorCode, ...args) {
     console.log(getLanguage(errorCode, args));
 }
