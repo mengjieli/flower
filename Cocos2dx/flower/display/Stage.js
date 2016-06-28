@@ -58,12 +58,8 @@ class Stage extends Sprite {
         //flower.trace("touchEvent",type,id,x,y);
     }
 
-    getMouseTarget(touchX, touchY, mutiply) {
-        var matrix = Matrix.$matrix;
-        matrix.identity();
-        matrix.tx = touchX;
-        matrix.ty = touchY;
-        var target = this.$getMouseTarget(matrix, mutiply) || this;
+    $getMouseTarget(touchX, touchY, mutiply) {
+        var target = super.$getMouseTarget(touchX, touchY, mutiply) || this;
         return target;
     }
 
@@ -83,7 +79,7 @@ class Stage extends Sprite {
         mouse.startY = y;
         mouse.mutiply = this.__touchList.length == 0 ? false : true;
         this.__touchList.push(mouse);
-        var target = this.getMouseTarget(x, y, mouse.mutiply);
+        var target = this.$getMouseTarget(x, y, mouse.mutiply);
         mouse.target = target;
         var parent = target.parent;
         while (parent && parent != this) {
@@ -108,7 +104,7 @@ class Stage extends Sprite {
     }
 
     $onMouseMove(x, y) {
-        var target = this.getMouseTarget(x, y, false);
+        var target = this.$getMouseTarget(x, y, false);
         var parent = target.parent;
         var list = [];
         if (target) {
@@ -187,8 +183,8 @@ class Stage extends Sprite {
         if (!mouse.target) {
             mouse.target = this;
         }
-        this.getMouseTarget(x, y, mouse.mutiply);
-        var target = mouse.target;//this.getMouseTarget(x, y, mouse.mutiply);
+        this.$getMouseTarget(x, y, mouse.mutiply);
+        var target = mouse.target;//this.$getMouseTarget(x, y, mouse.mutiply);
         mouse.moveX = x;
         mouse.moveY = y;
         var event;
@@ -221,7 +217,7 @@ class Stage extends Sprite {
         if (!mouse.target) {
             mouse.target = this;
         }
-        var target = this.getMouseTarget(x, y, mouse.mutiply);
+        var target = this.$getMouseTarget(x, y, mouse.mutiply);
         var event;
         if (target == mouse.target) {
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);

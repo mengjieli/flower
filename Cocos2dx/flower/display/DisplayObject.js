@@ -2,9 +2,6 @@ class DisplayObject extends EventDispatcher {
 
     static id = 0;
 
-    __x = 0;
-    __y = 0;
-
     $DisplayObject;
 
     /**
@@ -14,6 +11,8 @@ class DisplayObject extends EventDispatcher {
      *        left&horizontalCenter 或 right& horizontalCenter或 top&bottom 或 top&verticalCenter 或 bottom&verticalCenter)
      * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
      * 0x0004 bounds 在父类中的尺寸失效
+     * 0x0008 matrix
+     * 0x0010 reverseMatrix
      * 0x0100 重排子对象顺序
      * 0x0400 shape需要重绘
      * 0x0800 文字内容改变
@@ -71,6 +70,9 @@ class DisplayObject extends EventDispatcher {
             9: true, //multiplyTouchEnabled
             10: 0, //lastTouchX
             11: 0, //lastTouchY
+            12: new Matrix(), //matrix
+            13: new Matrix(), //reverseMatrix
+            14: 0, //radian
             50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
@@ -129,31 +131,33 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getX() {
-        return this.__x;
+        return this.$DisplayObject[12].tx;
     }
 
     $setX(val) {
         val = +val || 0;
-        if (val == this.__x) {
+        var matrix = this.$DisplayObject[12];
+        if (val == matrix.tx) {
             return;
         }
-        this.__x = val;
+        matrix.tx = val;
         this.$nativeShow.setX(val);
-        this.$invalidatePosition();
+        this.$invalidateReverseMatrix();
     }
 
     $getY() {
-        return this.__y;
+        return this.$DisplayObject[12].ty;
     }
 
     $setY(val) {
         val = +val || 0;
-        if (val == this.__y) {
+        var matrix = this.$DisplayObject[12];
+        if (val == matrix.ty) {
             return;
         }
-        this.__y = val;
+        matrix.ty = val;
         this.$nativeShow.setY(val);
-        this.$invalidatePosition();
+        this.$invalidateReverseMatrix();
     }
 
     $setScaleX(val) {
@@ -164,7 +168,7 @@ class DisplayObject extends EventDispatcher {
         }
         p[0] = val;
         this.$nativeShow.setScaleX(val);
-        this.$invalidatePosition();
+        this.$invalidateMatrix();
     }
 
     $getScaleX() {
@@ -183,7 +187,7 @@ class DisplayObject extends EventDispatcher {
         }
         p[1] = val;
         this.$nativeShow.setScaleY(val);
-        this.$invalidatePosition();
+        this.$invalidateMatrix();
     }
 
     $getScaleY() {
@@ -206,8 +210,29 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[2] = val;
+        p[14] = val * Math.PI / 180;
         this.$nativeShow.setRotation(val);
-        this.$invalidatePosition();
+        this.$invalidateMatrix();
+    }
+
+    $getMatrix() {
+        var p = this.$DisplayObject;
+        var matrix = p[12];
+        if (this.$hasFlags(0x0008)) {
+            this.$removeFlags(0x0008);
+            matrix.$updateSR(p[0], p[1], p[2]);
+        }
+        return matrix;
+    }
+
+    $getReverseMatrix() {
+        var p = this.$DisplayObject;
+        var matrix = p[13];
+        if (this.$hasFlags(0x0010)) {
+            this.$removeFlags(0x0010);
+            matrix.$updateRST(-p[14], 1 / p[0], 1 / p[1], -p[12].tx, -p[12].ty);
+        }
+        return matrix;
     }
 
     $setAlpha(val) {
@@ -489,7 +514,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     get radian() {
-        return this.rotation * Math.PI / 180;
+        return this.$DisplayObject[14];
     }
 
     get alpha() {
@@ -608,6 +633,22 @@ class DisplayObject extends EventDispatcher {
     }
 
     /**
+     * 矩阵失效
+     */
+    $invalidateMatrix() {
+        this.$addFlags(0x0008 | 0x0010);
+        this.$invalidatePosition();
+    }
+
+    /**
+     * 逆矩阵失效
+     */
+    $invalidateReverseMatrix() {
+        this.$addFlags(0x0010);
+        this.$invalidatePosition();
+    }
+
+    /**
      * 位置失效
      */
     $invalidatePosition() {
@@ -617,17 +658,12 @@ class DisplayObject extends EventDispatcher {
         }
     }
 
-    $getMouseTarget(matrix, multiply) {
+    $getMouseTarget(touchX, touchY, multiply) {
         if (this.touchEnabled == false || this._visible == false)
             return null;
-        matrix.save();
-        matrix.translate(-this.x, -this.y);
-        if (this.rotation)
-            matrix.rotate(-this.radian);
-        if (this.scaleX != 1 || this.scaleY != 1)
-            matrix.scale(1 / this.scaleX, 1 / this.scaleY);
-        var touchX = Math.floor(matrix.tx);
-        var touchY = Math.floor(matrix.ty);
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = Math.floor(point.x);
+        touchY = Math.floor(point.y);
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
@@ -635,7 +671,6 @@ class DisplayObject extends EventDispatcher {
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
             return this;
         }
-        matrix.restore();
         return null;
     }
 
