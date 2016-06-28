@@ -16,23 +16,7 @@ class DisplayObject extends EventDispatcher {
      * 0x0100 重排子对象顺序
      * 0x0400 shape需要重绘
      * 0x0800 文字内容改变
-     * 0x1000 x 属性失效，需要重新计算，导致这个值改变的原因可能是以下几种情况:
-     *        1) 自身 left、right、horizontalCenter 属性改变
-     *        2) 自身 x(并且设置了 left、right 或 horizontalCenter)、width(并且设置了 right 或 horizontalCenter)、scaleX(并且设置了 right 或 horizontalCenter)
-     *        3) 父类的 width(并设置了 left、right 或 horizontalCenter) 属性改变
-     * 0x1000 y 属性失效，需要重新计算，导致这个值改变的原因可能是以下几种情况:
-     *        1) 自身 top、bottom、verticalCenter 属性改变
-     *        2) 自身 x(并且设置了 top、bottom 或 verticalCenter)、height(并且设置了 top 或 verticalCenter)、scaleY(并且设置了 top 或 bottom 或 verticalCenter)
-     *        3) 父类的 width(并设置了 top、bottom 或 verticalCenter) 属性改变
-     * 0x2000 scaleX 属性失效
-     *        1) 自身 percentWidth 属性改变
-     *        2) contentBounds 失效 (并且设置了 width 或者 percentWidth 或 left&width 或 right&width 或 left&horizontalCenter 或 right&horizontalCenter)
-     *        3) 父类 width(并设置了 percentWidth 属性)
-     * 0x2000 scaleY 属性失效
-     *        1) 自身 percentHeight 属性改变
-     *        2) contentBounds 失效 (并且设置了 width 或者 percentWidth 或 top&height 或 bottom&height 或 top&verticalCenter 或 bottom&verticalCenter)
-     *        3) 父类 width(并设置了 percentWidth 属性)
-     *
+     * 0x1000 UI 属性失效
      */
     __flags = 0;
 
@@ -309,14 +293,9 @@ class DisplayObject extends EventDispatcher {
 
     $getContentBounds() {
         var rect = this.$DisplayObject[6];
-        if (this.$hasFlags(0x0001)) {
+        while (this.$hasFlags(0x0001)) {
             this.$removeFlags(0x0001);
             this.$measureContentBounds(rect);
-            this.$measureChildrenBounds(rect);
-            if (rect.width == 0) {
-                this.$measureContentBounds(rect);
-                this.$measureChildrenBounds(rect);
-            }
             this.$checkSettingSize(rect);
         }
         return rect;
@@ -567,14 +546,6 @@ class DisplayObject extends EventDispatcher {
      * @param size
      */
     $measureContentBounds(rect) {
-
-    }
-
-    /**
-     * 测量子对象的尺寸
-     * @param size
-     */
-    $measureChildrenBounds(rect) {
 
     }
 

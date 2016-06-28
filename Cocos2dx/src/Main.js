@@ -50,15 +50,18 @@ var Main = function () {
             //flower.trace(e.data[0].desc);
 
             var container = new flower.Sprite();
-            container.x = 50;
-            container.width = 150;
-            container.height = 200;
+            container.x = 100;
+            //container.width = 150;
+            //container.height = 200;
             flower.Stage.getInstance().addChild(container);
             container.addListener(flower.MouseEvent.MOUSE_OVER, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             container.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+            }, this);
+            container.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
+                container.dispose();
             }, this);
             //container.shape.drawRect(0, 0, 350, 500);
             //container.scaleX = container.scaleY = 0.5;
@@ -88,7 +91,6 @@ var Main = function () {
                     container.filters = [new flower.BlurFilter(blurX, blurY), new flower.ColorFilter(h, s, l), new flower.StrokeFilter(1, color)];
                 }
             }, 50);
-            //return;
 
             var bm = new flower.Bitmap();
             bm.x = bm.y = 100;
@@ -97,27 +99,27 @@ var Main = function () {
             bm.texture = e.data[1];
             bm.rotation = 30;
             bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
-                flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+                //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             bm.addListener(flower.TouchEvent.TOUCH_MOVE, function (e) {
-                flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+                //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             bm.addListener(flower.TouchEvent.TOUCH_END, function (e) {
-                flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+                //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             bm.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
-                flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+                //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             //bm.addListener(flower.MouseEvent.MOUSE_MOVE, function (e) {
             //                 flower.trace(e.currentTarget.name,e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             //}, this);
             bm.addListener(flower.MouseEvent.MOUSE_OVER, function (e) {
                 bm.scale9Grid = new flower.Rectangle(30, 25, 40, 50);
-                flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+                //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             bm.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
                 bm.scale9Grid = null;
-                flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
+                //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             container.addChild(bm);
 

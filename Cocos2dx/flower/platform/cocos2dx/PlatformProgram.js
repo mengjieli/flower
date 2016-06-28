@@ -27,10 +27,11 @@ class PlatformProgram {
         } else {
             this.$nativeProgrammer = shader;
         }
+        console.log("new programmer");
     }
 
     use() {
-        if(!Platform.native) {
+        if (!Platform.native) {
             this.$nativeProgrammer.use();
         }
     }

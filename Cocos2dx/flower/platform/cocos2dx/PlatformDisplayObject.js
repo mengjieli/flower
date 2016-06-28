@@ -99,12 +99,14 @@ class PlatformDisplayObject {
                     programmer.setUniformFloat("height", this.__height);
                 } else {
                     this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                    programmer.use();
                     programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
                     programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                 }
             }
         } else {
             if (this.__programmer) {
+                PlatformProgram.release(this.__programmer);
                 this.__programmer = null;
                 if (Platform.native) {
                     this.show.setGLProgramState(PlatformProgram.getInstance().$nativeProgrammer);

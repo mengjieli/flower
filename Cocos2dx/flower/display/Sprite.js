@@ -84,7 +84,7 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
-                this.$nativeShow.removeChild(child);
+                this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
                 child.$setParent(null, null);
                 child.$dispatchRemovedFromStageEvent();
@@ -136,7 +136,7 @@ class Sprite extends DisplayObject {
      * 测量子对象的区域
      * @param rect
      */
-    $measureChildrenBounds(rect) {
+    $measureContentBounds(rect) {
         var minX = 0;
         var minY = 0;
         var maxX = 0;
@@ -165,7 +165,7 @@ class Sprite extends DisplayObject {
             }
         }
         rect.x = minX;
-        rect.y = minX;
+        rect.y = minY;
         rect.width = maxX - minX;
         rect.height = maxY - minY;
     }
