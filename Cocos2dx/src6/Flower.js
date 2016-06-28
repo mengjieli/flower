@@ -2445,7 +2445,7 @@ class DisplayObject extends EventDispatcher {
         var matrix = p[12];
         if (this.$hasFlags(0x0008)) {
             this.$removeFlags(0x0008);
-            matrix.$updateSR(p[0], p[1], p[2]);
+            matrix.$updateSR(p[0], p[1], p[14]);
         }
         return matrix;
     }
@@ -2537,34 +2537,24 @@ class DisplayObject extends EventDispatcher {
             var maxX;
             var minY;
             var maxY;
-            var x;
-            var y;
-            var tmpPoint = Point.$TempPoint;
+            var point = Point.$TempPoint;
             for (var i = 0; i < list.length; i++) {
-                x = list[i][0];
-                y = list[i][1];
-                tmpPoint = matrix.transformPoint(x, y, tmpPoint);
-                //matrix.identity();
-                //matrix.tx = list[i][0];
-                //matrix.ty = list[i][1];
-                //matrix.scale(scaleX, scaleY);
-                //matrix.rotate(rotation);
-                //matrix.translate(x, y);
+                point = matrix.transformPoint(list[i][0], list[i][1], point);
                 if (i == 0) {
-                    minX = maxX = tmpPoint.x;
-                    minY = maxY = tmpPoint.y;
+                    minX = maxX = point.x;
+                    minY = maxY = point.y;
                 } else {
-                    if (tmpPoint.x < minX) {
-                        minX = tmpPoint.x;
+                    if (point.x < minX) {
+                        minX = point.x;
                     }
-                    if (tmpPoint.y < minY) {
-                        minY = tmpPoint.y;
+                    if (point.y < minY) {
+                        minY = point.y;
                     }
-                    if (tmpPoint.x > maxX) {
-                        maxX = tmpPoint.x;
+                    if (point.x > maxX) {
+                        maxX = point.x;
                     }
-                    if (tmpPoint.y > maxY) {
-                        maxY = tmpPoint.y;
+                    if (point.y > maxY) {
+                        maxY = point.y;
                     }
                 }
             }

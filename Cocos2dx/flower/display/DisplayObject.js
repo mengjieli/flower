@@ -220,7 +220,7 @@ class DisplayObject extends EventDispatcher {
         var matrix = p[12];
         if (this.$hasFlags(0x0008)) {
             this.$removeFlags(0x0008);
-            matrix.$updateSR(p[0], p[1], p[2]);
+            matrix.$updateSR(p[0], p[1], p[14]);
         }
         return matrix;
     }
@@ -307,37 +307,32 @@ class DisplayObject extends EventDispatcher {
             var rotation = this.radian;
             var list = [[contentRect.x, contentRect.y], [contentRect.x + contentRect.width, contentRect.y],
                 [contentRect.x, contentRect.y + contentRect.height], [contentRect.x + contentRect.width, contentRect.y + contentRect.height]];
-            var matrix = Matrix.create();
+            var matrix = this.$getMatrix();
             var minX;
             var maxX;
             var minY;
             var maxY;
+            var point = Point.$TempPoint;
             for (var i = 0; i < list.length; i++) {
-                matrix.identity();
-                matrix.tx = list[i][0];
-                matrix.ty = list[i][1];
-                matrix.scale(scaleX, scaleY);
-                matrix.rotate(rotation);
-                matrix.translate(x, y);
+                point = matrix.transformPoint(list[i][0], list[i][1], point);
                 if (i == 0) {
-                    minX = maxX = matrix.tx;
-                    minY = maxY = matrix.ty;
+                    minX = maxX = point.x;
+                    minY = maxY = point.y;
                 } else {
-                    if (matrix.tx < minX) {
-                        minX = matrix.tx;
+                    if (point.x < minX) {
+                        minX = point.x;
                     }
-                    if (matrix.ty < minY) {
-                        minY = matrix.ty;
+                    if (point.y < minY) {
+                        minY = point.y;
                     }
-                    if (matrix.tx > maxX) {
-                        maxX = matrix.tx;
+                    if (point.x > maxX) {
+                        maxX = point.x;
                     }
-                    if (matrix.ty > maxY) {
-                        maxY = matrix.ty;
+                    if (point.y > maxY) {
+                        maxY = point.y;
                     }
                 }
             }
-            Matrix.release(matrix);
             rect.x = minX;
             rect.y = minY;
             rect.width = maxX - minX;
