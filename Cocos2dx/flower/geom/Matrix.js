@@ -48,15 +48,42 @@ class Matrix {
         this.ty *= scaleY;
     }
 
-    $updateScaleRation(scaleX, scaleY, angle) {
+    transformPoint(pointX, pointY, resultPoint) {
+        var x = this.a * pointX + this.c * pointY + this.tx;
+        var y = this.b * pointX + this.d * pointY + this.ty;
+        if (resultPoint) {
+            resultPoint.setTo(x, y);
+            return resultPoint;
+        }
+        return new Point(x, y);
+    }
+
+    $updateSR(scaleX, scaleY, rotation) {
         var sin = 0;
         var cos = 1;
-        if (angle) {
-            sin = Math.sin(angle);
-            cos = Math.cos(angle);
+        if (rotation) {
+            sin = Math.sin(rotation);
+            cos = Math.cos(rotation);
+        }
+        this.a = cos * scaleX;
+        this.b = sin * scaleY;
+        this.c = -sin * scaleX;
+        this.d = cos * scaleY;
+    }
+
+    $updateRST(rotation, scaleX, scaleY, tx, ty) {
+        var sin = 0;
+        var cos = 1;
+        if (rotation) {
+            sin = Math.sin(rotation);
+            cos = Math.cos(rotation);
         }
         this.a = cos * scaleX;
         this.b = sin * scaleX;
+        this.c = -sin * scaleY;
+        this.d = cos * scaleY;
+        this.tx = cos * scaleX * tx - sin * scaleY * ty;
+        this.ty = sin * scaleX * tx + cos * scaleY * ty;
     }
 
     get deformation() {

@@ -2098,16 +2098,45 @@ var _exports = {};
                 this.ty *= scaleY;
             }
         }, {
-            key: "$updateScaleRation",
-            value: function $updateScaleRation(scaleX, scaleY, angle) {
+            key: "transformPoint",
+            value: function transformPoint(pointX, pointY, resultPoint) {
+                var x = this.a * pointX + this.c * pointY + this.tx;
+                var y = this.b * pointX + this.d * pointY + this.ty;
+                if (resultPoint) {
+                    resultPoint.setTo(x, y);
+                    return resultPoint;
+                }
+                return new Point(x, y);
+            }
+        }, {
+            key: "$updateSR",
+            value: function $updateSR(scaleX, scaleY, rotation) {
                 var sin = 0;
                 var cos = 1;
-                if (angle) {
-                    sin = Math.sin(angle);
-                    cos = Math.cos(angle);
+                if (rotation) {
+                    sin = Math.sin(rotation);
+                    cos = Math.cos(rotation);
+                }
+                this.a = cos * scaleX;
+                this.b = sin * scaleY;
+                this.c = -sin * scaleX;
+                this.d = cos * scaleY;
+            }
+        }, {
+            key: "$updateRST",
+            value: function $updateRST(rotation, scaleX, scaleY, tx, ty) {
+                var sin = 0;
+                var cos = 1;
+                if (rotation) {
+                    sin = Math.sin(rotation);
+                    cos = Math.cos(rotation);
                 }
                 this.a = cos * scaleX;
                 this.b = sin * scaleX;
+                this.c = -sin * scaleY;
+                this.d = cos * scaleY;
+                this.tx = cos * scaleX * tx - sin * scaleY * ty;
+                this.ty = sin * scaleX * tx + cos * scaleY * ty;
             }
         }, {
             key: "save",
@@ -2482,8 +2511,6 @@ var _exports = {};
 
             var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this13.__x = 0;
-            _this13.__y = 0;
             _this13.__flags = 0;
             _this13.__alpha = 1;
             _this13.__parentAlpha = 1;
@@ -2502,6 +2529,9 @@ var _exports = {};
                 9: true, //multiplyTouchEnabled
                 10: 0, //lastTouchX
                 11: 0, //lastTouchY
+                12: new Matrix(), //matrix
+                13: new Matrix(), //reverseMatrix
+                14: 0, //radian
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
@@ -2532,6 +2562,8 @@ var _exports = {};
          *        left&horizontalCenter 或 right& horizontalCenter或 top&bottom 或 top&verticalCenter 或 bottom&verticalCenter)
          * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
          * 0x0004 bounds 在父类中的尺寸失效
+         * 0x0008 matrix
+         * 0x0010 reverseMatrix
          * 0x0100 重排子对象顺序
          * 0x0400 shape需要重绘
          * 0x0800 文字内容改变
@@ -2612,34 +2644,36 @@ var _exports = {};
         }, {
             key: "$getX",
             value: function $getX() {
-                return this.__x;
+                return this.$DisplayObject[12].tx;
             }
         }, {
             key: "$setX",
             value: function $setX(val) {
                 val = +val || 0;
-                if (val == this.__x) {
+                var matrix = this.$DisplayObject[12];
+                if (val == matrix.tx) {
                     return;
                 }
-                this.__x = val;
+                matrix.tx = val;
                 this.$nativeShow.setX(val);
-                this.$invalidatePosition();
+                this.$invalidateReverseMatrix();
             }
         }, {
             key: "$getY",
             value: function $getY() {
-                return this.__y;
+                return this.$DisplayObject[12].ty;
             }
         }, {
             key: "$setY",
             value: function $setY(val) {
                 val = +val || 0;
-                if (val == this.__y) {
+                var matrix = this.$DisplayObject[12];
+                if (val == matrix.ty) {
                     return;
                 }
-                this.__y = val;
+                matrix.ty = val;
                 this.$nativeShow.setY(val);
-                this.$invalidatePosition();
+                this.$invalidateReverseMatrix();
             }
         }, {
             key: "$setScaleX",
@@ -2651,7 +2685,7 @@ var _exports = {};
                 }
                 p[0] = val;
                 this.$nativeShow.setScaleX(val);
-                this.$invalidatePosition();
+                this.$invalidateMatrix();
             }
         }, {
             key: "$getScaleX",
@@ -2672,7 +2706,7 @@ var _exports = {};
                 }
                 p[1] = val;
                 this.$nativeShow.setScaleY(val);
-                this.$invalidatePosition();
+                this.$invalidateMatrix();
             }
         }, {
             key: "$getScaleY",
@@ -2697,8 +2731,31 @@ var _exports = {};
                     return;
                 }
                 p[2] = val;
+                p[14] = val * Math.PI / 180;
                 this.$nativeShow.setRotation(val);
-                this.$invalidatePosition();
+                this.$invalidateMatrix();
+            }
+        }, {
+            key: "$getMatrix",
+            value: function $getMatrix() {
+                var p = this.$DisplayObject;
+                var matrix = p[12];
+                if (this.$hasFlags(0x0008)) {
+                    this.$removeFlags(0x0008);
+                    matrix.$updateSR(p[0], p[1], p[2]);
+                }
+                return matrix;
+            }
+        }, {
+            key: "$getReverseMatrix",
+            value: function $getReverseMatrix() {
+                var p = this.$DisplayObject;
+                var matrix = p[13];
+                if (this.$hasFlags(0x0010)) {
+                    this.$removeFlags(0x0010);
+                    matrix.$updateRST(-p[14], 1 / p[0], 1 / p[1], -p[12].tx, -p[12].ty);
+                }
+                return matrix;
             }
         }, {
             key: "$setAlpha",
@@ -2995,6 +3052,28 @@ var _exports = {};
             }
 
             /**
+             * 矩阵失效
+             */
+
+        }, {
+            key: "$invalidateMatrix",
+            value: function $invalidateMatrix() {
+                this.$addFlags(0x0008 | 0x0010);
+                this.$invalidatePosition();
+            }
+
+            /**
+             * 逆矩阵失效
+             */
+
+        }, {
+            key: "$invalidateReverseMatrix",
+            value: function $invalidateReverseMatrix() {
+                this.$addFlags(0x0010);
+                this.$invalidatePosition();
+            }
+
+            /**
              * 位置失效
              */
 
@@ -3008,14 +3087,11 @@ var _exports = {};
             }
         }, {
             key: "$getMouseTarget",
-            value: function $getMouseTarget(matrix, multiply) {
+            value: function $getMouseTarget(touchX, touchY, multiply) {
                 if (this.touchEnabled == false || this._visible == false) return null;
-                matrix.save();
-                matrix.translate(-this.x, -this.y);
-                if (this.rotation) matrix.rotate(-this.radian);
-                if (this.scaleX != 1 || this.scaleY != 1) matrix.scale(1 / this.scaleX, 1 / this.scaleY);
-                var touchX = Math.floor(matrix.tx);
-                var touchY = Math.floor(matrix.ty);
+                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+                touchX = Math.floor(point.x);
+                touchY = Math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -3023,7 +3099,6 @@ var _exports = {};
                 if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
                     return this;
                 }
-                matrix.restore();
                 return null;
             }
         }, {
@@ -3089,7 +3164,7 @@ var _exports = {};
         }, {
             key: "radian",
             get: function get() {
-                return this.rotation * Math.PI / 180;
+                return this.$DisplayObject[14];
             }
         }, {
             key: "alpha",
@@ -3382,17 +3457,12 @@ var _exports = {};
             }
         }, {
             key: "$getMouseTarget",
-            value: function $getMouseTarget(matrix, multiply) {
+            value: function $getMouseTarget(touchX, touchY, multiply) {
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
-                matrix.save();
-                matrix.translate(-this.x, -this.y);
-                if (this.rotation) matrix.rotate(-this.radian);
-                if (this.scaleX != 1 || this.scaleY != 1) {
-                    matrix.scale(1 / this.scaleX, 1 / this.scaleY);
-                }
-                var touchX = Math.floor(matrix.tx);
-                var touchY = Math.floor(matrix.ty);
+                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+                touchX = Math.floor(point.x);
+                touchY = Math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -3401,13 +3471,12 @@ var _exports = {};
                 var len = childs.length;
                 for (var i = len - 1; i >= 0; i--) {
                     if (childs[i].touchEnabled && (multiply == false || multiply == true && childs[i].multiplyTouchEnabled == true)) {
-                        target = childs[i].$getMouseTarget(matrix, multiply);
+                        target = childs[i].$getMouseTarget(touchX, touchY, multiply);
                         if (target) {
                             break;
                         }
                     }
                 }
-                matrix.restore();
                 return target;
             }
         }, {
@@ -3476,17 +3545,12 @@ var _exports = {};
             }
         }, {
             key: "$getMouseTarget",
-            value: function $getMouseTarget(matrix, multiply) {
+            value: function $getMouseTarget(touchX, touchY, multiply) {
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
-                matrix.save();
-                matrix.translate(-this.x, -this.y);
-                if (this.rotation) matrix.rotate(-this.radian);
-                if (this.scaleX != 1 || this.scaleY != 1) {
-                    matrix.scale(1 / this.scaleX, 1 / this.scaleY);
-                }
-                var touchX = Math.floor(matrix.tx);
-                var touchY = Math.floor(matrix.ty);
+                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+                touchX = Math.floor(point.x);
+                touchY = Math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -3497,13 +3561,12 @@ var _exports = {};
                     var len = childs.length;
                     for (var i = len - 1; i >= 0; i--) {
                         if (childs[i].touchEnabled && (multiply == false || multiply == true && childs[i].multiplyTouchEnabled == true)) {
-                            target = childs[i].$getMouseTarget(matrix, multiply);
+                            target = childs[i].$getMouseTarget(touchX, touchY, multiply);
                             if (target) {
                                 break;
                             }
                         }
                     }
-                    matrix.restore();
                     return target;
                 }
                 return null;
@@ -4339,13 +4402,9 @@ var _exports = {};
                 //flower.trace("touchEvent",type,id,x,y);
             }
         }, {
-            key: "getMouseTarget",
-            value: function getMouseTarget(touchX, touchY, mutiply) {
-                var matrix = Matrix.$matrix;
-                matrix.identity();
-                matrix.tx = touchX;
-                matrix.ty = touchY;
-                var target = this.$getMouseTarget(matrix, mutiply) || this;
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(touchX, touchY, mutiply) {
+                var target = _get(Object.getPrototypeOf(Stage.prototype), "$getMouseTarget", this).call(this, touchX, touchY, mutiply) || this;
                 return target;
             }
         }, {
@@ -4366,7 +4425,7 @@ var _exports = {};
                 mouse.startY = y;
                 mouse.mutiply = this.__touchList.length == 0 ? false : true;
                 this.__touchList.push(mouse);
-                var target = this.getMouseTarget(x, y, mouse.mutiply);
+                var target = this.$getMouseTarget(x, y, mouse.mutiply);
                 mouse.target = target;
                 var parent = target.parent;
                 while (parent && parent != this) {
@@ -4392,7 +4451,7 @@ var _exports = {};
         }, {
             key: "$onMouseMove",
             value: function $onMouseMove(x, y) {
-                var target = this.getMouseTarget(x, y, false);
+                var target = this.$getMouseTarget(x, y, false);
                 var parent = target.parent;
                 var list = [];
                 if (target) {
@@ -4472,8 +4531,8 @@ var _exports = {};
                 if (!mouse.target) {
                     mouse.target = this;
                 }
-                this.getMouseTarget(x, y, mouse.mutiply);
-                var target = mouse.target; //this.getMouseTarget(x, y, mouse.mutiply);
+                this.$getMouseTarget(x, y, mouse.mutiply);
+                var target = mouse.target; //this.$getMouseTarget(x, y, mouse.mutiply);
                 mouse.moveX = x;
                 mouse.moveY = y;
                 var event;
@@ -4507,7 +4566,7 @@ var _exports = {};
                 if (!mouse.target) {
                     mouse.target = this;
                 }
-                var target = this.getMouseTarget(x, y, mouse.mutiply);
+                var target = this.$getMouseTarget(x, y, mouse.mutiply);
                 var event;
                 if (target == mouse.target) {
                     event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);

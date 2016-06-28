@@ -49,9 +49,9 @@ var Main = function () {
             //flower.trace("纹理列表", list);
             //flower.trace(e.data[0].desc);
 
-            var container = new flower.Mask();
-            //container.width = 150;
-            //container.height = 200;
+            var container = new flower.Sprite();
+            container.width = 150;
+            container.height = 200;
             flower.Stage.getInstance().addChild(container);
             container.addListener(flower.MouseEvent.MOUSE_OVER, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
@@ -59,7 +59,7 @@ var Main = function () {
             container.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
-            container.shape.drawRect(0, 0, 350, 500);
+            //container.shape.drawRect(0, 0, 350, 500);
             //container.scaleX = container.scaleY = 0.5;
 
             var h = 0;
