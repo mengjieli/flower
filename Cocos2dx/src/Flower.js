@@ -2085,49 +2085,29 @@ var _exports = {};
         }, {
             key: "rotate",
             value: function rotate(angle) {
-                flower.Matrix.sin = Math.sin(angle);
-                flower.Matrix.cos = Math.cos(angle);
-                this.setTo(this.a * flower.Matrix.cos - this.c * flower.Matrix.sin, this.a * flower.Matrix.sin + this.c * flower.Matrix.cos, this.b * flower.Matrix.cos - this.d * flower.Matrix.sin, this.b * flower.Matrix.sin + this.d * flower.Matrix.cos, this.tx * flower.Matrix.cos - this.ty * flower.Matrix.sin, this.tx * flower.Matrix.sin + this.ty * flower.Matrix.cos);
+                var sin = Math.sin(angle);
+                var cos = Math.cos(angle);
+                this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos, this.b * cos - this.d * sin, this.b * sin + this.d * cos, this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
             }
         }, {
             key: "scale",
             value: function scale(scaleX, scaleY) {
-                this.a = scaleX;
-                this.d = scaleY;
-                this.tx *= this.a;
-                this.ty *= this.d;
+                this.a *= scaleX;
+                this.d *= scaleY;
+                this.tx *= scaleX;
+                this.ty *= scaleY;
             }
         }, {
-            key: "prependMatrix",
-            value: function prependMatrix(prep) {
-                this.setTo(this.a * prep.a + this.c * prep.b, this.b * prep.a + this.d * prep.b, this.a * prep.c + this.c * prep.d, this.b * prep.c + this.d * prep.d, this.tx + this.a * prep.tx + this.c * prep.ty, this.ty + this.b * prep.tx + this.d * prep.ty);
-            }
-        }, {
-            key: "prependTranslation",
-            value: function prependTranslation(tx, ty) {
-                this.tx += this.a * tx + this.c * ty;
-                this.ty += this.b * tx + this.d * ty;
-            }
-        }, {
-            key: "prependScale",
-            value: function prependScale(sx, sy) {
-                this.setTo(this.a * sx, this.b * sx, this.c * sy, this.d * sy, this.tx, this.ty);
-            }
-        }, {
-            key: "prependRotation",
-            value: function prependRotation(angle) {
-                var sin = Math.sin(angle);
-                var cos = Math.cos(angle);
-                this.setTo(this.a * cos + this.c * sin, this.b * cos + this.d * sin, this.c * cos - this.a * sin, this.d * cos - this.b * sin, this.tx, this.ty);
-            }
-        }, {
-            key: "prependSkew",
-            value: function prependSkew(skewX, skewY) {
-                var sinX = Math.sin(skewX);
-                var cosX = Math.cos(skewX);
-                var sinY = Math.sin(skewY);
-                var cosY = Math.cos(skewY);
-                this.setTo(this.a * cosY + this.c * sinY, this.b * cosY + this.d * sinY, this.c * cosX - this.a * sinX, this.d * cosX - this.b * sinX, this.tx, this.ty);
+            key: "$updateScaleRation",
+            value: function $updateScaleRation(scaleX, scaleY, angle) {
+                var sin = 0;
+                var cos = 1;
+                if (angle) {
+                    sin = Math.sin(angle);
+                    cos = Math.cos(angle);
+                }
+                this.a = cos * scaleX;
+                this.b = sin * scaleX;
             }
         }, {
             key: "save",
@@ -2548,15 +2528,30 @@ var _exports = {};
         /**
          * 脏标识
          * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+         *        1) 父容器 contentBounds 失效 (并且设置了 percentWidth 或 percentHeight 或 left&right 或
+         *        left&horizontalCenter 或 right& horizontalCenter或 top&bottom 或 top&verticalCenter 或 bottom&verticalCenter)
          * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
          * 0x0004 bounds 在父类中的尺寸失效
          * 0x0100 重排子对象顺序
          * 0x0400 shape需要重绘
          * 0x0800 文字内容改变
-         * 0x2000 UI位置布局改变，位置可能需要重新计算，导致这个标识出现可能有以下几种情况:
-         *        1) 自身 left、right、top、bottom、horizontalCenter、verticalCenter 属性改变
-         *        2) 自身 x、y、width、height、scaleX、scaleY、rotation 属性改变
-         *        3) 父类的 width、height 失效
+         * 0x1000 x 属性失效，需要重新计算，导致这个值改变的原因可能是以下几种情况:
+         *        1) 自身 left、right、horizontalCenter 属性改变
+         *        2) 自身 x(并且设置了 left、right 或 horizontalCenter)、width(并且设置了 right 或 horizontalCenter)、scaleX(并且设置了 right 或 horizontalCenter)
+         *        3) 父类的 width(并设置了 left、right 或 horizontalCenter) 属性改变
+         * 0x1000 y 属性失效，需要重新计算，导致这个值改变的原因可能是以下几种情况:
+         *        1) 自身 top、bottom、verticalCenter 属性改变
+         *        2) 自身 x(并且设置了 top、bottom 或 verticalCenter)、height(并且设置了 top 或 verticalCenter)、scaleY(并且设置了 top 或 bottom 或 verticalCenter)
+         *        3) 父类的 width(并设置了 top、bottom 或 verticalCenter) 属性改变
+         * 0x2000 scaleX 属性失效
+         *        1) 自身 percentWidth 属性改变
+         *        2) contentBounds 失效 (并且设置了 width 或者 percentWidth 或 left&width 或 right&width 或 left&horizontalCenter 或 right&horizontalCenter)
+         *        3) 父类 width(并设置了 percentWidth 属性)
+         * 0x2000 scaleY 属性失效
+         *        1) 自身 percentHeight 属性改变
+         *        2) contentBounds 失效 (并且设置了 width 或者 percentWidth 或 top&height 或 bottom&height 或 top&verticalCenter 或 bottom&verticalCenter)
+         *        3) 父类 width(并设置了 percentWidth 属性)
+         *
          */
 
 
@@ -2776,6 +2771,7 @@ var _exports = {};
             value: function $getBounds() {
                 var rect = this.$DisplayObject[7];
                 if (this.$hasFlags(0x0004)) {
+                    this.$removeFlags(0x0004);
                     var contentRect = this.$getContentBounds();
                     var x = this.x;
                     var y = this.y;
@@ -2818,7 +2814,6 @@ var _exports = {};
                     rect.y = minY;
                     rect.width = maxX - minX;
                     rect.height = maxY - minY;
-                    this.$removeFlags(0x0004);
                 }
                 return rect;
             }
@@ -2827,9 +2822,9 @@ var _exports = {};
             value: function $getContentBounds() {
                 var rect = this.$DisplayObject[6];
                 if (this.$hasFlags(0x0001)) {
+                    this.$removeFlags(0x0001);
                     this.$measureContentBounds(rect);
                     this.$measureChildrenBounds(rect);
-                    this.$removeFlags(0x0001);
                     if (rect.width == 0) {
                         this.$measureContentBounds(rect);
                         this.$measureChildrenBounds(rect);

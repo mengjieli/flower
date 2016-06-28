@@ -59,7 +59,8 @@ var Main = function () {
             container.addListener(flower.MouseEvent.MOUSE_OUT, function (e) {
                 flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
-            container.shape.drawRect(0, 0, 250, 500);
+            container.shape.drawRect(0, 0, 350, 500);
+            //container.scaleX = container.scaleY = 0.5;
 
             var h = 0;
             var s = 0;
