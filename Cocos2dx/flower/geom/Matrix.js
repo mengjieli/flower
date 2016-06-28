@@ -1,6 +1,4 @@
 class Matrix {
-    static sin;
-    static cos;
     a = 1;
     b = 0;
     c = 0;
@@ -36,43 +34,29 @@ class Matrix {
     }
 
     rotate(angle) {
-        flower.Matrix.sin = Math.sin(angle);
-        flower.Matrix.cos = Math.cos(angle);
-        this.setTo(this.a * flower.Matrix.cos - this.c * flower.Matrix.sin, this.a * flower.Matrix.sin + this.c * flower.Matrix.cos, this.b * flower.Matrix.cos - this.d * flower.Matrix.sin, this.b * flower.Matrix.sin + this.d * flower.Matrix.cos, this.tx * flower.Matrix.cos - this.ty * flower.Matrix.sin, this.tx * flower.Matrix.sin + this.ty * flower.Matrix.cos);
+        var sin = Math.sin(angle);
+        var cos = Math.cos(angle);
+        this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos,
+            this.b * cos - this.d * sin, this.b * sin + this.d * cos,
+            this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
     }
 
     scale(scaleX, scaleY) {
-        this.a = scaleX;
-        this.d = scaleY;
-        this.tx *= this.a;
-        this.ty *= this.d;
+        this.a *= scaleX;
+        this.d *= scaleY;
+        this.tx *= scaleX;
+        this.ty *= scaleY;
     }
 
-    prependMatrix(prep) {
-        this.setTo(this.a * prep.a + this.c * prep.b, this.b * prep.a + this.d * prep.b, this.a * prep.c + this.c * prep.d, this.b * prep.c + this.d * prep.d, this.tx + this.a * prep.tx + this.c * prep.ty, this.ty + this.b * prep.tx + this.d * prep.ty);
-    }
-
-    prependTranslation(tx, ty) {
-        this.tx += this.a * tx + this.c * ty;
-        this.ty += this.b * tx + this.d * ty;
-    }
-
-    prependScale(sx, sy) {
-        this.setTo(this.a * sx, this.b * sx, this.c * sy, this.d * sy, this.tx, this.ty);
-    }
-
-    prependRotation(angle) {
-        var sin = Math.sin(angle);
-        var cos = Math.cos(angle);
-        this.setTo(this.a * cos + this.c * sin, this.b * cos + this.d * sin, this.c * cos - this.a * sin, this.d * cos - this.b * sin, this.tx, this.ty);
-    }
-
-    prependSkew(skewX, skewY) {
-        var sinX = Math.sin(skewX);
-        var cosX = Math.cos(skewX);
-        var sinY = Math.sin(skewY);
-        var cosY = Math.cos(skewY);
-        this.setTo(this.a * cosY + this.c * sinY, this.b * cosY + this.d * sinY, this.c * cosX - this.a * sinX, this.d * cosX - this.b * sinX, this.tx, this.ty);
+    $updateScaleRation(scaleX, scaleY, angle) {
+        var sin = 0;
+        var cos = 1;
+        if (angle) {
+            sin = Math.sin(angle);
+            cos = Math.cos(angle);
+        }
+        this.a = cos * scaleX;
+        this.b = sin * scaleX;
     }
 
     get deformation() {
