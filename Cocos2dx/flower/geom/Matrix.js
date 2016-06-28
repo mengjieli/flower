@@ -86,6 +86,52 @@ class Matrix {
         this.ty = sin * scaleX * tx + cos * scaleY * ty;
     }
 
+    $transformRectangle(rect) {
+        var a = this.a;
+        var b = this.b;
+        var c = this.c;
+        var d = this.d;
+        var tx = this.tx;
+        var ty = this.ty;
+        var x = rect.x;
+        var y = rect.y;
+        var xMax = x + rect.width;
+        var yMax = y + rect.height;
+        var x0 = a * x + c * y + tx;
+        var y0 = b * x + d * y + ty;
+        var x1 = a * xMax + c * y + tx;
+        var y1 = b * xMax + d * y + ty;
+        var x2 = a * xMax + c * yMax + tx;
+        var y2 = b * xMax + d * yMax + ty;
+        var x3 = a * x + c * yMax + tx;
+        var y3 = b * x + d * yMax + ty;
+        var tmp = 0;
+        if (x0 > x1) {
+            tmp = x0;
+            x0 = x1;
+            x1 = tmp;
+        }
+        if (x2 > x3) {
+            tmp = x2;
+            x2 = x3;
+            x3 = tmp;
+        }
+        rect.x = Math.floor(x0 < x2 ? x0 : x2);
+        rect.width = Math.ceil((x1 > x3 ? x1 : x3) - rect.x);
+        if (y0 > y1) {
+            tmp = y0;
+            y0 = y1;
+            y1 = tmp;
+        }
+        if (y2 > y3) {
+            tmp = y2;
+            y2 = y3;
+            y3 = tmp;
+        }
+        rect.y = Math.floor(y0 < y2 ? y0 : y2);
+        rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+    }
+
     get deformation() {
         if (this.a != 1 || this.b != 0 || this.c != 0 || this.d != 1)
             return true;

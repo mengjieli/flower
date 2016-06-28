@@ -2139,6 +2139,53 @@ var _exports = {};
                 this.ty = sin * scaleX * tx + cos * scaleY * ty;
             }
         }, {
+            key: "$transformRectangle",
+            value: function $transformRectangle(rect) {
+                var a = this.a;
+                var b = this.b;
+                var c = this.c;
+                var d = this.d;
+                var tx = this.tx;
+                var ty = this.ty;
+                var x = rect.x;
+                var y = rect.y;
+                var xMax = x + rect.width;
+                var yMax = y + rect.height;
+                var x0 = a * x + c * y + tx;
+                var y0 = b * x + d * y + ty;
+                var x1 = a * xMax + c * y + tx;
+                var y1 = b * xMax + d * y + ty;
+                var x2 = a * xMax + c * yMax + tx;
+                var y2 = b * xMax + d * yMax + ty;
+                var x3 = a * x + c * yMax + tx;
+                var y3 = b * x + d * yMax + ty;
+                var tmp = 0;
+                if (x0 > x1) {
+                    tmp = x0;
+                    x0 = x1;
+                    x1 = tmp;
+                }
+                if (x2 > x3) {
+                    tmp = x2;
+                    x2 = x3;
+                    x3 = tmp;
+                }
+                rect.x = Math.floor(x0 < x2 ? x0 : x2);
+                rect.width = Math.ceil((x1 > x3 ? x1 : x3) - rect.x);
+                if (y0 > y1) {
+                    tmp = y0;
+                    y0 = y1;
+                    y1 = tmp;
+                }
+                if (y2 > y3) {
+                    tmp = y2;
+                    y2 = y3;
+                    y3 = tmp;
+                }
+                rect.y = Math.floor(y0 < y2 ? y0 : y2);
+                rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+            }
+        }, {
             key: "save",
             value: function save() {
                 var matrix = flower.Matrix.create();
@@ -2830,42 +2877,9 @@ var _exports = {};
                 if (this.$hasFlags(0x0004)) {
                     this.$removeFlags(0x0004);
                     var contentRect = this.$getContentBounds();
-                    var x = this.x;
-                    var y = this.y;
-                    var scaleX = this.scaleX;
-                    var scaleY = this.scaleY;
-                    var rotation = this.radian;
-                    var list = [[contentRect.x, contentRect.y], [contentRect.x + contentRect.width, contentRect.y], [contentRect.x, contentRect.y + contentRect.height], [contentRect.x + contentRect.width, contentRect.y + contentRect.height]];
+                    rect.copyFrom(contentRect);
                     var matrix = this.$getMatrix();
-                    var minX;
-                    var maxX;
-                    var minY;
-                    var maxY;
-                    var point = Point.$TempPoint;
-                    for (var i = 0; i < list.length; i++) {
-                        point = matrix.transformPoint(list[i][0], list[i][1], point);
-                        if (i == 0) {
-                            minX = maxX = point.x;
-                            minY = maxY = point.y;
-                        } else {
-                            if (point.x < minX) {
-                                minX = point.x;
-                            }
-                            if (point.y < minY) {
-                                minY = point.y;
-                            }
-                            if (point.x > maxX) {
-                                maxX = point.x;
-                            }
-                            if (point.y > maxY) {
-                                maxY = point.y;
-                            }
-                        }
-                    }
-                    rect.x = minX;
-                    rect.y = minY;
-                    rect.width = maxX - minX;
-                    rect.height = maxY - minY;
+                    matrix.$transformRectangle(rect);
                 }
                 return rect;
             }
