@@ -11,6 +11,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _exports = {};
+var $root = eval("this");
 (function () {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
@@ -22,6 +23,7 @@ var _exports = {};
      */
     var LANGUAGE = "";
     var SCALE = null;
+    //var $root = this;
 
     /**
      * 启动引擎
@@ -121,7 +123,7 @@ var _exports = {};
         for (var i = 0; i < arguments.length; i++) {
             str += arguments[i] + "\t\t";
         }
-        //console.log(str);
+        console.log(str);
     }
 
     _exports.start = start;
@@ -893,6 +895,18 @@ var _exports = {};
                 }
             }
         }, {
+            key: "setSettingWidth",
+            value: function setSettingWidth(width) {
+                this.__settingWidth = width;
+                this.setScaleX(this.__scaleX);
+            }
+        }, {
+            key: "setSettingHeight",
+            value: function setSettingHeight(height) {
+                this.__settingHeight = height;
+                this.setScaleY(this.__scaleY);
+            }
+        }, {
             key: "setScale9Grid",
             value: function setScale9Grid(scale9Grid) {
                 this.__scale9Grid = scale9Grid;
@@ -900,8 +914,8 @@ var _exports = {};
                     this.addProgrammerFlag(0x0001);
                     var width = this.__texture.width;
                     var height = this.__texture.height;
-                    var setWidth = this.__texture.width * this.__scaleX;
-                    var setHeight = this.__texture.height * this.__scaleY;
+                    var setWidth = this.__texture.width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
+                    var setHeight = this.__texture.height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
 
                     //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
                     //width /= this.__textureScaleX;
@@ -985,7 +999,11 @@ var _exports = {};
             key: "setScaleX",
             value: function setScaleX(val) {
                 this.__scaleX = val;
-                this.show.setScaleX(val * this.__textureScaleX);
+                if (this.__texture && this.__settingWidth != null) {
+                    this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+                } else {
+                    this.show.setScaleX(val * this.__textureScaleX);
+                }
                 if (this.__texture && this.__texture.offX) {
                     this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
                 }
@@ -995,7 +1013,11 @@ var _exports = {};
             key: "setScaleY",
             value: function setScaleY(val) {
                 this.__scaleY = val;
-                this.show.setScaleY(val * this.__textureScaleY);
+                if (this.__texture && this.__settingHeight != null) {
+                    this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+                } else {
+                    this.show.setScaleY(val * this.__textureScaleY);
+                }
                 if (this.__texture && this.__texture.offY) {
                     this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
                 }
@@ -1009,6 +1031,8 @@ var _exports = {};
                 this.__textureScaleY = 1;
                 this.__scale9Grid = null;
                 this.__colorFilter = null;
+                this.__settingWidth = null;
+                this.__settingHeight = null;
                 _get(Object.getPrototypeOf(PlatformBitmap.prototype), "release", this).call(this);
             }
         }]);
@@ -2664,7 +2688,7 @@ var _exports = {};
                 }
                 this.$addFlags(flags);
                 if (this.__parent) {
-                    this.__parent.$addFlags(flags);
+                    this.__parent.$addFlagsUp(flags);
                 }
             }
         }, {
@@ -2688,7 +2712,7 @@ var _exports = {};
                 }
                 this.$removeFlags(flags);
                 if (this.__parent) {
-                    this.__parent.$removeFlags(flags);
+                    this.__parent.$removeFlagsUp(flags);
                 }
             }
         }, {
@@ -2866,11 +2890,17 @@ var _exports = {};
         }, {
             key: "$setWidth",
             value: function $setWidth(val) {
-                val = +val || 0;
-                val = val < 0 ? 0 : val;
                 var p = this.$DisplayObject;
-                if (p[3] == val) {
-                    return false;
+                if (val == null) {
+                    if (p[3] == null) {
+                        return;
+                    }
+                } else {
+                    val = +val;
+                    val = val < 0 ? 0 : val;
+                    if (p[3] == val) {
+                        return false;
+                    }
                 }
                 p[3] = val;
                 this.$invalidatePosition();
@@ -2885,11 +2915,17 @@ var _exports = {};
         }, {
             key: "$setHeight",
             value: function $setHeight(val) {
-                val = +val || 0;
-                val = val < 0 ? 0 : val;
                 var p = this.$DisplayObject;
-                if (p[4] == val) {
-                    return false;
+                if (val == null) {
+                    if (p[4] == null) {
+                        return;
+                    }
+                } else {
+                    val = +val;
+                    val = val < 0 ? 0 : val;
+                    if (p[4] == val) {
+                        return false;
+                    }
                 }
                 p[4] = val;
                 this.$invalidatePosition();
@@ -2921,7 +2957,6 @@ var _exports = {};
                 while (this.$hasFlags(0x0001)) {
                     this.$removeFlags(0x0001);
                     this.$measureContentBounds(rect);
-                    this.$checkSettingSize(rect);
                 }
                 return rect;
             }
@@ -2945,36 +2980,36 @@ var _exports = {};
                 p[9] = val;
                 return true;
             }
-        }, {
-            key: "$checkSettingSize",
-            value: function $checkSettingSize(rect) {
-                var p = this.$DisplayObject;
-                /**
-                 * 尺寸失效， 并且约定过 宽 或者 高
-                 */
-                if (p[3] != null) {
-                    if (rect.width == 0) {
-                        if (p[3] == 0) {
-                            this.scaleX = 0;
-                        } else {
-                            this.scaleX = 1;
-                        }
-                    } else {
-                        this.scaleX = p[3] / rect.width;
-                    }
-                }
-                if (p[4]) {
-                    if (rect.height == 0) {
-                        if (p[4] == 0) {
-                            this.scaleY = 0;
-                        } else {
-                            this.scaleY = 1;
-                        }
-                    } else {
-                        this.scaleY = p[4] / rect.height;
-                    }
-                }
-            }
+
+            /**
+             * 尺寸失效， 并且约定过 宽 或者 高
+             */
+            /*$checkSettingSize(rect) {
+             var p = this.$DisplayObject;
+             if (p[3] != null) {
+             if (rect.width == 0) {
+             if (p[3] == 0) {
+             this.scaleX = 0;
+             } else {
+             this.scaleX = 1;
+             }
+             } else {
+             this.scaleX = p[3] / rect.width;
+             }
+             }
+             if (p[4]) {
+             if (rect.height == 0) {
+             if (p[4] == 0) {
+             this.scaleY = 0;
+             } else {
+             this.scaleY = 1;
+             }
+             } else {
+             this.scaleY = p[4] / rect.height;
+             }
+             }
+             }*/
+
         }, {
             key: "$setParent",
             value: function $setParent(parent, stage) {
@@ -3051,15 +3086,15 @@ var _exports = {};
                     this.__parent.dispatch(e);
                 }
             }
-        }, {
-            key: "$measureContentBounds",
-
 
             /**
              * 计算自身尺寸
              * 子类实现
              * @param size
              */
+
+        }, {
+            key: "$measureContentBounds",
             value: function $measureContentBounds(rect) {}
 
             /**
@@ -3137,9 +3172,6 @@ var _exports = {};
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
-                }
-                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-                    this.$getContentBounds();
                 }
             }
         }, {
@@ -3689,13 +3721,36 @@ var _exports = {};
                 return true;
             }
         }, {
+            key: "$setWidth",
+            value: function $setWidth(val) {
+                if (_get(Object.getPrototypeOf(Bitmap.prototype), "$setWidth", this).call(this, val) == false) {
+                    return false;
+                }
+                var p = this.$DisplayObject;
+                this.$nativeShow.setSettingWidth(p[3]);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setHeight",
+            value: function $setHeight(val) {
+                if (_get(Object.getPrototypeOf(Bitmap.prototype), "$setHeight", this).call(this, val) == false) {
+                    return false;
+                }
+                var p = this.$DisplayObject;
+                this.$nativeShow.setSettingHeight(p[4]);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
             key: "$measureContentBounds",
             value: function $measureContentBounds(rect) {
                 if (this.__texture) {
                     rect.x = this.__texture.offX;
                     rect.y = this.__texture.offY;
-                    rect.width = this.__texture.width;
-                    rect.height = this.__texture.height;
+                    var p = this.$DisplayObject;
+                    rect.width = p[3] || this.__texture.width;
+                    rect.height = p[4] || this.__texture.height;
                 } else {
                     rect.x = rect.y = rect.width = rect.height = 0;
                 }
@@ -7240,7 +7295,109 @@ var _exports = {};
     _exports.StringDo = StringDo;
     //////////////////////////End File:flower/utils/StringDo.js///////////////////////////
 
+    //////////////////////////File:flower/ui/core/UIComponent.js///////////////////////////
+
+    var UIComponent = function () {
+        function UIComponent() {
+            _classCallCheck(this, UIComponent);
+        }
+
+        _createClass(UIComponent, null, [{
+            key: "register",
+            value: function register(clazz) {
+                var p = clazz.prototype;
+                p.$initUIComponent = function () {
+                    this.$UIComponent = {
+                        0: null, //left
+                        1: null, //right
+                        2: null, //horizontalCenter
+                        3: null, //top
+                        4: null, //bottom
+                        5: null, //verticalCenter
+                        6: null, //percentWidth
+                        7: null, //percentHeight
+                        //8: false, //是否设置了自动布局属性
+                        9: null, //uiWidth
+                        10: null };
+                };
+
+                //uiHeight
+                p.$getWidth = function () {
+                    var p = this.$UIComponent;
+                    var d = this.$DisplayObject;
+                    return p[9] != null ? p[9] : d[3] != null ? d[3] : this.$getContentBounds().width;
+                };
+
+                p.$getHeight = function () {
+                    var p = this.$UIComponent;
+                    var d = this.$DisplayObject;
+                    return p[10] != null ? p[10] : d[4] != null ? d[4] : this.$getContentBounds().height;
+                };
+
+                p.$setLeft = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[0] == val) {
+                        return false;
+                    }
+                    p[0] = val;
+                    this.$invalidateContentBounds();
+                };
+
+                p.$setPercentWidth = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[6] == val) {
+                        return false;
+                    }
+                    p[6] = val;
+                    this.$invalidateContentBounds();
+                };
+
+                p.$addFlags = function (flags) {
+                    if (flags & 0x0001 == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                        this.__flags |= 0x1000;
+                    }
+                    this.__flags |= flags;
+                };
+
+                /**
+                 * 验证 UI 属性
+                 */
+                p.$validateUIComponent = function () {
+                    this.$removeFlags(0x1000);
+                    //开始验证属性
+                    console.log("验证 ui 属性");
+                    var parentWidth = this.parent.width;
+                    var parentHeight = this.parent.height;
+                };
+
+                p.$onFrameEnd = function () {
+                    if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+                        this.$validateUIComponent();
+                    }
+                    $root._get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                };
+
+                Object.defineProperty(p, "percentWidth", {
+                    get: function get() {
+                        return this.$UIComponent[6];
+                    },
+                    set: function set(val) {
+                        this.$setPercentWidth(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+            }
+        }]);
+
+        return UIComponent;
+    }();
+    //////////////////////////End File:flower/ui/core/UIComponent.js///////////////////////////
+
     //////////////////////////File:flower/ui/Group.js///////////////////////////
+
 
     var Group = function (_Sprite3) {
         _inherits(Group, _Sprite3);
@@ -7250,106 +7407,15 @@ var _exports = {};
 
             var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
-            _this23.$UIComponent = {
-                0: null, //left
-                1: null, //right
-                2: null, //horizontalCenter
-                3: null, //top
-                4: null, //bottom
-                5: null, //verticalCenter
-                6: null, //percentWidth
-                7: null, //percentHeight
-                //8: false, //是否设置了自动布局属性
-                9: null, //uiWidth
-                10: null };
+            _this23.$initUIComponent();
             return _this23;
         }
-
-        _createClass(Group, [{
-            key: "$getWidth",
-            //uiHeight
-            value: function $getWidth() {
-                var p = this.$UIComponent;
-                var d = this.$DisplayObject;
-                return p[9] != null ? p[9] : d[3] != null ? d[3] : this.$getContentBounds().width;
-            }
-        }, {
-            key: "$getHeight",
-            value: function $getHeight() {
-                var p = this.$UIComponent;
-                var d = this.$DisplayObject;
-                return p[10] != null ? p[10] : d[4] != null ? d[4] : this.$getContentBounds().height;
-            }
-        }, {
-            key: "$setLeft",
-            value: function $setLeft(val) {
-                val = +val || 0;
-                var p = this.$UIComponent;
-                if (p[0] == val) {
-                    return;
-                }
-                p[0] = val;
-                this.$invalidateContentBounds();
-            }
-        }, {
-            key: "$invalidateUIComponent",
-            value: function $invalidateUIComponent() {
-                if (this.parent) {
-                    if (this.parent.__UIComponent) {
-                        this.$invalidateUIComponent();
-                    } else {
-                        this.$addFlags(0x1000);
-                    }
-                } else {
-                    this.$addFlags(0x1000);
-                }
-            }
-
-            /**
-             * 验证 UI 属性
-             */
-
-        }, {
-            key: "$validateUIComponent",
-            value: function $validateUIComponent() {
-                this.$removeFlags(0x1000);
-                //开始验证属性
-            }
-
-            /**
-             * 本身尺寸失效
-             */
-
-        }, {
-            key: "$invalidateContentBounds",
-            value: function $invalidateContentBounds() {
-                this.$addFlagsUp(0x0001 | 0x0004);
-                this.$invalidateUIComponent();
-            }
-        }, {
-            key: "$invalidatePosition",
-            value: function $invalidatePosition() {
-                this.$addFlagsUp(0x0004);
-                if (this.__parent) {
-                    this.__parent.$addFlagsUp(0x0001);
-                }
-                this.$invalidateUIComponent();
-            }
-        }, {
-            key: "$onFrameEnd",
-            value: function $onFrameEnd() {
-                if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                    this.$validateUIComponent();
-                }
-                _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
-            }
-        }]);
 
         return Group;
     }(Sprite);
 
+    UIComponent.register(Group);
     Group.prototype.__UIComponent = true;
-
     _exports.Group = Group;
     //////////////////////////End File:flower/ui/Group.js///////////////////////////
 

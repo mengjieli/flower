@@ -231,10 +231,12 @@ var list = [
     "ObjectDo",
     "StringDo",
 
+    "UIComponent",
     "Group",
     "DataGroup",
 ];
 var fileContent = "var exports = {};\n";
+fileContent += "var $root = eval(\"this\");\n";
 fileContent += "(function(){\n";
 while (list.length) {
     var name = list.shift();

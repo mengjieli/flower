@@ -7,6 +7,7 @@ var $language = "zh_CN";
  */
 var LANGUAGE = "";
 var SCALE = null;
+//var $root = this;
 
 /**
  * 启动引擎
@@ -94,7 +95,7 @@ function trace() {
     for (var i = 0; i < arguments.length; i++) {
         str += arguments[i] + "\t\t";
     }
-    //console.log(str);
+    console.log(str);
 }
 
 exports.start = start;

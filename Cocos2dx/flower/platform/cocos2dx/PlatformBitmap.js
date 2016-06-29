@@ -4,6 +4,8 @@ class PlatformBitmap extends PlatformDisplayObject {
     __textureScaleX = 1;
     __textureScaleY = 1;
     __scale9Grid;
+    __settingWidth;
+    __settingHeight;
 
     constructor() {
         super();
@@ -39,14 +41,24 @@ class PlatformBitmap extends PlatformDisplayObject {
         }
     }
 
+    setSettingWidth(width) {
+        this.__settingWidth = width;
+        this.setScaleX(this.__scaleX);
+    }
+
+    setSettingHeight(height) {
+        this.__settingHeight = height;
+        this.setScaleY(this.__scaleY);
+    }
+
     setScale9Grid(scale9Grid) {
         this.__scale9Grid = scale9Grid;
         if (scale9Grid) {
             this.addProgrammerFlag(0x0001);
             var width = this.__texture.width;
             var height = this.__texture.height;
-            var setWidth = this.__texture.width * this.__scaleX;
-            var setHeight = this.__texture.height * this.__scaleY;
+            var setWidth = this.__texture.width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
+            var setHeight = this.__texture.height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
 
             //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
             //width /= this.__textureScaleX;
@@ -127,7 +139,11 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val * this.__textureScaleX);
+        if (this.__texture && this.__settingWidth != null) {
+            this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+        } else {
+            this.show.setScaleX(val * this.__textureScaleX);
+        }
         if (this.__texture && this.__texture.offX) {
             this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
         }
@@ -136,7 +152,11 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setScaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val * this.__textureScaleY);
+        if (this.__texture && this.__settingHeight != null) {
+            this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+        } else {
+            this.show.setScaleY(val * this.__textureScaleY);
+        }
         if (this.__texture && this.__texture.offY) {
             this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
         }
@@ -149,6 +169,8 @@ class PlatformBitmap extends PlatformDisplayObject {
         this.__textureScaleY = 1;
         this.__scale9Grid = null;
         this.__colorFilter = null;
+        this.__settingWidth = null;
+        this.__settingHeight = null;
         super.release();
     }
 }

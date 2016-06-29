@@ -82,7 +82,7 @@ class DisplayObject extends EventDispatcher {
         }
         this.$addFlags(flags);
         if (this.__parent) {
-            this.__parent.$addFlags(flags);
+            this.__parent.$addFlagsUp(flags);
         }
     }
 
@@ -103,7 +103,7 @@ class DisplayObject extends EventDispatcher {
         }
         this.$removeFlags(flags);
         if (this.__parent) {
-            this.__parent.$removeFlags(flags);
+            this.__parent.$removeFlagsUp(flags);
         }
     }
 
@@ -125,8 +125,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.tx = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setX(val);
@@ -144,8 +144,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.ty = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setY(val);
@@ -159,8 +159,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[0] = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setScaleX(val);
@@ -182,8 +182,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[1] = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setScaleY(val);
@@ -211,8 +211,8 @@ class DisplayObject extends EventDispatcher {
         }
         p[2] = val;
         p[14] = val * Math.PI / 180;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setRotation(val);
@@ -266,11 +266,17 @@ class DisplayObject extends EventDispatcher {
     }
 
     $setWidth(val) {
-        val = +val || 0;
-        val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
-        if (p[3] == val) {
-            return false;
+        if(val == null) {
+            if(p[3] == null) {
+                return;
+            }
+        } else {
+            val = +val;
+            val = val < 0 ? 0 : val;
+            if (p[3] == val) {
+                return false;
+            }
         }
         p[3] = val;
         this.$invalidatePosition();
@@ -283,11 +289,17 @@ class DisplayObject extends EventDispatcher {
     }
 
     $setHeight(val) {
-        val = +val || 0;
-        val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
-        if (p[4] == val) {
-            return false;
+        if(val == null) {
+            if(p[4] == null) {
+                return;
+            }
+        } else {
+            val = +val;
+            val = val < 0 ? 0 : val;
+            if (p[4] == val) {
+                return false;
+            }
         }
         p[4] = val;
         this.$invalidatePosition();
@@ -316,7 +328,6 @@ class DisplayObject extends EventDispatcher {
         while (this.$hasFlags(0x0001)) {
             this.$removeFlags(0x0001);
             this.$measureContentBounds(rect);
-            this.$checkSettingSize(rect);
         }
         return rect;
     }
@@ -339,34 +350,34 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
-    $checkSettingSize(rect) {
-        var p = this.$DisplayObject;
-        /**
-         * 尺寸失效， 并且约定过 宽 或者 高
-         */
-        if (p[3] != null) {
-            if (rect.width == 0) {
-                if (p[3] == 0) {
-                    this.scaleX = 0;
-                } else {
-                    this.scaleX = 1;
-                }
-            } else {
-                this.scaleX = p[3] / rect.width;
-            }
-        }
-        if (p[4]) {
-            if (rect.height == 0) {
-                if (p[4] == 0) {
-                    this.scaleY = 0;
-                } else {
-                    this.scaleY = 1;
-                }
-            } else {
-                this.scaleY = p[4] / rect.height;
-            }
-        }
-    }
+    /**
+     * 尺寸失效， 并且约定过 宽 或者 高
+     */
+    /*$checkSettingSize(rect) {
+     var p = this.$DisplayObject;
+     if (p[3] != null) {
+     if (rect.width == 0) {
+     if (p[3] == 0) {
+     this.scaleX = 0;
+     } else {
+     this.scaleX = 1;
+     }
+     } else {
+     this.scaleX = p[3] / rect.width;
+     }
+     }
+     if (p[4]) {
+     if (rect.height == 0) {
+     if (p[4] == 0) {
+     this.scaleY = 0;
+     } else {
+     this.scaleY = 1;
+     }
+     } else {
+     this.scaleY = p[4] / rect.height;
+     }
+     }
+     }*/
 
     $setParent(parent, stage) {
         this.__parent = parent;
@@ -417,8 +428,8 @@ class DisplayObject extends EventDispatcher {
     }
 
     $changeAllFilters() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setFilters(this.$getAllFilters());
@@ -434,6 +445,86 @@ class DisplayObject extends EventDispatcher {
         if (e.bubbles && this.__parent) {
             this.__parent.dispatch(e);
         }
+    }
+
+    /**
+     * 计算自身尺寸
+     * 子类实现
+     * @param size
+     */
+    $measureContentBounds(rect) {
+
+    }
+
+    /**
+     * 计算自身在父类中的尺寸
+     * @param rect
+     */
+    $measureBounds(rect) {
+
+    }
+
+    /**
+     * 本身尺寸失效
+     */
+    $invalidateContentBounds() {
+        this.$addFlagsUp(0x0001 | 0x0004);
+    }
+
+    /**
+     * 矩阵失效
+     */
+    $invalidateMatrix() {
+        this.$addFlags(0x0008 | 0x0010);
+        this.$invalidatePosition();
+    }
+
+    /**
+     * 逆矩阵失效
+     */
+    $invalidateReverseMatrix() {
+        this.$addFlags(0x0010);
+        this.$invalidatePosition();
+    }
+
+    /**
+     * 位置失效
+     */
+    $invalidatePosition() {
+        this.$addFlagsUp(0x0004);
+        if (this.__parent) {
+            this.__parent.$addFlagsUp(0x0001);
+        }
+    }
+
+    $getMouseTarget(touchX, touchY, multiply) {
+        if (this.touchEnabled == false || this._visible == false)
+            return null;
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = Math.floor(point.x);
+        touchY = Math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        var bounds = this.$getContentBounds();
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+            return this;
+        }
+        return null;
+    }
+
+    $onFrameEnd() {
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
+    }
+
+    dispose() {
+        if (this.parent) {
+            this.parent.removeChild(this);
+        }
+        super.dispose();
     }
 
     get x() {
@@ -562,88 +653,5 @@ class DisplayObject extends EventDispatcher {
     set $focusEnabled(val) {
         var p = this.$DisplayObject;
         p[50] = val;
-    }
-
-    /**
-     * 计算自身尺寸
-     * 子类实现
-     * @param size
-     */
-    $measureContentBounds(rect) {
-
-    }
-
-    /**
-     * 计算自身在父类中的尺寸
-     * @param rect
-     */
-    $measureBounds(rect) {
-
-    }
-
-    /**
-     * 本身尺寸失效
-     */
-    $invalidateContentBounds() {
-        this.$addFlagsUp(0x0001 | 0x0004);
-    }
-
-    /**
-     * 矩阵失效
-     */
-    $invalidateMatrix() {
-        this.$addFlags(0x0008 | 0x0010);
-        this.$invalidatePosition();
-    }
-
-    /**
-     * 逆矩阵失效
-     */
-    $invalidateReverseMatrix() {
-        this.$addFlags(0x0010);
-        this.$invalidatePosition();
-    }
-
-    /**
-     * 位置失效
-     */
-    $invalidatePosition() {
-        this.$addFlagsUp(0x0004);
-        if (this.__parent) {
-            this.__parent.$addFlagsUp(0x0001);
-        }
-    }
-
-    $getMouseTarget(touchX, touchY, multiply) {
-        if (this.touchEnabled == false || this._visible == false)
-            return null;
-        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-        touchX = Math.floor(point.x);
-        touchY = Math.floor(point.y);
-        var p = this.$DisplayObject;
-        p[10] = touchX;
-        p[11] = touchY;
-        var bounds = this.$getContentBounds();
-        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
-            return this;
-        }
-        return null;
-    }
-
-    $onFrameEnd() {
-        var p = this.$DisplayObject;
-        if (this.$hasFlags(0x0002)) {
-            this.$nativeShow.setAlpha(this.$getConcatAlpha());
-        }
-        if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            this.$getContentBounds();
-        }
-    }
-
-    dispose() {
-        if (this.parent) {
-            this.parent.removeChild(this);
-        }
-        super.dispose();
     }
 }

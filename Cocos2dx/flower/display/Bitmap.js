@@ -20,8 +20,8 @@ class Bitmap extends DisplayObject {
             this.__texture.$delCount();
         }
         this.__texture = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         if (val) {
@@ -37,12 +37,33 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $setWidth(val) {
+        if (super.$setWidth(val) == false) {
+            return false;
+        }
+        var p = this.$DisplayObject;
+        this.$nativeShow.setSettingWidth(p[3]);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setHeight(val) {
+        if (super.$setHeight(val) == false) {
+            return false;
+        }
+        var p = this.$DisplayObject;
+        this.$nativeShow.setSettingHeight(p[4]);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
     $measureContentBounds(rect) {
         if (this.__texture) {
             rect.x = this.__texture.offX;
             rect.y = this.__texture.offY;
-            rect.width = this.__texture.width;
-            rect.height = this.__texture.height;
+            var p = this.$DisplayObject;
+            rect.width = p[3] || this.__texture.width;
+            rect.height = p[4] || this.__texture.height;
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
@@ -54,8 +75,8 @@ class Bitmap extends DisplayObject {
             return false;
         }
         p[0] = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setScale9Grid(val);
@@ -80,8 +101,8 @@ class Bitmap extends DisplayObject {
     }
 
     dispose() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.texture = null;

@@ -1,4 +1,5 @@
 var exports = {};
+var $root = eval("this");
 (function(){
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
@@ -10,6 +11,7 @@ var $language = "zh_CN";
  */
 var LANGUAGE = "";
 var SCALE = null;
+//var $root = this;
 
 /**
  * 启动引擎
@@ -97,7 +99,7 @@ function trace() {
     for (var i = 0; i < arguments.length; i++) {
         str += arguments[i] + "\t\t";
     }
-    //console.log(str);
+    console.log(str);
 }
 
 exports.start = start;
@@ -782,6 +784,8 @@ class PlatformBitmap extends PlatformDisplayObject {
     __textureScaleX = 1;
     __textureScaleY = 1;
     __scale9Grid;
+    __settingWidth;
+    __settingHeight;
 
     constructor() {
         super();
@@ -817,14 +821,24 @@ class PlatformBitmap extends PlatformDisplayObject {
         }
     }
 
+    setSettingWidth(width) {
+        this.__settingWidth = width;
+        this.setScaleX(this.__scaleX);
+    }
+
+    setSettingHeight(height) {
+        this.__settingHeight = height;
+        this.setScaleY(this.__scaleY);
+    }
+
     setScale9Grid(scale9Grid) {
         this.__scale9Grid = scale9Grid;
         if (scale9Grid) {
             this.addProgrammerFlag(0x0001);
             var width = this.__texture.width;
             var height = this.__texture.height;
-            var setWidth = this.__texture.width * this.__scaleX;
-            var setHeight = this.__texture.height * this.__scaleY;
+            var setWidth = this.__texture.width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
+            var setHeight = this.__texture.height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
 
             //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
             //width /= this.__textureScaleX;
@@ -905,7 +919,11 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val * this.__textureScaleX);
+        if (this.__texture && this.__settingWidth != null) {
+            this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+        } else {
+            this.show.setScaleX(val * this.__textureScaleX);
+        }
         if (this.__texture && this.__texture.offX) {
             this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
         }
@@ -914,7 +932,11 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setScaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val * this.__textureScaleY);
+        if (this.__texture && this.__settingHeight != null) {
+            this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+        } else {
+            this.show.setScaleY(val * this.__textureScaleY);
+        }
         if (this.__texture && this.__texture.offY) {
             this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
         }
@@ -927,6 +949,8 @@ class PlatformBitmap extends PlatformDisplayObject {
         this.__textureScaleY = 1;
         this.__scale9Grid = null;
         this.__colorFilter = null;
+        this.__settingWidth = null;
+        this.__settingHeight = null;
         super.release();
     }
 }
@@ -2374,7 +2398,7 @@ class DisplayObject extends EventDispatcher {
         }
         this.$addFlags(flags);
         if (this.__parent) {
-            this.__parent.$addFlags(flags);
+            this.__parent.$addFlagsUp(flags);
         }
     }
 
@@ -2395,7 +2419,7 @@ class DisplayObject extends EventDispatcher {
         }
         this.$removeFlags(flags);
         if (this.__parent) {
-            this.__parent.$removeFlags(flags);
+            this.__parent.$removeFlagsUp(flags);
         }
     }
 
@@ -2417,8 +2441,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.tx = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setX(val);
@@ -2436,8 +2460,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         matrix.ty = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setY(val);
@@ -2451,8 +2475,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[0] = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setScaleX(val);
@@ -2474,8 +2498,8 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[1] = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setScaleY(val);
@@ -2503,8 +2527,8 @@ class DisplayObject extends EventDispatcher {
         }
         p[2] = val;
         p[14] = val * Math.PI / 180;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setRotation(val);
@@ -2558,11 +2582,17 @@ class DisplayObject extends EventDispatcher {
     }
 
     $setWidth(val) {
-        val = +val || 0;
-        val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
-        if (p[3] == val) {
-            return false;
+        if(val == null) {
+            if(p[3] == null) {
+                return;
+            }
+        } else {
+            val = +val;
+            val = val < 0 ? 0 : val;
+            if (p[3] == val) {
+                return false;
+            }
         }
         p[3] = val;
         this.$invalidatePosition();
@@ -2575,11 +2605,17 @@ class DisplayObject extends EventDispatcher {
     }
 
     $setHeight(val) {
-        val = +val || 0;
-        val = val < 0 ? 0 : val;
         var p = this.$DisplayObject;
-        if (p[4] == val) {
-            return false;
+        if(val == null) {
+            if(p[4] == null) {
+                return;
+            }
+        } else {
+            val = +val;
+            val = val < 0 ? 0 : val;
+            if (p[4] == val) {
+                return false;
+            }
         }
         p[4] = val;
         this.$invalidatePosition();
@@ -2608,7 +2644,6 @@ class DisplayObject extends EventDispatcher {
         while (this.$hasFlags(0x0001)) {
             this.$removeFlags(0x0001);
             this.$measureContentBounds(rect);
-            this.$checkSettingSize(rect);
         }
         return rect;
     }
@@ -2631,34 +2666,34 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
-    $checkSettingSize(rect) {
-        var p = this.$DisplayObject;
-        /**
-         * 尺寸失效， 并且约定过 宽 或者 高
-         */
-        if (p[3] != null) {
-            if (rect.width == 0) {
-                if (p[3] == 0) {
-                    this.scaleX = 0;
-                } else {
-                    this.scaleX = 1;
-                }
-            } else {
-                this.scaleX = p[3] / rect.width;
-            }
-        }
-        if (p[4]) {
-            if (rect.height == 0) {
-                if (p[4] == 0) {
-                    this.scaleY = 0;
-                } else {
-                    this.scaleY = 1;
-                }
-            } else {
-                this.scaleY = p[4] / rect.height;
-            }
-        }
-    }
+    /**
+     * 尺寸失效， 并且约定过 宽 或者 高
+     */
+    /*$checkSettingSize(rect) {
+     var p = this.$DisplayObject;
+     if (p[3] != null) {
+     if (rect.width == 0) {
+     if (p[3] == 0) {
+     this.scaleX = 0;
+     } else {
+     this.scaleX = 1;
+     }
+     } else {
+     this.scaleX = p[3] / rect.width;
+     }
+     }
+     if (p[4]) {
+     if (rect.height == 0) {
+     if (p[4] == 0) {
+     this.scaleY = 0;
+     } else {
+     this.scaleY = 1;
+     }
+     } else {
+     this.scaleY = p[4] / rect.height;
+     }
+     }
+     }*/
 
     $setParent(parent, stage) {
         this.__parent = parent;
@@ -2709,8 +2744,8 @@ class DisplayObject extends EventDispatcher {
     }
 
     $changeAllFilters() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setFilters(this.$getAllFilters());
@@ -2726,6 +2761,86 @@ class DisplayObject extends EventDispatcher {
         if (e.bubbles && this.__parent) {
             this.__parent.dispatch(e);
         }
+    }
+
+    /**
+     * 计算自身尺寸
+     * 子类实现
+     * @param size
+     */
+    $measureContentBounds(rect) {
+
+    }
+
+    /**
+     * 计算自身在父类中的尺寸
+     * @param rect
+     */
+    $measureBounds(rect) {
+
+    }
+
+    /**
+     * 本身尺寸失效
+     */
+    $invalidateContentBounds() {
+        this.$addFlagsUp(0x0001 | 0x0004);
+    }
+
+    /**
+     * 矩阵失效
+     */
+    $invalidateMatrix() {
+        this.$addFlags(0x0008 | 0x0010);
+        this.$invalidatePosition();
+    }
+
+    /**
+     * 逆矩阵失效
+     */
+    $invalidateReverseMatrix() {
+        this.$addFlags(0x0010);
+        this.$invalidatePosition();
+    }
+
+    /**
+     * 位置失效
+     */
+    $invalidatePosition() {
+        this.$addFlagsUp(0x0004);
+        if (this.__parent) {
+            this.__parent.$addFlagsUp(0x0001);
+        }
+    }
+
+    $getMouseTarget(touchX, touchY, multiply) {
+        if (this.touchEnabled == false || this._visible == false)
+            return null;
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = Math.floor(point.x);
+        touchY = Math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        var bounds = this.$getContentBounds();
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+            return this;
+        }
+        return null;
+    }
+
+    $onFrameEnd() {
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
+    }
+
+    dispose() {
+        if (this.parent) {
+            this.parent.removeChild(this);
+        }
+        super.dispose();
     }
 
     get x() {
@@ -2854,89 +2969,6 @@ class DisplayObject extends EventDispatcher {
     set $focusEnabled(val) {
         var p = this.$DisplayObject;
         p[50] = val;
-    }
-
-    /**
-     * 计算自身尺寸
-     * 子类实现
-     * @param size
-     */
-    $measureContentBounds(rect) {
-
-    }
-
-    /**
-     * 计算自身在父类中的尺寸
-     * @param rect
-     */
-    $measureBounds(rect) {
-
-    }
-
-    /**
-     * 本身尺寸失效
-     */
-    $invalidateContentBounds() {
-        this.$addFlagsUp(0x0001 | 0x0004);
-    }
-
-    /**
-     * 矩阵失效
-     */
-    $invalidateMatrix() {
-        this.$addFlags(0x0008 | 0x0010);
-        this.$invalidatePosition();
-    }
-
-    /**
-     * 逆矩阵失效
-     */
-    $invalidateReverseMatrix() {
-        this.$addFlags(0x0010);
-        this.$invalidatePosition();
-    }
-
-    /**
-     * 位置失效
-     */
-    $invalidatePosition() {
-        this.$addFlagsUp(0x0004);
-        if (this.__parent) {
-            this.__parent.$addFlagsUp(0x0001);
-        }
-    }
-
-    $getMouseTarget(touchX, touchY, multiply) {
-        if (this.touchEnabled == false || this._visible == false)
-            return null;
-        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-        touchX = Math.floor(point.x);
-        touchY = Math.floor(point.y);
-        var p = this.$DisplayObject;
-        p[10] = touchX;
-        p[11] = touchY;
-        var bounds = this.$getContentBounds();
-        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
-            return this;
-        }
-        return null;
-    }
-
-    $onFrameEnd() {
-        var p = this.$DisplayObject;
-        if (this.$hasFlags(0x0002)) {
-            this.$nativeShow.setAlpha(this.$getConcatAlpha());
-        }
-        if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            this.$getContentBounds();
-        }
-    }
-
-    dispose() {
-        if (this.parent) {
-            this.parent.removeChild(this);
-        }
-        super.dispose();
     }
 }
 //////////////////////////End File:flower/display/DisplayObject.js///////////////////////////
@@ -3288,8 +3320,8 @@ class Bitmap extends DisplayObject {
             this.__texture.$delCount();
         }
         this.__texture = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         if (val) {
@@ -3305,12 +3337,33 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $setWidth(val) {
+        if (super.$setWidth(val) == false) {
+            return false;
+        }
+        var p = this.$DisplayObject;
+        this.$nativeShow.setSettingWidth(p[3]);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setHeight(val) {
+        if (super.$setHeight(val) == false) {
+            return false;
+        }
+        var p = this.$DisplayObject;
+        this.$nativeShow.setSettingHeight(p[4]);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
     $measureContentBounds(rect) {
         if (this.__texture) {
             rect.x = this.__texture.offX;
             rect.y = this.__texture.offY;
-            rect.width = this.__texture.width;
-            rect.height = this.__texture.height;
+            var p = this.$DisplayObject;
+            rect.width = p[3] || this.__texture.width;
+            rect.height = p[4] || this.__texture.height;
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
@@ -3322,8 +3375,8 @@ class Bitmap extends DisplayObject {
             return false;
         }
         p[0] = val;
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.setScale9Grid(val);
@@ -3348,8 +3401,8 @@ class Bitmap extends DisplayObject {
     }
 
     dispose() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.texture = null;
@@ -6556,6 +6609,100 @@ exports.StringDo = StringDo;
 
 
 
+//////////////////////////File:flower/ui/core/UIComponent.js///////////////////////////
+class UIComponent {
+    static register(clazz) {
+        var p = clazz.prototype;
+        p.$initUIComponent = function () {
+            this.$UIComponent = {
+                0: null, //left
+                1: null, //right
+                2: null, //horizontalCenter
+                3: null, //top
+                4: null, //bottom
+                5: null, //verticalCenter
+                6: null, //percentWidth
+                7: null, //percentHeight
+                //8: false, //是否设置了自动布局属性
+                9: null, //uiWidth
+                10: null, //uiHeight
+            };
+        }
+
+        p.$getWidth = function () {
+            var p = this.$UIComponent;
+            var d = this.$DisplayObject;
+            return p[9] != null ? p[9] : (d[3] != null ? d[3] : this.$getContentBounds().width);
+        }
+
+        p.$getHeight = function () {
+            var p = this.$UIComponent;
+            var d = this.$DisplayObject;
+            return p[10] != null ? p[10] : (d[4] != null ? d[4] : this.$getContentBounds().height);
+        }
+
+        p.$setLeft = function (val) {
+            val = +val || 0;
+            var p = this.$UIComponent;
+            if (p[0] == val) {
+                return false;
+            }
+            p[0] = val;
+            this.$invalidateContentBounds();
+        }
+
+        p.$setPercentWidth = function (val) {
+            val = +val || 0;
+            var p = this.$UIComponent;
+            if (p[6] == val) {
+                return false;
+            }
+            p[6] = val;
+            this.$invalidateContentBounds();
+        }
+
+        p.$addFlags = function (flags) {
+            if (flags & 0x0001 == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                this.__flags |= 0x1000;
+            }
+            this.__flags |= flags;
+        }
+
+        /**
+         * 验证 UI 属性
+         */
+        p.$validateUIComponent = function () {
+            this.$removeFlags(0x1000);
+            //开始验证属性
+            console.log("验证 ui 属性");
+            var parentWidth = this.parent.width;
+            var parentHeight = this.parent.height;
+            
+        }
+
+        p.$onFrameEnd = function () {
+            if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+                this.$validateUIComponent();
+            }
+            $root._get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+        }
+
+        Object.defineProperty(p, "percentWidth", {
+            get: function () {
+                return this.$UIComponent[6];
+            },
+            set: function (val) {
+                this.$setPercentWidth(val);
+            },
+            enumerable: true,
+            configurable: true
+        });
+    }
+}
+//////////////////////////End File:flower/ui/core/UIComponent.js///////////////////////////
+
+
+
 //////////////////////////File:flower/ui/Group.js///////////////////////////
 class Group extends Sprite {
 
@@ -6563,89 +6710,11 @@ class Group extends Sprite {
 
     constructor() {
         super();
-        this.$UIComponent = {
-            0: null, //left
-            1: null, //right
-            2: null, //horizontalCenter
-            3: null, //top
-            4: null, //bottom
-            5: null, //verticalCenter
-            6: null, //percentWidth
-            7: null, //percentHeight
-            //8: false, //是否设置了自动布局属性
-            9: null, //uiWidth
-            10: null, //uiHeight
-        };
-    }
-
-    $getWidth() {
-        var p = this.$UIComponent;
-        var d = this.$DisplayObject;
-        return p[9] != null ? p[9] : (d[3] != null ? d[3] : this.$getContentBounds().width);
-    }
-
-    $getHeight() {
-        var p = this.$UIComponent;
-        var d = this.$DisplayObject;
-        return p[10] != null ? p[10] : (d[4] != null ? d[4] : this.$getContentBounds().height);
-    }
-
-    $setLeft(val) {
-        val = +val || 0;
-        var p = this.$UIComponent;
-        if (p[0] == val) {
-            return;
-        }
-        p[0] = val;
-        this.$invalidateContentBounds();
-    }
-
-    $invalidateUIComponent() {
-        if (this.parent) {
-            if (this.parent.__UIComponent) {
-                this.$invalidateUIComponent();
-            } else {
-                this.$addFlags(0x1000);
-            }
-        } else {
-            this.$addFlags(0x1000);
-        }
-    }
-
-    /**
-     * 验证 UI 属性
-     */
-    $validateUIComponent() {
-        this.$removeFlags(0x1000);
-        //开始验证属性
-    }
-
-    /**
-     * 本身尺寸失效
-     */
-    $invalidateContentBounds() {
-        this.$addFlagsUp(0x0001 | 0x0004);
-        this.$invalidateUIComponent();
-    }
-
-    $invalidatePosition() {
-        this.$addFlagsUp(0x0004);
-        if (this.__parent) {
-            this.__parent.$addFlagsUp(0x0001);
-        }
-        this.$invalidateUIComponent();
-    }
-
-    $onFrameEnd() {
-        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-            this.$validateUIComponent();
-        }
-        super.$onFrameEnd();
+        this.$initUIComponent();
     }
 }
-
+UIComponent.register(Group);
 Group.prototype.__UIComponent = true;
-
 exports.Group = Group;
 //////////////////////////End File:flower/ui/Group.js///////////////////////////
 

@@ -49,7 +49,8 @@ var Main = function () {
             //flower.trace("纹理列表", list);
             //flower.trace(e.data[0].desc);
 
-            var container = new flower.Sprite();
+            var container = new flower.Group();
+            container.percentWidth = 50;
             container.x = 100;
             //container.width = 150;
             //container.height = 200;
@@ -71,8 +72,8 @@ var Main = function () {
             //container.shape.drawRect(0, 0, 350, 500);
             //container.scaleX = container.scaleY = 0.5;
 
-            var group = new flower.Group();
-            var dg = new flower.DataGroup();
+            //var group = new flower.Group();
+            //var dg = new flower.DataGroup();
 
             var h = 0;
             var s = 0;
@@ -102,7 +103,7 @@ var Main = function () {
 
             var bm = new flower.Bitmap();
             bm.x = bm.y = 100;
-            //bm.width = bm.height = 200;
+            //bm.width = bm.height = 400;
             bm.scaleX = bm.scaleY = 4;
             bm.texture = e.data[1];
             bm.rotation = 30;
@@ -132,6 +133,9 @@ var Main = function () {
             container.addChild(bm);
 
             flower.trace(container.width, container.height);
+            //bm.width = bm.height = null;
+            //flower.trace(container.width, container.height);
+            //return;
 
             //setTimeout(function () {
             //    bm.texture = list[2];
