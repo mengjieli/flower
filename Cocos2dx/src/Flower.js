@@ -7239,5 +7239,88 @@ var _exports = {};
 
     _exports.StringDo = StringDo;
     //////////////////////////End File:flower/utils/StringDo.js///////////////////////////
+
+    //////////////////////////File:flower/ui/Group.js///////////////////////////
+
+    var Group = function (_Sprite3) {
+        _inherits(Group, _Sprite3);
+
+        function Group() {
+            _classCallCheck(this, Group);
+
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
+
+            _this23.$UIComponent = {
+                0: null, //left
+                1: null, //right
+                2: null, //horizontalCenter
+                3: null, //top
+                4: null, //bottom
+                5: null, //verticalCenter
+                6: null, //percentWidth
+                7: null, //percentHeight
+                //8: false, //是否设置了自动布局属性
+                9: null, //uiWidth
+                10: null };
+            return _this23;
+        }
+
+        _createClass(Group, [{
+            key: "$getWidth",
+            //uiHeight
+            value: function $getWidth() {
+                var p = this.$UIComponent;
+                var d = this.$DisplayObject;
+                return p[9] != null ? p[9] : d[3] != null ? d[3] : this.$getContentBounds().width;
+            }
+        }, {
+            key: "$getHeight",
+            value: function $getHeight() {
+                var p = this.$UIComponent;
+                var d = this.$DisplayObject;
+                return p[10] != null ? p[10] : d[4] != null ? d[4] : this.$getContentBounds().height;
+            }
+        }, {
+            key: "$setLeft",
+            value: function $setLeft(val) {
+                val = +val || 0;
+                var p = this.$UIComponent;
+                if (p[0] == val) {
+                    return;
+                }
+                p[0] = val;
+                this.$invalidateContentBounds();
+            }
+        }, {
+            key: "$invalidateUIComponent",
+            value: function $invalidateUIComponent() {}
+
+            /**
+             * 本身尺寸失效
+             */
+
+        }, {
+            key: "$invalidateContentBounds",
+            value: function $invalidateContentBounds() {
+                this.$addFlagsUp(0x0001 | 0x0004);
+                //if(this.parent && this.parent.)
+            }
+        }, {
+            key: "$invalidatePosition",
+            value: function $invalidatePosition() {
+                this.$addFlagsUp(0x0004);
+                if (this.__parent) {
+                    this.__parent.$addFlagsUp(0x0001);
+                }
+            }
+        }]);
+
+        return Group;
+    }(Sprite);
+
+    Group.prototype.__UIComponent = true;
+
+    _exports.Group = Group;
+    //////////////////////////End File:flower/ui/Group.js///////////////////////////
 })();
 var flower = _exports;

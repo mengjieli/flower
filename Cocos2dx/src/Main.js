@@ -71,6 +71,8 @@ var Main = function () {
             //container.shape.drawRect(0, 0, 350, 500);
             //container.scaleX = container.scaleY = 0.5;
 
+            var group = new flower.Group();
+
             var h = 0;
             var s = 0;
             var l = 0;

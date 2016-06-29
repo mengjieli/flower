@@ -229,7 +229,9 @@ var list = [
     "EnterFrame",
     "CallLater",
     "ObjectDo",
-    "StringDo"
+    "StringDo",
+
+    "Group",
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "(function(){\n";
