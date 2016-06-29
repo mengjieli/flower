@@ -50,9 +50,9 @@ var Main = function () {
             //flower.trace(e.data[0].desc);
 
             var container = new flower.Group();
-            container.percentWidth = 50;
-            container.percentHeight = 40;
-            container.x = 100;
+            container.width = 300;
+            container.height = 400;
+            //container.x = 100;
             //container.width = 150;
             //container.height = 200;
             flower.Stage.getInstance().addChild(container);
@@ -105,10 +105,12 @@ var Main = function () {
             var bm = new flower.Image();
             bm.x = bm.y = 100;
             //bm.width = bm.height = 400;
-            bm.scaleX = bm.scaleY = 4;
+            //bm.scaleX = bm.scaleY = 4;
             bm.texture = e.data[1];
-            bm.left = 0;
-            bm.right = 200;
+            bm.left = 50;
+            bm.right = 100;
+            bm.top = 120;
+            bm.bottom = 130;
             //bm.rotation = 30;
             bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
                 //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
@@ -134,6 +136,39 @@ var Main = function () {
                 //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
             container.addChild(bm);
+
+            console.log(bm.$getContentBounds());
+            var bounds = bm.$getBounds();
+            var matrix = bm.$getMatrix();
+            console.log(bounds);
+            //bounds.left = 0;
+            //bounds.right = 100;
+            var reverseMatrix = bm.$getReverseMatrix();
+            reverseMatrix.$transformRectangle(bounds);
+            console.log(bounds);
+
+            var point = new flower.Point(0, 0);
+            console.log(point);
+            matrix.transformPoint(point.x, point.y, point);
+            console.log(point);
+            reverseMatrix.transformPoint(point.x, point.y, point);
+            console.log(point);
+
+            console.log("new point");
+            point.setTo(100, 0);
+            console.log(point);
+            matrix.transformPoint(point.x, point.y, point);
+            console.log(point);
+            reverseMatrix.transformPoint(point.x, point.y, point);
+            console.log(point);
+
+            console.log("new point");
+            point.setTo(0, 100);
+            console.log(point);
+            matrix.transformPoint(point.x, point.y, point);
+            console.log(point);
+            reverseMatrix.transformPoint(point.x, point.y, point);
+            console.log(point);
 
             flower.trace(container.width, container.height);
             return;

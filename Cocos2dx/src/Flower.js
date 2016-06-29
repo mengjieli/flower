@@ -7417,10 +7417,18 @@ var $root = eval("this");
                         this.width = (p[1] - p[2]) * 2;
                         this.x = 2 * p[2] - p[1];
                     } else if (p[0] != null && p[1] != null) {
-                        this.width = p[1] - p[0];
+                        this.width = this.parent.width - p[1] - p[0];
                         this.x = p[0];
-                    } else if (p[6]) {
-                        this.width = this.parent.width * p[6] / 100;
+                    } else {
+                        if (p[0] != null) {
+                            this.x = p[0];
+                        }
+                        if (p[1] != null) {
+                            this.x = this.width - p[1] - this.width;
+                        }
+                        if (p[6]) {
+                            this.width = this.parent.width * p[6] / 100;
+                        }
                     }
                     if (p[3] != null && p[4] == null && p[5] != null) {
                         this.height = (p[5] - p[3]) * 2;
@@ -7429,10 +7437,18 @@ var $root = eval("this");
                         this.height = (p[4] - p[5]) * 2;
                         this.y = 2 * p[5] - p[4];
                     } else if (p[3] != null && p[4] != null) {
-                        this.height = p[4] - p[3];
+                        this.height = this.parent.height - p[4] - p[3];
                         this.y = p[3];
-                    } else if (p[7]) {
-                        this.height = this.parent.height * p[7] / 100;
+                    } else {
+                        if (p[2] != null) {
+                            this.y = p[0];
+                        }
+                        if (p[3] != null) {
+                            this.y = this.height - p[1] - this.height;
+                        }
+                        if (p[7]) {
+                            this.height = this.parent.height * p[7] / 100;
+                        }
                     }
                     var children = this.__children;
                     if (children) {
