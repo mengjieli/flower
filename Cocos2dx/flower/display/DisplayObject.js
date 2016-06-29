@@ -169,9 +169,6 @@ class DisplayObject extends EventDispatcher {
 
     $getScaleX() {
         var p = this.$DisplayObject;
-        if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            this.$getContentBounds();
-        }
         return p[0];
     }
 
@@ -192,9 +189,6 @@ class DisplayObject extends EventDispatcher {
 
     $getScaleY() {
         var p = this.$DisplayObject;
-        if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-            this.$getContentBounds();
-        }
         return p[1];
     }
 
@@ -267,8 +261,8 @@ class DisplayObject extends EventDispatcher {
 
     $setWidth(val) {
         var p = this.$DisplayObject;
-        if(val == null) {
-            if(p[3] == null) {
+        if (val == null) {
+            if (p[3] == null) {
                 return;
             }
         } else {
@@ -290,8 +284,8 @@ class DisplayObject extends EventDispatcher {
 
     $setHeight(val) {
         var p = this.$DisplayObject;
-        if(val == null) {
-            if(p[4] == null) {
+        if (val == null) {
+            if (p[4] == null) {
                 return;
             }
         } else {
@@ -349,35 +343,6 @@ class DisplayObject extends EventDispatcher {
         p[9] = val;
         return true;
     }
-
-    /**
-     * 尺寸失效， 并且约定过 宽 或者 高
-     */
-    /*$checkSettingSize(rect) {
-     var p = this.$DisplayObject;
-     if (p[3] != null) {
-     if (rect.width == 0) {
-     if (p[3] == 0) {
-     this.scaleX = 0;
-     } else {
-     this.scaleX = 1;
-     }
-     } else {
-     this.scaleX = p[3] / rect.width;
-     }
-     }
-     if (p[4]) {
-     if (rect.height == 0) {
-     if (p[4] == 0) {
-     this.scaleY = 0;
-     } else {
-     this.scaleY = 1;
-     }
-     } else {
-     this.scaleY = p[4] / rect.height;
-     }
-     }
-     }*/
 
     $setParent(parent, stage) {
         this.__parent = parent;

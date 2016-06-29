@@ -2785,9 +2785,6 @@ var $root = eval("this");
             key: "$getScaleX",
             value: function $getScaleX() {
                 var p = this.$DisplayObject;
-                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-                    this.$getContentBounds();
-                }
                 return p[0];
             }
         }, {
@@ -2810,9 +2807,6 @@ var $root = eval("this");
             key: "$getScaleY",
             value: function $getScaleY() {
                 var p = this.$DisplayObject;
-                if (this.$hasFlags(0x0001) && (p[3] != null || p[4] != null)) {
-                    this.$getContentBounds();
-                }
                 return p[1];
             }
         }, {
@@ -2980,36 +2974,6 @@ var $root = eval("this");
                 p[9] = val;
                 return true;
             }
-
-            /**
-             * 尺寸失效， 并且约定过 宽 或者 高
-             */
-            /*$checkSettingSize(rect) {
-             var p = this.$DisplayObject;
-             if (p[3] != null) {
-             if (rect.width == 0) {
-             if (p[3] == 0) {
-             this.scaleX = 0;
-             } else {
-             this.scaleX = 1;
-             }
-             } else {
-             this.scaleX = p[3] / rect.width;
-             }
-             }
-             if (p[4]) {
-             if (rect.height == 0) {
-             if (p[4] == 0) {
-             this.scaleY = 0;
-             } else {
-             this.scaleY = 1;
-             }
-             } else {
-             this.scaleY = p[4] / rect.height;
-             }
-             }
-             }*/
-
         }, {
             key: "$setParent",
             value: function $setParent(parent, stage) {
@@ -7316,24 +7280,23 @@ var $root = eval("this");
                         5: null, //verticalCenter
                         6: null, //percentWidth
                         7: null, //percentHeight
-                        //8: false, //是否设置了自动布局属性
-                        9: null, //uiWidth
-                        10: null };
+                        8: null, //uiWidth
+                        9: null };
                 };
+
+                //p.$getWidth = function () {
+                //    var p = this.$UIComponent;
+                //    var d = this.$DisplayObject;
+                //    return p[9] != null ? p[9] : (d[3] != null ? d[3] : this.$getContentBounds().width);
+                //}
+                //
+                //p.$getHeight = function () {
+                //    var p = this.$UIComponent;
+                //    var d = this.$DisplayObject;
+                //    return p[10] != null ? p[10] : (d[4] != null ? d[4] : this.$getContentBounds().height);
+                //}
 
                 //uiHeight
-                p.$getWidth = function () {
-                    var p = this.$UIComponent;
-                    var d = this.$DisplayObject;
-                    return p[9] != null ? p[9] : d[3] != null ? d[3] : this.$getContentBounds().width;
-                };
-
-                p.$getHeight = function () {
-                    var p = this.$UIComponent;
-                    var d = this.$DisplayObject;
-                    return p[10] != null ? p[10] : d[4] != null ? d[4] : this.$getContentBounds().height;
-                };
-
                 p.$setLeft = function (val) {
                     val = +val || 0;
                     var p = this.$UIComponent;
@@ -7341,6 +7304,56 @@ var $root = eval("this");
                         return false;
                     }
                     p[0] = val;
+                    this.$invalidateContentBounds();
+                };
+
+                p.$setRight = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[1] == val) {
+                        return false;
+                    }
+                    p[1] = val;
+                    this.$invalidateContentBounds();
+                };
+
+                p.$setHorizontalCenter = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[2] == val) {
+                        return false;
+                    }
+                    p[2] = val;
+                    this.$invalidateContentBounds();
+                };
+
+                p.$setTop = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[3] == val) {
+                        return false;
+                    }
+                    p[3] = val;
+                    this.$invalidateContentBounds();
+                };
+
+                p.$setBottom = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[4] == val) {
+                        return false;
+                    }
+                    p[4] = val;
+                    this.$invalidateContentBounds();
+                };
+
+                p.$setVerticalCenter = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[5] == val) {
+                        return false;
+                    }
+                    p[5] = val;
                     this.$invalidateContentBounds();
                 };
 
@@ -7354,12 +7367,40 @@ var $root = eval("this");
                     this.$invalidateContentBounds();
                 };
 
+                p.$setPercentHeight = function (val) {
+                    val = +val || 0;
+                    var p = this.$UIComponent;
+                    if (p[7] == val) {
+                        return false;
+                    }
+                    p[7] = val;
+                    this.$invalidateContentBounds();
+                };
+
                 p.$addFlags = function (flags) {
                     if (flags & 0x0001 == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
                         this.__flags |= 0x1000;
                     }
                     this.__flags |= flags;
                 };
+
+                //p.$setUIWidth = function (val) {
+                //    var p = this.$UIComponent;
+                //    if (p[8] == val) {
+                //        return;
+                //    }
+                //    p[8] = val;
+                //    this.$invalidatePosition();
+                //}
+                //
+                //p.$setUIHeight = function (val) {
+                //    var p = this.$UIComponent;
+                //    if (p[9] == val) {
+                //        return;
+                //    }
+                //    p[9] = val;
+                //    this.$invalidatePosition();
+                //}
 
                 /**
                  * 验证 UI 属性
@@ -7368,23 +7409,126 @@ var $root = eval("this");
                     this.$removeFlags(0x1000);
                     //开始验证属性
                     console.log("验证 ui 属性");
-                    var parentWidth = this.parent.width;
-                    var parentHeight = this.parent.height;
+                    var p = this.$UIComponent;
+                    if (p[0] != null && p[1] == null && p[2] != null) {
+                        this.width = (p[2] - p[0]) * 2;
+                        this.x = p[0];
+                    } else if (p[0] == null && p[1] != null && p[2] != null) {
+                        this.width = (p[1] - p[2]) * 2;
+                        this.x = 2 * p[2] - p[1];
+                    } else if (p[0] != null && p[1] != null) {
+                        this.width = p[1] - p[0];
+                        this.x = p[0];
+                    } else if (p[6]) {
+                        this.width = this.parent.width * p[6] / 100;
+                    }
+                    if (p[3] != null && p[4] == null && p[5] != null) {
+                        this.height = (p[5] - p[3]) * 2;
+                        this.y = p[3];
+                    } else if (p[3] == null && p[4] != null && p[5] != null) {
+                        this.height = (p[4] - p[5]) * 2;
+                        this.y = 2 * p[5] - p[4];
+                    } else if (p[3] != null && p[4] != null) {
+                        this.height = p[4] - p[3];
+                        this.y = p[3];
+                    } else if (p[7]) {
+                        this.height = this.parent.height * p[7] / 100;
+                    }
+                    var children = this.__children;
+                    if (children) {
+                        var child;
+                        for (var i = 0, len = children.length; i < len; i++) {
+                            child = children[i];
+                            if (child.__UIComponent) {
+                                child.$validateUIComponent();
+                            }
+                        }
+                    }
                 };
 
                 p.$onFrameEnd = function () {
                     if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                         this.$validateUIComponent();
                     }
-                    $root._get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                    $root._get(Object.getPrototypeOf(p), "$onFrameEnd", this).call(this);
                 };
 
+                Object.defineProperty(p, "left", {
+                    get: function get() {
+                        return this.$UIComponent[0];
+                    },
+                    set: function set(val) {
+                        this.$setLeft(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "right", {
+                    get: function get() {
+                        return this.$UIComponent[1];
+                    },
+                    set: function set(val) {
+                        this.$setRight(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "horizontalCenter", {
+                    get: function get() {
+                        return this.$UIComponent[2];
+                    },
+                    set: function set(val) {
+                        this.$setHorizontalCenter(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "top", {
+                    get: function get() {
+                        return this.$UIComponent[3];
+                    },
+                    set: function set(val) {
+                        this.$setTop(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "bottom", {
+                    get: function get() {
+                        return this.$UIComponent[4];
+                    },
+                    set: function set(val) {
+                        this.$setBottom(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "verticalCenter", {
+                    get: function get() {
+                        return this.$UIComponent[5];
+                    },
+                    set: function set(val) {
+                        this.$setVerticalCenter(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(p, "percentWidth", {
                     get: function get() {
                         return this.$UIComponent[6];
                     },
                     set: function set(val) {
                         this.$setPercentWidth(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "percentHeight", {
+                    get: function get() {
+                        return this.$UIComponent[7];
+                    },
+                    set: function set(val) {
+                        this.$setPercentHeight(val);
                     },
                     enumerable: true,
                     configurable: true
@@ -7435,5 +7579,27 @@ var $root = eval("this");
 
     _exports.DataGroup = DataGroup;
     //////////////////////////End File:flower/ui/DataGroup.js///////////////////////////
+
+    //////////////////////////File:flower/ui/Image.js///////////////////////////
+
+    var Image = function (_Bitmap) {
+        _inherits(Image, _Bitmap);
+
+        function Image() {
+            _classCallCheck(this, Image);
+
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+
+            _this25.$initUIComponent();
+            return _this25;
+        }
+
+        return Image;
+    }(Bitmap);
+
+    UIComponent.register(Image);
+    Image.prototype.__UIComponent = true;
+    _exports.Image = Image;
+    //////////////////////////End File:flower/ui/Image.js///////////////////////////
 })();
 var flower = _exports;

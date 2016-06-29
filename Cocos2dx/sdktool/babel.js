@@ -234,6 +234,7 @@ var list = [
     "UIComponent",
     "Group",
     "DataGroup",
+    "Image",
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "var $root = eval(\"this\");\n";

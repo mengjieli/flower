@@ -40,6 +40,7 @@ class Main {
 
         var container = new flower.Group();
         container.percentWidth = 50;
+        container.percentHeight = 40;
         container.x = 100;
         //container.width = 150;
         //container.height = 200;
@@ -91,12 +92,14 @@ class Main {
             }
         }, 50);
 
-        var bm = new flower.Bitmap();
+        var bm = new flower.Image();
         bm.x = bm.y = 100;
         //bm.width = bm.height = 400;
         bm.scaleX = bm.scaleY = 4;
         bm.texture = e.data[1];
-        bm.rotation = 30;
+        bm.left = 0;
+        bm.right = 200;
+        //bm.rotation = 30;
         bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
             //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
         }, this);
@@ -123,6 +126,7 @@ class Main {
         container.addChild(bm);
 
         flower.trace(container.width, container.height);
+        return;
         //bm.width = bm.height = null;
         //flower.trace(container.width, container.height);
         //return;
