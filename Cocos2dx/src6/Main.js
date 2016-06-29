@@ -61,6 +61,7 @@ class Main {
         //container.scaleX = container.scaleY = 0.5;
 
         var group = new flower.Group();
+        var dg = new flower.DataGroup();
 
 
         var h = 0;

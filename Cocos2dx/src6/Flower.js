@@ -6601,7 +6601,23 @@ class Group extends Sprite {
     }
 
     $invalidateUIComponent() {
+        if (this.parent) {
+            if (this.parent.__UIComponent) {
+                this.$invalidateUIComponent();
+            } else {
+                this.$addFlags(0x1000);
+            }
+        } else {
+            this.$addFlags(0x1000);
+        }
+    }
 
+    /**
+     * 验证 UI 属性
+     */
+    $validateUIComponent() {
+        this.$removeFlags(0x1000);
+        //开始验证属性
     }
 
     /**
@@ -6609,7 +6625,7 @@ class Group extends Sprite {
      */
     $invalidateContentBounds() {
         this.$addFlagsUp(0x0001 | 0x0004);
-        //if(this.parent && this.parent.)
+        this.$invalidateUIComponent();
     }
 
     $invalidatePosition() {
@@ -6617,6 +6633,14 @@ class Group extends Sprite {
         if (this.__parent) {
             this.__parent.$addFlagsUp(0x0001);
         }
+        this.$invalidateUIComponent();
+    }
+
+    $onFrameEnd() {
+        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+            this.$validateUIComponent();
+        }
+        super.$onFrameEnd();
     }
 }
 
@@ -6624,6 +6648,18 @@ Group.prototype.__UIComponent = true;
 
 exports.Group = Group;
 //////////////////////////End File:flower/ui/Group.js///////////////////////////
+
+
+
+//////////////////////////File:flower/ui/DataGroup.js///////////////////////////
+class DataGroup extends Group {
+    constructor() {
+        super();
+    }
+}
+
+exports.DataGroup = DataGroup;
+//////////////////////////End File:flower/ui/DataGroup.js///////////////////////////
 
 
 

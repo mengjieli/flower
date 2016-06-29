@@ -7293,7 +7293,28 @@ var _exports = {};
             }
         }, {
             key: "$invalidateUIComponent",
-            value: function $invalidateUIComponent() {}
+            value: function $invalidateUIComponent() {
+                if (this.parent) {
+                    if (this.parent.__UIComponent) {
+                        this.$invalidateUIComponent();
+                    } else {
+                        this.$addFlags(0x1000);
+                    }
+                } else {
+                    this.$addFlags(0x1000);
+                }
+            }
+
+            /**
+             * 验证 UI 属性
+             */
+
+        }, {
+            key: "$validateUIComponent",
+            value: function $validateUIComponent() {
+                this.$removeFlags(0x1000);
+                //开始验证属性
+            }
 
             /**
              * 本身尺寸失效
@@ -7303,7 +7324,7 @@ var _exports = {};
             key: "$invalidateContentBounds",
             value: function $invalidateContentBounds() {
                 this.$addFlagsUp(0x0001 | 0x0004);
-                //if(this.parent && this.parent.)
+                this.$invalidateUIComponent();
             }
         }, {
             key: "$invalidatePosition",
@@ -7312,6 +7333,15 @@ var _exports = {};
                 if (this.__parent) {
                     this.__parent.$addFlagsUp(0x0001);
                 }
+                this.$invalidateUIComponent();
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+                    this.$validateUIComponent();
+                }
+                _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
             }
         }]);
 
@@ -7322,5 +7352,22 @@ var _exports = {};
 
     _exports.Group = Group;
     //////////////////////////End File:flower/ui/Group.js///////////////////////////
+
+    //////////////////////////File:flower/ui/DataGroup.js///////////////////////////
+
+    var DataGroup = function (_Group) {
+        _inherits(DataGroup, _Group);
+
+        function DataGroup() {
+            _classCallCheck(this, DataGroup);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+        }
+
+        return DataGroup;
+    }(Group);
+
+    _exports.DataGroup = DataGroup;
+    //////////////////////////End File:flower/ui/DataGroup.js///////////////////////////
 })();
 var flower = _exports;

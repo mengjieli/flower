@@ -232,6 +232,7 @@ var list = [
     "StringDo",
 
     "Group",
+    "DataGroup",
 ];
 var fileContent = "var exports = {};\n";
 fileContent += "(function(){\n";
