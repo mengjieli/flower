@@ -2,12 +2,12 @@ require("./help/com/requirecom");
 require("./help/shell/requireshell");
 
 function compressComplete() {
-    new ShellCommand("babel", ["./src6", "-d", "./src"], function () {
+    new ShellCommand("babel", ["./srcFlower6", "-d", "./src"], function () {
             //console.log("complete!")
 
 //生成 js 依赖关系的文件
 
-            var readDir = "./src6";
+            var readDir = "./srcFlower6";
             var writeFile = "./src/require.js";
 
             function DoFile(file) {
@@ -73,7 +73,7 @@ function compressComplete() {
                     //}
                 }
                 if (!this.className) {
-                    console.log("[warn] not find class : " + file.url);
+                    //console.log("[warn] not find class : " + file.url);
                 }
             }
 
@@ -82,7 +82,7 @@ function compressComplete() {
             var list = [];
             for (var i = 0; i < files.length; i++) {
                 //console.log(files[i].url)
-                if (files[i].url.slice(0, "./src6/flower/".length) == "./src6/flower/") {
+                if (files[i].url.slice(0, "./srcFlower6/flower/".length) == "./srcFlower6/flower/") {
                     continue;
                 }
                 //if (files[i].url.slice(0, "../src/com/".length) == "../src/com/") {
@@ -133,7 +133,7 @@ function compressComplete() {
                     }
                     if (find) {
                         list.splice(i, 1);
-                        info.url = StringDo.replaceString(info.url, "src6", "src");
+                        info.url = StringDo.replaceString(info.url, "srcFlower6", "src");
                         str += "jsFiles.push(\"" + info.url.slice(2, info.url.length) + "\" );\n";
                         break;
                     }
@@ -144,9 +144,10 @@ function compressComplete() {
             beginStr = "var jsFiles = jsFiles||[];\n";
 
 
-            str = beginStr + str;
-            var saveFile = new File(writeFile);
-            saveFile.save(str, "utf-8");
+            //str = beginStr + str;
+            //str += "jsFiles.push(\"UI.js\");\n";
+            //var saveFile = new File(writeFile);
+            //saveFile.save(str, "utf-8");
 
 
         }, null, function (data) {
@@ -157,6 +158,108 @@ function compressComplete() {
         })
 }
 
+var file = new File("flower/");
+var files = file.readFilesWidthEnd("js");
+var list = [
+    "Flower",
+    "Platform",
+    "PlatformDisplayObject",
+    "PlatformSprite",
+    "PlatformTextField",
+    "PlatformTextInput",
+    "PlatformBitmap",
+    "PlatformShape",
+    "PlatformMask",
+    "PlatformTexture",
+    "PlatformURLLoader",
+    "PlatformProgram",
+    "PlatformShaderType",
+
+    "CoreTime",
+
+    "Language",
+    "zh_CN",
+
+    "EventDispatcher",
+    "Event",
+    "TouchEvent",
+    "MouseEvent",
+    "IOErrorEvent",
+
+    "Filter",
+    "ColorFilter",
+    "StrokeFilter",
+    "BlurFilter",
+
+    "Matrix",
+    "Point",
+    "Rectangle",
+    "Size",
+
+    "BlendMode",
+
+    "DisplayObject",
+    "Sprite",
+    "Mask",
+    "Bitmap",
+    "TextField",
+    "TextInput",
+    "Shape",
+    "Stage",
+
+    "Texture",
+    "TextureManager",
+
+    "URLLoader",
+    "URLLoaderList",
+
+    "Plist",
+    "PlistFrame",
+    "PlistLoader",
+    "PlistManager",
+
+    "Res",
+    "ResItem",
+    "ResItemInfo",
+    "ResType",
+
+    "TweenCenter",
+    "TweenPath",
+    "TweenPhysicMove",
+    "BasicPlugin",
+    "Ease",
+    "EaseFunction",
+    "TimeLine",
+    "Tween",
+
+    "EnterFrame",
+    "CallLater",
+    "ObjectDo",
+    "StringDo",
+    "Path",
+    "XMLAttribute",
+    "XMLElement",
+    "XMLNameSpace",
+];
+var fileContent = "var exports = {};\n";
+fileContent += "var $root = eval(\"this\");\n";
+fileContent += "(function(){\n";
+while (list.length) {
+    var name = list.shift();
+    file = files[i];
+    for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (f.name == name) {
+            fileContent += "//////////////////////////File:" + files[i].url + "///////////////////////////\n";
+            fileContent += files[i].readContent() + "\n";
+            fileContent += "//////////////////////////End File:" + files[i].url + "///////////////////////////\n\n\n\n";
+        }
+    }
+}
+fileContent += "})();\n";
+fileContent += "var flower = exports;\n";
+file = new File("srcFlower6/Flower.js");
+file.save(fileContent);
 
 
 compressComplete();

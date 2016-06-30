@@ -1,4 +1,4 @@
-class DataGroup extends Group {
+class DataGroup extends black.Group {
     constructor() {
         super();
     }

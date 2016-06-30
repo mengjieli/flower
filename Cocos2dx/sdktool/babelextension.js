@@ -2,12 +2,12 @@ require("./help/com/requirecom");
 require("./help/shell/requireshell");
 
 function compressComplete() {
-    new ShellCommand("babel", ["./src6", "-d", "./src"], function () {
+    new ShellCommand("babel", ["./srcExtension", "-d", "./src"], function () {
             //console.log("complete!")
 
 //生成 js 依赖关系的文件
 
-            var readDir = "./src6";
+            var readDir = "./srcExtension";
             var writeFile = "./src/require.js";
 
             function DoFile(file) {
@@ -73,7 +73,7 @@ function compressComplete() {
                     //}
                 }
                 if (!this.className) {
-                    console.log("[warn] not find class : " + file.url);
+                    //console.log("[warn] not find class : " + file.url);
                 }
             }
 
@@ -82,7 +82,7 @@ function compressComplete() {
             var list = [];
             for (var i = 0; i < files.length; i++) {
                 //console.log(files[i].url)
-                if (files[i].url.slice(0, "./src6/flower/".length) == "./src6/flower/") {
+                if (files[i].url.slice(0, "./srcExtension/flower/".length) == "./srcExtension/flower/") {
                     continue;
                 }
                 //if (files[i].url.slice(0, "../src/com/".length) == "../src/com/") {
@@ -133,7 +133,7 @@ function compressComplete() {
                     }
                     if (find) {
                         list.splice(i, 1);
-                        info.url = StringDo.replaceString(info.url, "src6", "src");
+                        info.url = StringDo.replaceString(info.url, "srcExtension", "src");
                         str += "jsFiles.push(\"" + info.url.slice(2, info.url.length) + "\" );\n";
                         break;
                     }
@@ -144,9 +144,9 @@ function compressComplete() {
             beginStr = "var jsFiles = jsFiles||[];\n";
 
 
-            str = beginStr + str;
-            var saveFile = new File(writeFile);
-            saveFile.save(str, "utf-8");
+            //str = beginStr + str;
+            //var saveFile = new File(writeFile);
+            //saveFile.save(str, "utf-8");
 
 
         }, null, function (data) {
@@ -157,6 +157,34 @@ function compressComplete() {
         })
 }
 
+var file = new File("extension/");
+var files = file.readFilesWidthEnd("js");
+var list = [
+    "UIComponent",
+    "Group",
+    "DataGroup",
+    "Image",
+];
+var fileContent = "";
+fileContent += "var black = {};\n";
+fileContent += "var $root = eval(\"this\");\n";
+fileContent += "(function(){\n";
+while (list.length) {
+    var name = list.shift();
+    file = files[i];
+    for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (f.name == name) {
+            fileContent += "//////////////////////////File:" + files[i].url + "///////////////////////////\n";
+            fileContent += files[i].readContent() + "\n";
+            fileContent += "//////////////////////////End File:" + files[i].url + "///////////////////////////\n\n\n\n";
+        }
+    }
+}
+fileContent += "})();\n";
+file = new File("srcExtension/Black.js");
+fileContent = StringDo.replaceString(fileContent,"exports.","black.");
+file.save(fileContent);
 
 
 compressComplete();

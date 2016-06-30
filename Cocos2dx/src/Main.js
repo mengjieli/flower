@@ -20,15 +20,15 @@ var Main = function () {
             flower.Stage.getInstance().addChild(container);
             container.x = container.y = 50;
 
-            var image = new flower.Image("res/qq.png");
+            var image = new black.Image("res/qq.png");
             container.addChild(image);
             image.x = image.y = 0;
 
-            var image = new flower.Image("res/qq.png");
+            var image = new black.Image("res/qq.png");
             container.addChild(image);
             image.x = image.y = 100;
 
-            image = new flower.Image();
+            image = new black.Image();
             image.source = "castle/dikuai_04.png#PLIST#res/castlebuilding1.plist";
             image.x = image.y = 150;
             container.addChild(image);
@@ -38,7 +38,7 @@ var Main = function () {
             //    //container.addChild(image);
             //    //image.x = image.y = 50;
             //    var res = new flower.ResItem("res/qq.png", flower.ResType.IMAGE);
-            //    res.addInfo("res/qq2.png", null, null, null, null, true);
+            //    res.addInfo("res/qq2.png",null, null, null, null, null, true);
             //    (new flower.URLLoader(res)).load();
             //});
             //

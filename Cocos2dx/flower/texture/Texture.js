@@ -162,3 +162,5 @@ class Texture {
      */
     static $blank;
 }
+
+exports.Texture = Texture;

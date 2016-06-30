@@ -1,4 +1,4 @@
-class Group extends Sprite {
+class Group extends flower.Sprite {
 
     $UIComponent;
 

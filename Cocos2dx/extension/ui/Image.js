@@ -1,4 +1,4 @@
-class Image extends Bitmap {
+class Image extends flower.Bitmap {
 
     $UIComponent;
     __source;
@@ -18,16 +18,16 @@ class Image extends Bitmap {
         if (val == null) {
             this.texture = null;
         }
-        else if (val instanceof Texture) {
+        else if (val instanceof flower.Texture) {
             this.texture = val;
         } else {
             if (this.__loader) {
                 this.__loader.dispose();
             }
-            this.__loader = new URLLoader(val);
+            this.__loader = new flower.URLLoader(val);
             this.__loader.load();
-            this.__loader.addListener(Event.COMPLETE, this.__onLoadComplete, this);
-            this.__loader.addListener(IOErrorEvent.ERROR, this.__onLoadError, this);
+            this.__loader.addListener(flower.Event.COMPLETE, this.__onLoadComplete, this);
+            this.__loader.addListener(flower.IOErrorEvent.ERROR, this.__onLoadError, this);
         }
     }
 
