@@ -18,6 +18,9 @@ class Bitmap extends DisplayObject {
         }
         if (this.__texture) {
             this.__texture.$delCount();
+            if (this.__texture.dispatcher) {
+                this.__texture.dispatcher.removeListener(Event.COMPLETE, this.$updateTexture, this);
+            }
         }
         this.__texture = val;
         if (!this.$nativeShow) {
@@ -33,8 +36,17 @@ class Bitmap extends DisplayObject {
         else {
             this.$nativeShow.setTexture(Texture.$blank);
         }
+        if (this.__texture && this.__texture.dispatcher) {
+            this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+        }
         this.$invalidateContentBounds();
         return true;
+    }
+
+    $updateTexture(e) {
+        var txt = this.texture;
+        this.texture = null;
+        this.texture = txt;
     }
 
     $setWidth(val) {

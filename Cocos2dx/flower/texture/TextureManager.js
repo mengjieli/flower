@@ -39,6 +39,15 @@ class TextureManager {
         return null;
     }
 
+    $getTextureByURL(url) {
+        for (var i = 0; i < this.list.length; i++) {
+            if (this.list[i].url == url) {
+                return this.list[i];
+            }
+        }
+        return null;
+    }
+
     $check() {
         var texture;
         for (var i = 0; i < this.list.length; i++) {

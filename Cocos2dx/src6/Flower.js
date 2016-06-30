@@ -5,13 +5,15 @@ var $root = eval("this");
 var DEBUG = true;
 var TIP = true;
 var $language = "zh_CN";
+var NATIVE = true;
 /**
  * 用户使用的语言
  * @type {null}
  */
 var LANGUAGE = "";
 var SCALE = null;
-//var $root = this;
+var CACHE = true;
+var UPDATE_RESOURCE = true;
 
 /**
  * 启动引擎
@@ -1068,6 +1070,7 @@ class PlatformURLLoader {
             $tip(2001, url);
         }
         if (url.slice(0, "http://".length) == "http://") {
+            flower.trace("http加载,", url);
             var xhr = cc.loader.getXMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.onloadend = function () {
@@ -1080,22 +1083,22 @@ class PlatformURLLoader {
             };
             xhr.send();
         } else {
-            var res = cc.loader.getRes(url);
+            var res;
+            if(url.split(".")[url.split(".").length - 1] != "plist") {
+                res = cc.loader.getRes(url);
+            }
             if (res) {
-                if (res instanceof String) {
-
-                } else {
-                    res = JSON.stringify(res);
-                }
                 back.call(thisObj, res);
                 PlatformURLLoader.isLoading = false;
             } else {
-                cc.loader.load(url, function () {
-                }, function (error, data) {
+                cc.loader.loadTxt(url, function (error, data) {
                     if (error) {
                         errorBack.call(thisObj);
                     }
                     else {
+                        if (!CACHE) {
+                            cc.loader.release(url);
+                        }
                         if (data instanceof Array) {
                             data = JSON.stringify(data[0]);
                         }
@@ -1121,6 +1124,9 @@ class PlatformURLLoader {
                 errorBack.call(thisObj);
             }
             else {
+                if (!CACHE) {
+                    cc.loader.release(url);
+                }
                 var texture;
                 if (Platform.native) {
                     texture = img;
@@ -1281,9 +1287,11 @@ locale_strings[1003] = "重复创建纹理:{0}";
 locale_strings[1004] = "创建纹理:{0}";
 locale_strings[1005] = "释放纹理:{0}";
 locale_strings[1006] = "纹理已释放:{0} ，关于纹理释放可访问 http://flower/docs/texture.html?dispose";
+locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
 locale_strings[2003] = "[加载纹理失败] {0}";
+locale_strings[2004] = "[加载Plist失败] {0}";
 
 //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
@@ -3283,6 +3291,9 @@ class Bitmap extends DisplayObject {
         }
         if (this.__texture) {
             this.__texture.$delCount();
+            if (this.__texture.dispatcher) {
+                this.__texture.dispatcher.removeListener(Event.COMPLETE, this.$updateTexture, this);
+            }
         }
         this.__texture = val;
         if (!this.$nativeShow) {
@@ -3298,8 +3309,17 @@ class Bitmap extends DisplayObject {
         else {
             this.$nativeShow.setTexture(Texture.$blank);
         }
+        if (this.__texture && this.__texture.dispatcher) {
+            this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+        }
         this.$invalidateContentBounds();
         return true;
+    }
+
+    $updateTexture(e) {
+        var txt = this.texture;
+        this.texture = null;
+        this.texture = txt;
     }
 
     $setWidth(val) {
@@ -4345,6 +4365,12 @@ class Texture {
     $count;
     $parentTexture;
 
+    /**
+     * 更新时间抛出对象，当 Texture 更新时，此对象抛出更新事件 Event.UPDATE
+     * @native
+     */
+    __dispatcher = UPDATE_RESOURCE ? new EventDispatcher() : null;
+
     constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
         this.$nativeTexture = nativeTexture;
         this.__url = url;
@@ -4354,6 +4380,17 @@ class Texture {
         this.__height = h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
+    }
+
+    $update(nativeTexture, w, h, settingWidth, settingHeight) {
+        this.$nativeTexture = nativeTexture;
+        this.__width = w;
+        this.__height = h;
+        this.__settingWidth = settingWidth;
+        this.__settingHeight = settingHeight;
+        if (this.dispatcher) {
+            this.dispatcher.dispatchWidth(Event.UPDATE);
+        }
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
@@ -4372,7 +4409,7 @@ class Texture {
     }
 
     $useTexture() {
-        if(this.$parentTexture) {
+        if (this.$parentTexture) {
             this.$parentTexture.$useTexture();
         } else {
             if (!this.$nativeTexture) {
@@ -4450,6 +4487,14 @@ class Texture {
         return this.height / this.__height;
     }
 
+    /**
+     * 更新时间抛出对象，当 Texture 更新时，此对象抛出更新事件 Event.UPDATE
+     * @native
+     */
+    get dispatcher() {
+        return this.__dispatcher;
+    }
+
     dispose() {
         if (this.$count != 0 || !this.__use) {
             return false;
@@ -4513,6 +4558,15 @@ class TextureManager {
         return null;
     }
 
+    $getTextureByURL(url) {
+        for (var i = 0; i < this.list.length; i++) {
+            if (this.list[i].url == url) {
+                return this.list[i];
+            }
+        }
+        return null;
+    }
+
     $check() {
         var texture;
         for (var i = 0; i < this.list.length; i++) {
@@ -4557,6 +4611,12 @@ class URLLoader extends EventDispatcher {
 
     constructor(res) {
         super();
+        this.$setResource(res);
+        this._language = LANGUAGE;
+        this._scale = SCALE ? SCALE : null;
+    }
+
+    $setResource(res) {
         if (typeof(res) == "string") {
             var resItem = Res.getRes(res);
             if (resItem) {
@@ -4568,8 +4628,6 @@ class URLLoader extends EventDispatcher {
         }
         this._res = res;
         this._type = this._res.type;
-        this._language = LANGUAGE;
-        this._scale = SCALE ? SCALE : null;
     }
 
     get url() {
@@ -4600,6 +4658,9 @@ class URLLoader extends EventDispatcher {
     }
 
     load(res) {
+        if (res) {
+            this.$setResource(res);
+        }
         if (this._isLoading) {
             dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
             return;
@@ -4607,7 +4668,7 @@ class URLLoader extends EventDispatcher {
         this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
         this._isLoading = true;
         for (var i = 0; i < URLLoader.list.length; i++) {
-            if (URLLoader.list[i].loadURL == this.loadURL) {
+            if (URLLoader.list[i].loadURL == this.loadURL && URLLoader.list[i].type == this.type) {
                 this._linkLoader = URLLoader.list[i];
                 break;
             }
@@ -4619,34 +4680,82 @@ class URLLoader extends EventDispatcher {
         URLLoader.list.push(this);
         if (this.type == ResType.IMAGE) {
             this.loadTexture();
+        } else if (this.type == ResType.PLIST) {
+            this.loadPlist();
         } else {
             this.loadText();
         }
     }
 
     loadTexture() {
-        var texture = TextureManager.getInstance().$getTextureByNativeURL(this._loadInfo.url);
+        var texture = TextureManager.getInstance().$getTextureByURL(this.url);
+        if (this._loadInfo.update) {
+            texture = null;
+        }
         if (texture) {
             texture.$addCount();
             this._data = texture;
             new CallLater(this.loadComplete, this);
         }
         else {
-            PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+            if (this._loadInfo.plist) {
+                var loader = new URLLoader(this._loadInfo.plist);
+                loader.addListener(Event.COMPLETE, this.onLoadTexturePlistComplete, this);
+                loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+                loader.load();
+            } else {
+                PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+            }
         }
     }
 
+    onLoadTexturePlistComplete(e) {
+        var plist = e.data;
+        this._data = plist.getFrameTexture(this.url);
+        this.loadComplete();
+    }
+
     loadTextureComplete(nativeTexture, width, height) {
-        nativeTexture = new PlatformTexture(this._loadInfo.url,nativeTexture);
-        var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
-        this._data = texture;
-        texture.$addCount();
+        nativeTexture = new PlatformTexture(this._loadInfo.url, nativeTexture);
+        var oldTexture;
+        if (this._loadInfo.update) {
+            oldTexture = TextureManager.getInstance().$getTextureByURL(this.url);
+        }
+        if (oldTexture) {
+            oldTexture.$update(nativeTexture, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
+        } else {
+            var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
+            this._data = texture;
+            texture.$addCount();
+        }
         new CallLater(this.loadComplete, this);
     }
 
     setTextureByLink(texture) {
         texture.$addCount();
         this._data = texture;
+        this.loadComplete();
+    }
+
+    loadPlist() {
+        var plist = PlistManager.getInstance().getPlist(this.url);
+        if (plist) {
+            this._data = plist;
+            new CallLater(this.loadComplete, this);
+        } else {
+            var load = PlistManager.getInstance().load(this.url, this._loadInfo.url);
+            load.addListener(Event.COMPLETE, this.loadPlistComplete, this);
+            load.addListener(IOErrorEvent.ERROR, this.loadError, this);
+        }
+    }
+
+    loadPlistComplete(e) {
+        this._data = e.data;
+        new CallLater(this.loadComplete, this);
+    }
+
+    setPlistByLink(plist) {
+        this._data = plist;
         this.loadComplete();
     }
 
@@ -4682,7 +4791,7 @@ class URLLoader extends EventDispatcher {
     loadComplete() {
         if (this._links) {
             for (var i = 0; i < this._links.length; i++) {
-                if (this._type == ResType.Image) {
+                if (this._type == ResType.IMAGE) {
                     this._links[i].setTextureByLink(this._data);
                 }
                 else if (this._type == ResType.TEXT) {
@@ -4690,6 +4799,8 @@ class URLLoader extends EventDispatcher {
                 }
                 else if (this._type == ResType.JSON) {
                     this._links[i].setJsonByLink(this._data);
+                } else if (this._type == ResType.PLIST) {
+                    this._links[i].setPlistByLink(this._data);
                 }
             }
         }
@@ -4713,9 +4824,15 @@ class URLLoader extends EventDispatcher {
         this._selfDispose = false;
     }
 
-    loadError() {
+    loadError(e) {
         if (this.hasListener(IOErrorEvent.ERROR)) {
             this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, getLanguage(2003, this._loadInfo.url)));
+            if (this._links) {
+                for (var i = 0; i < this._links.length; i++) {
+                    this._links[i].loadError();
+                }
+            }
+            this.dispose();
         }
         else {
             $error(2003, this._loadInfo.url);
@@ -4826,6 +4943,400 @@ exports.URLLoaderList = URLLoaderList;
 
 
 
+//////////////////////////File:flower/plist/Plist.js///////////////////////////
+class Plist {
+
+    frames = [];
+    _url;
+    _texture;
+    _cacheFlag = false;
+
+    constructor(url, texture) {
+        this._url = url;
+        this._texture = texture;
+    }
+
+    addFrame(frame) {
+        this.frames.push(frame);
+        frame.$setPlist(this);
+    }
+
+    get url() {
+        return this._url;
+    }
+
+    get texture() {
+        return this._texture;
+    }
+
+    set texture(val) {
+        if (this._texture == val) {
+            return;
+        }
+        if (this._texture && this._cacheFlag) {
+            this._texture.$delCount();
+        }
+        this._texture = val;
+        for (var i = 0, len = this.frames.length; i < len; i++) {
+            this.frames[i].clearTexture();
+        }
+    }
+
+    cache() {
+        if (this._texture) {
+            this._texture.$addCount();
+            this._cacheFlag = true;
+        }
+    }
+
+    delCache() {
+        if (this._texture && this._cacheFlag) {
+            this._texture.$delCount();
+            this._cacheFlag = false;
+        }
+    }
+
+    getFrameTexture(name) {
+        if (this.texture.hasDispose) {
+            this._texture = TextureManager.getInstance().$getTextureByURL(this.texture.url);
+        }
+        for (var i = 0, len = this.frames.length; i < len; i++) {
+            if (this.frames[i].name == name) {
+                return this.frames[i].texture;
+            }
+        }
+        return null;
+    }
+}
+//////////////////////////End File:flower/plist/Plist.js///////////////////////////
+
+
+
+//////////////////////////File:flower/plist/PlistFrame.js///////////////////////////
+class PlistFrame {
+    _name;
+    _x;
+    _y;
+    _width;
+    _height;
+    _rotation = false;
+    _offX = 0;
+    _offY = 0;
+    _moveX;
+    _moveY;
+    _sourceHeight;
+    _sourceWidth;
+    _texture;
+    _plist;
+
+    constructor(name) {
+        this._name = name;
+    }
+
+    decode(xml) {
+        var content;
+        for (var i = 0; i < xml.list.length; i++) {
+            if (xml.list[i].name == "key") {
+                content = xml.list[i + 1].value;
+                if (content) {
+                    while (content.indexOf("{") != -1) {
+                        content = content.slice(0, content.indexOf("{")) + content.slice(content.indexOf("{") + 1, content.length);
+                    }
+                    while (content.indexOf("}") != -1) {
+                        content = content.slice(0, content.indexOf("}")) + content.slice(content.indexOf("}") + 1, content.length);
+                    }
+                }
+                if (xml.list[i].value == "frame") {
+                    this._x = parseInt(content.split(",")[0]);
+                    this._y = parseInt(content.split(",")[1]);
+                    this._width = parseInt(content.split(",")[2]);
+                    this._height = parseInt(content.split(",")[3]);
+                }
+                else if (xml.list[i].value == "rotated") {
+                    if (xml.list[i + 1].name == "true") this._rotation = true;
+                    else  this._rotation = false;
+                }
+                else if (xml.list[i].value == "offset") {
+                    this._offX = parseInt(content.split(",")[0]);
+                    this._offY = parseInt(content.split(",")[1]);
+                }
+                else if (xml.list[i].value == "sourceSize") {
+                    this._sourceWidth = parseInt(content.split(",")[0]);
+                    this._sourceHeight = parseInt(content.split(",")[1]);
+                }
+                i++;
+            }
+        }
+        this._moveX = this._offX + (this._sourceWidth - this._width) / 2;
+        this._moveY = this._offY + (this._sourceHeight - this._height) / 2;
+    }
+
+    get name() {
+        return this._name;
+    }
+
+    $setPlist(plist) {
+        this._plist = plist;
+    }
+
+    get texture() {
+        if (!this._texture) {
+            this._texture = this._plist.texture.createSubTexture(this._x, this._y, this._width, this._height, this._moveX, this._moveY, this._rotation);
+        }
+        return this._texture;
+    }
+
+    clearTexture() {
+        this._texture = null;
+    }
+}
+//////////////////////////End File:flower/plist/PlistFrame.js///////////////////////////
+
+
+
+//////////////////////////File:flower/plist/PlistLoader.js///////////////////////////
+class PlistLoader extends EventDispatcher {
+
+    res;
+    _url;
+    _nativeURL
+    textureURL;
+    frames;
+    disposeFlag = false;
+    plist;
+
+    constructor(url, nativeURL) {
+        super();
+        this._url = url;
+        this._nativeURL = nativeURL;
+        this.__load();
+    }
+
+    __load() {
+        var plist = PlistManager.getInstance().getPlist(this._nativeURL);
+        if (plist) {
+            this.plist = plist;
+            this.loadTexture();
+        } else {
+            var res = new ResItem(this._nativeURL, ResType.TEXT);
+            res.addURL(this._nativeURL);
+            var loader = new URLLoader(res);
+            loader.addListener(Event.COMPLETE, this.loadPlistComplete, this);
+            loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            loader.load();
+        }
+    }
+
+    loadError(e) {
+        if (this.hasListener(IOErrorEvent.ERROR)) {
+            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, e.message));
+        } else {
+            $error(2004, this.url);
+        }
+    }
+
+    loadPlistComplete(e) {
+        var frames = [];
+        this.frames = frames;
+        var content = e.data;
+        var xml = XMLElement.parse(content);
+        xml = xml.list[0];
+        var reslist;
+        var attributes;
+        for (var i = 0; i < xml.list.length; i++) {
+            if (xml.list[i].name == "key") {
+                if (xml.list[i].value == "frames") {
+                    reslist = xml.list[i + 1];
+                }
+                else if (xml.list[i].value == "metadata") {
+                    attributes = xml.list[i + 1];
+                }
+                i++;
+            }
+        }
+        var frameFrame;
+        var frame;
+        for (i = 0; i < reslist.list.length; i++) {
+            if (reslist.list[i].name == "key") {
+                frame = new PlistFrame(reslist.list[i].value);
+                frame.decode(reslist.list[i + 1]);
+                frames.push(frame);
+                i++;
+            }
+        }
+        for (i = 0; i < attributes.list.length; i++) {
+            if (attributes.list[i].name == "key") {
+                if (attributes.list[i].value == "realTextureFileName") {
+                    var end = -1;
+                    for (var c = 0; c < this._nativeURL.length; c++) {
+                        if (this._nativeURL.charAt(c) == "/") {
+                            end = c;
+                        }
+                    }
+                    if (end == -1) this.textureURL = attributes.list[i + 1].value;
+                    else  this.textureURL = this._nativeURL.slice(0, end + 1) + attributes.list[i + 1].value;
+                }
+                else if (attributes.list[i].value == "size") {
+                    var size = attributes.list[i + 1].value;
+                    size = size.slice(1, size.length - 1);
+                    //this.width = Math.floor(size.split(",")[0]);
+                    //this.height = Math.floor(size.split(",")[1]);
+                }
+                i++;
+            }
+        }
+        this.loadTexture();
+    }
+
+    loadTexture() {
+        var flag = true;
+        if (this.plist) {
+            var texture = this.plist.texture;
+            if (!texture.hasDispose) {
+                flag = false;
+                texture.$addCount();
+            }
+        }
+        if (flag) {
+            var loader = new URLLoader(this.textureURL || this.plist.texture.nativeURL);
+            loader.addListener(Event.COMPLETE, this.loadTextureComplete, this);
+            loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            loader.load();
+        } else {
+            CallLater.add(this.loadComplete, this, [this.plist]);
+        }
+    }
+
+    loadTextureComplete(e) {
+        if (this.disposeFlag) {
+            return;
+        }
+        var texture = e.data;
+        texture.$addCount();
+        if (this.plist) {
+            this.plist.texture = texture;
+            this.loadComplete(this.plist);
+        } else {
+            var plist = new Plist(this.url, texture);
+            var list = this.frames || [];
+            for (var i = 0, len = list.length; i < len; i++) {
+                plist.addFrame(list[i]);
+            }
+            PlistManager.getInstance().addPlist(plist);
+            this.loadComplete(plist);
+        }
+        this.dispose();
+    }
+
+    loadComplete(plist) {
+        plist.texture.$delCount();
+        //var texture = plist.getFrameTexture(this.childName);
+        this.dispatchWidth(Event.COMPLETE, plist);
+    }
+
+    dispose() {
+        this.frames = null;
+        this.disposeFlag = true;
+    }
+
+    get url() {
+        return this._url;
+    }
+}
+//////////////////////////End File:flower/plist/PlistLoader.js///////////////////////////
+
+
+
+//////////////////////////File:flower/plist/PlistManager.js///////////////////////////
+class PlistManager {
+
+    plists = [];
+    caches = {};
+    loadingPlist = [];
+
+    constructor() {
+
+    }
+
+    addPlist(plist) {
+        this.plists.push(plist);
+    }
+
+    addPlistWidthConfig(content) {
+
+    }
+
+    cache(url) {
+        this.caches[url] = true;
+    }
+
+    delCache(url) {
+        delete this.caches[url];
+    }
+
+    getPlist(url) {
+        for (var i = 0, len = this.plists.length; i < len; i++) {
+            if (this.plists[i].url == url) {
+                return this.plists[i];
+            }
+        }
+        return null;
+    }
+
+    load(url, nativeURL) {
+        var loader;
+        var list = this.loadingPlist;
+        var url;
+        for (var i = 0, len = list.length; i < len; i++) {
+            if (url == list[i].url) {
+                loader = list[i];
+                break;
+            }
+        }
+        if (!loader) {
+            loader = new PlistLoader(url, nativeURL);
+            list.push(loader);
+            loader.addListener(Event.COMPLETE, this.__onLoadPlistComplete, this);
+        }
+        return loader;
+    }
+
+    __onLoadPlistComplete(e) {
+        var loader = e.currentTarget;
+        var list = this.loadingPlist;
+        for (var i = 0, len = list.length; i < len; i++) {
+            if (loader == list[i]) {
+                list.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    getTexture(url) {
+        var arr = url.split("#");
+        var plistURL = arr[0];
+        var frameName = arr[1];
+        var plist = this.getPlist(url);
+        if (!plist) {
+            return null;
+        }
+        var texture = plist.getFrameTexture(frameName);
+        if (!texture || texture.hasDispose == false) {
+            return null;
+        }
+        return texture;
+    }
+
+    static instance = new PlistManager();
+
+    static getInstance() {
+        return PlistManager.instance;
+    }
+}
+//////////////////////////End File:flower/plist/PlistManager.js///////////////////////////
+
+
+
 //////////////////////////File:flower/res/Res.js///////////////////////////
 class Res {
 
@@ -4929,14 +5440,17 @@ class ResItem {
         this.__loadList.push(info);
     }
 
-    addInfo(url, settingWidth, settingHeight, scale, language) {
+    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false) {
         var info = ResItemInfo.create();
         info.url = url;
+        info.plist = plist;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
         info.scale = scale || 1;
         info.language = language;
+        info.update = update;
         this.__loadList.push(info);
+        return info;
     }
 
     getLoadInfo(language, scale) {
@@ -4974,7 +5488,13 @@ class ResItem {
     static $pools = [];
 
     static create(url) {
-        var array = url.split("/");
+        var plist = null;
+        var array = url.split("#PLIST#");
+        if (array.length == 2) {
+            url = array[0];
+            plist = array[1];
+        }
+        array = url.split("/");
         var last = array.pop();
         var nameArray = last.split(".");
         var name = "";
@@ -5019,7 +5539,7 @@ class ResItem {
         } else {
             res = new ResItem(useURL, ResType.getType(end));
         }
-        res.addInfo(url, settingWidth, settingHeight, scale, language);
+        res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
         return res;
     }
 
@@ -5045,6 +5565,11 @@ class ResItemInfo {
     url;
 
     /**
+     * plist 地址
+     */
+    plist;
+
+    /**
      * 预设的宽
      */
     settingWidth;
@@ -5064,6 +5589,12 @@ class ResItemInfo {
      */
     language;
 
+    /**
+     * 是否更新旧的纹理
+     * @native
+     */
+    update = UPDATE_RESOURCE ? false : null;
+
     static $pools = [];
 
     static create() {
@@ -5075,6 +5606,7 @@ class ResItemInfo {
     }
 
     static release(info) {
+        info.update = false;
         ResItemInfo.$pools.push(info);
     }
 }
@@ -5089,6 +5621,7 @@ class ResType {
     static TEXT = 1;
     static JSON = 2;
     static IMAGE = 3;
+    static PLIST = 4;
 
     static getURLType(url) {
         if (url.split(".").length == 1) {
@@ -5104,6 +5637,9 @@ class ResType {
         }
         if (end == "png" || end == "jpg") {
             return ResType.IMAGE;
+        }
+        if (end == "plist") {
+            return ResType.PLIST;
         }
         return ResType.TEXT;
     }
@@ -6574,6 +7110,318 @@ exports.StringDo = StringDo;
 
 
 
+//////////////////////////File:flower/utils/Path.js///////////////////////////
+class Path {
+    static getFileEnd(url) {
+        var end = url.split("?")[0];
+        end = end.split("/")[end.split("/").length - 1];
+        if (end.split(".").length == 1) {
+            return "";
+        }
+        return end.split(".")[end.split(".").length - 1];
+    }
+
+    static getPathDirection(url) {
+        var arr = url.split("/");
+        if(arr.length == 1) {
+            return "";
+        }
+        return url.slice(0,url.length-arr[arr.length-1].length);
+    }
+}
+
+exports.Path = Path;
+//////////////////////////End File:flower/utils/Path.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/XMLAttribute.js///////////////////////////
+class XMLAttribute {
+    name = "";
+    value = "";
+
+    constructor()
+    {
+    }
+
+}
+
+exports.XMLAttribute = XMLAttribute;
+//////////////////////////End File:flower/utils/XMLAttribute.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/XMLElement.js///////////////////////////
+class XMLElement extends XMLAttribute {
+    namesapces;
+    attributes;
+    list;
+    value;
+
+    constructor() {
+        super();
+        this.namesapces = [];
+        this.attributes = [];
+        this.list = [];
+    }
+
+    addNameSpace(nameSpace) {
+        this.namesapces.push(nameSpace);
+    }
+
+    getAttribute(name) {
+        for (var i = 0; i < this.attributes.length; i++) {
+            if (this.attributes[i].name == name) {
+                return this.attributes[i];
+            }
+        }
+        return null;
+    }
+
+    getNameSapce(name) {
+        for (var i = 0; i < this.namesapces.length; i++) {
+            if (this.namesapces[i].name == name) {
+                return this.namesapces[i];
+            }
+        }
+        return null;
+    }
+
+    getElementByAttribute(atrName, value) {
+        for (var i = 0; i < this.list.length; i++) {
+            for (var a = 0; a < this.list[i].attributes.length; a++) {
+                if (this.list[i].attributes[a].name == atrName && this.list[i].attributes[a].value == value) {
+                    return this.list[i];
+                }
+            }
+        }
+        return null;
+    }
+
+    getElement(name) {
+        for (var i = 0; i < this.list.length; i++) {
+            if (this.list[i].name == name) {
+                return this.list[i];
+            }
+        }
+        return null;
+    }
+
+    getElements(atrName) {
+        var res = [];
+        for (var i = 0; i < this.list.length; i++) {
+            if (this.list[i].name == atrName) {
+                res.push(this.list[i]);
+            }
+        }
+        return res;
+    }
+
+    getAllElements() {
+        var res = [this];
+        for (var i = 0; i < this.list.length; i++) {
+            res = res.concat(this.list[i].getAllElements());
+        }
+        return res;
+    }
+
+    parse(content) {
+        var delStart = -1;
+        for (var i = 0; i < content.length; i++) {
+            if (content.charAt(i) == "\r" || content.charAt(i) == "\n") {
+                content = content.slice(0, i) + content.slice(i + 1, content.length);
+                i--;
+            }
+            if (delStart == -1 && (content.slice(i, i + 2) == "<!" || content.slice(i, i + 2) == "<?")) {
+                delStart = i;
+            }
+            if (delStart != -1 && content.charAt(i) == ">") {
+                content = content.slice(0, delStart) + content.slice(i + 1, content.length);
+                i = i - (i - delStart + 1);
+                delStart = -1;
+            }
+        }
+        this.readInfo(content);
+        if (this.value == "") {
+            this.value = null;
+        }
+    }
+
+    readInfo(content, startIndex = 0) {
+        var leftSign = -1;
+        var len = content.length;
+        var c;
+        var j;
+        for (var i = startIndex; i < len; i++) {
+            c = content.charAt(i);
+            if (c == "<") {
+                for (j = i + 1; j < len; j++) {
+                    c = content.charAt(j);
+                    if (c != " " && c != "\t") {
+                        i = j;
+                        break;
+                    }
+                }
+                for (j = i + 1; j < len; j++) {
+                    c = content.charAt(j);
+                    if (c == " " || c == "\t" || c == "/" || c == ">") {
+                        this.name = content.slice(i, j);
+                        i = j;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        var end = false;
+        var attribute;
+        var nameSpace;
+        for (; i < len; i++) {
+            c = content.charAt(i);
+            if (c == "/") {
+                end = true;
+            }
+            else if (c == ">") {
+                i++;
+                break;
+            }
+            else if (c == " " || c == "\t") {
+            }
+            else {
+                for (j = i + 1; j < len; j++) {
+                    c = content.charAt(j);
+                    if (c == "=" || c == " " || c == "\t") {
+                        var atrName = content.slice(i, j);
+                        if (atrName.split(":").length == 2) {
+                            nameSpace = new XMLNameSpace();
+                            this.namesapces.push(nameSpace);
+                            nameSpace.name = atrName.split(":")[1];
+                        }
+                        else {
+                            attribute = new XMLAttribute();
+                            this.attributes.push(attribute);
+                            attribute.name = atrName;
+                        }
+                        break;
+                    }
+                }
+                j++;
+                var startSign;
+                for (; j < len; j++) {
+                    c = content.charAt(j);
+                    if (c == "\"" || c == "'") {
+                        i = j + 1;
+                        startSign = c;
+                        break;
+                    }
+                }
+                j++;
+                for (; j < len; j++) {
+                    c = content.charAt(j);
+                    if (c == startSign && content.charAt(j - 1) != "\\") {
+                        if (attribute) {
+                            attribute.value = content.slice(i, j);
+                            attribute = null;
+                        }
+                        else {
+                            nameSpace.value = content.slice(i, j);
+                            nameSpace = null;
+                        }
+                        i = j;
+                        break;
+                    }
+                }
+            }
+        }
+        if (end == true)
+            return i;
+        var contentStart;
+        for (; i < len; i++) {
+            c = content.charAt(i);
+            if (c != " " && c != "\t") {
+                contentStart = i;
+                i--;
+                break;
+            }
+        }
+        for (; i < len; i++) {
+            c = content.charAt(i);
+            if (c == "<") {
+                for (j = i + 1; j < len; j++) {
+                    c = content.charAt(j);
+                    if (c != " " && c != "\t") {
+                        break;
+                    }
+                }
+                if (c == "/") {
+                    for (j = i + 1; j < len; j++) {
+                        c = content.charAt(j);
+                        if (c == " " || c == "\t" || c == ">") {
+                            var endName = content.slice(i + 2, j);
+                            if (endName != this.name) {
+                                $error(1020, this.name, endName);
+                            }
+                            break;
+                        }
+                    }
+                    if (this.list.length == 0) {
+                        i--;
+                        for (; i >= 0; i--) {
+                            c = content.charAt(i);
+                            if (c != " " && c != "\t") {
+                                break;
+                            }
+                        }
+                        this.value = content.slice(contentStart, i + 1);
+                    }
+                    for (; j < len; j++) {
+                        c = content.charAt(j);
+                        if (c == ">") {
+                            i = j + 1;
+                            break;
+                        }
+                    }
+                    end = true;
+                    break;
+                }
+                else {
+                    var element = new XMLElement();
+                    this.list.push(element);
+                    i = element.readInfo(content, i) - 1;
+                }
+            }
+        }
+        return i;
+    }
+
+    static parse(content) {
+        var xml = new XMLElement();
+        xml.parse(content);
+        return xml;
+    }
+
+}
+exports.XMLElement = XMLElement;
+//////////////////////////End File:flower/utils/XMLElement.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/XMLNameSpace.js///////////////////////////
+class XMLNameSpace {
+    name = "";
+    value = "";
+
+    constructor()
+    {
+    }
+
+}
+
+exports.XMLNameSpace = XMLNameSpace;
+//////////////////////////End File:flower/utils/XMLNameSpace.js///////////////////////////
+
+
+
 //////////////////////////File:flower/ui/core/UIComponent.js///////////////////////////
 class UIComponent {
     static register(clazz) {
@@ -6716,7 +7564,7 @@ class UIComponent {
         p.$validateUIComponent = function () {
             this.$removeFlags(0x1000);
             //开始验证属性
-            console.log("验证 ui 属性");
+            //console.log("验证 ui 属性");
             var p = this.$UIComponent;
             if (p[0] != null && p[1] == null && p [2] != null) {
                 this.width = (p[2] - p[0]) * 2;
@@ -6897,10 +7745,58 @@ exports.DataGroup = DataGroup;
 class Image extends Bitmap {
 
     $UIComponent;
+    __source;
+    __loader;
 
-    constructor() {
+    constructor(source = null) {
         super();
         this.$initUIComponent();
+        this.source = source;
+    }
+
+    $setSource(val) {
+        if (this.__source == val) {
+            return;
+        }
+        this.__source = val;
+        if (val == null) {
+            this.texture = null;
+        }
+        else if (val instanceof Texture) {
+            this.texture = val;
+        } else {
+            if (this.__loader) {
+                this.__loader.dispose();
+            }
+            this.__loader = new URLLoader(val);
+            this.__loader.load();
+            this.__loader.addListener(Event.COMPLETE, this.__onLoadComplete, this);
+            this.__loader.addListener(IOErrorEvent.ERROR, this.__onLoadError, this);
+        }
+    }
+
+    __onLoadError(e) {
+        this.__loader = null;
+    }
+
+    __onLoadComplete(e) {
+        this.__loader = null;
+        this.texture = e.data;
+    }
+
+    dispose() {
+        if (this.__loader) {
+            this.__loader.dispose();
+        }
+        super.dispose();
+    }
+
+    get source() {
+        return this.__source;
+    }
+
+    set source(val) {
+        this.$setSource(val);
     }
 }
 

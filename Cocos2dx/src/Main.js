@@ -16,20 +16,61 @@ var Main = function () {
         value: function ready() {
             new Test();
 
-            var res = new flower.ResItem("Close.json", flower.ResType.JSON);
-            res.addURL("res/actions/display/Close@en.json");
-            res.addURL("res/actions/display/Dispose@cn.json");
-            flower.Res.addRes(res);
+            var container = new flower.Sprite();
+            flower.Stage.getInstance().addChild(container);
+            container.x = container.y = 50;
 
-            res = new flower.ResItem("Image.png", flower.ResType.IMAGE);
-            res.addURL("res/font.png");
-            res.addURL("res/font@100x100@cn@2.png");
-            res.addURL("res/font@100x100@en.png");
-            flower.Res.addRes(res);
+            var image = new flower.Image("res/qq.png");
+            container.addChild(image);
+            image.x = image.y = 0;
 
-            var load = new flower.URLLoaderList(["Close.json", "Image.png", "res/qq.png", "res/color.png"]);
-            load.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
-            load.load();
+            var image = new flower.Image("res/qq.png");
+            container.addChild(image);
+            image.x = image.y = 100;
+
+            image = new flower.Image();
+            image.source = "castle/dikuai_04.png#PLIST#res/castlebuilding1.plist";
+            image.x = image.y = 150;
+            container.addChild(image);
+
+            //container.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
+            //    //var image = new flower.Image("res/qq.png");
+            //    //container.addChild(image);
+            //    //image.x = image.y = 50;
+            //    var res = new flower.ResItem("res/qq.png", flower.ResType.IMAGE);
+            //    res.addInfo("res/qq2.png", null, null, null, null, true);
+            //    (new flower.URLLoader(res)).load();
+            //});
+            //
+            //
+            //var load = new flower.URLLoader("res/castlebuilding1.plist");
+            //load.load();
+            //load.addListener(flower.Event.COMPLETE, function (e) {
+            //    console.log("load plist complete");
+            //    var plist = e.data;
+            //    var texture = plist.getFrameTexture("castle/dikuai_04.png");
+            //    var bm = new flower.Bitmap(texture);
+            //    container.addChild(bm);
+            //    bm.x = bm.y = 150;
+            //});
+
+            //var res = new flower.ResItem("Close.json", flower.ResType.JSON);
+            //res.addURL("res/actions/display/Close@en.json");
+            //res.addURL("res/actions/display/Dispose@cn.json");
+            //flower.Res.addRes(res);
+            //
+            //res = new flower.ResItem("Image.png", flower.ResType.IMAGE);
+            //res.addURL("res/font.png");
+            //res.addURL("res/font@100x100@cn@2.png");
+            //res.addURL("res/font@100x100@en.png");
+            //flower.Res.addRes(res);
+            //
+            //var load = new flower.URLLoaderList(["Close.json", "Image.png", "res/qq.png", "res/color.png",
+            //    "res/castlebg.png","res/castle.png","res/castle1.png","res/castle2.png","res/castle3.png"
+            //    ,"res/castle4.png","res/castle5.png","res/castle6.png","res/castle7.png","res/castle8.png",
+            //    "res/castle9.png","res/castle10.png"]);
+            //load.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
+            //load.load();
 
             //var load = new flower.URLLoader("Close.json");
             //load.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
@@ -65,10 +106,10 @@ var Main = function () {
             container.addListener(flower.TouchEvent.TOUCH_RELEASE, function (e) {
                 container.dispose();
 
-                this.onLoadComplete({ data: list });
-                //setTimeout(function(){
-                //    this.onLoadComplete({data:list});
-                //}.bind(this),1000);
+                //this.onLoadComplete({data: list});
+                setTimeout(function () {
+                    this.onLoadComplete({ data: list });
+                }.bind(this), 5000);
             }, this);
             //container.shape.drawRect(0, 0, 350, 500);
             //container.scaleX = container.scaleY = 0.5;
@@ -102,16 +143,33 @@ var Main = function () {
                 }
             }, 50);
 
+            //var bg = new flower.Image();
+            //bg.texture = e.data[5];
+            //bg.x = bg.y = 50;
+            //container.addChild(bg);
+            //
+            //var bg2 = new flower.Image();
+            //bg2.texture = e.data[4];
+            //bg2.x = bg2.y = 100;
+            //container.addChild(bg2);
+
+            //for(var i = 1; i < 11; i++) {
+            //    var castle = new flower.Image();
+            //    castle.texture = e.data[5+i];
+            //    castle.x = castle.y = 150;
+            //    container.addChild(castle);
+            //}
+
             var bm = new flower.Image();
             bm.x = bm.y = 100;
             //bm.width = bm.height = 400;
-            //bm.scaleX = bm.scaleY = 4;
+            bm.scaleX = bm.scaleY = 2;
             bm.texture = e.data[1];
             bm.left = 50;
             bm.right = 100;
             bm.top = 120;
             bm.bottom = 130;
-            //bm.rotation = 30;
+            bm.rotation = 30;
             bm.addListener(flower.TouchEvent.TOUCH_BEGIN, function (e) {
                 //flower.trace(e.currentTarget.name, e.type, e.touchX, e.touchY, e.stageX, e.stageY);
             }, this);
@@ -137,41 +195,39 @@ var Main = function () {
             }, this);
             container.addChild(bm);
 
-            console.log(bm.$getContentBounds());
             var bounds = bm.$getBounds();
             var matrix = bm.$getMatrix();
-            console.log(bounds);
+            flower.trace(bounds);
             //bounds.left = 0;
             //bounds.right = 100;
             var reverseMatrix = bm.$getReverseMatrix();
             reverseMatrix.$transformRectangle(bounds);
-            console.log(bounds);
+            flower.trace(bounds);
 
             var point = new flower.Point(0, 0);
-            console.log(point);
+            flower.trace(point);
             matrix.transformPoint(point.x, point.y, point);
-            console.log(point);
+            flower.trace(point);
             reverseMatrix.transformPoint(point.x, point.y, point);
-            console.log(point);
+            flower.trace(point);
 
-            console.log("new point");
+            flower.trace("new point");
             point.setTo(100, 0);
-            console.log(point);
+            flower.trace(point);
             matrix.transformPoint(point.x, point.y, point);
-            console.log(point);
+            flower.trace(point);
             reverseMatrix.transformPoint(point.x, point.y, point);
-            console.log(point);
+            flower.trace(point);
 
-            console.log("new point");
+            flower.trace("new point");
             point.setTo(0, 100);
-            console.log(point);
+            flower.trace(point);
             matrix.transformPoint(point.x, point.y, point);
-            console.log(point);
+            flower.trace(point);
             reverseMatrix.transformPoint(point.x, point.y, point);
-            console.log(point);
+            flower.trace(point);
 
             flower.trace(container.width, container.height);
-            return;
             //bm.width = bm.height = null;
             //flower.trace(container.width, container.height);
             //return;
@@ -221,7 +277,7 @@ var Main = function () {
             container.addChild(txt);
 
             //for(var key in txt.$nativeShow.show) {
-            //    console.log(key);
+            //    flower.trace(key);
             //}
 
             var shape = new flower.Shape();

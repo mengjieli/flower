@@ -14,6 +14,12 @@ class URLLoader extends EventDispatcher {
 
     constructor(res) {
         super();
+        this.$setResource(res);
+        this._language = LANGUAGE;
+        this._scale = SCALE ? SCALE : null;
+    }
+
+    $setResource(res) {
         if (typeof(res) == "string") {
             var resItem = Res.getRes(res);
             if (resItem) {
@@ -25,8 +31,6 @@ class URLLoader extends EventDispatcher {
         }
         this._res = res;
         this._type = this._res.type;
-        this._language = LANGUAGE;
-        this._scale = SCALE ? SCALE : null;
     }
 
     get url() {
@@ -57,6 +61,9 @@ class URLLoader extends EventDispatcher {
     }
 
     load(res) {
+        if (res) {
+            this.$setResource(res);
+        }
         if (this._isLoading) {
             dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
             return;
@@ -64,7 +71,7 @@ class URLLoader extends EventDispatcher {
         this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
         this._isLoading = true;
         for (var i = 0; i < URLLoader.list.length; i++) {
-            if (URLLoader.list[i].loadURL == this.loadURL) {
+            if (URLLoader.list[i].loadURL == this.loadURL && URLLoader.list[i].type == this.type) {
                 this._linkLoader = URLLoader.list[i];
                 break;
             }
@@ -76,34 +83,82 @@ class URLLoader extends EventDispatcher {
         URLLoader.list.push(this);
         if (this.type == ResType.IMAGE) {
             this.loadTexture();
+        } else if (this.type == ResType.PLIST) {
+            this.loadPlist();
         } else {
             this.loadText();
         }
     }
 
     loadTexture() {
-        var texture = TextureManager.getInstance().$getTextureByNativeURL(this._loadInfo.url);
+        var texture = TextureManager.getInstance().$getTextureByURL(this.url);
+        if (this._loadInfo.update) {
+            texture = null;
+        }
         if (texture) {
             texture.$addCount();
             this._data = texture;
             new CallLater(this.loadComplete, this);
         }
         else {
-            PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+            if (this._loadInfo.plist) {
+                var loader = new URLLoader(this._loadInfo.plist);
+                loader.addListener(Event.COMPLETE, this.onLoadTexturePlistComplete, this);
+                loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+                loader.load();
+            } else {
+                PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+            }
         }
     }
 
+    onLoadTexturePlistComplete(e) {
+        var plist = e.data;
+        this._data = plist.getFrameTexture(this.url);
+        this.loadComplete();
+    }
+
     loadTextureComplete(nativeTexture, width, height) {
-        nativeTexture = new PlatformTexture(this._loadInfo.url,nativeTexture);
-        var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
-        this._data = texture;
-        texture.$addCount();
+        nativeTexture = new PlatformTexture(this._loadInfo.url, nativeTexture);
+        var oldTexture;
+        if (this._loadInfo.update) {
+            oldTexture = TextureManager.getInstance().$getTextureByURL(this.url);
+        }
+        if (oldTexture) {
+            oldTexture.$update(nativeTexture, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
+        } else {
+            var texture = TextureManager.getInstance().$createTexture(nativeTexture, this.url, this._loadInfo.url, width, height, this._loadInfo.settingWidth, this._loadInfo.settingHeight);
+            this._data = texture;
+            texture.$addCount();
+        }
         new CallLater(this.loadComplete, this);
     }
 
     setTextureByLink(texture) {
         texture.$addCount();
         this._data = texture;
+        this.loadComplete();
+    }
+
+    loadPlist() {
+        var plist = PlistManager.getInstance().getPlist(this.url);
+        if (plist) {
+            this._data = plist;
+            new CallLater(this.loadComplete, this);
+        } else {
+            var load = PlistManager.getInstance().load(this.url, this._loadInfo.url);
+            load.addListener(Event.COMPLETE, this.loadPlistComplete, this);
+            load.addListener(IOErrorEvent.ERROR, this.loadError, this);
+        }
+    }
+
+    loadPlistComplete(e) {
+        this._data = e.data;
+        new CallLater(this.loadComplete, this);
+    }
+
+    setPlistByLink(plist) {
+        this._data = plist;
         this.loadComplete();
     }
 
@@ -139,7 +194,7 @@ class URLLoader extends EventDispatcher {
     loadComplete() {
         if (this._links) {
             for (var i = 0; i < this._links.length; i++) {
-                if (this._type == ResType.Image) {
+                if (this._type == ResType.IMAGE) {
                     this._links[i].setTextureByLink(this._data);
                 }
                 else if (this._type == ResType.TEXT) {
@@ -147,6 +202,8 @@ class URLLoader extends EventDispatcher {
                 }
                 else if (this._type == ResType.JSON) {
                     this._links[i].setJsonByLink(this._data);
+                } else if (this._type == ResType.PLIST) {
+                    this._links[i].setPlistByLink(this._data);
                 }
             }
         }
@@ -170,9 +227,15 @@ class URLLoader extends EventDispatcher {
         this._selfDispose = false;
     }
 
-    loadError() {
+    loadError(e) {
         if (this.hasListener(IOErrorEvent.ERROR)) {
             this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, getLanguage(2003, this._loadInfo.url)));
+            if (this._links) {
+                for (var i = 0; i < this._links.length; i++) {
+                    this._links[i].loadError();
+                }
+            }
+            this.dispose();
         }
         else {
             $error(2003, this._loadInfo.url);

@@ -212,6 +212,11 @@ var list = [
     "URLLoader",
     "URLLoaderList",
 
+    "Plist",
+    "PlistFrame",
+    "PlistLoader",
+    "PlistManager",
+
     "Res",
     "ResItem",
     "ResItemInfo",
@@ -230,6 +235,10 @@ var list = [
     "CallLater",
     "ObjectDo",
     "StringDo",
+    "Path",
+    "XMLAttribute",
+    "XMLElement",
+    "XMLNameSpace",
 
     "UIComponent",
     "Group",

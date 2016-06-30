@@ -13,6 +13,7 @@ class PlatformURLLoader {
             $tip(2001, url);
         }
         if (url.slice(0, "http://".length) == "http://") {
+            flower.trace("http加载,", url);
             var xhr = cc.loader.getXMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.onloadend = function () {
@@ -25,22 +26,22 @@ class PlatformURLLoader {
             };
             xhr.send();
         } else {
-            var res = cc.loader.getRes(url);
+            var res;
+            if(url.split(".")[url.split(".").length - 1] != "plist") {
+                res = cc.loader.getRes(url);
+            }
             if (res) {
-                if (res instanceof String) {
-
-                } else {
-                    res = JSON.stringify(res);
-                }
                 back.call(thisObj, res);
                 PlatformURLLoader.isLoading = false;
             } else {
-                cc.loader.load(url, function () {
-                }, function (error, data) {
+                cc.loader.loadTxt(url, function (error, data) {
                     if (error) {
                         errorBack.call(thisObj);
                     }
                     else {
+                        if (!CACHE) {
+                            cc.loader.release(url);
+                        }
                         if (data instanceof Array) {
                             data = JSON.stringify(data[0]);
                         }
@@ -66,6 +67,9 @@ class PlatformURLLoader {
                 errorBack.call(thisObj);
             }
             else {
+                if (!CACHE) {
+                    cc.loader.release(url);
+                }
                 var texture;
                 if (Platform.native) {
                     texture = img;

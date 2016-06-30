@@ -1,13 +1,15 @@
 var DEBUG = true;
 var TIP = true;
 var $language = "zh_CN";
+var NATIVE = true;
 /**
  * 用户使用的语言
  * @type {null}
  */
 var LANGUAGE = "";
 var SCALE = null;
-//var $root = this;
+var CACHE = true;
+var UPDATE_RESOURCE = true;
 
 /**
  * 启动引擎

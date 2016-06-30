@@ -64,14 +64,17 @@ class ResItem {
         this.__loadList.push(info);
     }
 
-    addInfo(url, settingWidth, settingHeight, scale, language) {
+    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false) {
         var info = ResItemInfo.create();
         info.url = url;
+        info.plist = plist;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
         info.scale = scale || 1;
         info.language = language;
+        info.update = update;
         this.__loadList.push(info);
+        return info;
     }
 
     getLoadInfo(language, scale) {
@@ -109,7 +112,13 @@ class ResItem {
     static $pools = [];
 
     static create(url) {
-        var array = url.split("/");
+        var plist = null;
+        var array = url.split("#PLIST#");
+        if (array.length == 2) {
+            url = array[0];
+            plist = array[1];
+        }
+        array = url.split("/");
         var last = array.pop();
         var nameArray = last.split(".");
         var name = "";
@@ -154,7 +163,7 @@ class ResItem {
         } else {
             res = new ResItem(useURL, ResType.getType(end));
         }
-        res.addInfo(url, settingWidth, settingHeight, scale, language);
+        res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
         return res;
     }
 

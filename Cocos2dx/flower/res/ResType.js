@@ -2,6 +2,7 @@ class ResType {
     static TEXT = 1;
     static JSON = 2;
     static IMAGE = 3;
+    static PLIST = 4;
 
     static getURLType(url) {
         if (url.split(".").length == 1) {
@@ -17,6 +18,9 @@ class ResType {
         }
         if (end == "png" || end == "jpg") {
             return ResType.IMAGE;
+        }
+        if (end == "plist") {
+            return ResType.PLIST;
         }
         return ResType.TEXT;
     }

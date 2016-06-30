@@ -139,7 +139,7 @@ class UIComponent {
         p.$validateUIComponent = function () {
             this.$removeFlags(0x1000);
             //开始验证属性
-            console.log("验证 ui 属性");
+            //console.log("验证 ui 属性");
             var p = this.$UIComponent;
             if (p[0] != null && p[1] == null && p [2] != null) {
                 this.width = (p[2] - p[0]) * 2;

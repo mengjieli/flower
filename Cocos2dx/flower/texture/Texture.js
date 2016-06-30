@@ -15,6 +15,12 @@ class Texture {
     $count;
     $parentTexture;
 
+    /**
+     * 更新时间抛出对象，当 Texture 更新时，此对象抛出更新事件 Event.UPDATE
+     * @native
+     */
+    __dispatcher = UPDATE_RESOURCE ? new EventDispatcher() : null;
+
     constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
         this.$nativeTexture = nativeTexture;
         this.__url = url;
@@ -24,6 +30,17 @@ class Texture {
         this.__height = h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
+    }
+
+    $update(nativeTexture, w, h, settingWidth, settingHeight) {
+        this.$nativeTexture = nativeTexture;
+        this.__width = w;
+        this.__height = h;
+        this.__settingWidth = settingWidth;
+        this.__settingHeight = settingHeight;
+        if (this.dispatcher) {
+            this.dispatcher.dispatchWidth(Event.UPDATE);
+        }
     }
 
     createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
@@ -42,7 +59,7 @@ class Texture {
     }
 
     $useTexture() {
-        if(this.$parentTexture) {
+        if (this.$parentTexture) {
             this.$parentTexture.$useTexture();
         } else {
             if (!this.$nativeTexture) {
@@ -118,6 +135,14 @@ class Texture {
 
     get scaleY() {
         return this.height / this.__height;
+    }
+
+    /**
+     * 更新时间抛出对象，当 Texture 更新时，此对象抛出更新事件 Event.UPDATE
+     * @native
+     */
+    get dispatcher() {
+        return this.__dispatcher;
     }
 
     dispose() {

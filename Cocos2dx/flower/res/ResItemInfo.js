@@ -6,6 +6,11 @@ class ResItemInfo {
     url;
 
     /**
+     * plist 地址
+     */
+    plist;
+
+    /**
      * 预设的宽
      */
     settingWidth;
@@ -25,6 +30,12 @@ class ResItemInfo {
      */
     language;
 
+    /**
+     * 是否更新旧的纹理
+     * @native
+     */
+    update = UPDATE_RESOURCE ? false : null;
+
     static $pools = [];
 
     static create() {
@@ -36,6 +47,7 @@ class ResItemInfo {
     }
 
     static release(info) {
+        info.update = false;
         ResItemInfo.$pools.push(info);
     }
 }
