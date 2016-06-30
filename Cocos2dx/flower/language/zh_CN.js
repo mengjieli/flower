@@ -15,3 +15,10 @@ locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
 locale_strings[2003] = "[加载纹理失败] {0}";
 locale_strings[2004] = "[加载Plist失败] {0}";
+locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
+

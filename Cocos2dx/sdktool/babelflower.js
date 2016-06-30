@@ -7,6 +7,7 @@ function compressComplete() {
 
 //生成 js 依赖关系的文件
 
+            return;
             var readDir = "./srcFlower6";
             var writeFile = "./src/require.js";
 
@@ -241,8 +242,29 @@ var list = [
     "XMLElement",
     "XMLNameSpace",
 ];
-var fileContent = "var exports = {};\n";
-fileContent += "var $root = eval(\"this\");\n";
+var fileContent = "";
+fileContent += `
+var $root = eval(\"this\");
+var __define = $root.__define || function (o, p, g, s) {
+        Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
+    };
+
+function __extends(d, b) {
+    if (b == null) {
+        console.log("bug !!", arguments.callee.caller);
+    }
+    for (var p in b)
+        if (b.hasOwnProperty(p))
+            d[p] = b[p];
+    function __() {
+        this.constructor = d;
+    }
+
+    __.prototype = b.prototype;
+    d.prototype = new __();
+}
+var flower = {};
+`;
 fileContent += "(function(){\n";
 while (list.length) {
     var name = list.shift();
@@ -257,7 +279,9 @@ while (list.length) {
     }
 }
 fileContent += "})();\n";
-fileContent += "var flower = exports;\n";
+fileContent += "var trace = flower.trace;\n";
+fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
+//fileContent += "var flower = exports;\n";
 file = new File("srcFlower6/Flower.js");
 file.save(fileContent);
 

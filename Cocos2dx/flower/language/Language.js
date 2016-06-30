@@ -18,3 +18,5 @@ function getLanguage(code, args) {
     }
     return text;
 }
+
+exports.sys.getLanguage = getLanguage;

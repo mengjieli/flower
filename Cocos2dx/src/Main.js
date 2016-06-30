@@ -20,18 +20,26 @@ var Main = function () {
             flower.Stage.getInstance().addChild(container);
             container.x = container.y = 50;
 
-            var image = new black.Image("res/qq.png");
-            container.addChild(image);
-            image.x = image.y = 0;
+            //var image = new flower.Image("res/qq.png");
+            //container.addChild(image);
+            //image.x = image.y = 0;
+            //
+            //
+            //var image = new flower.Image("res/qq.png");
+            //container.addChild(image);
+            //image.x = image.y = 100;
+            //
+            //
+            //image = new flower.Image();
+            //image.source = "castle/dikuai_04.png#PLIST#res/castlebuilding1.plist";
+            //image.x = image.y = 150;
+            //container.addChild(image);
 
-            var image = new black.Image("res/qq.png");
-            container.addChild(image);
-            image.x = image.y = 100;
+            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:Image source=\"res/qq.png\"/>\n        </f:Group>\n        ";
 
-            image = new black.Image();
-            image.source = "castle/dikuai_04.png#PLIST#res/castlebuilding1.plist";
-            image.x = image.y = 150;
-            container.addChild(image);
+            var ui = new flower.UIParser();
+            ui.parseUI(clazz);
+            container.addChild(ui);
 
             //container.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
             //    //var image = new flower.Image("res/qq.png");

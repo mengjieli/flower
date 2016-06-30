@@ -103,3 +103,9 @@ function trace() {
 exports.start = start;
 exports.getLanguage = $getLanguage;
 exports.trace = trace;
+exports.sys = {
+    DEBUG: DEBUG,
+    $tip: $tip,
+    $warn: $warn,
+    $error: $error
+}

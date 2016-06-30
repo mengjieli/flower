@@ -10,8 +10,25 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _exports = {};
 var $root = eval("this");
+var __define = $root.__define || function (o, p, g, s) {
+    Object.defineProperty(o, p, { configurable: true, enumerable: true, get: g, set: s });
+};
+
+function __extends(d, b) {
+    if (b == null) {
+        console.log("bug !!", arguments.callee.caller);
+    }
+    for (var p in b) {
+        if (b.hasOwnProperty(p)) d[p] = b[p];
+    }function __() {
+        this.constructor = d;
+    }
+
+    __.prototype = b.prototype;
+    d.prototype = new __();
+}
+var flower = {};
 (function () {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
@@ -128,9 +145,15 @@ var $root = eval("this");
         console.log(str);
     }
 
-    _exports.start = start;
-    _exports.getLanguage = $getLanguage;
-    _exports.trace = trace;
+    flower.start = start;
+    flower.getLanguage = $getLanguage;
+    flower.trace = trace;
+    flower.sys = {
+        DEBUG: DEBUG,
+        $tip: $tip,
+        $warn: $warn,
+        $error: $error
+    };
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/Platform.js///////////////////////////
@@ -1378,7 +1401,7 @@ var $root = eval("this");
     CoreTime.currentTime = 0;
 
 
-    _exports.CoreTime = CoreTime;
+    flower.CoreTime = CoreTime;
     //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
     //////////////////////////File:flower/language/Language.js///////////////////////////
@@ -1402,6 +1425,8 @@ var $root = eval("this");
         }
         return text;
     }
+
+    flower.sys.getLanguage = getLanguage;
     //////////////////////////End File:flower/language/Language.js///////////////////////////
 
     //////////////////////////File:flower/language/zh_CN.js///////////////////////////
@@ -1422,6 +1447,12 @@ var $root = eval("this");
     locale_strings[2002] = "[loadTexture] {0}";
     locale_strings[2003] = "[加载纹理失败] {0}";
     locale_strings[2004] = "[加载Plist失败] {0}";
+    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+    locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+    locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+    locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
 
     //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
@@ -1625,7 +1656,7 @@ var $root = eval("this");
         return EventDispatcher;
     }();
 
-    _exports.EventDispatcher = EventDispatcher;
+    flower.EventDispatcher = EventDispatcher;
     //////////////////////////End File:flower/event/EventDispatcher.js///////////////////////////
 
     //////////////////////////File:flower/event/Event.js///////////////////////////
@@ -1723,7 +1754,7 @@ var $root = eval("this");
     Event._eventPool = [];
 
 
-    _exports.Event = Event;
+    flower.Event = Event;
     //////////////////////////End File:flower/event/Event.js///////////////////////////
 
     //////////////////////////File:flower/event/TouchEvent.js///////////////////////////
@@ -1788,7 +1819,7 @@ var $root = eval("this");
     TouchEvent.MOVE = "move";
 
 
-    _exports.TouchEvent = TouchEvent;
+    flower.TouchEvent = TouchEvent;
     //////////////////////////End File:flower/event/TouchEvent.js///////////////////////////
 
     //////////////////////////File:flower/event/MouseEvent.js///////////////////////////
@@ -1840,7 +1871,7 @@ var $root = eval("this");
     MouseEvent.MOUSE_OUT = "mouse_out";
 
 
-    _exports.MouseEvent = MouseEvent;
+    flower.MouseEvent = MouseEvent;
     //////////////////////////End File:flower/event/MouseEvent.js///////////////////////////
 
     //////////////////////////File:flower/event/IOErrorEvent.js///////////////////////////
@@ -1867,7 +1898,7 @@ var $root = eval("this");
     IOErrorEvent.ERROR = "error";
 
 
-    _exports.IOErrorEvent = IOErrorEvent;
+    flower.IOErrorEvent = IOErrorEvent;
     //////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
 
     //////////////////////////File:flower/filters/Filter.js///////////////////////////
@@ -1903,7 +1934,7 @@ var $root = eval("this");
         return Filter;
     }();
 
-    _exports.Filter = Filter;
+    flower.Filter = Filter;
     //////////////////////////End File:flower/filters/Filter.js///////////////////////////
 
     //////////////////////////File:flower/filters/ColorFilter.js///////////////////////////
@@ -1981,7 +2012,7 @@ var $root = eval("this");
         return ColorFilter;
     }(Filter);
 
-    _exports.ColorFilter = ColorFilter;
+    flower.ColorFilter = ColorFilter;
     //////////////////////////End File:flower/filters/ColorFilter.js///////////////////////////
 
     //////////////////////////File:flower/filters/StrokeFilter.js///////////////////////////
@@ -2042,7 +2073,7 @@ var $root = eval("this");
         return StrokeFilter;
     }(Filter);
 
-    _exports.StrokeFilter = StrokeFilter;
+    flower.StrokeFilter = StrokeFilter;
     //////////////////////////End File:flower/filters/StrokeFilter.js///////////////////////////
 
     //////////////////////////File:flower/filters/BlurFilter.js///////////////////////////
@@ -2100,7 +2131,7 @@ var $root = eval("this");
         return BlurFilter;
     }(Filter);
 
-    _exports.BlurFilter = BlurFilter;
+    flower.BlurFilter = BlurFilter;
     //////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
 
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
@@ -2305,7 +2336,7 @@ var $root = eval("this");
     Matrix.matrixPool = [];
 
 
-    _exports.Matrix = Matrix;
+    flower.Matrix = Matrix;
     //////////////////////////End File:flower/geom/Matrix.js///////////////////////////
 
     //////////////////////////File:flower/geom/Point.js///////////////////////////
@@ -2364,7 +2395,7 @@ var $root = eval("this");
     Point.pointPool = [];
 
 
-    _exports.Point = Point;
+    flower.Point = Point;
     //////////////////////////End File:flower/geom/Point.js///////////////////////////
 
     //////////////////////////File:flower/geom/Rectangle.js///////////////////////////
@@ -2528,7 +2559,7 @@ var $root = eval("this");
     Rectangle.rectanglePool = [];
 
 
-    _exports.Rectangle = Rectangle;
+    flower.Rectangle = Rectangle;
     //////////////////////////End File:flower/geom/Rectangle.js///////////////////////////
 
     //////////////////////////File:flower/geom/Size.js///////////////////////////
@@ -2582,7 +2613,7 @@ var $root = eval("this");
     Size.sizePool = [];
 
 
-    _exports.Size = Size;
+    flower.Size = Size;
     //////////////////////////End File:flower/geom/Size.js///////////////////////////
 
     //////////////////////////File:flower/display/BlendMode.js///////////////////////////
@@ -3579,7 +3610,7 @@ var $root = eval("this");
         return Sprite;
     }(DisplayObject);
 
-    _exports.Sprite = Sprite;
+    flower.Sprite = Sprite;
     //////////////////////////End File:flower/display/Sprite.js///////////////////////////
 
     //////////////////////////File:flower/display/Mask.js///////////////////////////
@@ -3649,7 +3680,7 @@ var $root = eval("this");
         return Mask;
     }(Sprite);
 
-    _exports.Mask = Mask;
+    flower.Mask = Mask;
     //////////////////////////End File:flower/display/Mask.js///////////////////////////
 
     //////////////////////////File:flower/display/Bitmap.js///////////////////////////
@@ -3792,7 +3823,7 @@ var $root = eval("this");
         return Bitmap;
     }(DisplayObject);
 
-    _exports.Bitmap = Bitmap;
+    flower.Bitmap = Bitmap;
     //////////////////////////End File:flower/display/Bitmap.js///////////////////////////
 
     //////////////////////////File:flower/display/TextField.js///////////////////////////
@@ -3996,7 +4027,7 @@ var $root = eval("this");
         return TextField;
     }(DisplayObject);
 
-    _exports.TextField = TextField;
+    flower.TextField = TextField;
     //////////////////////////End File:flower/display/TextField.js///////////////////////////
 
     //////////////////////////File:flower/display/TextInput.js///////////////////////////
@@ -4219,7 +4250,7 @@ var $root = eval("this");
         return TextInput;
     }(DisplayObject);
 
-    _exports.TextInput = TextInput;
+    flower.TextInput = TextInput;
     //////////////////////////End File:flower/display/TextInput.js///////////////////////////
 
     //////////////////////////File:flower/display/Shape.js///////////////////////////
@@ -4491,7 +4522,7 @@ var $root = eval("this");
         return Shape;
     }(DisplayObject);
 
-    _exports.Shape = Shape;
+    flower.Shape = Shape;
     //////////////////////////End File:flower/display/Shape.js///////////////////////////
 
     //////////////////////////File:flower/display/Stage.js///////////////////////////
@@ -4813,7 +4844,7 @@ var $root = eval("this");
     Stage.stages = [];
 
 
-    _exports.Stage = Stage;
+    flower.Stage = Stage;
     //////////////////////////End File:flower/display/Stage.js///////////////////////////
 
     //////////////////////////File:flower/texture/Texture.js///////////////////////////
@@ -5003,7 +5034,7 @@ var $root = eval("this");
         return Texture;
     }();
 
-    _exports.Texture = Texture;
+    flower.Texture = Texture;
     //////////////////////////End File:flower/texture/Texture.js///////////////////////////
 
     //////////////////////////File:flower/texture/TextureManager.js///////////////////////////
@@ -5393,7 +5424,7 @@ var $root = eval("this");
     URLLoader.list = [];
 
 
-    _exports.URLLoader = URLLoader;
+    flower.URLLoader = URLLoader;
     //////////////////////////End File:flower/net/URLLoader.js///////////////////////////
 
     //////////////////////////File:flower/net/URLLoaderList.js///////////////////////////
@@ -5466,7 +5497,7 @@ var $root = eval("this");
         return URLLoaderList;
     }(EventDispatcher);
 
-    _exports.URLLoaderList = URLLoaderList;
+    flower.URLLoaderList = URLLoaderList;
     //////////////////////////End File:flower/net/URLLoaderList.js///////////////////////////
 
     //////////////////////////File:flower/plist/Plist.js///////////////////////////
@@ -5929,7 +5960,7 @@ var $root = eval("this");
     Res.__resItems = [];
 
 
-    _exports.Res = Res;
+    flower.Res = Res;
     //////////////////////////End File:flower/res/Res.js///////////////////////////
 
     //////////////////////////File:flower/res/ResItem.js///////////////////////////
@@ -6128,7 +6159,7 @@ var $root = eval("this");
     ResItem.$pools = [];
 
 
-    _exports.ResItem = ResItem;
+    flower.ResItem = ResItem;
     //////////////////////////End File:flower/res/ResItem.js///////////////////////////
 
     //////////////////////////File:flower/res/ResItemInfo.js///////////////////////////
@@ -6199,7 +6230,7 @@ var $root = eval("this");
     ResItemInfo.$pools = [];
 
 
-    _exports.ResItemInfo = ResItemInfo;
+    flower.ResItemInfo = ResItemInfo;
     //////////////////////////End File:flower/res/ResItemInfo.js///////////////////////////
 
     //////////////////////////File:flower/res/ResType.js///////////////////////////
@@ -6243,7 +6274,7 @@ var $root = eval("this");
     ResType.PLIST = 4;
 
 
-    _exports.ResType = ResType;
+    flower.ResType = ResType;
     //////////////////////////End File:flower/res/ResType.js///////////////////////////
 
     //////////////////////////File:flower/tween/plugins/TweenCenter.js///////////////////////////
@@ -6352,7 +6383,7 @@ var $root = eval("this");
         return TweenCenter;
     }();
 
-    _exports.TweenCenter = TweenCenter;
+    flower.TweenCenter = TweenCenter;
     //////////////////////////End File:flower/tween/plugins/TweenCenter.js///////////////////////////
 
     //////////////////////////File:flower/tween/plugins/TweenPath.js///////////////////////////
@@ -6443,7 +6474,7 @@ var $root = eval("this");
         return TweenPath;
     }();
 
-    _exports.TweenPath = TweenPath;
+    flower.TweenPath = TweenPath;
     //////////////////////////End File:flower/tween/plugins/TweenPath.js///////////////////////////
 
     //////////////////////////File:flower/tween/plugins/TweenPhysicMove.js///////////////////////////
@@ -6564,7 +6595,7 @@ var $root = eval("this");
         return TweenPhysicMove;
     }();
 
-    _exports.TweenPhysicMove = TweenPhysicMove;
+    flower.TweenPhysicMove = TweenPhysicMove;
     //////////////////////////End File:flower/tween/plugins/TweenPhysicMove.js///////////////////////////
 
     //////////////////////////File:flower/tween/BasicPlugin.js///////////////////////////
@@ -6612,7 +6643,7 @@ var $root = eval("this");
         return BasicPlugin;
     }();
 
-    _exports.BasicPlugin = BasicPlugin;
+    flower.BasicPlugin = BasicPlugin;
     //////////////////////////End File:flower/tween/BasicPlugin.js///////////////////////////
 
     //////////////////////////File:flower/tween/Ease.js///////////////////////////
@@ -6675,7 +6706,7 @@ var $root = eval("this");
     Ease.BOUNCE_EASE_OUT_IN = "BounceEaseOutIn";
 
 
-    _exports.Ease = Ease;
+    flower.Ease = Ease;
     //////////////////////////End File:flower/tween/Ease.js///////////////////////////
 
     //////////////////////////File:flower/tween/EaseFunction.js///////////////////////////
@@ -7187,7 +7218,7 @@ var $root = eval("this");
         return TimeLine;
     }();
 
-    _exports.TimeLine = TimeLine;
+    flower.TimeLine = TimeLine;
     //////////////////////////End File:flower/tween/TimeLine.js///////////////////////////
 
     //////////////////////////File:flower/tween/Tween.js///////////////////////////
@@ -7517,7 +7548,7 @@ var $root = eval("this");
     Tween.easeCache = {};
 
 
-    _exports.Tween = Tween;
+    flower.Tween = Tween;
     //////////////////////////End File:flower/tween/Tween.js///////////////////////////
 
     //////////////////////////File:flower/utils/EnterFrame.js///////////////////////////
@@ -7583,7 +7614,7 @@ var $root = eval("this");
     EnterFrame.updateFactor = 1;
 
 
-    _exports.EnterFrame = EnterFrame;
+    flower.EnterFrame = EnterFrame;
     //////////////////////////End File:flower/utils/EnterFrame.js///////////////////////////
 
     //////////////////////////File:flower/utils/CallLater.js///////////////////////////
@@ -7643,7 +7674,7 @@ var $root = eval("this");
     CallLater._list = [];
 
 
-    _exports.CallLater = CallLater;
+    flower.CallLater = CallLater;
     //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
 
     //////////////////////////File:flower/utils/ObjectDo.js///////////////////////////
@@ -7731,7 +7762,7 @@ var $root = eval("this");
         return ObjectDo;
     }();
 
-    _exports.ObjectDo = ObjectDo;
+    flower.ObjectDo = ObjectDo;
     //////////////////////////End File:flower/utils/ObjectDo.js///////////////////////////
 
     //////////////////////////File:flower/utils/StringDo.js///////////////////////////
@@ -7834,7 +7865,7 @@ var $root = eval("this");
         return StringDo;
     }();
 
-    _exports.StringDo = StringDo;
+    flower.StringDo = StringDo;
     //////////////////////////End File:flower/utils/StringDo.js///////////////////////////
 
     //////////////////////////File:flower/utils/Path.js///////////////////////////
@@ -7868,7 +7899,7 @@ var $root = eval("this");
         return Path;
     }();
 
-    _exports.Path = Path;
+    flower.Path = Path;
     //////////////////////////End File:flower/utils/Path.js///////////////////////////
 
     //////////////////////////File:flower/utils/XMLAttribute.js///////////////////////////
@@ -7880,7 +7911,7 @@ var $root = eval("this");
         this.value = "";
     };
 
-    _exports.XMLAttribute = XMLAttribute;
+    flower.XMLAttribute = XMLAttribute;
     //////////////////////////End File:flower/utils/XMLAttribute.js///////////////////////////
 
     //////////////////////////File:flower/utils/XMLElement.js///////////////////////////
@@ -8143,7 +8174,7 @@ var $root = eval("this");
         return XMLElement;
     }(XMLAttribute);
 
-    _exports.XMLElement = XMLElement;
+    flower.XMLElement = XMLElement;
     //////////////////////////End File:flower/utils/XMLElement.js///////////////////////////
 
     //////////////////////////File:flower/utils/XMLNameSpace.js///////////////////////////
@@ -8155,7 +8186,7 @@ var $root = eval("this");
         this.value = "";
     };
 
-    _exports.XMLNameSpace = XMLNameSpace;
+    flower.XMLNameSpace = XMLNameSpace;
     //////////////////////////End File:flower/utils/XMLNameSpace.js///////////////////////////
 })();
-var flower = _exports;
+var trace = flower.trace;

@@ -7,6 +7,7 @@ function compressComplete() {
 
 //生成 js 依赖关系的文件
 
+            return;
             var readDir = "./srcExtension";
             var writeFile = "./src/require.js";
 
@@ -33,11 +34,12 @@ function compressComplete() {
                         begin = begin + name.length;
                         begin = StringDo.jumpStrings(content, begin, [" ", "\t"]);
                         if (content.slice(begin, begin + "extends".length) == "extends" && (content.charAt(begin + "extends".length) == " " || content.charAt(begin + "extends".length) == "\t")) {
+                            console.log(file.url, "extends");
                             begin = begin + "extends".length;
                             begin = StringDo.jumpStrings(content, begin, [" ", "\t"]);
                             var superClass = content.slice(begin, StringDo.findCharNotABC(content, begin));
                             this.dependClasses.push(superClass);
-                            //console.log(name + " -> " + this.dependClasses);
+                            console.log(name + " -> " + this.dependClasses);
                         }
                     }
                     if (this.className) {
@@ -160,10 +162,13 @@ function compressComplete() {
 var file = new File("extension/");
 var files = file.readFilesWidthEnd("js");
 var list = [
+    "Black",
     "UIComponent",
     "Group",
     "DataGroup",
+    "UIParser",
     "Image",
+    "TileImage",
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";
@@ -183,7 +188,10 @@ while (list.length) {
 }
 fileContent += "})();\n";
 file = new File("srcExtension/Black.js");
-fileContent = StringDo.replaceString(fileContent,"exports.","black.");
+fileContent = StringDo.replaceString(fileContent, "exports.", "black.");
+fileContent += "for(var key in black) {\n";
+fileContent += "\tflower[key] = black[key];\n";
+fileContent += "}\n";
 file.save(fileContent);
 
 

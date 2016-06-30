@@ -1,5 +1,24 @@
-var exports = {};
+
 var $root = eval("this");
+var __define = $root.__define || function (o, p, g, s) {
+        Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
+    };
+
+function __extends(d, b) {
+    if (b == null) {
+        console.log("bug !!", arguments.callee.caller);
+    }
+    for (var p in b)
+        if (b.hasOwnProperty(p))
+            d[p] = b[p];
+    function __() {
+        this.constructor = d;
+    }
+
+    __.prototype = b.prototype;
+    d.prototype = new __();
+}
+var flower = {};
 (function(){
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
@@ -104,9 +123,15 @@ function trace() {
     console.log(str);
 }
 
-exports.start = start;
-exports.getLanguage = $getLanguage;
-exports.trace = trace;
+flower.start = start;
+flower.getLanguage = $getLanguage;
+flower.trace = trace;
+flower.sys = {
+    DEBUG: DEBUG,
+    $tip: $tip,
+    $warn: $warn,
+    $error: $error
+}
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
 
@@ -1244,7 +1269,7 @@ class CoreTime {
     }
 }
 
-exports.CoreTime = CoreTime;
+flower.CoreTime = CoreTime;
 //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
 
@@ -1270,6 +1295,8 @@ function getLanguage(code, args) {
     }
     return text;
 }
+
+flower.sys.getLanguage = getLanguage;
 //////////////////////////End File:flower/language/Language.js///////////////////////////
 
 
@@ -1292,6 +1319,13 @@ locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
 locale_strings[2003] = "[加载纹理失败] {0}";
 locale_strings[2004] = "[加载Plist失败] {0}";
+locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
+
 
 //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
@@ -1471,7 +1505,7 @@ class EventDispatcher {
     }
 }
 
-exports.EventDispatcher = EventDispatcher;
+flower.EventDispatcher = EventDispatcher;
 //////////////////////////End File:flower/event/EventDispatcher.js///////////////////////////
 
 
@@ -1557,7 +1591,7 @@ class Event {
     }
 }
 
-exports.Event = Event;
+flower.Event = Event;
 //////////////////////////End File:flower/event/Event.js///////////////////////////
 
 
@@ -1606,7 +1640,7 @@ class TouchEvent extends Event {
     static MOVE = "move";
 }
 
-exports.TouchEvent = TouchEvent;
+flower.TouchEvent = TouchEvent;
 //////////////////////////End File:flower/event/TouchEvent.js///////////////////////////
 
 
@@ -1648,7 +1682,7 @@ class MouseEvent extends Event {
     static MOUSE_OUT = "mouse_out";
 }
 
-exports.MouseEvent = MouseEvent;
+flower.MouseEvent = MouseEvent;
 //////////////////////////End File:flower/event/MouseEvent.js///////////////////////////
 
 
@@ -1670,7 +1704,7 @@ class IOErrorEvent extends Event {
 
 }
 
-exports.IOErrorEvent = IOErrorEvent;
+flower.IOErrorEvent = IOErrorEvent;
 //////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
 
 
@@ -1699,7 +1733,7 @@ class Filter {
     }
 }
 
-exports.Filter = Filter;
+flower.Filter = Filter;
 //////////////////////////End File:flower/filters/Filter.js///////////////////////////
 
 
@@ -1763,7 +1797,7 @@ class ColorFilter extends Filter {
     }
 }
 
-exports.ColorFilter = ColorFilter;
+flower.ColorFilter = ColorFilter;
 //////////////////////////End File:flower/filters/ColorFilter.js///////////////////////////
 
 
@@ -1811,7 +1845,7 @@ class StrokeFilter extends Filter {
     }
 }
 
-exports.StrokeFilter = StrokeFilter;
+flower.StrokeFilter = StrokeFilter;
 //////////////////////////End File:flower/filters/StrokeFilter.js///////////////////////////
 
 
@@ -1857,7 +1891,7 @@ class BlurFilter extends Filter {
     }
 }
 
-exports.BlurFilter = BlurFilter;
+flower.BlurFilter = BlurFilter;
 //////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
 
 
@@ -2045,7 +2079,7 @@ class Matrix {
 
 }
 
-exports.Matrix = Matrix;
+flower.Matrix = Matrix;
 //////////////////////////End File:flower/geom/Matrix.js///////////////////////////
 
 
@@ -2098,7 +2132,7 @@ class Point {
     }
 }
 
-exports.Point = Point;
+flower.Point = Point;
 //////////////////////////End File:flower/geom/Point.js///////////////////////////
 
 
@@ -2248,7 +2282,7 @@ class Rectangle {
     }
 }
 
-exports.Rectangle = Rectangle;
+flower.Rectangle = Rectangle;
 //////////////////////////End File:flower/geom/Rectangle.js///////////////////////////
 
 
@@ -2297,7 +2331,7 @@ class Size {
     }
 }
 
-exports.Size = Size;
+flower.Size = Size;
 //////////////////////////End File:flower/geom/Size.js///////////////////////////
 
 
@@ -3201,7 +3235,7 @@ class Sprite extends DisplayObject {
     }
 }
 
-exports.Sprite = Sprite;
+flower.Sprite = Sprite;
 //////////////////////////End File:flower/display/Sprite.js///////////////////////////
 
 
@@ -3265,7 +3299,7 @@ class Mask extends Sprite {
     }
 }
 
-exports.Mask = Mask;
+flower.Mask = Mask;
 //////////////////////////End File:flower/display/Mask.js///////////////////////////
 
 
@@ -3397,7 +3431,7 @@ class Bitmap extends DisplayObject {
     }
 }
 
-exports.Bitmap = Bitmap;
+flower.Bitmap = Bitmap;
 //////////////////////////End File:flower/display/Bitmap.js///////////////////////////
 
 
@@ -3583,7 +3617,7 @@ class TextField extends DisplayObject {
     }
 }
 
-exports.TextField = TextField;
+flower.TextField = TextField;
 //////////////////////////End File:flower/display/TextField.js///////////////////////////
 
 
@@ -3786,7 +3820,7 @@ class TextInput extends DisplayObject {
     }
 }
 
-exports.TextInput = TextInput;
+flower.TextInput = TextInput;
 //////////////////////////End File:flower/display/TextInput.js///////////////////////////
 
 
@@ -4046,7 +4080,7 @@ class Shape extends DisplayObject {
     }
 }
 
-exports.Shape = Shape;
+flower.Shape = Shape;
 //////////////////////////End File:flower/display/Shape.js///////////////////////////
 
 
@@ -4342,7 +4376,7 @@ class Stage extends Sprite {
     }
 }
 
-exports.Stage = Stage;
+flower.Stage = Stage;
 //////////////////////////End File:flower/display/Stage.js///////////////////////////
 
 
@@ -4513,7 +4547,7 @@ class Texture {
     static $blank;
 }
 
-exports.Texture = Texture;
+flower.Texture = Texture;
 //////////////////////////End File:flower/texture/Texture.js///////////////////////////
 
 
@@ -4874,7 +4908,7 @@ class URLLoader extends EventDispatcher {
     }
 }
 
-exports.URLLoader = URLLoader;
+flower.URLLoader = URLLoader;
 //////////////////////////End File:flower/net/URLLoader.js///////////////////////////
 
 
@@ -4940,7 +4974,7 @@ class URLLoaderList extends EventDispatcher {
     }
 }
 
-exports.URLLoaderList = URLLoaderList;
+flower.URLLoaderList = URLLoaderList;
 //////////////////////////End File:flower/net/URLLoaderList.js///////////////////////////
 
 
@@ -5370,7 +5404,7 @@ class Res {
     }
 }
 
-exports.Res = Res;
+flower.Res = Res;
 //////////////////////////End File:flower/res/Res.js///////////////////////////
 
 
@@ -5553,7 +5587,7 @@ class ResItem {
     }
 }
 
-exports.ResItem = ResItem;
+flower.ResItem = ResItem;
 //////////////////////////End File:flower/res/ResItem.js///////////////////////////
 
 
@@ -5613,7 +5647,7 @@ class ResItemInfo {
     }
 }
 
-exports.ResItemInfo = ResItemInfo;
+flower.ResItemInfo = ResItemInfo;
 //////////////////////////End File:flower/res/ResItemInfo.js///////////////////////////
 
 
@@ -5647,7 +5681,7 @@ class ResType {
     }
 }
 
-exports.ResType = ResType;
+flower.ResType = ResType;
 //////////////////////////End File:flower/res/ResType.js///////////////////////////
 
 
@@ -5759,7 +5793,7 @@ class TweenCenter {
     }
 }
 
-exports.TweenCenter = TweenCenter;
+flower.TweenCenter = TweenCenter;
 //////////////////////////End File:flower/tween/plugins/TweenCenter.js///////////////////////////
 
 
@@ -5844,7 +5878,7 @@ class TweenPath {
 
 }
 
-exports.TweenPath = TweenPath;
+flower.TweenPath = TweenPath;
 //////////////////////////End File:flower/tween/plugins/TweenPath.js///////////////////////////
 
 
@@ -5955,7 +5989,7 @@ class TweenPhysicMove {
 
 }
 
-exports.TweenPhysicMove = TweenPhysicMove;
+flower.TweenPhysicMove = TweenPhysicMove;
 //////////////////////////End File:flower/tween/plugins/TweenPhysicMove.js///////////////////////////
 
 
@@ -6004,7 +6038,7 @@ class BasicPlugin {
     }
 }
 
-exports.BasicPlugin = BasicPlugin;
+flower.BasicPlugin = BasicPlugin;
 //////////////////////////End File:flower/tween/BasicPlugin.js///////////////////////////
 
 
@@ -6059,7 +6093,7 @@ class Ease {
     }
 }
 
-exports.Ease = Ease;
+flower.Ease = Ease;
 //////////////////////////End File:flower/tween/Ease.js///////////////////////////
 
 
@@ -6516,7 +6550,7 @@ class TimeLine {
     }
 }
 
-exports.TimeLine = TimeLine;
+flower.TimeLine = TimeLine;
 //////////////////////////End File:flower/tween/TimeLine.js///////////////////////////
 
 
@@ -6827,7 +6861,7 @@ class Tween {
 
 }
 
-exports.Tween = Tween;
+flower.Tween = Tween;
 //////////////////////////End File:flower/tween/Tween.js///////////////////////////
 
 
@@ -6883,7 +6917,7 @@ class EnterFrame {
     }
 }
 
-exports.EnterFrame = EnterFrame;
+flower.EnterFrame = EnterFrame;
 //////////////////////////End File:flower/utils/EnterFrame.js///////////////////////////
 
 
@@ -6935,7 +6969,7 @@ class CallLater {
 
 }
 
-exports.CallLater = CallLater;
+flower.CallLater = CallLater;
 //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
 
 
@@ -7017,7 +7051,7 @@ class ObjectDo {
     }
 }
 
-exports.ObjectDo = ObjectDo;
+flower.ObjectDo = ObjectDo;
 //////////////////////////End File:flower/utils/ObjectDo.js///////////////////////////
 
 
@@ -7107,7 +7141,7 @@ class StringDo {
     }
 }
 
-exports.StringDo = StringDo;
+flower.StringDo = StringDo;
 //////////////////////////End File:flower/utils/StringDo.js///////////////////////////
 
 
@@ -7132,7 +7166,7 @@ class Path {
     }
 }
 
-exports.Path = Path;
+flower.Path = Path;
 //////////////////////////End File:flower/utils/Path.js///////////////////////////
 
 
@@ -7148,7 +7182,7 @@ class XMLAttribute {
 
 }
 
-exports.XMLAttribute = XMLAttribute;
+flower.XMLAttribute = XMLAttribute;
 //////////////////////////End File:flower/utils/XMLAttribute.js///////////////////////////
 
 
@@ -7403,7 +7437,7 @@ class XMLElement extends XMLAttribute {
     }
 
 }
-exports.XMLElement = XMLElement;
+flower.XMLElement = XMLElement;
 //////////////////////////End File:flower/utils/XMLElement.js///////////////////////////
 
 
@@ -7419,10 +7453,10 @@ class XMLNameSpace {
 
 }
 
-exports.XMLNameSpace = XMLNameSpace;
+flower.XMLNameSpace = XMLNameSpace;
 //////////////////////////End File:flower/utils/XMLNameSpace.js///////////////////////////
 
 
 
 })();
-var flower = exports;
+var trace = flower.trace;

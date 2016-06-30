@@ -10,20 +10,30 @@ class Main {
         flower.Stage.getInstance().addChild(container);
         container.x = container.y = 50;
 
-        var image = new black.Image("res/qq.png");
-        container.addChild(image);
-        image.x = image.y = 0;
+        //var image = new flower.Image("res/qq.png");
+        //container.addChild(image);
+        //image.x = image.y = 0;
+        //
+        //
+        //var image = new flower.Image("res/qq.png");
+        //container.addChild(image);
+        //image.x = image.y = 100;
+        //
+        //
+        //image = new flower.Image();
+        //image.source = "castle/dikuai_04.png#PLIST#res/castlebuilding1.plist";
+        //image.x = image.y = 150;
+        //container.addChild(image);
 
+        var clazz = `
+        <f:Group xmlns:f="flower">
+            <f:Image source="res/qq.png"/>
+        </f:Group>
+        `;
 
-        var image = new black.Image("res/qq.png");
-        container.addChild(image);
-        image.x = image.y = 100;
-
-
-        image = new black.Image();
-        image.source = "castle/dikuai_04.png#PLIST#res/castlebuilding1.plist";
-        image.x = image.y = 150;
-        container.addChild(image);
+        var ui = new flower.UIParser();
+        ui.parseUI(clazz);
+        container.addChild(ui);
 
         //container.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
         //    //var image = new flower.Image("res/qq.png");
