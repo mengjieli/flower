@@ -80,6 +80,14 @@ var $root = eval("this");
                     }
                 };
 
+                p.removeAllBindProperty = function () {
+                    var binds = this.$UIComponent[10];
+                    for (var key in binds) {
+                        binds[key].dispose();
+                        delete binds[key];
+                    }
+                };
+
                 p.setStatePropertyValue = function (property, state, val) {
                     var checks = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
@@ -478,6 +486,14 @@ var $root = eval("this");
             _this.$initUIComponent();
             return _this;
         }
+
+        _createClass(Group, [{
+            key: "dispose",
+            value: function dispose() {
+                this.removeAllBindProperty();
+                _get(Object.getPrototypeOf(Group.prototype), "dispose", this).call(this);
+            }
+        }]);
 
         return Group;
     }(flower.Sprite);
@@ -1087,6 +1103,7 @@ var $root = eval("this");
                 if (this.__loader) {
                     this.__loader.dispose();
                 }
+                this.removeAllBindProperty();
                 _get(Object.getPrototypeOf(Image.prototype), "dispose", this).call(this);
             }
         }, {

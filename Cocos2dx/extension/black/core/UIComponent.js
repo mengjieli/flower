@@ -48,6 +48,14 @@ class UIComponent {
             }
         }
 
+        p.removeAllBindProperty = function() {
+            var binds = this.$UIComponent[10];
+            for (var key in binds) {
+                binds[key].dispose();
+                delete binds[key];
+            }
+        }
+
         p.setStatePropertyValue = function (property, state, val, checks = null) {
             if (!this._propertyValues) {
                 this._propertyValues = {};

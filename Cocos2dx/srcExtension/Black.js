@@ -61,6 +61,14 @@ class UIComponent {
             }
         }
 
+        p.removeAllBindProperty = function() {
+            var binds = this.$UIComponent[10];
+            for (var key in binds) {
+                binds[key].dispose();
+                delete binds[key];
+            }
+        }
+
         p.setStatePropertyValue = function (property, state, val, checks = null) {
             if (!this._propertyValues) {
                 this._propertyValues = {};
@@ -453,6 +461,11 @@ class Group extends flower.Sprite {
     constructor() {
         super();
         this.$initUIComponent();
+    }
+
+    dispose() {
+        this.removeAllBindProperty();
+        super.dispose();
     }
 }
 UIComponent.register(Group);
@@ -1035,6 +1048,7 @@ class Image extends flower.Bitmap {
         if (this.__loader) {
             this.__loader.dispose();
         }
+        this.removeAllBindProperty();
         super.dispose();
     }
 

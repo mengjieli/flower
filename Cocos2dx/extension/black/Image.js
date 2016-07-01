@@ -44,6 +44,7 @@ class Image extends flower.Bitmap {
         if (this.__loader) {
             this.__loader.dispose();
         }
+        this.removeAllBindProperty();
         super.dispose();
     }
 

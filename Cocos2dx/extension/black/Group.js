@@ -6,6 +6,11 @@ class Group extends flower.Sprite {
         super();
         this.$initUIComponent();
     }
+
+    dispose() {
+        this.removeAllBindProperty();
+        super.dispose();
+    }
 }
 UIComponent.register(Group);
 Group.prototype.__UIComponent = true;
