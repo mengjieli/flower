@@ -501,6 +501,7 @@ var $root = eval("this");
     UIComponent.register(Group);
     Group.prototype.__UIComponent = true;
     black.Group = Group;
+    this.removeAllBindProperty();
     //////////////////////////End File:extension/black/Group.js///////////////////////////
 
     //////////////////////////File:extension/black/DataGroup.js///////////////////////////

@@ -471,6 +471,7 @@ class Group extends flower.Sprite {
 UIComponent.register(Group);
 Group.prototype.__UIComponent = true;
 black.Group = Group;
+this.removeAllBindProperty();
 //////////////////////////End File:extension/black/Group.js///////////////////////////
 
 
