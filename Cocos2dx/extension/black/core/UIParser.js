@@ -377,15 +377,11 @@ class UIParser extends Group {
             var atrArray = atrName.split(".");
             if (atrName == "class") {
             } else if (atrName == "id") {
-            }
-            else if (atrName == "scale9Grid") {
-                setObject += before + "\t" + thisObj + "." + atrName + " = new flower.Rectangle(" + atrValue + ");\n";
             } else if (atrArray.length == 2) {
                 var atrState = atrArray[1];
                 atrName = atrArray[0];
                 setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
-            }
-            else if (atrArray.length == 1) {
+            } else if (atrArray.length == 1) {
                 if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
                     setObject += before + "\t" + thisObj + ".bindProperty(\"" + atrName + "\", \"" + atrValue + "\", [this]);\n";
                 } else {

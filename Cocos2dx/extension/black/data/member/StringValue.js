@@ -1,6 +1,6 @@
 class StringValue extends Value {
 
-    constructor(init = 0) {
+    constructor(init = "") {
         super();
         this.__old = this.__value = init;
     }

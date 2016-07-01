@@ -344,9 +344,8 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
-    $setParent(parent, stage) {
+    $setParent(parent) {
         this.__parent = parent;
-        this.__stage = stage;
         var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
         if (this.__parentAlpha != parentAlpha) {
             this.__parentAlpha = parentAlpha;
@@ -359,6 +358,10 @@ class DisplayObject extends EventDispatcher {
             this.$setParentFilters(null);
             this.dispatchWidth(Event.REMOVED);
         }
+    }
+
+    $setStage(stage) {
+        this.__stage = stage;
     }
 
     $dispatchAddedToStageEvent() {

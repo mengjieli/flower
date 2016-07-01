@@ -6,20 +6,20 @@ class Button extends Group {
         super();
         this.absoluteState = true;
         this.currentState = "up";
-        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouch, this);
-        this.addListener(flower.TouchEvent.TOUCH_END, this._onTouch, this);
-        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouch, this);
     }
 
-    _getMouseTarget(matrix, mutiply) {
-        var target = super._getMouseTarget(matrix, mutiply);
+    $getMouseTarget(touchX, touchY, multiply) {
+        var target = super.$getMouseTarget(touchX, touchY, multiply);
         if (target) {
             target = this;
         }
         return target;
     }
 
-    _onTouch(e) {
+    __onTouch(e) {
         if (!this.enabled) {
             e.stopPropagation();
             return;
@@ -35,30 +35,30 @@ class Button extends Group {
         }
     }
 
-    _setEnabled(val) {
+    __setEnabled(val) {
+        val = !!val;
+        if (this._enabled == val) {
+            return false;
+        }
         this._enabled = val;
         if (this._enabled) {
             this.currentState = "up";
-        }
-        else {
+        } else {
             this.currentState = "disabled";
         }
+        return true;
     }
 
     set enabled(val) {
-        val = !!val;
-        if (this._enabled == val) {
-            return;
-        }
-        this._setEnabled(val);
+        this.__setEnabled(val);
     }
 
     get enabled() {
         return this._enabled;
     }
 
-    addUIEvents() {
-        super.addUIEvents();
+    addUIComponentEvents() {
+        super.addUIComponentEvents();
         this.addListener(flower.TouchEvent.TOUCH_END, this.onEXEClick, this);
     }
 

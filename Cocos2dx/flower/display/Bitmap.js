@@ -82,6 +82,13 @@ class Bitmap extends DisplayObject {
     }
 
     $setScale9Grid(val) {
+        if (typeof val == "string" && val.split(",").length == 4) {
+            var params = val.split(",");
+            val = new Rectangle(+params[0], +params[1], +params[2], +params[3]);
+        }
+        if (!(val instanceof Rectangle)) {
+            val = null;
+        }
         var p = this.$Bitmap;
         if (p[0] == val) {
             return false;

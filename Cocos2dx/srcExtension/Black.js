@@ -29,7 +29,20 @@ class UIComponent {
                 10: {}, //binds
                 11: new StringValue(),//state
                 12: false, //absoluteState
+                13: this, //eventThis
             };
+            this.addUIComponentEvents();
+        }
+
+        p.addUIComponentEvents = function () {
+            this.addListener(flower.Event.ADDED_TO_STAGE, this.onEXEAdded, this);
+        }
+
+        p.addChildAt = function (child, index) {
+            $root._get(Object.getPrototypeOf(p), "addChildAt", this).call(this, child, index);
+            if (child.parent == this && child.__UIComponent && !child.absoluteState) {
+                child.currentState = this.currentState;
+            }
         }
 
         p.bindProperty = function (property, content, checks = null) {
@@ -80,6 +93,12 @@ class UIComponent {
                 }
             }
             return this.currentState;
+        }
+
+        p.onEXEAdded = function (e) {
+            if (this.onAddedEXE && e.target == this) {
+                this.onAddedEXE.call(this);
+            }
         }
 
         //p.$getWidth = function () {
@@ -390,6 +409,32 @@ class UIComponent {
             },
             set: function (val) {
                 this.$UIComponent[12] = !!val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(p, "eventThis", {
+            get: function () {
+                return this.$UIComponent[13];
+            },
+            set: function (val) {
+                this.$UIComponent[13] = val || this;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(p, "onAddedToStage", {
+            get: function () {
+                return this.onAddedEXE;
+            },
+            set: function (val) {
+                if (typeof val == "string") {
+                    var content = val;
+                    val = function () {
+                        eval(content);
+                    }.bind(this.eventThis);
+                }
+                this.onAddedEXE = val;
             },
             enumerable: true,
             configurable: true
@@ -809,15 +854,11 @@ class UIParser extends Group {
             var atrArray = atrName.split(".");
             if (atrName == "class") {
             } else if (atrName == "id") {
-            }
-            else if (atrName == "scale9Grid") {
-                setObject += before + "\t" + thisObj + "." + atrName + " = new flower.Rectangle(" + atrValue + ");\n";
             } else if (atrArray.length == 2) {
                 var atrState = atrArray[1];
                 atrName = atrArray[0];
                 setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
-            }
-            else if (atrArray.length == 1) {
+            } else if (atrArray.length == 1) {
                 if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
                     setObject += before + "\t" + thisObj + ".bindProperty(\"" + atrName + "\", \"" + atrValue + "\", [this]);\n";
                 } else {
@@ -1038,20 +1079,20 @@ class Button extends Group {
         super();
         this.absoluteState = true;
         this.currentState = "up";
-        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouch, this);
-        this.addListener(flower.TouchEvent.TOUCH_END, this._onTouch, this);
-        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouch, this);
     }
 
-    _getMouseTarget(matrix, mutiply) {
-        var target = super._getMouseTarget(matrix, mutiply);
+    $getMouseTarget(touchX, touchY, multiply) {
+        var target = super.$getMouseTarget(touchX, touchY, multiply);
         if (target) {
             target = this;
         }
         return target;
     }
 
-    _onTouch(e) {
+    __onTouch(e) {
         if (!this.enabled) {
             e.stopPropagation();
             return;
@@ -1067,30 +1108,30 @@ class Button extends Group {
         }
     }
 
-    _setEnabled(val) {
+    __setEnabled(val) {
+        val = !!val;
+        if (this._enabled == val) {
+            return false;
+        }
         this._enabled = val;
         if (this._enabled) {
             this.currentState = "up";
-        }
-        else {
+        } else {
             this.currentState = "disabled";
         }
+        return true;
     }
 
     set enabled(val) {
-        val = !!val;
-        if (this._enabled == val) {
-            return;
-        }
-        this._setEnabled(val);
+        this.__setEnabled(val);
     }
 
     get enabled() {
         return this._enabled;
     }
 
-    addUIEvents() {
-        super.addUIEvents();
+    addUIComponentEvents() {
+        super.addUIComponentEvents();
         this.addListener(flower.TouchEvent.TOUCH_END, this.onEXEClick, this);
     }
 
@@ -1646,7 +1687,7 @@ class ObjectValue extends Value {
 //////////////////////////File:extension/black/data/member/StringValue.js///////////////////////////
 class StringValue extends Value {
 
-    constructor(init = 0) {
+    constructor(init = "") {
         super();
         this.__old = this.__value = init;
     }

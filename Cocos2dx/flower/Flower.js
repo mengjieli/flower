@@ -54,7 +54,7 @@ function $getLanguage() {
 
 function $error(errorCode, ...args) {
     var msg;
-    if (errorCode instanceof String) {
+    if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
         msg = getLanguage(errorCode, args);
@@ -65,7 +65,7 @@ function $error(errorCode, ...args) {
 
 function $warn(errorCode, ...args) {
     var msg;
-    if (errorCode instanceof String) {
+    if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
         msg = getLanguage(errorCode, args);

@@ -87,7 +87,7 @@ var flower = {};
 
     function $error(errorCode) {
         var msg;
-        if (errorCode instanceof String) {
+        if (typeof errorCode == "string") {
             msg = errorCode;
         } else {
             for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -102,7 +102,7 @@ var flower = {};
 
     function $warn(errorCode) {
         var msg;
-        if (errorCode instanceof String) {
+        if (typeof errorCode == "string") {
             msg = errorCode;
         } else {
             for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
@@ -3045,9 +3045,8 @@ var flower = {};
             }
         }, {
             key: "$setParent",
-            value: function $setParent(parent, stage) {
+            value: function $setParent(parent) {
                 this.__parent = parent;
-                this.__stage = stage;
                 var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
                 if (this.__parentAlpha != parentAlpha) {
                     this.__parentAlpha = parentAlpha;
@@ -3060,6 +3059,11 @@ var flower = {};
                     this.$setParentFilters(null);
                     this.dispatchWidth(Event.REMOVED);
                 }
+            }
+        }, {
+            key: "$setStage",
+            value: function $setStage(stage) {
+                this.__stage = stage;
             }
         }, {
             key: "$dispatchAddedToStageEvent",
@@ -3414,6 +3418,7 @@ var flower = {};
             key: "addChild",
             value: function addChild(child) {
                 this.addChildAt(child, this.__children.length);
+                return child;
             }
         }, {
             key: "addChildAt",
@@ -3434,12 +3439,41 @@ var flower = {};
                     }
                     this.$nativeShow.addChild(child.$nativeShow);
                     children.splice(index, 0, child);
-                    child.$setParent(this, this.stage);
+                    child.$setStage(this.stage);
+                    child.$setParent(this);
                     if (child.parent == this) {
                         child.$dispatchAddedToStageEvent();
                         this.$invalidateContentBounds();
                         this.$addFlags(0x0100);
                     }
+                }
+                return child;
+            }
+        }, {
+            key: "$setStage",
+            value: function $setStage(stage) {
+                _get(Object.getPrototypeOf(Sprite.prototype), "$setStage", this).call(this, stage);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$setStage(this.stage);
+                }
+            }
+        }, {
+            key: "$dispatchAddedToStageEvent",
+            value: function $dispatchAddedToStageEvent() {
+                _get(Object.getPrototypeOf(Sprite.prototype), "$dispatchAddedToStageEvent", this).call(this);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$dispatchAddedToStageEvent();
+                }
+            }
+        }, {
+            key: "$dispatchRemovedFromStageEvent",
+            value: function $dispatchRemovedFromStageEvent() {
+                _get(Object.getPrototypeOf(Sprite.prototype), "$dispatchRemovedFromStageEvent", this).call(this);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$dispatchRemovedFromStageEvent();
                 }
             }
         }, {
@@ -3472,13 +3506,15 @@ var flower = {};
                         }
                         this.$nativeShow.removeChild(child.$nativeShow);
                         children.splice(i, 1);
-                        child.$setParent(null, null);
+                        child.$setStage(null);
+                        child.$setParent(null);
                         child.$dispatchRemovedFromStageEvent();
                         this.$invalidateContentBounds();
                         this.$addFlags(0x0100);
-                        break;
+                        return child;
                     }
                 }
+                return null;
             }
         }, {
             key: "removeChildAt",
@@ -3487,7 +3523,7 @@ var flower = {};
                 if (index < 0 || index >= children.length) {
                     return;
                 }
-                this.removeChild(children[index]);
+                return this.removeChild(children[index]);
             }
         }, {
             key: "setChildIndex",
@@ -3814,6 +3850,13 @@ var flower = {};
         }, {
             key: "$setScale9Grid",
             value: function $setScale9Grid(val) {
+                if (typeof val == "string" && val.split(",").length == 4) {
+                    var params = val.split(",");
+                    val = new Rectangle(+params[0], +params[1], +params[2], +params[3]);
+                }
+                if (!(val instanceof Rectangle)) {
+                    val = null;
+                }
                 var p = this.$Bitmap;
                 if (p[0] == val) {
                     return false;

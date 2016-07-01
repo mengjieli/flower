@@ -77,7 +77,7 @@ function $getLanguage() {
 
 function $error(errorCode, ...args) {
     var msg;
-    if (errorCode instanceof String) {
+    if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
         msg = getLanguage(errorCode, args);
@@ -88,7 +88,7 @@ function $error(errorCode, ...args) {
 
 function $warn(errorCode, ...args) {
     var msg;
-    if (errorCode instanceof String) {
+    if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
         msg = getLanguage(errorCode, args);
@@ -2726,9 +2726,8 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
-    $setParent(parent, stage) {
+    $setParent(parent) {
         this.__parent = parent;
-        this.__stage = stage;
         var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
         if (this.__parentAlpha != parentAlpha) {
             this.__parentAlpha = parentAlpha;
@@ -2741,6 +2740,10 @@ class DisplayObject extends EventDispatcher {
             this.$setParentFilters(null);
             this.dispatchWidth(Event.REMOVED);
         }
+    }
+
+    $setStage(stage) {
+        this.__stage = stage;
     }
 
     $dispatchAddedToStageEvent() {
@@ -3052,6 +3055,7 @@ class Sprite extends DisplayObject {
 
     addChild(child) {
         this.addChildAt(child, this.__children.length);
+        return child;
     }
 
     addChildAt(child, index) {
@@ -3071,12 +3075,38 @@ class Sprite extends DisplayObject {
             }
             this.$nativeShow.addChild(child.$nativeShow);
             children.splice(index, 0, child);
-            child.$setParent(this, this.stage);
+            child.$setStage(this.stage);
+            child.$setParent(this);
             if (child.parent == this) {
                 child.$dispatchAddedToStageEvent();
                 this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
             }
+        }
+        return child;
+    }
+
+    $setStage(stage) {
+        super.$setStage(stage);
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$setStage(this.stage);
+        }
+    }
+
+    $dispatchAddedToStageEvent() {
+        super.$dispatchAddedToStageEvent();
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$dispatchAddedToStageEvent();
+        }
+    }
+
+    $dispatchRemovedFromStageEvent() {
+        super.$dispatchRemovedFromStageEvent();
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$dispatchRemovedFromStageEvent();
         }
     }
 
@@ -3107,13 +3137,15 @@ class Sprite extends DisplayObject {
                 }
                 this.$nativeShow.removeChild(child.$nativeShow);
                 children.splice(i, 1);
-                child.$setParent(null, null);
+                child.$setStage(null);
+                child.$setParent(null);
                 child.$dispatchRemovedFromStageEvent();
                 this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
-                break;
+                return child;
             }
         }
+        return null;
     }
 
     removeChildAt(index) {
@@ -3121,7 +3153,7 @@ class Sprite extends DisplayObject {
         if (index < 0 || index >= children.length) {
             return;
         }
-        this.removeChild(children[index]);
+        return this.removeChild(children[index]);
     }
 
     setChildIndex(child, index) {
@@ -3422,6 +3454,13 @@ class Bitmap extends DisplayObject {
     }
 
     $setScale9Grid(val) {
+        if (typeof val == "string" && val.split(",").length == 4) {
+            var params = val.split(",");
+            val = new Rectangle(+params[0], +params[1], +params[2], +params[3]);
+        }
+        if (!(val instanceof Rectangle)) {
+            val = null;
+        }
         var p = this.$Bitmap;
         if (p[0] == val) {
             return false;

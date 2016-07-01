@@ -16,7 +16,20 @@ class UIComponent {
                 10: {}, //binds
                 11: new StringValue(),//state
                 12: false, //absoluteState
+                13: this, //eventThis
             };
+            this.addUIComponentEvents();
+        }
+
+        p.addUIComponentEvents = function () {
+            this.addListener(flower.Event.ADDED_TO_STAGE, this.onEXEAdded, this);
+        }
+
+        p.addChildAt = function (child, index) {
+            $root._get(Object.getPrototypeOf(p), "addChildAt", this).call(this, child, index);
+            if (child.parent == this && child.__UIComponent && !child.absoluteState) {
+                child.currentState = this.currentState;
+            }
         }
 
         p.bindProperty = function (property, content, checks = null) {
@@ -67,6 +80,12 @@ class UIComponent {
                 }
             }
             return this.currentState;
+        }
+
+        p.onEXEAdded = function (e) {
+            if (this.onAddedEXE && e.target == this) {
+                this.onAddedEXE.call(this);
+            }
         }
 
         //p.$getWidth = function () {
@@ -377,6 +396,32 @@ class UIComponent {
             },
             set: function (val) {
                 this.$UIComponent[12] = !!val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(p, "eventThis", {
+            get: function () {
+                return this.$UIComponent[13];
+            },
+            set: function (val) {
+                this.$UIComponent[13] = val || this;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(p, "onAddedToStage", {
+            get: function () {
+                return this.onAddedEXE;
+            },
+            set: function (val) {
+                if (typeof val == "string") {
+                    var content = val;
+                    val = function () {
+                        eval(content);
+                    }.bind(this.eventThis);
+                }
+                this.onAddedEXE = val;
             },
             enumerable: true,
             configurable: true

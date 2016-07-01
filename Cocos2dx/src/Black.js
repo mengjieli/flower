@@ -45,10 +45,23 @@ var $root = eval("this");
                         9: null, //uiHeight
                         10: {}, //binds
                         11: new StringValue(), //state
-                        12: false };
+                        12: false, //absoluteState
+                        13: this };
+                    //eventThis
+                    this.addUIComponentEvents();
                 };
 
-                //absoluteState
+                p.addUIComponentEvents = function () {
+                    this.addListener(flower.Event.ADDED_TO_STAGE, this.onEXEAdded, this);
+                };
+
+                p.addChildAt = function (child, index) {
+                    $root._get(Object.getPrototypeOf(p), "addChildAt", this).call(this, child, index);
+                    if (child.parent == this && child.__UIComponent && !child.absoluteState) {
+                        child.currentState = this.currentState;
+                    }
+                };
+
                 p.bindProperty = function (property, content) {
                     var checks = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
@@ -100,6 +113,12 @@ var $root = eval("this");
                         }
                     }
                     return this.currentState;
+                };
+
+                p.onEXEAdded = function (e) {
+                    if (this.onAddedEXE && e.target == this) {
+                        this.onAddedEXE.call(this);
+                    }
                 };
 
                 //p.$getWidth = function () {
@@ -408,6 +427,32 @@ var $root = eval("this");
                     },
                     set: function set(val) {
                         this.$UIComponent[12] = !!val;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "eventThis", {
+                    get: function get() {
+                        return this.$UIComponent[13];
+                    },
+                    set: function set(val) {
+                        this.$UIComponent[13] = val || this;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "onAddedToStage", {
+                    get: function get() {
+                        return this.onAddedEXE;
+                    },
+                    set: function set(val) {
+                        if (typeof val == "string") {
+                            var content = val;
+                            val = function () {
+                                eval(content);
+                            }.bind(this.eventThis);
+                        }
+                        this.onAddedEXE = val;
                     },
                     enumerable: true,
                     configurable: true
@@ -789,9 +834,7 @@ var $root = eval("this");
                     var atrName = xml.attributes[i].name;
                     var atrValue = xml.attributes[i].value;
                     var atrArray = atrName.split(".");
-                    if (atrName == "class") {} else if (atrName == "id") {} else if (atrName == "scale9Grid") {
-                        setObject += before + "\t" + thisObj + "." + atrName + " = new flower.Rectangle(" + atrValue + ");\n";
-                    } else if (atrArray.length == 2) {
+                    if (atrName == "class") {} else if (atrName == "id") {} else if (atrArray.length == 2) {
                         var atrState = atrArray[1];
                         atrName = atrArray[0];
                         setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
@@ -1100,24 +1143,24 @@ var $root = eval("this");
 
             _this6.absoluteState = true;
             _this6.currentState = "up";
-            _this6.addListener(flower.TouchEvent.TOUCH_BEGIN, _this6._onTouch, _this6);
-            _this6.addListener(flower.TouchEvent.TOUCH_END, _this6._onTouch, _this6);
-            _this6.addListener(flower.TouchEvent.TOUCH_RELEASE, _this6._onTouch, _this6);
+            _this6.addListener(flower.TouchEvent.TOUCH_BEGIN, _this6.__onTouch, _this6);
+            _this6.addListener(flower.TouchEvent.TOUCH_END, _this6.__onTouch, _this6);
+            _this6.addListener(flower.TouchEvent.TOUCH_RELEASE, _this6.__onTouch, _this6);
             return _this6;
         }
 
         _createClass(Button, [{
-            key: "_getMouseTarget",
-            value: function _getMouseTarget(matrix, mutiply) {
-                var target = _get(Object.getPrototypeOf(Button.prototype), "_getMouseTarget", this).call(this, matrix, mutiply);
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(touchX, touchY, multiply) {
+                var target = _get(Object.getPrototypeOf(Button.prototype), "$getMouseTarget", this).call(this, touchX, touchY, multiply);
                 if (target) {
                     target = this;
                 }
                 return target;
             }
         }, {
-            key: "_onTouch",
-            value: function _onTouch(e) {
+            key: "__onTouch",
+            value: function __onTouch(e) {
                 if (!this.enabled) {
                     e.stopPropagation();
                     return;
@@ -1133,19 +1176,24 @@ var $root = eval("this");
                 }
             }
         }, {
-            key: "_setEnabled",
-            value: function _setEnabled(val) {
+            key: "__setEnabled",
+            value: function __setEnabled(val) {
+                val = !!val;
+                if (this._enabled == val) {
+                    return false;
+                }
                 this._enabled = val;
                 if (this._enabled) {
                     this.currentState = "up";
                 } else {
                     this.currentState = "disabled";
                 }
+                return true;
             }
         }, {
-            key: "addUIEvents",
-            value: function addUIEvents() {
-                _get(Object.getPrototypeOf(Button.prototype), "addUIEvents", this).call(this);
+            key: "addUIComponentEvents",
+            value: function addUIComponentEvents() {
+                _get(Object.getPrototypeOf(Button.prototype), "addUIComponentEvents", this).call(this);
                 this.addListener(flower.TouchEvent.TOUCH_END, this.onEXEClick, this);
             }
         }, {
@@ -1158,11 +1206,7 @@ var $root = eval("this");
         }, {
             key: "enabled",
             set: function set(val) {
-                val = !!val;
-                if (this._enabled == val) {
-                    return;
-                }
-                this._setEnabled(val);
+                this.__setEnabled(val);
             },
             get: function get() {
                 return this._enabled;
@@ -1827,7 +1871,7 @@ var $root = eval("this");
         _inherits(StringValue, _Value6);
 
         function StringValue() {
-            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+            var init = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
 
             _classCallCheck(this, StringValue);
 
