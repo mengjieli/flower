@@ -56,8 +56,8 @@ class Sprite extends DisplayObject {
             if (child.parent) {
                 child.parent.$removeChild(child);
             }
-            if(!this.$nativeShow) {
-                $warn(1002,this.name);
+            if (!this.$nativeShow) {
+                $warn(1002, this.name);
                 return;
             }
             this.$nativeShow.addChild(child.$nativeShow);
@@ -75,8 +75,8 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
-                if(!this.$nativeShow) {
-                    $warn(1002,this.name);
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
                     return;
                 }
                 this.$nativeShow.removeChild(child.$nativeShow);
@@ -92,8 +92,8 @@ class Sprite extends DisplayObject {
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
             if (children[i] == child) {
-                if(!this.$nativeShow) {
-                    $warn(1002,this.name);
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
                     return;
                 }
                 this.$nativeShow.removeChild(child.$nativeShow);
@@ -134,6 +134,15 @@ class Sprite extends DisplayObject {
             }
         }
         return -1;
+    }
+
+    getChildAt(index) {
+        index = index & ~0;
+        if (index < 0 || index > this.__children.length) {
+            $error(1007, "getChildAt", index, this.__children.length);
+            return null;
+        }
+        return this.__children[index];
     }
 
     $changeAllFilters() {
@@ -213,8 +222,8 @@ class Sprite extends DisplayObject {
          * 子对象序列改变
          */
         if (this.$hasFlags(0x0100)) {
-            if(!this.$nativeShow) {
-                $warn(1002,this.name);
+            if (!this.$nativeShow) {
+                $warn(1002, this.name);
                 return;
             }
             this.$nativeShow.resetChildIndex(children);
@@ -231,8 +240,8 @@ class Sprite extends DisplayObject {
     }
 
     $releaseContainer() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         Platform.release("Sprite", this.$nativeShow);

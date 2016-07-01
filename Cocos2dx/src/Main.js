@@ -56,24 +56,17 @@ var Main = function () {
             this.data = size;
             flower.trace(size.width.value, size.height.value, size.length.value);
 
-            new flower.Binding(this, null, "text", "{this.data.width*this.data.height}");
-            size.width.value = 120;
+            //new flower.Binding(this, null, "text", "{this.data.width*this.data.height}");
+            //size.width.value = 120;
 
-            //var clazz = `
-            //<f:Group xmlns:f="flower">
-            //    <f:Image source="res/font@100x100@cn@2.png" scaleX="2" scaleY="2" scale9Grid="30,25,40,50">
-            //        <f:filters>
-            //            <f:Array>
-            //                <f:ColorFilter h="90" s="0" l="0"/>
-            //            </f:Array>
-            //        </f:filters>
-            //    </f:Image>
-            //</f:Group>
-            //`;
-            //
-            //var ui = new flower.UIParser();
-            //ui.parseUI(clazz);
-            //container.addChild(ui);
+            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:Image source=\"res/font@100x100@cn@2.png\" scaleX.up=\"2\" scaleX.down=\"3\" scaleY=\"2\" scale9Grid=\"30,25,40,50\">\n                <f:filters>\n                    <f:Array>\n                        <f:ColorFilter h=\"90\" s=\"0\" l=\"0\"/>\n                    </f:Array>\n                </f:filters>\n            </f:Image>\n        </f:Group>\n        ";
+
+            var ui = new flower.UIParser();
+            ui.parseUI(clazz);
+            container.addChild(ui);
+            ui.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
+                ui.currentState = ui.currentState == "up" ? "down" : "up";
+            });
 
             //container.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
             //    //var image = new flower.Image("res/qq.png");

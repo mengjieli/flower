@@ -42,7 +42,64 @@ var $root = eval("this");
                         6: null, //percentWidth
                         7: null, //percentHeight
                         8: null, //uiWidth
-                        9: null };
+                        9: null, //uiHeight
+                        10: {}, //binds
+                        11: new StringValue(), //state
+                        12: false };
+                };
+
+                //absoluteState
+                p.bindProperty = function (property, content) {
+                    var checks = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+                    var binds = this.$UIComponent[10];
+                    if (binds[property]) {
+                        binds[property].dispose();
+                    }
+                    binds[property] = new flower.Binding(this, checks, property, content);
+                };
+
+                p.removeBindProperty = function (property) {
+                    var binds = this.$UIComponent[10];
+                    if (binds[property]) {
+                        binds[property].dispose();
+                        delete binds[property];
+                    }
+                };
+
+                p.setStatePropertyValue = function (property, state, val) {
+                    var checks = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                    if (!this._propertyValues) {
+                        this._propertyValues = {};
+                        if (!this._propertyValues[property]) {
+                            this._propertyValues[property] = {};
+                        }
+                        this.bindProperty("currentState", "{this.changeState(this.state)}");
+                        this._propertyValues[property][state] = { "value": val, "checks": checks };
+                    } else {
+                        if (!this._propertyValues[property]) {
+                            this._propertyValues[property] = {};
+                        }
+                        this._propertyValues[property][state] = { "value": val, "checks": checks };
+                    }
+                    if (state == this.currentState) {
+                        this.removeBindProperty(property);
+                        this.bindProperty(property, val);
+                    }
+                };
+
+                p.changeState = function (state) {
+                    if (!this._propertyValues) {
+                        return this.currentState;
+                    }
+                    for (var property in this._propertyValues) {
+                        if (this._propertyValues[property][state]) {
+                            this.removeBindProperty(property);
+                            this.bindProperty(property, this._propertyValues[property][state].value, this._propertyValues[property][state].checks);
+                        }
+                    }
+                    return this.currentState;
                 };
 
                 //p.$getWidth = function () {
@@ -57,7 +114,6 @@ var $root = eval("this");
                 //    return p[10] != null ? p[10] : (d[4] != null ? d[4] : this.$getContentBounds().height);
                 //}
 
-                //uiHeight
                 p.$setLeft = function (val) {
                     val = +val || 0;
                     var p = this.$UIComponent;
@@ -306,6 +362,52 @@ var $root = eval("this");
                     },
                     set: function set(val) {
                         this.$setPercentHeight(val);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "currentState", {
+                    get: function get() {
+                        return this.state.value;
+                    },
+                    set: function set(val) {
+                        if (this instanceof flower.Sprite) {
+                            if (this.state.value == val) {
+                                return;
+                            }
+                            this.state.value = val;
+                            for (var i = 0; i < this.numChildren; i++) {
+                                var child = this.getChildAt(i);
+                                if (child.__UIComponent) {
+                                    if (!child.absoluteState) {
+                                        child.currentState = val;
+                                    }
+                                }
+                            }
+                        } else {
+                            if (this.state.value == val) {
+                                return;
+                            }
+                            this.state.value = val;
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "state", {
+                    get: function get() {
+                        return this.$UIComponent[11];
+                    },
+                    set: function set(val) {},
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "absoluteState", {
+                    get: function get() {
+                        return this.$UIComponent[12];
+                    },
+                    set: function set(val) {
+                        this.$UIComponent[12] = !!val;
                     },
                     enumerable: true,
                     configurable: true
