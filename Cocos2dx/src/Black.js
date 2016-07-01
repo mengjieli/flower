@@ -934,15 +934,26 @@ var $root = eval("this");
         f: {
             "Object": "Object",
             "Array": "Array",
+
             "Point": "flower.Point",
             "Size": "flower.Size",
             "Rectangle": "flower.Rectangle",
+
             "ColorFilter": "flower.ColorFilter",
             "TextField": "flower.TextField",
             "TextInput": "flower.TextInput",
             "Bitmap": "flower.Bitmap",
             "Shape": "flower.Shape",
             "Mask": "flower.Mask",
+
+            "ArrayValue": "flower.ArrayValue",
+            "BooleanValue": "flower.BooleanValue",
+            "IntValue": "flower.IntValue",
+            "NumberValue": "flower.NumberValue",
+            "ObjectValue": "flower.ObjectValue",
+            "StringValue": "flower.StringValue",
+            "UIntValue": "flower.UIntValue",
+
             "Label": "flower.Label",
             "Image": "flower.Image",
             "Group": "flower.Group",
@@ -969,7 +980,8 @@ var $root = eval("this");
         localContent: {},
         localURL: {},
         addChild: {
-            "Array": "push"
+            "Array": "push",
+            "ArrayValue": "push"
         }
     };
 

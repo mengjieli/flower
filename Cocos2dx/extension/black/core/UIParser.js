@@ -3,15 +3,26 @@ class UIParser extends Group {
         f: {
             "Object": "Object",
             "Array": "Array",
+
             "Point": "flower.Point",
             "Size": "flower.Size",
             "Rectangle": "flower.Rectangle",
-            "ColorFilter":"flower.ColorFilter",
+
+            "ColorFilter": "flower.ColorFilter",
             "TextField": "flower.TextField",
             "TextInput": "flower.TextInput",
             "Bitmap": "flower.Bitmap",
             "Shape": "flower.Shape",
             "Mask": "flower.Mask",
+
+            "ArrayValue": "flower.ArrayValue",
+            "BooleanValue": "flower.BooleanValue",
+            "IntValue": "flower.IntValue",
+            "NumberValue": "flower.NumberValue",
+            "ObjectValue": "flower.ObjectValue",
+            "StringValue": "flower.StringValue",
+            "UIntValue": "flower.UIntValue",
+
             "Label": "flower.Label",
             "Image": "flower.Image",
             "Group": "flower.Group",
@@ -37,8 +48,9 @@ class UIParser extends Group {
         local: {},
         localContent: {},
         localURL: {},
-        addChild:{
-            "Array":"push"
+        addChild: {
+            "Array": "push",
+            "ArrayValue": "push"
         }
     };
 
@@ -438,7 +450,7 @@ class UIParser extends Group {
                     }
                 } else {
                     funcName = className + "_get" + itemClassName;
-                    setObject += before + "\t" + thisObj + "." + (UIParser.classes.addChild[createClassName]?UIParser.classes.addChild[createClassName]:"addChild") + "(this." + funcName + "(" + thisObj + "));\n";
+                    setObject += before + "\t" + thisObj + "." + (UIParser.classes.addChild[createClassName] ? UIParser.classes.addChild[createClassName] : "addChild") + "(this." + funcName + "(" + thisObj + "));\n";
                     this.decodeObject(before, className, funcName, true, item, hasLocalNS, propertyFunc, nameIndex);
                 }
             }

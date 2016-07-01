@@ -59,14 +59,14 @@ var Main = function () {
             //new flower.Binding(this, null, "text", "{this.data.width*this.data.height}");
             //size.width.value = 120;
 
-            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:Image source=\"res/font@100x100@cn@2.png\" scaleX.up=\"2\" scaleX.down=\"3\" scaleY=\"2\" scale9Grid=\"30,25,40,50\">\n                <f:filters>\n                    <f:Array>\n                        <f:ColorFilter h=\"90\" s=\"0\" l=\"0\"/>\n                    </f:Array>\n                </f:filters>\n            </f:Image>\n        </f:Group>\n        ";
+            var clazz = "\n        <f:Button xmlns:f=\"flower\">\n            <f:Image source=\"res/font@100x100@cn@2.png\" scaleX.up=\"2\" scaleX.down=\"3\" scaleY=\"2\" scale9Grid=\"30,25,40,50\">\n                <f:filters>\n                    <f:Array>\n                        <f:ColorFilter h=\"90\" s=\"0\" l=\"0\"/>\n                    </f:Array>\n                </f:filters>\n            </f:Image>\n        </f:Button>\n        ";
 
             var ui = new flower.UIParser();
             ui.parseUI(clazz);
             container.addChild(ui);
-            ui.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
-                ui.currentState = ui.currentState == "up" ? "down" : "up";
-            });
+            //ui.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
+            //    ui.currentState = ui.currentState == "up" ? "down" : "up";
+            //});
 
             //container.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
             //    //var image = new flower.Image("res/qq.png");
