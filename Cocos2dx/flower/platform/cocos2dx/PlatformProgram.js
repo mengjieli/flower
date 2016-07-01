@@ -13,7 +13,8 @@ class PlatformProgram {
             }
         }
         var shader;// = Programmer.shader;
-        shader = new cc.GLProgram(vsh, fsh);
+        shader = new cc.GLProgram();
+        shader.initWithString(programmers[vsh],programmers[fsh]);
         shader.retain();
         if (!Platform.native) {
             shader.addAttribute(cc.ATTRIBUTE_NAME_POSITION, cc.VERTEX_ATTRIB_POSITION);

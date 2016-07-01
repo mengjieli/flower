@@ -53,7 +53,7 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setScale9Grid(scale9Grid) {
         this.__scale9Grid = scale9Grid;
-        if (scale9Grid) {
+        if (scale9Grid && this.__texture) {
             this.addProgrammerFlag(0x0001);
             var width = this.__texture.width;
             var height = this.__texture.height;

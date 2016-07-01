@@ -2,9 +2,11 @@ class UIParser extends Group {
     static classes = {
         f: {
             "Object": "Object",
+            "Array": "Array",
             "Point": "flower.Point",
             "Size": "flower.Size",
             "Rectangle": "flower.Rectangle",
+            "ColorFilter":"flower.ColorFilter",
             "TextField": "flower.TextField",
             "TextInput": "flower.TextInput",
             "Bitmap": "flower.Bitmap",
@@ -34,7 +36,10 @@ class UIParser extends Group {
         },
         local: {},
         localContent: {},
-        localURL: {}
+        localURL: {},
+        addChild:{
+            "Array":"push"
+        }
     };
 
     _className;
@@ -328,9 +333,10 @@ class UIParser extends Group {
     decodeObject(before, className, funcName, createClass, xml, hasLocalNS, propertyFunc, nameIndex) {
         var setObject = before + className + ".prototype." + funcName + " = function(parentObject) {\n";
         var thisObj = "parentObject";
+        var createClassName;
         if (createClass) {
             var createClassNameSpace = xml.name.split(":")[0];
-            var createClassName = xml.name.split(":")[1];
+            createClassName = xml.name.split(":")[1];
             if (createClassNameSpace == "local" && createClassName == "Object") {
                 thisObj = "object";
                 setObject += before + "\t" + thisObj + " = {};\n";
@@ -345,7 +351,7 @@ class UIParser extends Group {
                 } else {
                     setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
                 }
-                setObject += before + "\t" + thisObj + ".eventThis = this;\n";
+                setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
             }
         }
         var idAtr = xml.getAttribute("id");
@@ -432,7 +438,7 @@ class UIParser extends Group {
                     }
                 } else {
                     funcName = className + "_get" + itemClassName;
-                    setObject += before + "\t" + thisObj + ".addChild(this." + funcName + "(" + thisObj + "));\n";
+                    setObject += before + "\t" + thisObj + "." + (UIParser.classes.addChild[createClassName]?UIParser.classes.addChild[createClassName]:"addChild") + "(this." + funcName + "(" + thisObj + "));\n";
                     this.decodeObject(before, className, funcName, true, item, hasLocalNS, propertyFunc, nameIndex);
                 }
             }

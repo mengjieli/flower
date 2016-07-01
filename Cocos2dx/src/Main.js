@@ -35,7 +35,7 @@ var Main = function () {
             //image.x = image.y = 150;
             //container.addChild(image);
 
-            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:Image source=\"res/font@100x100@cn@2.png\" scale9Grid=\"\"/>\n        </f:Group>\n        ";
+            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:Image source=\"res/font@100x100@cn@2.png\" scaleX=\"2\" scaleY=\"2\" scale9Grid=\"30,25,40,50\">\n                <f:filters>\n                    <f:Array>\n                        <f:ColorFilter h=\"90\" s=\"0\" l=\"0\"/>\n                    </f:Array>\n                </f:filters>\n            </f:Image>\n        </f:Group>\n        ";
 
             var ui = new flower.UIParser();
             ui.parseUI(clazz);

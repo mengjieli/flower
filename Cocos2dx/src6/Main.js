@@ -27,7 +27,13 @@ class Main {
 
         var clazz = `
         <f:Group xmlns:f="flower">
-            <f:Image source="res/font@100x100@cn@2.png" scale9Grid=""/>
+            <f:Image source="res/font@100x100@cn@2.png" scaleX="2" scaleY="2" scale9Grid="30,25,40,50">
+                <f:filters>
+                    <f:Array>
+                        <f:ColorFilter h="90" s="0" l="0"/>
+                    </f:Array>
+                </f:filters>
+            </f:Image>
         </f:Group>
         `;
 

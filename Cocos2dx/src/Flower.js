@@ -43,6 +43,7 @@ var flower = {};
     var SCALE = null;
     var CACHE = true;
     var UPDATE_RESOURCE = true;
+    var programmers = {};
 
     /**
      * 启动引擎
@@ -62,10 +63,13 @@ var flower = {};
             Texture.$blank.$addCount();
             loader = new URLLoader("res/shaders/Bitmap.fsh");
             loader.addListener(Event.COMPLETE, function (e) {
+                programmers[loader.url] = e.data;
                 loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
                 loader.addListener(Event.COMPLETE, function (e) {
+                    programmers[loader.url] = e.data;
                     loader = new URLLoader("res/shaders/Source.fsh");
                     loader.addListener(Event.COMPLETE, function (e) {
+                        programmers[loader.url] = e.data;
                         completeFunc();
                     });
                     loader.load();
@@ -935,7 +939,7 @@ var flower = {};
             key: "setScale9Grid",
             value: function setScale9Grid(scale9Grid) {
                 this.__scale9Grid = scale9Grid;
-                if (scale9Grid) {
+                if (scale9Grid && this.__texture) {
                     this.addProgrammerFlag(0x0001);
                     var width = this.__texture.width;
                     var height = this.__texture.height;
@@ -1308,7 +1312,8 @@ var flower = {};
                 }
             }
             var shader; // = Programmer.shader;
-            shader = new cc.GLProgram(vsh, fsh);
+            shader = new cc.GLProgram();
+            shader.initWithString(programmers[vsh], programmers[fsh]);
             shader.retain();
             if (!Platform.native) {
                 shader.addAttribute(cc.ATTRIBUTE_NAME_POSITION, cc.VERTEX_ATTRIB_POSITION);

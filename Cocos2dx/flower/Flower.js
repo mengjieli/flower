@@ -10,6 +10,7 @@ var LANGUAGE = "";
 var SCALE = null;
 var CACHE = true;
 var UPDATE_RESOURCE = true;
+var programmers = {};
 
 /**
  * 启动引擎
@@ -29,10 +30,13 @@ function start(completeFunc, scale, language) {
         Texture.$blank.$addCount();
         loader = new URLLoader("res/shaders/Bitmap.fsh");
         loader.addListener(Event.COMPLETE, function (e) {
+            programmers[loader.url] = e.data;
             loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
             loader.addListener(Event.COMPLETE, function (e) {
+                programmers[loader.url] = e.data;
                 loader = new URLLoader("res/shaders/Source.fsh");
                 loader.addListener(Event.COMPLETE, function (e) {
+                    programmers[loader.url] = e.data;
                     completeFunc();
                 });
                 loader.load();
