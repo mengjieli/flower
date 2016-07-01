@@ -1085,9 +1085,111 @@ var $root = eval("this");
 
     //////////////////////////End File:extension/black/TileImage.js///////////////////////////
 
+    //////////////////////////File:extension/black/Button.js///////////////////////////
+
+
+    var Button = function (_Group3) {
+        _inherits(Button, _Group3);
+
+        function Button() {
+            _classCallCheck(this, Button);
+
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+
+            _this6._enabled = true;
+
+            _this6.absoluteState = true;
+            _this6.currentState = "up";
+            _this6.addListener(flower.TouchEvent.TOUCH_BEGIN, _this6._onTouch, _this6);
+            _this6.addListener(flower.TouchEvent.TOUCH_END, _this6._onTouch, _this6);
+            _this6.addListener(flower.TouchEvent.TOUCH_RELEASE, _this6._onTouch, _this6);
+            return _this6;
+        }
+
+        _createClass(Button, [{
+            key: "_getMouseTarget",
+            value: function _getMouseTarget(matrix, mutiply) {
+                var target = _get(Object.getPrototypeOf(Button.prototype), "_getMouseTarget", this).call(this, matrix, mutiply);
+                if (target) {
+                    target = this;
+                }
+                return target;
+            }
+        }, {
+            key: "_onTouch",
+            value: function _onTouch(e) {
+                if (!this.enabled) {
+                    e.stopPropagation();
+                    return;
+                }
+                switch (e.type) {
+                    case flower.TouchEvent.TOUCH_BEGIN:
+                        this.currentState = "down";
+                        break;
+                    case flower.TouchEvent.TOUCH_END:
+                    case flower.TouchEvent.TOUCH_RELEASE:
+                        this.currentState = "up";
+                        break;
+                }
+            }
+        }, {
+            key: "_setEnabled",
+            value: function _setEnabled(val) {
+                this._enabled = val;
+                if (this._enabled) {
+                    this.currentState = "up";
+                } else {
+                    this.currentState = "disabled";
+                }
+            }
+        }, {
+            key: "addUIEvents",
+            value: function addUIEvents() {
+                _get(Object.getPrototypeOf(Button.prototype), "addUIEvents", this).call(this);
+                this.addListener(flower.TouchEvent.TOUCH_END, this.onEXEClick, this);
+            }
+        }, {
+            key: "onEXEClick",
+            value: function onEXEClick(e) {
+                if (this.onClickEXE && e.target == this) {
+                    this.onClickEXE.call(this);
+                }
+            }
+        }, {
+            key: "enabled",
+            set: function set(val) {
+                val = !!val;
+                if (this._enabled == val) {
+                    return;
+                }
+                this._setEnabled(val);
+            },
+            get: function get() {
+                return this._enabled;
+            }
+        }, {
+            key: "onClick",
+            set: function set(val) {
+                if (typeof val == "string") {
+                    var content = val;
+                    val = function () {
+                        eval(content);
+                    }.bind(this.eventThis);
+                }
+                this.onClickEXE = val;
+            },
+            get: function get() {
+                return this.onClickEXE;
+            }
+        }]);
+
+        return Button;
+    }(Group);
+
+    black.Button = Button;
+    //////////////////////////End File:extension/black/Button.js///////////////////////////
+
     //////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
-
-
     var locale_strings = flower.sys.$locale_strings["zh_CN"];
 
     locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
@@ -1112,7 +1214,7 @@ var $root = eval("this");
         function Value() {
             var _Object$getPrototypeO;
 
-            var _temp, _this6, _ret;
+            var _temp, _this7, _ret;
 
             _classCallCheck(this, Value);
 
@@ -1120,7 +1222,7 @@ var $root = eval("this");
                 args[_key] = arguments[_key];
             }
 
-            return _ret = (_temp = (_this6 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this6), _this6.__old = null, _this6.__value = null, _temp), _possibleConstructorReturn(_this6, _ret);
+            return _ret = (_temp = (_this7 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this7), _this7.__old = null, _this7.__value = null, _temp), _possibleConstructorReturn(_this7, _ret);
         }
 
         _createClass(Value, [{
@@ -1170,15 +1272,15 @@ var $root = eval("this");
 
             _classCallCheck(this, ArrayValue);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
 
-            _this7._key = "";
-            _this7._rangeMinKey = "";
-            _this7._rangeMaxKey = "";
+            _this8._key = "";
+            _this8._rangeMinKey = "";
+            _this8._rangeMaxKey = "";
 
-            _this7.list = init || [];
-            _this7._length = _this7.list.length;
-            return _this7;
+            _this8.list = init || [];
+            _this8._length = _this8.list.length;
+            return _this8;
         }
 
         _createClass(ArrayValue, [{
@@ -1567,10 +1669,10 @@ var $root = eval("this");
 
             _classCallCheck(this, BooleanValue);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
 
-            _this8.__old = _this8.__value = init;
-            return _this8;
+            _this9.__old = _this9.__value = init;
+            return _this9;
         }
 
         _createClass(BooleanValue, [{
@@ -1601,10 +1703,10 @@ var $root = eval("this");
 
             _classCallCheck(this, IntValue);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
 
-            _this9.__old = _this9.__value = init;
-            return _this9;
+            _this10.__old = _this10.__value = init;
+            return _this10;
         }
 
         _createClass(IntValue, [{
@@ -1635,10 +1737,10 @@ var $root = eval("this");
 
             _classCallCheck(this, NumberValue);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
 
-            _this10.__old = _this10.__value = init;
-            return _this10;
+            _this11.__old = _this11.__value = init;
+            return _this11;
         }
 
         _createClass(NumberValue, [{
@@ -1667,10 +1769,10 @@ var $root = eval("this");
         function ObjectValue() {
             _classCallCheck(this, ObjectValue);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
 
-            _this11.__old = _this11.__value = {};
-            return _this11;
+            _this12.__old = _this12.__value = {};
+            return _this12;
         }
 
         _createClass(ObjectValue, [{
@@ -1729,10 +1831,10 @@ var $root = eval("this");
 
             _classCallCheck(this, StringValue);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
 
-            _this12.__old = _this12.__value = init;
-            return _this12;
+            _this13.__old = _this13.__value = init;
+            return _this13;
         }
 
         _createClass(StringValue, [{
@@ -1763,10 +1865,10 @@ var $root = eval("this");
 
             _classCallCheck(this, UIntValue);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
 
-            _this13.__old = _this13.__value = init;
-            return _this13;
+            _this14.__old = _this14.__value = init;
+            return _this14;
         }
 
         _createClass(UIntValue, [{

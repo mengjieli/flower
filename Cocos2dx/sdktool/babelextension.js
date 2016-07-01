@@ -169,6 +169,7 @@ var list = [
     "UIParser",
     "Image",
     "TileImage",
+    "Button",
 
     "zh_CN",
 
