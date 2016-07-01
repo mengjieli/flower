@@ -15,4 +15,3 @@ class Group extends flower.Sprite {
 UIComponent.register(Group);
 Group.prototype.__UIComponent = true;
 exports.Group = Group;
-this.removeAllBindProperty();
