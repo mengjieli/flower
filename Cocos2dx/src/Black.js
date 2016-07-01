@@ -970,6 +970,410 @@ var $root = eval("this");
     }(Group);
 
     //////////////////////////End File:extension/black/TileImage.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/ArrayValue.js///////////////////////////
+    /**
+     *
+     * @Event
+     * Event.ADDED item
+     * Event.REMOVED item
+     * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
+     */
+
+
+    var ArrayValue = function (_Value) {
+        _inherits(ArrayValue, _Value);
+
+        function ArrayValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+
+            _classCallCheck(this, ArrayValue);
+
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
+
+            _this6._key = "";
+            _this6._rangeMinKey = "";
+            _this6._rangeMaxKey = "";
+
+            _this6.list = init || [];
+            _this6._length = _this6.list.length;
+            return _this6;
+        }
+
+        _createClass(ArrayValue, [{
+            key: "push",
+            value: function push(item) {
+                this.list.push(item);
+                this._length = this._length + 1;
+                this.dispatchWidth(flower.Event.ADDED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "addItemAt",
+            value: function addItemAt(item, index) {
+                index = +index & ~0;
+                if (index < 0 || index > this.list.length) {
+                    sys.$error(3101, index, this.list.length);
+                    return;
+                }
+                this.list.splice(index, 0, item);
+                this._length = this._length + 1;
+                this.dispatchWidth(flower.Event.ADDED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "shift",
+            value: function shift() {
+                if (!this.list.length) {
+                    return;
+                }
+                var item = this.list.shift();
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "splice",
+            value: function splice(startIndex) {
+                var delCount = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+                var i;
+                startIndex = +startIndex & ~0;
+                delCount = +delCount & ~0;
+                if (delCount <= 0) {
+                    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+                        args[_key - 2] = arguments[_key];
+                    }
+
+                    for (i = 0; i < args.length; i++) {
+                        this.list.splice(startIndex, 0, args[i]);
+                    }
+                    this._length = this._length + 1;
+                    for (i = 0; i < args.length; i++) {
+                        this.dispatchWidth(flower.Event.ADDED, args[i]);
+                    }
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                } else {
+                    var list = this.list.splice(startIndex, delCount);
+                    this._length = this._length - delCount;
+                    for (i = 0; i < list.length; i++) {
+                        this.dispatchWidth(flower.Event.REMOVED, list[i]);
+                    }
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                }
+            }
+        }, {
+            key: "slice",
+            value: function slice(startIndex, end) {
+                startIndex = +startIndex & ~0;
+                end = +end & ~0;
+                return new ArrayValue(this.list.slice(startIndex, end));
+            }
+        }, {
+            key: "pop",
+            value: function pop() {
+                if (!this.list.length) {
+                    return;
+                }
+                var item = this.list.pop();
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "removeAll",
+            value: function removeAll() {
+                if (!this.list.length) {
+                    return;
+                }
+                while (this.list.length) {
+                    var item = this.list.pop();
+                    this._length = this._length - 1;
+                    this.dispatchWidth(flower.Event.REMOVED, item);
+                }
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "removeItem",
+            value: function removeItem(item) {
+                for (var i = 0, len = this.list.length; i < len; i++) {
+                    if (this.list[i] == item) {
+                        this.list.splice(i, 1);
+                        this._length = this._length - 1;
+                        this.dispatchWidth(flower.Event.REMOVED, item);
+                        this.dispatchWidth(flower.Event.UPDATE, this);
+                        return item;
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "removeItemAt",
+            value: function removeItemAt(index) {
+                index = +index & ~0;
+                if (index < 0 || index >= this.list.length) {
+                    sys.$error(3101, index, this.list.length);
+                    return;
+                }
+                var item = this.list.splice(index, 1)[0];
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "removeItemWith",
+            value: function removeItemWith(key, value) {
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                var item;
+                var i;
+                if (key2 != "") {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value) {
+                            item = this.list.splice(i, 1)[0];
+                            break;
+                        }
+                    }
+                } else {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                            item = this.list.splice(i, 1)[0];
+                            break;
+                        }
+                    }
+                }
+                if (!item) {
+                    return;
+                }
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "getItemIndex",
+            value: function getItemIndex(item) {
+                for (var i = 0, len = this.list.length; i < len; i++) {
+                    if (this.list[i] == item) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+        }, {
+            key: "getItemWith",
+            value: function getItemWith(key, value) {
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                var i;
+                if (!key2) {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value) {
+                            return this.list[i];
+                        }
+                    }
+                } else {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                            return this.list[i];
+                        }
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemFunction",
+            value: function getItemFunction(func, thisObj) {
+                for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+                    args[_key2 - 2] = arguments[_key2];
+                }
+
+                for (var i = 0; i < this.list.length; i++) {
+                    args.push(this.list[i]);
+                    var r = func.apply(thisObj, args);
+                    args.pop();
+                    if (r == true) {
+                        return this.list[i];
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemsWith",
+            value: function getItemsWith(key, value) {
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                var result = [];
+                var i;
+                if (key2 != "") {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value) {
+                            result.push(this.list[i]);
+                        }
+                    }
+                } else {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                            result.push(this.list[i]);
+                        }
+                    }
+                }
+                return result;
+            }
+        }, {
+            key: "setItemsAttributeWith",
+            value: function setItemsAttributeWith(findKey, findValue) {
+                var setKey = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var setValue = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                for (var i = 0; i < this.list.length; i++) {
+                    if (this.list[i][findKey] == findValue) {
+                        this.list[i][setKey] = setValue;
+                    }
+                }
+            }
+        }, {
+            key: "getItemsFunction",
+            value: function getItemsFunction(func) {
+                var thisObj = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+                var _arguments__ = [];
+                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
+                    _arguments__ = arguments[argumentsLength];
+                }
+                var result = [];
+                var args = [];
+                if (_arguments__.length && _arguments__.length > 2) {
+                    args = [];
+                    for (var a = 2; a < _arguments__.length; a++) {
+                        args.push(_arguments__[a]);
+                    }
+                }
+                for (var i = 0; i < this.list.length; i++) {
+                    args.push(this.list[i]);
+                    var r = func.apply(thisObj, args);
+                    args.pop();
+                    if (r == true) {
+                        result.push(this.list[i]);
+                    }
+                }
+                return result;
+            }
+        }, {
+            key: "sort",
+            value: function sort() {
+                var _arguments__ = [];
+                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
+                    _arguments__ = arguments[argumentsLength];
+                }
+                this.list.sort.apply(this.list.sort, _arguments__);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "getItemAt",
+            value: function getItemAt(index) {
+                index = +index & ~0;
+                if (index < 0 || index >= this.list.length) {
+                    sys.$error(3101, index, this.list.length);
+                    return;
+                }
+                return this.list[index];
+            }
+        }, {
+            key: "getItemByValue",
+            value: function getItemByValue(value) {
+                if (this.key == "") {
+                    return null;
+                }
+                for (var i = 0; i < this.list.length; i++) {
+                    if (this.list[i][this.key] == value) {
+                        return this.list[i];
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemByRange",
+            value: function getItemByRange(value) {
+                if (this.key == "" || this.rangeMinKey == "" || this.rangeMaxKey == "") {
+                    return null;
+                }
+                for (var i = 0; i < this.list.length; i++) {
+                    var min = this.list[i][this.rangeMinKey];
+                    var max = this.list[i][this.rangeMaxKey];
+                    if (value >= min && value <= max) {
+                        return this.list[i];
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemsByRange",
+            value: function getItemsByRange(value) {
+                if (this.key == "" || this.rangeMinKey == "" || this.rangeMaxKey == "") {
+                    return null;
+                }
+                var list = [];
+                for (var i = 0; i < this.list.length; i++) {
+                    var min = this.list[i][this.rangeMinKey];
+                    var max = this.list[i][this.rangeMaxKey];
+                    if (value >= min && value <= max) {
+                        list.push(this.list[i]);
+                    }
+                }
+                return list;
+            }
+        }, {
+            key: "key",
+            set: function set(val) {
+                this._key = val;
+            },
+            get: function get() {
+                return this._key;
+            }
+        }, {
+            key: "rangeMinKey",
+            set: function set(val) {
+                this._rangeMinKey = val;
+            },
+            get: function get() {
+                return this._rangeMinKey;
+            }
+        }, {
+            key: "rangeMaxKey",
+            set: function set(val) {
+                this._rangeMaxKey = val;
+            },
+            get: function get() {
+                return this._rangeMaxKey;
+            }
+        }, {
+            key: "length",
+            get: function get() {
+                return this._length;
+            },
+            set: function set(val) {
+                val = +val & ~0;
+                if (this._length == val) {} else {
+                    while (this.list.length > val) {
+                        var item = this.list.pop();
+                        this._length = this._length - 1;
+                        this.dispatchWidth(flower.Event.REMOVED, item);
+                    }
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                }
+            }
+        }]);
+
+        return ArrayValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/ArrayValue.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];

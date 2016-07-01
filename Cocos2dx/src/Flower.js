@@ -1440,7 +1440,6 @@ var flower = {};
 
     var locale_strings = $locale_strings["zh_CN"];
 
-    //core  1000-1999
     locale_strings[1001] = "对象已经回收。";
     locale_strings[1002] = "对象已释放，对象名称:{0}";
     locale_strings[1003] = "重复创建纹理:{0}";
@@ -1459,6 +1458,7 @@ var flower = {};
     locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
     locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
 
+    flower.sys.$locale_strings = $locale_strings;
     //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
 
     //////////////////////////File:flower/event/EventDispatcher.js///////////////////////////

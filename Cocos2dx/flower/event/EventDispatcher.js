@@ -15,6 +15,13 @@ class EventDispatcher {
         this.__hasDispose = true;
     }
 
+    $release() {
+        this.__EventDispatcher = {
+            0: this,
+            1: {}
+        }
+    }
+
     /**
      *
      * @param type

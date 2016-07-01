@@ -169,6 +169,16 @@ var list = [
     "UIParser",
     "Image",
     "TileImage",
+
+    "Value",
+    "ArrayValue",
+    "BooleanValue",
+    "IntValue",
+    "NumberValue",
+    "ObjectValue",
+    "StringValue",
+    "UIntValue",
+    "DataManager"
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";
