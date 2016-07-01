@@ -35,11 +35,45 @@ var Main = function () {
             //image.x = image.y = 150;
             //container.addChild(image);
 
-            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:Image source=\"res/font@100x100@cn@2.png\" scaleX=\"2\" scaleY=\"2\" scale9Grid=\"30,25,40,50\">\n                <f:filters>\n                    <f:Array>\n                        <f:ColorFilter h=\"90\" s=\"0\" l=\"0\"/>\n                    </f:Array>\n                </f:filters>\n            </f:Image>\n        </f:Group>\n        ";
+            var define = {
+                "name": "Size",
+                "members": {
+                    "width": { "type": "int", "init": 100 },
+                    "height": { "type": "int", "init": 2 }
+                }
+            };
+            var dm = flower.DataManager.getInstance();
+            dm.addDefine(define);
+            define = {
+                "name": "Sizes",
+                "extends": "Size",
+                "members": {
+                    "length": { "type": "uint" }
+                }
+            };
+            dm.addDefine(define);
+            var size = dm.createData("Sizes");
+            this.data = size;
+            flower.trace(size.width.value, size.height.value, size.length.value);
 
-            var ui = new flower.UIParser();
-            ui.parseUI(clazz);
-            container.addChild(ui);
+            new flower.Binding(this, null, "text", "{this.data.width*this.data.height}");
+            size.width.value = 120;
+
+            //var clazz = `
+            //<f:Group xmlns:f="flower">
+            //    <f:Image source="res/font@100x100@cn@2.png" scaleX="2" scaleY="2" scale9Grid="30,25,40,50">
+            //        <f:filters>
+            //            <f:Array>
+            //                <f:ColorFilter h="90" s="0" l="0"/>
+            //            </f:Array>
+            //        </f:filters>
+            //    </f:Image>
+            //</f:Group>
+            //`;
+            //
+            //var ui = new flower.UIParser();
+            //ui.parseUI(clazz);
+            //container.addChild(ui);
 
             //container.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
             //    //var image = new flower.Image("res/qq.png");
@@ -307,6 +341,11 @@ var Main = function () {
             //rect.drawPoly(vertices, null, 5, {r:255,g:0,b:0,a:255});
             //rect.setPosition(100,-100);
             //container.$nativeShow.show.addChild(rect);
+        }
+    }, {
+        key: "text",
+        set: function set(val) {
+            flower.trace("set text :", val);
         }
     }]);
 

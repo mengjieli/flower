@@ -309,6 +309,7 @@ var flower = {};
             this.__width = 0;
             this.__height = 0;
             this.__programmer = null;
+            this.__filters = null;
             this.__programmerFlag = 0;
         }
 
@@ -430,6 +431,7 @@ var flower = {};
         }, {
             key: "setFilters",
             value: function setFilters(filters) {
+                this.__filters = filters;
                 var types1 = [0, 0, 0, 0];
                 var types2 = [0, 0, 0, 0];
                 var bigFilters = [];
@@ -551,6 +553,7 @@ var flower = {};
         }, {
             key: "release",
             value: function release() {
+                this.setFilters([]);
                 var show = this.show;
                 show.setPosition(0, 0);
                 show.setScale(1);
@@ -886,6 +889,7 @@ var flower = {};
 
             var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformBitmap).call(this));
 
+            _this4.__texture = null;
             _this4.__textureScaleX = 1;
             _this4.__textureScaleY = 1;
 
@@ -915,6 +919,7 @@ var flower = {};
                 this.setScaleX(this.__scaleX);
                 this.setScaleY(this.__scaleY);
                 this.setScale9Grid(this.__scale9Grid);
+                this.setFilters(this.__filters);
                 if (this.__programmer) {
                     if (Platform.native) {
                         this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
@@ -922,6 +927,15 @@ var flower = {};
                         this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
                     }
                 }
+            }
+        }, {
+            key: "setFilters",
+            value: function setFilters(filters) {
+                if (!this.__texture) {
+                    this.__filters = filters;
+                    return;
+                }
+                _get(Object.getPrototypeOf(PlatformBitmap.prototype), "setFilters", this).call(this, filters);
             }
         }, {
             key: "setSettingWidth",
@@ -939,7 +953,10 @@ var flower = {};
             key: "setScale9Grid",
             value: function setScale9Grid(scale9Grid) {
                 this.__scale9Grid = scale9Grid;
-                if (scale9Grid && this.__texture) {
+                if (!this.__texture) {
+                    return;
+                }
+                if (scale9Grid) {
                     this.addProgrammerFlag(0x0001);
                     var width = this.__texture.width;
                     var height = this.__texture.height;
@@ -1055,6 +1072,7 @@ var flower = {};
         }, {
             key: "release",
             value: function release() {
+                this.setScale9Grid(null);
                 this.__texture = null;
                 this.__textureScaleX = 1;
                 this.__textureScaleY = 1;
@@ -1440,6 +1458,7 @@ var flower = {};
 
     var locale_strings = $locale_strings["zh_CN"];
 
+    //core 1000-3000
     locale_strings[1001] = "对象已经回收。";
     locale_strings[1002] = "对象已释放，对象名称:{0}";
     locale_strings[1003] = "重复创建纹理:{0}";
@@ -1451,12 +1470,6 @@ var flower = {};
     locale_strings[2002] = "[loadTexture] {0}";
     locale_strings[2003] = "[加载纹理失败] {0}";
     locale_strings[2004] = "[加载Plist失败] {0}";
-    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
-    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
-    locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
-    locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
-    locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
-    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
 
     flower.sys.$locale_strings = $locale_strings;
     //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
@@ -1480,6 +1493,14 @@ var flower = {};
             value: function dispose() {
                 this.__EventDispatcher = null;
                 this.__hasDispose = true;
+            }
+        }, {
+            key: "$release",
+            value: function $release() {
+                this.__EventDispatcher = {
+                    0: this,
+                    1: {}
+                };
             }
 
             /**

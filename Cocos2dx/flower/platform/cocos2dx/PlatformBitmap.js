@@ -1,6 +1,6 @@
 class PlatformBitmap extends PlatformDisplayObject {
 
-    __texture;
+    __texture = null;
     __textureScaleX = 1;
     __textureScaleY = 1;
     __scale9Grid;
@@ -32,6 +32,7 @@ class PlatformBitmap extends PlatformDisplayObject {
         this.setScaleX(this.__scaleX);
         this.setScaleY(this.__scaleY);
         this.setScale9Grid(this.__scale9Grid);
+        this.setFilters(this.__filters);
         if (this.__programmer) {
             if (Platform.native) {
                 this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
@@ -39,6 +40,15 @@ class PlatformBitmap extends PlatformDisplayObject {
                 this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
             }
         }
+    }
+
+
+    setFilters(filters) {
+        if (!this.__texture) {
+            this.__filters = filters;
+            return;
+        }
+        super.setFilters(filters);
     }
 
     setSettingWidth(width) {
@@ -53,7 +63,10 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setScale9Grid(scale9Grid) {
         this.__scale9Grid = scale9Grid;
-        if (scale9Grid && this.__texture) {
+        if (!this.__texture) {
+            return;
+        }
+        if (scale9Grid) {
             this.addProgrammerFlag(0x0001);
             var width = this.__texture.width;
             var height = this.__texture.height;
@@ -164,6 +177,7 @@ class PlatformBitmap extends PlatformDisplayObject {
     }
 
     release() {
+        this.setScale9Grid(null);
         this.__texture = null;
         this.__textureScaleX = 1;
         this.__textureScaleY = 1;

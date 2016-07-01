@@ -285,6 +285,7 @@ class PlatformDisplayObject {
     __width = 0;
     __height = 0;
     __programmer = null;
+    __filters = null;
 
     /**
      * 0x0001 scale9Grid
@@ -394,6 +395,7 @@ class PlatformDisplayObject {
     }
 
     setFilters(filters) {
+        this.__filters = filters;
         var types1 = [0, 0, 0, 0];
         var types2 = [0, 0, 0, 0];
         var bigFilters = [];
@@ -458,7 +460,7 @@ class PlatformDisplayObject {
                 nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters2")].concat(types2));
             }
         }
-        if(bigFilters && bigFilters.length) {
+        if (bigFilters && bigFilters.length) {
             this.setBigFilters(bigFilters);
         }
     }
@@ -513,6 +515,7 @@ class PlatformDisplayObject {
     }
 
     release() {
+        this.setFilters([]);
         var show = this.show;
         show.setPosition(0, 0);
         show.setScale(1);
@@ -811,7 +814,7 @@ PlatformTextInput.$mesureTxt.retain();
 //////////////////////////File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
 class PlatformBitmap extends PlatformDisplayObject {
 
-    __texture;
+    __texture = null;
     __textureScaleX = 1;
     __textureScaleY = 1;
     __scale9Grid;
@@ -843,6 +846,7 @@ class PlatformBitmap extends PlatformDisplayObject {
         this.setScaleX(this.__scaleX);
         this.setScaleY(this.__scaleY);
         this.setScale9Grid(this.__scale9Grid);
+        this.setFilters(this.__filters);
         if (this.__programmer) {
             if (Platform.native) {
                 this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
@@ -850,6 +854,15 @@ class PlatformBitmap extends PlatformDisplayObject {
                 this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
             }
         }
+    }
+
+
+    setFilters(filters) {
+        if (!this.__texture) {
+            this.__filters = filters;
+            return;
+        }
+        super.setFilters(filters);
     }
 
     setSettingWidth(width) {
@@ -864,7 +877,10 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setScale9Grid(scale9Grid) {
         this.__scale9Grid = scale9Grid;
-        if (scale9Grid && this.__texture) {
+        if (!this.__texture) {
+            return;
+        }
+        if (scale9Grid) {
             this.addProgrammerFlag(0x0001);
             var width = this.__texture.width;
             var height = this.__texture.height;
@@ -975,6 +991,7 @@ class PlatformBitmap extends PlatformDisplayObject {
     }
 
     release() {
+        this.setScale9Grid(null);
         this.__texture = null;
         this.__textureScaleX = 1;
         this.__textureScaleY = 1;
@@ -1312,6 +1329,7 @@ $locale_strings["zh_CN"] = $locale_strings["zh_CN"] || {};
 
 var locale_strings = $locale_strings["zh_CN"];
 
+//core 1000-3000
 locale_strings[1001] = "对象已经回收。";
 locale_strings[1002] = "对象已释放，对象名称:{0}";
 locale_strings[1003] = "重复创建纹理:{0}";
@@ -1323,12 +1341,6 @@ locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
 locale_strings[2003] = "[加载纹理失败] {0}";
 locale_strings[2004] = "[加载Plist失败] {0}";
-locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
-locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
-locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
-locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
-locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
-locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
 
 flower.sys.$locale_strings = $locale_strings;
 //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
@@ -1351,6 +1363,13 @@ class EventDispatcher {
     dispose() {
         this.__EventDispatcher = null;
         this.__hasDispose = true;
+    }
+
+    $release() {
+        this.__EventDispatcher = {
+            0: this,
+            1: {}
+        }
     }
 
     /**

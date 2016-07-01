@@ -1,6 +1,7 @@
 class BooleanValue extends Value {
 
     constructor(init = false) {
+        super();
         this.__old = this.__value = init;
     }
 

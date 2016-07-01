@@ -1,6 +1,7 @@
 class UIntValue extends Value {
 
     constructor(init = 0) {
+        super();
         this.__old = this.__value = init;
     }
 

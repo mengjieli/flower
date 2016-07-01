@@ -917,6 +917,26 @@ class TileImage extends Group {
 
 
 
+//////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
+var locale_strings = flower.sys.$locale_strings["zh_CN"];
+
+
+locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
+locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
+locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
+locale_strings[3012] = "没有定义的数据结构 :{0}";
+locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
+locale_strings[3100] = "没有定义的数据类型 :{0}";
+locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
+//////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
+
+
+
 //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
 class Value extends flower.EventDispatcher {
 
@@ -935,7 +955,7 @@ class Value extends flower.EventDispatcher {
         return this.__value;
     }
 
-    set value(init) {
+    set value(val) {
         this.$setValue(val);
     }
 
@@ -943,6 +963,8 @@ class Value extends flower.EventDispatcher {
         return this.__old;
     }
 }
+
+black.Value = Value;
 //////////////////////////End File:extension/black/data/member/Value.js///////////////////////////
 
 
@@ -1306,6 +1328,7 @@ class ArrayValue extends Value {
 class BooleanValue extends Value {
 
     constructor(init = false) {
+        super();
         this.__old = this.__value = init;
     }
 
@@ -1327,6 +1350,7 @@ class BooleanValue extends Value {
 class IntValue extends Value {
 
     constructor(init = 0) {
+        super();
         this.__old = this.__value = init;
     }
 
@@ -1348,6 +1372,7 @@ class IntValue extends Value {
 class NumberValue extends Value {
 
     constructor(init = 0) {
+        super();
         this.__old = this.__value = init;
     }
 
@@ -1369,6 +1394,7 @@ class NumberValue extends Value {
 class ObjectValue extends Value {
 
     constructor() {
+        super();
         this.__old = this.__value = {};
     }
 
@@ -1416,6 +1442,7 @@ class ObjectValue extends Value {
 class StringValue extends Value {
 
     constructor(init = 0) {
+        super();
         this.__old = this.__value = init;
     }
 
@@ -1437,6 +1464,7 @@ class StringValue extends Value {
 class UIntValue extends Value {
 
     constructor(init = 0) {
+        super();
         this.__old = this.__value = init;
     }
 
@@ -1463,7 +1491,7 @@ class DataManager {
     _root = {};
 
     constructor() {
-        if (flower.DataManager.ist) {
+        if (DataManager.instance) {
             return;
         }
     }
@@ -1482,12 +1510,23 @@ class DataManager {
         if (!this._defines[className]) {
             this._defines[className] = {
                 id: 0,
+                className: "",
                 define: null
             };
         }
         var item = this._defines[className];
-        var defineClass = "Data" + className + (item.id != 0 ? item.id : "");
-        var content = "var " + defineClass + " (function (_super) {\n" +
+        var defineClass = "Data_" + className + (item.id != 0 ? item.id : "");
+        item.className = defineClass;
+        var extendClassName = "ObjectValue";
+        if (config.extends) {
+            var extendsItem = this.getClass(config.extends);
+            if (!extendsItem) {
+                sys.$error(3013, config.extends, flower.ObjectDo.toString(config));
+                return;
+            }
+            extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
+        }
+        var content = "var " + defineClass + " = (function (_super) {\n" +
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "() {\n" +
             "\t\t_super.call(this);\n";
@@ -1497,35 +1536,50 @@ class DataManager {
             for (var key in members) {
                 member = members[key];
                 if (member.type == "int") {
-                    content += "\t\this." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
                 } else if (member.type == "uint") {
-                    content += "\t\this." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
                 } else if (member.type == "string") {
-                    content += "\t\this." + key + " = new StringValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? member.init : "") + ");\n";
                 } else if (member.type == "boolean") {
-                    content += "\t\this." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
                 } else if (member.type == "array") {
-                    content += "\t\this." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
                 } else if (member.type == "*") {
-                    content += "\t\this." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
+                    content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
                 } else {
-                    content += "\t\this." + key + " = DataManager.getInstance().createData(" + member.type + ");\n";
+                    content += "\t\tthis." + key + " = DataManager.getInstance().createData(" + member.type + ");\n";
                 }
             }
         }
         content += "\t}\n" +
-            "\treturn " + className + ";\n" +
-            "})(ObjectValue);\n";
+            "\treturn " + defineClass + ";\n" +
+            "})(" + extendClassName + ");\n";
+        content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
+        console.log("数据结构:\n" + content);
         if (sys.DEBUG) {
             try {
-                item.define = eval(content);
+                eval(content);
             } catch (e) {
-                sys.$error(3011, content);
+                sys.$error(3011, e, content);
             }
         } else {
-            item.define = eval(className);
+            eval(className);
         }
         item.id++;
+    }
+
+    $addClassDefine(clazz, className) {
+        var item = this._defines[className];
+        item.define = clazz;
+    }
+
+    getClass(className) {
+        var item = this._defines[className];
+        if (!item) {
+            return null;
+        }
+        return item.define;
     }
 
     createData(className) {
@@ -1551,6 +1605,8 @@ class DataManager {
         return DataManager.instance;
     }
 }
+
+black.DataManager = DataManager;
 //////////////////////////End File:extension/black/data/DataManager.js///////////////////////////
 
 

@@ -2,7 +2,7 @@ require("./help/com/requirecom");
 require("./help/shell/requireshell");
 
 function compressComplete() {
-    new ShellCommand("babel", ["./srcExtension", "-d", "./src"], function () {
+    new ShellCommand("babel", ["./srcBinding", "-d", "./src"], function () {
             //console.log("complete!")
 
 //生成 js 依赖关系的文件
@@ -159,31 +159,28 @@ function compressComplete() {
         })
 }
 
-var file = new File("extension/");
+var file = new File("binding/");
 var files = file.readFilesWidthEnd("js");
 var list = [
-    "Black",
-    "UIComponent",
-    "Group",
-    "DataGroup",
-    "UIParser",
-    "Image",
-    "TileImage",
-
-    "zh_CN",
-
-    "Value",
-    "ArrayValue",
-    "BooleanValue",
-    "IntValue",
-    "NumberValue",
-    "ObjectValue",
-    "StringValue",
-    "UIntValue",
-    "DataManager"
+    "CallParams",
+    "DeviceStmt",
+    "Expr",
+    "ExprAtr",
+    "ExprAtrItem",
+    "ExprStmt",
+    "ObjectAtr",
+    "ParserItem",
+    "Stmts",
+    "Compiler",
+    "Parser",
+    "ParserTable",
+    "Scanner",
+    "ScannerTable",
+    "TokenType",
+    "Binding"
 ];
 var fileContent = "";
-fileContent += "var black = {};\n";
+fileContent += "var binding = {};\n";
 fileContent += "var $root = eval(\"this\");\n";
 fileContent += "(function(){\n";
 while (list.length) {
@@ -199,10 +196,10 @@ while (list.length) {
     }
 }
 fileContent += "})();\n";
-file = new File("srcExtension/Black.js");
-fileContent = StringDo.replaceString(fileContent, "exports.", "black.");
-fileContent += "for(var key in black) {\n";
-fileContent += "\tflower[key] = black[key];\n";
+file = new File("srcBinding/Binding.js");
+fileContent = StringDo.replaceString(fileContent, "exports.", "binding.");
+fileContent += "for(var key in binding) {\n";
+fileContent += "\tflower[key] = binding[key];\n";
 fileContent += "}\n";
 file.save(fileContent);
 

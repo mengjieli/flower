@@ -1,6 +1,7 @@
 class ObjectValue extends Value {
 
     constructor() {
+        super();
         this.__old = this.__value = {};
     }
 

@@ -15,7 +15,7 @@ class Value extends flower.EventDispatcher {
         return this.__value;
     }
 
-    set value(init) {
+    set value(val) {
         this.$setValue(val);
     }
 
@@ -23,3 +23,5 @@ class Value extends flower.EventDispatcher {
         return this.__old;
     }
 }
+
+exports.Value = Value;

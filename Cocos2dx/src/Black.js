@@ -971,6 +971,74 @@ var $root = eval("this");
 
     //////////////////////////End File:extension/black/TileImage.js///////////////////////////
 
+    //////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
+
+
+    var locale_strings = flower.sys.$locale_strings["zh_CN"];
+
+    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+    locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+    locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+    locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
+    locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
+    locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
+    locale_strings[3012] = "没有定义的数据结构 :{0}";
+    locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
+    locale_strings[3100] = "没有定义的数据类型 :{0}";
+    locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
+    //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
+
+    var Value = function (_flower$EventDispatch) {
+        _inherits(Value, _flower$EventDispatch);
+
+        function Value() {
+            var _Object$getPrototypeO;
+
+            var _temp, _this6, _ret;
+
+            _classCallCheck(this, Value);
+
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+            }
+
+            return _ret = (_temp = (_this6 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this6), _this6.__old = null, _this6.__value = null, _temp), _possibleConstructorReturn(_this6, _ret);
+        }
+
+        _createClass(Value, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+            }
+        }, {
+            key: "value",
+            get: function get() {
+                return this.__value;
+            },
+            set: function set(val) {
+                this.$setValue(val);
+            }
+        }, {
+            key: "old",
+            get: function get() {
+                return this.__old;
+            }
+        }]);
+
+        return Value;
+    }(flower.EventDispatcher);
+
+    black.Value = Value;
+    //////////////////////////End File:extension/black/data/member/Value.js///////////////////////////
+
     //////////////////////////File:extension/black/data/member/ArrayValue.js///////////////////////////
     /**
      *
@@ -980,7 +1048,6 @@ var $root = eval("this");
      * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
      */
 
-
     var ArrayValue = function (_Value) {
         _inherits(ArrayValue, _Value);
 
@@ -989,15 +1056,15 @@ var $root = eval("this");
 
             _classCallCheck(this, ArrayValue);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
 
-            _this6._key = "";
-            _this6._rangeMinKey = "";
-            _this6._rangeMaxKey = "";
+            _this7._key = "";
+            _this7._rangeMinKey = "";
+            _this7._rangeMaxKey = "";
 
-            _this6.list = init || [];
-            _this6._length = _this6.list.length;
-            return _this6;
+            _this7.list = init || [];
+            _this7._length = _this7.list.length;
+            return _this7;
         }
 
         _createClass(ArrayValue, [{
@@ -1042,8 +1109,8 @@ var $root = eval("this");
                 startIndex = +startIndex & ~0;
                 delCount = +delCount & ~0;
                 if (delCount <= 0) {
-                    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-                        args[_key - 2] = arguments[_key];
+                    for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+                        args[_key2 - 2] = arguments[_key2];
                     }
 
                     for (i = 0; i < args.length; i++) {
@@ -1189,8 +1256,8 @@ var $root = eval("this");
         }, {
             key: "getItemFunction",
             value: function getItemFunction(func, thisObj) {
-                for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-                    args[_key2 - 2] = arguments[_key2];
+                for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+                    args[_key3 - 2] = arguments[_key3];
                 }
 
                 for (var i = 0; i < this.list.length; i++) {
@@ -1374,6 +1441,374 @@ var $root = eval("this");
         return ArrayValue;
     }(Value);
     //////////////////////////End File:extension/black/data/member/ArrayValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/BooleanValue.js///////////////////////////
+
+
+    var BooleanValue = function (_Value2) {
+        _inherits(BooleanValue, _Value2);
+
+        function BooleanValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+            _classCallCheck(this, BooleanValue);
+
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
+
+            _this8.__old = _this8.__value = init;
+            return _this8;
+        }
+
+        _createClass(BooleanValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = !!val;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return BooleanValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/BooleanValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/IntValue.js///////////////////////////
+
+
+    var IntValue = function (_Value3) {
+        _inherits(IntValue, _Value3);
+
+        function IntValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+            _classCallCheck(this, IntValue);
+
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
+
+            _this9.__old = _this9.__value = init;
+            return _this9;
+        }
+
+        _createClass(IntValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = +val & ~0;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return IntValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/IntValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/NumberValue.js///////////////////////////
+
+
+    var NumberValue = function (_Value4) {
+        _inherits(NumberValue, _Value4);
+
+        function NumberValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+            _classCallCheck(this, NumberValue);
+
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
+
+            _this10.__old = _this10.__value = init;
+            return _this10;
+        }
+
+        _createClass(NumberValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = +val;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return NumberValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/NumberValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/ObjectValue.js///////////////////////////
+
+
+    var ObjectValue = function (_Value5) {
+        _inherits(ObjectValue, _Value5);
+
+        function ObjectValue() {
+            _classCallCheck(this, ObjectValue);
+
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
+
+            _this11.__old = _this11.__value = {};
+            return _this11;
+        }
+
+        _createClass(ObjectValue, [{
+            key: "update",
+            value: function update() {
+                var change = false;
+                for (var i = 0; i < arguments.length;) {
+                    var name = arguments.length <= i + 0 ? undefined : arguments[i + 0];
+                    if (i + 1 >= arguments.length) {
+                        break;
+                    }
+                    var value = arguments.length <= i + 1 + 0 ? undefined : arguments[i + 1 + 0];
+                    var obj = this[name];
+                    if (obj instanceof Value) {
+                        if (obj.value != value) {
+                            obj.value = value;
+                            change = true;
+                        }
+                    } else {
+                        if (obj != value) {
+                            this[name] = value;
+                            change = true;
+                        }
+                    }
+                    this[name] = value;
+                    i += 2;
+                }
+                if (change) {
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                }
+            }
+        }, {
+            key: "addMember",
+            value: function addMember(name, value) {
+                this[name] = value;
+            }
+        }, {
+            key: "deleteMember",
+            value: function deleteMember(name) {
+                delete this[name];
+            }
+        }]);
+
+        return ObjectValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/ObjectValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/StringValue.js///////////////////////////
+
+
+    var StringValue = function (_Value6) {
+        _inherits(StringValue, _Value6);
+
+        function StringValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+            _classCallCheck(this, StringValue);
+
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
+
+            _this12.__old = _this12.__value = init;
+            return _this12;
+        }
+
+        _createClass(StringValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = "" + val;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return StringValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/StringValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/UIntValue.js///////////////////////////
+
+
+    var UIntValue = function (_Value7) {
+        _inherits(UIntValue, _Value7);
+
+        function UIntValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+            _classCallCheck(this, UIntValue);
+
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
+
+            _this13.__old = _this13.__value = init;
+            return _this13;
+        }
+
+        _createClass(UIntValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = +val & ~0;
+                if (val < 0) {
+                    val = 0;
+                }
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return UIntValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/UIntValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
+
+
+    var DataManager = function () {
+        function DataManager() {
+            _classCallCheck(this, DataManager);
+
+            this._defines = {};
+            this._root = {};
+
+            if (DataManager.instance) {
+                return;
+            }
+        }
+
+        _createClass(DataManager, [{
+            key: "addRootData",
+            value: function addRootData(name, className) {
+                this[name] = this.createData(className);
+                this._root[name] = this[name];
+            }
+        }, {
+            key: "addDefine",
+            value: function addDefine(config) {
+                var className = config.name;
+                if (!className) {
+                    sys.$error(3010, flower.ObjectDo.toString(config));
+                    return;
+                }
+                if (!this._defines[className]) {
+                    this._defines[className] = {
+                        id: 0,
+                        className: "",
+                        define: null
+                    };
+                }
+                var item = this._defines[className];
+                var defineClass = "Data_" + className + (item.id != 0 ? item.id : "");
+                item.className = defineClass;
+                var extendClassName = "ObjectValue";
+                if (config.extends) {
+                    var extendsItem = this.getClass(config.extends);
+                    if (!extendsItem) {
+                        sys.$error(3013, config.extends, flower.ObjectDo.toString(config));
+                        return;
+                    }
+                    extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
+                }
+                var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "() {\n" + "\t\t_super.call(this);\n";
+                var members = config.members;
+                if (members) {
+                    var member;
+                    for (var key in members) {
+                        member = members[key];
+                        if (member.type == "int") {
+                            content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "uint") {
+                            content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "string") {
+                            content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "boolean") {
+                            content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "array") {
+                            content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "*") {
+                            content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
+                        } else {
+                            content += "\t\tthis." + key + " = DataManager.getInstance().createData(" + member.type + ");\n";
+                        }
+                    }
+                }
+                content += "\t}\n" + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
+                content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
+                console.log("数据结构:\n" + content);
+                if (sys.DEBUG) {
+                    try {
+                        eval(content);
+                    } catch (e) {
+                        sys.$error(3011, e, content);
+                    }
+                } else {
+                    eval(className);
+                }
+                item.id++;
+            }
+        }, {
+            key: "$addClassDefine",
+            value: function $addClassDefine(clazz, className) {
+                var item = this._defines[className];
+                item.define = clazz;
+            }
+        }, {
+            key: "getClass",
+            value: function getClass(className) {
+                var item = this._defines[className];
+                if (!item) {
+                    return null;
+                }
+                return item.define;
+            }
+        }, {
+            key: "createData",
+            value: function createData(className) {
+                var item = this._defines[className];
+                if (!item) {
+                    sys.$error(3012, className);
+                    return;
+                }
+                return new item.define();
+            }
+        }, {
+            key: "clear",
+            value: function clear() {
+                for (var key in this._root) {
+                    delete this._root[key];
+                    delete this[key];
+                }
+                this._defines = {};
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                return DataManager.instance;
+            }
+        }]);
+
+        return DataManager;
+    }();
+
+    DataManager.instance = new DataManager();
+
+
+    black.DataManager = DataManager;
+    //////////////////////////End File:extension/black/data/DataManager.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];

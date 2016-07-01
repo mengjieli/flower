@@ -9,6 +9,7 @@ class PlatformDisplayObject {
     __width = 0;
     __height = 0;
     __programmer = null;
+    __filters = null;
 
     /**
      * 0x0001 scale9Grid
@@ -118,6 +119,7 @@ class PlatformDisplayObject {
     }
 
     setFilters(filters) {
+        this.__filters = filters;
         var types1 = [0, 0, 0, 0];
         var types2 = [0, 0, 0, 0];
         var bigFilters = [];
@@ -182,7 +184,7 @@ class PlatformDisplayObject {
                 nativeProgrammer.setUniformLocationWith4f.apply(nativeProgrammer, [nativeProgrammer.getUniformLocationForName("filters2")].concat(types2));
             }
         }
-        if(bigFilters && bigFilters.length) {
+        if (bigFilters && bigFilters.length) {
             this.setBigFilters(bigFilters);
         }
     }
@@ -237,6 +239,7 @@ class PlatformDisplayObject {
     }
 
     release() {
+        this.setFilters([]);
         var show = this.show;
         show.setPosition(0, 0);
         show.setScale(1);
