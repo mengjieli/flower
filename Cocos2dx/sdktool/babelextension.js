@@ -164,14 +164,6 @@ var files = file.readFilesWidthEnd("js");
 var list = [
     "Black",
     "UIComponent",
-    "Group",
-    "DataGroup",
-    "UIParser",
-    "Image",
-    "TileImage",
-    "Button",
-
-    "zh_CN",
 
     "Value",
     "ArrayValue",
@@ -181,7 +173,22 @@ var list = [
     "ObjectValue",
     "StringValue",
     "UIntValue",
-    "DataManager"
+    "DataManager",
+
+    "zh_CN",
+
+    "Group",
+    "UIParser",
+    "DataGroup",
+    "Label",
+    "RectUI",
+    "Image",
+    "TileImage",
+    "Button",
+    "ToggleButton",
+    "RadioButton",
+    "RadioButtonGroup",
+    "ToggleSwitch",
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";

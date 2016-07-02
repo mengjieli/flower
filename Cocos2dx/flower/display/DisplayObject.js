@@ -41,13 +41,14 @@ class DisplayObject extends EventDispatcher {
 
     constructor() {
         super();
+        var id = DisplayObject.id++;
         this.$DisplayObject = {
             0: 1, //scaleX
             1: 1, //scaleY
             2: 0, //rotation
             3: null, //settingWidth
             4: null, //settingHeight
-            5: "instance" + DisplayObject.id++, //name
+            5: "instance" + id, //name
             6: new Rectangle(), //contentBounds 自身显示尺寸失效
             7: new Rectangle(), //bounds 在父类中的表现尺寸
             8: true, //touchEnabeld
@@ -57,6 +58,7 @@ class DisplayObject extends EventDispatcher {
             12: new Matrix(), //matrix
             13: new Matrix(), //reverseMatrix
             14: 0, //radian
+            20: id, //id
             50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
@@ -621,5 +623,9 @@ class DisplayObject extends EventDispatcher {
     set $focusEnabled(val) {
         var p = this.$DisplayObject;
         p[50] = val;
+    }
+
+    get id() {
+        return this.$DisplayObject[20];
     }
 }

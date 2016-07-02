@@ -254,21 +254,30 @@ var $root = eval("this");
                     //开始验证属性
                     //console.log("验证 ui 属性");
                     var p = this.$UIComponent;
+                    if (this.$hasFlags(0x0001)) {
+                        this.$getContentBounds();
+                    }
+                    if (this instanceof Label) {
+                        console.log("验证 ui 属性");
+                    }
                     if (p[0] != null && p[1] == null && p[2] != null) {
                         this.width = (p[2] - p[0]) * 2;
-                        this.x = p[0];
+                        this.x = this.parent.$getBounds().x + p[0];
                     } else if (p[0] == null && p[1] != null && p[2] != null) {
                         this.width = (p[1] - p[2]) * 2;
-                        this.x = 2 * p[2] - p[1];
+                        this.x = this.parent.$getBounds().x + 2 * p[2] - p[1];
                     } else if (p[0] != null && p[1] != null) {
                         this.width = this.parent.width - p[1] - p[0];
-                        this.x = p[0];
+                        this.x = this.parent.$getBounds().x + p[0];
                     } else {
                         if (p[0] != null) {
-                            this.x = p[0];
+                            this.x = this.parent.$getBounds().x + p[0];
                         }
                         if (p[1] != null) {
-                            this.x = this.width - p[1] - this.width;
+                            this.x = this.parent.$getBounds().x + this.width - p[1] - this.width;
+                        }
+                        if (p[2] != null) {
+                            this.x = this.parent.$getBounds().x + (this.parent.width - this.width) * 0.5;
                         }
                         if (p[6]) {
                             this.width = this.parent.width * p[6] / 100;
@@ -276,19 +285,22 @@ var $root = eval("this");
                     }
                     if (p[3] != null && p[4] == null && p[5] != null) {
                         this.height = (p[5] - p[3]) * 2;
-                        this.y = p[3];
+                        this.y = this.parent.$getBounds().y + p[3];
                     } else if (p[3] == null && p[4] != null && p[5] != null) {
                         this.height = (p[4] - p[5]) * 2;
-                        this.y = 2 * p[5] - p[4];
+                        this.y = this.parent.$getBounds().y + 2 * p[5] - p[4];
                     } else if (p[3] != null && p[4] != null) {
                         this.height = this.parent.height - p[4] - p[3];
-                        this.y = p[3];
+                        this.y = this.parent.$getBounds().y + p[3];
                     } else {
-                        if (p[2] != null) {
-                            this.y = p[0];
-                        }
                         if (p[3] != null) {
-                            this.y = this.height - p[1] - this.height;
+                            this.y = this.parent.$getBounds().y + p[0];
+                        }
+                        if (p[4] != null) {
+                            this.y = this.parent.$getBounds().y + this.height - p[1] - this.height;
+                        }
+                        if (p[5] != null) {
+                            this.y = this.parent.$getBounds().y + (this.parent.height - this.height) * 0.5;
                         }
                         if (p[7]) {
                             this.height = this.parent.height * p[7] / 100;
@@ -472,8 +484,845 @@ var $root = eval("this");
     }();
     //////////////////////////End File:extension/black/core/UIComponent.js///////////////////////////
 
-    //////////////////////////File:extension/black/Group.js///////////////////////////
+    //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
 
+
+    var Value = function (_flower$EventDispatch) {
+        _inherits(Value, _flower$EventDispatch);
+
+        function Value() {
+            var _Object$getPrototypeO;
+
+            var _temp, _this, _ret;
+
+            _classCallCheck(this, Value);
+
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+            }
+
+            return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.__old = null, _this.__value = null, _temp), _possibleConstructorReturn(_this, _ret);
+        }
+
+        _createClass(Value, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+            }
+        }, {
+            key: "value",
+            get: function get() {
+                return this.__value;
+            },
+            set: function set(val) {
+                this.$setValue(val);
+            }
+        }, {
+            key: "old",
+            get: function get() {
+                return this.__old;
+            }
+        }]);
+
+        return Value;
+    }(flower.EventDispatcher);
+
+    black.Value = Value;
+    //////////////////////////End File:extension/black/data/member/Value.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/ArrayValue.js///////////////////////////
+    /**
+     *
+     * @Event
+     * Event.ADDED item
+     * Event.REMOVED item
+     * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
+     */
+
+    var ArrayValue = function (_Value) {
+        _inherits(ArrayValue, _Value);
+
+        function ArrayValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+
+            _classCallCheck(this, ArrayValue);
+
+            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
+
+            _this2._key = "";
+            _this2._rangeMinKey = "";
+            _this2._rangeMaxKey = "";
+
+            _this2.list = init || [];
+            _this2._length = _this2.list.length;
+            return _this2;
+        }
+
+        _createClass(ArrayValue, [{
+            key: "push",
+            value: function push(item) {
+                this.list.push(item);
+                this._length = this._length + 1;
+                this.dispatchWidth(flower.Event.ADDED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "addItemAt",
+            value: function addItemAt(item, index) {
+                index = +index & ~0;
+                if (index < 0 || index > this.list.length) {
+                    sys.$error(3101, index, this.list.length);
+                    return;
+                }
+                this.list.splice(index, 0, item);
+                this._length = this._length + 1;
+                this.dispatchWidth(flower.Event.ADDED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "shift",
+            value: function shift() {
+                if (!this.list.length) {
+                    return;
+                }
+                var item = this.list.shift();
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "splice",
+            value: function splice(startIndex) {
+                var delCount = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+                var i;
+                startIndex = +startIndex & ~0;
+                delCount = +delCount & ~0;
+                if (delCount <= 0) {
+                    for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+                        args[_key2 - 2] = arguments[_key2];
+                    }
+
+                    for (i = 0; i < args.length; i++) {
+                        this.list.splice(startIndex, 0, args[i]);
+                    }
+                    this._length = this._length + 1;
+                    for (i = 0; i < args.length; i++) {
+                        this.dispatchWidth(flower.Event.ADDED, args[i]);
+                    }
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                } else {
+                    var list = this.list.splice(startIndex, delCount);
+                    this._length = this._length - delCount;
+                    for (i = 0; i < list.length; i++) {
+                        this.dispatchWidth(flower.Event.REMOVED, list[i]);
+                    }
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                }
+            }
+        }, {
+            key: "slice",
+            value: function slice(startIndex, end) {
+                startIndex = +startIndex & ~0;
+                end = +end & ~0;
+                return new ArrayValue(this.list.slice(startIndex, end));
+            }
+        }, {
+            key: "pop",
+            value: function pop() {
+                if (!this.list.length) {
+                    return;
+                }
+                var item = this.list.pop();
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "removeAll",
+            value: function removeAll() {
+                if (!this.list.length) {
+                    return;
+                }
+                while (this.list.length) {
+                    var item = this.list.pop();
+                    this._length = this._length - 1;
+                    this.dispatchWidth(flower.Event.REMOVED, item);
+                }
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "removeItem",
+            value: function removeItem(item) {
+                for (var i = 0, len = this.list.length; i < len; i++) {
+                    if (this.list[i] == item) {
+                        this.list.splice(i, 1);
+                        this._length = this._length - 1;
+                        this.dispatchWidth(flower.Event.REMOVED, item);
+                        this.dispatchWidth(flower.Event.UPDATE, this);
+                        return item;
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "removeItemAt",
+            value: function removeItemAt(index) {
+                index = +index & ~0;
+                if (index < 0 || index >= this.list.length) {
+                    sys.$error(3101, index, this.list.length);
+                    return;
+                }
+                var item = this.list.splice(index, 1)[0];
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "removeItemWith",
+            value: function removeItemWith(key, value) {
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                var item;
+                var i;
+                if (key2 != "") {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value) {
+                            item = this.list.splice(i, 1)[0];
+                            break;
+                        }
+                    }
+                } else {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                            item = this.list.splice(i, 1)[0];
+                            break;
+                        }
+                    }
+                }
+                if (!item) {
+                    return;
+                }
+                this._length = this._length - 1;
+                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+                return item;
+            }
+        }, {
+            key: "getItemIndex",
+            value: function getItemIndex(item) {
+                for (var i = 0, len = this.list.length; i < len; i++) {
+                    if (this.list[i] == item) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+        }, {
+            key: "getItemWith",
+            value: function getItemWith(key, value) {
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                var i;
+                if (!key2) {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value) {
+                            return this.list[i];
+                        }
+                    }
+                } else {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                            return this.list[i];
+                        }
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemFunction",
+            value: function getItemFunction(func, thisObj) {
+                for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+                    args[_key3 - 2] = arguments[_key3];
+                }
+
+                for (var i = 0; i < this.list.length; i++) {
+                    args.push(this.list[i]);
+                    var r = func.apply(thisObj, args);
+                    args.pop();
+                    if (r == true) {
+                        return this.list[i];
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemsWith",
+            value: function getItemsWith(key, value) {
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                var result = [];
+                var i;
+                if (key2 != "") {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value) {
+                            result.push(this.list[i]);
+                        }
+                    }
+                } else {
+                    for (i = 0; i < this.list.length; i++) {
+                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                            result.push(this.list[i]);
+                        }
+                    }
+                }
+                return result;
+            }
+        }, {
+            key: "setItemsAttributeWith",
+            value: function setItemsAttributeWith(findKey, findValue) {
+                var setKey = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var setValue = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+                for (var i = 0; i < this.list.length; i++) {
+                    if (this.list[i][findKey] == findValue) {
+                        this.list[i][setKey] = setValue;
+                    }
+                }
+            }
+        }, {
+            key: "getItemsFunction",
+            value: function getItemsFunction(func) {
+                var thisObj = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+                var _arguments__ = [];
+                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
+                    _arguments__ = arguments[argumentsLength];
+                }
+                var result = [];
+                var args = [];
+                if (_arguments__.length && _arguments__.length > 2) {
+                    args = [];
+                    for (var a = 2; a < _arguments__.length; a++) {
+                        args.push(_arguments__[a]);
+                    }
+                }
+                for (var i = 0; i < this.list.length; i++) {
+                    args.push(this.list[i]);
+                    var r = func.apply(thisObj, args);
+                    args.pop();
+                    if (r == true) {
+                        result.push(this.list[i]);
+                    }
+                }
+                return result;
+            }
+        }, {
+            key: "sort",
+            value: function sort() {
+                var _arguments__ = [];
+                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
+                    _arguments__ = arguments[argumentsLength];
+                }
+                this.list.sort.apply(this.list.sort, _arguments__);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "getItemAt",
+            value: function getItemAt(index) {
+                index = +index & ~0;
+                if (index < 0 || index >= this.list.length) {
+                    sys.$error(3101, index, this.list.length);
+                    return;
+                }
+                return this.list[index];
+            }
+        }, {
+            key: "getItemByValue",
+            value: function getItemByValue(value) {
+                if (this.key == "") {
+                    return null;
+                }
+                for (var i = 0; i < this.list.length; i++) {
+                    if (this.list[i][this.key] == value) {
+                        return this.list[i];
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemByRange",
+            value: function getItemByRange(value) {
+                if (this.key == "" || this.rangeMinKey == "" || this.rangeMaxKey == "") {
+                    return null;
+                }
+                for (var i = 0; i < this.list.length; i++) {
+                    var min = this.list[i][this.rangeMinKey];
+                    var max = this.list[i][this.rangeMaxKey];
+                    if (value >= min && value <= max) {
+                        return this.list[i];
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getItemsByRange",
+            value: function getItemsByRange(value) {
+                if (this.key == "" || this.rangeMinKey == "" || this.rangeMaxKey == "") {
+                    return null;
+                }
+                var list = [];
+                for (var i = 0; i < this.list.length; i++) {
+                    var min = this.list[i][this.rangeMinKey];
+                    var max = this.list[i][this.rangeMaxKey];
+                    if (value >= min && value <= max) {
+                        list.push(this.list[i]);
+                    }
+                }
+                return list;
+            }
+        }, {
+            key: "key",
+            set: function set(val) {
+                this._key = val;
+            },
+            get: function get() {
+                return this._key;
+            }
+        }, {
+            key: "rangeMinKey",
+            set: function set(val) {
+                this._rangeMinKey = val;
+            },
+            get: function get() {
+                return this._rangeMinKey;
+            }
+        }, {
+            key: "rangeMaxKey",
+            set: function set(val) {
+                this._rangeMaxKey = val;
+            },
+            get: function get() {
+                return this._rangeMaxKey;
+            }
+        }, {
+            key: "length",
+            get: function get() {
+                return this._length;
+            },
+            set: function set(val) {
+                val = +val & ~0;
+                if (this._length == val) {} else {
+                    while (this.list.length > val) {
+                        var item = this.list.pop();
+                        this._length = this._length - 1;
+                        this.dispatchWidth(flower.Event.REMOVED, item);
+                    }
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                }
+            }
+        }]);
+
+        return ArrayValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/ArrayValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/BooleanValue.js///////////////////////////
+
+
+    var BooleanValue = function (_Value2) {
+        _inherits(BooleanValue, _Value2);
+
+        function BooleanValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+            _classCallCheck(this, BooleanValue);
+
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
+
+            _this3.__old = _this3.__value = init;
+            return _this3;
+        }
+
+        _createClass(BooleanValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = !!val;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return BooleanValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/BooleanValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/IntValue.js///////////////////////////
+
+
+    var IntValue = function (_Value3) {
+        _inherits(IntValue, _Value3);
+
+        function IntValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+            _classCallCheck(this, IntValue);
+
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
+
+            _this4.__old = _this4.__value = init;
+            return _this4;
+        }
+
+        _createClass(IntValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = +val & ~0;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return IntValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/IntValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/NumberValue.js///////////////////////////
+
+
+    var NumberValue = function (_Value4) {
+        _inherits(NumberValue, _Value4);
+
+        function NumberValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+            _classCallCheck(this, NumberValue);
+
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
+
+            _this5.__old = _this5.__value = init;
+            return _this5;
+        }
+
+        _createClass(NumberValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = +val;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return NumberValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/NumberValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/ObjectValue.js///////////////////////////
+
+
+    var ObjectValue = function (_Value5) {
+        _inherits(ObjectValue, _Value5);
+
+        function ObjectValue() {
+            _classCallCheck(this, ObjectValue);
+
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
+
+            _this6.__old = _this6.__value = {};
+            return _this6;
+        }
+
+        _createClass(ObjectValue, [{
+            key: "update",
+            value: function update() {
+                var change = false;
+                for (var i = 0; i < arguments.length;) {
+                    var name = arguments.length <= i + 0 ? undefined : arguments[i + 0];
+                    if (i + 1 >= arguments.length) {
+                        break;
+                    }
+                    var value = arguments.length <= i + 1 + 0 ? undefined : arguments[i + 1 + 0];
+                    var obj = this[name];
+                    if (obj instanceof Value) {
+                        if (obj.value != value) {
+                            obj.value = value;
+                            change = true;
+                        }
+                    } else {
+                        if (obj != value) {
+                            this[name] = value;
+                            change = true;
+                        }
+                    }
+                    this[name] = value;
+                    i += 2;
+                }
+                if (change) {
+                    this.dispatchWidth(flower.Event.UPDATE, this);
+                }
+            }
+        }, {
+            key: "addMember",
+            value: function addMember(name, value) {
+                this[name] = value;
+            }
+        }, {
+            key: "deleteMember",
+            value: function deleteMember(name) {
+                delete this[name];
+            }
+        }]);
+
+        return ObjectValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/ObjectValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/StringValue.js///////////////////////////
+
+
+    var StringValue = function (_Value6) {
+        _inherits(StringValue, _Value6);
+
+        function StringValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+
+            _classCallCheck(this, StringValue);
+
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
+
+            _this7.__old = _this7.__value = init;
+            return _this7;
+        }
+
+        _createClass(StringValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = "" + val;
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return StringValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/StringValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/UIntValue.js///////////////////////////
+
+
+    var UIntValue = function (_Value7) {
+        _inherits(UIntValue, _Value7);
+
+        function UIntValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+            _classCallCheck(this, UIntValue);
+
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
+
+            _this8.__old = _this8.__value = init;
+            return _this8;
+        }
+
+        _createClass(UIntValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                val = +val & ~0;
+                if (val < 0) {
+                    val = 0;
+                }
+                if (val == this.__value) {
+                    return;
+                }
+                this.__old = this.__value;
+                this.__value = val;
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }]);
+
+        return UIntValue;
+    }(Value);
+    //////////////////////////End File:extension/black/data/member/UIntValue.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
+
+
+    var DataManager = function () {
+        function DataManager() {
+            _classCallCheck(this, DataManager);
+
+            this._defines = {};
+            this._root = {};
+
+            if (DataManager.instance) {
+                return;
+            }
+        }
+
+        _createClass(DataManager, [{
+            key: "addRootData",
+            value: function addRootData(name, className) {
+                this[name] = this.createData(className);
+                this._root[name] = this[name];
+            }
+        }, {
+            key: "addDefine",
+            value: function addDefine(config) {
+                var className = config.name;
+                if (!className) {
+                    sys.$error(3010, flower.ObjectDo.toString(config));
+                    return;
+                }
+                if (!this._defines[className]) {
+                    this._defines[className] = {
+                        id: 0,
+                        className: "",
+                        define: null
+                    };
+                }
+                var item = this._defines[className];
+                var defineClass = "Data_" + className + (item.id != 0 ? item.id : "");
+                item.className = defineClass;
+                var extendClassName = "ObjectValue";
+                if (config.extends) {
+                    var extendsItem = this.getClass(config.extends);
+                    if (!extendsItem) {
+                        sys.$error(3013, config.extends, flower.ObjectDo.toString(config));
+                        return;
+                    }
+                    extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
+                }
+                var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "() {\n" + "\t\t_super.call(this);\n";
+                var members = config.members;
+                if (members) {
+                    var member;
+                    for (var key in members) {
+                        member = members[key];
+                        if (member.type == "int") {
+                            content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "uint") {
+                            content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "string") {
+                            content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "boolean") {
+                            content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "array") {
+                            content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "*") {
+                            content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
+                        } else {
+                            content += "\t\tthis." + key + " = DataManager.getInstance().createData(" + member.type + ");\n";
+                        }
+                    }
+                }
+                content += "\t}\n" + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
+                content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
+                console.log("数据结构:\n" + content);
+                if (sys.DEBUG) {
+                    try {
+                        eval(content);
+                    } catch (e) {
+                        sys.$error(3011, e, content);
+                    }
+                } else {
+                    eval(className);
+                }
+                item.id++;
+            }
+        }, {
+            key: "$addClassDefine",
+            value: function $addClassDefine(clazz, className) {
+                var item = this._defines[className];
+                item.define = clazz;
+            }
+        }, {
+            key: "getClass",
+            value: function getClass(className) {
+                var item = this._defines[className];
+                if (!item) {
+                    return null;
+                }
+                return item.define;
+            }
+        }, {
+            key: "createData",
+            value: function createData(className) {
+                var item = this._defines[className];
+                if (!item) {
+                    sys.$error(3012, className);
+                    return;
+                }
+                return new item.define();
+            }
+        }, {
+            key: "clear",
+            value: function clear() {
+                for (var key in this._root) {
+                    delete this._root[key];
+                    delete this[key];
+                }
+                this._defines = {};
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                return DataManager.instance;
+            }
+        }]);
+
+        return DataManager;
+    }();
+
+    DataManager.instance = new DataManager();
+
+
+    black.DataManager = DataManager;
+    //////////////////////////End File:extension/black/data/DataManager.js///////////////////////////
+
+    //////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
+    var locale_strings = flower.sys.$locale_strings["zh_CN"];
+
+    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+    locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+    locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+    locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
+    locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
+    locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
+    locale_strings[3012] = "没有定义的数据结构 :{0}";
+    locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
+    locale_strings[3100] = "没有定义的数据类型 :{0}";
+    locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
+    //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
+
+    //////////////////////////File:extension/black/Group.js///////////////////////////
 
     var Group = function (_flower$Sprite) {
         _inherits(Group, _flower$Sprite);
@@ -481,10 +1330,10 @@ var $root = eval("this");
         function Group() {
             _classCallCheck(this, Group);
 
-            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
-            _this.$initUIComponent();
-            return _this;
+            _this9.$initUIComponent();
+            return _this9;
         }
 
         _createClass(Group, [{
@@ -503,24 +1352,7 @@ var $root = eval("this");
     black.Group = Group;
     //////////////////////////End File:extension/black/Group.js///////////////////////////
 
-    //////////////////////////File:extension/black/DataGroup.js///////////////////////////
-
-    var DataGroup = function (_black$Group) {
-        _inherits(DataGroup, _black$Group);
-
-        function DataGroup() {
-            _classCallCheck(this, DataGroup);
-
-            return _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
-        }
-
-        return DataGroup;
-    }(black.Group);
-
-    black.DataGroup = DataGroup;
-    //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
-
-    //////////////////////////File:extension/black/core/UIParser.js///////////////////////////
+    //////////////////////////File:extension/black/UIParser.js///////////////////////////
 
     var UIParser = function (_Group) {
         _inherits(UIParser, _Group);
@@ -528,10 +1360,10 @@ var $root = eval("this");
         function UIParser() {
             _classCallCheck(this, UIParser);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
-            _this3.classes = flower.UIParser.classes;
-            return _this3;
+            _this10.classes = flower.UIParser.classes;
+            return _this10;
         }
 
         _createClass(UIParser, [{
@@ -1046,7 +1878,169 @@ var $root = eval("this");
 
 
     black.UIParser = UIParser;
-    //////////////////////////End File:extension/black/core/UIParser.js///////////////////////////
+    //////////////////////////End File:extension/black/UIParser.js///////////////////////////
+
+    //////////////////////////File:extension/black/DataGroup.js///////////////////////////
+
+    var DataGroup = function (_black$Group) {
+        _inherits(DataGroup, _black$Group);
+
+        function DataGroup() {
+            _classCallCheck(this, DataGroup);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+        }
+
+        return DataGroup;
+    }(black.Group);
+
+    black.DataGroup = DataGroup;
+    //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
+
+    //////////////////////////File:extension/black/Label.js///////////////////////////
+
+    var Label = function (_flower$TextField) {
+        _inherits(Label, _flower$TextField);
+
+        function Label() {
+            var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+
+            _classCallCheck(this, Label);
+
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
+
+            _this12.$initUIComponent();
+            return _this12;
+        }
+
+        _createClass(Label, [{
+            key: "dispose",
+            value: function dispose() {
+                this.removeAllBindProperty();
+                _get(Object.getPrototypeOf(Label.prototype), "dispose", this).call(this);
+            }
+        }]);
+
+        return Label;
+    }(flower.TextField);
+
+    UIComponent.register(Label);
+    Label.prototype.__UIComponent = true;
+    black.Label = Label;
+    //////////////////////////End File:extension/black/Label.js///////////////////////////
+
+    //////////////////////////File:extension/black/RectUI.js///////////////////////////
+
+    var RectUI = function (_flower$Shape) {
+        _inherits(RectUI, _flower$Shape);
+
+        function RectUI() {
+            _classCallCheck(this, RectUI);
+
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
+
+            _this13.$RectUI = {
+                0: 0, //width
+                1: 0 };
+            //height
+            _this13.drawRect = null;
+            _this13.$initUIComponent();
+            return _this13;
+        }
+
+        _createClass(RectUI, [{
+            key: "$setFillColor",
+            value: function $setFillColor(val) {
+                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setFillColor", this).call(this, val)) {
+                    this.$resetRectUI();
+                }
+            }
+        }, {
+            key: "$setFillAlpha",
+            value: function $setFillAlpha(val) {
+                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setFillAlpha", this).call(this, val)) {
+                    this.$resetRectUI();
+                }
+            }
+        }, {
+            key: "$setLineWidth",
+            value: function $setLineWidth(val) {
+                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setLineWidth", this).call(this, val)) {
+                    this.$resetRectUI();
+                }
+            }
+        }, {
+            key: "$setLineColor",
+            value: function $setLineColor(val) {
+                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setLineColor", this).call(this, val)) {
+                    this.$resetRectUI();
+                }
+            }
+        }, {
+            key: "$setLineAlpha",
+            value: function $setLineAlpha(val) {
+                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setLineAlpha", this).call(this, val)) {
+                    this.$resetRectUI();
+                }
+            }
+        }, {
+            key: "$setWidth",
+            value: function $setWidth(val) {
+                val = +val || 0;
+                var p = this.$RectUI;
+                if (p[0] == val) {
+                    return;
+                }
+                p[0] = val;
+                this.$resetRectUI();
+            }
+        }, {
+            key: "$resetRectUI",
+            value: function $resetRectUI() {
+                var p = this.$Shape;
+                if (p[9].length == 0) {
+                    p[9].push({});
+                }
+                var width = this.$RectUI[0];
+                var height = this.$RectUI[1];
+                var x = 0;
+                var y = 0;
+                p[9][0] = {
+                    points: [{ x: x, y: y }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }],
+                    fillColor: p[0],
+                    fillAlpha: p[1],
+                    lineWidth: p[2],
+                    lineColor: p[3],
+                    lineAlpha: p[4]
+                };
+                this.$addFlags(0x0400);
+            }
+        }, {
+            key: "$setHeight",
+            value: function $setHeight(val) {
+                val = +val || 0;
+                var p = this.$RectUI;
+                if (p[1] == val) {
+                    return;
+                }
+                p[1] = val;
+                this.$resetRectUI();
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                this.removeAllBindProperty();
+                _get(Object.getPrototypeOf(RectUI.prototype), "dispose", this).call(this);
+            }
+        }]);
+
+        return RectUI;
+    }(flower.Shape);
+
+    UIComponent.register(RectUI);
+    RectUI.prototype.__UIComponent = true;
+    black.RectUI = RectUI;
+    //////////////////////////End File:extension/black/RectUI.js///////////////////////////
 
     //////////////////////////File:extension/black/Image.js///////////////////////////
 
@@ -1058,11 +2052,11 @@ var $root = eval("this");
 
             _classCallCheck(this, Image);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
 
-            _this4.$initUIComponent();
-            _this4.source = source;
-            return _this4;
+            _this14.$initUIComponent();
+            _this14.source = source;
+            return _this14;
         }
 
         _createClass(Image, [{
@@ -1154,16 +2148,16 @@ var $root = eval("this");
         function Button() {
             _classCallCheck(this, Button);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-            _this6._enabled = true;
+            _this16._enabled = true;
 
-            _this6.absoluteState = true;
-            _this6.currentState = "up";
-            _this6.addListener(flower.TouchEvent.TOUCH_BEGIN, _this6.__onTouch, _this6);
-            _this6.addListener(flower.TouchEvent.TOUCH_END, _this6.__onTouch, _this6);
-            _this6.addListener(flower.TouchEvent.TOUCH_RELEASE, _this6.__onTouch, _this6);
-            return _this6;
+            _this16.absoluteState = true;
+            _this16.currentState = "up";
+            _this16.addListener(flower.TouchEvent.TOUCH_BEGIN, _this16.__onTouch, _this16);
+            _this16.addListener(flower.TouchEvent.TOUCH_END, _this16.__onTouch, _this16);
+            _this16.addListener(flower.TouchEvent.TOUCH_RELEASE, _this16.__onTouch, _this16);
+            return _this16;
         }
 
         _createClass(Button, [{
@@ -1250,842 +2244,346 @@ var $root = eval("this");
     black.Button = Button;
     //////////////////////////End File:extension/black/Button.js///////////////////////////
 
-    //////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
-    var locale_strings = flower.sys.$locale_strings["zh_CN"];
+    //////////////////////////File:extension/black/ToggleButton.js///////////////////////////
 
-    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
-    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
-    locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
-    locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
-    locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
-    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
-    locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
-    locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
-    locale_strings[3012] = "没有定义的数据结构 :{0}";
-    locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
-    locale_strings[3100] = "没有定义的数据类型 :{0}";
-    locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
-    //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
+    var ToggleButton = function (_Button) {
+        _inherits(ToggleButton, _Button);
 
-    //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
+        function ToggleButton() {
+            _classCallCheck(this, ToggleButton);
 
-    var Value = function (_flower$EventDispatch) {
-        _inherits(Value, _flower$EventDispatch);
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-        function Value() {
-            var _Object$getPrototypeO;
-
-            var _temp, _this7, _ret;
-
-            _classCallCheck(this, Value);
-
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                args[_key] = arguments[_key];
-            }
-
-            return _ret = (_temp = (_this7 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this7), _this7.__old = null, _this7.__value = null, _temp), _possibleConstructorReturn(_this7, _ret);
+            _this17.__selected = false;
+            return _this17;
         }
 
-        _createClass(Value, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                if (val == this.__value) {
+        _createClass(ToggleButton, [{
+            key: "__onTouch",
+            value: function __onTouch(e) {
+                if (!this.enabled) {
+                    e.stopPropagation();
                     return;
                 }
-                this.__old = this.__value;
-                this.__value = val;
-            }
-        }, {
-            key: "value",
-            get: function get() {
-                return this.__value;
-            },
-            set: function set(val) {
-                this.$setValue(val);
-            }
-        }, {
-            key: "old",
-            get: function get() {
-                return this.__old;
-            }
-        }]);
-
-        return Value;
-    }(flower.EventDispatcher);
-
-    black.Value = Value;
-    //////////////////////////End File:extension/black/data/member/Value.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/member/ArrayValue.js///////////////////////////
-    /**
-     *
-     * @Event
-     * Event.ADDED item
-     * Event.REMOVED item
-     * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
-     */
-
-    var ArrayValue = function (_Value) {
-        _inherits(ArrayValue, _Value);
-
-        function ArrayValue() {
-            var init = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-
-            _classCallCheck(this, ArrayValue);
-
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
-
-            _this8._key = "";
-            _this8._rangeMinKey = "";
-            _this8._rangeMaxKey = "";
-
-            _this8.list = init || [];
-            _this8._length = _this8.list.length;
-            return _this8;
-        }
-
-        _createClass(ArrayValue, [{
-            key: "push",
-            value: function push(item) {
-                this.list.push(item);
-                this._length = this._length + 1;
-                this.dispatchWidth(flower.Event.ADDED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }, {
-            key: "addItemAt",
-            value: function addItemAt(item, index) {
-                index = +index & ~0;
-                if (index < 0 || index > this.list.length) {
-                    sys.$error(3101, index, this.list.length);
-                    return;
-                }
-                this.list.splice(index, 0, item);
-                this._length = this._length + 1;
-                this.dispatchWidth(flower.Event.ADDED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }, {
-            key: "shift",
-            value: function shift() {
-                if (!this.list.length) {
-                    return;
-                }
-                var item = this.list.shift();
-                this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
-                return item;
-            }
-        }, {
-            key: "splice",
-            value: function splice(startIndex) {
-                var delCount = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
-
-                var i;
-                startIndex = +startIndex & ~0;
-                delCount = +delCount & ~0;
-                if (delCount <= 0) {
-                    for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-                        args[_key2 - 2] = arguments[_key2];
-                    }
-
-                    for (i = 0; i < args.length; i++) {
-                        this.list.splice(startIndex, 0, args[i]);
-                    }
-                    this._length = this._length + 1;
-                    for (i = 0; i < args.length; i++) {
-                        this.dispatchWidth(flower.Event.ADDED, args[i]);
-                    }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
-                } else {
-                    var list = this.list.splice(startIndex, delCount);
-                    this._length = this._length - delCount;
-                    for (i = 0; i < list.length; i++) {
-                        this.dispatchWidth(flower.Event.REMOVED, list[i]);
-                    }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
-                }
-            }
-        }, {
-            key: "slice",
-            value: function slice(startIndex, end) {
-                startIndex = +startIndex & ~0;
-                end = +end & ~0;
-                return new ArrayValue(this.list.slice(startIndex, end));
-            }
-        }, {
-            key: "pop",
-            value: function pop() {
-                if (!this.list.length) {
-                    return;
-                }
-                var item = this.list.pop();
-                this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
-                return item;
-            }
-        }, {
-            key: "removeAll",
-            value: function removeAll() {
-                if (!this.list.length) {
-                    return;
-                }
-                while (this.list.length) {
-                    var item = this.list.pop();
-                    this._length = this._length - 1;
-                    this.dispatchWidth(flower.Event.REMOVED, item);
-                }
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }, {
-            key: "removeItem",
-            value: function removeItem(item) {
-                for (var i = 0, len = this.list.length; i < len; i++) {
-                    if (this.list[i] == item) {
-                        this.list.splice(i, 1);
-                        this._length = this._length - 1;
-                        this.dispatchWidth(flower.Event.REMOVED, item);
-                        this.dispatchWidth(flower.Event.UPDATE, this);
-                        return item;
-                    }
-                }
-                return null;
-            }
-        }, {
-            key: "removeItemAt",
-            value: function removeItemAt(index) {
-                index = +index & ~0;
-                if (index < 0 || index >= this.list.length) {
-                    sys.$error(3101, index, this.list.length);
-                    return;
-                }
-                var item = this.list.splice(index, 1)[0];
-                this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
-                return item;
-            }
-        }, {
-            key: "removeItemWith",
-            value: function removeItemWith(key, value) {
-                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
-                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
-
-                var item;
-                var i;
-                if (key2 != "") {
-                    for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
-                            item = this.list.splice(i, 1)[0];
-                            break;
+                switch (e.type) {
+                    case flower.TouchEvent.TOUCH_BEGIN:
+                        if (this.__selected) {
+                            this.currentState = "selectedDown";
+                        } else {
+                            this.currentState = "down";
                         }
-                    }
-                } else {
-                    for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
-                            item = this.list.splice(i, 1)[0];
-                            break;
-                        }
-                    }
-                }
-                if (!item) {
-                    return;
-                }
-                this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
-                return item;
-            }
-        }, {
-            key: "getItemIndex",
-            value: function getItemIndex(item) {
-                for (var i = 0, len = this.list.length; i < len; i++) {
-                    if (this.list[i] == item) {
-                        return i;
-                    }
-                }
-                return -1;
-            }
-        }, {
-            key: "getItemWith",
-            value: function getItemWith(key, value) {
-                var key2 = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
-                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
-
-                var i;
-                if (!key2) {
-                    for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
-                            return this.list[i];
-                        }
-                    }
-                } else {
-                    for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
-                            return this.list[i];
-                        }
-                    }
-                }
-                return null;
-            }
-        }, {
-            key: "getItemFunction",
-            value: function getItemFunction(func, thisObj) {
-                for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
-                    args[_key3 - 2] = arguments[_key3];
-                }
-
-                for (var i = 0; i < this.list.length; i++) {
-                    args.push(this.list[i]);
-                    var r = func.apply(thisObj, args);
-                    args.pop();
-                    if (r == true) {
-                        return this.list[i];
-                    }
-                }
-                return null;
-            }
-        }, {
-            key: "getItemsWith",
-            value: function getItemsWith(key, value) {
-                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
-                var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
-
-                var result = [];
-                var i;
-                if (key2 != "") {
-                    for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
-                            result.push(this.list[i]);
-                        }
-                    }
-                } else {
-                    for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
-                            result.push(this.list[i]);
-                        }
-                    }
-                }
-                return result;
-            }
-        }, {
-            key: "setItemsAttributeWith",
-            value: function setItemsAttributeWith(findKey, findValue) {
-                var setKey = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
-                var setValue = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
-
-                for (var i = 0; i < this.list.length; i++) {
-                    if (this.list[i][findKey] == findValue) {
-                        this.list[i][setKey] = setValue;
-                    }
-                }
-            }
-        }, {
-            key: "getItemsFunction",
-            value: function getItemsFunction(func) {
-                var thisObj = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-
-                var _arguments__ = [];
-                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
-                    _arguments__ = arguments[argumentsLength];
-                }
-                var result = [];
-                var args = [];
-                if (_arguments__.length && _arguments__.length > 2) {
-                    args = [];
-                    for (var a = 2; a < _arguments__.length; a++) {
-                        args.push(_arguments__[a]);
-                    }
-                }
-                for (var i = 0; i < this.list.length; i++) {
-                    args.push(this.list[i]);
-                    var r = func.apply(thisObj, args);
-                    args.pop();
-                    if (r == true) {
-                        result.push(this.list[i]);
-                    }
-                }
-                return result;
-            }
-        }, {
-            key: "sort",
-            value: function sort() {
-                var _arguments__ = [];
-                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
-                    _arguments__ = arguments[argumentsLength];
-                }
-                this.list.sort.apply(this.list.sort, _arguments__);
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }, {
-            key: "getItemAt",
-            value: function getItemAt(index) {
-                index = +index & ~0;
-                if (index < 0 || index >= this.list.length) {
-                    sys.$error(3101, index, this.list.length);
-                    return;
-                }
-                return this.list[index];
-            }
-        }, {
-            key: "getItemByValue",
-            value: function getItemByValue(value) {
-                if (this.key == "") {
-                    return null;
-                }
-                for (var i = 0; i < this.list.length; i++) {
-                    if (this.list[i][this.key] == value) {
-                        return this.list[i];
-                    }
-                }
-                return null;
-            }
-        }, {
-            key: "getItemByRange",
-            value: function getItemByRange(value) {
-                if (this.key == "" || this.rangeMinKey == "" || this.rangeMaxKey == "") {
-                    return null;
-                }
-                for (var i = 0; i < this.list.length; i++) {
-                    var min = this.list[i][this.rangeMinKey];
-                    var max = this.list[i][this.rangeMaxKey];
-                    if (value >= min && value <= max) {
-                        return this.list[i];
-                    }
-                }
-                return null;
-            }
-        }, {
-            key: "getItemsByRange",
-            value: function getItemsByRange(value) {
-                if (this.key == "" || this.rangeMinKey == "" || this.rangeMaxKey == "") {
-                    return null;
-                }
-                var list = [];
-                for (var i = 0; i < this.list.length; i++) {
-                    var min = this.list[i][this.rangeMinKey];
-                    var max = this.list[i][this.rangeMaxKey];
-                    if (value >= min && value <= max) {
-                        list.push(this.list[i]);
-                    }
-                }
-                return list;
-            }
-        }, {
-            key: "key",
-            set: function set(val) {
-                this._key = val;
-            },
-            get: function get() {
-                return this._key;
-            }
-        }, {
-            key: "rangeMinKey",
-            set: function set(val) {
-                this._rangeMinKey = val;
-            },
-            get: function get() {
-                return this._rangeMinKey;
-            }
-        }, {
-            key: "rangeMaxKey",
-            set: function set(val) {
-                this._rangeMaxKey = val;
-            },
-            get: function get() {
-                return this._rangeMaxKey;
-            }
-        }, {
-            key: "length",
-            get: function get() {
-                return this._length;
-            },
-            set: function set(val) {
-                val = +val & ~0;
-                if (this._length == val) {} else {
-                    while (this.list.length > val) {
-                        var item = this.list.pop();
-                        this._length = this._length - 1;
-                        this.dispatchWidth(flower.Event.REMOVED, item);
-                    }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
-                }
-            }
-        }]);
-
-        return ArrayValue;
-    }(Value);
-    //////////////////////////End File:extension/black/data/member/ArrayValue.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/member/BooleanValue.js///////////////////////////
-
-
-    var BooleanValue = function (_Value2) {
-        _inherits(BooleanValue, _Value2);
-
-        function BooleanValue() {
-            var init = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-
-            _classCallCheck(this, BooleanValue);
-
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
-
-            _this9.__old = _this9.__value = init;
-            return _this9;
-        }
-
-        _createClass(BooleanValue, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                val = !!val;
-                if (val == this.__value) {
-                    return;
-                }
-                this.__old = this.__value;
-                this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }]);
-
-        return BooleanValue;
-    }(Value);
-    //////////////////////////End File:extension/black/data/member/BooleanValue.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/member/IntValue.js///////////////////////////
-
-
-    var IntValue = function (_Value3) {
-        _inherits(IntValue, _Value3);
-
-        function IntValue() {
-            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-
-            _classCallCheck(this, IntValue);
-
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
-
-            _this10.__old = _this10.__value = init;
-            return _this10;
-        }
-
-        _createClass(IntValue, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                val = +val & ~0;
-                if (val == this.__value) {
-                    return;
-                }
-                this.__old = this.__value;
-                this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }]);
-
-        return IntValue;
-    }(Value);
-    //////////////////////////End File:extension/black/data/member/IntValue.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/member/NumberValue.js///////////////////////////
-
-
-    var NumberValue = function (_Value4) {
-        _inherits(NumberValue, _Value4);
-
-        function NumberValue() {
-            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-
-            _classCallCheck(this, NumberValue);
-
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
-
-            _this11.__old = _this11.__value = init;
-            return _this11;
-        }
-
-        _createClass(NumberValue, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                val = +val;
-                if (val == this.__value) {
-                    return;
-                }
-                this.__old = this.__value;
-                this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }]);
-
-        return NumberValue;
-    }(Value);
-    //////////////////////////End File:extension/black/data/member/NumberValue.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/member/ObjectValue.js///////////////////////////
-
-
-    var ObjectValue = function (_Value5) {
-        _inherits(ObjectValue, _Value5);
-
-        function ObjectValue() {
-            _classCallCheck(this, ObjectValue);
-
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
-
-            _this12.__old = _this12.__value = {};
-            return _this12;
-        }
-
-        _createClass(ObjectValue, [{
-            key: "update",
-            value: function update() {
-                var change = false;
-                for (var i = 0; i < arguments.length;) {
-                    var name = arguments.length <= i + 0 ? undefined : arguments[i + 0];
-                    if (i + 1 >= arguments.length) {
                         break;
-                    }
-                    var value = arguments.length <= i + 1 + 0 ? undefined : arguments[i + 1 + 0];
-                    var obj = this[name];
-                    if (obj instanceof Value) {
-                        if (obj.value != value) {
-                            obj.value = value;
-                            change = true;
+                    case flower.TouchEvent.TOUCH_END:
+                    case flower.TouchEvent.TOUCH_RELEASE:
+                        if (e.type == flower.TouchEvent.TOUCH_END) {
+                            this.selected = !this.selected;
                         }
-                    } else {
-                        if (obj != value) {
-                            this[name] = value;
-                            change = true;
+                        if (this.__selected) {
+                            this.currentState = "selectedUp";
+                        } else {
+                            this.currentState = "up";
                         }
-                    }
-                    this[name] = value;
-                    i += 2;
-                }
-                if (change) {
-                    this.dispatchWidth(flower.Event.UPDATE, this);
+                        break;
                 }
             }
         }, {
-            key: "addMember",
-            value: function addMember(name, value) {
-                this[name] = value;
+            key: "__setEnabled",
+            value: function __setEnabled(val) {
+                _get(Object.getPrototypeOf(ToggleButton.prototype), "_setEnabled", this).call(this, val);
+                if (val == false && this.__selected) {
+                    this.selected = false;
+                }
             }
         }, {
-            key: "deleteMember",
-            value: function deleteMember(name) {
-                delete this[name];
-            }
-        }]);
-
-        return ObjectValue;
-    }(Value);
-    //////////////////////////End File:extension/black/data/member/ObjectValue.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/member/StringValue.js///////////////////////////
-
-
-    var StringValue = function (_Value6) {
-        _inherits(StringValue, _Value6);
-
-        function StringValue() {
-            var init = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
-
-            _classCallCheck(this, StringValue);
-
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
-
-            _this13.__old = _this13.__value = init;
-            return _this13;
-        }
-
-        _createClass(StringValue, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                val = "" + val;
-                if (val == this.__value) {
+            key: "__setSelected",
+            value: function __setSelected(val) {
+                val = !!val;
+                if (!this.enabled || val == this.__selected) {
                     return;
                 }
-                this.__old = this.__value;
-                this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }]);
-
-        return StringValue;
-    }(Value);
-    //////////////////////////End File:extension/black/data/member/StringValue.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/member/UIntValue.js///////////////////////////
-
-
-    var UIntValue = function (_Value7) {
-        _inherits(UIntValue, _Value7);
-
-        function UIntValue() {
-            var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-
-            _classCallCheck(this, UIntValue);
-
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
-
-            _this14.__old = _this14.__value = init;
-            return _this14;
-        }
-
-        _createClass(UIntValue, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                val = +val & ~0;
-                if (val < 0) {
-                    val = 0;
+                this.__selected = val;
+                if (val) {
+                    this.currentState = "selectedUp";
+                } else {
+                    this.currentState = "up";
                 }
-                if (val == this.__value) {
-                    return;
+                if (this.onChangeEXE) {
+                    this.onChangeEXE.call(this);
                 }
-                this.__old = this.__value;
-                this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
-            }
-        }]);
-
-        return UIntValue;
-    }(Value);
-    //////////////////////////End File:extension/black/data/member/UIntValue.js///////////////////////////
-
-    //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
-
-
-    var DataManager = function () {
-        function DataManager() {
-            _classCallCheck(this, DataManager);
-
-            this._defines = {};
-            this._root = {};
-
-            if (DataManager.instance) {
-                return;
-            }
-        }
-
-        _createClass(DataManager, [{
-            key: "addRootData",
-            value: function addRootData(name, className) {
-                this[name] = this.createData(className);
-                this._root[name] = this[name];
             }
         }, {
-            key: "addDefine",
-            value: function addDefine(config) {
-                var className = config.name;
-                if (!className) {
-                    sys.$error(3010, flower.ObjectDo.toString(config));
+            key: "selected",
+            get: function get() {
+                return this.__selected;
+            },
+            set: function set(val) {
+                this.__setSelected(val);
+            }
+        }, {
+            key: "onChange",
+            set: function set(val) {
+                if (typeof val == "string") {
+                    var content = val;
+                    val = function () {
+                        eval(content);
+                    }.bind(this.eventThis);
+                }
+                this.onChangeEXE = val;
+            },
+            get: function get() {
+                return this.onChangeEXE;
+            }
+        }]);
+
+        return ToggleButton;
+    }(Button);
+
+    black.ToggleButton = ToggleButton;
+    //////////////////////////End File:extension/black/ToggleButton.js///////////////////////////
+
+    //////////////////////////File:extension/black/RadioButton.js///////////////////////////
+
+    var RadioButton = function (_ToggleButton) {
+        _inherits(RadioButton, _ToggleButton);
+
+        function RadioButton() {
+            _classCallCheck(this, RadioButton);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButton).call(this));
+        }
+
+        _createClass(RadioButton, [{
+            key: "__setSelected",
+            value: function __setSelected(val) {
+                if (val == false && this._group && this._group.selection == this) {
                     return;
                 }
-                if (!this._defines[className]) {
-                    this._defines[className] = {
-                        id: 0,
-                        className: "",
-                        define: null
-                    };
+                _get(Object.getPrototypeOf(RadioButton.prototype), "__setSelected", this).call(this, val);
+                if (this._group) {
+                    this._group.$itemSelectedChange(this);
                 }
-                var item = this._defines[className];
-                var defineClass = "Data_" + className + (item.id != 0 ? item.id : "");
-                item.className = defineClass;
-                var extendClassName = "ObjectValue";
-                if (config.extends) {
-                    var extendsItem = this.getClass(config.extends);
-                    if (!extendsItem) {
-                        sys.$error(3013, config.extends, flower.ObjectDo.toString(config));
+            }
+        }, {
+            key: "__setGroupName",
+            value: function __setGroupName(val) {
+                if (val == this._groupName) {
+                    return;
+                }
+                if (this._group) {
+                    this._group.$removeButton(this);
+                    this._group = null;
+                }
+                this._groupName = val;
+                this._group = RadioButtonGroup.$addButton(this);
+            }
+        }, {
+            key: "groupName",
+            get: function get() {
+                return this._groupName;
+            },
+            set: function set(val) {
+                this.__setGroupName(val);
+            }
+        }, {
+            key: "group",
+            get: function get() {
+                return this._group;
+            }
+        }]);
+
+        return RadioButton;
+    }(ToggleButton);
+
+    black.RadioButton = RadioButton;
+    //////////////////////////End File:extension/black/RadioButton.js///////////////////////////
+
+    //////////////////////////File:extension/black/RadioButtonGroup.js///////////////////////////
+
+    var RadioButtonGroup = function (_Group4) {
+        _inherits(RadioButtonGroup, _Group4);
+
+        function RadioButtonGroup(groupName) {
+            _classCallCheck(this, RadioButtonGroup);
+
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+
+            _this19._buttons = [];
+            _this19._enabled = true;
+
+            if (groupName == null || groupName == "") {
+                groupName = "group" + _this19.id;
+            }
+            _this19._groupName = groupName;
+            RadioButtonGroup.groups.push(_this19);
+            return _this19;
+        }
+
+        _createClass(RadioButtonGroup, [{
+            key: "addChildAt",
+            value: function addChildAt(child) {
+                var index = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+                _get(Object.getPrototypeOf(RadioButtonGroup.prototype), "addChildAt", this).call(this, child);
+                if (child instanceof RadioButton && child.group != this) {
+                    child.groupName = this._groupName;
+                }
+            }
+        }, {
+            key: "$itemSelectedChange",
+            value: function $itemSelectedChange(button) {
+                if (button.selected) {
+                    this.selection = button;
+                }
+            }
+        }, {
+            key: "$addButton",
+            value: function $addButton(button) {
+                for (var i = 0; i < this._buttons.length; i++) {
+                    if (this._buttons[i] == button) {
                         return;
                     }
-                    extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
                 }
-                var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "() {\n" + "\t\t_super.call(this);\n";
-                var members = config.members;
-                if (members) {
-                    var member;
-                    for (var key in members) {
-                        member = members[key];
-                        if (member.type == "int") {
-                            content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "uint") {
-                            content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "string") {
-                            content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "boolean") {
-                            content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "array") {
-                            content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "*") {
-                            content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
-                        } else {
-                            content += "\t\tthis." + key + " = DataManager.getInstance().createData(" + member.type + ");\n";
+                this._buttons.push(button);
+                if (this.enabled == false) {
+                    button.enabled = this.enabled;
+                }
+                if (button.selected) {
+                    if (!this._selection) {
+                        this.selection = button;
+                    } else {
+                        button.selected = false;
+                    }
+                }
+            }
+        }, {
+            key: "$removeButton",
+            value: function $removeButton(button) {
+                for (var i = 0; i < this._buttons.length; i++) {
+                    if (this._buttons[i] == button) {
+                        this._buttons.splice(i, 1);
+                        if (button == this._selection) {
+                            this.selection = null;
                         }
+                        return button;
                     }
                 }
-                content += "\t}\n" + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
-                content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
-                console.log("数据结构:\n" + content);
-                if (sys.DEBUG) {
-                    try {
-                        eval(content);
-                    } catch (e) {
-                        sys.$error(3011, e, content);
+                return null;
+            }
+        }, {
+            key: "__setSelection",
+            value: function __setSelection(val) {
+                this._selection = val;
+                if (this._selection) {
+                    this._selection.selected = true;
+                }
+                for (var i = 0; i < this._buttons.length; i++) {
+                    if (this._buttons[i] != this._selection) {
+                        this._buttons[i].selected = false;
                     }
-                } else {
-                    eval(className);
                 }
-                item.id++;
-            }
-        }, {
-            key: "$addClassDefine",
-            value: function $addClassDefine(clazz, className) {
-                var item = this._defines[className];
-                item.define = clazz;
-            }
-        }, {
-            key: "getClass",
-            value: function getClass(className) {
-                var item = this._defines[className];
-                if (!item) {
-                    return null;
+                if (this.onChangeEXE) {
+                    this.onChangeEXE.call(this);
                 }
-                return item.define;
             }
         }, {
-            key: "createData",
-            value: function createData(className) {
-                var item = this._defines[className];
-                if (!item) {
-                    sys.$error(3012, className);
+            key: "selection",
+            get: function get() {
+                return this._selection;
+            },
+            set: function set(val) {
+                if (!this._enabled || this._selection == val) {
                     return;
                 }
-                return new item.define();
+                this.__setSelection(val);
             }
         }, {
-            key: "clear",
-            value: function clear() {
-                for (var key in this._root) {
-                    delete this._root[key];
-                    delete this[key];
-                }
-                this._defines = {};
+            key: "groupName",
+            get: function get() {
+                return this._groupName;
             }
+        }, {
+            key: "enabled",
+            get: function get() {
+                return this._enabled;
+            },
+            set: function set(val) {
+                val = !!val;
+                if (this._enabled == val) {
+                    return;
+                }
+                this._enabled = val;
+                for (var i = 0; i < this._buttons.length; i++) {
+                    this._buttons[i].enabled = this._enabled;
+                }
+            }
+
+            /////////////////////////////////////Event///////////////////////////////////
+
+        }, {
+            key: "onChange",
+            set: function set(val) {
+                if (typeof val == "string") {
+                    var content = val;
+                    val = function () {
+                        eval(content);
+                    }.bind(this.eventThis);
+                }
+                this.onChangeEXE = val;
+            },
+            get: function get() {
+                return this.onChangeEXE;
+            }
+
+            /////////////////////////////////////static///////////////////////////////////
+
         }], [{
-            key: "getInstance",
-            value: function getInstance() {
-                return DataManager.instance;
+            key: "$addButton",
+            value: function $addButton(button) {
+                if (button.groupName && button.groupName != "") {
+                    var group;
+                    var groupGroup;
+                    var list = RadioButtonGroup.groups;
+                    for (var i = 0, len = list.length; i < len; i++) {
+                        if (list[i].groupName == button.groupName) {
+                            group = list[i];
+                            break;
+                        }
+                    }
+                    if (!group) {
+                        group = new RadioButtonGroup(button.groupName);
+                    }
+                    group.$addButton(button);
+                    return group;
+                }
+                return null;
             }
         }]);
 
-        return DataManager;
-    }();
+        return RadioButtonGroup;
+    }(Group);
 
-    DataManager.instance = new DataManager();
+    RadioButtonGroup.groups = [];
 
 
-    black.DataManager = DataManager;
-    //////////////////////////End File:extension/black/data/DataManager.js///////////////////////////
+    black.RadioButtonGroup = RadioButtonGroup;
+    //////////////////////////End File:extension/black/RadioButtonGroup.js///////////////////////////
+
+    //////////////////////////File:extension/black/ToggleSwitch.js///////////////////////////
+
+    var ToggleSwitch = function (_ToggleButton2) {
+        _inherits(ToggleSwitch, _ToggleButton2);
+
+        function ToggleSwitch() {
+            _classCallCheck(this, ToggleSwitch);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleSwitch).call(this));
+        }
+
+        return ToggleSwitch;
+    }(ToggleButton);
+
+    black.ToggleSwitch = ToggleSwitch;
+    //////////////////////////End File:extension/black/ToggleSwitch.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];

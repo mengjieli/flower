@@ -48,7 +48,7 @@ class UIComponent {
             }
         }
 
-        p.removeAllBindProperty = function() {
+        p.removeAllBindProperty = function () {
             var binds = this.$UIComponent[10];
             for (var key in binds) {
                 binds[key].dispose();
@@ -221,22 +221,31 @@ class UIComponent {
             //开始验证属性
             //console.log("验证 ui 属性");
             var p = this.$UIComponent;
+            if (this.$hasFlags(0x0001)) {
+                this.$getContentBounds();
+            }
+            if(this instanceof Label) {
+                console.log("验证 ui 属性");
+            }
             if (p[0] != null && p[1] == null && p [2] != null) {
                 this.width = (p[2] - p[0]) * 2;
-                this.x = p[0];
+                this.x = this.parent.$getBounds().x + p[0];
             }
             else if (p[0] == null && p[1] != null && p[2] != null) {
                 this.width = (p[1] - p[2]) * 2;
-                this.x = 2 * p[2] - p[1];
+                this.x = this.parent.$getBounds().x + 2 * p[2] - p[1];
             } else if (p[0] != null && p[1] != null) {
                 this.width = this.parent.width - p[1] - p[0];
-                this.x = p[0];
+                this.x = this.parent.$getBounds().x + p[0];
             } else {
                 if (p[0] != null) {
-                    this.x = p[0];
+                    this.x = this.parent.$getBounds().x + p[0];
                 }
                 if (p[1] != null) {
-                    this.x = this.width - p[1] - this.width;
+                    this.x = this.parent.$getBounds().x + this.width - p[1] - this.width;
+                }
+                if (p[2] != null) {
+                    this.x = this.parent.$getBounds().x + (this.parent.width - this.width) * 0.5;
                 }
                 if (p[6]) {
                     this.width = this.parent.width * p[6] / 100;
@@ -244,19 +253,22 @@ class UIComponent {
             }
             if (p[3] != null && p[4] == null && p [5] != null) {
                 this.height = (p[5] - p[3]) * 2;
-                this.y = p[3];
+                this.y = this.parent.$getBounds().y + p[3];
             } else if (p[3] == null && p[4] != null && p[5] != null) {
                 this.height = (p[4] - p[5]) * 2;
-                this.y = 2 * p[5] - p[4];
+                this.y = this.parent.$getBounds().y + 2 * p[5] - p[4];
             } else if (p[3] != null && p[4] != null) {
                 this.height = this.parent.height - p[4] - p[3];
-                this.y = p[3];
+                this.y = this.parent.$getBounds().y + p[3];
             } else {
-                if (p[2] != null) {
-                    this.y = p[0];
-                }
                 if (p[3] != null) {
-                    this.y = this.height - p[1] - this.height;
+                    this.y = this.parent.$getBounds().y + p[0];
+                }
+                if (p[4] != null) {
+                    this.y = this.parent.$getBounds().y + this.height - p[1] - this.height;
+                }
+                if (p[5] != null) {
+                    this.y = this.parent.$getBounds().y + (this.parent.height - this.height) * 0.5;
                 }
                 if (p[7]) {
                     this.height = this.parent.height * p[7] / 100;

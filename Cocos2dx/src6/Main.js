@@ -51,13 +51,19 @@ class Main {
 
         var clazz = `
         <f:Button onClick="flower.trace('click');" xmlns:f="flower">
-            <f:Image source="res/font@100x100@cn@2.png" scaleX.up="2" scaleX.down="3" scaleY.up="2" scaleY.down="3" scale9Grid.up="" scale9Grid.down="30,25,40,50">
+            <!--f:RectUI x="-50" y="-50" width="200" height="200" fillColor="0xff00ff"/-->
+            <f:Image source="res/font@100x100@cn@2.png"
+            x="100" y="150"
+            scaleX.up="2" scaleX.down="3"
+            scaleY.up="2" scaleY.down="3"
+            scale9Grid.up="" scale9Grid.down="30,25,40,50">
                 <f:filters>
                     <f:Array>
                         <f:ColorFilter h="90" s="0" l="0"/>
                     </f:Array>
                 </f:filters>
             </f:Image>
+            <f:Label text.up="hello!" text.down="you are foolish" horizontalCenter="0" verticalCenter="0"/>
         </f:Button>
         `;
 

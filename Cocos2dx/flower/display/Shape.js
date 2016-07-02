@@ -239,6 +239,7 @@ class Shape extends DisplayObject {
 
     $onFrameEnd() {
         this.$redraw();
+        super.$onFrameEnd();
     }
 
     dispose() {
