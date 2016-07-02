@@ -242,6 +242,7 @@ class UIParser extends Group {
         content += before + "\tfunction " + className + "(_data) {\n";
         content += before + "\t\tif(_data) this._data = _data;\n";
         content += before + "\t\t _super.call(this);\n";
+        content += before + "\t\tthis." + className + "_binds = [];\n";
         var scriptInfo = {
             content: ""
         };
@@ -253,12 +254,16 @@ class UIParser extends Group {
         if (this.hasInitFunction) {
             content += before + "\t\tthis." + className + "_init();\n";
         }
+        content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
             content += propertyList[i];
         }
         content += scriptInfo.content;
+        content += before + "\t" + className + ".prototype." + className + "_setBindProperty = function() {\n";
+        content += before + "\t\tfor(var i = 0; i < this." + className + "_binds.length; i++) this." + className + "_binds[i][0].bindProperty(this." + className + "_binds[i][1],this." + className + "_binds[i][2],[this]);\n";
+        content += before + "\t}\n\n";
         content += before + "\treturn " + className + ";\n";
         if (uinameNS == "f") {
             content += before + "})(" + extendClass + ");\n";
@@ -383,7 +388,10 @@ class UIParser extends Group {
                 setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
             } else if (atrArray.length == 1) {
                 if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
-                    setObject += before + "\t" + thisObj + ".bindProperty(\"" + atrName + "\", \"" + atrValue + "\", [this]);\n";
+                    setObject += before + "\tif(" + thisObj + ".__UIComponent) ";
+                    setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
+                    setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
+                    //setObject += before + "\t" + thisObj + ".bindProperty(\"" + atrName + "\", \"" + atrValue + "\", [this]);\n";
                 } else {
                     setObject += before + "\t" + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
                 }

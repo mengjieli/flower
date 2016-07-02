@@ -1938,6 +1938,7 @@ var $root = eval("this");
                 content += before + "\tfunction " + className + "(_data) {\n";
                 content += before + "\t\tif(_data) this._data = _data;\n";
                 content += before + "\t\t _super.call(this);\n";
+                content += before + "\t\tthis." + className + "_binds = [];\n";
                 var scriptInfo = {
                     content: ""
                 };
@@ -1949,12 +1950,16 @@ var $root = eval("this");
                 if (this.hasInitFunction) {
                     content += before + "\t\tthis." + className + "_init();\n";
                 }
+                content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
                 content += before + "\t}\n\n";
                 content += propertyList[propertyList.length - 1];
                 for (var i = 0; i < propertyList.length - 1; i++) {
                     content += propertyList[i];
                 }
                 content += scriptInfo.content;
+                content += before + "\t" + className + ".prototype." + className + "_setBindProperty = function() {\n";
+                content += before + "\t\tfor(var i = 0; i < this." + className + "_binds.length; i++) this." + className + "_binds[i][0].bindProperty(this." + className + "_binds[i][1],this." + className + "_binds[i][2],[this]);\n";
+                content += before + "\t}\n\n";
                 content += before + "\treturn " + className + ";\n";
                 if (uinameNS == "f") {
                     content += before + "})(" + extendClass + ");\n";
@@ -2078,10 +2083,13 @@ var $root = eval("this");
                         setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
                     } else if (atrArray.length == 1) {
                         if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
-                            setObject += before + "\t" + thisObj + ".bindProperty(\"" + atrName + "\", \"" + atrValue + "\", [this]);\n";
+                            setObject += before + "\tif(" + thisObj + ".__UIComponent) ";
+                            setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
+                            setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
+                            //setObject += before + "\t" + thisObj + ".bindProperty(\"" + atrName + "\", \"" + atrValue + "\", [this]);\n";
                         } else {
-                            setObject += before + "\t" + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
-                        }
+                                setObject += before + "\t" + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
+                            }
                     }
                 }
                 if (xml.list.length) {
@@ -3377,10 +3385,27 @@ var $root = eval("this");
     black.ToggleButton = ToggleButton;
     //////////////////////////End File:extension/black/ToggleButton.js///////////////////////////
 
+    //////////////////////////File:extension/black/CheckBox.js///////////////////////////
+
+    var CheckBox = function (_ToggleButton) {
+        _inherits(CheckBox, _ToggleButton);
+
+        function CheckBox() {
+            _classCallCheck(this, CheckBox);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(CheckBox).call(this));
+        }
+
+        return CheckBox;
+    }(ToggleButton);
+
+    black.CheckBox = CheckBox;
+    //////////////////////////End File:extension/black/CheckBox.js///////////////////////////
+
     //////////////////////////File:extension/black/RadioButton.js///////////////////////////
 
-    var RadioButton = function (_ToggleButton) {
-        _inherits(RadioButton, _ToggleButton);
+    var RadioButton = function (_ToggleButton2) {
+        _inherits(RadioButton, _ToggleButton2);
 
         function RadioButton() {
             _classCallCheck(this, RadioButton);
@@ -3441,17 +3466,17 @@ var $root = eval("this");
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
 
-            _this24._buttons = [];
-            _this24._enabled = true;
+            _this25._buttons = [];
+            _this25._enabled = true;
 
             if (groupName == null || groupName == "") {
-                groupName = "group" + _this24.id;
+                groupName = "group" + _this25.id;
             }
-            _this24._groupName = groupName;
-            RadioButtonGroup.groups.push(_this24);
-            return _this24;
+            _this25._groupName = groupName;
+            RadioButtonGroup.groups.push(_this25);
+            return _this25;
         }
 
         _createClass(RadioButtonGroup, [{
@@ -3606,8 +3631,8 @@ var $root = eval("this");
 
     //////////////////////////File:extension/black/ToggleSwitch.js///////////////////////////
 
-    var ToggleSwitch = function (_ToggleButton2) {
-        _inherits(ToggleSwitch, _ToggleButton2);
+    var ToggleSwitch = function (_ToggleButton3) {
+        _inherits(ToggleSwitch, _ToggleButton3);
 
         function ToggleSwitch() {
             _classCallCheck(this, ToggleSwitch);
@@ -3629,12 +3654,12 @@ var $root = eval("this");
         function ListBase() {
             _classCallCheck(this, ListBase);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
 
-            _this26.requireSelection = true;
-            _this26.itemClickedEnabled = true;
-            _this26.itemSelectedEnabled = true;
-            return _this26;
+            _this27.requireSelection = true;
+            _this27.itemClickedEnabled = true;
+            _this27.itemSelectedEnabled = true;
+            return _this27;
         }
 
         return ListBase;
@@ -3651,10 +3676,10 @@ var $root = eval("this");
         function List() {
             _classCallCheck(this, List);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
 
-            _this27.layout = new VerticalLayout();
-            return _this27;
+            _this28.layout = new VerticalLayout();
+            return _this28;
         }
 
         return List;
@@ -3671,11 +3696,11 @@ var $root = eval("this");
         function TabBar() {
             _classCallCheck(this, TabBar);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
 
-            _this28.layout = new HorizontalLayout();
-            _this28.layout.fixElementSize = false;
-            return _this28;
+            _this29.layout = new HorizontalLayout();
+            _this29.layout.fixElementSize = false;
+            return _this29;
         }
 
         _createClass(TabBar, [{
@@ -3700,11 +3725,11 @@ var $root = eval("this");
         function ViewStack() {
             _classCallCheck(this, ViewStack);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
 
-            _this29._items = [];
-            _this29._selectedIndex = -1;
-            return _this29;
+            _this30._items = [];
+            _this30._selectedIndex = -1;
+            return _this30;
         }
 
         _createClass(ViewStack, [{
@@ -3878,25 +3903,25 @@ var $root = eval("this");
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this30._viewSize = flower.Size.create(0, 0);
-            _this30._scrollDisX = [];
-            _this30._scrollDisY = [];
-            _this30._scrollTime = [];
-            _this30._upGap = 18;
+            _this31._viewSize = flower.Size.create(0, 0);
+            _this31._scrollDisX = [];
+            _this31._scrollDisY = [];
+            _this31._scrollTime = [];
+            _this31._upGap = 18;
 
-            _this30.addListener(flower.TouchEvent.TOUCH_BEGIN, _this30.__onTouchScroller, _this30);
-            _this30.addListener(flower.TouchEvent.TOUCH_MOVE, _this30.__onTouchScroller, _this30);
-            _this30.addListener(flower.TouchEvent.TOUCH_END, _this30.__onTouchScroller, _this30);
-            _this30.addListener(flower.TouchEvent.TOUCH_RELEASE, _this30.__onTouchScroller, _this30);
-            _this30.width = _this30.height = 100;
+            _this31.addListener(flower.TouchEvent.TOUCH_BEGIN, _this31.__onTouchScroller, _this31);
+            _this31.addListener(flower.TouchEvent.TOUCH_MOVE, _this31.__onTouchScroller, _this31);
+            _this31.addListener(flower.TouchEvent.TOUCH_END, _this31.__onTouchScroller, _this31);
+            _this31.addListener(flower.TouchEvent.TOUCH_RELEASE, _this31.__onTouchScroller, _this31);
+            _this31.width = _this31.height = 100;
             //var bg = new RectUI();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this30;
+            return _this31;
         }
 
         _createClass(Scroller, [{

@@ -193,6 +193,7 @@ var list = [
     "MaskUI",
     "Button",
     "ToggleButton",
+    "CheckBox",
     "RadioButton",
     "RadioButtonGroup",
     "ToggleSwitch",
