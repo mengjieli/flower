@@ -2399,6 +2399,8 @@ class DisplayObject extends EventDispatcher {
      * 0x0400 shape需要重绘
      * 0x0800 文字内容改变
      * 0x1000 UI 属性失效
+     * 0x2000 layout 失效
+     * 0x4000 DataGroup 需要显示对象 data
      */
     __flags = 0;
 
@@ -2423,13 +2425,14 @@ class DisplayObject extends EventDispatcher {
 
     constructor() {
         super();
+        var id = DisplayObject.id++;
         this.$DisplayObject = {
             0: 1, //scaleX
             1: 1, //scaleY
             2: 0, //rotation
             3: null, //settingWidth
             4: null, //settingHeight
-            5: "instance" + DisplayObject.id++, //name
+            5: "instance" + id, //name
             6: new Rectangle(), //contentBounds 自身显示尺寸失效
             7: new Rectangle(), //bounds 在父类中的表现尺寸
             8: true, //touchEnabeld
@@ -2439,6 +2442,7 @@ class DisplayObject extends EventDispatcher {
             12: new Matrix(), //matrix
             13: new Matrix(), //reverseMatrix
             14: 0, //radian
+            20: id, //id
             50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
@@ -2955,8 +2959,11 @@ class DisplayObject extends EventDispatcher {
     }
 
     get name() {
-        var p = this.$DisplayObject;
-        return p[5];
+        return this.$DisplayObject[5];
+    }
+
+    set name(val) {
+        this.$DisplayObject[5] = val;
     }
 
     get touchEnabled() {
@@ -3003,6 +3010,10 @@ class DisplayObject extends EventDispatcher {
     set $focusEnabled(val) {
         var p = this.$DisplayObject;
         p[50] = val;
+    }
+
+    get id() {
+        return this.$DisplayObject[20];
     }
 }
 //////////////////////////End File:flower/display/DisplayObject.js///////////////////////////
@@ -3061,7 +3072,7 @@ class Sprite extends DisplayObject {
     addChildAt(child, index) {
         var children = this.__children;
         if (index < 0 || index > children.length) {
-            return;
+            return child;
         }
         if (child.parent == this) {
             this.setChildIndex(child, index);
@@ -3071,7 +3082,7 @@ class Sprite extends DisplayObject {
             }
             if (!this.$nativeShow) {
                 $warn(1002, this.name);
-                return;
+                return null;
             }
             this.$nativeShow.addChild(child.$nativeShow);
             children.splice(index, 0, child);
@@ -3122,9 +3133,10 @@ class Sprite extends DisplayObject {
                 children.splice(i, 1);
                 this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
-                break;
+                return child;
             }
         }
+        return null;
     }
 
     removeChild(child) {
@@ -3158,13 +3170,14 @@ class Sprite extends DisplayObject {
 
     setChildIndex(child, index) {
         var childIndex = this.getChildIndex(child);
-        if (childIndex == index) {
-            return;
+        if (childIndex == index || childIndex < 0) {
+            return null;
         }
         var children = this.__children;
         children.splice(childIndex, 1);
         children.splice(index, 0, child);
         this.$addFlags(0x0100);
+        return child;
     }
 
     getChildIndex(child) {
@@ -3184,6 +3197,12 @@ class Sprite extends DisplayObject {
             return null;
         }
         return this.__children[index];
+    }
+
+    removeAll() {
+        while (this.numChildren) {
+            this.removeChildAt(0);
+        }
     }
 
     $changeAllFilters() {
@@ -3317,8 +3336,12 @@ class Mask extends Sprite {
     $initContainer() {
         this.__children = [];
         this.$nativeShow = Platform.create("Mask");
-        this.__shape = new Shape();
+        this.__shape = this.$createShape();
         this.$nativeShow.setShape(this.__shape.$nativeShow);
+    }
+
+    $createShape() {
+        return new Shape();
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -3355,8 +3378,8 @@ class Mask extends Sprite {
     }
 
     $releaseContainer() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         Platform.release("Mask", this.$nativeShow);
@@ -4139,6 +4162,7 @@ class Shape extends DisplayObject {
 
     $onFrameEnd() {
         this.$redraw();
+        super.$onFrameEnd();
     }
 
     dispose() {

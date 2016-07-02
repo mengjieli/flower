@@ -49,7 +49,7 @@ class Sprite extends DisplayObject {
     addChildAt(child, index) {
         var children = this.__children;
         if (index < 0 || index > children.length) {
-            return;
+            return child;
         }
         if (child.parent == this) {
             this.setChildIndex(child, index);
@@ -59,7 +59,7 @@ class Sprite extends DisplayObject {
             }
             if (!this.$nativeShow) {
                 $warn(1002, this.name);
-                return;
+                return null;
             }
             this.$nativeShow.addChild(child.$nativeShow);
             children.splice(index, 0, child);
@@ -110,9 +110,10 @@ class Sprite extends DisplayObject {
                 children.splice(i, 1);
                 this.$invalidateContentBounds();
                 this.$addFlags(0x0100);
-                break;
+                return child;
             }
         }
+        return null;
     }
 
     removeChild(child) {
@@ -146,13 +147,14 @@ class Sprite extends DisplayObject {
 
     setChildIndex(child, index) {
         var childIndex = this.getChildIndex(child);
-        if (childIndex == index) {
-            return;
+        if (childIndex == index || childIndex < 0) {
+            return null;
         }
         var children = this.__children;
         children.splice(childIndex, 1);
         children.splice(index, 0, child);
         this.$addFlags(0x0100);
+        return child;
     }
 
     getChildIndex(child) {
@@ -172,6 +174,12 @@ class Sprite extends DisplayObject {
             return null;
         }
         return this.__children[index];
+    }
+
+    removeAll() {
+        while (this.numChildren) {
+            this.removeChildAt(0);
+        }
     }
 
     $changeAllFilters() {

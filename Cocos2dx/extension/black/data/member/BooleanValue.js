@@ -15,3 +15,5 @@ class BooleanValue extends Value {
         this.dispatchWidth(flower.Event.UPDATE, this);
     }
 }
+
+exports.BooleanValue = BooleanValue;

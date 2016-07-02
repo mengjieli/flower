@@ -348,3 +348,5 @@ class ArrayValue extends Value {
         }
     }
 }
+
+exports.ArrayValue = ArrayValue;

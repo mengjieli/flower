@@ -9,8 +9,12 @@ class Mask extends Sprite {
     $initContainer() {
         this.__children = [];
         this.$nativeShow = Platform.create("Mask");
-        this.__shape = new Shape();
+        this.__shape = this.$createShape();
         this.$nativeShow.setShape(this.__shape.$nativeShow);
+    }
+
+    $createShape() {
+        return new Shape();
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -47,8 +51,8 @@ class Mask extends Sprite {
     }
 
     $releaseContainer() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         Platform.release("Mask", this.$nativeShow);

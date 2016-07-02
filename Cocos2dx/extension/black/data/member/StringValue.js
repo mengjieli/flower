@@ -15,3 +15,5 @@ class StringValue extends Value {
         this.dispatchWidth(flower.Event.UPDATE, this);
     }
 }
+
+exports.StringValue = StringValue;

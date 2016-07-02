@@ -41,3 +41,5 @@ class ObjectValue extends Value {
         delete this[name];
     }
 }
+
+exports.ObjectValue = ObjectValue;

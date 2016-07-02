@@ -5,6 +5,13 @@ class Label extends flower.TextField {
         this.$initUIComponent();
     }
 
+    $onFrameEnd() {
+        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+            this.$validateUIComponent();
+        }
+        super.$onFrameEnd();
+    }
+
     dispose() {
         this.removeAllBindProperty();
         super.dispose();

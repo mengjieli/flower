@@ -17,6 +17,8 @@ class DisplayObject extends EventDispatcher {
      * 0x0400 shape需要重绘
      * 0x0800 文字内容改变
      * 0x1000 UI 属性失效
+     * 0x2000 layout 失效
+     * 0x4000 DataGroup 需要显示对象 data
      */
     __flags = 0;
 
@@ -575,8 +577,11 @@ class DisplayObject extends EventDispatcher {
     }
 
     get name() {
-        var p = this.$DisplayObject;
-        return p[5];
+        return this.$DisplayObject[5];
+    }
+
+    set name(val) {
+        this.$DisplayObject[5] = val;
     }
 
     get touchEnabled() {

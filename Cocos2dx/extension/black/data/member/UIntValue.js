@@ -18,3 +18,5 @@ class UIntValue extends Value {
         this.dispatchWidth(flower.Event.UPDATE, this);
     }
 }
+
+exports.UIntValue = UIntValue;

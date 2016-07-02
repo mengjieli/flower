@@ -177,18 +177,28 @@ var list = [
 
     "zh_CN",
 
+    "Layout",
+    "LinearLayout",
+    "HorizontalLayout",
+    "VerticalLayout",
+
     "Group",
     "UIParser",
     "DataGroup",
+    "ItemRenderer",
     "Label",
     "RectUI",
     "Image",
     "TileImage",
+    "MaskUI",
     "Button",
     "ToggleButton",
     "RadioButton",
     "RadioButtonGroup",
     "ToggleSwitch",
+    "ListBase",
+    "List",
+    "Scroller"
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";

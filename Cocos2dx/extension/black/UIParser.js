@@ -15,7 +15,7 @@ class UIParser extends Group {
             "Shape": "flower.Shape",
             "Mask": "flower.Mask",
 
-            "ArrayValue": "flower.ArrayValue",
+            "ArrayValue": "ArrayValue",
             "BooleanValue": "flower.BooleanValue",
             "IntValue": "flower.IntValue",
             "NumberValue": "flower.NumberValue",
@@ -237,7 +237,7 @@ class UIParser extends Group {
             content += before + "(function (" + packages[i] + ") {\n";
             before += "\t";
         }
-        content += before + "var " + className + " = (function (_super) {\n";
+        content += (packages.length ? before : "") + "var " + className + " = (function (_super) {\n";
         content += before + "\t__extends(" + className + ", _super);\n";
         content += before + "\tfunction " + className + "(_data) {\n";
         content += before + "\t\tif(_data) this._data = _data;\n";

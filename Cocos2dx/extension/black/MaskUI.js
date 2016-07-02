@@ -1,6 +1,4 @@
-class Group extends flower.Sprite {
-
-    $UIComponent;
+class MaskUI extends flower.Mask {
 
     constructor() {
         super();
@@ -8,6 +6,9 @@ class Group extends flower.Sprite {
     }
 
     $validateChildrenUIComponent() {
+        if (this.shape.__UIComponent) {
+            this.shape.$validateUIComponent(this);
+        }
         var children = this.__children;
         if (children) {
             var child;
@@ -21,9 +22,9 @@ class Group extends flower.Sprite {
     }
 
     $resetLayout() {
-        if(this.$hasFlags(0x2000)) {
+        if (this.$hasFlags(0x2000)) {
             this.$removeFlags(0x2000);
-            if(this.layout) {
+            if (this.layout) {
                 this.layout.updateList(this.width, this.height);
             }
         }
@@ -34,14 +35,10 @@ class Group extends flower.Sprite {
             this.$validateUIComponent();
         }
         super.$onFrameEnd();
+        this.shape.$onFrameEnd();
         this.$resetLayout();
     }
-
-    dispose() {
-        this.removeAllBindProperty();
-        super.dispose();
-    }
 }
-UIComponent.register(Group,true);
-Group.prototype.__UIComponent = true;
-exports.Group = Group;
+UIComponent.register(MaskUI, true);
+MaskUI.prototype.__UIComponent = true;
+exports.MaskUI = MaskUI;

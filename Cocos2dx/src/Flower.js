@@ -2683,13 +2683,14 @@ var flower = {};
             _this13.__parentAlpha = 1;
             _this13.__concatAlpha = 1;
 
+            var id = DisplayObject.id++;
             _this13.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
                 3: null, //settingWidth
                 4: null, //settingHeight
-                5: "instance" + DisplayObject.id++, //name
+                5: "instance" + id, //name
                 6: new Rectangle(), //contentBounds 自身显示尺寸失效
                 7: new Rectangle(), //bounds 在父类中的表现尺寸
                 8: true, //touchEnabeld
@@ -2699,6 +2700,7 @@ var flower = {};
                 12: new Matrix(), //matrix
                 13: new Matrix(), //reverseMatrix
                 14: 0, //radian
+                20: id, //id
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
@@ -2735,6 +2737,8 @@ var flower = {};
          * 0x0400 shape需要重绘
          * 0x0800 文字内容改变
          * 0x1000 UI 属性失效
+         * 0x2000 layout 失效
+         * 0x4000 DataGroup 需要显示对象 data
          */
 
 
@@ -3302,8 +3306,10 @@ var flower = {};
         }, {
             key: "name",
             get: function get() {
-                var p = this.$DisplayObject;
-                return p[5];
+                return this.$DisplayObject[5];
+            },
+            set: function set(val) {
+                this.$DisplayObject[5] = val;
             }
         }, {
             key: "touchEnabled",
@@ -3352,6 +3358,11 @@ var flower = {};
             set: function set(val) {
                 var p = this.$DisplayObject;
                 p[50] = val;
+            }
+        }, {
+            key: "id",
+            get: function get() {
+                return this.$DisplayObject[20];
             }
         }]);
 
@@ -3425,7 +3436,7 @@ var flower = {};
             value: function addChildAt(child, index) {
                 var children = this.__children;
                 if (index < 0 || index > children.length) {
-                    return;
+                    return child;
                 }
                 if (child.parent == this) {
                     this.setChildIndex(child, index);
@@ -3435,7 +3446,7 @@ var flower = {};
                     }
                     if (!this.$nativeShow) {
                         $warn(1002, this.name);
-                        return;
+                        return null;
                     }
                     this.$nativeShow.addChild(child.$nativeShow);
                     children.splice(index, 0, child);
@@ -3490,9 +3501,10 @@ var flower = {};
                         children.splice(i, 1);
                         this.$invalidateContentBounds();
                         this.$addFlags(0x0100);
-                        break;
+                        return child;
                     }
                 }
+                return null;
             }
         }, {
             key: "removeChild",
@@ -3529,13 +3541,14 @@ var flower = {};
             key: "setChildIndex",
             value: function setChildIndex(child, index) {
                 var childIndex = this.getChildIndex(child);
-                if (childIndex == index) {
-                    return;
+                if (childIndex == index || childIndex < 0) {
+                    return null;
                 }
                 var children = this.__children;
                 children.splice(childIndex, 1);
                 children.splice(index, 0, child);
                 this.$addFlags(0x0100);
+                return child;
             }
         }, {
             key: "getChildIndex",
@@ -3557,6 +3570,13 @@ var flower = {};
                     return null;
                 }
                 return this.__children[index];
+            }
+        }, {
+            key: "removeAll",
+            value: function removeAll() {
+                while (this.numChildren) {
+                    this.removeChildAt(0);
+                }
             }
         }, {
             key: "$changeAllFilters",
@@ -3702,8 +3722,13 @@ var flower = {};
             value: function $initContainer() {
                 this.__children = [];
                 this.$nativeShow = Platform.create("Mask");
-                this.__shape = new Shape();
+                this.__shape = this.$createShape();
                 this.$nativeShow.setShape(this.__shape.$nativeShow);
+            }
+        }, {
+            key: "$createShape",
+            value: function $createShape() {
+                return new Shape();
             }
         }, {
             key: "$getMouseTarget",
@@ -4540,6 +4565,7 @@ var flower = {};
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 this.$redraw();
+                _get(Object.getPrototypeOf(Shape.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
             key: "dispose",

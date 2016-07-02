@@ -8,3 +8,5 @@ class TileImage extends Group {
         
     }
 }
+
+exports.TileImage = Group;

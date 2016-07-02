@@ -1,5 +1,5 @@
 class UIComponent {
-    static register(clazz) {
+    static register(clazz, isContainer = false) {
         var p = clazz.prototype;
         p.$initUIComponent = function () {
             this.$UIComponent = {
@@ -17,19 +17,74 @@ class UIComponent {
                 11: new StringValue(),//state
                 12: false, //absoluteState
                 13: this, //eventThis
+                14: null, //layout
             };
             this.addUIComponentEvents();
         }
 
-        p.addUIComponentEvents = function () {
-            this.addListener(flower.Event.ADDED_TO_STAGE, this.onEXEAdded, this);
+        if (isContainer) {
+            Object.defineProperty(p, "layout", {
+                get: function () {
+                    return this.$UIComponent[14];
+                },
+                set: function (val) {
+                    if (this.$UIComponent[14] == val) {
+                        return;
+                    }
+                    if (this.$UIComponent[14]) {
+                        this.$UIComponent[14].$clear();
+                    }
+                    this.$UIComponent[14] = val;
+                    if (val) {
+                        val.$setFlag();
+                        var len = this.numChildren;
+                        for (var i = 0; i < len; i++) {
+                            val.addElementAt(this.getChildAt(i), i);
+                        }
+                    }
+                    this.$addFlags(0x2000);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            p.addChildAt = function (child, index) {
+                var flag = child.parent != this ? true : false;
+                $root._get(Object.getPrototypeOf(p), "addChildAt", this).call(this, child, index);
+                if (flag && child.parent == this) {
+                    if (child.__UIComponent && !child.absoluteState) {
+                        child["currentState"] = this.currentState;
+                    }
+                    if (this.layout) {
+                        this.layout.addElementAt(child, index);
+                    }
+                }
+            }
+            p.$removeChild = function (child) {
+                if ($root._get(Object.getPrototypeOf(p), "$removeChild", this).call(this, child)) {
+                    if (this.layout) {
+                        this.layout.removeElement(child);
+                    }
+                }
+            }
+            p.removeChild = function (child) {
+                if ($root._get(Object.getPrototypeOf(p), "removeChild", this).call(this, child)) {
+                    if (this.layout) {
+                        this.layout.removeElement(child);
+                    }
+                }
+            }
+            p.setChildIndex = function (child, index) {
+                if ($root._get(Object.getPrototypeOf(p), "setChildIndex", this).call(this, child, index)) {
+                    if (this.layout) {
+                        this.layout.setEelementIndex(child);
+                    }
+                }
+            }
         }
 
-        p.addChildAt = function (child, index) {
-            $root._get(Object.getPrototypeOf(p), "addChildAt", this).call(this, child, index);
-            if (child.parent == this && child.__UIComponent && !child.absoluteState) {
-                child.currentState = this.currentState;
-            }
+
+        p.addUIComponentEvents = function () {
+            this.addListener(flower.Event.ADDED_TO_STAGE, this.onEXEAdded, this);
         }
 
         p.bindProperty = function (property, content, checks = null) {
@@ -191,6 +246,9 @@ class UIComponent {
         p.$addFlags = function (flags) {
             if (flags & 0x0001 == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
                 this.__flags |= 0x1000;
+                if (this instanceof flower.Sprite && this.layout) {
+                    this.__flags |= 0x2000;
+                }
             }
             this.__flags |= flags;
         }
@@ -216,7 +274,7 @@ class UIComponent {
         /**
          * 验证 UI 属性
          */
-        p.$validateUIComponent = function () {
+        p.$validateUIComponent = function (parent) {
             this.$removeFlags(0x1000);
             //开始验证属性
             //console.log("验证 ui 属性");
@@ -224,73 +282,60 @@ class UIComponent {
             if (this.$hasFlags(0x0001)) {
                 this.$getContentBounds();
             }
-            if(this instanceof Label) {
-                console.log("验证 ui 属性");
-            }
+            parent = parent||this.parent;
+            //if (this instanceof Group) {
+            //    console.log("验证 ui 属性",flower.EnterFrame.frame);
+            //}
             if (p[0] != null && p[1] == null && p [2] != null) {
                 this.width = (p[2] - p[0]) * 2;
-                this.x = this.parent.$getBounds().x + p[0];
+                this.x = parent.$getBounds().x + p[0];
             }
             else if (p[0] == null && p[1] != null && p[2] != null) {
                 this.width = (p[1] - p[2]) * 2;
-                this.x = this.parent.$getBounds().x + 2 * p[2] - p[1];
+                this.x = parent.$getBounds().x + 2 * p[2] - p[1];
             } else if (p[0] != null && p[1] != null) {
-                this.width = this.parent.width - p[1] - p[0];
-                this.x = this.parent.$getBounds().x + p[0];
+                this.width = parent.width - p[1] - p[0];
+                this.x = parent.$getBounds().x + p[0];
             } else {
                 if (p[0] != null) {
-                    this.x = this.parent.$getBounds().x + p[0];
+                    this.x = parent.$getBounds().x + p[0];
                 }
                 if (p[1] != null) {
-                    this.x = this.parent.$getBounds().x + this.width - p[1] - this.width;
+                    this.x = parent.$getBounds().x + this.width - p[1] - this.width;
                 }
                 if (p[2] != null) {
-                    this.x = this.parent.$getBounds().x + (this.parent.width - this.width) * 0.5;
+                    this.x = parent.$getBounds().x + (parent.width - this.width) * 0.5;
                 }
                 if (p[6]) {
-                    this.width = this.parent.width * p[6] / 100;
+                    this.width = parent.width * p[6] / 100;
                 }
             }
             if (p[3] != null && p[4] == null && p [5] != null) {
                 this.height = (p[5] - p[3]) * 2;
-                this.y = this.parent.$getBounds().y + p[3];
+                this.y = parent.$getBounds().y + p[3];
             } else if (p[3] == null && p[4] != null && p[5] != null) {
                 this.height = (p[4] - p[5]) * 2;
-                this.y = this.parent.$getBounds().y + 2 * p[5] - p[4];
+                this.y = parent.$getBounds().y + 2 * p[5] - p[4];
             } else if (p[3] != null && p[4] != null) {
-                this.height = this.parent.height - p[4] - p[3];
-                this.y = this.parent.$getBounds().y + p[3];
+                this.height = parent.height - p[4] - p[3];
+                this.y = parent.$getBounds().y + p[3];
             } else {
                 if (p[3] != null) {
-                    this.y = this.parent.$getBounds().y + p[0];
+                    this.y = parent.$getBounds().y + p[0];
                 }
                 if (p[4] != null) {
-                    this.y = this.parent.$getBounds().y + this.height - p[1] - this.height;
+                    this.y = parent.$getBounds().y + this.height - p[1] - this.height;
                 }
                 if (p[5] != null) {
-                    this.y = this.parent.$getBounds().y + (this.parent.height - this.height) * 0.5;
+                    this.y = parent.$getBounds().y + (parent.height - this.height) * 0.5;
                 }
                 if (p[7]) {
-                    this.height = this.parent.height * p[7] / 100;
+                    this.height = parent.height * p[7] / 100;
                 }
             }
-            var children = this.__children;
-            if (children) {
-                var child;
-                for (var i = 0, len = children.length; i < len; i++) {
-                    child = children[i];
-                    if (child.__UIComponent) {
-                        child.$validateUIComponent();
-                    }
-                }
+            if (this instanceof flower.Sprite) {
+                this.$validateChildrenUIComponent();
             }
-        }
-
-        p.$onFrameEnd = function () {
-            if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                this.$validateUIComponent();
-            }
-            $root._get(Object.getPrototypeOf(p), "$onFrameEnd", this).call(this);
         }
 
         Object.defineProperty(p, "left", {

@@ -15,3 +15,5 @@ class IntValue extends Value {
         this.dispatchWidth(flower.Event.UPDATE, this);
     }
 }
+
+exports.IntValue = IntValue;
