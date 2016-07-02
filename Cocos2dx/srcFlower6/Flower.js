@@ -592,6 +592,7 @@ class PlatformTextField extends PlatformDisplayObject {
         super();
         this.show = new cc.LabelTTF("", "Times Roman", 12);
         this.show.setAnchorPoint(0, 1);
+        this.show.setFontFillColor({r: 0, g: 0, b: 0}, true);
         this.show.retain();
     }
 

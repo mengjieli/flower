@@ -86,30 +86,27 @@ var $root = eval("this");
                             if (child.__UIComponent && !child.absoluteState) {
                                 child["currentState"] = this.currentState;
                             }
-                            if (this.layout) {
-                                this.layout.addElementAt(child, index);
-                            }
+                        }
+                        if (child.parent == this && this.layout) {
+                            this.layout.addElementAt(child, index);
                         }
                     };
                     p.$removeChild = function (child) {
-                        if ($root._get(Object.getPrototypeOf(p), "$removeChild", this).call(this, child)) {
-                            if (this.layout) {
-                                this.layout.removeElement(child);
-                            }
+                        $root._get(Object.getPrototypeOf(p), "$removeChild", this).call(this, child);
+                        if (child.parent != this && this.layout) {
+                            this.layout.removeElement(child);
                         }
                     };
                     p.removeChild = function (child) {
-                        if ($root._get(Object.getPrototypeOf(p), "removeChild", this).call(this, child)) {
-                            if (this.layout) {
-                                this.layout.removeElement(child);
-                            }
+                        $root._get(Object.getPrototypeOf(p), "removeChild", this).call(this, child);
+                        if (child.parent != this && this.layout) {
+                            this.layout.removeElement(child);
                         }
                     };
                     p.setChildIndex = function (child, index) {
-                        if ($root._get(Object.getPrototypeOf(p), "setChildIndex", this).call(this, child, index)) {
-                            if (this.layout) {
-                                this.layout.setEelementIndex(child);
-                            }
+                        $root._get(Object.getPrototypeOf(p), "setChildIndex", this).call(this, child, index);
+                        if (child.parent == this && this.layout) {
+                            this.layout.setElementIndex(child, index);
                         }
                     };
                 }
@@ -275,16 +272,6 @@ var $root = eval("this");
                     }
                     p[7] = val;
                     this.$invalidateContentBounds();
-                };
-
-                p.$addFlags = function (flags) {
-                    if (flags & 0x0001 == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
-                        this.__flags |= 0x1000;
-                        if (this instanceof flower.Sprite && this.layout) {
-                            this.__flags |= 0x2000;
-                        }
-                    }
-                    this.__flags |= flags;
                 };
 
                 //p.$setUIWidth = function (val) {
@@ -1572,7 +1559,7 @@ var $root = eval("this");
             value: function updateList(width, height) {
                 var startIndex = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
-                flower.trace("update layout", flower.EnterFrame.frame);
+                //flower.trace("update layout",flower.EnterFrame.frame);
                 if (!this.flag) {
                     return;
                 }
@@ -1696,6 +1683,17 @@ var $root = eval("this");
         }
 
         _createClass(Group, [{
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                    this.__flags |= 0x1000;
+                    if (this.layout) {
+                        this.__flags |= 0x2000;
+                    }
+                }
+                this.__flags |= flags;
+            }
+        }, {
             key: "$validateChildrenUIComponent",
             value: function $validateChildrenUIComponent() {
                 var children = this.__children;
@@ -2308,6 +2306,20 @@ var $root = eval("this");
                 }
             }
         }, {
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                    this.__flags |= 0x1000;
+                    if (this.layout) {
+                        this.__flags |= 0x2000;
+                    }
+                }
+                if ((flags & 0x0004) == 0x0004) {
+                    this.__flags |= 0x4000;
+                }
+                this.__flags |= flags;
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 if (this._viewer) {
@@ -2430,8 +2442,8 @@ var $root = eval("this");
                 var item = new this._itemRenderer(data);
                 item.index = index;
                 item.$setList(this._data);
-                item.addListener(TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
-                item.addListener(TouchEvent.TOUCH_END, this._onTouchItem, this);
+                item.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
+                item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
                 item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
                 if (item.data == this._downItem) {
                     if (item.data == this._selectedItem && this._itemSelectedEnabled) {
@@ -2455,7 +2467,7 @@ var $root = eval("this");
             value: function _onTouchItem(e) {
                 var item = e.currentTarget;
                 switch (e.type) {
-                    case TouchEvent.TOUCH_BEGIN:
+                    case flower.TouchEvent.TOUCH_BEGIN:
                         if (this._itemSelectedEnabled) {
                             if (item.data == this._selectedItem) {
                                 item.currentState = "selectedDown";
@@ -2465,10 +2477,10 @@ var $root = eval("this");
                         }
                         this._downItem = item.data;
                         break;
-                    case TouchEvent.TOUCH_RELEASE:
+                    case flower.TouchEvent.TOUCH_RELEASE:
                         this.$releaseItem();
                         break;
-                    case TouchEvent.TOUCH_END:
+                    case flower.TouchEvent.TOUCH_END:
                         if (this._downItem == item.data) {
                             this._downItem = null;
                             this._setSelectedItem(item);
@@ -2818,6 +2830,14 @@ var $root = eval("this");
         }
 
         _createClass(Label, [{
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                    this.__flags |= 0x1000;
+                }
+                this.__flags |= flags;
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
@@ -2861,6 +2881,14 @@ var $root = eval("this");
         }
 
         _createClass(RectUI, [{
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                    this.__flags |= 0x1000;
+                }
+                this.__flags |= flags;
+            }
+        }, {
             key: "$setFillColor",
             value: function $setFillColor(val) {
                 if (_get(Object.getPrototypeOf(RectUI.prototype), "$setFillColor", this).call(this, val)) {
@@ -2980,6 +3008,14 @@ var $root = eval("this");
         }
 
         _createClass(Image, [{
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                    this.__flags |= 0x1000;
+                }
+                this.__flags |= flags;
+            }
+        }, {
             key: "$setSource",
             value: function $setSource(val) {
                 if (this.__source == val) {
@@ -3083,6 +3119,17 @@ var $root = eval("this");
         }
 
         _createClass(MaskUI, [{
+            key: "$addFlags",
+            value: function $addFlags(flags) {
+                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                    this.__flags |= 0x1000;
+                    if (this.layout) {
+                        this.__flags |= 0x2000;
+                    }
+                }
+                this.__flags |= flags;
+            }
+        }, {
             key: "$validateChildrenUIComponent",
             value: function $validateChildrenUIComponent() {
                 if (this.shape.__UIComponent) {
@@ -3632,12 +3679,16 @@ var $root = eval("this");
             _this28._scrollTime = [];
             _this28._upGap = 18;
 
+            _this28.addListener(flower.TouchEvent.TOUCH_BEGIN, _this28.__onTouchScroller, _this28);
+            _this28.addListener(flower.TouchEvent.TOUCH_MOVE, _this28.__onTouchScroller, _this28);
+            _this28.addListener(flower.TouchEvent.TOUCH_END, _this28.__onTouchScroller, _this28);
+            _this28.addListener(flower.TouchEvent.TOUCH_RELEASE, _this28.__onTouchScroller, _this28);
             _this28.width = _this28.height = 100;
-            var bg = new RectUI();
-            bg.fillColor = 0x555555;
-            bg.percentWidth = 100;
-            bg.percentHeight = 100;
-            _this28.addChild(bg);
+            //var bg = new RectUI();
+            //bg.fillColor = 0x555555;
+            //bg.percentWidth = 100;
+            //bg.percentHeight = 100;
+            //this.addChild(bg);
             return _this28;
         }
 
@@ -3655,8 +3706,8 @@ var $root = eval("this");
                 if (!this._viewport) {
                     return;
                 }
-                var x = this.touchX;
-                var y = this.touchY;
+                var x = this.lastTouchX;
+                var y = this.lastTouchY;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
                         if (this._throw) {
@@ -3791,18 +3842,18 @@ var $root = eval("this");
                 if (this._viewport == val) {
                     return;
                 }
-                if (this._viewport) {
-                    this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-                    this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-                    this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-                    this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-                }
+                //if (this._viewport) {
+                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
+                //}
                 this._viewport = val;
                 this._viewport.viewer = this;
-                this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-                this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-                this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-                this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
+                //this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+                //this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+                //this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+                //this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
                 if (this._viewport.parent != this) {
                     this.addChild(this._viewport);
                 }

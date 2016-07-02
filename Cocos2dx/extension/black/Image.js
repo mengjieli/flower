@@ -10,6 +10,13 @@ class Image extends flower.Bitmap {
         this.source = source;
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+        }
+        this.__flags |= flags;
+    }
+
     $setSource(val) {
         if (this.__source == val) {
             return;

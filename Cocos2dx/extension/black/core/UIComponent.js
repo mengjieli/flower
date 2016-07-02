@@ -54,30 +54,27 @@ class UIComponent {
                     if (child.__UIComponent && !child.absoluteState) {
                         child["currentState"] = this.currentState;
                     }
-                    if (this.layout) {
-                        this.layout.addElementAt(child, index);
-                    }
+                }
+                if (child.parent == this && this.layout) {
+                    this.layout.addElementAt(child, index);
                 }
             }
             p.$removeChild = function (child) {
-                if ($root._get(Object.getPrototypeOf(p), "$removeChild", this).call(this, child)) {
-                    if (this.layout) {
-                        this.layout.removeElement(child);
-                    }
+                $root._get(Object.getPrototypeOf(p), "$removeChild", this).call(this, child);
+                if (child.parent != this && this.layout) {
+                    this.layout.removeElement(child);
                 }
             }
             p.removeChild = function (child) {
-                if ($root._get(Object.getPrototypeOf(p), "removeChild", this).call(this, child)) {
-                    if (this.layout) {
-                        this.layout.removeElement(child);
-                    }
+                $root._get(Object.getPrototypeOf(p), "removeChild", this).call(this, child);
+                if (child.parent != this && this.layout) {
+                    this.layout.removeElement(child);
                 }
             }
             p.setChildIndex = function (child, index) {
-                if ($root._get(Object.getPrototypeOf(p), "setChildIndex", this).call(this, child, index)) {
-                    if (this.layout) {
-                        this.layout.setEelementIndex(child);
-                    }
+                $root._get(Object.getPrototypeOf(p), "setChildIndex", this).call(this, child, index);
+                if (child.parent == this && this.layout) {
+                    this.layout.setElementIndex(child, index);
                 }
             }
         }
@@ -243,16 +240,6 @@ class UIComponent {
             this.$invalidateContentBounds();
         }
 
-        p.$addFlags = function (flags) {
-            if (flags & 0x0001 == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
-                this.__flags |= 0x1000;
-                if (this instanceof flower.Sprite && this.layout) {
-                    this.__flags |= 0x2000;
-                }
-            }
-            this.__flags |= flags;
-        }
-
         //p.$setUIWidth = function (val) {
         //    var p = this.$UIComponent;
         //    if (p[8] == val) {
@@ -282,7 +269,7 @@ class UIComponent {
             if (this.$hasFlags(0x0001)) {
                 this.$getContentBounds();
             }
-            parent = parent||this.parent;
+            parent = parent || this.parent;
             //if (this instanceof Group) {
             //    console.log("验证 ui 属性",flower.EnterFrame.frame);
             //}

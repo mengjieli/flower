@@ -70,7 +70,7 @@ class LinearLayout extends Layout {
     }
 
     updateList(width, height, startIndex = 0) {
-        flower.trace("update layout",flower.EnterFrame.frame);
+        //flower.trace("update layout",flower.EnterFrame.frame);
         if (!this.flag) {
             return;
         }

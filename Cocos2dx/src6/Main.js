@@ -55,16 +55,16 @@ class Main {
         //</f:Group>
         //`;
         var clazz = `
-            <f:Scroller xmlns:f="flower">
+            <f:Scroller y="100" width="200" height="300" xmlns:f="flower">
                 <f:viewport>
                     <f:List>
                         <f:layout>
-                            <f:VerticalLayout>
+                            <f:VerticalLayout gap="10">
                             </f:VerticalLayout>
                         </f:layout>
                         <f:itemRenderer>
                             <f:ItemRenderer>
-                                <f:Label text="{data.label}"/>
+                                <f:Label text="{data.label}" fontSize="20" fontColor="0xffffff"/>
                             </f:ItemRenderer>
                         </f:itemRenderer>
                         <f:dataProvider>
@@ -75,7 +75,6 @@ class Main {
                 </f:viewport>
                 <f:script>
                     <f:init>
-                        flower.trace("12321321321",this.array);
                         for(var i = 0; i < 100; i++) {
                             this.array.push({label:"条目" + i});
                         }

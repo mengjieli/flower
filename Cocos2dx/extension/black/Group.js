@@ -7,6 +7,16 @@ class Group extends flower.Sprite {
         this.$initUIComponent();
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+            if (this.layout) {
+                this.__flags |= 0x2000;
+            }
+        }
+        this.__flags |= flags;
+    }
+
     $validateChildrenUIComponent() {
         var children = this.__children;
         if (children) {

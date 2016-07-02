@@ -34,6 +34,19 @@ class DataGroup extends Group {
         }
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+            if (this.layout) {
+                this.__flags |= 0x2000;
+            }
+        }
+        if ((flags & 0x0004) == 0x0004) {
+            this.__flags |= 0x4000;
+        }
+        this.__flags |= flags;
+    }
+
     $onFrameEnd() {
         if (this._viewer) {
             if (this._viewWidth != this._viewer.width || this._viewHeight != this._viewer.height) {
@@ -155,8 +168,8 @@ class DataGroup extends Group {
         var item = new this._itemRenderer(data);
         item.index = index;
         item.$setList(this._data);
-        item.addListener(TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
-        item.addListener(TouchEvent.TOUCH_END, this._onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
         if (item.data == this._downItem) {
             if (item.data == this._selectedItem && this._itemSelectedEnabled) {
@@ -179,7 +192,7 @@ class DataGroup extends Group {
     _onTouchItem(e) {
         var item = e.currentTarget;
         switch (e.type) {
-            case TouchEvent.TOUCH_BEGIN:
+            case flower.TouchEvent.TOUCH_BEGIN:
                 if (this._itemSelectedEnabled) {
                     if (item.data == this._selectedItem) {
                         item.currentState = "selectedDown";
@@ -189,10 +202,10 @@ class DataGroup extends Group {
                 }
                 this._downItem = item.data;
                 break;
-            case TouchEvent.TOUCH_RELEASE:
+            case flower.TouchEvent.TOUCH_RELEASE:
                 this.$releaseItem();
                 break;
-            case TouchEvent.TOUCH_END:
+            case flower.TouchEvent.TOUCH_END:
                 if (this._downItem == item.data) {
                     this._downItem = null;
                     this._setSelectedItem(item);

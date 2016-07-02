@@ -67,30 +67,27 @@ class UIComponent {
                     if (child.__UIComponent && !child.absoluteState) {
                         child["currentState"] = this.currentState;
                     }
-                    if (this.layout) {
-                        this.layout.addElementAt(child, index);
-                    }
+                }
+                if (child.parent == this && this.layout) {
+                    this.layout.addElementAt(child, index);
                 }
             }
             p.$removeChild = function (child) {
-                if ($root._get(Object.getPrototypeOf(p), "$removeChild", this).call(this, child)) {
-                    if (this.layout) {
-                        this.layout.removeElement(child);
-                    }
+                $root._get(Object.getPrototypeOf(p), "$removeChild", this).call(this, child);
+                if (child.parent != this && this.layout) {
+                    this.layout.removeElement(child);
                 }
             }
             p.removeChild = function (child) {
-                if ($root._get(Object.getPrototypeOf(p), "removeChild", this).call(this, child)) {
-                    if (this.layout) {
-                        this.layout.removeElement(child);
-                    }
+                $root._get(Object.getPrototypeOf(p), "removeChild", this).call(this, child);
+                if (child.parent != this && this.layout) {
+                    this.layout.removeElement(child);
                 }
             }
             p.setChildIndex = function (child, index) {
-                if ($root._get(Object.getPrototypeOf(p), "setChildIndex", this).call(this, child, index)) {
-                    if (this.layout) {
-                        this.layout.setEelementIndex(child);
-                    }
+                $root._get(Object.getPrototypeOf(p), "setChildIndex", this).call(this, child, index);
+                if (child.parent == this && this.layout) {
+                    this.layout.setElementIndex(child, index);
                 }
             }
         }
@@ -256,16 +253,6 @@ class UIComponent {
             this.$invalidateContentBounds();
         }
 
-        p.$addFlags = function (flags) {
-            if (flags & 0x0001 == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
-                this.__flags |= 0x1000;
-                if (this instanceof flower.Sprite && this.layout) {
-                    this.__flags |= 0x2000;
-                }
-            }
-            this.__flags |= flags;
-        }
-
         //p.$setUIWidth = function (val) {
         //    var p = this.$UIComponent;
         //    if (p[8] == val) {
@@ -295,7 +282,7 @@ class UIComponent {
             if (this.$hasFlags(0x0001)) {
                 this.$getContentBounds();
             }
-            parent = parent||this.parent;
+            parent = parent || this.parent;
             //if (this instanceof Group) {
             //    console.log("验证 ui 属性",flower.EnterFrame.frame);
             //}
@@ -1236,6 +1223,7 @@ class Layout {
         return 0;
     }
 
+
     getContentSize() {
         return null;
     }
@@ -1387,7 +1375,7 @@ class LinearLayout extends Layout {
     }
 
     updateList(width, height, startIndex = 0) {
-        flower.trace("update layout",flower.EnterFrame.frame);
+        //flower.trace("update layout",flower.EnterFrame.frame);
         if (!this.flag) {
             return;
         }
@@ -1494,6 +1482,16 @@ class Group extends flower.Sprite {
     constructor() {
         super();
         this.$initUIComponent();
+    }
+
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+            if (this.layout) {
+                this.__flags |= 0x2000;
+            }
+        }
+        this.__flags |= flags;
     }
 
     $validateChildrenUIComponent() {
@@ -2089,6 +2087,19 @@ class DataGroup extends Group {
         }
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+            if (this.layout) {
+                this.__flags |= 0x2000;
+            }
+        }
+        if ((flags & 0x0004) == 0x0004) {
+            this.__flags |= 0x4000;
+        }
+        this.__flags |= flags;
+    }
+
     $onFrameEnd() {
         if (this._viewer) {
             if (this._viewWidth != this._viewer.width || this._viewHeight != this._viewer.height) {
@@ -2210,8 +2221,8 @@ class DataGroup extends Group {
         var item = new this._itemRenderer(data);
         item.index = index;
         item.$setList(this._data);
-        item.addListener(TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
-        item.addListener(TouchEvent.TOUCH_END, this._onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
         if (item.data == this._downItem) {
             if (item.data == this._selectedItem && this._itemSelectedEnabled) {
@@ -2234,7 +2245,7 @@ class DataGroup extends Group {
     _onTouchItem(e) {
         var item = e.currentTarget;
         switch (e.type) {
-            case TouchEvent.TOUCH_BEGIN:
+            case flower.TouchEvent.TOUCH_BEGIN:
                 if (this._itemSelectedEnabled) {
                     if (item.data == this._selectedItem) {
                         item.currentState = "selectedDown";
@@ -2244,10 +2255,10 @@ class DataGroup extends Group {
                 }
                 this._downItem = item.data;
                 break;
-            case TouchEvent.TOUCH_RELEASE:
+            case flower.TouchEvent.TOUCH_RELEASE:
                 this.$releaseItem();
                 break;
-            case TouchEvent.TOUCH_END:
+            case flower.TouchEvent.TOUCH_END:
                 if (this._downItem == item.data) {
                     this._downItem = null;
                     this._setSelectedItem(item);
@@ -2569,6 +2580,13 @@ class Label extends flower.TextField {
         this.$initUIComponent();
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+        }
+        this.__flags |= flags;
+    }
+
     $onFrameEnd() {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
@@ -2600,6 +2618,13 @@ class RectUI extends flower.Shape {
         };
         this.drawRect = null;
         this.$initUIComponent();
+    }
+
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+        }
+        this.__flags |= flags;
     }
 
     $setFillColor(val) {
@@ -2709,6 +2734,13 @@ class Image extends flower.Bitmap {
         this.source = source;
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+        }
+        this.__flags |= flags;
+    }
+
     $setSource(val) {
         if (this.__source == val) {
             return;
@@ -2793,6 +2825,16 @@ class MaskUI extends flower.Mask {
     constructor() {
         super();
         this.$initUIComponent();
+    }
+
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+            if (this.layout) {
+                this.__flags |= 0x2000;
+            }
+        }
+        this.__flags |= flags;
     }
 
     $validateChildrenUIComponent() {
@@ -3277,12 +3319,16 @@ class Scroller extends MaskUI {
 
     constructor() {
         super();
+        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+        this.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+        this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
         this.width = this.height = 100;
-        var bg = new RectUI();
-        bg.fillColor = 0x555555;
-        bg.percentWidth = 100;
-        bg.percentHeight = 100;
-        this.addChild(bg);
+        //var bg = new RectUI();
+        //bg.fillColor = 0x555555;
+        //bg.percentWidth = 100;
+        //bg.percentHeight = 100;
+        //this.addChild(bg);
     }
 
     $createShape() {
@@ -3296,8 +3342,8 @@ class Scroller extends MaskUI {
         if (!this._viewport) {
             return;
         }
-        var x = this.touchX;
-        var y = this.touchY;
+        var x = this.lastTouchX;
+        var y = this.lastTouchY;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
                 if (this._throw) {
@@ -3429,18 +3475,18 @@ class Scroller extends MaskUI {
         if (this._viewport == val) {
             return;
         }
-        if (this._viewport) {
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-        }
+        //if (this._viewport) {
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
+        //}
         this._viewport = val;
         this._viewport.viewer = this;
-        this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-        this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-        this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-        this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
         if (this._viewport.parent != this) {
             this.addChild(this._viewport);
         }

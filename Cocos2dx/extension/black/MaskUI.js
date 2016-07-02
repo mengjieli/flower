@@ -5,6 +5,16 @@ class MaskUI extends flower.Mask {
         this.$initUIComponent();
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+            if (this.layout) {
+                this.__flags |= 0x2000;
+            }
+        }
+        this.__flags |= flags;
+    }
+
     $validateChildrenUIComponent() {
         if (this.shape.__UIComponent) {
             this.shape.$validateUIComponent(this);

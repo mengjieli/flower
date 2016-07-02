@@ -645,6 +645,7 @@ var flower = {};
 
             _this2.show = new cc.LabelTTF("", "Times Roman", 12);
             _this2.show.setAnchorPoint(0, 1);
+            _this2.show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
             _this2.show.retain();
             return _this2;
         }

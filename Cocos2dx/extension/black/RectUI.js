@@ -10,6 +10,13 @@ class RectUI extends flower.Shape {
         this.$initUIComponent();
     }
 
+    $addFlags(flags) {
+        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+            this.__flags |= 0x1000;
+        }
+        this.__flags |= flags;
+    }
+
     $setFillColor(val) {
         if (super.$setFillColor(val)) {
             this.$resetRectUI();

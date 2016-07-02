@@ -13,12 +13,16 @@ class Scroller extends MaskUI {
 
     constructor() {
         super();
+        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+        this.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+        this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
         this.width = this.height = 100;
-        var bg = new RectUI();
-        bg.fillColor = 0x555555;
-        bg.percentWidth = 100;
-        bg.percentHeight = 100;
-        this.addChild(bg);
+        //var bg = new RectUI();
+        //bg.fillColor = 0x555555;
+        //bg.percentWidth = 100;
+        //bg.percentHeight = 100;
+        //this.addChild(bg);
     }
 
     $createShape() {
@@ -32,8 +36,8 @@ class Scroller extends MaskUI {
         if (!this._viewport) {
             return;
         }
-        var x = this.touchX;
-        var y = this.touchY;
+        var x = this.lastTouchX;
+        var y = this.lastTouchY;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
                 if (this._throw) {
@@ -165,18 +169,18 @@ class Scroller extends MaskUI {
         if (this._viewport == val) {
             return;
         }
-        if (this._viewport) {
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-            this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-        }
+        //if (this._viewport) {
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
+        //}
         this._viewport = val;
         this._viewport.viewer = this;
-        this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-        this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-        this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-        this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
+        //this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
         if (this._viewport.parent != this) {
             this.addChild(this._viewport);
         }
