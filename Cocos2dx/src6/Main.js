@@ -69,7 +69,6 @@ class Main {
                         </f:itemRenderer>
                         <f:dataProvider>
                             <f:ArrayValue id="array">
-
                             </f:ArrayValue>
                         </f:dataProvider>
                     </f:List>
@@ -77,7 +76,7 @@ class Main {
                 <f:script>
                     <f:init>
                         flower.trace("12321321321",this.array);
-                        for(var i = 0; 100 > i; i++) {
+                        for(var i = 0; i < 100; i++) {
                             this.array.push({label:"条目" + i});
                         }
                     </f:init>

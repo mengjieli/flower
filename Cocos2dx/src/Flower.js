@@ -8260,9 +8260,37 @@ var flower = {};
                             end = true;
                             break;
                         } else {
-                            var element = new XMLElement();
-                            this.list.push(element);
-                            i = element.readInfo(content, i) - 1;
+                            //视图找 <abcsklsklskl />a
+                            var isNextElement = true;
+                            for (var n = i + 1; n < len; n++) {
+                                c = content.charAt(n);
+                                if (c != " " && c != "\t") {
+                                    break;
+                                }
+                            }
+                            for (; n < len; n++) {
+                                c = content.charCodeAt(n);
+                                if (c >= 97 && c <= 122 || c >= 65 && c <= 90 || c >= 48 && c <= 57 || c == 58) {
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            }
+                            for (; n < len; n++) {
+                                c = content.charAt(n);
+                                if (c != " " && c != "\t") {
+                                    break;
+                                }
+                            }
+                            var c = content.charCodeAt(n);
+                            if (c == 47 || c == 62 || c >= 97 && c <= 122 || c >= 65 && c <= 90) {} else {
+                                isNextElement = false;
+                            }
+                            if (isNextElement) {
+                                var element = new XMLElement();
+                                this.list.push(element);
+                                i = element.readInfo(content, i) - 1;
+                            }
                         }
                     }
                 }
