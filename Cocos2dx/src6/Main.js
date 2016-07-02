@@ -56,9 +56,12 @@ class Main {
         //`;
         var clazz = `
         <f:Group xmlns:f="flower">
-            <f:ViewStack x="100" y="100" id="viewStack">
-                <f:Label text="面板1" fontColor="0xffffff"/>
-                <f:Label text="面板2" fontColor="0xffffff"/>
+            <f:ViewStack x="50" y="50" id="viewStack">
+                <f:Group>
+                    <f:RectUI width="100" height="100"/>
+                    <f:Label text="面板111111" fontColor="0xffffff"/>
+                </f:Group>
+                <f:Label text="面板2222" fontColor="0xffffff" fontSize="14"/>
                 <f:Group id="g3">
                     <f:Button onClick="this.g3.parent.removeChild(this.g3);">
                         <f:Label text="面板3" fontColor="0xffffff"/>
@@ -68,7 +71,7 @@ class Main {
             <f:TabBar dataProvider="{viewStack}">
                 <f:itemRenderer>
                     <f:ItemRenderer width="100" height="20">
-                        <f:Label text="{this.data.text}" color.up="0xff0000" color.selectedUp="0x00ff00"/>
+                        <f:Label text="{this.data.text}" color.up="0xff0000" color.selectedUp="0x00ff00" fontColor="0x00ff00"/>
                     </f:ItemRenderer>
                 </f:itemRenderer>
             </f:TabBar>

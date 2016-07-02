@@ -10,13 +10,6 @@ class TabBar extends ListBase {
         super._setSelectedItem(item);
         (this.dataProvider).selectedItem = item.data;
     }
-
-    //$onFrameEnd() {
-    //    if (this._data && this._itemRenderer && (this.$getFlag(0x400))) {
-    //
-    //    }
-    //    super.$onFrameEnd();
-    //}
 }
 
 exports.TabBar = TabBar;

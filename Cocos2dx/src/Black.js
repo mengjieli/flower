@@ -3684,14 +3684,6 @@ var $root = eval("this");
                 _get(Object.getPrototypeOf(TabBar.prototype), "_setSelectedItem", this).call(this, item);
                 this.dataProvider.selectedItem = item.data;
             }
-
-            //$onFrameEnd() {
-            //    if (this._data && this._itemRenderer && (this.$getFlag(0x400))) {
-            //
-            //    }
-            //    super.$onFrameEnd();
-            //}
-
         }]);
 
         return TabBar;
@@ -3727,12 +3719,12 @@ var $root = eval("this");
                     }
                 }
                 this._items.push(display);
-                this.dispatchWidth(Event.UPDATE);
+                this.dispatchWidth(flower.Event.UPDATE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
                 if (!find) {
-                    this.dispatchWidth(Event.ADDED, display);
+                    this.dispatchWidth(flower.Event.ADDED, display);
                 }
             }
         }, {
@@ -3747,12 +3739,12 @@ var $root = eval("this");
                     }
                 }
                 this._items.splice(i, 0, display);
-                this.dispatchWidth(Event.UPDATE);
+                this.dispatchWidth(flower.Event.UPDATE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
                 if (!find) {
-                    this.dispatchWidth(Event.ADDED, display);
+                    this.dispatchWidth(flower.Event.ADDED, display);
                 }
             }
         }, {
@@ -3763,8 +3755,8 @@ var $root = eval("this");
                         this._items.splice(i, 1);
                         if (display == this._selectedItem) {
                             this._setSelectedIndex(0);
-                            this.dispatchWidth(Event.UPDATE);
-                            this.dispatchWidth(Event.REMOVED, display);
+                            this.dispatchWidth(flower.Event.UPDATE);
+                            this.dispatchWidth(flower.Event.REMOVED, display);
                         }
                         return display;
                     }
@@ -3779,8 +3771,8 @@ var $root = eval("this");
                     this._selectedItem = this._items[0];
                     this._selectedIndex = 0;
                     _get(Object.getPrototypeOf(ViewStack.prototype), "removeChild", this).call(this, display);
-                    this.dispatchWidth(Event.UPDATE);
-                    this.dispatchWidth(Event.REMOVED, display);
+                    this.dispatchWidth(flower.Event.UPDATE);
+                    this.dispatchWidth(flower.Event.REMOVED, display);
                 } else {
                     flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
                 }
@@ -3805,7 +3797,7 @@ var $root = eval("this");
                     if (this._items[i] == display) {
                         this._items.splice(i, 1);
                         this._items.splice(index, 0, display);
-                        this.dispatchWidth(Event.UPDATE);
+                        this.dispatchWidth(flower.Event.UPDATE);
                         return display;
                     }
                 }
@@ -3817,7 +3809,7 @@ var $root = eval("this");
                 var opt = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
                 _get(Object.getPrototypeOf(ViewStack.prototype), "sortChild", this).call(this, key, opt);
-                this.dispatchWidth(Event.UPDATE);
+                this.dispatchWidth(flower.Event.UPDATE);
             }
         }, {
             key: "_setSelectedIndex",
@@ -3831,7 +3823,7 @@ var $root = eval("this");
                 if (item) {
                     this._selectedItem = item;
                     this._selectedIndex = val;
-                    _get(Object.getPrototypeOf(ViewStack.prototype), "addChild", this).call(this, this._selectedItem);
+                    _get(Object.getPrototypeOf(ViewStack.prototype), "addChildAt", this).call(this, this._selectedItem, this.numChildren);
                 }
             }
         }, {

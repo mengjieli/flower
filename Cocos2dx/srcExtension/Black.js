@@ -3316,13 +3316,6 @@ class TabBar extends ListBase {
         super._setSelectedItem(item);
         (this.dataProvider).selectedItem = item.data;
     }
-
-    //$onFrameEnd() {
-    //    if (this._data && this._itemRenderer && (this.$getFlag(0x400))) {
-    //
-    //    }
-    //    super.$onFrameEnd();
-    //}
 }
 
 black.TabBar = TabBar;
@@ -3351,12 +3344,12 @@ class ViewStack extends Group {
             }
         }
         this._items.push(display);
-        this.dispatchWidth(Event.UPDATE);
+        this.dispatchWidth(flower.Event.UPDATE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
         if (!find) {
-            this.dispatchWidth(Event.ADDED, display);
+            this.dispatchWidth(flower.Event.ADDED, display);
         }
     }
 
@@ -3370,12 +3363,12 @@ class ViewStack extends Group {
             }
         }
         this._items.splice(i, 0, display);
-        this.dispatchWidth(Event.UPDATE);
+        this.dispatchWidth(flower.Event.UPDATE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
         if (!find) {
-            this.dispatchWidth(Event.ADDED, display);
+            this.dispatchWidth(flower.Event.ADDED, display);
         }
     }
 
@@ -3385,8 +3378,8 @@ class ViewStack extends Group {
                 this._items.splice(i, 1);
                 if (display == this._selectedItem) {
                     this._setSelectedIndex(0);
-                    this.dispatchWidth(Event.UPDATE);
-                    this.dispatchWidth(Event.REMOVED, display);
+                    this.dispatchWidth(flower.Event.UPDATE);
+                    this.dispatchWidth(flower.Event.REMOVED, display);
                 }
                 return display;
             }
@@ -3400,8 +3393,8 @@ class ViewStack extends Group {
             this._selectedItem = this._items[0];
             this._selectedIndex = 0;
             super.removeChild(display);
-            this.dispatchWidth(Event.UPDATE);
-            this.dispatchWidth(Event.REMOVED, display);
+            this.dispatchWidth(flower.Event.UPDATE);
+            this.dispatchWidth(flower.Event.REMOVED, display);
         } else {
             flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
         }
@@ -3424,7 +3417,7 @@ class ViewStack extends Group {
             if (this._items[i] == display) {
                 this._items.splice(i, 1);
                 this._items.splice(index, 0, display);
-                this.dispatchWidth(Event.UPDATE);
+                this.dispatchWidth(flower.Event.UPDATE);
                 return display;
             }
         }
@@ -3433,7 +3426,7 @@ class ViewStack extends Group {
 
     sortChild(key, opt = 0) {
         super.sortChild(key, opt);
-        this.dispatchWidth(Event.UPDATE);
+        this.dispatchWidth(flower.Event.UPDATE);
     }
 
     _setSelectedIndex(val) {
@@ -3446,7 +3439,7 @@ class ViewStack extends Group {
         if (item) {
             this._selectedItem = item;
             this._selectedIndex = val;
-            super.addChild(this._selectedItem);
+            super.addChildAt(this._selectedItem,this.numChildren);
         }
     }
 
