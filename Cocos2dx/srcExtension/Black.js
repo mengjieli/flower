@@ -1194,7 +1194,7 @@ locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
 locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
 locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
 locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
-locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
+locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
 locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
 locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
 locale_strings[3012] = "没有定义的数据结构 :{0}";
@@ -3300,6 +3300,191 @@ class List extends ListBase {
 
 black.List = List;
 //////////////////////////End File:extension/black/List.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/TabBar.js///////////////////////////
+class TabBar extends ListBase {
+
+    constructor() {
+        super();
+        this.layout = new HorizontalLayout();
+        this.layout.fixElementSize = false;
+    }
+
+    _setSelectedItem(item) {
+        super._setSelectedItem(item);
+        (this.dataProvider).selectedItem = item.data;
+    }
+
+    //$onFrameEnd() {
+    //    if (this._data && this._itemRenderer && (this.$getFlag(0x400))) {
+    //
+    //    }
+    //    super.$onFrameEnd();
+    //}
+}
+
+black.TabBar = TabBar;
+//////////////////////////End File:extension/black/TabBar.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/ViewStack.js///////////////////////////
+class ViewStack extends Group {
+
+    _items = [];
+    _selectedIndex = -1;
+    _selectedItem;
+
+    constructor() {
+        super();
+    }
+
+    addChild(display) {
+        var find = false;
+        for (var i = 0; i < this._items.length; i++) {
+            if (this._items[i] == display) {
+                this._items.splice(i, 1);
+                find = true;
+                break;
+            }
+        }
+        this._items.push(display);
+        this.dispatchWidth(Event.UPDATE);
+        if (this._selectedIndex < 0) {
+            this._setSelectedIndex(0);
+        }
+        if (!find) {
+            this.dispatchWidth(Event.ADDED, display);
+        }
+    }
+
+    addChildAt(display, index) {
+        var find = false;
+        for (var i = 0; i < this._items.length; i++) {
+            if (this._items[i] == display) {
+                this._items.splice(i, 1);
+                find = true;
+                break;
+            }
+        }
+        this._items.splice(i, 0, display);
+        this.dispatchWidth(Event.UPDATE);
+        if (this._selectedIndex < 0) {
+            this._setSelectedIndex(0);
+        }
+        if (!find) {
+            this.dispatchWidth(Event.ADDED, display);
+        }
+    }
+
+    removeChild(display) {
+        for (var i = 0; i < this._items.length; i++) {
+            if (this._items[i] == display) {
+                this._items.splice(i, 1);
+                if (display == this._selectedItem) {
+                    this._setSelectedIndex(0);
+                    this.dispatchWidth(Event.UPDATE);
+                    this.dispatchWidth(Event.REMOVED, display);
+                }
+                return display;
+            }
+        }
+        return null;
+    }
+
+    removeChildAt(index) {
+        var display = this._items.splice(index, 1)[0];
+        if (display == this._selectedItem) {
+            this._selectedItem = this._items[0];
+            this._selectedIndex = 0;
+            super.removeChild(display);
+            this.dispatchWidth(Event.UPDATE);
+            this.dispatchWidth(Event.REMOVED, display);
+        } else {
+            flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
+        }
+        return display;
+    }
+
+    getChildIndex(display) {
+        if (display) {
+            for (var i = 0; i < this._items.length; i++) {
+                if (this._items[i] == display) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    setChildIndex(display, index) {
+        for (var i = 0; i < this._items.length; i++) {
+            if (this._items[i] == display) {
+                this._items.splice(i, 1);
+                this._items.splice(index, 0, display);
+                this.dispatchWidth(Event.UPDATE);
+                return display;
+            }
+        }
+        return null;
+    }
+
+    sortChild(key, opt = 0) {
+        super.sortChild(key, opt);
+        this.dispatchWidth(Event.UPDATE);
+    }
+
+    _setSelectedIndex(val) {
+        if (this._selectedItem) {
+            super.removeChild(this._selectedItem);
+        }
+        this._selectedItem = null;
+        this._selectedIndex = -1;
+        var item = this._items[val];
+        if (item) {
+            this._selectedItem = item;
+            this._selectedIndex = val;
+            super.addChild(this._selectedItem);
+        }
+    }
+
+    get length() {
+        return this._items.length;
+    }
+
+    getItemAt(index) {
+        return this._items[index];
+    }
+
+    getItemIndex(item) {
+        return this.getChildIndex(item);
+    }
+
+    set selectedIndex(val) {
+        val = +val || 0;
+        if (val == this._selectedIndex) {
+            return;
+        }
+        if (val < 0 || val >= this._items.length) {
+            val = -1;
+        }
+        this._setSelectedIndex(val);
+    }
+
+    get selectedIndex() {
+        return this._selectedIndex;
+    }
+
+    set selectedItem(val) {
+        var index = this.getChildIndex(val);
+        this._setSelectedIndex(index);
+    }
+}
+
+black.ViewStack = ViewStack;
+//////////////////////////End File:extension/black/ViewStack.js///////////////////////////
 
 
 

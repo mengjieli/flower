@@ -198,6 +198,8 @@ var list = [
     "ToggleSwitch",
     "ListBase",
     "List",
+    "TabBar",
+    "ViewStack",
     "Scroller"
 ];
 var fileContent = "";

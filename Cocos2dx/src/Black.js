@@ -1353,7 +1353,7 @@ var $root = eval("this");
     locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
     locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
     locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
-    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower.ui\" :\n{0}";
+    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
     locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
     locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
     locale_strings[3012] = "没有定义的数据结构 :{0}";
@@ -3663,6 +3663,221 @@ var $root = eval("this");
     black.List = List;
     //////////////////////////End File:extension/black/List.js///////////////////////////
 
+    //////////////////////////File:extension/black/TabBar.js///////////////////////////
+
+    var TabBar = function (_ListBase2) {
+        _inherits(TabBar, _ListBase2);
+
+        function TabBar() {
+            _classCallCheck(this, TabBar);
+
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+
+            _this28.layout = new HorizontalLayout();
+            _this28.layout.fixElementSize = false;
+            return _this28;
+        }
+
+        _createClass(TabBar, [{
+            key: "_setSelectedItem",
+            value: function _setSelectedItem(item) {
+                _get(Object.getPrototypeOf(TabBar.prototype), "_setSelectedItem", this).call(this, item);
+                this.dataProvider.selectedItem = item.data;
+            }
+
+            //$onFrameEnd() {
+            //    if (this._data && this._itemRenderer && (this.$getFlag(0x400))) {
+            //
+            //    }
+            //    super.$onFrameEnd();
+            //}
+
+        }]);
+
+        return TabBar;
+    }(ListBase);
+
+    black.TabBar = TabBar;
+    //////////////////////////End File:extension/black/TabBar.js///////////////////////////
+
+    //////////////////////////File:extension/black/ViewStack.js///////////////////////////
+
+    var ViewStack = function (_Group7) {
+        _inherits(ViewStack, _Group7);
+
+        function ViewStack() {
+            _classCallCheck(this, ViewStack);
+
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+
+            _this29._items = [];
+            _this29._selectedIndex = -1;
+            return _this29;
+        }
+
+        _createClass(ViewStack, [{
+            key: "addChild",
+            value: function addChild(display) {
+                var find = false;
+                for (var i = 0; i < this._items.length; i++) {
+                    if (this._items[i] == display) {
+                        this._items.splice(i, 1);
+                        find = true;
+                        break;
+                    }
+                }
+                this._items.push(display);
+                this.dispatchWidth(Event.UPDATE);
+                if (this._selectedIndex < 0) {
+                    this._setSelectedIndex(0);
+                }
+                if (!find) {
+                    this.dispatchWidth(Event.ADDED, display);
+                }
+            }
+        }, {
+            key: "addChildAt",
+            value: function addChildAt(display, index) {
+                var find = false;
+                for (var i = 0; i < this._items.length; i++) {
+                    if (this._items[i] == display) {
+                        this._items.splice(i, 1);
+                        find = true;
+                        break;
+                    }
+                }
+                this._items.splice(i, 0, display);
+                this.dispatchWidth(Event.UPDATE);
+                if (this._selectedIndex < 0) {
+                    this._setSelectedIndex(0);
+                }
+                if (!find) {
+                    this.dispatchWidth(Event.ADDED, display);
+                }
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(display) {
+                for (var i = 0; i < this._items.length; i++) {
+                    if (this._items[i] == display) {
+                        this._items.splice(i, 1);
+                        if (display == this._selectedItem) {
+                            this._setSelectedIndex(0);
+                            this.dispatchWidth(Event.UPDATE);
+                            this.dispatchWidth(Event.REMOVED, display);
+                        }
+                        return display;
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "removeChildAt",
+            value: function removeChildAt(index) {
+                var display = this._items.splice(index, 1)[0];
+                if (display == this._selectedItem) {
+                    this._selectedItem = this._items[0];
+                    this._selectedIndex = 0;
+                    _get(Object.getPrototypeOf(ViewStack.prototype), "removeChild", this).call(this, display);
+                    this.dispatchWidth(Event.UPDATE);
+                    this.dispatchWidth(Event.REMOVED, display);
+                } else {
+                    flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
+                }
+                return display;
+            }
+        }, {
+            key: "getChildIndex",
+            value: function getChildIndex(display) {
+                if (display) {
+                    for (var i = 0; i < this._items.length; i++) {
+                        if (this._items[i] == display) {
+                            return i;
+                        }
+                    }
+                }
+                return -1;
+            }
+        }, {
+            key: "setChildIndex",
+            value: function setChildIndex(display, index) {
+                for (var i = 0; i < this._items.length; i++) {
+                    if (this._items[i] == display) {
+                        this._items.splice(i, 1);
+                        this._items.splice(index, 0, display);
+                        this.dispatchWidth(Event.UPDATE);
+                        return display;
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "sortChild",
+            value: function sortChild(key) {
+                var opt = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+                _get(Object.getPrototypeOf(ViewStack.prototype), "sortChild", this).call(this, key, opt);
+                this.dispatchWidth(Event.UPDATE);
+            }
+        }, {
+            key: "_setSelectedIndex",
+            value: function _setSelectedIndex(val) {
+                if (this._selectedItem) {
+                    _get(Object.getPrototypeOf(ViewStack.prototype), "removeChild", this).call(this, this._selectedItem);
+                }
+                this._selectedItem = null;
+                this._selectedIndex = -1;
+                var item = this._items[val];
+                if (item) {
+                    this._selectedItem = item;
+                    this._selectedIndex = val;
+                    _get(Object.getPrototypeOf(ViewStack.prototype), "addChild", this).call(this, this._selectedItem);
+                }
+            }
+        }, {
+            key: "getItemAt",
+            value: function getItemAt(index) {
+                return this._items[index];
+            }
+        }, {
+            key: "getItemIndex",
+            value: function getItemIndex(item) {
+                return this.getChildIndex(item);
+            }
+        }, {
+            key: "length",
+            get: function get() {
+                return this._items.length;
+            }
+        }, {
+            key: "selectedIndex",
+            set: function set(val) {
+                val = +val || 0;
+                if (val == this._selectedIndex) {
+                    return;
+                }
+                if (val < 0 || val >= this._items.length) {
+                    val = -1;
+                }
+                this._setSelectedIndex(val);
+            },
+            get: function get() {
+                return this._selectedIndex;
+            }
+        }, {
+            key: "selectedItem",
+            set: function set(val) {
+                var index = this.getChildIndex(val);
+                this._setSelectedIndex(index);
+            }
+        }]);
+
+        return ViewStack;
+    }(Group);
+
+    black.ViewStack = ViewStack;
+    //////////////////////////End File:extension/black/ViewStack.js///////////////////////////
+
     //////////////////////////File:extension/black/Scroller.js///////////////////////////
 
     var Scroller = function (_MaskUI) {
@@ -3671,25 +3886,25 @@ var $root = eval("this");
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this28._viewSize = flower.Size.create(0, 0);
-            _this28._scrollDisX = [];
-            _this28._scrollDisY = [];
-            _this28._scrollTime = [];
-            _this28._upGap = 18;
+            _this30._viewSize = flower.Size.create(0, 0);
+            _this30._scrollDisX = [];
+            _this30._scrollDisY = [];
+            _this30._scrollTime = [];
+            _this30._upGap = 18;
 
-            _this28.addListener(flower.TouchEvent.TOUCH_BEGIN, _this28.__onTouchScroller, _this28);
-            _this28.addListener(flower.TouchEvent.TOUCH_MOVE, _this28.__onTouchScroller, _this28);
-            _this28.addListener(flower.TouchEvent.TOUCH_END, _this28.__onTouchScroller, _this28);
-            _this28.addListener(flower.TouchEvent.TOUCH_RELEASE, _this28.__onTouchScroller, _this28);
-            _this28.width = _this28.height = 100;
+            _this30.addListener(flower.TouchEvent.TOUCH_BEGIN, _this30.__onTouchScroller, _this30);
+            _this30.addListener(flower.TouchEvent.TOUCH_MOVE, _this30.__onTouchScroller, _this30);
+            _this30.addListener(flower.TouchEvent.TOUCH_END, _this30.__onTouchScroller, _this30);
+            _this30.addListener(flower.TouchEvent.TOUCH_RELEASE, _this30.__onTouchScroller, _this30);
+            _this30.width = _this30.height = 100;
             //var bg = new RectUI();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this28;
+            return _this30;
         }
 
         _createClass(Scroller, [{
