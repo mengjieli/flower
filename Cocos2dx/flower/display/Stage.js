@@ -1,8 +1,12 @@
 class Stage extends Sprite {
+
+    $debugSprite = new Sprite();
+
     constructor() {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.addChild(this.$debugSprite);
     }
 
     get stageWidth() {
@@ -11,6 +15,13 @@ class Stage extends Sprite {
 
     get stageHeight() {
         return Platform.height;
+    }
+
+    addChildAt(child, index) {
+        super.addChildAt(child, index);
+        if (child != this.$debugSprite && index == this.numChildren - 1) {
+            this.addChild(this.$debugSprite);
+        }
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
@@ -273,6 +284,10 @@ class Stage extends Sprite {
 
     set focus(val) {
         this.$setFocus(val);
+    }
+
+    get debugContainer() {
+        return this.$debugSprite;
     }
 
     static stages = [];

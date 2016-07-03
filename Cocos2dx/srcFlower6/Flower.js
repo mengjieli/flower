@@ -175,15 +175,15 @@ class Platform {
                 engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
             },
             onTouchesBegan: function (touch) {
-                engine.$addTouchEvent("begin",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesMoved: function (touch) {
-                engine.$addTouchEvent("move",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesEnded: function (touch) {
-                engine.$addTouchEvent("end",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
         });
@@ -1270,6 +1270,85 @@ class PlatformProgram {
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformProgram.js///////////////////////////
+
+
+
+//////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
+/**
+ * 调试信息
+ */
+class DebugInfo {
+
+    /**
+     * 平台对象纪录
+     * @type {{}}
+     */
+    platformObjects;
+    /**
+     *
+     * @type {{}}
+     */
+    objects = {};
+
+    /**
+     * 所有纹理纹理信息
+     * @type {Array}
+     */
+    textures = [];
+
+    constructor() {
+
+    }
+
+    addTexture(texture) {
+        this.textures.push(texture);
+    }
+
+    delTexture(texture) {
+        for (var i = 0; i < this.textures.length; i++) {
+            if (this.textures[i] == texture) {
+                this.textures.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    static instance = new DebugInfo();
+
+    static getInstance() {
+        return DebugInfo.instance;
+    }
+}
+
+flower.DebugInfo = DebugInfo;
+//////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/debug/TextureInfo.js///////////////////////////
+class TextureInfo {
+
+    __texture;
+
+    constructor(texture) {
+        this.__texture = texture;
+    }
+
+    get url() {
+        return this.__texture.url;
+    }
+
+    get nativeURL() {
+        return this.__texture.nativeURL;
+    }
+
+    get count() {
+        return this.__texture.count;
+    }
+}
+
+flower.TextureInfo = TextureInfo;
+//////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
 
 
 
@@ -4184,10 +4263,14 @@ flower.Shape = Shape;
 
 //////////////////////////File:flower/display/Stage.js///////////////////////////
 class Stage extends Sprite {
+
+    $debugSprite = new Sprite();
+
     constructor() {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.addChild(this.$debugSprite);
     }
 
     get stageWidth() {
@@ -4196,6 +4279,13 @@ class Stage extends Sprite {
 
     get stageHeight() {
         return Platform.height;
+    }
+
+    addChildAt(child, index) {
+        super.addChildAt(child, index);
+        if (child != this.$debugSprite && index == this.numChildren - 1) {
+            this.addChild(this.$debugSprite);
+        }
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
@@ -4460,6 +4550,10 @@ class Stage extends Sprite {
         this.$setFocus(val);
     }
 
+    get debugContainer() {
+        return this.$debugSprite;
+    }
+
     static stages = [];
 
     static getInstance() {
@@ -4618,6 +4712,10 @@ class Texture {
         return this.height / this.__height;
     }
 
+    get count() {
+        return this.count;
+    }
+
     /**
      * 更新时间抛出对象，当 Texture 更新时，此对象抛出更新事件 Event.UPDATE
      * @native
@@ -4679,6 +4777,9 @@ class TextureManager {
         }
         var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
         this.list.push(texture);
+        if (DEBUG) {
+            DebugInfo.getInstance().addTexture(texture);
+        }
         return texture;
     }
 
@@ -4707,6 +4808,7 @@ class TextureManager {
             if (texture.$count == 0) {
                 if (texture.dispose()) {
                     this.list.splice(i, 1);
+                    DebugInfo.getInstance().delTexture(texture);
                     i--;
                 }
             }
@@ -7361,10 +7463,10 @@ class XMLElement extends XMLAttribute {
     parse(content) {
         var delStart = -1;
         for (var i = 0; i < content.length; i++) {
-            if (content.charAt(i) == "\r" || content.charAt(i) == "\n") {
-                content = content.slice(0, i) + content.slice(i + 1, content.length);
-                i--;
-            }
+            //if (content.charAt(i) == "\r" || content.charAt(i) == "\n") {
+            //    content = content.slice(0, i) + content.slice(i + 1, content.length);
+            //    i--;
+            //}
             if (delStart == -1 && (content.slice(i, i + 2) == "<!" || content.slice(i, i + 2) == "<?")) {
                 delStart = i;
             }

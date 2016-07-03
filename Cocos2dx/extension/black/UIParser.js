@@ -73,6 +73,7 @@ class UIParser extends Group {
         var loader = new flower.URLLoader(url);
         loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
         loader.addListener(flower.Event.ERROR, this.loadContentError, this);
+        loader.load();
         this.parseUIAsyncFlag = true;
     }
 
@@ -80,6 +81,7 @@ class UIParser extends Group {
         var loader = new flower.URLLoader(url);
         loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
         loader.addListener(flower.Event.ERROR, this.loadContentError, this);
+        loader.load();
         this.parseUIAsyncFlag = false;
     }
 
@@ -159,7 +161,9 @@ class UIParser extends Group {
             return new UIClass(data);
         }
         var ui = new UIClass();
-        this.addChild(ui);
+        if(!ui.parent) {
+            this.addChild(ui);
+        }
         return ui;
     }
 
@@ -255,6 +259,7 @@ class UIParser extends Group {
             content += before + "\t\tthis." + className + "_init();\n";
         }
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
+        content += before + "\t\tthis.$callUIComponentEvent(50);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
@@ -275,7 +280,6 @@ class UIParser extends Group {
         for (var i = 0; i < packages.length; i++) {
             if (i == 0) {
                 classEnd = before + "})(" + packages[i] + " || (" + packages[i] + " = {}));\n" + classEnd;
-
             } else {
                 classEnd = before + "})(" + packages[i] + " = " + packages[i - 1] + "." + packages[i] + " || (" + packages[i - 1] + "." + packages[i] + " = {}));\n" + classEnd;
             }

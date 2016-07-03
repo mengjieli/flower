@@ -74,10 +74,10 @@ class XMLElement extends XMLAttribute {
     parse(content) {
         var delStart = -1;
         for (var i = 0; i < content.length; i++) {
-            if (content.charAt(i) == "\r" || content.charAt(i) == "\n") {
-                content = content.slice(0, i) + content.slice(i + 1, content.length);
-                i--;
-            }
+            //if (content.charAt(i) == "\r" || content.charAt(i) == "\n") {
+            //    content = content.slice(0, i) + content.slice(i + 1, content.length);
+            //    i--;
+            //}
             if (delStart == -1 && (content.slice(i, i + 2) == "<!" || content.slice(i, i + 2) == "<?")) {
                 delStart = i;
             }

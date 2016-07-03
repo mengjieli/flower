@@ -32,15 +32,15 @@ class Platform {
                 engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
             },
             onTouchesBegan: function (touch) {
-                engine.$addTouchEvent("begin",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesMoved: function (touch) {
-                engine.$addTouchEvent("move",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
             onTouchesEnded: function (touch) {
-                engine.$addTouchEvent("end",touch.getID()||0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
                 return true;
             },
         });

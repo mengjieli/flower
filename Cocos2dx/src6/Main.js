@@ -70,7 +70,8 @@ class Main {
                 </f:Group>
                 <f:Label text="面板2222" fontColor="0xffffff" fontSize="14"/>
                 <f:Group id="g3">
-                    <f:Button onClick="flower.trace('hello!');">
+                    <f:Button onClick="this.parent.removeChild(this);">
+                        <f:Image source="res/font@100x100@cn@2.png"/>
                         <f:Label text="面板3" fontColor="0xffffff"/>
                     </f:Button>
                 </f:Group>
@@ -81,6 +82,9 @@ class Main {
         var ui = new flower.UIParser();
         ui.parseUI(clazz);
         container.addChild(ui);
+
+        (new flower.UIParser()).parseUIAsync("res/debug/Debug.xml");
+
         //ui.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
         //    ui.currentState = ui.currentState == "up" ? "down" : "up";
         //});

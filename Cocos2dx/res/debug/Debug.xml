@@ -1,0 +1,40 @@
+<f:Group creationComplete="this.start();" xmlns:f="flower">
+    <f:List id="list">
+        <f:itemRenderer>
+            <f:ItemRenderer>
+                <f:Label text="{this.data.url}" color="0xff0000"/>
+            </f:ItemRenderer>
+        </f:itemRenderer>
+    </f:List>
+    <f:script>
+        <f:start>
+            this.textures = new flower.ArrayValue();
+            this.list.dataProvider = this.textures;
+            flower.Stage.getInstance().addChild(this);
+            flower.EnterFrame.add(this.update,this);
+        </f:start>
+        <f:update params="now,gap">
+            var textures = flower.DebugInfo.getInstance().textures;
+            console.log(textures.length);
+            var texture;
+            var txtInfo;
+            for(var i = 0; textures.length > i; i++) {
+                texture = textures[i];
+                for(var j = 0; this.textures.length > j; j++) {
+                    if(this.textures.getItemAt(j).url == textures[i].url) {
+                        txtInfo = this.textures.getItemAt(j);
+                        break;
+                    }
+                }
+                if(!txtInfo) {
+                    this.textures.push(txtInfo = {
+                        url:new flower.StringValue(),
+                        nativeURL:new flower.StringValue()
+                    });
+                }
+                txtInfo.url.value = texture.url;
+            }
+            <!--console.log("frame",now,gap);-->
+        </f:update>
+    </f:script>
+</f:Group>

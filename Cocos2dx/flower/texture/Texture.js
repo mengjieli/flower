@@ -137,6 +137,10 @@ class Texture {
         return this.height / this.__height;
     }
 
+    get count() {
+        return this.count;
+    }
+
     /**
      * 更新时间抛出对象，当 Texture 更新时，此对象抛出更新事件 Event.UPDATE
      * @native

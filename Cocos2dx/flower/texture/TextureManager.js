@@ -27,6 +27,9 @@ class TextureManager {
         }
         var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
         this.list.push(texture);
+        if (DEBUG) {
+            DebugInfo.getInstance().addTexture(texture);
+        }
         return texture;
     }
 
@@ -55,6 +58,7 @@ class TextureManager {
             if (texture.$count == 0) {
                 if (texture.dispose()) {
                     this.list.splice(i, 1);
+                    DebugInfo.getInstance().delTexture(texture);
                     i--;
                 }
             }

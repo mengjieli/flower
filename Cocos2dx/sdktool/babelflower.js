@@ -176,6 +176,9 @@ var list = [
     "PlatformProgram",
     "PlatformShaderType",
 
+    "DebugInfo",
+    "TextureInfo",
+
     "CoreTime",
 
     "Language",

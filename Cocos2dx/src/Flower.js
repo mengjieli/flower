@@ -1393,10 +1393,103 @@ var flower = {};
     }();
     //////////////////////////End File:flower/platform/cocos2dx/PlatformProgram.js///////////////////////////
 
-    //////////////////////////File:flower/core/CoreTime.js///////////////////////////
+    //////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
+    /**
+     * 调试信息
+     */
 
 
     PlatformProgram.programmers = [];
+
+    var DebugInfo = function () {
+        /**
+         *
+         * @type {{}}
+         */
+
+        function DebugInfo() {
+            _classCallCheck(this, DebugInfo);
+
+            this.objects = {};
+            this.textures = [];
+        }
+
+        /**
+         * 所有纹理纹理信息
+         * @type {Array}
+         */
+
+
+        /**
+         * 平台对象纪录
+         * @type {{}}
+         */
+
+
+        _createClass(DebugInfo, [{
+            key: "addTexture",
+            value: function addTexture(texture) {
+                this.textures.push(texture);
+            }
+        }, {
+            key: "delTexture",
+            value: function delTexture(texture) {
+                for (var i = 0; i < this.textures.length; i++) {
+                    if (this.textures[i] == texture) {
+                        this.textures.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                return DebugInfo.instance;
+            }
+        }]);
+
+        return DebugInfo;
+    }();
+
+    DebugInfo.instance = new DebugInfo();
+
+
+    flower.DebugInfo = DebugInfo;
+    //////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
+
+    //////////////////////////File:flower/debug/TextureInfo.js///////////////////////////
+
+    var TextureInfo = function () {
+        function TextureInfo(texture) {
+            _classCallCheck(this, TextureInfo);
+
+            this.__texture = texture;
+        }
+
+        _createClass(TextureInfo, [{
+            key: "url",
+            get: function get() {
+                return this.__texture.url;
+            }
+        }, {
+            key: "nativeURL",
+            get: function get() {
+                return this.__texture.nativeURL;
+            }
+        }, {
+            key: "count",
+            get: function get() {
+                return this.__texture.count;
+            }
+        }]);
+
+        return TextureInfo;
+    }();
+
+    flower.TextureInfo = TextureInfo;
+    //////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
+
+    //////////////////////////File:flower/core/CoreTime.js///////////////////////////
 
     var CoreTime = function () {
         function CoreTime() {
@@ -4642,6 +4735,7 @@ var flower = {};
 
             var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
+            _this20.$debugSprite = new Sprite();
             _this20.__nativeMouseMoveEvent = [];
             _this20.__nativeTouchEvent = [];
             _this20.__mouseOverList = [_this20];
@@ -4652,10 +4746,22 @@ var flower = {};
 
             _this20.__stage = _this20;
             Stage.stages.push(_this20);
+            _this20.addChild(_this20.$debugSprite);
             return _this20;
         }
 
         _createClass(Stage, [{
+            key: "addChildAt",
+            value: function addChildAt(child, index) {
+                _get(Object.getPrototypeOf(Stage.prototype), "addChildAt", this).call(this, child, index);
+                if (child != this.$debugSprite && index == this.numChildren - 1) {
+                    this.addChild(this.$debugSprite);
+                }
+            }
+
+            ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+
+        }, {
             key: "$setFocus",
             value: function $setFocus(val) {
                 if (val && !val.$focusEnabled) {
@@ -4920,9 +5026,6 @@ var flower = {};
             get: function get() {
                 return Platform.height;
             }
-
-            ///////////////////////////////////////触摸事件处理///////////////////////////////////////
-
         }, {
             key: "focus",
             get: function get() {
@@ -4930,6 +5033,11 @@ var flower = {};
             },
             set: function set(val) {
                 this.$setFocus(val);
+            }
+        }, {
+            key: "debugContainer",
+            get: function get() {
+                return this.$debugSprite;
             }
         }], [{
             key: "getInstance",
@@ -5125,6 +5233,11 @@ var flower = {};
             get: function get() {
                 return this.height / this.__height;
             }
+        }, {
+            key: "count",
+            get: function get() {
+                return this.count;
+            }
 
             /**
              * 更新时间抛出对象，当 Texture 更新时，此对象抛出更新事件 Event.UPDATE
@@ -5182,6 +5295,9 @@ var flower = {};
                 }
                 var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
                 this.list.push(texture);
+                if (DEBUG) {
+                    DebugInfo.getInstance().addTexture(texture);
+                }
                 return texture;
             }
         }, {
@@ -5213,6 +5329,7 @@ var flower = {};
                     if (texture.$count == 0) {
                         if (texture.dispose()) {
                             this.list.splice(i, 1);
+                            DebugInfo.getInstance().delTexture(texture);
                             i--;
                         }
                     }
@@ -8109,10 +8226,10 @@ var flower = {};
             value: function parse(content) {
                 var delStart = -1;
                 for (var i = 0; i < content.length; i++) {
-                    if (content.charAt(i) == "\r" || content.charAt(i) == "\n") {
-                        content = content.slice(0, i) + content.slice(i + 1, content.length);
-                        i--;
-                    }
+                    //if (content.charAt(i) == "\r" || content.charAt(i) == "\n") {
+                    //    content = content.slice(0, i) + content.slice(i + 1, content.length);
+                    //    i--;
+                    //}
                     if (delStart == -1 && (content.slice(i, i + 2) == "<!" || content.slice(i, i + 2) == "<?")) {
                         delStart = i;
                     }

@@ -49,8 +49,9 @@ var $root = eval("this");
                         11: new StringValue(), //state
                         12: false, //absoluteState
                         13: this, //eventThis
-                        14: null };
-                    //layout
+                        14: null, //layout
+                        50: null };
+                    //[event] creationComplete
                     this.addUIComponentEvents();
                 };
 
@@ -179,6 +180,13 @@ var $root = eval("this");
                 p.onEXEAdded = function (e) {
                     if (this.onAddedEXE && e.target == this) {
                         this.onAddedEXE.call(this);
+                    }
+                };
+
+                p.$callUIComponentEvent = function (type) {
+                    var func = this.$UIComponent[type];
+                    if (func) {
+                        func.call(this.eventThis);
                     }
                 };
 
@@ -490,6 +498,22 @@ var $root = eval("this");
                     },
                     set: function set(val) {
                         this.$UIComponent[13] = val || this;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(p, "creationComplete", {
+                    get: function get() {
+                        return this.$UIComponent[50];
+                    },
+                    set: function set(val) {
+                        if (typeof val == "string") {
+                            var content = val;
+                            val = function val() {
+                                eval(content);
+                            };
+                        }
+                        this.$UIComponent[50] = val;
                     },
                     enumerable: true,
                     configurable: true
@@ -1765,6 +1789,7 @@ var $root = eval("this");
                 var loader = new flower.URLLoader(url);
                 loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
                 loader.addListener(flower.Event.ERROR, this.loadContentError, this);
+                loader.load();
                 this.parseUIAsyncFlag = true;
             }
         }, {
@@ -1773,6 +1798,7 @@ var $root = eval("this");
                 var loader = new flower.URLLoader(url);
                 loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
                 loader.addListener(flower.Event.ERROR, this.loadContentError, this);
+                loader.load();
                 this.parseUIAsyncFlag = false;
             }
         }, {
@@ -1858,7 +1884,9 @@ var $root = eval("this");
                     return new UIClass(data);
                 }
                 var ui = new UIClass();
-                this.addChild(ui);
+                if (!ui.parent) {
+                    this.addChild(ui);
+                }
                 return ui;
             }
         }, {
@@ -1951,6 +1979,7 @@ var $root = eval("this");
                     content += before + "\t\tthis." + className + "_init();\n";
                 }
                 content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
+                content += before + "\t\tthis.$callUIComponentEvent(50);\n";
                 content += before + "\t}\n\n";
                 content += propertyList[propertyList.length - 1];
                 for (var i = 0; i < propertyList.length - 1; i++) {

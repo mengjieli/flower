@@ -18,6 +18,7 @@ class UIComponent {
                 12: false, //absoluteState
                 13: this, //eventThis
                 14: null, //layout
+                50: null, //[event] creationComplete
             };
             this.addUIComponentEvents();
         }
@@ -145,6 +146,13 @@ class UIComponent {
         p.onEXEAdded = function (e) {
             if (this.onAddedEXE && e.target == this) {
                 this.onAddedEXE.call(this);
+            }
+        }
+
+        p.$callUIComponentEvent = function (type) {
+            var func = this.$UIComponent[type];
+            if (func) {
+                func.call(this.eventThis);
             }
         }
 
@@ -462,6 +470,22 @@ class UIComponent {
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(p, "creationComplete", {
+            get: function () {
+                return this.$UIComponent[50];
+            },
+            set: function (val) {
+                if (typeof val == "string") {
+                    var content = val;
+                    val = function () {
+                        eval(content);
+                    };
+                }
+                this.$UIComponent[50] = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(p, "onAddedToStage", {
             get: function () {
                 return this.onAddedEXE;
@@ -478,5 +502,6 @@ class UIComponent {
             enumerable: true,
             configurable: true
         });
+
     }
 }
