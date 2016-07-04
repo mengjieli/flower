@@ -1,8 +1,4 @@
 <f:Group creationComplete="this.start();" xmlns:f="flower">
-    <f:RectUI width="200" height="100"/>
-    <f:Button id="btn" onClick="this.btn.dispose();">
-        <f:Image x="200" source="res/qq.png"/>
-    </f:Button>
     <f:List id="list">
         <f:itemRenderer>
             <f:ItemRenderer>

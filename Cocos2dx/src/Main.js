@@ -64,11 +64,11 @@ var Main = function () {
             //    <f:RectUI percentWidth="100" percentHeight="100"/>
             //</f:Group>
             //`;
-            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:TabBar dataProvider=\"{viewStack}\">\n                <f:itemRenderer>\n                    <f:ItemRenderer width=\"100\" height=\"20\">\n                        <f:Label text=\"{this.data.text}\" color.up=\"0xff0000\" color.selectedUp=\"0x00ff00\" fontColor=\"0x00ff00\"/>\n                    </f:ItemRenderer>\n                </f:itemRenderer>\n            </f:TabBar>\n            <f:ViewStack x=\"50\" y=\"50\" id=\"viewStack\">\n                <f:Group>\n                    <f:RectUI width=\"100\" height=\"100\"/>\n                    <f:Label text=\"面板111111\" fontColor=\"0xffffff\"/>\n                </f:Group>\n                <f:Label text=\"面板2222\" fontColor=\"0xffffff\" fontSize=\"14\"/>\n                <f:Group id=\"g3\">\n                    <f:Button onClick=\"this.parent.removeChild(this);\">\n                        <f:Image source=\"res/font@100x100@cn@2.png\"/>\n                        <f:Label text=\"面板3\" fontColor=\"0xffffff\"/>\n                    </f:Button>\n                </f:Group>\n            </f:ViewStack>\n        </f:Group>\n        ";
+            var clazz = "\n        <f:Group xmlns:f=\"flower\">\n            <f:TabBar dataProvider=\"{viewStack}\">\n                <f:itemRenderer>\n                    <f:ItemRenderer width=\"100\" height=\"20\">\n                        <f:Label text=\"{this.data.text}\" color.up=\"0xff0000\" color.selectedUp=\"0x00ff00\" fontColor=\"0x00ff00\"/>\n                    </f:ItemRenderer>\n                </f:itemRenderer>\n            </f:TabBar>\n            <f:ViewStack x=\"50\" y=\"50\" id=\"viewStack\">\n                <f:Group>\n                    <f:RectUI width=\"100\" height=\"100\"/>\n                    <f:Label text=\"面板111111\" fontColor=\"0xffffff\"/>\n                </f:Group>\n                <f:Label text=\"面板2222\" fontColor=\"0xffffff\" fontSize=\"14\"/>\n                <f:Group id=\"g3\">\n                    <f:Button onClick=\"this.g3.dispose();\">\n                        <f:Image source=\"res/font@100x100@cn@2.png\"/>\n                        <f:Label text=\"面板3\" fontColor=\"0xffffff\"/>\n                    </f:Button>\n                </f:Group>\n            </f:ViewStack>\n        </f:Group>\n        ";
 
-            //var ui = new flower.UIParser();
-            //ui.parseUI(clazz);
-            //container.addChild(ui);
+            var ui = new flower.UIParser();
+            ui.parseUI(clazz);
+            container.addChild(ui);
 
             new flower.UIParser().parseUIAsync("res/debug/Debug.xml");
 
