@@ -41,7 +41,7 @@ function update(now, gap) {
     for (var i = 0; this.textures.length > i; i++) {
         find = false;
         for (var j = 0; textures.length > j; j++) {
-            if (this.textures.getItemAt(i).url.value == textures[i].url) {
+            if (this.textures.getItemAt(i).url.value == textures[j].url) {
                 find = true;
                 break;
             }

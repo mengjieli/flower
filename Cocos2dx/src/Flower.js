@@ -8137,22 +8137,36 @@ var flower = {};
                     return "";
                 }
                 var end = pos + 1;
+                var startPos;
+                var endPos;
+                var count = 0;
                 while (true) {
-                    var start = StringDo.findString(str, "{", end);
-                    if (start == -1) {
-                        break;
+                    var startPos = StringDo.findString(str, "{", end);
+                    var endPos = StringDo.findString(str, "}", end);
+                    if (startPos != -1 && endPos != -1) {
+                        if (startPos < endPos) {
+                            count++;
+                            end = startPos + 1;
+                        } else {
+                            count--;
+                            end = endPos + 1;
+                            if (count < 0) {
+                                break;
+                            }
+                        }
+                    } else if (startPos != -1) {
+                        return "";
+                    } else if (endPos != -1) {
+                        end = endPos + 1;
+                        count--;
+                        if (count < 0) {
+                            break;
+                        }
+                    } else {
+                        return "";
                     }
-                    var index = StringDo.findString(str, "}", end);
-                    if (index == -1 || index < start) {
-                        break;
-                    }
-                    end = index + 1;
                 }
-                end = StringDo.findString(str, "}", end);
-                if (end == -1) {
-                    return "";
-                }
-                return str.slice(pos, end + 1);
+                return str.slice(pos, end);
             }
 
             /**

@@ -2210,6 +2210,7 @@ var $root = eval("this");
                         sys.$error(3007, this.scriptURL, this.scriptContent);
                     }
                     if (name == "get" || name == "set") {
+                        pos += name.length;
                         gset = name == "get" ? 1 : 2;
                         //跳过 function 之后的分隔符
                         pos2 = flower.StringDo.jumpProgramSpace(content, pos);
@@ -2252,14 +2253,15 @@ var $root = eval("this");
                             }
                         } else {
                             params += name;
+                            pos += name.length;
                         }
                         //跳过空格
                         pos = flower.StringDo.jumpProgramSpace(content, pos);
                         char = content.charAt(pos);
                         if (char == ",") {
                             params += ",";
+                            pos++;
                         }
-                        pos++;
                     }
                     if (!flag) {
                         sys.$error(3007, this.scriptURL, this.scriptContent);
