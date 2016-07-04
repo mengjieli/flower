@@ -8036,6 +8036,19 @@ var flower = {};
                 return -1;
             }
         }, {
+            key: "findStrings",
+            value: function findStrings(content, _findStrings, begin) {
+                begin = begin || 0;
+                for (var i = begin; i < content.length; i++) {
+                    for (var j = 0; j < _findStrings.length; j++) {
+                        if (content.slice(i, i + _findStrings[j].length) == _findStrings[j]) {
+                            return i;
+                        }
+                    }
+                }
+                return -1;
+            }
+        }, {
             key: "jumpStrings",
             value: function jumpStrings(content, start, jumps) {
                 var pos = start;
@@ -8086,6 +8099,118 @@ var flower = {};
                     }
                 }
                 return false;
+            }
+        }, {
+            key: "findId",
+            value: function findId(str, pos) {
+                if (str.length <= pos) {
+                    return "";
+                }
+                var id = "";
+                var code;
+                for (var j = pos, len = str.length; j < len; j++) {
+                    code = str.charCodeAt(j);
+                    if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code == 95 || j != pos && code >= 48 && code <= 57) {
+                        id += str.charAt(j);
+                    } else {
+                        break;
+                    }
+                }
+                return id;
+            }
+
+            /**
+             * 分析函数体
+             * @param str
+             * @param pos
+             */
+
+        }, {
+            key: "findFunctionContent",
+            value: function findFunctionContent(str, pos) {
+                if (str.length <= pos) {
+                    return "";
+                }
+                //跳过程序空白
+                pos = StringDo.jumpProgramSpace(str, pos);
+                if (str.charAt(pos) != "{") {
+                    return "";
+                }
+                var end = pos + 1;
+                while (true) {
+                    var start = StringDo.findString(str, "{", end);
+                    if (start == -1) {
+                        break;
+                    }
+                    var index = StringDo.findString(str, "}", end);
+                    if (index == -1 || index < start) {
+                        break;
+                    }
+                    end = index + 1;
+                }
+                end = StringDo.findString(str, "}", end);
+                if (end == -1) {
+                    return "";
+                }
+                return str.slice(pos, end + 1);
+            }
+
+            /**
+             * 删除程序注释
+             * @param str
+             * @param pos
+             */
+
+        }, {
+            key: "deleteProgramNote",
+            value: function deleteProgramNote(str, pos) {
+                var end;
+                for (var len = str.length; pos < len; pos++) {
+                    if (str.slice(pos, pos + 2) == "//") {
+                        end = StringDo.findStrings(str, ["\r", "\n"], pos);
+                        str = str.slice(0, pos) + str.slice(end, str.length);
+                        len = str.length;
+                        pos--;
+                    } else if (str.slice(pos, pos + 2) == "/*") {
+                        end = StringDo.findString(str, "*/", pos);
+                        if (end == -1) {
+                            return len;
+                        }
+                        end += 2;
+                        while (true) {
+                            var nextStart = StringDo.findString(str, "/*", end);
+                            if (nextStart == -1) {
+                                nextStart = len;
+                            }
+                            var nextEnd = StringDo.findString(str, "*/", end);
+                            if (nextEnd == -1 || nextEnd > nextStart) {
+                                break;
+                            }
+                            end = nextEnd + 2;
+                        }
+                        str = str.slice(0, pos) + str.slice(end, str.length);
+                        len = str.length;
+                    }
+                }
+                return str;
+            }
+
+            /**
+             * 跳过程序空格，包含 " ","\t","\r","\n"
+             * @param str
+             * @param pos
+             */
+
+        }, {
+            key: "jumpProgramSpace",
+            value: function jumpProgramSpace(str, pos) {
+                for (var len = str.length; pos < len; pos++) {
+                    var char = str.charAt(pos);
+                    if (char == " " || char == "　" || char == "\t" || char == "\r" || char == "\n") {} else {
+                        break;
+                    }
+                }
+                return pos;
             }
         }]);
 

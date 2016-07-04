@@ -1220,6 +1220,7 @@ locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}
 locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
 locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
 locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
+locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
 locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
 locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
 locale_strings[3012] = "没有定义的数据结构 :{0}";
@@ -1626,6 +1627,9 @@ class UIParser extends Group {
     loadData;
     rootXML;
     hasInitFunction;
+    scriptURL;
+    scriptContent;
+    loadURL;
 
     constructor() {
         super();
@@ -1633,6 +1637,7 @@ class UIParser extends Group {
     }
 
     parseUIAsync(url, data = null) {
+        this.loadURL = url;
         this.loadData = data;
         var loader = new flower.URLLoader(url);
         loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
@@ -1642,6 +1647,7 @@ class UIParser extends Group {
     }
 
     parseAsync(url) {
+        this.loadURL = url;
         var loader = new flower.URLLoader(url);
         loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
         loader.addListener(flower.Event.ERROR, this.loadContentError, this);
@@ -1662,6 +1668,7 @@ class UIParser extends Group {
         var xml = flower.XMLElement.parse(e.data);
         this.loadContent = xml;
         var list = xml.getAllElements();
+        var scriptURL = "";
         for (var i = 0; i < list.length; i++) {
             var name = list[i].name;
             var nameSpace = name.split(":")[0];
@@ -1684,8 +1691,35 @@ class UIParser extends Group {
                     }
                 }
             }
+            if (nameSpace == "f" && name == "script" && list[i].getAttribute("src")) {
+                scriptURL = list[i].getAttribute("src").value;
+            }
         }
         this.relationIndex = 0;
+        if (scriptURL != "") {
+            if (scriptURL.slice(0, 2) == "./") {
+                if (this.loadURL.split("/").length == 1) {
+                    scriptURL = scriptURL.slice(2, scriptURL.length);
+                } else {
+                    scriptURL = this.loadURL.slice(0, this.loadURL.length - this.loadURL.split("/")[this.loadURL.split("/").length - 1].length) + scriptURL.slice(2, scriptURL.length);
+                }
+            }
+            this.loadScript(scriptURL);
+        } else {
+            this.loadNextRelationUI();
+        }
+    }
+
+    loadScript(url) {
+        this.scriptURL = url;
+        var loader = new flower.URLLoader(url);
+        loader.addListener(flower.Event.COMPLETE, this.loadScriptComplete, this);
+        loader.addListener(flower.IOErrorEvent.ERROR, this.loadContentError, this);
+        loader.load();
+    }
+
+    loadScriptComplete(e) {
+        this.scriptContent = e.data;
         this.loadNextRelationUI();
     }
 
@@ -1699,10 +1733,10 @@ class UIParser extends Group {
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
                 var ui = this.parseUI(this.loadContent, this.loadData);
-                this.dispatchWidth(Event.COMPLETE, ui);
+                //this.dispatchWidth(Event.COMPLETE, ui);
             } else {
                 var data = this.parse(this.loadContent);
-                this.dispatchWidth(Event.COMPLETE, data);
+                //this.dispatchWidth(Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
@@ -1727,7 +1761,7 @@ class UIParser extends Group {
             return new UIClass(data);
         }
         var ui = new UIClass();
-        if(!ui.parent) {
+        if (!ui.parent) {
             this.addChild(ui);
         }
         return ui;
@@ -1873,48 +1907,224 @@ class UIParser extends Group {
 
     decodeScripts(before, className, scripts, script) {
         var content = "";
-        for (var i = 0; i < scripts.length; i++) {
-            for (var s = 0; s < scripts[i].list.length; s++) {
-                var item = scripts[i].list[s];
-                var childName = item.name;
-                childName = childName.split(":")[1];
-                if (item.list.length && item.getElement("f:set") || item.getElement("f:get")) {
-                    var setFunction = item.getElement("f:set");
-                    var getFunction = item.getElement("f:get");
-                    script.content += before + "\tObject.defineProperty(" + className + ".prototype, \"" + childName + "\", {\n";
-                    if (getFunction) {
-                        script.content += "\t\tget: function () {\n"
-                        script.content += "\t\t\t" + getFunction.value + "\n";
-                        script.content += "\t\t},\n";
+        if (this.scriptContent && this.scriptContent != "") {
+            var scriptContent = this.scriptContent;
+            //删除注释
+            scriptContent = flower.StringDo.deleteProgramNote(scriptContent, 0);
+            var i = 0;
+            var len = scriptContent.length;
+            var pos = 0;
+            var list = [];
+            while (true) {
+                var nextFunction = this.findNextFunction(scriptContent, pos);
+                if (nextFunction) {
+                    pos = nextFunction.endIndex;
+                    list.push(nextFunction);
+                } else {
+                    break;
+                }
+            }
+            for (var i = 0; i < list.length; i++) {
+                var func = list[i];
+                if (func.gset == 0) {
+                    script.content += before + "\t" + className + ".prototype." + func.name + " = function(" +
+                        func.params + ") " + func.content + "\n";
+                } else {
+                    var setContent = func.gset == 1 ? "" : func.content;
+                    var getContent = func.gset == 1 ? func.content : "";
+                    var prams = func.gset == 1 ? "" : func.params;
+                    for (var f = 0; f < list.length; f++) {
+                        if (f != i && list[f].name == func.name && list[f].gset && list[f].gset != func.gset) {
+                            if (list[f].gset == 1) {
+                                getContent = list[f].content;
+                            } else {
+                                setContent = list[f].content;
+                                prams = list[f].params;
+                            }
+                            list.splice(f, 1);
+                            break;
+                        }
                     }
-                    if (setFunction) {
-                        script.content += "\t\tset: function (val) {\n";
-                        script.content += "\t\t\t" + setFunction.value + "\n";
-                        script.content += "\t\t},\n";
+                    script.content += before + "\tObject.defineProperty(" + className + ".prototype, \"" + func.name + "\", {\n";
+                    if (getContent != "") {
+                        script.content += "\t\tget: function () " + getContent + ",\n";
+                    }
+                    if (setContent != "") {
+                        script.content += "\t\tset: function (" + prams + ") " + setContent + ",\n";
                     }
                     script.content += "\t\tenumerable: true,\n"
                     script.content += "\t\tconfigurable: true\n";
                     script.content += "\t\t});\n\n";
-                } else if (item.value == null || item.value == "") {
-                    var initValue = item.getAttribute("init");
-                    content += before + "\t\tthis." + childName + " = " + (initValue == null ? "null" : initValue.value) + ";\n";
-                } else {
-                    if (childName == "init") {
-                        childName = className + "_" + childName;
-                        this.hasInitFunction = true;
+                }
+            }
+        } else {
+            for (var i = 0; i < scripts.length; i++) {
+                for (var s = 0; s < scripts[i].list.length; s++) {
+                    var item = scripts[i].list[s];
+                    var childName = item.name;
+                    childName = childName.split(":")[1];
+                    if (item.list.length && item.getElement("f:set") || item.getElement("f:get")) {
+                        var setFunction = item.getElement("f:set");
+                        var getFunction = item.getElement("f:get");
+                        script.content += before + "\tObject.defineProperty(" + className + ".prototype, \"" + childName + "\", {\n";
+                        if (getFunction) {
+                            script.content += "\t\tget: function () {\n"
+                            script.content += "\t\t\t" + getFunction.value + "\n";
+                            script.content += "\t\t},\n";
+                        }
+                        if (setFunction) {
+                            script.content += "\t\tset: function (val) {\n";
+                            script.content += "\t\t\t" + setFunction.value + "\n";
+                            script.content += "\t\t},\n";
+                        }
+                        script.content += "\t\tenumerable: true,\n"
+                        script.content += "\t\tconfigurable: true\n";
+                        script.content += "\t\t});\n\n";
+                    } else if (item.value == null || item.value == "") {
+                        var initValue = item.getAttribute("init");
+                        content += before + "\t\tthis." + childName + " = " + (initValue == null ? "null" : initValue.value) + ";\n";
+                    } else {
+                        if (childName == "init") {
+                            childName = className + "_" + childName;
+                            this.hasInitFunction = true;
+                        }
+                        script.content += before + "\t" + className + ".prototype." + childName + " = function(";
+                        var params = item.getAttribute("params");
+                        if (params) {
+                            script.content += params.value;
+                        }
+                        script.content += ") {\n";
+                        script.content += "\t\t" + item.value;
+                        script.content += "\t}\n\n";
                     }
-                    script.content += before + "\t" + className + ".prototype." + childName + " = function(";
-                    var params = item.getAttribute("params");
-                    if (params) {
-                        script.content += params.value;
-                    }
-                    script.content += ") {\n";
-                    script.content += "\t\t" + item.value;
-                    script.content += "\t}\n\n";
                 }
             }
         }
         return content;
+    }
+
+    /**
+     * 查找下一个函数，并分析出 函数名和参数列表
+     * @param content
+     * @param start
+     * @return {
+     *      name : 函数名
+     *      gset : 0.普通函数 1.get函数 2.set函数
+     *      params : 参数列表 (也是字符串，直接用就可以)
+     *      content : 函数体
+     *      endIndex : 函数体结束标识 } 之后的那个位置
+     * }
+     */
+    findNextFunction(content, start) {
+        var len = "function".length;
+        var flag;
+        var name;
+        var params;
+        var char;
+        var pos, pos2, i;
+        var res;
+        var gset = 0;
+        var funcName;
+        //跳过空格和注释
+        i = flower.StringDo.jumpProgramSpace(content, start);
+        if (i == content.length) {
+            return null;
+        }
+        if (content.slice(i, i + len) == "function") {
+            if (i != 0) {
+                //判断 function 之前是不是分隔符
+                char = content.charAt(i - 1);
+                if (char != "\t" && char != " " && char != "\r" && char != "\n") {
+                    sys.$error(3007, this.scriptURL, this.scriptContent);
+                }
+            }
+            i = pos = i + len;
+            //跳过 function 之后的分隔符
+            pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+            if (pos2 == pos) {
+                sys.$error(3007, this.scriptURL, this.scriptContent);
+            }
+            pos = pos2;
+            //获取 function 之后的函数名
+            name = flower.StringDo.findId(content, pos);
+            if (name == "") {
+                i = pos;
+                sys.$error(3007, this.scriptURL, this.scriptContent);
+            }
+            if (name == "get" || name == "set") {
+                gset = name == "get" ? 1 : 2;
+                //跳过 function 之后的分隔符
+                pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+                if (pos2 == pos) {
+                    sys.$error(3007, this.scriptURL, this.scriptContent);
+                }
+                pos = pos2;
+                //获取 function 之后的函数名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    i = pos;
+                    sys.$error(3007, this.scriptURL, this.scriptContent);
+                }
+            }
+            funcName = name;
+            //跳过函数名之后的分隔符
+            i = pos = flower.StringDo.jumpProgramSpace(content, pos + name.length);
+            //判断函数名之后是不是(
+            char = content.charAt(pos);
+            if (char != "(") {
+                sys.$error(3007, this.scriptURL, this.scriptContent);
+            }
+            //跳过 (
+            pos++;
+            //查找 params
+            params = "";
+            flag = true;
+            while (true) {
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                //查找 param 名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    if (content.charAt(pos) == ")") {
+                        i = pos + 1;
+                        break;
+                    } else {
+                        flag = false;
+                        break;
+                    }
+                } else {
+                    params += name;
+                }
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                char = content.charAt(pos);
+                if (char == ",") {
+                    params += ",";
+                }
+                pos++;
+            }
+            if (!flag) {
+                sys.$error(3007, this.scriptURL, this.scriptContent);
+            }
+            res = {
+                name: funcName,
+                gset: gset,
+                params: params,
+            }
+        }
+        if (!res) {
+            sys.$error(3007, this.scriptURL, this.scriptContent);
+        }
+
+        //分析函数体
+        //跳过空格
+        var content = flower.StringDo.findFunctionContent(content, i);
+        if (content == "") {
+            sys.$error(3007, this.scriptURL, this.scriptContent);
+        }
+        res.content = content;
+        res.endIndex = i + content.length + 1;
+        return res;
     }
 
     decodeObject(before, className, funcName, createClass, xml, hasLocalNS, propertyFunc, nameIndex) {
