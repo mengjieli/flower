@@ -58,7 +58,9 @@ class TextureManager {
             if (texture.$count == 0) {
                 if (texture.dispose()) {
                     this.list.splice(i, 1);
-                    DebugInfo.getInstance().delTexture(texture);
+                    if (DEBUG) {
+                        DebugInfo.getInstance().delTexture(texture);
+                    }
                     i--;
                 }
             }

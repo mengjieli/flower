@@ -35,8 +35,10 @@ class DataGroup extends Group {
     }
 
     $addFlags(flags) {
-        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
-            this.__flags |= 0x1000;
+        if ((flags & 0x0001) == 0x0001) {
+            if ((this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                this.__flags |= 0x1000;
+            }
             if (this.layout) {
                 this.__flags |= 0x2000;
             }
@@ -147,6 +149,7 @@ class DataGroup extends Group {
                 this._canSelecteItem();
             }
         }
+        super.$onFrameEnd();
         if (measureSize) {
             if (!this._viewer || !this.layout || !this.layout.fixElementSize) {
                 var size = this.layout.getContentSize();
@@ -161,7 +164,6 @@ class DataGroup extends Group {
                 flower.Size.release(size);
             }
         }
-        super.$onFrameEnd();
     }
 
     createItem(data, index) {

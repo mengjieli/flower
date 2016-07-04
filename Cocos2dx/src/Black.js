@@ -1853,9 +1853,11 @@ var $root = eval("this");
                 }
                 if (this.relationIndex >= this.relationUI.length) {
                     if (this.parseUIAsyncFlag) {
-                        this.dispatchWidth(Event.COMPLETE, this.parseUI(this.loadContent, this.loadData));
+                        var ui = this.parseUI(this.loadContent, this.loadData);
+                        this.dispatchWidth(Event.COMPLETE, ui);
                     } else {
-                        this.dispatchWidth(Event.COMPLETE, this.parse(this.loadContent));
+                        var data = this.parse(this.loadContent);
+                        this.dispatchWidth(Event.COMPLETE, data);
                     }
                 } else {
                     var parser = new UIParser();
@@ -2345,8 +2347,10 @@ var $root = eval("this");
         }, {
             key: "$addFlags",
             value: function $addFlags(flags) {
-                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
-                    this.__flags |= 0x1000;
+                if ((flags & 0x0001) == 0x0001) {
+                    if ((this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                        this.__flags |= 0x1000;
+                    }
                     if (this.layout) {
                         this.__flags |= 0x2000;
                     }
@@ -2458,6 +2462,7 @@ var $root = eval("this");
                         this._canSelecteItem();
                     }
                 }
+                _get(Object.getPrototypeOf(DataGroup.prototype), "$onFrameEnd", this).call(this);
                 if (measureSize) {
                     if (!this._viewer || !this.layout || !this.layout.fixElementSize) {
                         var size = this.layout.getContentSize();
@@ -2471,7 +2476,6 @@ var $root = eval("this");
                         flower.Size.release(size);
                     }
                 }
-                _get(Object.getPrototypeOf(DataGroup.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
             key: "createItem",

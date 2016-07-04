@@ -1235,8 +1235,8 @@ var $root = eval("this");
                             }
                             if (lastEnd < i) {
                                 this.stmts.push(content.slice(lastEnd, i));
-                                lastEnd = j + 1;
                             }
+                            lastEnd = j + 1;
                             var stmt = Compiler.parserExpr(content.slice(i + 1, j), checks, { "this": thisObj }, {
                                 "Tween": flower.Tween,
                                 "Ease": flower.Ease

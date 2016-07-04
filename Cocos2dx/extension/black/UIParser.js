@@ -134,9 +134,11 @@ class UIParser extends Group {
         }
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
-                this.dispatchWidth(Event.COMPLETE, this.parseUI(this.loadContent, this.loadData));
+                var ui = this.parseUI(this.loadContent, this.loadData);
+                this.dispatchWidth(Event.COMPLETE, ui);
             } else {
-                this.dispatchWidth(Event.COMPLETE, this.parse(this.loadContent));
+                var data = this.parse(this.loadContent);
+                this.dispatchWidth(Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();

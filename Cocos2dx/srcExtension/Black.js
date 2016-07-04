@@ -1698,9 +1698,11 @@ class UIParser extends Group {
         }
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
-                this.dispatchWidth(Event.COMPLETE, this.parseUI(this.loadContent, this.loadData));
+                var ui = this.parseUI(this.loadContent, this.loadData);
+                this.dispatchWidth(Event.COMPLETE, ui);
             } else {
-                this.dispatchWidth(Event.COMPLETE, this.parse(this.loadContent));
+                var data = this.parse(this.loadContent);
+                this.dispatchWidth(Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
@@ -2125,8 +2127,10 @@ class DataGroup extends Group {
     }
 
     $addFlags(flags) {
-        if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
-            this.__flags |= 0x1000;
+        if ((flags & 0x0001) == 0x0001) {
+            if ((this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
+                this.__flags |= 0x1000;
+            }
             if (this.layout) {
                 this.__flags |= 0x2000;
             }
@@ -2237,6 +2241,7 @@ class DataGroup extends Group {
                 this._canSelecteItem();
             }
         }
+        super.$onFrameEnd();
         if (measureSize) {
             if (!this._viewer || !this.layout || !this.layout.fixElementSize) {
                 var size = this.layout.getContentSize();
@@ -2251,7 +2256,6 @@ class DataGroup extends Group {
                 flower.Size.release(size);
             }
         }
-        super.$onFrameEnd();
     }
 
     createItem(data, index) {

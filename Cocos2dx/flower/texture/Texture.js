@@ -138,7 +138,7 @@ class Texture {
     }
 
     get count() {
-        return this.count;
+        return this.$count;
     }
 
     /**

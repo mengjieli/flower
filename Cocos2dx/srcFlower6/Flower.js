@@ -1131,7 +1131,8 @@ class PlatformURLLoader {
             xhr.send();
         } else {
             var res;
-            if(url.split(".")[url.split(".").length - 1] != "plist") {
+            var end = url.split(".")[url.split(".").length - 1];
+            if (end != "plist" && end != "xml" && end != "json") {
                 res = cc.loader.getRes(url);
             }
             if (res) {
@@ -4713,7 +4714,7 @@ class Texture {
     }
 
     get count() {
-        return this.count;
+        return this.$count;
     }
 
     /**
@@ -4808,7 +4809,9 @@ class TextureManager {
             if (texture.$count == 0) {
                 if (texture.dispose()) {
                     this.list.splice(i, 1);
-                    DebugInfo.getInstance().delTexture(texture);
+                    if (DEBUG) {
+                        DebugInfo.getInstance().delTexture(texture);
+                    }
                     i--;
                 }
             }

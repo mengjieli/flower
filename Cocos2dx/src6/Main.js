@@ -79,9 +79,9 @@ class Main {
         </f:Group>
         `;
 
-        var ui = new flower.UIParser();
-        ui.parseUI(clazz);
-        container.addChild(ui);
+        //var ui = new flower.UIParser();
+        //ui.parseUI(clazz);
+        //container.addChild(ui);
 
         (new flower.UIParser()).parseUIAsync("res/debug/Debug.xml");
 

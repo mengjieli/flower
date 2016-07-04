@@ -27,7 +27,8 @@ class PlatformURLLoader {
             xhr.send();
         } else {
             var res;
-            if(url.split(".")[url.split(".").length - 1] != "plist") {
+            var end = url.split(".")[url.split(".").length - 1];
+            if (end != "plist" && end != "xml" && end != "json") {
                 res = cc.loader.getRes(url);
             }
             if (res) {
