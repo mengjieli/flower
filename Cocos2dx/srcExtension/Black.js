@@ -11,7 +11,20 @@ for (var key in flower.sys) {
 
 
 //////////////////////////File:extension/black/core/UIComponent.js///////////////////////////
+/**
+ * Event:
+ * 1000 creationComplete
+ * 1001 add
+ * 1002 addToStage
+ * 1003 remove
+ * 1004 removeFromStage
+ * 1020 touchBegin
+ * 1021 touchEnd
+ * 1022 touchRelease
+ * 1100 click
+ */
 class UIComponent {
+
     static register(clazz, isContainer = false) {
         var p = clazz.prototype;
         p.$initUIComponent = function () {
@@ -31,9 +44,15 @@ class UIComponent {
                 12: false, //absoluteState
                 13: this, //eventThis
                 14: null, //layout
-                50: null, //[event] creationComplete
             };
-            this.addUIComponentEvents();
+            UIComponent.registerEvent(clazz, 1000, "creationComplete", UIEvent.CREATION_COMPLETE);
+            UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
+            UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
+            UIComponent.registerEvent(clazz, 1003, "remove", flower.Event.REMOVED);
+            UIComponent.registerEvent(clazz, 1004, "removeFromStage", flower.Event.REMOVED_FROM_STAGE);
+            UIComponent.registerEvent(clazz, 1020, "touchBegin", flower.TouchEvent.TOUCH_BEGIN);
+            UIComponent.registerEvent(clazz, 1021, "touchEnd", flower.TouchEvent.TOUCH_END);
+            UIComponent.registerEvent(clazz, 1022, "touchRelease", flower.TouchEvent.TOUCH_RELEASE);
         }
 
         if (isContainer) {
@@ -91,11 +110,6 @@ class UIComponent {
                     this.layout.setElementIndex(child, index);
                 }
             }
-        }
-
-
-        p.addUIComponentEvents = function () {
-            this.addListener(flower.Event.ADDED_TO_STAGE, this.onEXEAdded, this);
         }
 
         p.bindProperty = function (property, content, checks = null) {
@@ -156,30 +170,12 @@ class UIComponent {
             return this.currentState;
         }
 
-        p.onEXEAdded = function (e) {
-            if (this.onAddedEXE && e.target == this) {
-                this.onAddedEXE.call(this);
-            }
-        }
-
         p.$callUIComponentEvent = function (type) {
             var func = this.$UIComponent[type];
             if (func) {
                 func.call(this.eventThis);
             }
         }
-
-        //p.$getWidth = function () {
-        //    var p = this.$UIComponent;
-        //    var d = this.$DisplayObject;
-        //    return p[9] != null ? p[9] : (d[3] != null ? d[3] : this.$getContentBounds().width);
-        //}
-        //
-        //p.$getHeight = function () {
-        //    var p = this.$UIComponent;
-        //    var d = this.$DisplayObject;
-        //    return p[10] != null ? p[10] : (d[4] != null ? d[4] : this.$getContentBounds().height);
-        //}
 
         p.$setLeft = function (val) {
             val = +val || 0;
@@ -260,24 +256,6 @@ class UIComponent {
             p[7] = val;
             this.$invalidateContentBounds();
         }
-
-        //p.$setUIWidth = function (val) {
-        //    var p = this.$UIComponent;
-        //    if (p[8] == val) {
-        //        return;
-        //    }
-        //    p[8] = val;
-        //    this.$invalidatePosition();
-        //}
-        //
-        //p.$setUIHeight = function (val) {
-        //    var p = this.$UIComponent;
-        //    if (p[9] == val) {
-        //        return;
-        //    }
-        //    p[9] = val;
-        //    this.$invalidatePosition();
-        //}
 
         /**
          * 验证 UI 属性
@@ -483,9 +461,13 @@ class UIComponent {
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(p, "creationComplete", {
+    }
+
+    static registerEvent = function (clazz, index, name, eventType) {
+        var p = clazz.prototype;
+        Object.defineProperty(p, name, {
             get: function () {
-                return this.$UIComponent[50];
+                return this.$UIComponent[index];
             },
             set: function (val) {
                 if (typeof val == "string") {
@@ -494,31 +476,38 @@ class UIComponent {
                         eval(content);
                     };
                 }
-                this.$UIComponent[50] = val;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(p, "onAddedToStage", {
-            get: function () {
-                return this.onAddedEXE;
-            },
-            set: function (val) {
-                if (typeof val == "string") {
-                    var content = val;
-                    val = function () {
-                        eval(content);
-                    }.bind(this.eventThis);
+                this.$UIComponent[index] = val;
+                if (val) {
+                    if (!this.$UIComponent[1000 + index]) {
+                        this.$UIComponent[1000 + index] = function () {
+                            this.$callUIComponentEvent(index);
+                        };
+                        this.addListener(eventType, this.$UIComponent[1000 + index], this);
+                    }
                 }
-                this.onAddedEXE = val;
             },
             enumerable: true,
             configurable: true
         });
-
     }
 }
+
+black.UIComponent = UIComponent;
 //////////////////////////End File:extension/black/core/UIComponent.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/events/UIEvent.js///////////////////////////
+class UIEvent extends flower.Event {
+    constructor(type, bubbles = false) {
+        super(type, bubbles);
+    }
+
+    static CREATION_COMPLETE = "creation_complete";
+}
+
+black.UIEvent = UIEvent;
+//////////////////////////End File:extension/black/events/UIEvent.js///////////////////////////
 
 
 
@@ -1859,7 +1848,7 @@ class UIParser extends Group {
             content += before + "\t\tthis." + className + "_init();\n";
         }
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tthis.$callUIComponentEvent(50);\n";
+        content += before + "\t\tthis.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
@@ -3140,6 +3129,7 @@ class Button extends Group {
         super();
         this.absoluteState = true;
         this.currentState = "up";
+
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouch, this);
@@ -3190,34 +3180,9 @@ class Button extends Group {
     get enabled() {
         return this._enabled;
     }
-
-    addUIComponentEvents() {
-        super.addUIComponentEvents();
-        this.addListener(flower.TouchEvent.TOUCH_END, this.onEXEClick, this);
-    }
-
-    onClickEXE;
-
-    set onClick(val) {
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
-        }
-        this.onClickEXE = val;
-    }
-
-    get onClick() {
-        return this.onClickEXE;
-    }
-
-    onEXEClick(e) {
-        if (this.onClickEXE && e.target == this) {
-            this.onClickEXE.call(this);
-        }
-    }
 }
+
+UIComponent.registerEvent(Button, 1100, "click", flower.TouchEvent.TOUCH_END);
 
 black.Button = Button;
 //////////////////////////End File:extension/black/Button.js///////////////////////////
@@ -3652,6 +3617,11 @@ class ViewStack extends Group {
         return null;
     }
 
+    $removeChild(display) {
+        super.$removeChild(display);
+        this.removeChild(display);
+    }
+
     removeChildAt(index) {
         var display = this._items.splice(index, 1)[0];
         if (display == this._selectedItem) {
@@ -3704,7 +3674,7 @@ class ViewStack extends Group {
         if (item) {
             this._selectedItem = item;
             this._selectedIndex = val;
-            super.addChildAt(this._selectedItem,this.numChildren);
+            super.addChildAt(this._selectedItem, this.numChildren);
         }
     }
 

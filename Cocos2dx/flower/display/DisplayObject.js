@@ -492,6 +492,23 @@ class DisplayObject extends EventDispatcher {
         }
     }
 
+    localToGlobal(point) {
+        point = point || new flower.Point();
+        var matrix;
+        var display = this;
+        while (display) {
+            matrix = display.$getMatrix();
+            matrix.transformPoint(point.x, point.y, point);
+            display = display.parent;
+        }
+        return point;
+    }
+
+    startDrag(dragSprite = null, dragType = "", dragData = null) {
+        var point = this.localToGlobal(flower.Point.create());
+        DragManager.startDrag(point.x, point.y, this, dragSprite, dragType, dragData);
+    }
+
     dispose() {
         if (this.parent) {
             this.parent.removeChild(this);
@@ -590,7 +607,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     set touchEnabled(val) {
-        this.$setTouchEnabeld(val);
+        this.$setTouchEnabled(val);
     }
 
     get multiplyTouchEnabled() {

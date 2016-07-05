@@ -61,6 +61,11 @@ class ViewStack extends Group {
         return null;
     }
 
+    $removeChild(display) {
+        super.$removeChild(display);
+        this.removeChild(display);
+    }
+
     removeChildAt(index) {
         var display = this._items.splice(index, 1)[0];
         if (display == this._selectedItem) {
@@ -113,7 +118,7 @@ class ViewStack extends Group {
         if (item) {
             this._selectedItem = item;
             this._selectedIndex = val;
-            super.addChildAt(this._selectedItem,this.numChildren);
+            super.addChildAt(this._selectedItem, this.numChildren);
         }
     }
 

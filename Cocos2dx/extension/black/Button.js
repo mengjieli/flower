@@ -6,6 +6,7 @@ class Button extends Group {
         super();
         this.absoluteState = true;
         this.currentState = "up";
+
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouch, this);
@@ -56,33 +57,8 @@ class Button extends Group {
     get enabled() {
         return this._enabled;
     }
-
-    addUIComponentEvents() {
-        super.addUIComponentEvents();
-        this.addListener(flower.TouchEvent.TOUCH_END, this.onEXEClick, this);
-    }
-
-    onClickEXE;
-
-    set onClick(val) {
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
-        }
-        this.onClickEXE = val;
-    }
-
-    get onClick() {
-        return this.onClickEXE;
-    }
-
-    onEXEClick(e) {
-        if (this.onClickEXE && e.target == this) {
-            this.onClickEXE.call(this);
-        }
-    }
 }
+
+UIComponent.registerEvent(Button, 1100, "click", flower.TouchEvent.TOUCH_END);
 
 exports.Button = Button;

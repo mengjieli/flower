@@ -1806,6 +1806,64 @@ flower.MouseEvent = MouseEvent;
 
 
 
+//////////////////////////File:flower/event/DragEvent.js///////////////////////////
+class DragEvent extends Event {
+
+    //DisplayObject
+    $dragSource;
+    $dragType;
+    $accept = false;
+
+    constructor(type, bubbles = true) {
+        super(type, bubbles);
+    }
+
+    get dragSource() {
+        return this.$dragSource;
+    }
+
+    get dragType() {
+        return this.$dragType;
+    }
+
+    get hasAccept() {
+        return this.$accept;
+    }
+
+    accept() {
+        this.$accept = true;
+    }
+
+    static DRAG_OVER = "drag_over";
+    static DRAG_OUT = "drag_out";
+    static DRAG_END = "drag_end";
+
+    static $Pools = [];
+
+    static create(type, bubbles, dragSource, dragType, dragData) {
+        var event = DragEvent.$Pools.pop();
+        if (!event) {
+            event = new DragEvent(type, bubbles);
+        } else {
+            event.$type = type;
+            event.$bubbles = bubbles;
+        }
+        event.data = dragData;
+        event.$dragSource = dragSource;
+        event.$dragType = dragType;
+        return event;
+    }
+
+    static release(e) {
+        DragEvent.$Pools.push(e);
+    }
+}
+
+flower.DragEvent = DragEvent;
+//////////////////////////End File:flower/event/DragEvent.js///////////////////////////
+
+
+
 //////////////////////////File:flower/event/IOErrorEvent.js///////////////////////////
 class IOErrorEvent extends Event {
 
@@ -2969,6 +3027,23 @@ class DisplayObject extends EventDispatcher {
         }
     }
 
+    localToGlobal(point) {
+        point = point || new flower.Point();
+        var matrix;
+        var display = this;
+        while (display) {
+            matrix = display.$getMatrix();
+            matrix.transformPoint(point.x, point.y, point);
+            display = display.parent;
+        }
+        return point;
+    }
+
+    startDrag(dragSprite = null, dragType = "", dragData = null) {
+        var point = this.localToGlobal(flower.Point.create());
+        DragManager.startDrag(point.x, point.y, this, dragSprite, dragType, dragData);
+    }
+
     dispose() {
         if (this.parent) {
             this.parent.removeChild(this);
@@ -3067,7 +3142,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     set touchEnabled(val) {
-        this.$setTouchEnabeld(val);
+        this.$setTouchEnabled(val);
     }
 
     get multiplyTouchEnabled() {
@@ -4279,13 +4354,17 @@ flower.Shape = Shape;
 //////////////////////////File:flower/display/Stage.js///////////////////////////
 class Stage extends Sprite {
 
-    $debugSprite = new Sprite();
+    $debugSprite
+    $drag;
 
     constructor() {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.$debugSprite = new Sprite();
         this.addChild(this.$debugSprite);
+        this.$drag = DragManager.getInstance();
+        this.addChild(this.$drag);
     }
 
     get stageWidth() {
@@ -4298,8 +4377,9 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && index == this.numChildren - 1) {
+        if (child != this.$debugSprite && child != this.$drag) {
             this.addChild(this.$debugSprite);
+            this.addChild(this.$drag);
         }
     }
 
@@ -4307,6 +4387,7 @@ class Stage extends Sprite {
     __nativeMouseMoveEvent = [];
     __nativeTouchEvent = [];
     __mouseOverList = [this];
+    __dragOverList = [this];
     __touchList = [];
     __lastMouseX = -1;
     __lastMouseY = -1;
@@ -4396,60 +4477,108 @@ class Stage extends Sprite {
     $onMouseMove(x, y) {
         var target = this.$getMouseTarget(x, y, false);
         var parent = target.parent;
-        var list = [];
-        if (target) {
-            list.push(target);
-        }
-        while (parent && parent != this) {
-            list.push(parent);
-            parent = parent.parent;
-        }
         var event;
-        for (var i = 0; i < list.length; i++) {
-            var find = false;
-            for (var j = 0; j < this.__mouseOverList.length; j++) {
-                if (list[i] == this.__mouseOverList[j]) {
-                    find = true;
-                    break;
-                }
+        var list = [];
+        this.$drag.$updatePosition(x, y);
+        if (this.$drag.isDragging) {
+            if (target) {
+                list.push(target);
             }
-            if (!find) {
-                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER, false);
-                event.$stageX = x;
-                event.$stageY = y;
-                event.$target = target;
-                event.$touchX = list[i].lastTouchX;
-                event.$touchY = list[i].lastTouchY;
-                list[i].dispatch(event);
+            while (parent && parent != this) {
+                list.push(parent);
+                parent = parent.parent;
             }
-        }
-        for (var j = 0; j < this.__mouseOverList.length; j++) {
-            var find = false;
             for (var i = 0; i < list.length; i++) {
-                if (list[i] == this.__mouseOverList[j]) {
-                    find = true;
-                    break;
+                var find = false;
+                for (var j = 0; j < this.__dragOverList.length; j++) {
+                    if (list[i] == this.__dragOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.DragEvent(flower.DragEvent.DRAG_OVER, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = list[i].lastTouchX;
+                    event.$touchY = list[i].lastTouchY;
+                    list[i].dispatch(event);
                 }
             }
-            if (!find) {
-                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT, false);
+            for (var j = 0; j < this.__dragOverList.length; j++) {
+                var find = false;
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] == this.__dragOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.DragEvent(flower.DragEvent.DRAG_OUT, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = this.__dragOverList[j].lastTouchX;
+                    event.$touchY = this.__dragOverList[j].lastTouchY;
+                    this.__dragOverList[j].dispatch(event);
+                }
+            }
+            this.__dragOverList = list;
+        } else {
+            if (target) {
+                list.push(target);
+            }
+            while (parent && parent != this) {
+                list.push(parent);
+                parent = parent.parent;
+            }
+            for (var i = 0; i < list.length; i++) {
+                var find = false;
+                for (var j = 0; j < this.__mouseOverList.length; j++) {
+                    if (list[i] == this.__mouseOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = list[i].lastTouchX;
+                    event.$touchY = list[i].lastTouchY;
+                    list[i].dispatch(event);
+                }
+            }
+            for (var j = 0; j < this.__mouseOverList.length; j++) {
+                var find = false;
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] == this.__mouseOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = this.__mouseOverList[j].lastTouchX;
+                    event.$touchY = this.__mouseOverList[j].lastTouchY;
+                    this.__mouseOverList[j].dispatch(event);
+                }
+            }
+            this.__mouseOverList = list;
+            if (target) {
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_MOVE);
                 event.$stageX = x;
                 event.$stageY = y;
                 event.$target = target;
-                event.$touchX = this.__mouseOverList[j].lastTouchX;
-                event.$touchY = this.__mouseOverList[j].lastTouchY;
-                this.__mouseOverList[j].dispatch(event);
+                event.$touchX = target.lastTouchX;
+                event.$touchY = target.lastTouchY;
+                target.dispatch(event);
             }
-        }
-        this.__mouseOverList = list;
-        if (target) {
-            event = new flower.MouseEvent(flower.MouseEvent.MOUSE_MOVE);
-            event.$stageX = x;
-            event.$stageY = y;
-            event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
-            target.dispatch(event);
         }
     }
 
@@ -4508,6 +4637,9 @@ class Stage extends Sprite {
             mouse.target = this;
         }
         var target = this.$getMouseTarget(x, y, mouse.mutiply);
+        if (this.$drag.isDragging) {
+            this.$drag.$dragEnd(target);
+        }
         var event;
         if (target == mouse.target) {
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);
@@ -4518,8 +4650,7 @@ class Stage extends Sprite {
             event.$touchX = target.lastTouchX;
             event.$touchY = target.lastTouchY;
             target.dispatch(event);
-        }
-        else {
+        } else {
             target = mouse.target;
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_RELEASE);
             event.$touchId = id;
@@ -4584,6 +4715,110 @@ class Stage extends Sprite {
 
 flower.Stage = Stage;
 //////////////////////////End File:flower/display/Stage.js///////////////////////////
+
+
+
+//////////////////////////File:flower/manager/DragManager.js///////////////////////////
+class DragManager extends Sprite {
+
+    dragSource;
+    dragSprite;
+    dragType;
+    dragData;
+    __isDragging = false;
+    __dragStartX;
+    __dragStartY;
+    __dragSourceX;
+    __dragSourceY;
+    __mouseX;
+    __mouseY;
+
+    constructor() {
+        super();
+        this.touchEnabled = false;
+    }
+
+    startDrag(startX, startY, dragSource, dragSprite, dragType = "", dragData = null) {
+        this.__dragStartX = startX;
+        this.__dragStartY = startY;
+        this.dragSource = dragSource;
+        this.dragSprite = dragSprite;
+        this.dragType = dragType;
+        this.dragData = dragData;
+        this.__isDragging = true;
+        if (dragSprite) {
+            this.addChild(dragSprite);
+        } else {
+            this.__dragSourceX = dragSource.x;
+            this.__dragSourceY = dragSource.y;
+            this.__mouseX = this.x;
+            this.__mouseY = this.y;
+        }
+    }
+
+    $updatePosition(x, y) {
+        this.x = x;
+        this.y = y;
+        if (this.isDragging && !this.dragSprite) {
+            this.dragSource.x = this.x - this.__mouseX + this.__dragSourceX;
+            this.dragSource.y = this.y - this.__mouseY + this.__dragSourceY;
+        }
+    }
+
+    __stopDrag() {
+        if (this.dragSprite && this.dragSprite.parent == this) {
+            this.removeChild(this.dragSprite);
+        }
+        this.dragSource = null;
+        this.dragSprite = null;
+        this.dragType = "";
+        this.dragData = null;
+        this.__isDragging = false;
+    }
+
+    $dragEnd(display) {
+        var event = flower.DragEvent.create(flower.DragEvent.DRAG_END, true, this.dragSource, this.dragType, this.dragData);
+        display.dispatch(event);
+        if (event.hasAccept) {
+
+        } else {
+            if (this.dragSprite) {
+                this.parent.addChild(this.dragSprite);
+                this.dragSprite.x = this.x;
+                this.dragSprite.y = this.y;
+                flower.Tween.to(this.dragSprite, 1, {
+                    x: this.__dragStartX,
+                    y: this.__dragStartY,
+                    alpha: 0.1,
+                }, flower.Ease.QUAD_EASE_IN_OUT).call(function (sprite) {
+                    if (sprite.parent) {
+                        sprite.dispose();
+                    }
+                }, null, this.dragSprite);
+            }
+        }
+        this.__stopDrag();
+    }
+
+    get isDragging() {
+        return this.__isDragging;
+    }
+
+    static instance;
+
+    static getInstance() {
+        if (!DragManager.instance) {
+            DragManager.instance = new DragManager();
+        }
+        return DragManager.instance;
+    }
+
+    static startDrag(startX, startY, dragSource, dragSprite, dragType, dragData) {
+        DragManager.instance.startDrag(startX, startY, dragSource, dragSprite, dragType, dragData);
+    }
+}
+
+//////////////////////////End File:flower/manager/DragManager.js///////////////////////////
 
 
 

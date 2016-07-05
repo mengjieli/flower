@@ -1,12 +1,16 @@
 class Stage extends Sprite {
 
-    $debugSprite = new Sprite();
+    $debugSprite
+    $drag;
 
     constructor() {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.$debugSprite = new Sprite();
         this.addChild(this.$debugSprite);
+        this.$drag = DragManager.getInstance();
+        this.addChild(this.$drag);
     }
 
     get stageWidth() {
@@ -19,8 +23,9 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && index == this.numChildren - 1) {
+        if (child != this.$debugSprite && child != this.$drag) {
             this.addChild(this.$debugSprite);
+            this.addChild(this.$drag);
         }
     }
 
@@ -28,6 +33,7 @@ class Stage extends Sprite {
     __nativeMouseMoveEvent = [];
     __nativeTouchEvent = [];
     __mouseOverList = [this];
+    __dragOverList = [this];
     __touchList = [];
     __lastMouseX = -1;
     __lastMouseY = -1;
@@ -117,60 +123,108 @@ class Stage extends Sprite {
     $onMouseMove(x, y) {
         var target = this.$getMouseTarget(x, y, false);
         var parent = target.parent;
-        var list = [];
-        if (target) {
-            list.push(target);
-        }
-        while (parent && parent != this) {
-            list.push(parent);
-            parent = parent.parent;
-        }
         var event;
-        for (var i = 0; i < list.length; i++) {
-            var find = false;
-            for (var j = 0; j < this.__mouseOverList.length; j++) {
-                if (list[i] == this.__mouseOverList[j]) {
-                    find = true;
-                    break;
-                }
+        var list = [];
+        this.$drag.$updatePosition(x, y);
+        if (this.$drag.isDragging) {
+            if (target) {
+                list.push(target);
             }
-            if (!find) {
-                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER, false);
-                event.$stageX = x;
-                event.$stageY = y;
-                event.$target = target;
-                event.$touchX = list[i].lastTouchX;
-                event.$touchY = list[i].lastTouchY;
-                list[i].dispatch(event);
+            while (parent && parent != this) {
+                list.push(parent);
+                parent = parent.parent;
             }
-        }
-        for (var j = 0; j < this.__mouseOverList.length; j++) {
-            var find = false;
             for (var i = 0; i < list.length; i++) {
-                if (list[i] == this.__mouseOverList[j]) {
-                    find = true;
-                    break;
+                var find = false;
+                for (var j = 0; j < this.__dragOverList.length; j++) {
+                    if (list[i] == this.__dragOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.DragEvent(flower.DragEvent.DRAG_OVER, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = list[i].lastTouchX;
+                    event.$touchY = list[i].lastTouchY;
+                    list[i].dispatch(event);
                 }
             }
-            if (!find) {
-                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT, false);
+            for (var j = 0; j < this.__dragOverList.length; j++) {
+                var find = false;
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] == this.__dragOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.DragEvent(flower.DragEvent.DRAG_OUT, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = this.__dragOverList[j].lastTouchX;
+                    event.$touchY = this.__dragOverList[j].lastTouchY;
+                    this.__dragOverList[j].dispatch(event);
+                }
+            }
+            this.__dragOverList = list;
+        } else {
+            if (target) {
+                list.push(target);
+            }
+            while (parent && parent != this) {
+                list.push(parent);
+                parent = parent.parent;
+            }
+            for (var i = 0; i < list.length; i++) {
+                var find = false;
+                for (var j = 0; j < this.__mouseOverList.length; j++) {
+                    if (list[i] == this.__mouseOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OVER, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = list[i].lastTouchX;
+                    event.$touchY = list[i].lastTouchY;
+                    list[i].dispatch(event);
+                }
+            }
+            for (var j = 0; j < this.__mouseOverList.length; j++) {
+                var find = false;
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] == this.__mouseOverList[j]) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find) {
+                    event = new flower.MouseEvent(flower.MouseEvent.MOUSE_OUT, false);
+                    event.$stageX = x;
+                    event.$stageY = y;
+                    event.$target = target;
+                    event.$touchX = this.__mouseOverList[j].lastTouchX;
+                    event.$touchY = this.__mouseOverList[j].lastTouchY;
+                    this.__mouseOverList[j].dispatch(event);
+                }
+            }
+            this.__mouseOverList = list;
+            if (target) {
+                event = new flower.MouseEvent(flower.MouseEvent.MOUSE_MOVE);
                 event.$stageX = x;
                 event.$stageY = y;
                 event.$target = target;
-                event.$touchX = this.__mouseOverList[j].lastTouchX;
-                event.$touchY = this.__mouseOverList[j].lastTouchY;
-                this.__mouseOverList[j].dispatch(event);
+                event.$touchX = target.lastTouchX;
+                event.$touchY = target.lastTouchY;
+                target.dispatch(event);
             }
-        }
-        this.__mouseOverList = list;
-        if (target) {
-            event = new flower.MouseEvent(flower.MouseEvent.MOUSE_MOVE);
-            event.$stageX = x;
-            event.$stageY = y;
-            event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
-            target.dispatch(event);
         }
     }
 
@@ -229,6 +283,9 @@ class Stage extends Sprite {
             mouse.target = this;
         }
         var target = this.$getMouseTarget(x, y, mouse.mutiply);
+        if (this.$drag.isDragging) {
+            this.$drag.$dragEnd(target);
+        }
         var event;
         if (target == mouse.target) {
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_END);
@@ -239,8 +296,7 @@ class Stage extends Sprite {
             event.$touchX = target.lastTouchX;
             event.$touchY = target.lastTouchY;
             target.dispatch(event);
-        }
-        else {
+        } else {
             target = mouse.target;
             event = new flower.TouchEvent(flower.TouchEvent.TOUCH_RELEASE);
             event.$touchId = id;

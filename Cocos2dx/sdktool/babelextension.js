@@ -165,6 +165,8 @@ var list = [
     "Black",
     "UIComponent",
 
+    "UIEvent",
+
     "Value",
     "ArrayValue",
     "BooleanValue",

@@ -294,7 +294,7 @@ class UIParser extends Group {
             content += before + "\t\tthis." + className + "_init();\n";
         }
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tthis.$callUIComponentEvent(50);\n";
+        content += before + "\t\tthis.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {

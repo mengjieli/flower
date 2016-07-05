@@ -1,4 +1,5 @@
 <f:Group creationComplete="this.start();" xmlns:f="flower">
+    <f:RectUI width="150" height="50" fillColor="0x00ff00"/>
     <f:List id="list">
         <f:itemRenderer>
             <f:ItemRenderer>

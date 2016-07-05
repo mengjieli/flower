@@ -21,6 +21,18 @@ var $root = eval("this");
     //////////////////////////End File:extension/black/core/Black.js///////////////////////////
 
     //////////////////////////File:extension/black/core/UIComponent.js///////////////////////////
+    /**
+     * Event:
+     * 1000 creationComplete
+     * 1001 add
+     * 1002 addToStage
+     * 1003 remove
+     * 1004 removeFromStage
+     * 1020 touchBegin
+     * 1021 touchEnd
+     * 1022 touchRelease
+     * 1100 click
+     */
 
     var UIComponent = function () {
         function UIComponent() {
@@ -49,10 +61,16 @@ var $root = eval("this");
                         11: new StringValue(), //state
                         12: false, //absoluteState
                         13: this, //eventThis
-                        14: null, //layout
-                        50: null };
-                    //[event] creationComplete
-                    this.addUIComponentEvents();
+                        14: null };
+                    //layout
+                    UIComponent.registerEvent(clazz, 1000, "creationComplete", UIEvent.CREATION_COMPLETE);
+                    UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
+                    UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
+                    UIComponent.registerEvent(clazz, 1003, "remove", flower.Event.REMOVED);
+                    UIComponent.registerEvent(clazz, 1004, "removeFromStage", flower.Event.REMOVED_FROM_STAGE);
+                    UIComponent.registerEvent(clazz, 1020, "touchBegin", flower.TouchEvent.TOUCH_BEGIN);
+                    UIComponent.registerEvent(clazz, 1021, "touchEnd", flower.TouchEvent.TOUCH_END);
+                    UIComponent.registerEvent(clazz, 1022, "touchRelease", flower.TouchEvent.TOUCH_RELEASE);
                 };
 
                 if (isContainer) {
@@ -111,10 +129,6 @@ var $root = eval("this");
                         }
                     };
                 }
-
-                p.addUIComponentEvents = function () {
-                    this.addListener(flower.Event.ADDED_TO_STAGE, this.onEXEAdded, this);
-                };
 
                 p.bindProperty = function (property, content) {
                     var checks = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
@@ -177,30 +191,12 @@ var $root = eval("this");
                     return this.currentState;
                 };
 
-                p.onEXEAdded = function (e) {
-                    if (this.onAddedEXE && e.target == this) {
-                        this.onAddedEXE.call(this);
-                    }
-                };
-
                 p.$callUIComponentEvent = function (type) {
                     var func = this.$UIComponent[type];
                     if (func) {
                         func.call(this.eventThis);
                     }
                 };
-
-                //p.$getWidth = function () {
-                //    var p = this.$UIComponent;
-                //    var d = this.$DisplayObject;
-                //    return p[9] != null ? p[9] : (d[3] != null ? d[3] : this.$getContentBounds().width);
-                //}
-                //
-                //p.$getHeight = function () {
-                //    var p = this.$UIComponent;
-                //    var d = this.$DisplayObject;
-                //    return p[10] != null ? p[10] : (d[4] != null ? d[4] : this.$getContentBounds().height);
-                //}
 
                 p.$setLeft = function (val) {
                     val = +val || 0;
@@ -281,24 +277,6 @@ var $root = eval("this");
                     p[7] = val;
                     this.$invalidateContentBounds();
                 };
-
-                //p.$setUIWidth = function (val) {
-                //    var p = this.$UIComponent;
-                //    if (p[8] == val) {
-                //        return;
-                //    }
-                //    p[8] = val;
-                //    this.$invalidatePosition();
-                //}
-                //
-                //p.$setUIHeight = function (val) {
-                //    var p = this.$UIComponent;
-                //    if (p[9] == val) {
-                //        return;
-                //    }
-                //    p[9] = val;
-                //    this.$invalidatePosition();
-                //}
 
                 /**
                  * 验证 UI 属性
@@ -502,47 +480,66 @@ var $root = eval("this");
                     enumerable: true,
                     configurable: true
                 });
-                Object.defineProperty(p, "creationComplete", {
-                    get: function get() {
-                        return this.$UIComponent[50];
-                    },
-                    set: function set(val) {
-                        if (typeof val == "string") {
-                            var content = val;
-                            val = function val() {
-                                eval(content);
-                            };
-                        }
-                        this.$UIComponent[50] = val;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(p, "onAddedToStage", {
-                    get: function get() {
-                        return this.onAddedEXE;
-                    },
-                    set: function set(val) {
-                        if (typeof val == "string") {
-                            var content = val;
-                            val = function () {
-                                eval(content);
-                            }.bind(this.eventThis);
-                        }
-                        this.onAddedEXE = val;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
             }
         }]);
 
         return UIComponent;
     }();
+
+    UIComponent.registerEvent = function (clazz, index, name, eventType) {
+        var p = clazz.prototype;
+        Object.defineProperty(p, name, {
+            get: function get() {
+                return this.$UIComponent[index];
+            },
+            set: function set(val) {
+                if (typeof val == "string") {
+                    var content = val;
+                    val = function val() {
+                        eval(content);
+                    };
+                }
+                this.$UIComponent[index] = val;
+                if (val) {
+                    if (!this.$UIComponent[1000 + index]) {
+                        this.$UIComponent[1000 + index] = function () {
+                            this.$callUIComponentEvent(index);
+                        };
+                        this.addListener(eventType, this.$UIComponent[1000 + index], this);
+                    }
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+    };
+
+    black.UIComponent = UIComponent;
     //////////////////////////End File:extension/black/core/UIComponent.js///////////////////////////
 
-    //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
+    //////////////////////////File:extension/black/events/UIEvent.js///////////////////////////
 
+    var UIEvent = function (_flower$Event) {
+        _inherits(UIEvent, _flower$Event);
+
+        function UIEvent(type) {
+            var bubbles = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+            _classCallCheck(this, UIEvent);
+
+            return _possibleConstructorReturn(this, Object.getPrototypeOf(UIEvent).call(this, type, bubbles));
+        }
+
+        return UIEvent;
+    }(flower.Event);
+
+    UIEvent.CREATION_COMPLETE = "creation_complete";
+
+
+    black.UIEvent = UIEvent;
+    //////////////////////////End File:extension/black/events/UIEvent.js///////////////////////////
+
+    //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
 
     var Value = function (_flower$EventDispatch) {
         _inherits(Value, _flower$EventDispatch);
@@ -550,7 +547,7 @@ var $root = eval("this");
         function Value() {
             var _Object$getPrototypeO;
 
-            var _temp, _this, _ret;
+            var _temp, _this2, _ret;
 
             _classCallCheck(this, Value);
 
@@ -558,7 +555,7 @@ var $root = eval("this");
                 args[_key] = arguments[_key];
             }
 
-            return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.__old = null, _this.__value = null, _temp), _possibleConstructorReturn(_this, _ret);
+            return _ret = (_temp = (_this2 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this2), _this2.__old = null, _this2.__value = null, _temp), _possibleConstructorReturn(_this2, _ret);
         }
 
         _createClass(Value, [{
@@ -608,15 +605,15 @@ var $root = eval("this");
 
             _classCallCheck(this, ArrayValue);
 
-            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
 
-            _this2._key = "";
-            _this2._rangeMinKey = "";
-            _this2._rangeMaxKey = "";
+            _this3._key = "";
+            _this3._rangeMinKey = "";
+            _this3._rangeMaxKey = "";
 
-            _this2.list = init || [];
-            _this2._length = _this2.list.length;
-            return _this2;
+            _this3.list = init || [];
+            _this3._length = _this3.list.length;
+            return _this3;
         }
 
         _createClass(ArrayValue, [{
@@ -1006,10 +1003,10 @@ var $root = eval("this");
 
             _classCallCheck(this, BooleanValue);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
 
-            _this3.__old = _this3.__value = init;
-            return _this3;
+            _this4.__old = _this4.__value = init;
+            return _this4;
         }
 
         _createClass(BooleanValue, [{
@@ -1041,10 +1038,10 @@ var $root = eval("this");
 
             _classCallCheck(this, IntValue);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
 
-            _this4.__old = _this4.__value = init;
-            return _this4;
+            _this5.__old = _this5.__value = init;
+            return _this5;
         }
 
         _createClass(IntValue, [{
@@ -1076,10 +1073,10 @@ var $root = eval("this");
 
             _classCallCheck(this, NumberValue);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
 
-            _this5.__old = _this5.__value = init;
-            return _this5;
+            _this6.__old = _this6.__value = init;
+            return _this6;
         }
 
         _createClass(NumberValue, [{
@@ -1109,10 +1106,10 @@ var $root = eval("this");
         function ObjectValue() {
             _classCallCheck(this, ObjectValue);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
 
-            _this6.__old = _this6.__value = {};
-            return _this6;
+            _this7.__old = _this7.__value = {};
+            return _this7;
         }
 
         _createClass(ObjectValue, [{
@@ -1172,10 +1169,10 @@ var $root = eval("this");
 
             _classCallCheck(this, StringValue);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
 
-            _this7.__old = _this7.__value = init;
-            return _this7;
+            _this8.__old = _this8.__value = init;
+            return _this8;
         }
 
         _createClass(StringValue, [{
@@ -1207,10 +1204,10 @@ var $root = eval("this");
 
             _classCallCheck(this, UIntValue);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
 
-            _this8.__old = _this8.__value = init;
-            return _this8;
+            _this9.__old = _this9.__value = init;
+            return _this9;
         }
 
         _createClass(UIntValue, [{
@@ -1507,13 +1504,13 @@ var $root = eval("this");
         function LinearLayout() {
             _classCallCheck(this, LinearLayout);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(LinearLayout).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(LinearLayout).call(this));
 
-            _this9._gap = 0;
-            _this9._align = "";
+            _this10._gap = 0;
+            _this10._align = "";
 
-            _this9._fixElementSize = true;
-            return _this9;
+            _this10._fixElementSize = true;
+            return _this10;
         }
 
         _createClass(LinearLayout, [{
@@ -1661,10 +1658,10 @@ var $root = eval("this");
         function HorizontalLayout() {
             _classCallCheck(this, HorizontalLayout);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(HorizontalLayout).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(HorizontalLayout).call(this));
 
-            _this10.align = flower.Layout.HorizontalAlign;
-            return _this10;
+            _this11.align = flower.Layout.HorizontalAlign;
+            return _this11;
         }
 
         return HorizontalLayout;
@@ -1681,10 +1678,10 @@ var $root = eval("this");
         function VerticalLayout() {
             _classCallCheck(this, VerticalLayout);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(VerticalLayout).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(VerticalLayout).call(this));
 
-            _this11.align = flower.Layout.VerticalAlign;
-            return _this11;
+            _this12.align = flower.Layout.VerticalAlign;
+            return _this12;
         }
 
         return VerticalLayout;
@@ -1701,10 +1698,10 @@ var $root = eval("this");
         function Group() {
             _classCallCheck(this, Group);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
-            _this12.$initUIComponent();
-            return _this12;
+            _this13.$initUIComponent();
+            return _this13;
         }
 
         _createClass(Group, [{
@@ -1775,10 +1772,10 @@ var $root = eval("this");
         function UIParser() {
             _classCallCheck(this, UIParser);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
-            _this13.classes = flower.UIParser.classes;
-            return _this13;
+            _this14.classes = flower.UIParser.classes;
+            return _this14;
         }
 
         _createClass(UIParser, [{
@@ -2014,7 +2011,7 @@ var $root = eval("this");
                     content += before + "\t\tthis." + className + "_init();\n";
                 }
                 content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-                content += before + "\t\tthis.$callUIComponentEvent(50);\n";
+                content += before + "\t\tthis.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
                 content += before + "\t}\n\n";
                 content += propertyList[propertyList.length - 1];
                 for (var i = 0; i < propertyList.length - 1; i++) {
@@ -2530,16 +2527,16 @@ var $root = eval("this");
         function DataGroup() {
             _classCallCheck(this, DataGroup);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
 
-            _this14._itemSelectedEnabled = false;
-            _this14._itemClickedEnabled = false;
-            _this14._requireSelection = false;
+            _this15._itemSelectedEnabled = false;
+            _this15._itemClickedEnabled = false;
+            _this15._requireSelection = false;
 
-            _this14._itemSelectedEnabled = true;
-            _this14._itemClickedEnabled = true;
-            _this14.addListener(flower.TouchEvent.TOUCH_RELEASE, _this14._onTouchItem, _this14);
-            return _this14;
+            _this15._itemSelectedEnabled = true;
+            _this15._itemClickedEnabled = true;
+            _this15.addListener(flower.TouchEvent.TOUCH_RELEASE, _this15._onTouchItem, _this15);
+            return _this15;
         }
 
         _createClass(DataGroup, [{
@@ -2962,12 +2959,12 @@ var $root = eval("this");
         function ItemRenderer() {
             _classCallCheck(this, ItemRenderer);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
 
-            _this15._selected = false;
+            _this16._selected = false;
 
-            _this15.absoluteState = true;
-            return _this15;
+            _this16.absoluteState = true;
+            return _this16;
         }
 
         _createClass(ItemRenderer, [{
@@ -3077,10 +3074,10 @@ var $root = eval("this");
 
             _classCallCheck(this, Label);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
 
-            _this16.$initUIComponent();
-            return _this16;
+            _this17.$initUIComponent();
+            return _this17;
         }
 
         _createClass(Label, [{
@@ -3123,15 +3120,15 @@ var $root = eval("this");
         function RectUI() {
             _classCallCheck(this, RectUI);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
 
-            _this17.$RectUI = {
+            _this18.$RectUI = {
                 0: 0, //width
                 1: 0 };
             //height
-            _this17.drawRect = null;
-            _this17.$initUIComponent();
-            return _this17;
+            _this18.drawRect = null;
+            _this18.$initUIComponent();
+            return _this18;
         }
 
         _createClass(RectUI, [{
@@ -3254,11 +3251,11 @@ var $root = eval("this");
 
             _classCallCheck(this, Image);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
 
-            _this18.$initUIComponent();
-            _this18.source = source;
-            return _this18;
+            _this19.$initUIComponent();
+            _this19.source = source;
+            return _this19;
         }
 
         _createClass(Image, [{
@@ -3366,10 +3363,10 @@ var $root = eval("this");
         function MaskUI() {
             _classCallCheck(this, MaskUI);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
 
-            _this20.$initUIComponent();
-            return _this20;
+            _this21.$initUIComponent();
+            return _this21;
         }
 
         _createClass(MaskUI, [{
@@ -3438,16 +3435,17 @@ var $root = eval("this");
         function Button() {
             _classCallCheck(this, Button);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-            _this21._enabled = true;
+            _this22._enabled = true;
 
-            _this21.absoluteState = true;
-            _this21.currentState = "up";
-            _this21.addListener(flower.TouchEvent.TOUCH_BEGIN, _this21.__onTouch, _this21);
-            _this21.addListener(flower.TouchEvent.TOUCH_END, _this21.__onTouch, _this21);
-            _this21.addListener(flower.TouchEvent.TOUCH_RELEASE, _this21.__onTouch, _this21);
-            return _this21;
+            _this22.absoluteState = true;
+            _this22.currentState = "up";
+
+            _this22.addListener(flower.TouchEvent.TOUCH_BEGIN, _this22.__onTouch, _this22);
+            _this22.addListener(flower.TouchEvent.TOUCH_END, _this22.__onTouch, _this22);
+            _this22.addListener(flower.TouchEvent.TOUCH_RELEASE, _this22.__onTouch, _this22);
+            return _this22;
         }
 
         _createClass(Button, [{
@@ -3492,19 +3490,6 @@ var $root = eval("this");
                 return true;
             }
         }, {
-            key: "addUIComponentEvents",
-            value: function addUIComponentEvents() {
-                _get(Object.getPrototypeOf(Button.prototype), "addUIComponentEvents", this).call(this);
-                this.addListener(flower.TouchEvent.TOUCH_END, this.onEXEClick, this);
-            }
-        }, {
-            key: "onEXEClick",
-            value: function onEXEClick(e) {
-                if (this.onClickEXE && e.target == this) {
-                    this.onClickEXE.call(this);
-                }
-            }
-        }, {
             key: "enabled",
             set: function set(val) {
                 this.__setEnabled(val);
@@ -3512,24 +3497,12 @@ var $root = eval("this");
             get: function get() {
                 return this._enabled;
             }
-        }, {
-            key: "onClick",
-            set: function set(val) {
-                if (typeof val == "string") {
-                    var content = val;
-                    val = function () {
-                        eval(content);
-                    }.bind(this.eventThis);
-                }
-                this.onClickEXE = val;
-            },
-            get: function get() {
-                return this.onClickEXE;
-            }
         }]);
 
         return Button;
     }(Group);
+
+    UIComponent.registerEvent(Button, 1100, "click", flower.TouchEvent.TOUCH_END);
 
     black.Button = Button;
     //////////////////////////End File:extension/black/Button.js///////////////////////////
@@ -3542,10 +3515,10 @@ var $root = eval("this");
         function ToggleButton() {
             _classCallCheck(this, ToggleButton);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-            _this22.__selected = false;
-            return _this22;
+            _this23.__selected = false;
+            return _this23;
         }
 
         _createClass(ToggleButton, [{
@@ -3712,17 +3685,17 @@ var $root = eval("this");
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
 
-            _this25._buttons = [];
-            _this25._enabled = true;
+            _this26._buttons = [];
+            _this26._enabled = true;
 
             if (groupName == null || groupName == "") {
-                groupName = "group" + _this25.id;
+                groupName = "group" + _this26.id;
             }
-            _this25._groupName = groupName;
-            RadioButtonGroup.groups.push(_this25);
-            return _this25;
+            _this26._groupName = groupName;
+            RadioButtonGroup.groups.push(_this26);
+            return _this26;
         }
 
         _createClass(RadioButtonGroup, [{
@@ -3900,12 +3873,12 @@ var $root = eval("this");
         function ListBase() {
             _classCallCheck(this, ListBase);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
 
-            _this27.requireSelection = true;
-            _this27.itemClickedEnabled = true;
-            _this27.itemSelectedEnabled = true;
-            return _this27;
+            _this28.requireSelection = true;
+            _this28.itemClickedEnabled = true;
+            _this28.itemSelectedEnabled = true;
+            return _this28;
         }
 
         return ListBase;
@@ -3922,10 +3895,10 @@ var $root = eval("this");
         function List() {
             _classCallCheck(this, List);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
 
-            _this28.layout = new VerticalLayout();
-            return _this28;
+            _this29.layout = new VerticalLayout();
+            return _this29;
         }
 
         return List;
@@ -3942,11 +3915,11 @@ var $root = eval("this");
         function TabBar() {
             _classCallCheck(this, TabBar);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
 
-            _this29.layout = new HorizontalLayout();
-            _this29.layout.fixElementSize = false;
-            return _this29;
+            _this30.layout = new HorizontalLayout();
+            _this30.layout.fixElementSize = false;
+            return _this30;
         }
 
         _createClass(TabBar, [{
@@ -3971,11 +3944,11 @@ var $root = eval("this");
         function ViewStack() {
             _classCallCheck(this, ViewStack);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
 
-            _this30._items = [];
-            _this30._selectedIndex = -1;
-            return _this30;
+            _this31._items = [];
+            _this31._selectedIndex = -1;
+            return _this31;
         }
 
         _createClass(ViewStack, [{
@@ -4033,6 +4006,12 @@ var $root = eval("this");
                     }
                 }
                 return null;
+            }
+        }, {
+            key: "$removeChild",
+            value: function $removeChild(display) {
+                _get(Object.getPrototypeOf(ViewStack.prototype), "$removeChild", this).call(this, display);
+                this.removeChild(display);
             }
         }, {
             key: "removeChildAt",
@@ -4149,25 +4128,25 @@ var $root = eval("this");
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this31._viewSize = flower.Size.create(0, 0);
-            _this31._scrollDisX = [];
-            _this31._scrollDisY = [];
-            _this31._scrollTime = [];
-            _this31._upGap = 18;
+            _this32._viewSize = flower.Size.create(0, 0);
+            _this32._scrollDisX = [];
+            _this32._scrollDisY = [];
+            _this32._scrollTime = [];
+            _this32._upGap = 18;
 
-            _this31.addListener(flower.TouchEvent.TOUCH_BEGIN, _this31.__onTouchScroller, _this31);
-            _this31.addListener(flower.TouchEvent.TOUCH_MOVE, _this31.__onTouchScroller, _this31);
-            _this31.addListener(flower.TouchEvent.TOUCH_END, _this31.__onTouchScroller, _this31);
-            _this31.addListener(flower.TouchEvent.TOUCH_RELEASE, _this31.__onTouchScroller, _this31);
-            _this31.width = _this31.height = 100;
+            _this32.addListener(flower.TouchEvent.TOUCH_BEGIN, _this32.__onTouchScroller, _this32);
+            _this32.addListener(flower.TouchEvent.TOUCH_MOVE, _this32.__onTouchScroller, _this32);
+            _this32.addListener(flower.TouchEvent.TOUCH_END, _this32.__onTouchScroller, _this32);
+            _this32.addListener(flower.TouchEvent.TOUCH_RELEASE, _this32.__onTouchScroller, _this32);
+            _this32.width = _this32.height = 100;
             //var bg = new RectUI();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this31;
+            return _this32;
         }
 
         _createClass(Scroller, [{

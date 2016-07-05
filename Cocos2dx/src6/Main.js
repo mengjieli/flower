@@ -70,7 +70,7 @@ class Main {
                 </f:Group>
                 <f:Label text="面板2222" fontColor="0xffffff" fontSize="14"/>
                 <f:Group id="g3">
-                    <f:Button onClick="this.g3.dispose();">
+                    <f:Button  touchBegin="this.g3.startDrag(this.g3);">
                         <f:Image source="res/font@100x100@cn@2.png"/>
                         <f:Label text="面板3" fontColor="0xffffff"/>
                     </f:Button>

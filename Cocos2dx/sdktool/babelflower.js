@@ -188,7 +188,9 @@ var list = [
     "Event",
     "TouchEvent",
     "MouseEvent",
+    "DragEvent",
     "IOErrorEvent",
+
 
     "Filter",
     "ColorFilter",
@@ -210,6 +212,8 @@ var list = [
     "TextInput",
     "Shape",
     "Stage",
+
+    "DragManager",
 
     "Texture",
     "TextureManager",
