@@ -3419,8 +3419,9 @@ var flower = {};
                 var dragType = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
                 var dragData = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
-                //var point = this.localToGlobal(flower.Point.create());
-                DragManager.startDrag(this, dragSprite, dragType, dragData);
+                var point = this.localToGlobal(flower.Point.create());
+                DragManager.startDrag(point.x, point.y, this, dragSprite, dragType, dragData);
+                flower.Point.release(point);
             }
         }, {
             key: "dispose",
@@ -5248,9 +5249,9 @@ var flower = {};
 
         _createClass(DragManager, [{
             key: "startDrag",
-            value: function startDrag(dragSource, dragSprite) {
-                var dragType = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
-                var dragData = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+            value: function startDrag(sourceX, soureceY, dragSource, dragSprite) {
+                var dragType = arguments.length <= 4 || arguments[4] === undefined ? "" : arguments[4];
+                var dragData = arguments.length <= 5 || arguments[5] === undefined ? null : arguments[5];
 
                 this.dragSource = dragSource;
                 this.dragSprite = dragSprite;
@@ -5258,6 +5259,8 @@ var flower = {};
                 this.dragData = dragData;
                 this.__isDragging = true;
                 if (dragSprite) {
+                    dragSprite.x -= this.x - sourceX;
+                    dragSprite.y -= this.y - soureceY;
                     this.addChild(dragSprite);
                     this.__dragStartX = dragSprite.x + this.x;
                     this.__dragStartY = dragSprite.y + this.y;
@@ -5328,8 +5331,8 @@ var flower = {};
             }
         }, {
             key: "startDrag",
-            value: function startDrag(dragSource, dragSprite, dragType, dragData) {
-                DragManager.instance.startDrag(dragSource, dragSprite, dragType, dragData);
+            value: function startDrag(sourceX, soureceY, dragSource, dragSprite, dragType, dragData) {
+                DragManager.instance.startDrag(sourceX, soureceY, dragSource, dragSprite, dragType, dragData);
             }
         }]);
 

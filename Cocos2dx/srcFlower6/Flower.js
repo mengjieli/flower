@@ -3040,8 +3040,9 @@ class DisplayObject extends EventDispatcher {
     }
 
     startDrag(dragSprite = null, dragType = "", dragData = null) {
-        //var point = this.localToGlobal(flower.Point.create());
-        DragManager.startDrag( this, dragSprite, dragType, dragData);
+        var point = this.localToGlobal(flower.Point.create());
+        DragManager.startDrag(point.x, point.y, this, dragSprite, dragType, dragData);
+        flower.Point.release(point);
     }
 
     dispose() {
@@ -4738,13 +4739,15 @@ class DragManager extends Sprite {
         this.touchEnabled = false;
     }
 
-    startDrag(dragSource, dragSprite, dragType = "", dragData = null) {
+    startDrag(sourceX, soureceY, dragSource, dragSprite, dragType = "", dragData = null) {
         this.dragSource = dragSource;
         this.dragSprite = dragSprite;
         this.dragType = dragType;
         this.dragData = dragData;
         this.__isDragging = true;
         if (dragSprite) {
+            dragSprite.x -= (this.x - sourceX);
+            dragSprite.y -= (this.y - soureceY);
             this.addChild(dragSprite);
             this.__dragStartX = dragSprite.x + this.x;
             this.__dragStartY = dragSprite.y + this.y;
@@ -4813,8 +4816,8 @@ class DragManager extends Sprite {
         return DragManager.instance;
     }
 
-    static startDrag(dragSource, dragSprite, dragType, dragData) {
-        DragManager.instance.startDrag(dragSource, dragSprite, dragType, dragData);
+    static startDrag(sourceX, soureceY, dragSource, dragSprite, dragType, dragData) {
+        DragManager.instance.startDrag(sourceX, soureceY, dragSource, dragSprite, dragType, dragData);
     }
 }
 
