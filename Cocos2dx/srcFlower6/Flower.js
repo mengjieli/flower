@@ -33,6 +33,7 @@ var LANGUAGE = "";
 var SCALE = null;
 var CACHE = true;
 var UPDATE_RESOURCE = true;
+var RETINA = false;
 var programmers = {};
 
 /**
@@ -150,6 +151,7 @@ class Platform {
     static height;
 
     static start(engine, root) {
+        RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
             ctor: function () {
@@ -590,10 +592,12 @@ class PlatformTextField extends PlatformDisplayObject {
 
     constructor() {
         super();
-        this.show = new cc.LabelTTF("", "Times Roman", 12);
+        this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 1.5 : 1) * 12);
         this.show.setAnchorPoint(0, 1);
         this.show.setFontFillColor({r: 0, g: 0, b: 0}, true);
         this.show.retain();
+        this.setScaleX(1);
+        this.setScaleY(1);
     }
 
     setFontColor(color) {
@@ -603,7 +607,7 @@ class PlatformTextField extends PlatformDisplayObject {
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.setFontSize(size);
-        this.show.setFontSize(size);
+        this.show.setFontSize((RETINA ? 1.5 : 1) * size);
         var txt = this.show;
         txt.text = "";
         var txtText = "";
@@ -652,10 +656,20 @@ class PlatformTextField extends PlatformDisplayObject {
 
     }
 
+    setScaleX(val) {
+        this.__scaleX = val;
+        this.show.setScaleX(val * (RETINA ? (1/1.5) : 1));
+    }
+
+    setScaleY(val) {
+        this.__scaleY = val;
+        this.show.setScaleY(val * (RETINA ? (1/1.5) : 1));
+    }
+
     release() {
         var show = this.show;
         show.setString("");
-        show.setFontSize(12);
+        show.setFontSize((RETINA ? 1.5 : 1) * 12);
         show.setFontFillColor({r: 0, g: 0, b: 0}, true);
         super.release();
     }

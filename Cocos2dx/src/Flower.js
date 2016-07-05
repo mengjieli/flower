@@ -43,6 +43,7 @@ var flower = {};
     var SCALE = null;
     var CACHE = true;
     var UPDATE_RESOURCE = true;
+    var RETINA = false;
     var programmers = {};
 
     /**
@@ -170,6 +171,7 @@ var flower = {};
         _createClass(Platform, null, [{
             key: "start",
             value: function start(engine, root) {
+                RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
                 Platform.native = cc.sys.isNative;
                 var scene = cc.Scene.extend({
                     ctor: function ctor() {
@@ -643,10 +645,12 @@ var flower = {};
 
             var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformTextField).call(this));
 
-            _this2.show = new cc.LabelTTF("", "Times Roman", 12);
+            _this2.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 1.5 : 1) * 12);
             _this2.show.setAnchorPoint(0, 1);
             _this2.show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
             _this2.show.retain();
+            _this2.setScaleX(1);
+            _this2.setScaleY(1);
             return _this2;
         }
 
@@ -660,7 +664,7 @@ var flower = {};
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
                 var $mesureTxt = PlatformTextField.$mesureTxt;
                 $mesureTxt.setFontSize(size);
-                this.show.setFontSize(size);
+                this.show.setFontSize((RETINA ? 1.5 : 1) * size);
                 var txt = this.show;
                 txt.text = "";
                 var txtText = "";
@@ -708,11 +712,23 @@ var flower = {};
             key: "setFilters",
             value: function setFilters(filters) {}
         }, {
+            key: "setScaleX",
+            value: function setScaleX(val) {
+                this.__scaleX = val;
+                this.show.setScaleX(val * (RETINA ? 1 / 1.5 : 1));
+            }
+        }, {
+            key: "setScaleY",
+            value: function setScaleY(val) {
+                this.__scaleY = val;
+                this.show.setScaleY(val * (RETINA ? 1 / 1.5 : 1));
+            }
+        }, {
             key: "release",
             value: function release() {
                 var show = this.show;
                 show.setString("");
-                show.setFontSize(12);
+                show.setFontSize((RETINA ? 1.5 : 1) * 12);
                 show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
                 _get(Object.getPrototypeOf(PlatformTextField.prototype), "release", this).call(this);
             }

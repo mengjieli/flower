@@ -10,6 +10,7 @@ var LANGUAGE = "";
 var SCALE = null;
 var CACHE = true;
 var UPDATE_RESOURCE = true;
+var RETINA = false;
 var programmers = {};
 
 /**
