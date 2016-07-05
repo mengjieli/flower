@@ -3419,8 +3419,8 @@ var flower = {};
                 var dragType = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
                 var dragData = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
-                var point = this.localToGlobal(flower.Point.create());
-                DragManager.startDrag(point.x, point.y, this, dragSprite, dragType, dragData);
+                //var point = this.localToGlobal(flower.Point.create());
+                DragManager.startDrag(this, dragSprite, dragType, dragData);
             }
         }, {
             key: "dispose",
@@ -5248,12 +5248,10 @@ var flower = {};
 
         _createClass(DragManager, [{
             key: "startDrag",
-            value: function startDrag(startX, startY, dragSource, dragSprite) {
-                var dragType = arguments.length <= 4 || arguments[4] === undefined ? "" : arguments[4];
-                var dragData = arguments.length <= 5 || arguments[5] === undefined ? null : arguments[5];
+            value: function startDrag(dragSource, dragSprite) {
+                var dragType = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+                var dragData = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
-                this.__dragStartX = startX;
-                this.__dragStartY = startY;
                 this.dragSource = dragSource;
                 this.dragSprite = dragSprite;
                 this.dragType = dragType;
@@ -5261,6 +5259,8 @@ var flower = {};
                 this.__isDragging = true;
                 if (dragSprite) {
                     this.addChild(dragSprite);
+                    this.__dragStartX = dragSprite.x + this.x;
+                    this.__dragStartY = dragSprite.y + this.y;
                 } else {
                     this.__dragSourceX = dragSource.x;
                     this.__dragSourceY = dragSource.y;
@@ -5298,12 +5298,12 @@ var flower = {};
                 if (event.hasAccept) {} else {
                     if (this.dragSprite) {
                         this.parent.addChild(this.dragSprite);
-                        this.dragSprite.x = this.x;
-                        this.dragSprite.y = this.y;
+                        this.dragSprite.x += this.x;
+                        this.dragSprite.y += this.y;
                         flower.Tween.to(this.dragSprite, 1, {
                             x: this.__dragStartX,
                             y: this.__dragStartY,
-                            alpha: 0.1
+                            alpha: 0
                         }, flower.Ease.QUAD_EASE_IN_OUT).call(function (sprite) {
                             if (sprite.parent) {
                                 sprite.dispose();
@@ -5328,8 +5328,8 @@ var flower = {};
             }
         }, {
             key: "startDrag",
-            value: function startDrag(startX, startY, dragSource, dragSprite, dragType, dragData) {
-                DragManager.instance.startDrag(startX, startY, dragSource, dragSprite, dragType, dragData);
+            value: function startDrag(dragSource, dragSprite, dragType, dragData) {
+                DragManager.instance.startDrag(dragSource, dragSprite, dragType, dragData);
             }
         }]);
 

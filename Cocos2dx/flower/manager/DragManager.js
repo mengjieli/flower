@@ -17,9 +17,7 @@ class DragManager extends Sprite {
         this.touchEnabled = false;
     }
 
-    startDrag(startX, startY, dragSource, dragSprite, dragType = "", dragData = null) {
-        this.__dragStartX = startX;
-        this.__dragStartY = startY;
+    startDrag(dragSource, dragSprite, dragType = "", dragData = null) {
         this.dragSource = dragSource;
         this.dragSprite = dragSprite;
         this.dragType = dragType;
@@ -27,6 +25,8 @@ class DragManager extends Sprite {
         this.__isDragging = true;
         if (dragSprite) {
             this.addChild(dragSprite);
+            this.__dragStartX = dragSprite.x + this.x;
+            this.__dragStartY = dragSprite.y + this.y;
         } else {
             this.__dragSourceX = dragSource.x;
             this.__dragSourceY = dragSource.y;
@@ -63,12 +63,12 @@ class DragManager extends Sprite {
         } else {
             if (this.dragSprite) {
                 this.parent.addChild(this.dragSprite);
-                this.dragSprite.x = this.x;
-                this.dragSprite.y = this.y;
+                this.dragSprite.x += this.x;
+                this.dragSprite.y += this.y;
                 flower.Tween.to(this.dragSprite, 1, {
                     x: this.__dragStartX,
                     y: this.__dragStartY,
-                    alpha: 0.1,
+                    alpha: 0,
                 }, flower.Ease.QUAD_EASE_IN_OUT).call(function (sprite) {
                     if (sprite.parent) {
                         sprite.dispose();
@@ -92,7 +92,7 @@ class DragManager extends Sprite {
         return DragManager.instance;
     }
 
-    static startDrag(startX, startY, dragSource, dragSprite, dragType, dragData) {
-        DragManager.instance.startDrag(startX, startY, dragSource, dragSprite, dragType, dragData);
+    static startDrag(dragSource, dragSprite, dragType, dragData) {
+        DragManager.instance.startDrag(dragSource, dragSprite, dragType, dragData);
     }
 }

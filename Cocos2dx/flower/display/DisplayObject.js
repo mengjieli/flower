@@ -505,8 +505,8 @@ class DisplayObject extends EventDispatcher {
     }
 
     startDrag(dragSprite = null, dragType = "", dragData = null) {
-        var point = this.localToGlobal(flower.Point.create());
-        DragManager.startDrag(point.x, point.y, this, dragSprite, dragType, dragData);
+        //var point = this.localToGlobal(flower.Point.create());
+        DragManager.startDrag( this, dragSprite, dragType, dragData);
     }
 
     dispose() {
