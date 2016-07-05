@@ -67,7 +67,7 @@ class DragManager extends Sprite {
                 this.parent.addChild(this.dragSprite);
                 this.dragSprite.x += this.x;
                 this.dragSprite.y += this.y;
-                flower.Tween.to(this.dragSprite, 1, {
+                flower.Tween.to(this.dragSprite, 0.5, {
                     x: this.__dragStartX,
                     y: this.__dragStartY,
                     alpha: 0,
