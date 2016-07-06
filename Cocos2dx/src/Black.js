@@ -553,20 +553,20 @@ var $root = eval("this");
 
         function DataGroupEvent(type) {
             var bubbles = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-            var item = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+            var itemData = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, DataGroupEvent);
 
             var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroupEvent).call(this, type, bubbles));
 
-            _this2.__item = item;
+            _this2.__itemData = itemData;
             return _this2;
         }
 
         _createClass(DataGroupEvent, [{
-            key: "item",
+            key: "itemData",
             get: function get() {
-                return this.__item;
+                return this.__itemData;
             }
         }]);
 
@@ -2786,7 +2786,7 @@ var $root = eval("this");
                             p[8] = null;
                             if (p[11]) {
                                 item.$onClick();
-                                this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
+                                this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
                             }
                         } else {
                             this.__releaseItem();

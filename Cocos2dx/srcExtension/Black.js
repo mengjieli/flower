@@ -521,15 +521,15 @@ black.UIEvent = UIEvent;
 //////////////////////////File:extension/black/events/DataGroupEvent.js///////////////////////////
 class DataGroupEvent extends flower.Event {
 
-    __item;
+    __itemData;
 
-    constructor(type, bubbles = false, item = null) {
+    constructor(type, bubbles = false, itemData = null) {
         super(type, bubbles);
-        this.__item = item;
+        this.__itemData = itemData;
     }
 
-    get item() {
-        return this.__item;
+    get itemData() {
+        return this.__itemData;
     }
 
     static SELECTED_ITEM_CHANGE = "selected_item_change";
@@ -2536,7 +2536,7 @@ class DataGroup extends Group {
                     p[8] = null;
                     if (p[11]) {
                         item.$onClick();
-                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
+                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
                     }
                 } else {
                     this.__releaseItem();

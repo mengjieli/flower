@@ -209,7 +209,7 @@ class DataGroup extends Group {
                     p[8] = null;
                     if (p[11]) {
                         item.$onClick();
-                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
+                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
                     }
                 } else {
                     this.__releaseItem();

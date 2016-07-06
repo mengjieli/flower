@@ -3,7 +3,7 @@
     <f:MaskUI percentWidth="100" percentHeight="100">
         <f:Group id="content">
             <f:RectUI percentWidth="100" percentHeight="100" fillColor="0x00ff00"/>
-            <f:List id="list" clickItem="console.log(arguments[0].item.data.url.value)">
+            <f:List id="list" clickItem="console.log(arguments[0].itemData.url.value)">
                 <f:itemRenderer>
                     <f:ItemRenderer width="200">
                         <f:RectUI visible.up="false" visible.selectedUp="true" percentWidth="100"
