@@ -1,23 +1,24 @@
 class DataGroup extends Group {
 
-    _data;
-    _itemRenderer;
-    _items;
-    _viewer;
-    _viewWidth;
-    _viewHeight;
-    _contentWidth;
-    _contentHeight;
-    _downItem;
-    _selectedItem;
-    _itemSelectedEnabled = false;
-    _itemClickedEnabled = false;
-    _requireSelection = false;
+    $DataGroup;
 
     constructor() {
         super();
-        this._itemSelectedEnabled = true;
-        this._itemClickedEnabled = true;
+        this.$DataGroup = {
+            0: null, //data
+            1: null, //itemRenderer
+            2: null, //items
+            3: null, //viewer
+            4: 0,    //viewerWidth
+            5: 0,    //viewerHeight
+            6: 0,    //contentWidth
+            7: 0,    //contentHeight
+            8: null, //downItem
+            9: null, //selectedItem
+            10: false,//itemSelectedEnabled
+            11: true,//itemClickedEnabled
+            12: false,//requireSelection
+        }
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
     }
 
@@ -28,7 +29,7 @@ class DataGroup extends Group {
     $resetLayout() {
         if (this.$hasFlags(0x2000)) {
             this.$removeFlags(0x2000);
-            if (this.layout && (!this._viewer || !this.layout.fixElementSize)) {
+            if (this.layout && (!this.$DataGroup[3] || !this.layout.fixElementSize)) {
                 this.layout.updateList(this.width, this.height);
             }
         }
@@ -50,32 +51,34 @@ class DataGroup extends Group {
     }
 
     $onFrameEnd() {
-        if (this._viewer) {
-            if (this._viewWidth != this._viewer.width || this._viewHeight != this._viewer.height) {
-                this._viewWidth = this._viewer.width;
-                this._viewHeight = this._viewer.height;
+        var p = this.$DataGroup;
+        if (p[3]) {
+            if (p[4] != p[3].width || p[5] != p[3].height) {
+                p[4] = p[3].width;
+                p[5] = p[3].height;
                 this.$addFlags(0x4000);
             }
         }
-        if (this._data && this._data.length && this._itemRenderer && (this.$hasFlags(0x4000))) {
+        if (p[0] && p[0].length && p[1] && (this.$hasFlags(0x4000))) {
             this.$removeFlags(0x4000);
-            if (!this._items) {
-                this._items = [];
+            if (!p[2]) {
+                p[2] = [];
             }
-            var list = this._data;
+            var items = p[2];
+            var list = p[0];
             var newItems = [];
             var item;
             var itemData;
             var measureSize = false;
             var findSelected = false;
-            if (!this._viewer || !this.layout || !this.layout.fixElementSize) {
+            if (!p[3] || !this.layout || !this.layout.fixElementSize) {
                 for (var i = 0, len = list.length; i < len; i++) {
                     item = null;
                     itemData = list.getItemAt(i);
-                    for (var f = 0; f < this._items.length; f++) {
-                        if (this._items[f].data == itemData) {
-                            item = this._items[f];
-                            this._items.splice(f, 1);
+                    for (var f = 0; f < items.length; f++) {
+                        if (items[f].data == itemData) {
+                            item = items[f];
+                            items.splice(f, 1);
                             break;
                         }
                     }
@@ -90,7 +93,7 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i] = item;
-                    if (item.data == this._selectedItem) {
+                    if (item.data == p[9]) {
                         findSelected = true;
                     }
                 }
@@ -98,22 +101,22 @@ class DataGroup extends Group {
                 this.layout.$clear();
                 var elementWidth;
                 var elementHeight;
-                if (!this._items.length) {
+                if (!items.length) {
                     item = this.createItem(list.getItemAt(0), 0);
                     item.data = list.getItemAt(0);
-                    this._items.push(item);
+                    items.push(item);
                 }
-                elementWidth = this._items[0].width;
-                elementHeight = this._items[0].height;
+                elementWidth = items[0].width;
+                elementHeight = items[0].height;
                 var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
                 for (var i = firstItemIndex; i < list.length; i++) {
                     item = null;
                     itemData = list.getItemAt(i);
-                    for (var f = 0; f < this._items.length; f++) {
-                        if (this._items[f].data == itemData) {
-                            item = this._items[f];
-                            this._items.splice(f, 1);
+                    for (var f = 0; f < items.length; f++) {
+                        if (items[f].data == itemData) {
+                            item = items[f];
+                            items.splice(f, 1);
                             break;
                         }
                     }
@@ -128,117 +131,120 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i - firstItemIndex] = item;
-                    if (item.data == this._selectedItem) {
+                    if (item.data == p[9]) {
                         findSelected = true;
                     }
-                    this.layout.updateList(this._viewWidth, this._viewHeight, firstItemIndex);
-                    if (this.layout.isElementsOutSize(-this.x, -this.y, this._viewWidth, this._viewHeight)) {
+                    this.layout.updateList(p[4], p[5], firstItemIndex);
+                    if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                         break;
                     }
                 }
             }
-            if (findSelected == false && this._selectedItem) {
-                this._selectedItem = null;
+            if (findSelected == false && p[9]) {
+                p[9] = null;
             }
             measureSize = true;
-            while (this._items.length) {
-                this._items.pop().dispose();
+            while (items.length) {
+                items.pop().dispose();
             }
-            this._items = newItems;
+            p[2] = newItems;
         }
         super.$onFrameEnd();
         if (measureSize) {
-            if (!this._viewer || !this.layout || !this.layout.fixElementSize) {
+            if (!p[3] || !this.layout || !this.layout.fixElementSize) {
                 var size = this.layout.getContentSize();
-                this._contentWidth = size.width;
-                this._contentHeight = size.height;
+                p[6] = size.width;
+                p[7] = size.height;
                 flower.Size.release(size);
             }
-            else if (this._items.length) {
-                var size = this.layout.measureSize(this._items[0].width, this._items[0].height, list.length);
-                this._contentWidth = size.width;
-                this._contentHeight = size.height;
+            else if (p[2].length) {
+                var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                p[6] = size.width;
+                p[7] = size.height;
                 flower.Size.release(size);
             }
         }
     }
 
     createItem(data, index) {
-        var item = new this._itemRenderer(data);
+        var p = this.$DataGroup;
+        var item = new p[1](data);
         item.index = index;
-        item.$setList(this._data);
+        item.$setList(p[0]);
         item.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
-        if (item.data == this._downItem) {
-            if (item.data == this._selectedItem) {
+        if (item.data == p[8]) {
+            if (item.data == p[9]) {
                 item.currentState = "selectedDown";
                 item.selected = true;
             } else {
                 item.currentState = "down";
             }
         } else {
-            if (item.data == this._selectedItem) {
-                item.currentState = "selected";
+            if (item.data == p[9]) {
+                item.currentState = "selectedUp";
                 item.selected = true;
             } else {
-                item.currentState = "noSelected";
+                item.currentState = "up";
             }
         }
         return item;
     }
 
     _onTouchItem(e) {
+        var p = this.$DataGroup;
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                //if (this._itemSelectedEnabled) {
-                //    if (item.data == this._selectedItem) {
-                //        item.currentState = "selectedDown";
-                //    } else {
-                //        item.currentState = "down";
-                //    }
-                //}
+                p[8] = item.data;
+                item.currentState = "down";
                 this.__setSelectedItemData(item.data);
-                if (this._itemClickedEnabled) {
-                    item.currentState = "selected";
-                    item.$onClick();
-                    this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, false, item));
-                }
-
-                //this._downItem = item.data;
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
-                //this.$releaseItem();
+                this.__releaseItem();
                 break;
             case flower.TouchEvent.TOUCH_END:
-                //if (this._downItem == item.data) {
-                //    this._downItem = null;
-                //    this._setSelectedItem(item);
-                //    if (this._itemClickedEnabled) {
-                //        item.$onClick();
-                //        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
-                //    }
-                //}
+                if (p[8] == item.data) {
+                    p[8] = null;
+                    if (p[11]) {
+                        item.$onClick();
+                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
+                    }
+                } else {
+                    this.__releaseItem();
+                }
                 break;
         }
     }
 
-    _setSelectedIndex(val) {
-
+    __releaseItem() {
+        var p = this.$DataGroup;
+        var clickItem = this.getItemByData(p[8]);
+        if (clickItem) {
+            if (p[8] == p[9]) {
+                clickItem.currentState = "selectedUp";
+            } else {
+                clickItem.currentState = "up";
+            }
+        }
+        p[8] = null;
     }
 
     _canSelecteItem() {
-        if (this._requireSelection && this._itemSelectedEnabled && !this._selectedItem && this._data && this._data.length) {
-            this.__setSelectedItemData(this._data.getItemAt(0));
+        var p = this.$DataGroup;
+        if (p[12] && p[10] && !p[9] && p[0] && p[0].length) {
+            this.__setSelectedItemData(p[0].getItemAt(0));
         }
     }
 
     __setSelectedItemData(itemData) {
-        if (itemData == this._selectedItem) {
+        var p = this.$DataGroup;
+        var selectedItem = p[9];
+        if (itemData == selectedItem || !p[10]) {
             return;
         }
-        var data = this._data;
+        var data = p[0];
         var find = false;
         for (var i = 0, len = data.length; i < data.length; i++) {
             if (data.getItemAt(i) == itemData) {
@@ -249,35 +255,32 @@ class DataGroup extends Group {
             itemData = null;
         }
         var itemRenderer;
-        if (this._selectedItem) {
-            itemRenderer = this.getItemByData(this._selectedItem);
+        if (selectedItem) {
+            itemRenderer = this.getItemByData(selectedItem);
             if (itemRenderer) {
-                itemRenderer.currentState = "noSelected";
+                if (itemRenderer == p[8]) {
+                    itemRenderer.currentState = "down";
+                } else {
+                    itemRenderer.currentState = "up";
+                }
                 itemRenderer.selected = false;
             }
         }
-        this._selectedItem = itemData;
-        itemRenderer = this.getItemByData(this._selectedItem);
+        selectedItem = p[9] = itemData;
+        itemRenderer = this.getItemByData(selectedItem);
         if (itemRenderer) {
-            itemRenderer.currentState = "selected";
+            if (itemRenderer == p[8]) {
+                itemRenderer.currentState = "selectedDown";
+            } else {
+                itemRenderer.currentState = "selectedUp";
+            }
             itemRenderer.selected = true;
         }
-        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, this._selectedItem));
-        if (!this._selectedItem) {
+        data.selectedItem = itemData;
+        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, itemData));
+        if (!selectedItem) {
             this._canSelecteItem();
         }
-    }
-
-    $releaseItem() {
-        var clickItem = this.getItemByData(this._downItem);
-        if (clickItem) {
-            if (this._downItem == this._selectedItem && this._itemSelectedEnabled) {
-                clickItem.currentState = "selectedUp";
-            } else {
-                clickItem.currentState = "up";
-            }
-        }
-        this._downItem = null;
     }
 
     onScroll() {
@@ -285,69 +288,84 @@ class DataGroup extends Group {
     }
 
     getItemByData(data) {
-        if (!this._items) {
+        var items = this.$DataGroup[2];
+        if (!items) {
             return null;
         }
-        for (var i = 0, len = this._items.length; i < len; i++) {
-            if (this._items[i].data == data) {
-                return this._items[i];
+        for (var i = 0, len = items.length; i < len; i++) {
+            if (items[i].data == data) {
+                return items[i];
             }
         }
         return null;
     }
 
+    getItemDataIndex(data) {
+        var p = this.$DataGroup;
+        for (var i = 0, i = p[0].length; i < len; i++) {
+            if (p[0].getItemAt(i) == data) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     //////////////////////////////////get&set//////////////////////////////////
     get dataProvider() {
-        return this._data;
+        var p = this.$DataGroup;
+        return p[0];
     }
 
     set dataProvider(val) {
-        if (this._data == val) {
+        var p = this.$DataGroup;
+        if (p[0] == val) {
             return;
         }
-        if (this._data) {
-            this._data.removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
+        if (p[0]) {
+            p[0].removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
         }
         this.removeAll();
-        this._items = null;
-        this._data = val;
+        p[2] = null;
+        p[0] = val;
         this.$addFlags(0x4000);
-        if (this._data) {
-            if (!this._selectedItem) {
+        if (p[0]) {
+            if (!p[9]) {
                 this._canSelecteItem();
             }
-            this._data.addListener(flower.Event.UPDATE, this.onDataUpdate, this);
+            p[0].addListener(flower.Event.UPDATE, this.onDataUpdate, this);
         }
     }
 
     get itemRenderer() {
-        return this._itemRenderer;
+        var p = this.$DataGroup;
+        return p[1];
     }
 
     set itemRenderer(val) {
-        if (this._itemRenderer == val) {
+        var p = this.$DataGroup;
+        if (p[1] == val) {
             return;
         }
         this.removeAll();
-        this._items = null;
-        this._itemRenderer = val;
+        p[2] = null;
+        p[1] = val;
         this.$addFlags(0x4000);
     }
 
     get numElements() {
-        return this._items.length;
+        return this.$DataGroup[2].length;
     }
 
     set viewer(display) {
-        this._viewer = display;
+        p[3] = display;
     }
 
     get contentWidth() {
-        return this._contentWidth;
+        return p[6];
     }
 
     get contentHeight() {
-        return this._contentHeight;
+        return p[7];
     }
 
     get scrollEnabled() {
@@ -356,35 +374,50 @@ class DataGroup extends Group {
 
 
     get selectedIndex() {
-        return this._selectedItem ? this._selectedItem.itemIndex : -1;
+        return this.getItemDataIndex(this.$DataGroup[9]);
     }
 
     set selectedIndex(val) {
+        var p = this.$DataGroup;
         val = +val || 0;
-        if (this._selectedItem && this._selectedItem.itemIndex == val) {
-            return;
+        var item;
+        if (val != -1) {
+            if (val < 0 || val >= p[0].length) {
+                sys.$error(3101, val, p[0].length);
+            }
+            item = p[0][val];
+            if (p[9] && p[9].itemIndex == val) {
+                return;
+            }
         }
-        this._setSelectedIndex(val);
+        this.__setSelectedItemData(item);
     }
 
     get selectedItem() {
-        return this._selectedItem;
+        return this.$DataGroup[9];
+    }
+
+    set selectedItem(val) {
+        this.__setSelectedItemData(val);
     }
 
     get itemSelectedEnabled() {
-        return this._itemSelectedEnabled;
+        return this.$DataGroup[10];
     }
 
     set itemSelectedEnabled(val) {
         if (val == "false") {
             val = false;
         }
-        this._itemSelectedEnabled = !!val;
+        if (this.$DataGroup[10] == val) {
+            return;
+        }
+        this.$DataGroup[10] = !!val;
         this._canSelecteItem();
     }
 
     get itemClickedEnabled() {
-        return this._itemClickedEnabled;
+        return this.$DataGroup[11];
     }
 
     set itemClickedEnabled(val) {
@@ -392,14 +425,14 @@ class DataGroup extends Group {
             val = false;
         }
         val = !!val;
-        if (this._itemClickedEnabled == val) {
+        if (this.$DataGroup[11] == val) {
             return;
         }
-        this._itemClickedEnabled = val;
+        this.$DataGroup[11] = val;
     }
 
     get requireSelection() {
-        return this._requireSelection;
+        return this.$DataGroup[12];
     }
 
     set requireSelection(val) {
@@ -407,10 +440,10 @@ class DataGroup extends Group {
             val = false;
         }
         val = !!val;
-        if (val == this._requireSelection) {
+        if (val == this.$DataGroup[12]) {
             return;
         }
-        this._requireSelection = val;
+        this.$DataGroup[12] = val;
         if (val) {
             this._canSelecteItem();
         }

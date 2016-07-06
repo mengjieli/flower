@@ -59,7 +59,7 @@ class Main {
             <f:TabBar dataProvider="{viewStack}">
                 <f:itemRenderer>
                     <f:ItemRenderer width="100" height="20">
-                        <f:Label text="{this.data.text}" color.up="0xff0000" color.selectedUp="0x00ff00" fontColor="0x00ff00"/>
+                        <f:Label text="{this.data.text}" fontColor.selectedUp="0xff0000" fontColor.up="0x00ff00"/>
                     </f:ItemRenderer>
                 </f:itemRenderer>
             </f:TabBar>
@@ -78,7 +78,7 @@ class Main {
                             <f:List>
                                 <f:itemRenderer>
                                     <f:ItemRenderer>
-                                        <f:Label text="{this.data.label}" fontColor.selected="0xff0000" fontColor.noSelected="0x00ff00"/>
+                                        <f:Label text="{this.data.label}" fontColor.selectedUp="0xff0000" fontColor.up="0x00ff00"/>
                                     </f:ItemRenderer>
                                 </f:itemRenderer>
                             </f:List>

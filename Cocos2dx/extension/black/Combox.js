@@ -28,7 +28,7 @@ class Combox extends Group {
         } else {
             this.label.text = "";
         }
-        if(e) {
+        if (e) {
             this.dispatch(e);
         }
     }
@@ -83,6 +83,8 @@ class Combox extends Group {
         }
         this.$combox[2] = val;
         if (val) {
+            val.itemClickedEnabled = true;
+            val.itemSelectedEnabled = true;
             val.requireSelection = true;
             val.dataProvider = this.$combox[5];
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
