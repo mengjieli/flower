@@ -1,11 +1,19 @@
-<f:Group creationComplete="this.start();" xmlns:f="flower">
-    <f:RectUI width="150" height="50" fillColor="0x00ff00"/>
-    <f:List id="list">
-        <f:itemRenderer>
-            <f:ItemRenderer>
-                <f:Label text="{this.data.count}  {this.data.url}" fontColor="0xff0000"/>
-            </f:ItemRenderer>
-        </f:itemRenderer>
-    </f:List>
-    <f:script src="./Debug.js"/>
+<f:Group
+        creationComplete="this.start();" xmlns:f="flower">
+    <f:MaskUI percentWidth="100" percentHeight="100">
+        <f:Group id="content">
+            <f:RectUI percentWidth="100" percentHeight="100" fillColor="0x00ff00"/>
+            <f:List id="list">
+                <f:itemRenderer>
+                    <f:ItemRenderer width="200">
+                        <f:RectUI visible.noSelected="false" visible.selected="true" percentWidth="100"
+                                  percentHeight="100"
+                                  fillColor="0x0000ff"/>
+                        <f:Label text="{this.data.count}  {this.data.url}" fontColor="0xff0000"/>
+                    </f:ItemRenderer>
+                </f:itemRenderer>
+            </f:List>
+        </f:Group>
+        <f:script src="./Debug.js"/>
+    </f:MaskUI>
 </f:Group>

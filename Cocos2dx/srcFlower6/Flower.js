@@ -310,6 +310,10 @@ class PlatformDisplayObject {
         this.show.setPositionY(-val);
     }
 
+    setVisible(val) {
+        this.show.setVisible(val);
+    }
+
     setWidth(val) {
         this.__width = val;
         var programmer = this.__programmer;
@@ -594,14 +598,18 @@ class PlatformTextField extends PlatformDisplayObject {
         super();
         this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 1.5 : 1) * 12);
         this.show.setAnchorPoint(0, 1);
-        this.show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        this.setFontColor(0);
         this.show.retain();
         this.setScaleX(1);
         this.setScaleY(1);
     }
 
     setFontColor(color) {
-        this.show.setFontFillColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF}, true);
+        if (Platform.native) {
+            this.show.setFontFillColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF}, true);
+        } else {
+            this.show.color = {r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF};
+        }
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
@@ -658,19 +666,19 @@ class PlatformTextField extends PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val * (RETINA ? (1/1.5) : 1));
+        this.show.setScaleX(val * (RETINA ? (1 / 1.5) : 1));
     }
 
     setScaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val * (RETINA ? (1/1.5) : 1));
+        this.show.setScaleY(val * (RETINA ? (1 / 1.5) : 1));
     }
 
     release() {
         var show = this.show;
         show.setString("");
         show.setFontSize((RETINA ? 1.5 : 1) * 12);
-        show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        this.setFontColor(0);
         super.release();
     }
 }
@@ -2570,6 +2578,7 @@ class DisplayObject extends EventDispatcher {
     __alpha = 1;
     __parentAlpha = 1;
     __concatAlpha = 1;
+    __visible = true;
 
     /**
      * native 显示，比如 cocos2dx 的显示对象或者 egret 的显示对象等...
@@ -2785,6 +2794,18 @@ class DisplayObject extends EventDispatcher {
         }
         this.__alpha = val;
         this.$addFlagsDown(0x0002);
+    }
+
+    $setVisible(val) {
+        if(val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if (val == this.__visible) {
+            return false;
+        }
+        this.__visible = val;
+        this.$nativeShow.setVisible(val);
     }
 
     $getConcatAlpha() {
@@ -3123,6 +3144,14 @@ class DisplayObject extends EventDispatcher {
 
     get parent() {
         return this.__parent;
+    }
+
+    get visible() {
+        return this.__visible;
+    }
+
+    set visible(val) {
+        this.$setVisible(val);
     }
 
     get stage() {
@@ -4356,6 +4385,7 @@ flower.Shape = Shape;
 class Stage extends Sprite {
 
     $debugSprite
+    $menu;
     $drag;
 
     constructor() {
@@ -4364,6 +4394,8 @@ class Stage extends Sprite {
         Stage.stages.push(this);
         this.$debugSprite = new Sprite();
         this.addChild(this.$debugSprite);
+        this.$menu = MenuManager.getInstance();
+        this.addChild(this.$menu);
         this.$drag = DragManager.getInstance();
         this.addChild(this.$drag);
     }
@@ -4378,8 +4410,9 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && child != this.$drag) {
+        if (child != this.$debugSprite && child != this.$drag && child != this.$menu) {
             this.addChild(this.$debugSprite);
+            this.addChild(this.$menu);
             this.addChild(this.$drag);
         }
     }
@@ -4822,6 +4855,53 @@ class DragManager extends Sprite {
 }
 
 //////////////////////////End File:flower/manager/DragManager.js///////////////////////////
+
+
+
+//////////////////////////File:flower/manager/MenuManager.js///////////////////////////
+class MenuManager extends Sprite {
+
+    __addFrame = 0;
+
+    constructor() {
+        super();
+        this.addListener(Event.ADDED_TO_STAGE, this.__addedToStage, this);
+    }
+
+    __addedToStage(e) {
+        this.removeListener(Event.ADDED_TO_STAGE, this.addedToStage, this);
+        this.stage.addListener(TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+    }
+
+    __onTouch(e) {
+        var frame = flower.EnterFrame.frame;
+        if (frame > this.__addFrame && this.numChildren) {
+            this.removeAll();
+        }
+    }
+
+    addChildAt(child, index) {
+        this.__addFrame = flower.EnterFrame.frame;
+        super.addChildAt(child, index);
+    }
+
+    static instance;
+
+    static getInstance() {
+        if (!MenuManager.instance) {
+            MenuManager.instance = new MenuManager();
+        }
+        return MenuManager.instance;
+    }
+
+    static showMenu(display) {
+        MenuManager.getInstance().removeAll();
+        MenuManager.getInstance().addChild(display);
+    }
+}
+
+flower.MenuManager = MenuManager;
+//////////////////////////End File:flower/manager/MenuManager.js///////////////////////////
 
 
 
@@ -7883,7 +7963,7 @@ class XMLElement extends XMLAttribute {
                 }
                 for (j = i + 1; j < len; j++) {
                     c = content.charAt(j);
-                    if (c == " " || c == "\t" || c == "/" || c == ">") {
+                    if (c == " " || c == "\t" || c == "\r" || c == "\n" || c == "/" || c == ">") {
                         this.name = content.slice(i, j);
                         i = j;
                         break;
@@ -7904,7 +7984,7 @@ class XMLElement extends XMLAttribute {
                 i++;
                 break;
             }
-            else if (c == " " || c == "\t") {
+            else if (c == " " || c == "\t" || c == "\r" || c == "\n" || c=="　") {
             }
             else {
                 for (j = i + 1; j < len; j++) {

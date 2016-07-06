@@ -1,11 +1,11 @@
-
-
 function start() {
     //测试注释
     this.textures = new flower.ArrayValue();
     this.list.dataProvider = this.textures;
     flower.Stage.getInstance().addChild(this);
     flower.EnterFrame.add(this.update, this);
+    this.content.y = -100;
+    flower.Tween.to(this.content, 0.5, {y: 0},flower.Ease.CUBIC_EASE_IN_OUT);
 }
 
 /**

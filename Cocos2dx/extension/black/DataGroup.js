@@ -58,6 +58,7 @@ class DataGroup extends Group {
             }
         }
         if (this._data && this._data.length && this._itemRenderer && (this.$hasFlags(0x4000))) {
+            this.$removeFlags(0x4000);
             if (!this._items) {
                 this._items = [];
             }
@@ -144,10 +145,6 @@ class DataGroup extends Group {
                 this._items.pop().dispose();
             }
             this._items = newItems;
-            this.$removeFlags(0x4000);
-            if (!this._selectedItem) {
-                this._canSelecteItem();
-            }
         }
         super.$onFrameEnd();
         if (measureSize) {
@@ -174,18 +171,18 @@ class DataGroup extends Group {
         item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
         if (item.data == this._downItem) {
-            if (item.data == this._selectedItem && this._itemSelectedEnabled) {
+            if (item.data == this._selectedItem) {
                 item.currentState = "selectedDown";
                 item.selected = true;
             } else {
                 item.currentState = "down";
             }
         } else {
-            if (item.data == this._selectedItem && this._itemSelectedEnabled) {
-                item.currentState = "selectedUp";
+            if (item.data == this._selectedItem) {
+                item.currentState = "selected";
                 item.selected = true;
             } else {
-                item.currentState = "up";
+                item.currentState = "noSelected";
             }
         }
         return item;
@@ -195,36 +192,34 @@ class DataGroup extends Group {
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                if (this._itemSelectedEnabled) {
-                    if (item.data == this._selectedItem) {
-                        item.currentState = "selectedDown";
-                    } else {
-                        item.currentState = "down";
-                    }
+                //if (this._itemSelectedEnabled) {
+                //    if (item.data == this._selectedItem) {
+                //        item.currentState = "selectedDown";
+                //    } else {
+                //        item.currentState = "down";
+                //    }
+                //}
+                this.__setSelectedItemData(item.data);
+                if (this._itemClickedEnabled) {
+                    item.currentState = "selected";
+                    item.$onClick();
+                    this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, false, item));
                 }
-                this._downItem = item.data;
+
+                //this._downItem = item.data;
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
-                this.$releaseItem();
+                //this.$releaseItem();
                 break;
             case flower.TouchEvent.TOUCH_END:
-                if (this._downItem == item.data) {
-                    this._downItem = null;
-                    this._setSelectedItem(item);
-                    if (this._itemClickedEnabled) {
-                        item.$onClick();
-                        //var data = item.data;
-                        //var find = false;
-                        //for (var i = 0, len = this._data.length; i < len; i++) {
-                        //    if (this._data.getItemAt(i) == data) {
-                        //        find = true;
-                        //    }
-                        //}
-                        //if (find && this.onClickItemEXE) {
-                        //    this.onClickItemEXE.call(this, item.data);
-                        //}
-                    }
-                }
+                //if (this._downItem == item.data) {
+                //    this._downItem = null;
+                //    this._setSelectedItem(item);
+                //    if (this._itemClickedEnabled) {
+                //        item.$onClick();
+                //        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
+                //    }
+                //}
                 break;
         }
     }
@@ -234,35 +229,42 @@ class DataGroup extends Group {
     }
 
     _canSelecteItem() {
-        if (this._requireSelection && this._itemSelectedEnabled && !this._selectedItem && this._data.length) {
-            this._selectedItem = this._data.getItemAt(0);
-            var item = this.getItemByData(this._selectedItem);
-            if (item) {
-                item.currentState = "selectedUp";
-                item.selected = true;
-            }
+        if (this._requireSelection && this._itemSelectedEnabled && !this._selectedItem && this._data && this._data.length) {
+            this.__setSelectedItemData(this._data.getItemAt(0));
         }
     }
 
-    _setSelectedItem(item) {
-        if (item == null || item.data != this._selectedItem) {
-            if (this._selectedItem) {
-                var itemRenderer = this.getItemByData(this._selectedItem);
-                if (itemRenderer) {
-                    itemRenderer.currentState = "up";
-                    itemRenderer.selected = false;
-                }
+    __setSelectedItemData(itemData) {
+        if (itemData == this._selectedItem) {
+            return;
+        }
+        var data = this._data;
+        var find = false;
+        for (var i = 0, len = data.length; i < data.length; i++) {
+            if (data.getItemAt(i) == itemData) {
+                find = true;
             }
         }
-        if (item && this._itemSelectedEnabled) {
-            item.currentState = "selectedUp";
-            item.selected = true;
-            this._selectedItem = item.data;
-        } else {
-            if (item) {
-                item.currentState = "up";
+        if (!find) {
+            itemData = null;
+        }
+        var itemRenderer;
+        if (this._selectedItem) {
+            itemRenderer = this.getItemByData(this._selectedItem);
+            if (itemRenderer) {
+                itemRenderer.currentState = "noSelected";
+                itemRenderer.selected = false;
             }
-            this._selectedItem = null;
+        }
+        this._selectedItem = itemData;
+        itemRenderer = this.getItemByData(this._selectedItem);
+        if (itemRenderer) {
+            itemRenderer.currentState = "selected";
+            itemRenderer.selected = true;
+        }
+        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, this._selectedItem));
+        if (!this._selectedItem) {
+            this._canSelecteItem();
         }
     }
 
@@ -283,6 +285,9 @@ class DataGroup extends Group {
     }
 
     getItemByData(data) {
+        if (!this._items) {
+            return null;
+        }
         for (var i = 0, len = this._items.length; i < len; i++) {
             if (this._items[i].data == data) {
                 return this._items[i];
@@ -300,12 +305,18 @@ class DataGroup extends Group {
         if (this._data == val) {
             return;
         }
+        if (this._data) {
+            this._data.removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
+        }
         this.removeAll();
         this._items = null;
         this._data = val;
         this.$addFlags(0x4000);
         if (this._data) {
-            this._data.addListener(flower.Event.UPDATE, this.onDataUpdate, this)
+            if (!this._selectedItem) {
+                this._canSelecteItem();
+            }
+            this._data.addListener(flower.Event.UPDATE, this.onDataUpdate, this);
         }
     }
 
@@ -365,7 +376,11 @@ class DataGroup extends Group {
     }
 
     set itemSelectedEnabled(val) {
+        if (val == "false") {
+            val = false;
+        }
         this._itemSelectedEnabled = !!val;
+        this._canSelecteItem();
     }
 
     get itemClickedEnabled() {
@@ -373,6 +388,9 @@ class DataGroup extends Group {
     }
 
     set itemClickedEnabled(val) {
+        if (val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._itemClickedEnabled == val) {
             return;
@@ -385,28 +403,18 @@ class DataGroup extends Group {
     }
 
     set requireSelection(val) {
+        if (val == "false") {
+            val = false;
+        }
         val = !!val;
         if (val == this._requireSelection) {
             return;
         }
         this._requireSelection = val;
+        if (val) {
+            this._canSelecteItem();
+        }
     }
-
-    //onClickItemEXE:Function;
-    //
-    //set onClickItem(val) {
-    //    if (typeof val == "string") {
-    //        var content:string = <any>val;
-    //        val = function (item) {
-    //            eval(content);
-    //        }.bind(this.eventThis);
-    //    }
-    //    this.onClickItemEXE = val;
-    //}
-    //
-    //get onClickItem() {
-    //    return this.onClickItemEXE;
-    //}
 }
 
 exports.DataGroup = DataGroup;

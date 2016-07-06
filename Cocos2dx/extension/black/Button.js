@@ -37,6 +37,9 @@ class Button extends Group {
     }
 
     __setEnabled(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._enabled == val) {
             return false;

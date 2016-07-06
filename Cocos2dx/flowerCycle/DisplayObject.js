@@ -318,6 +318,9 @@ class DisplayObject {
     }
 
     $setVisible(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (val == this.$visible) {
             return false;
@@ -376,6 +379,9 @@ class DisplayObject {
     }
 
     $setTouchEnabeld(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (val == this.$touchEnabled) {
             return false;

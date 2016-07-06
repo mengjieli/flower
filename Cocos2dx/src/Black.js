@@ -465,6 +465,9 @@ var $root = eval("this");
                         return this.$UIComponent[12];
                     },
                     set: function set(val) {
+                        if (val == "false") {
+                            val = false;
+                        }
                         this.$UIComponent[12] = !!val;
                     },
                     enumerable: true,
@@ -539,6 +542,40 @@ var $root = eval("this");
     black.UIEvent = UIEvent;
     //////////////////////////End File:extension/black/events/UIEvent.js///////////////////////////
 
+    //////////////////////////File:extension/black/events/DataGroupEvent.js///////////////////////////
+
+    var DataGroupEvent = function (_flower$Event2) {
+        _inherits(DataGroupEvent, _flower$Event2);
+
+        function DataGroupEvent(type) {
+            var bubbles = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+            var item = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+            _classCallCheck(this, DataGroupEvent);
+
+            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroupEvent).call(this, type, bubbles));
+
+            _this2.__item = item;
+            return _this2;
+        }
+
+        _createClass(DataGroupEvent, [{
+            key: "item",
+            get: function get() {
+                return this.__item;
+            }
+        }]);
+
+        return DataGroupEvent;
+    }(flower.Event);
+
+    DataGroupEvent.SELECT_ITEM_CHANGE = "select_item_change";
+    DataGroupEvent.CLICK_ITEM = "click_item";
+
+
+    black.DataGroupEvent = DataGroupEvent;
+    //////////////////////////End File:extension/black/events/DataGroupEvent.js///////////////////////////
+
     //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
 
     var Value = function (_flower$EventDispatch) {
@@ -547,7 +584,7 @@ var $root = eval("this");
         function Value() {
             var _Object$getPrototypeO;
 
-            var _temp, _this2, _ret;
+            var _temp, _this3, _ret;
 
             _classCallCheck(this, Value);
 
@@ -555,7 +592,7 @@ var $root = eval("this");
                 args[_key] = arguments[_key];
             }
 
-            return _ret = (_temp = (_this2 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this2), _this2.__old = null, _this2.__value = null, _temp), _possibleConstructorReturn(_this2, _ret);
+            return _ret = (_temp = (_this3 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this3), _this3.__old = null, _this3.__value = null, _temp), _possibleConstructorReturn(_this3, _ret);
         }
 
         _createClass(Value, [{
@@ -605,15 +642,15 @@ var $root = eval("this");
 
             _classCallCheck(this, ArrayValue);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
 
-            _this3._key = "";
-            _this3._rangeMinKey = "";
-            _this3._rangeMaxKey = "";
+            _this4._key = "";
+            _this4._rangeMinKey = "";
+            _this4._rangeMaxKey = "";
 
-            _this3.list = init || [];
-            _this3._length = _this3.list.length;
-            return _this3;
+            _this4.list = init || [];
+            _this4._length = _this4.list.length;
+            return _this4;
         }
 
         _createClass(ArrayValue, [{
@@ -1003,10 +1040,10 @@ var $root = eval("this");
 
             _classCallCheck(this, BooleanValue);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
 
-            _this4.__old = _this4.__value = init;
-            return _this4;
+            _this5.__old = _this5.__value = init;
+            return _this5;
         }
 
         _createClass(BooleanValue, [{
@@ -1038,10 +1075,10 @@ var $root = eval("this");
 
             _classCallCheck(this, IntValue);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
 
-            _this5.__old = _this5.__value = init;
-            return _this5;
+            _this6.__old = _this6.__value = init;
+            return _this6;
         }
 
         _createClass(IntValue, [{
@@ -1073,10 +1110,10 @@ var $root = eval("this");
 
             _classCallCheck(this, NumberValue);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
 
-            _this6.__old = _this6.__value = init;
-            return _this6;
+            _this7.__old = _this7.__value = init;
+            return _this7;
         }
 
         _createClass(NumberValue, [{
@@ -1106,10 +1143,10 @@ var $root = eval("this");
         function ObjectValue() {
             _classCallCheck(this, ObjectValue);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
 
-            _this7.__old = _this7.__value = {};
-            return _this7;
+            _this8.__old = _this8.__value = {};
+            return _this8;
         }
 
         _createClass(ObjectValue, [{
@@ -1169,10 +1206,10 @@ var $root = eval("this");
 
             _classCallCheck(this, StringValue);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
 
-            _this8.__old = _this8.__value = init;
-            return _this8;
+            _this9.__old = _this9.__value = init;
+            return _this9;
         }
 
         _createClass(StringValue, [{
@@ -1204,10 +1241,10 @@ var $root = eval("this");
 
             _classCallCheck(this, UIntValue);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
 
-            _this9.__old = _this9.__value = init;
-            return _this9;
+            _this10.__old = _this10.__value = init;
+            return _this10;
         }
 
         _createClass(UIntValue, [{
@@ -1481,6 +1518,9 @@ var $root = eval("this");
                 return this._fixElementSize;
             },
             set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 this._fixElementSize = !!val;
             }
         }]);
@@ -1504,13 +1544,13 @@ var $root = eval("this");
         function LinearLayout() {
             _classCallCheck(this, LinearLayout);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(LinearLayout).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(LinearLayout).call(this));
 
-            _this10._gap = 0;
-            _this10._align = "";
+            _this11._gap = 0;
+            _this11._align = "";
 
-            _this10._fixElementSize = true;
-            return _this10;
+            _this11._fixElementSize = true;
+            return _this11;
         }
 
         _createClass(LinearLayout, [{
@@ -1658,10 +1698,10 @@ var $root = eval("this");
         function HorizontalLayout() {
             _classCallCheck(this, HorizontalLayout);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(HorizontalLayout).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(HorizontalLayout).call(this));
 
-            _this11.align = flower.Layout.HorizontalAlign;
-            return _this11;
+            _this12.align = flower.Layout.HorizontalAlign;
+            return _this12;
         }
 
         return HorizontalLayout;
@@ -1678,10 +1718,10 @@ var $root = eval("this");
         function VerticalLayout() {
             _classCallCheck(this, VerticalLayout);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(VerticalLayout).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(VerticalLayout).call(this));
 
-            _this12.align = flower.Layout.VerticalAlign;
-            return _this12;
+            _this13.align = flower.Layout.VerticalAlign;
+            return _this13;
         }
 
         return VerticalLayout;
@@ -1698,10 +1738,10 @@ var $root = eval("this");
         function Group() {
             _classCallCheck(this, Group);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
-            _this13.$initUIComponent();
-            return _this13;
+            _this14.$initUIComponent();
+            return _this14;
         }
 
         _createClass(Group, [{
@@ -1772,10 +1812,10 @@ var $root = eval("this");
         function UIParser() {
             _classCallCheck(this, UIParser);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
-            _this14.classes = flower.UIParser.classes;
-            return _this14;
+            _this15.classes = flower.UIParser.classes;
+            return _this15;
         }
 
         _createClass(UIParser, [{
@@ -2502,6 +2542,7 @@ var $root = eval("this");
             "List": "flower.List",
             "TabBar": "flower.TabBar",
             "ViewStack": "flower.ViewStack",
+            "Combox": "Combox",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -2527,16 +2568,16 @@ var $root = eval("this");
         function DataGroup() {
             _classCallCheck(this, DataGroup);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
 
-            _this15._itemSelectedEnabled = false;
-            _this15._itemClickedEnabled = false;
-            _this15._requireSelection = false;
+            _this16._itemSelectedEnabled = false;
+            _this16._itemClickedEnabled = false;
+            _this16._requireSelection = false;
 
-            _this15._itemSelectedEnabled = true;
-            _this15._itemClickedEnabled = true;
-            _this15.addListener(flower.TouchEvent.TOUCH_RELEASE, _this15._onTouchItem, _this15);
-            return _this15;
+            _this16._itemSelectedEnabled = true;
+            _this16._itemClickedEnabled = true;
+            _this16.addListener(flower.TouchEvent.TOUCH_RELEASE, _this16._onTouchItem, _this16);
+            return _this16;
         }
 
         _createClass(DataGroup, [{
@@ -2581,6 +2622,7 @@ var $root = eval("this");
                     }
                 }
                 if (this._data && this._data.length && this._itemRenderer && this.$hasFlags(0x4000)) {
+                    this.$removeFlags(0x4000);
                     if (!this._items) {
                         this._items = [];
                     }
@@ -2667,10 +2709,6 @@ var $root = eval("this");
                         this._items.pop().dispose();
                     }
                     this._items = newItems;
-                    this.$removeFlags(0x4000);
-                    if (!this._selectedItem) {
-                        this._canSelecteItem();
-                    }
                 }
                 _get(Object.getPrototypeOf(DataGroup.prototype), "$onFrameEnd", this).call(this);
                 if (measureSize) {
@@ -2697,18 +2735,18 @@ var $root = eval("this");
                 item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
                 item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
                 if (item.data == this._downItem) {
-                    if (item.data == this._selectedItem && this._itemSelectedEnabled) {
+                    if (item.data == this._selectedItem) {
                         item.currentState = "selectedDown";
                         item.selected = true;
                     } else {
                         item.currentState = "down";
                     }
                 } else {
-                    if (item.data == this._selectedItem && this._itemSelectedEnabled) {
-                        item.currentState = "selectedUp";
+                    if (item.data == this._selectedItem) {
+                        item.currentState = "selected";
                         item.selected = true;
                     } else {
-                        item.currentState = "up";
+                        item.currentState = "noSelected";
                     }
                 }
                 return item;
@@ -2719,36 +2757,34 @@ var $root = eval("this");
                 var item = e.currentTarget;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
-                        if (this._itemSelectedEnabled) {
-                            if (item.data == this._selectedItem) {
-                                item.currentState = "selectedDown";
-                            } else {
-                                item.currentState = "down";
-                            }
+                        //if (this._itemSelectedEnabled) {
+                        //    if (item.data == this._selectedItem) {
+                        //        item.currentState = "selectedDown";
+                        //    } else {
+                        //        item.currentState = "down";
+                        //    }
+                        //}
+                        this.__setSelectedItemData(item.data);
+                        if (this._itemClickedEnabled) {
+                            item.currentState = "selected";
+                            item.$onClick();
+                            this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, false, item));
                         }
-                        this._downItem = item.data;
+
+                        //this._downItem = item.data;
                         break;
                     case flower.TouchEvent.TOUCH_RELEASE:
-                        this.$releaseItem();
+                        //this.$releaseItem();
                         break;
                     case flower.TouchEvent.TOUCH_END:
-                        if (this._downItem == item.data) {
-                            this._downItem = null;
-                            this._setSelectedItem(item);
-                            if (this._itemClickedEnabled) {
-                                item.$onClick();
-                                //var data = item.data;
-                                //var find = false;
-                                //for (var i = 0, len = this._data.length; i < len; i++) {
-                                //    if (this._data.getItemAt(i) == data) {
-                                //        find = true;
-                                //    }
-                                //}
-                                //if (find && this.onClickItemEXE) {
-                                //    this.onClickItemEXE.call(this, item.data);
-                                //}
-                            }
-                        }
+                        //if (this._downItem == item.data) {
+                        //    this._downItem = null;
+                        //    this._setSelectedItem(item);
+                        //    if (this._itemClickedEnabled) {
+                        //        item.$onClick();
+                        //        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
+                        //    }
+                        //}
                         break;
                 }
             }
@@ -2758,36 +2794,43 @@ var $root = eval("this");
         }, {
             key: "_canSelecteItem",
             value: function _canSelecteItem() {
-                if (this._requireSelection && this._itemSelectedEnabled && !this._selectedItem && this._data.length) {
-                    this._selectedItem = this._data.getItemAt(0);
-                    var item = this.getItemByData(this._selectedItem);
-                    if (item) {
-                        item.currentState = "selectedUp";
-                        item.selected = true;
-                    }
+                if (this._requireSelection && this._itemSelectedEnabled && !this._selectedItem && this._data && this._data.length) {
+                    this.__setSelectedItemData(this._data.getItemAt(0));
                 }
             }
         }, {
-            key: "_setSelectedItem",
-            value: function _setSelectedItem(item) {
-                if (item == null || item.data != this._selectedItem) {
-                    if (this._selectedItem) {
-                        var itemRenderer = this.getItemByData(this._selectedItem);
-                        if (itemRenderer) {
-                            itemRenderer.currentState = "up";
-                            itemRenderer.selected = false;
-                        }
+            key: "__setSelectedItemData",
+            value: function __setSelectedItemData(itemData) {
+                if (itemData == this._selectedItem) {
+                    return;
+                }
+                var data = this._data;
+                var find = false;
+                for (var i = 0, len = data.length; i < data.length; i++) {
+                    if (data.getItemAt(i) == itemData) {
+                        find = true;
                     }
                 }
-                if (item && this._itemSelectedEnabled) {
-                    item.currentState = "selectedUp";
-                    item.selected = true;
-                    this._selectedItem = item.data;
-                } else {
-                    if (item) {
-                        item.currentState = "up";
+                if (!find) {
+                    itemData = null;
+                }
+                var itemRenderer;
+                if (this._selectedItem) {
+                    itemRenderer = this.getItemByData(this._selectedItem);
+                    if (itemRenderer) {
+                        itemRenderer.currentState = "noSelected";
+                        itemRenderer.selected = false;
                     }
-                    this._selectedItem = null;
+                }
+                this._selectedItem = itemData;
+                itemRenderer = this.getItemByData(this._selectedItem);
+                if (itemRenderer) {
+                    itemRenderer.currentState = "selected";
+                    itemRenderer.selected = true;
+                }
+                this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, this._selectedItem));
+                if (!this._selectedItem) {
+                    this._canSelecteItem();
                 }
             }
         }, {
@@ -2811,6 +2854,9 @@ var $root = eval("this");
         }, {
             key: "getItemByData",
             value: function getItemByData(data) {
+                if (!this._items) {
+                    return null;
+                }
                 for (var i = 0, len = this._items.length; i < len; i++) {
                     if (this._items[i].data == data) {
                         return this._items[i];
@@ -2830,11 +2876,17 @@ var $root = eval("this");
                 if (this._data == val) {
                     return;
                 }
+                if (this._data) {
+                    this._data.removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
+                }
                 this.removeAll();
                 this._items = null;
                 this._data = val;
                 this.$addFlags(0x4000);
                 if (this._data) {
+                    if (!this._selectedItem) {
+                        this._canSelecteItem();
+                    }
                     this._data.addListener(flower.Event.UPDATE, this.onDataUpdate, this);
                 }
             }
@@ -2900,7 +2952,11 @@ var $root = eval("this");
                 return this._itemSelectedEnabled;
             },
             set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 this._itemSelectedEnabled = !!val;
+                this._canSelecteItem();
             }
         }, {
             key: "itemClickedEnabled",
@@ -2908,6 +2964,9 @@ var $root = eval("this");
                 return this._itemClickedEnabled;
             },
             set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 val = !!val;
                 if (this._itemClickedEnabled == val) {
                     return;
@@ -2920,29 +2979,18 @@ var $root = eval("this");
                 return this._requireSelection;
             },
             set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 val = !!val;
                 if (val == this._requireSelection) {
                     return;
                 }
                 this._requireSelection = val;
+                if (val) {
+                    this._canSelecteItem();
+                }
             }
-
-            //onClickItemEXE:Function;
-            //
-            //set onClickItem(val) {
-            //    if (typeof val == "string") {
-            //        var content:string = <any>val;
-            //        val = function (item) {
-            //            eval(content);
-            //        }.bind(this.eventThis);
-            //    }
-            //    this.onClickItemEXE = val;
-            //}
-            //
-            //get onClickItem() {
-            //    return this.onClickItemEXE;
-            //}
-
         }]);
 
         return DataGroup;
@@ -2959,12 +3007,12 @@ var $root = eval("this");
         function ItemRenderer() {
             _classCallCheck(this, ItemRenderer);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
 
-            _this16._selected = false;
+            _this17._selected = false;
 
-            _this16.absoluteState = true;
-            return _this16;
+            _this17.absoluteState = true;
+            return _this17;
         }
 
         _createClass(ItemRenderer, [{
@@ -3017,6 +3065,9 @@ var $root = eval("this");
                 return this._selected;
             },
             set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 val = !!val;
                 if (this._selected == val) {
                     return;
@@ -3074,10 +3125,10 @@ var $root = eval("this");
 
             _classCallCheck(this, Label);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
 
-            _this17.$initUIComponent();
-            return _this17;
+            _this18.$initUIComponent();
+            return _this18;
         }
 
         _createClass(Label, [{
@@ -3120,15 +3171,15 @@ var $root = eval("this");
         function RectUI() {
             _classCallCheck(this, RectUI);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
 
-            _this18.$RectUI = {
+            _this19.$RectUI = {
                 0: 0, //width
                 1: 0 };
             //height
-            _this18.drawRect = null;
-            _this18.$initUIComponent();
-            return _this18;
+            _this19.drawRect = null;
+            _this19.$initUIComponent();
+            return _this19;
         }
 
         _createClass(RectUI, [{
@@ -3251,11 +3302,11 @@ var $root = eval("this");
 
             _classCallCheck(this, Image);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
 
-            _this19.$initUIComponent();
-            _this19.source = source;
-            return _this19;
+            _this20.$initUIComponent();
+            _this20.source = source;
+            return _this20;
         }
 
         _createClass(Image, [{
@@ -3363,13 +3414,21 @@ var $root = eval("this");
         function MaskUI() {
             _classCallCheck(this, MaskUI);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
 
-            _this21.$initUIComponent();
-            return _this21;
+            _this22.$initUIComponent();
+            return _this22;
         }
 
         _createClass(MaskUI, [{
+            key: "$createShape",
+            value: function $createShape() {
+                var shape = new RectUI();
+                shape.percentWidth = 100;
+                shape.percentHeight = 100;
+                return shape;
+            }
+        }, {
             key: "$addFlags",
             value: function $addFlags(flags) {
                 if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
@@ -3435,17 +3494,17 @@ var $root = eval("this");
         function Button() {
             _classCallCheck(this, Button);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-            _this22._enabled = true;
+            _this23._enabled = true;
 
-            _this22.absoluteState = true;
-            _this22.currentState = "up";
+            _this23.absoluteState = true;
+            _this23.currentState = "up";
 
-            _this22.addListener(flower.TouchEvent.TOUCH_BEGIN, _this22.__onTouch, _this22);
-            _this22.addListener(flower.TouchEvent.TOUCH_END, _this22.__onTouch, _this22);
-            _this22.addListener(flower.TouchEvent.TOUCH_RELEASE, _this22.__onTouch, _this22);
-            return _this22;
+            _this23.addListener(flower.TouchEvent.TOUCH_BEGIN, _this23.__onTouch, _this23);
+            _this23.addListener(flower.TouchEvent.TOUCH_END, _this23.__onTouch, _this23);
+            _this23.addListener(flower.TouchEvent.TOUCH_RELEASE, _this23.__onTouch, _this23);
+            return _this23;
         }
 
         _createClass(Button, [{
@@ -3477,6 +3536,9 @@ var $root = eval("this");
         }, {
             key: "__setEnabled",
             value: function __setEnabled(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 val = !!val;
                 if (this._enabled == val) {
                     return false;
@@ -3515,10 +3577,10 @@ var $root = eval("this");
         function ToggleButton() {
             _classCallCheck(this, ToggleButton);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-            _this23.__selected = false;
-            return _this23;
+            _this24.__selected = false;
+            return _this24;
         }
 
         _createClass(ToggleButton, [{
@@ -3560,6 +3622,9 @@ var $root = eval("this");
         }, {
             key: "__setSelected",
             value: function __setSelected(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 val = !!val;
                 if (!this.enabled || val == this.__selected) {
                     return;
@@ -3685,17 +3750,17 @@ var $root = eval("this");
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
 
-            _this26._buttons = [];
-            _this26._enabled = true;
+            _this27._buttons = [];
+            _this27._enabled = true;
 
             if (groupName == null || groupName == "") {
-                groupName = "group" + _this26.id;
+                groupName = "group" + _this27.id;
             }
-            _this26._groupName = groupName;
-            RadioButtonGroup.groups.push(_this26);
-            return _this26;
+            _this27._groupName = groupName;
+            RadioButtonGroup.groups.push(_this27);
+            return _this27;
         }
 
         _createClass(RadioButtonGroup, [{
@@ -3787,6 +3852,9 @@ var $root = eval("this");
                 return this._enabled;
             },
             set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 val = !!val;
                 if (this._enabled == val) {
                     return;
@@ -3873,12 +3941,12 @@ var $root = eval("this");
         function ListBase() {
             _classCallCheck(this, ListBase);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
 
-            _this28.requireSelection = true;
-            _this28.itemClickedEnabled = true;
-            _this28.itemSelectedEnabled = true;
-            return _this28;
+            _this29.requireSelection = true;
+            _this29.itemClickedEnabled = true;
+            _this29.itemSelectedEnabled = true;
+            return _this29;
         }
 
         return ListBase;
@@ -3895,10 +3963,10 @@ var $root = eval("this");
         function List() {
             _classCallCheck(this, List);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
 
-            _this29.layout = new VerticalLayout();
-            return _this29;
+            _this30.layout = new VerticalLayout();
+            return _this30;
         }
 
         return List;
@@ -3915,11 +3983,11 @@ var $root = eval("this");
         function TabBar() {
             _classCallCheck(this, TabBar);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
 
-            _this30.layout = new HorizontalLayout();
-            _this30.layout.fixElementSize = false;
-            return _this30;
+            _this31.layout = new HorizontalLayout();
+            _this31.layout.fixElementSize = false;
+            return _this31;
         }
 
         _createClass(TabBar, [{
@@ -3944,11 +4012,11 @@ var $root = eval("this");
         function ViewStack() {
             _classCallCheck(this, ViewStack);
 
-            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
 
-            _this31._items = [];
-            _this31._selectedIndex = -1;
-            return _this31;
+            _this32._items = [];
+            _this32._selectedIndex = -1;
+            return _this32;
         }
 
         _createClass(ViewStack, [{
@@ -4128,25 +4196,25 @@ var $root = eval("this");
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this32._viewSize = flower.Size.create(0, 0);
-            _this32._scrollDisX = [];
-            _this32._scrollDisY = [];
-            _this32._scrollTime = [];
-            _this32._upGap = 18;
+            _this33._viewSize = flower.Size.create(0, 0);
+            _this33._scrollDisX = [];
+            _this33._scrollDisY = [];
+            _this33._scrollTime = [];
+            _this33._upGap = 18;
 
-            _this32.addListener(flower.TouchEvent.TOUCH_BEGIN, _this32.__onTouchScroller, _this32);
-            _this32.addListener(flower.TouchEvent.TOUCH_MOVE, _this32.__onTouchScroller, _this32);
-            _this32.addListener(flower.TouchEvent.TOUCH_END, _this32.__onTouchScroller, _this32);
-            _this32.addListener(flower.TouchEvent.TOUCH_RELEASE, _this32.__onTouchScroller, _this32);
-            _this32.width = _this32.height = 100;
+            _this33.addListener(flower.TouchEvent.TOUCH_BEGIN, _this33.__onTouchScroller, _this33);
+            _this33.addListener(flower.TouchEvent.TOUCH_MOVE, _this33.__onTouchScroller, _this33);
+            _this33.addListener(flower.TouchEvent.TOUCH_END, _this33.__onTouchScroller, _this33);
+            _this33.addListener(flower.TouchEvent.TOUCH_RELEASE, _this33.__onTouchScroller, _this33);
+            _this33.width = _this33.height = 100;
             //var bg = new RectUI();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this32;
+            return _this33;
         }
 
         _createClass(Scroller, [{
@@ -4361,6 +4429,176 @@ var $root = eval("this");
 
     black.Scroller = Scroller;
     //////////////////////////End File:extension/black/Scroller.js///////////////////////////
+
+    //////////////////////////File:extension/black/Combox.js///////////////////////////
+
+    var Combox = function (_Group8) {
+        _inherits(Combox, _Group8);
+
+        function Combox() {
+            _classCallCheck(this, Combox);
+
+            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(Combox).call(this));
+
+            _this34.$combox = {
+                0: null, //label
+                1: null, //button
+                2: null, //list
+                3: false, //openFlags
+                4: "label", //labelField
+                5: null };
+            return _this34;
+        }
+
+        _createClass(Combox, [{
+            key: "__onClickButton",
+            //dataProvider
+            value: function __onClickButton(e) {
+                this.isOpen = !this.isOpen;
+            }
+        }, {
+            key: "__listRemoved",
+            value: function __listRemoved(e) {
+                this.$combox[3] = false;
+            }
+        }, {
+            key: "__listSelectItemChange",
+            value: function __listSelectItemChange(e) {
+                if (this.label && this.list && this.list.selectedItem) {
+                    this.label.text = this.list.selectedItem[this.$combox[4]];
+                } else {
+                    this.label.text = "";
+                }
+                if (e) {
+                    this.dispatch(e);
+                }
+            }
+        }, {
+            key: "label",
+            set: function set(val) {
+                if (this.$combox[0] == val) {
+                    return;
+                }
+                this.$combox[0] = val;
+                if (val) {
+                    val.touchEnabled = false;
+                    if (val.parent != this) {
+                        this.addChild(val);
+                    }
+                }
+                this.__listSelectItemChange();
+            },
+            get: function get() {
+                return this.$combox[0];
+            }
+        }, {
+            key: "button",
+            set: function set(val) {
+                if (this.$combox[1] == val) {
+                    return;
+                }
+                if (this.$combox[1]) {
+                    this.$combox[1].removeListener(flower.TouchEvent.TOUCH_END, this.__onClickButton, this);
+                }
+                this.$combox[1] = val;
+                if (val) {
+                    val.addListener(flower.TouchEvent.TOUCH_END, this.__onClickButton, this);
+                    if (val.parent != this) {
+                        this.addChild(val);
+                    }
+                }
+            },
+            get: function get() {
+                return this.$combox[1];
+            }
+        }, {
+            key: "list",
+            set: function set(val) {
+                if (this.$combox[2] == val) {
+                    return;
+                }
+                if (this.$combox[2]) {
+                    this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
+                    this.$combox[2].addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+                }
+                this.$combox[2] = val;
+                if (val) {
+                    val.requireSelection = true;
+                    val.dataProvider = this.$combox[5];
+                    val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
+                    val.addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+                }
+                this.__listSelectItemChange();
+            },
+            get: function get() {
+                return this.$combox[2];
+            }
+        }, {
+            key: "isOpen",
+            get: function get() {
+                return this.$combox[3];
+            },
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.$combox[3]) {
+                    return;
+                }
+                this.$combox[3] = val;
+                if (val) {
+                    var list = this.$combox[2];
+                    if (this.stage && list) {
+                        var point = flower.Point.create();
+                        this.localToGlobal(point);
+                        list.x = point.x;
+                        list.y = point.y + this.height;
+                        flower.Point.release(point);
+                        flower.MenuManager.showMenu(list);
+                    }
+                } else {}
+            }
+        }, {
+            key: "labelField",
+            get: function get() {
+                return this.$combox[4];
+            },
+            set: function set(val) {
+                this.$combox[4] = val;
+                this.__listSelectItemChange();
+            }
+        }, {
+            key: "dataProvider",
+            get: function get() {
+                return this.$combox[5];
+            },
+            set: function set(val) {
+                if (this.$combox[5] == val) {
+                    return;
+                }
+                this.$combox[5] = val;
+                if (this.list) {
+                    this.list.dataProvider = this.$combox[5];
+                }
+            }
+        }, {
+            key: "selectedItem",
+            get: function get() {
+                return this.list ? this.list.selectedItem : null;
+            }
+        }, {
+            key: "selectedIndex",
+            get: function get() {
+                return this.list ? this.list.selectedIndex : -1;
+            }
+        }]);
+
+        return Combox;
+    }(Group);
+
+    black.Combox = Combox;
+    //////////////////////////End File:extension/black/Combox.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];

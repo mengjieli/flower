@@ -42,6 +42,9 @@ class ToggleButton extends Button {
     }
 
     __setSelected(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (!this.enabled || val == this.__selected) {
             return;

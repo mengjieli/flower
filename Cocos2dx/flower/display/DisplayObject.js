@@ -35,6 +35,7 @@ class DisplayObject extends EventDispatcher {
     __alpha = 1;
     __parentAlpha = 1;
     __concatAlpha = 1;
+    __visible = true;
 
     /**
      * native 显示，比如 cocos2dx 的显示对象或者 egret 的显示对象等...
@@ -250,6 +251,18 @@ class DisplayObject extends EventDispatcher {
         }
         this.__alpha = val;
         this.$addFlagsDown(0x0002);
+    }
+
+    $setVisible(val) {
+        if(val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if (val == this.__visible) {
+            return false;
+        }
+        this.__visible = val;
+        this.$nativeShow.setVisible(val);
     }
 
     $getConcatAlpha() {
@@ -588,6 +601,14 @@ class DisplayObject extends EventDispatcher {
 
     get parent() {
         return this.__parent;
+    }
+
+    get visible() {
+        return this.__visible;
+    }
+
+    set visible(val) {
+        this.$setVisible(val);
     }
 
     get stage() {

@@ -43,6 +43,9 @@ class ItemRenderer extends Group {
     }
 
     set selected(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._selected == val) {
             return;

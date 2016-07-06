@@ -64,9 +64,34 @@ class Main {
                 </f:itemRenderer>
             </f:TabBar>
             <f:ViewStack x="50" y="50" id="viewStack">
-                <f:Group>
-                    <f:RectUI width="100" height="100"/>
-                    <f:Label text="面板111111" fontColor="0xffffff"/>
+                <f:Group text="tab1">
+                    <f:Combox>
+                        <f:label>
+                            <f:Label width="100" fontColor="0xff00ff"/>
+                        </f:label>
+                        <f:button>
+                            <f:Button>
+                                <f:Label x="100" text="按钮" fontColor="0xffffff"/>
+                            </f:Button>
+                        </f:button>
+                        <f:list>
+                            <f:List>
+                                <f:itemRenderer>
+                                    <f:ItemRenderer>
+                                        <f:Label text="{this.data.label}" fontColor.selected="0xff0000" fontColor.noSelected="0x00ff00"/>
+                                    </f:ItemRenderer>
+                                </f:itemRenderer>
+                            </f:List>
+                        </f:list>
+                        <f:dataProvider>
+                            <f:ArrayValue>
+                                <f:Object label="选项1"/>
+                                <f:Object label="选项2"/>
+                                <f:Object label="选项3"/>
+                                <f:Object label="选项4"/>
+                            </f:ArrayValue>
+                        </f:dataProvider>
+                    </f:Combox>
                 </f:Group>
                 <f:Label text="面板2222" fontColor="0xffffff" fontSize="14"/>
                 <f:Group id="g3">

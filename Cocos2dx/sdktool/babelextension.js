@@ -166,6 +166,7 @@ var list = [
     "UIComponent",
 
     "UIEvent",
+    "DataGroupEvent",
 
     "Value",
     "ArrayValue",
@@ -203,7 +204,8 @@ var list = [
     "List",
     "TabBar",
     "ViewStack",
-    "Scroller"
+    "Scroller",
+    "Combox",
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";

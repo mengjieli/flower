@@ -433,6 +433,9 @@ class UIComponent {
                 return this.$UIComponent[12];
             },
             set: function (val) {
+                if(val == "false") {
+                    val = false;
+                }
                 this.$UIComponent[12] = !!val;
             },
             enumerable: true,

@@ -214,6 +214,7 @@ var list = [
     "Stage",
 
     "DragManager",
+    "MenuManager",
 
     "Texture",
     "TextureManager",

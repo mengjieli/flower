@@ -110,7 +110,7 @@ class XMLElement extends XMLAttribute {
                 }
                 for (j = i + 1; j < len; j++) {
                     c = content.charAt(j);
-                    if (c == " " || c == "\t" || c == "/" || c == ">") {
+                    if (c == " " || c == "\t" || c == "\r" || c == "\n" || c == "/" || c == ">") {
                         this.name = content.slice(i, j);
                         i = j;
                         break;
@@ -131,7 +131,7 @@ class XMLElement extends XMLAttribute {
                 i++;
                 break;
             }
-            else if (c == " " || c == "\t") {
+            else if (c == " " || c == "\t" || c == "\r" || c == "\n" || c=="　") {
             }
             else {
                 for (j = i + 1; j < len; j++) {

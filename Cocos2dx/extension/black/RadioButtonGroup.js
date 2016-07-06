@@ -94,6 +94,9 @@ class RadioButtonGroup extends Group {
     }
 
     set enabled(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._enabled == val) {
             return;

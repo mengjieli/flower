@@ -8,14 +8,18 @@ class PlatformTextField extends PlatformDisplayObject {
         super();
         this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 1.5 : 1) * 12);
         this.show.setAnchorPoint(0, 1);
-        this.show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        this.setFontColor(0);
         this.show.retain();
         this.setScaleX(1);
         this.setScaleY(1);
     }
 
     setFontColor(color) {
-        this.show.setFontFillColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF}, true);
+        if (Platform.native) {
+            this.show.setFontFillColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF}, true);
+        } else {
+            this.show.color = {r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF};
+        }
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
@@ -72,19 +76,19 @@ class PlatformTextField extends PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val * (RETINA ? (1/1.5) : 1));
+        this.show.setScaleX(val * (RETINA ? (1 / 1.5) : 1));
     }
 
     setScaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val * (RETINA ? (1/1.5) : 1));
+        this.show.setScaleY(val * (RETINA ? (1 / 1.5) : 1));
     }
 
     release() {
         var show = this.show;
         show.setString("");
         show.setFontSize((RETINA ? 1.5 : 1) * 12);
-        show.setFontFillColor({r: 0, g: 0, b: 0}, true);
+        this.setFontColor(0);
         super.release();
     }
 }

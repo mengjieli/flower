@@ -32,6 +32,10 @@ class PlatformDisplayObject {
         this.show.setPositionY(-val);
     }
 
+    setVisible(val) {
+        this.show.setVisible(val);
+    }
+
     setWidth(val) {
         this.__width = val;
         var programmer = this.__programmer;

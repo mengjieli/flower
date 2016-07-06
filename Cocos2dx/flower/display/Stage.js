@@ -1,6 +1,7 @@
 class Stage extends Sprite {
 
     $debugSprite
+    $menu;
     $drag;
 
     constructor() {
@@ -9,6 +10,8 @@ class Stage extends Sprite {
         Stage.stages.push(this);
         this.$debugSprite = new Sprite();
         this.addChild(this.$debugSprite);
+        this.$menu = MenuManager.getInstance();
+        this.addChild(this.$menu);
         this.$drag = DragManager.getInstance();
         this.addChild(this.$drag);
     }
@@ -23,8 +26,9 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && child != this.$drag) {
+        if (child != this.$debugSprite && child != this.$drag && child != this.$menu) {
             this.addChild(this.$debugSprite);
+            this.addChild(this.$menu);
             this.addChild(this.$drag);
         }
     }

@@ -446,6 +446,9 @@ class UIComponent {
                 return this.$UIComponent[12];
             },
             set: function (val) {
+                if(val == "false") {
+                    val = false;
+                }
                 this.$UIComponent[12] = !!val;
             },
             enumerable: true,
@@ -508,6 +511,29 @@ class UIEvent extends flower.Event {
 
 black.UIEvent = UIEvent;
 //////////////////////////End File:extension/black/events/UIEvent.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/events/DataGroupEvent.js///////////////////////////
+class DataGroupEvent extends flower.Event {
+
+    __item;
+
+    constructor(type, bubbles = false, item = null) {
+        super(type, bubbles);
+        this.__item = item;
+    }
+
+    get item() {
+        return this.__item;
+    }
+
+    static SELECT_ITEM_CHANGE = "select_item_change";
+    static CLICK_ITEM = "click_item";
+}
+
+black.DataGroupEvent = DataGroupEvent;
+//////////////////////////End File:extension/black/events/DataGroupEvent.js///////////////////////////
 
 
 
@@ -1304,6 +1330,9 @@ class Layout {
     }
 
     set fixElementSize(val) {
+        if(val == "false") {
+            val = false;
+        }
         this._fixElementSize = !!val;
     }
 
@@ -1595,6 +1624,7 @@ class UIParser extends Group {
             "List": "flower.List",
             "TabBar": "flower.TabBar",
             "ViewStack": "flower.ViewStack",
+            "Combox": "Combox",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -2351,6 +2381,7 @@ class DataGroup extends Group {
             }
         }
         if (this._data && this._data.length && this._itemRenderer && (this.$hasFlags(0x4000))) {
+            this.$removeFlags(0x4000);
             if (!this._items) {
                 this._items = [];
             }
@@ -2437,10 +2468,6 @@ class DataGroup extends Group {
                 this._items.pop().dispose();
             }
             this._items = newItems;
-            this.$removeFlags(0x4000);
-            if (!this._selectedItem) {
-                this._canSelecteItem();
-            }
         }
         super.$onFrameEnd();
         if (measureSize) {
@@ -2467,18 +2494,18 @@ class DataGroup extends Group {
         item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
         if (item.data == this._downItem) {
-            if (item.data == this._selectedItem && this._itemSelectedEnabled) {
+            if (item.data == this._selectedItem) {
                 item.currentState = "selectedDown";
                 item.selected = true;
             } else {
                 item.currentState = "down";
             }
         } else {
-            if (item.data == this._selectedItem && this._itemSelectedEnabled) {
-                item.currentState = "selectedUp";
+            if (item.data == this._selectedItem) {
+                item.currentState = "selected";
                 item.selected = true;
             } else {
-                item.currentState = "up";
+                item.currentState = "noSelected";
             }
         }
         return item;
@@ -2488,36 +2515,34 @@ class DataGroup extends Group {
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                if (this._itemSelectedEnabled) {
-                    if (item.data == this._selectedItem) {
-                        item.currentState = "selectedDown";
-                    } else {
-                        item.currentState = "down";
-                    }
+                //if (this._itemSelectedEnabled) {
+                //    if (item.data == this._selectedItem) {
+                //        item.currentState = "selectedDown";
+                //    } else {
+                //        item.currentState = "down";
+                //    }
+                //}
+                this.__setSelectedItemData(item.data);
+                if (this._itemClickedEnabled) {
+                    item.currentState = "selected";
+                    item.$onClick();
+                    this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, false, item));
                 }
-                this._downItem = item.data;
+
+                //this._downItem = item.data;
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
-                this.$releaseItem();
+                //this.$releaseItem();
                 break;
             case flower.TouchEvent.TOUCH_END:
-                if (this._downItem == item.data) {
-                    this._downItem = null;
-                    this._setSelectedItem(item);
-                    if (this._itemClickedEnabled) {
-                        item.$onClick();
-                        //var data = item.data;
-                        //var find = false;
-                        //for (var i = 0, len = this._data.length; i < len; i++) {
-                        //    if (this._data.getItemAt(i) == data) {
-                        //        find = true;
-                        //    }
-                        //}
-                        //if (find && this.onClickItemEXE) {
-                        //    this.onClickItemEXE.call(this, item.data);
-                        //}
-                    }
-                }
+                //if (this._downItem == item.data) {
+                //    this._downItem = null;
+                //    this._setSelectedItem(item);
+                //    if (this._itemClickedEnabled) {
+                //        item.$onClick();
+                //        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item));
+                //    }
+                //}
                 break;
         }
     }
@@ -2527,35 +2552,42 @@ class DataGroup extends Group {
     }
 
     _canSelecteItem() {
-        if (this._requireSelection && this._itemSelectedEnabled && !this._selectedItem && this._data.length) {
-            this._selectedItem = this._data.getItemAt(0);
-            var item = this.getItemByData(this._selectedItem);
-            if (item) {
-                item.currentState = "selectedUp";
-                item.selected = true;
-            }
+        if (this._requireSelection && this._itemSelectedEnabled && !this._selectedItem && this._data && this._data.length) {
+            this.__setSelectedItemData(this._data.getItemAt(0));
         }
     }
 
-    _setSelectedItem(item) {
-        if (item == null || item.data != this._selectedItem) {
-            if (this._selectedItem) {
-                var itemRenderer = this.getItemByData(this._selectedItem);
-                if (itemRenderer) {
-                    itemRenderer.currentState = "up";
-                    itemRenderer.selected = false;
-                }
+    __setSelectedItemData(itemData) {
+        if (itemData == this._selectedItem) {
+            return;
+        }
+        var data = this._data;
+        var find = false;
+        for (var i = 0, len = data.length; i < data.length; i++) {
+            if (data.getItemAt(i) == itemData) {
+                find = true;
             }
         }
-        if (item && this._itemSelectedEnabled) {
-            item.currentState = "selectedUp";
-            item.selected = true;
-            this._selectedItem = item.data;
-        } else {
-            if (item) {
-                item.currentState = "up";
+        if (!find) {
+            itemData = null;
+        }
+        var itemRenderer;
+        if (this._selectedItem) {
+            itemRenderer = this.getItemByData(this._selectedItem);
+            if (itemRenderer) {
+                itemRenderer.currentState = "noSelected";
+                itemRenderer.selected = false;
             }
-            this._selectedItem = null;
+        }
+        this._selectedItem = itemData;
+        itemRenderer = this.getItemByData(this._selectedItem);
+        if (itemRenderer) {
+            itemRenderer.currentState = "selected";
+            itemRenderer.selected = true;
+        }
+        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, this._selectedItem));
+        if (!this._selectedItem) {
+            this._canSelecteItem();
         }
     }
 
@@ -2576,6 +2608,9 @@ class DataGroup extends Group {
     }
 
     getItemByData(data) {
+        if (!this._items) {
+            return null;
+        }
         for (var i = 0, len = this._items.length; i < len; i++) {
             if (this._items[i].data == data) {
                 return this._items[i];
@@ -2593,12 +2628,18 @@ class DataGroup extends Group {
         if (this._data == val) {
             return;
         }
+        if (this._data) {
+            this._data.removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
+        }
         this.removeAll();
         this._items = null;
         this._data = val;
         this.$addFlags(0x4000);
         if (this._data) {
-            this._data.addListener(flower.Event.UPDATE, this.onDataUpdate, this)
+            if (!this._selectedItem) {
+                this._canSelecteItem();
+            }
+            this._data.addListener(flower.Event.UPDATE, this.onDataUpdate, this);
         }
     }
 
@@ -2658,7 +2699,11 @@ class DataGroup extends Group {
     }
 
     set itemSelectedEnabled(val) {
+        if (val == "false") {
+            val = false;
+        }
         this._itemSelectedEnabled = !!val;
+        this._canSelecteItem();
     }
 
     get itemClickedEnabled() {
@@ -2666,6 +2711,9 @@ class DataGroup extends Group {
     }
 
     set itemClickedEnabled(val) {
+        if (val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._itemClickedEnabled == val) {
             return;
@@ -2678,28 +2726,18 @@ class DataGroup extends Group {
     }
 
     set requireSelection(val) {
+        if (val == "false") {
+            val = false;
+        }
         val = !!val;
         if (val == this._requireSelection) {
             return;
         }
         this._requireSelection = val;
+        if (val) {
+            this._canSelecteItem();
+        }
     }
-
-    //onClickItemEXE:Function;
-    //
-    //set onClickItem(val) {
-    //    if (typeof val == "string") {
-    //        var content:string = <any>val;
-    //        val = function (item) {
-    //            eval(content);
-    //        }.bind(this.eventThis);
-    //    }
-    //    this.onClickItemEXE = val;
-    //}
-    //
-    //get onClickItem() {
-    //    return this.onClickItemEXE;
-    //}
 }
 
 black.DataGroup = DataGroup;
@@ -2753,6 +2791,9 @@ class ItemRenderer extends Group {
     }
 
     set selected(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._selected == val) {
             return;
@@ -3069,6 +3110,13 @@ class MaskUI extends flower.Mask {
         this.$initUIComponent();
     }
 
+    $createShape() {
+        var shape = new RectUI();
+        shape.percentWidth = 100;
+        shape.percentHeight = 100;
+        return shape;
+    }
+
     $addFlags(flags) {
         if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
             this.__flags |= 0x1000;
@@ -3160,6 +3208,9 @@ class Button extends Group {
     }
 
     __setEnabled(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._enabled == val) {
             return false;
@@ -3234,6 +3285,9 @@ class ToggleButton extends Button {
     }
 
     __setSelected(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (!this.enabled || val == this.__selected) {
             return;
@@ -3436,6 +3490,9 @@ class RadioButtonGroup extends Group {
     }
 
     set enabled(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (this._enabled == val) {
             return;
@@ -3941,6 +3998,170 @@ class Scroller extends MaskUI {
 
 black.Scroller = Scroller;
 //////////////////////////End File:extension/black/Scroller.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/Combox.js///////////////////////////
+class Combox extends Group {
+
+    $combox;
+
+    constructor() {
+        super();
+        this.$combox = {
+            0: null, //label
+            1: null, //button
+            2: null, //list
+            3: false, //openFlags
+            4: "label", //labelField
+            5: null, //dataProvider
+        }
+    }
+
+    __onClickButton(e) {
+        this.isOpen = !this.isOpen;
+    }
+
+    __listRemoved(e) {
+        this.$combox[3] = false;
+    }
+
+    __listSelectItemChange(e) {
+        if (this.label && this.list && this.list.selectedItem) {
+            this.label.text = this.list.selectedItem[this.$combox[4]];
+        } else {
+            this.label.text = "";
+        }
+        if(e) {
+            this.dispatch(e);
+        }
+    }
+
+    set label(val) {
+        if (this.$combox[0] == val) {
+            return;
+        }
+        this.$combox[0] = val;
+        if (val) {
+            val.touchEnabled = false;
+            if (val.parent != this) {
+                this.addChild(val);
+            }
+        }
+        this.__listSelectItemChange();
+    }
+
+    get label() {
+        return this.$combox[0];
+    }
+
+
+    set button(val) {
+        if (this.$combox[1] == val) {
+            return;
+        }
+        if (this.$combox[1]) {
+            this.$combox[1].removeListener(flower.TouchEvent.TOUCH_END, this.__onClickButton, this);
+        }
+        this.$combox[1] = val;
+        if (val) {
+            val.addListener(flower.TouchEvent.TOUCH_END, this.__onClickButton, this);
+            if (val.parent != this) {
+                this.addChild(val);
+            }
+        }
+    }
+
+    get button() {
+        return this.$combox[1];
+    }
+
+
+    set list(val) {
+        if (this.$combox[2] == val) {
+            return;
+        }
+        if (this.$combox[2]) {
+            this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
+            this.$combox[2].addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+        }
+        this.$combox[2] = val;
+        if (val) {
+            val.requireSelection = true;
+            val.dataProvider = this.$combox[5];
+            val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
+            val.addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+        }
+        this.__listSelectItemChange();
+    }
+
+    get list() {
+        return this.$combox[2];
+    }
+
+    get isOpen() {
+        return this.$combox[3];
+    }
+
+    set isOpen(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if (val == this.$combox[3]) {
+            return;
+        }
+        this.$combox[3] = val;
+        if (val) {
+            var list = this.$combox[2];
+            if (this.stage && list) {
+                var point = flower.Point.create();
+                this.localToGlobal(point);
+                list.x = point.x;
+                list.y = point.y + this.height;
+                flower.Point.release(point);
+                flower.MenuManager.showMenu(list);
+            }
+        } else {
+
+        }
+    }
+
+    get labelField() {
+        return this.$combox[4];
+    }
+
+    set labelField(val) {
+        this.$combox[4] = val;
+        this.__listSelectItemChange();
+    }
+
+    get dataProvider() {
+        return this.$combox[5];
+    }
+
+    set dataProvider(val) {
+        if (this.$combox[5] == val) {
+            return;
+        }
+        this.$combox[5] = val;
+        if (this.list) {
+            this.list.dataProvider = this.$combox[5];
+        }
+    }
+
+    get selectedItem() {
+        return this.list ? this.list.selectedItem : null;
+    }
+
+    get selectedIndex() {
+        return this.list ? this.list.selectedIndex : -1;
+    }
+}
+
+
+black.Combox = Combox;
+//////////////////////////End File:extension/black/Combox.js///////////////////////////
 
 
 

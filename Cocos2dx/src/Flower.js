@@ -336,6 +336,11 @@ var flower = {};
                 this.show.setPositionY(-val);
             }
         }, {
+            key: "setVisible",
+            value: function setVisible(val) {
+                this.show.setVisible(val);
+            }
+        }, {
             key: "setWidth",
             value: function setWidth(val) {
                 this.__width = val;
@@ -647,7 +652,7 @@ var flower = {};
 
             _this2.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 1.5 : 1) * 12);
             _this2.show.setAnchorPoint(0, 1);
-            _this2.show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
+            _this2.setFontColor(0);
             _this2.show.retain();
             _this2.setScaleX(1);
             _this2.setScaleY(1);
@@ -657,7 +662,11 @@ var flower = {};
         _createClass(PlatformTextField, [{
             key: "setFontColor",
             value: function setFontColor(color) {
-                this.show.setFontFillColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF }, true);
+                if (Platform.native) {
+                    this.show.setFontFillColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF }, true);
+                } else {
+                    this.show.color = { r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF };
+                }
             }
         }, {
             key: "changeText",
@@ -729,7 +738,7 @@ var flower = {};
                 var show = this.show;
                 show.setString("");
                 show.setFontSize((RETINA ? 1.5 : 1) * 12);
-                show.setFontFillColor({ r: 0, g: 0, b: 0 }, true);
+                this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextField.prototype), "release", this).call(this);
             }
         }]);
@@ -2854,7 +2863,25 @@ var flower = {};
         _inherits(DisplayObject, _EventDispatcher);
 
         /**
-         * 父对象
+         * 舞台类
+         */
+
+
+        /**
+         * 脏标识
+         * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
+         *        1) 父容器 contentBounds 失效 (并且设置了 percentWidth 或 percentHeight 或 left&right 或
+         *        left&horizontalCenter 或 right& horizontalCenter或 top&bottom 或 top&verticalCenter 或 bottom&verticalCenter)
+         * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
+         * 0x0004 bounds 在父类中的尺寸失效
+         * 0x0008 matrix
+         * 0x0010 reverseMatrix
+         * 0x0100 重排子对象顺序
+         * 0x0400 shape需要重绘
+         * 0x0800 文字内容改变
+         * 0x1000 UI 属性失效
+         * 0x2000 layout 失效
+         * 0x4000 DataGroup 需要显示对象 data
          */
 
         function DisplayObject() {
@@ -2866,6 +2893,7 @@ var flower = {};
             _this14.__alpha = 1;
             _this14.__parentAlpha = 1;
             _this14.__concatAlpha = 1;
+            _this14.__visible = true;
 
             var id = DisplayObject.id++;
             _this14.$DisplayObject = {
@@ -2904,25 +2932,7 @@ var flower = {};
 
 
         /**
-         * 舞台类
-         */
-
-
-        /**
-         * 脏标识
-         * 0x0001 contentBounds 显示尺寸失效，自身显示区域失效，或者容器的子对象位置大小发生改变
-         *        1) 父容器 contentBounds 失效 (并且设置了 percentWidth 或 percentHeight 或 left&right 或
-         *        left&horizontalCenter 或 right& horizontalCenter或 top&bottom 或 top&verticalCenter 或 bottom&verticalCenter)
-         * 0x0002 alpha 最终 alpha，即 alpha 值从根节点开始连乘到此对象
-         * 0x0004 bounds 在父类中的尺寸失效
-         * 0x0008 matrix
-         * 0x0010 reverseMatrix
-         * 0x0100 重排子对象顺序
-         * 0x0400 shape需要重绘
-         * 0x0800 文字内容改变
-         * 0x1000 UI 属性失效
-         * 0x2000 layout 失效
-         * 0x4000 DataGroup 需要显示对象 data
+         * 父对象
          */
 
 
@@ -3125,6 +3135,19 @@ var flower = {};
                 }
                 this.__alpha = val;
                 this.$addFlagsDown(0x0002);
+            }
+        }, {
+            key: "$setVisible",
+            value: function $setVisible(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.__visible) {
+                    return false;
+                }
+                this.__visible = val;
+                this.$nativeShow.setVisible(val);
             }
         }, {
             key: "$getConcatAlpha",
@@ -3505,6 +3528,14 @@ var flower = {};
             key: "parent",
             get: function get() {
                 return this.__parent;
+            }
+        }, {
+            key: "visible",
+            get: function get() {
+                return this.__visible;
+            },
+            set: function set(val) {
+                this.$setVisible(val);
             }
         }, {
             key: "stage",
@@ -4862,6 +4893,8 @@ var flower = {};
             Stage.stages.push(_this21);
             _this21.$debugSprite = new Sprite();
             _this21.addChild(_this21.$debugSprite);
+            _this21.$menu = MenuManager.getInstance();
+            _this21.addChild(_this21.$menu);
             _this21.$drag = DragManager.getInstance();
             _this21.addChild(_this21.$drag);
             return _this21;
@@ -4871,8 +4904,9 @@ var flower = {};
             key: "addChildAt",
             value: function addChildAt(child, index) {
                 _get(Object.getPrototypeOf(Stage.prototype), "addChildAt", this).call(this, child, index);
-                if (child != this.$debugSprite && child != this.$drag) {
+                if (child != this.$debugSprite && child != this.$drag && child != this.$menu) {
                     this.addChild(this.$debugSprite);
+                    this.addChild(this.$menu);
                     this.addChild(this.$drag);
                 }
             }
@@ -5341,8 +5375,66 @@ var flower = {};
 
     //////////////////////////End File:flower/manager/DragManager.js///////////////////////////
 
-    //////////////////////////File:flower/texture/Texture.js///////////////////////////
+    //////////////////////////File:flower/manager/MenuManager.js///////////////////////////
 
+
+    var MenuManager = function (_Sprite4) {
+        _inherits(MenuManager, _Sprite4);
+
+        function MenuManager() {
+            _classCallCheck(this, MenuManager);
+
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
+
+            _this23.__addFrame = 0;
+
+            _this23.addListener(Event.ADDED_TO_STAGE, _this23.__addedToStage, _this23);
+            return _this23;
+        }
+
+        _createClass(MenuManager, [{
+            key: "__addedToStage",
+            value: function __addedToStage(e) {
+                this.removeListener(Event.ADDED_TO_STAGE, this.addedToStage, this);
+                this.stage.addListener(TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+            }
+        }, {
+            key: "__onTouch",
+            value: function __onTouch(e) {
+                var frame = flower.EnterFrame.frame;
+                if (frame > this.__addFrame && this.numChildren) {
+                    this.removeAll();
+                }
+            }
+        }, {
+            key: "addChildAt",
+            value: function addChildAt(child, index) {
+                this.__addFrame = flower.EnterFrame.frame;
+                _get(Object.getPrototypeOf(MenuManager.prototype), "addChildAt", this).call(this, child, index);
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                if (!MenuManager.instance) {
+                    MenuManager.instance = new MenuManager();
+                }
+                return MenuManager.instance;
+            }
+        }, {
+            key: "showMenu",
+            value: function showMenu(display) {
+                MenuManager.getInstance().removeAll();
+                MenuManager.getInstance().addChild(display);
+            }
+        }]);
+
+        return MenuManager;
+    }(Sprite);
+
+    flower.MenuManager = MenuManager;
+    //////////////////////////End File:flower/manager/MenuManager.js///////////////////////////
+
+    //////////////////////////File:flower/texture/Texture.js///////////////////////////
 
     var Texture = function () {
         function Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
@@ -5640,16 +5732,16 @@ var flower = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this23._createRes = false;
-            _this23._isLoading = false;
-            _this23._selfDispose = false;
+            _this24._createRes = false;
+            _this24._isLoading = false;
+            _this24._selfDispose = false;
 
-            _this23.$setResource(res);
-            _this23._language = LANGUAGE;
-            _this23._scale = SCALE ? SCALE : null;
-            return _this23;
+            _this24.$setResource(res);
+            _this24._language = LANGUAGE;
+            _this24._scale = SCALE ? SCALE : null;
+            return _this24;
         }
 
         _createClass(URLLoader, [{
@@ -5941,12 +6033,12 @@ var flower = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this24.__list = list;
-            _this24.__dataList = [];
-            _this24.__index = 0;
-            return _this24;
+            _this25.__list = list;
+            _this25.__dataList = [];
+            _this25.__index = 0;
+            return _this25;
         }
 
         _createClass(URLLoaderList, [{
@@ -6169,14 +6261,14 @@ var flower = {};
         function PlistLoader(url, nativeURL) {
             _classCallCheck(this, PlistLoader);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
 
-            _this25.disposeFlag = false;
+            _this26.disposeFlag = false;
 
-            _this25._url = url;
-            _this25._nativeURL = nativeURL;
-            _this25.__load();
-            return _this25;
+            _this26._url = url;
+            _this26._nativeURL = nativeURL;
+            _this26.__load();
+            return _this26;
         }
 
         _createClass(PlistLoader, [{
@@ -8567,12 +8659,12 @@ var flower = {};
         function XMLElement() {
             _classCallCheck(this, XMLElement);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
 
-            _this26.namesapces = [];
-            _this26.attributes = [];
-            _this26.list = [];
-            return _this26;
+            _this27.namesapces = [];
+            _this27.attributes = [];
+            _this27.list = [];
+            return _this27;
         }
 
         _createClass(XMLElement, [{
@@ -8686,7 +8778,7 @@ var flower = {};
                         }
                         for (j = i + 1; j < len; j++) {
                             c = content.charAt(j);
-                            if (c == " " || c == "\t" || c == "/" || c == ">") {
+                            if (c == " " || c == "\t" || c == "\r" || c == "\n" || c == "/" || c == ">") {
                                 this.name = content.slice(i, j);
                                 i = j;
                                 break;
@@ -8705,7 +8797,7 @@ var flower = {};
                     } else if (c == ">") {
                         i++;
                         break;
-                    } else if (c == " " || c == "\t") {} else {
+                    } else if (c == " " || c == "\t" || c == "\r" || c == "\n" || c == "　") {} else {
                         for (j = i + 1; j < len; j++) {
                             c = content.charAt(j);
                             if (c == "=" || c == " " || c == "\t") {

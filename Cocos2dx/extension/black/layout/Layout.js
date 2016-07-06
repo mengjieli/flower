@@ -81,6 +81,9 @@ class Layout {
     }
 
     set fixElementSize(val) {
+        if(val == "false") {
+            val = false;
+        }
         this._fixElementSize = !!val;
     }
 
