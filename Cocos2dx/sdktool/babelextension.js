@@ -206,6 +206,7 @@ var list = [
     "ViewStack",
     "Scroller",
     "Combox",
+    "Panel",
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";

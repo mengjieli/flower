@@ -1,6 +1,8 @@
 class Stage extends Sprite {
 
+    $background;
     $debugSprite
+    $pop;
     $menu;
     $drag;
 
@@ -8,12 +10,16 @@ class Stage extends Sprite {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.$background = new Shape();
         this.$debugSprite = new Sprite();
         this.addChild(this.$debugSprite);
+        this.$pop = PopManager.getInstance();
+        this.addChild(this.$pop);
         this.$menu = MenuManager.getInstance();
         this.addChild(this.$menu);
         this.$drag = DragManager.getInstance();
         this.addChild(this.$drag);
+        this.backgroundColor = 0;
     }
 
     get stageWidth() {
@@ -26,8 +32,9 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && child != this.$drag && child != this.$menu) {
+        if (child != this.$debugSprite && child != this.$drag && child != this.$menu && child != this.$pop) {
             this.addChild(this.$debugSprite);
+            this.addChild(this.$pop);
             this.addChild(this.$menu);
             this.addChild(this.$drag);
         }
@@ -336,6 +343,33 @@ class Stage extends Sprite {
         }
         mouseMoveList.length = 0;
         super.$onFrameEnd();
+        this.$background.$onFrameEnd();
+    }
+
+    $setWidth(val) {
+        return;
+    }
+
+    $setHeight(val) {
+        return;
+    }
+
+    $resize(width, height) {
+        super.$setWidth(width);
+        super.$setHeight(height);
+        this.$background.clear();
+        this.$background.drawRect(0, 0, this.width, this.height);
+        this.$pop.$resize(width, height);
+    }
+
+    set backgroundColor(val) {
+        this.$background.clear();
+        this.$background.fillColor = val;
+        this.$background.drawRect(0, 0, this.width, this.height);
+    }
+
+    get backgroundColor() {
+        return this.$background.fillColor;
     }
 
     get focus() {

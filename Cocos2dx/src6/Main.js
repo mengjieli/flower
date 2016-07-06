@@ -5,6 +5,7 @@ class Main {
 
     ready() {
         new Test();
+        flower.Stage.getInstance().backgroundColor = 0xffffff;
 
         var container = new flower.Sprite();
         flower.Stage.getInstance().addChild(container);
@@ -64,6 +65,11 @@ class Main {
                 </f:itemRenderer>
             </f:TabBar>
             <f:ViewStack x="50" y="50" id="viewStack">
+                <f:Group text="弹出框">
+                    <f:Button click="var ui = (new flower.UIParser());flower.PopManager.pop(ui,true);ui.parseUIAsync('res/theme/panel/Panel.xml');">
+                        <f:Label text="弹出面板" fontColor.up="0xffff00" fontColor.down="0x00ff00"/>
+                    </f:Button>
+                </f:Group>
                 <f:Group text="tab1">
                     <f:Combox>
                         <f:label>
@@ -93,7 +99,6 @@ class Main {
                         </f:dataProvider>
                     </f:Combox>
                 </f:Group>
-                <f:Label text="面板2222" fontColor="0xffffff" fontSize="14"/>
                 <f:Group id="g3">
                     <f:Button  touchBegin="this.g3.startDrag();">
                         <f:Image source="res/font@100x100@cn@2.png"/>

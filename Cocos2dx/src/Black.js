@@ -295,22 +295,22 @@ var $root = eval("this");
                     //}
                     if (p[0] != null && p[1] == null && p[2] != null) {
                         this.width = (p[2] - p[0]) * 2;
-                        this.x = parent.$getBounds().x + p[0];
+                        this.x = parent.$getContentBounds().x + p[0];
                     } else if (p[0] == null && p[1] != null && p[2] != null) {
                         this.width = (p[1] - p[2]) * 2;
-                        this.x = parent.$getBounds().x + 2 * p[2] - p[1];
+                        this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
                     } else if (p[0] != null && p[1] != null) {
                         this.width = parent.width - p[1] - p[0];
-                        this.x = parent.$getBounds().x + p[0];
+                        this.x = parent.$getContentBounds().x + p[0];
                     } else {
                         if (p[0] != null) {
-                            this.x = parent.$getBounds().x + p[0];
+                            this.x = parent.$getContentBounds().x + p[0];
                         }
                         if (p[1] != null) {
-                            this.x = parent.$getBounds().x + this.width - p[1] - this.width;
+                            this.x = parent.$getContentBounds().x + this.width - p[1] - this.width;
                         }
                         if (p[2] != null) {
-                            this.x = parent.$getBounds().x + (parent.width - this.width) * 0.5;
+                            this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
                         }
                         if (p[6]) {
                             this.width = parent.width * p[6] / 100;
@@ -318,22 +318,22 @@ var $root = eval("this");
                     }
                     if (p[3] != null && p[4] == null && p[5] != null) {
                         this.height = (p[5] - p[3]) * 2;
-                        this.y = parent.$getBounds().y + p[3];
+                        this.y = parent.$getContentBounds().y + p[3];
                     } else if (p[3] == null && p[4] != null && p[5] != null) {
                         this.height = (p[4] - p[5]) * 2;
-                        this.y = parent.$getBounds().y + 2 * p[5] - p[4];
+                        this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
                     } else if (p[3] != null && p[4] != null) {
                         this.height = parent.height - p[4] - p[3];
-                        this.y = parent.$getBounds().y + p[3];
+                        this.y = parent.$getContentBounds().y + p[3];
                     } else {
                         if (p[3] != null) {
-                            this.y = parent.$getBounds().y + p[0];
+                            this.y = parent.$getContentBounds().y + p[0];
                         }
                         if (p[4] != null) {
-                            this.y = parent.$getBounds().y + this.height - p[1] - this.height;
+                            this.y = parent.$getContentBounds().y + this.height - p[1] - this.height;
                         }
                         if (p[5] != null) {
-                            this.y = parent.$getBounds().y + (parent.height - this.height) * 0.5;
+                            this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
                         }
                         if (p[7]) {
                             this.height = parent.height * p[7] / 100;
@@ -1819,6 +1819,7 @@ var $root = eval("this");
             var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
             _this15.classes = flower.UIParser.classes;
+            _this15.percentWidth = _this15.percentHeight = 100;
             return _this15;
         }
 
@@ -1927,18 +1928,17 @@ var $root = eval("this");
                 }
                 if (this.relationIndex >= this.relationUI.length) {
                     if (this.parseUIAsyncFlag) {
-                        var ui = this.parseUI(this.loadContent, this.loadData);
-                        //this.dispatchWidth(Event.COMPLETE, ui);
+                        this.parseUI(this.loadContent, this.loadData);
                     } else {
-                            var data = this.parse(this.loadContent);
-                            //this.dispatchWidth(Event.COMPLETE, data);
-                        }
-                } else {
-                        var parser = new UIParser();
-                        parser.parseAsync(this.relationUI[this.relationIndex]);
-                        parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
-                        parser.addListener(Event.ERROR, this.relationLoadError, this);
+                        var data = this.parse(this.loadContent);
+                        this.dispatchWidth(Event.COMPLETE, data);
                     }
+                } else {
+                    var parser = new UIParser();
+                    parser.parseAsync(this.relationUI[this.relationIndex]);
+                    parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
+                    parser.addListener(Event.ERROR, this.relationLoadError, this);
+                }
             }
         }, {
             key: "relationLoadError",
@@ -1954,6 +1954,11 @@ var $root = eval("this");
             value: function parseUI(content) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
+                new flower.CallLater(this.__parseUI, this, [content, data]);
+            }
+        }, {
+            key: "__parseUI",
+            value: function __parseUI(content, data) {
                 var className = this.parse(content);
                 var UIClass = this.classes.local[className];
                 if (data) {
@@ -1963,7 +1968,7 @@ var $root = eval("this");
                 if (!ui.parent) {
                     this.addChild(ui);
                 }
-                return ui;
+                this.dispatchWidth(Event.COMPLETE, ui);
             }
         }, {
             key: "parse",
@@ -2546,7 +2551,8 @@ var $root = eval("this");
             "List": "flower.List",
             "TabBar": "flower.TabBar",
             "ViewStack": "flower.ViewStack",
-            "Combox": "Combox",
+            "Combox": "flower.Combox",
+            "Panel": "flower.Panel",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -3042,8 +3048,8 @@ var $root = eval("this");
         return DataGroup;
     }(Group);
 
-    UIComponent.registerEvent(DataGroup, 1101, "clickItem", DataGroupEvent.CLICK_ITEM);
-    UIComponent.registerEvent(DataGroup, 1102, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
+    UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
+    UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
 
     black.DataGroup = DataGroup;
     //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
@@ -4650,6 +4656,99 @@ var $root = eval("this");
 
     black.Combox = Combox;
     //////////////////////////End File:extension/black/Combox.js///////////////////////////
+
+    //////////////////////////File:extension/black/Panel.js///////////////////////////
+
+    var Panel = function (_Group9) {
+        _inherits(Panel, _Group9);
+
+        function Panel() {
+            _classCallCheck(this, Panel);
+
+            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
+
+            _this35.$Panel = {
+                0: "", //title
+                1: null, //titleLabel
+                2: null };
+            return _this35;
+        }
+
+        _createClass(Panel, [{
+            key: "__changeTitle",
+            //closeButton
+            value: function __changeTitle() {
+                var p = this.$Panel;
+                if (p[0] && p[1]) {
+                    p[1].text = p[0];
+                }
+            }
+        }, {
+            key: "$onClose",
+            value: function $onClose() {
+                this.close();
+            }
+        }, {
+            key: "close",
+            value: function close() {
+                if (this.parent) {
+                    this.parent.removeChild(this);
+                }
+            }
+        }, {
+            key: "title",
+            set: function set(val) {
+                if (this.$Panel[0] == val) {
+                    return;
+                }
+                this.$Panel[0] = val;
+                this.__changeTitle();
+            },
+            get: function get() {
+                return this.$Panel[0];
+            }
+        }, {
+            key: "titleLabel",
+            get: function get() {
+                return this.$Panel[1];
+            },
+            set: function set(val) {
+                if (this.$Panel[1] == val) {
+                    return;
+                }
+                this.$Panel[1] = val;
+                if (val.parent != this) {
+                    this.addChild(val);
+                }
+                this.__changeTitle();
+            }
+        }, {
+            key: "closeButton",
+            get: function get() {
+                return this.$Panel[2];
+            },
+            set: function set(val) {
+                if (this.$Panel[2] == val) {
+                    return;
+                }
+                if (this.$Panel[2]) {
+                    this.$Panel[2].removeListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
+                }
+                this.$Panel[2] = val;
+                if (val) {
+                    if (val.parent != this) {
+                        this.addChild(val);
+                    }
+                    val.addListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
+                }
+            }
+        }]);
+
+        return Panel;
+    }(Group);
+
+    black.Panel = Panel;
+    //////////////////////////End File:extension/black/Panel.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];

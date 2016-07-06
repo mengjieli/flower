@@ -261,23 +261,23 @@ class UIComponent {
             //}
             if (p[0] != null && p[1] == null && p [2] != null) {
                 this.width = (p[2] - p[0]) * 2;
-                this.x = parent.$getBounds().x + p[0];
+                this.x = parent.$getContentBounds().x + p[0];
             }
             else if (p[0] == null && p[1] != null && p[2] != null) {
                 this.width = (p[1] - p[2]) * 2;
-                this.x = parent.$getBounds().x + 2 * p[2] - p[1];
+                this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
             } else if (p[0] != null && p[1] != null) {
                 this.width = parent.width - p[1] - p[0];
-                this.x = parent.$getBounds().x + p[0];
+                this.x = parent.$getContentBounds().x + p[0];
             } else {
                 if (p[0] != null) {
-                    this.x = parent.$getBounds().x + p[0];
+                    this.x = parent.$getContentBounds().x + p[0];
                 }
                 if (p[1] != null) {
-                    this.x = parent.$getBounds().x + this.width - p[1] - this.width;
+                    this.x = parent.$getContentBounds().x + this.width - p[1] - this.width;
                 }
                 if (p[2] != null) {
-                    this.x = parent.$getBounds().x + (parent.width - this.width) * 0.5;
+                    this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
                 }
                 if (p[6]) {
                     this.width = parent.width * p[6] / 100;
@@ -285,22 +285,22 @@ class UIComponent {
             }
             if (p[3] != null && p[4] == null && p [5] != null) {
                 this.height = (p[5] - p[3]) * 2;
-                this.y = parent.$getBounds().y + p[3];
+                this.y = parent.$getContentBounds().y + p[3];
             } else if (p[3] == null && p[4] != null && p[5] != null) {
                 this.height = (p[4] - p[5]) * 2;
-                this.y = parent.$getBounds().y + 2 * p[5] - p[4];
+                this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
             } else if (p[3] != null && p[4] != null) {
                 this.height = parent.height - p[4] - p[3];
-                this.y = parent.$getBounds().y + p[3];
+                this.y = parent.$getContentBounds().y + p[3];
             } else {
                 if (p[3] != null) {
-                    this.y = parent.$getBounds().y + p[0];
+                    this.y = parent.$getContentBounds().y + p[0];
                 }
                 if (p[4] != null) {
-                    this.y = parent.$getBounds().y + this.height - p[1] - this.height;
+                    this.y = parent.$getContentBounds().y + this.height - p[1] - this.height;
                 }
                 if (p[5] != null) {
-                    this.y = parent.$getBounds().y + (parent.height - this.height) * 0.5;
+                    this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
                 }
                 if (p[7]) {
                     this.height = parent.height * p[7] / 100;

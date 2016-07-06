@@ -215,6 +215,7 @@ var list = [
 
     "DragManager",
     "MenuManager",
+    "PopManager",
 
     "Texture",
     "TextureManager",

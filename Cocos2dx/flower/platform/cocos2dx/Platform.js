@@ -6,7 +6,7 @@ class Platform {
     static width;
     static height;
 
-    static start(engine, root) {
+    static start(engine, root, background) {
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
@@ -51,11 +51,11 @@ class Platform {
         cc.director.runScene(Platform.stage);
         Platform.width = cc.director.getWinSize().width;
         Platform.height = cc.director.getWinSize().height;
+        engine.$resize(Platform.width, Platform.height);
+        background.show.setPositionY(Platform.height);
+        Platform.stage.addChild(background.show);
         root.show.setPositionY(Platform.height);
-        //debugRoot.setPositionY(Platform.height);
         Platform.stage.addChild(root.show);
-        //Platform.stage.addChild(debugRoot);
-        //System.$mesureTxt.retain();
     }
 
 

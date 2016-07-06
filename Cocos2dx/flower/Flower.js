@@ -22,7 +22,7 @@ function start(completeFunc, scale, language) {
     LANGUAGE = language || "";
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow);
+    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
     //completeFunc();
     var loader = new URLLoader("res/blank.png");

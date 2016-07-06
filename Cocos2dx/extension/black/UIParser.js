@@ -41,7 +41,8 @@ class UIParser extends Group {
             "List": "flower.List",
             "TabBar": "flower.TabBar",
             "ViewStack": "flower.ViewStack",
-            "Combox": "Combox",
+            "Combox": "flower.Combox",
+            "Panel": "flower.Panel",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -70,6 +71,7 @@ class UIParser extends Group {
     constructor() {
         super();
         this.classes = flower.UIParser.classes;
+        this.percentWidth = this.percentHeight = 100;
     }
 
     parseUIAsync(url, data = null) {
@@ -168,11 +170,10 @@ class UIParser extends Group {
         }
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
-                var ui = this.parseUI(this.loadContent, this.loadData);
-                //this.dispatchWidth(Event.COMPLETE, ui);
+                this.parseUI(this.loadContent, this.loadData);
             } else {
                 var data = this.parse(this.loadContent);
-                //this.dispatchWidth(Event.COMPLETE, data);
+                this.dispatchWidth(Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
@@ -191,6 +192,10 @@ class UIParser extends Group {
     }
 
     parseUI(content, data = null) {
+        new flower.CallLater(this.__parseUI, this, [content, data]);
+    }
+
+    __parseUI(content, data) {
         var className = this.parse(content);
         var UIClass = this.classes.local[className];
         if (data) {
@@ -200,7 +205,7 @@ class UIParser extends Group {
         if (!ui.parent) {
             this.addChild(ui);
         }
-        return ui;
+        this.dispatchWidth(Event.COMPLETE, ui);
     }
 
     parse(content) {

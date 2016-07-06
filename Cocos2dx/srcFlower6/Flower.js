@@ -45,7 +45,7 @@ function start(completeFunc, scale, language) {
     LANGUAGE = language || "";
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow);
+    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
     //completeFunc();
     var loader = new URLLoader("res/blank.png");
@@ -150,7 +150,7 @@ class Platform {
     static width;
     static height;
 
-    static start(engine, root) {
+    static start(engine, root, background) {
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
@@ -195,11 +195,11 @@ class Platform {
         cc.director.runScene(Platform.stage);
         Platform.width = cc.director.getWinSize().width;
         Platform.height = cc.director.getWinSize().height;
+        engine.$resize(Platform.width, Platform.height);
+        background.show.setPositionY(Platform.height);
+        Platform.stage.addChild(background.show);
         root.show.setPositionY(Platform.height);
-        //debugRoot.setPositionY(Platform.height);
         Platform.stage.addChild(root.show);
-        //Platform.stage.addChild(debugRoot);
-        //System.$mesureTxt.retain();
     }
 
 
@@ -4384,7 +4384,9 @@ flower.Shape = Shape;
 //////////////////////////File:flower/display/Stage.js///////////////////////////
 class Stage extends Sprite {
 
+    $background;
     $debugSprite
+    $pop;
     $menu;
     $drag;
 
@@ -4392,12 +4394,16 @@ class Stage extends Sprite {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.$background = new Shape();
         this.$debugSprite = new Sprite();
         this.addChild(this.$debugSprite);
+        this.$pop = PopManager.getInstance();
+        this.addChild(this.$pop);
         this.$menu = MenuManager.getInstance();
         this.addChild(this.$menu);
         this.$drag = DragManager.getInstance();
         this.addChild(this.$drag);
+        this.backgroundColor = 0;
     }
 
     get stageWidth() {
@@ -4410,8 +4416,9 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && child != this.$drag && child != this.$menu) {
+        if (child != this.$debugSprite && child != this.$drag && child != this.$menu && child != this.$pop) {
             this.addChild(this.$debugSprite);
+            this.addChild(this.$pop);
             this.addChild(this.$menu);
             this.addChild(this.$drag);
         }
@@ -4720,6 +4727,33 @@ class Stage extends Sprite {
         }
         mouseMoveList.length = 0;
         super.$onFrameEnd();
+        this.$background.$onFrameEnd();
+    }
+
+    $setWidth(val) {
+        return;
+    }
+
+    $setHeight(val) {
+        return;
+    }
+
+    $resize(width, height) {
+        super.$setWidth(width);
+        super.$setHeight(height);
+        this.$background.clear();
+        this.$background.drawRect(0, 0, this.width, this.height);
+        this.$pop.$resize(width, height);
+    }
+
+    set backgroundColor(val) {
+        this.$background.clear();
+        this.$background.fillColor = val;
+        this.$background.drawRect(0, 0, this.width, this.height);
+    }
+
+    get backgroundColor() {
+        return this.$background.fillColor;
     }
 
     get focus() {
@@ -4902,6 +4936,101 @@ class MenuManager extends Sprite {
 
 flower.MenuManager = MenuManager;
 //////////////////////////End File:flower/manager/MenuManager.js///////////////////////////
+
+
+
+//////////////////////////File:flower/manager/PopManager.js///////////////////////////
+class PopManager extends Sprite {
+
+    __panels = [];
+
+    constructor() {
+        super();
+    }
+
+    $resize(width, height) {
+        this.width = width;
+        this.height = height;
+        var panels = this.__panels;
+        for (var i = 0; i < panels.length; i++) {
+            var item = panels[i];
+            var panel = item.panel;
+            if (item.center) {
+                panel.x = (this.width - panel.width) / 2;
+                panel.y = (this.height - panel.height) / 2;
+            }
+            if (item.mask) {
+                var shape = item.mask;
+                shape.clear();
+                shape.drawRect(0, 0, width, height);
+            }
+        }
+    }
+
+    removeChild(child) {
+        var panels = this.__panels;
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i].panel == child) {
+                if (panels[i].mask) {
+                    super.removeChild(panels[i].mask);
+                }
+                panels.splice(i, 1);
+            }
+        }
+        super.removeChild(child);
+    }
+
+    pop(panel, mask = false, center = false) {
+        var find = false;
+        var item;
+        var panels = this.__panels;
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i] == panel) {
+                item = panels[i];
+                if (item.mask) {
+                    this.removeChild(item.mask);
+                }
+                panels.splice(i, 1);
+                find = true;
+                break;
+            }
+        }
+        var item = {
+            mask: null,
+            panel: panel,
+            center: center
+        };
+        panels.push(item);
+        if (center) {
+            panel.x = (this.width - panel.width) / 2;
+            panel.y = (this.height - panel.height) / 2;
+        }
+        if (mask) {
+            item.mask = new Shape();
+            item.mask.fillColor = 0;
+            item.mask.fillAlpha = 0.4;
+            item.mask.drawRect(0, 0, this.width, this.height);
+            this.addChild(item.mask);
+        }
+        this.addChild(panel);
+    }
+
+    static instance;
+
+    static getInstance() {
+        if (!PopManager.instance) {
+            PopManager.instance = new PopManager();
+        }
+        return PopManager.instance;
+    }
+
+    static pop(panel, mask = false, center = false) {
+        PopManager.getInstance().pop(panel, mask, center);
+    }
+}
+
+flower.PopManager = PopManager;
+//////////////////////////End File:flower/manager/PopManager.js///////////////////////////
 
 
 
@@ -7694,7 +7823,7 @@ class StringDo {
         var code;
         for (var j = pos, len = str.length; j < len; j++) {
             code = str.charCodeAt(j);
-            if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code == 95 || j != pos && code >= 48 && code <= 57) {
+            if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code == 36 || code == 95 || j != pos && code >= 48 && code <= 57) {
                 id += str.charAt(j);
             } else {
                 break;

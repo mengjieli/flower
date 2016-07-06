@@ -101,7 +101,7 @@ class StringDo {
         var code;
         for (var j = pos, len = str.length; j < len; j++) {
             code = str.charCodeAt(j);
-            if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code == 95 || j != pos && code >= 48 && code <= 57) {
+            if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code == 36 || code == 95 || j != pos && code >= 48 && code <= 57) {
                 id += str.charAt(j);
             } else {
                 break;

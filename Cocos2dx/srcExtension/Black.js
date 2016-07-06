@@ -274,23 +274,23 @@ class UIComponent {
             //}
             if (p[0] != null && p[1] == null && p [2] != null) {
                 this.width = (p[2] - p[0]) * 2;
-                this.x = parent.$getBounds().x + p[0];
+                this.x = parent.$getContentBounds().x + p[0];
             }
             else if (p[0] == null && p[1] != null && p[2] != null) {
                 this.width = (p[1] - p[2]) * 2;
-                this.x = parent.$getBounds().x + 2 * p[2] - p[1];
+                this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
             } else if (p[0] != null && p[1] != null) {
                 this.width = parent.width - p[1] - p[0];
-                this.x = parent.$getBounds().x + p[0];
+                this.x = parent.$getContentBounds().x + p[0];
             } else {
                 if (p[0] != null) {
-                    this.x = parent.$getBounds().x + p[0];
+                    this.x = parent.$getContentBounds().x + p[0];
                 }
                 if (p[1] != null) {
-                    this.x = parent.$getBounds().x + this.width - p[1] - this.width;
+                    this.x = parent.$getContentBounds().x + this.width - p[1] - this.width;
                 }
                 if (p[2] != null) {
-                    this.x = parent.$getBounds().x + (parent.width - this.width) * 0.5;
+                    this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
                 }
                 if (p[6]) {
                     this.width = parent.width * p[6] / 100;
@@ -298,22 +298,22 @@ class UIComponent {
             }
             if (p[3] != null && p[4] == null && p [5] != null) {
                 this.height = (p[5] - p[3]) * 2;
-                this.y = parent.$getBounds().y + p[3];
+                this.y = parent.$getContentBounds().y + p[3];
             } else if (p[3] == null && p[4] != null && p[5] != null) {
                 this.height = (p[4] - p[5]) * 2;
-                this.y = parent.$getBounds().y + 2 * p[5] - p[4];
+                this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
             } else if (p[3] != null && p[4] != null) {
                 this.height = parent.height - p[4] - p[3];
-                this.y = parent.$getBounds().y + p[3];
+                this.y = parent.$getContentBounds().y + p[3];
             } else {
                 if (p[3] != null) {
-                    this.y = parent.$getBounds().y + p[0];
+                    this.y = parent.$getContentBounds().y + p[0];
                 }
                 if (p[4] != null) {
-                    this.y = parent.$getBounds().y + this.height - p[1] - this.height;
+                    this.y = parent.$getContentBounds().y + this.height - p[1] - this.height;
                 }
                 if (p[5] != null) {
-                    this.y = parent.$getBounds().y + (parent.height - this.height) * 0.5;
+                    this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
                 }
                 if (p[7]) {
                     this.height = parent.height * p[7] / 100;
@@ -1628,7 +1628,8 @@ class UIParser extends Group {
             "List": "flower.List",
             "TabBar": "flower.TabBar",
             "ViewStack": "flower.ViewStack",
-            "Combox": "Combox",
+            "Combox": "flower.Combox",
+            "Panel": "flower.Panel",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -1657,6 +1658,7 @@ class UIParser extends Group {
     constructor() {
         super();
         this.classes = flower.UIParser.classes;
+        this.percentWidth = this.percentHeight = 100;
     }
 
     parseUIAsync(url, data = null) {
@@ -1755,11 +1757,10 @@ class UIParser extends Group {
         }
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
-                var ui = this.parseUI(this.loadContent, this.loadData);
-                //this.dispatchWidth(Event.COMPLETE, ui);
+                this.parseUI(this.loadContent, this.loadData);
             } else {
                 var data = this.parse(this.loadContent);
-                //this.dispatchWidth(Event.COMPLETE, data);
+                this.dispatchWidth(Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
@@ -1778,6 +1779,10 @@ class UIParser extends Group {
     }
 
     parseUI(content, data = null) {
+        new flower.CallLater(this.__parseUI, this, [content, data]);
+    }
+
+    __parseUI(content, data) {
         var className = this.parse(content);
         var UIClass = this.classes.local[className];
         if (data) {
@@ -1787,7 +1792,7 @@ class UIParser extends Group {
         if (!ui.parent) {
             this.addChild(ui);
         }
-        return ui;
+        this.dispatchWidth(Event.COMPLETE, ui);
     }
 
     parse(content) {
@@ -2777,8 +2782,8 @@ class DataGroup extends Group {
     }
 }
 
-UIComponent.registerEvent(DataGroup, 1101, "clickItem", DataGroupEvent.CLICK_ITEM);
-UIComponent.registerEvent(DataGroup, 1102, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
+UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
+UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
 
 black.DataGroup = DataGroup;
 //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
@@ -4204,6 +4209,90 @@ class Combox extends Group {
 
 black.Combox = Combox;
 //////////////////////////End File:extension/black/Combox.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/Panel.js///////////////////////////
+class Panel extends Group {
+
+    $Panel;
+
+    constructor() {
+        super();
+        this.$Panel = {
+            0: "",//title
+            1: null, //titleLabel
+            2: null, //closeButton
+        }
+    }
+
+    __changeTitle() {
+        var p = this.$Panel;
+        if (p[0] && p[1]) {
+            p[1].text = p[0];
+        }
+    }
+
+    $onClose() {
+        this.close();
+    }
+
+    close() {
+        if (this.parent) {
+            this.parent.removeChild(this);
+        }
+    }
+
+    set title(val) {
+        if (this.$Panel[0] == val) {
+            return;
+        }
+        this.$Panel[0] = val;
+        this.__changeTitle();
+    }
+
+    get title() {
+        return this.$Panel[0];
+    }
+
+    get titleLabel() {
+        return this.$Panel[1];
+    }
+
+    set titleLabel(val) {
+        if (this.$Panel[1] == val) {
+            return;
+        }
+        this.$Panel[1] = val;
+        if (val.parent != this) {
+            this.addChild(val);
+        }
+        this.__changeTitle();
+    }
+
+    get closeButton() {
+        return this.$Panel[2];
+    }
+
+    set closeButton(val) {
+        if (this.$Panel[2] == val) {
+            return;
+        }
+        if (this.$Panel[2]) {
+            this.$Panel[2].removeListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
+        }
+        this.$Panel[2] = val;
+        if (val) {
+            if (val.parent != this) {
+                this.addChild(val);
+            }
+            val.addListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
+        }
+    }
+}
+
+black.Panel = Panel;
+//////////////////////////End File:extension/black/Panel.js///////////////////////////
 
 
 

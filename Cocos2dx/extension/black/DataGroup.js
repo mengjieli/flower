@@ -450,7 +450,7 @@ class DataGroup extends Group {
     }
 }
 
-UIComponent.registerEvent(DataGroup, 1101, "clickItem", DataGroupEvent.CLICK_ITEM);
-UIComponent.registerEvent(DataGroup, 1102, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
+UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
+UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
 
 exports.DataGroup = DataGroup;

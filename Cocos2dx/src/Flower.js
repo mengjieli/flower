@@ -55,7 +55,7 @@ var flower = {};
         LANGUAGE = language || "";
         var stage = new Stage();
         Platform._runBack = CoreTime.$run;
-        Platform.start(stage, stage.$nativeShow);
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
         //completeFunc();
         var loader = new URLLoader("res/blank.png");
@@ -170,7 +170,7 @@ var flower = {};
 
         _createClass(Platform, null, [{
             key: "start",
-            value: function start(engine, root) {
+            value: function start(engine, root, background) {
                 RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
                 Platform.native = cc.sys.isNative;
                 var scene = cc.Scene.extend({
@@ -215,11 +215,11 @@ var flower = {};
                 cc.director.runScene(Platform.stage);
                 Platform.width = cc.director.getWinSize().width;
                 Platform.height = cc.director.getWinSize().height;
+                engine.$resize(Platform.width, Platform.height);
+                background.show.setPositionY(Platform.height);
+                Platform.stage.addChild(background.show);
                 root.show.setPositionY(Platform.height);
-                //debugRoot.setPositionY(Platform.height);
                 Platform.stage.addChild(root.show);
-                //Platform.stage.addChild(debugRoot);
-                //System.$mesureTxt.retain();
             }
         }, {
             key: "_run",
@@ -4891,12 +4891,16 @@ var flower = {};
 
             _this21.__stage = _this21;
             Stage.stages.push(_this21);
+            _this21.$background = new Shape();
             _this21.$debugSprite = new Sprite();
             _this21.addChild(_this21.$debugSprite);
+            _this21.$pop = PopManager.getInstance();
+            _this21.addChild(_this21.$pop);
             _this21.$menu = MenuManager.getInstance();
             _this21.addChild(_this21.$menu);
             _this21.$drag = DragManager.getInstance();
             _this21.addChild(_this21.$drag);
+            _this21.backgroundColor = 0;
             return _this21;
         }
 
@@ -4904,8 +4908,9 @@ var flower = {};
             key: "addChildAt",
             value: function addChildAt(child, index) {
                 _get(Object.getPrototypeOf(Stage.prototype), "addChildAt", this).call(this, child, index);
-                if (child != this.$debugSprite && child != this.$drag && child != this.$menu) {
+                if (child != this.$debugSprite && child != this.$drag && child != this.$menu && child != this.$pop) {
                     this.addChild(this.$debugSprite);
+                    this.addChild(this.$pop);
                     this.addChild(this.$menu);
                     this.addChild(this.$drag);
                 }
@@ -5218,6 +5223,26 @@ var flower = {};
                 }
                 mouseMoveList.length = 0;
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
+                this.$background.$onFrameEnd();
+            }
+        }, {
+            key: "$setWidth",
+            value: function $setWidth(val) {
+                return;
+            }
+        }, {
+            key: "$setHeight",
+            value: function $setHeight(val) {
+                return;
+            }
+        }, {
+            key: "$resize",
+            value: function $resize(width, height) {
+                _get(Object.getPrototypeOf(Stage.prototype), "$setWidth", this).call(this, width);
+                _get(Object.getPrototypeOf(Stage.prototype), "$setHeight", this).call(this, height);
+                this.$background.clear();
+                this.$background.drawRect(0, 0, this.width, this.height);
+                this.$pop.$resize(width, height);
             }
         }, {
             key: "stageWidth",
@@ -5228,6 +5253,16 @@ var flower = {};
             key: "stageHeight",
             get: function get() {
                 return Platform.height;
+            }
+        }, {
+            key: "backgroundColor",
+            set: function set(val) {
+                this.$background.clear();
+                this.$background.fillColor = val;
+                this.$background.drawRect(0, 0, this.width, this.height);
+            },
+            get: function get() {
+                return this.$background.fillColor;
             }
         }, {
             key: "focus",
@@ -5433,6 +5468,117 @@ var flower = {};
 
     flower.MenuManager = MenuManager;
     //////////////////////////End File:flower/manager/MenuManager.js///////////////////////////
+
+    //////////////////////////File:flower/manager/PopManager.js///////////////////////////
+
+    var PopManager = function (_Sprite5) {
+        _inherits(PopManager, _Sprite5);
+
+        function PopManager() {
+            _classCallCheck(this, PopManager);
+
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
+
+            _this24.__panels = [];
+            return _this24;
+        }
+
+        _createClass(PopManager, [{
+            key: "$resize",
+            value: function $resize(width, height) {
+                this.width = width;
+                this.height = height;
+                var panels = this.__panels;
+                for (var i = 0; i < panels.length; i++) {
+                    var item = panels[i];
+                    var panel = item.panel;
+                    if (item.center) {
+                        panel.x = (this.width - panel.width) / 2;
+                        panel.y = (this.height - panel.height) / 2;
+                    }
+                    if (item.mask) {
+                        var shape = item.mask;
+                        shape.clear();
+                        shape.drawRect(0, 0, width, height);
+                    }
+                }
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(child) {
+                var panels = this.__panels;
+                for (var i = 0; i < panels.length; i++) {
+                    if (panels[i].panel == child) {
+                        if (panels[i].mask) {
+                            _get(Object.getPrototypeOf(PopManager.prototype), "removeChild", this).call(this, panels[i].mask);
+                        }
+                        panels.splice(i, 1);
+                    }
+                }
+                _get(Object.getPrototypeOf(PopManager.prototype), "removeChild", this).call(this, child);
+            }
+        }, {
+            key: "pop",
+            value: function pop(panel) {
+                var mask = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+                var center = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+                var find = false;
+                var item;
+                var panels = this.__panels;
+                for (var i = 0; i < panels.length; i++) {
+                    if (panels[i] == panel) {
+                        item = panels[i];
+                        if (item.mask) {
+                            this.removeChild(item.mask);
+                        }
+                        panels.splice(i, 1);
+                        find = true;
+                        break;
+                    }
+                }
+                var item = {
+                    mask: null,
+                    panel: panel,
+                    center: center
+                };
+                panels.push(item);
+                if (center) {
+                    panel.x = (this.width - panel.width) / 2;
+                    panel.y = (this.height - panel.height) / 2;
+                }
+                if (mask) {
+                    item.mask = new Shape();
+                    item.mask.fillColor = 0;
+                    item.mask.fillAlpha = 0.4;
+                    item.mask.drawRect(0, 0, this.width, this.height);
+                    this.addChild(item.mask);
+                }
+                this.addChild(panel);
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                if (!PopManager.instance) {
+                    PopManager.instance = new PopManager();
+                }
+                return PopManager.instance;
+            }
+        }, {
+            key: "pop",
+            value: function pop(panel) {
+                var mask = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+                var center = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+                PopManager.getInstance().pop(panel, mask, center);
+            }
+        }]);
+
+        return PopManager;
+    }(Sprite);
+
+    flower.PopManager = PopManager;
+    //////////////////////////End File:flower/manager/PopManager.js///////////////////////////
 
     //////////////////////////File:flower/texture/Texture.js///////////////////////////
 
@@ -5732,16 +5878,16 @@ var flower = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this24._createRes = false;
-            _this24._isLoading = false;
-            _this24._selfDispose = false;
+            _this25._createRes = false;
+            _this25._isLoading = false;
+            _this25._selfDispose = false;
 
-            _this24.$setResource(res);
-            _this24._language = LANGUAGE;
-            _this24._scale = SCALE ? SCALE : null;
-            return _this24;
+            _this25.$setResource(res);
+            _this25._language = LANGUAGE;
+            _this25._scale = SCALE ? SCALE : null;
+            return _this25;
         }
 
         _createClass(URLLoader, [{
@@ -6033,12 +6179,12 @@ var flower = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this25.__list = list;
-            _this25.__dataList = [];
-            _this25.__index = 0;
-            return _this25;
+            _this26.__list = list;
+            _this26.__dataList = [];
+            _this26.__index = 0;
+            return _this26;
         }
 
         _createClass(URLLoaderList, [{
@@ -6261,14 +6407,14 @@ var flower = {};
         function PlistLoader(url, nativeURL) {
             _classCallCheck(this, PlistLoader);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
 
-            _this26.disposeFlag = false;
+            _this27.disposeFlag = false;
 
-            _this26._url = url;
-            _this26._nativeURL = nativeURL;
-            _this26.__load();
-            return _this26;
+            _this27._url = url;
+            _this27._nativeURL = nativeURL;
+            _this27.__load();
+            return _this27;
         }
 
         _createClass(PlistLoader, [{
@@ -8481,7 +8627,7 @@ var flower = {};
                 var code;
                 for (var j = pos, len = str.length; j < len; j++) {
                     code = str.charCodeAt(j);
-                    if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code == 95 || j != pos && code >= 48 && code <= 57) {
+                    if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code == 36 || code == 95 || j != pos && code >= 48 && code <= 57) {
                         id += str.charAt(j);
                     } else {
                         break;
@@ -8659,12 +8805,12 @@ var flower = {};
         function XMLElement() {
             _classCallCheck(this, XMLElement);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
 
-            _this27.namesapces = [];
-            _this27.attributes = [];
-            _this27.list = [];
-            return _this27;
+            _this28.namesapces = [];
+            _this28.attributes = [];
+            _this28.list = [];
+            return _this28;
         }
 
         _createClass(XMLElement, [{
