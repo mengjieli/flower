@@ -2,13 +2,13 @@
     <f:script src="./Panel.js"/>
     <f:RectUI id="background" percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1"
               fillColor="0xE7E7E7"/>
-    <f:RectUI id="titleBar" left="1" right="1" top="1" height="24" fillColor="0xD0D0D0" touchBegin="this.startDrag();"/>
-    <f:titleLabel>
-        <f:Label y="3" touchEnabled="false" text="Panel" horizontalCenter="0" fontSize="18" fontColor="0x252325"/>
-    </f:titleLabel>
-    <f:closeButton>
-        <f:Button width="30" height="24" top="1" right="1">
+    <f:Group left="1" right="1" height="24" top="1">
+        <f:RectUI id="titleBar" percentWidth="100" percentHeight="100" fillColor="0xD0D0D0"
+                  touchBegin="this.startDrag();"/>
+        <f:Label id="titleLabel" y="3" touchEnabled="false" text="Panel" horizontalCenter="0" fontSize="16"
+                 fontColor="0x252325"/>
+        <f:Button id="closeButton" width="30" height="24" right="0">
             <f:RectUI percentWidth="100" percentHeight="100" fillColor.up="0xFC4A4A" fillColor.down="0x7D2525"/>
         </f:Button>
-    </f:closeButton>
+    </f:Group>
 </f:Panel>

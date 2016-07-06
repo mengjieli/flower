@@ -560,13 +560,14 @@ var flower = {};
         }, {
             key: "release",
             value: function release() {
+                this.setScaleX(1);
+                this.setScaleY(1);
+                this.setRotation(0);
                 this.setFilters([]);
-                var show = this.show;
-                show.setPosition(0, 0);
-                show.setScale(1);
-                show.setOpacity(255);
-                show.setRotation(0);
-                show.setVisible(true);
+                this.setAlpha(1);
+                this.setX(0);
+                this.setY(0);
+                this.setVisible(true);
                 this.__x = 0;
                 this.__y = 0;
                 this.__scaleX = 1;
