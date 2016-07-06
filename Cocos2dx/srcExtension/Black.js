@@ -170,10 +170,10 @@ class UIComponent {
             return this.currentState;
         }
 
-        p.$callUIComponentEvent = function (type) {
+        p.$callUIComponentEvent = function (type, args) {
             var func = this.$UIComponent[type];
             if (func) {
-                func.call(this.eventThis);
+                func.apply(this.eventThis, args);
             }
         }
 
@@ -446,7 +446,7 @@ class UIComponent {
                 return this.$UIComponent[12];
             },
             set: function (val) {
-                if(val == "false") {
+                if (val == "false") {
                     val = false;
                 }
                 this.$UIComponent[12] = !!val;
@@ -483,7 +483,11 @@ class UIComponent {
                 if (val) {
                     if (!this.$UIComponent[1000 + index]) {
                         this.$UIComponent[1000 + index] = function () {
-                            this.$callUIComponentEvent(index);
+                            var args = [];
+                            for (var i = 0; i < arguments.length; i++) {
+                                args[i] = arguments[i];
+                            }
+                            this.$callUIComponentEvent(index, args);
                         };
                         this.addListener(eventType, this.$UIComponent[1000 + index], this);
                     }
@@ -528,7 +532,7 @@ class DataGroupEvent extends flower.Event {
         return this.__item;
     }
 
-    static SELECT_ITEM_CHANGE = "select_item_change";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
     static CLICK_ITEM = "click_item";
 }
 
@@ -2342,7 +2346,7 @@ class DataGroup extends Group {
             11: true,//itemClickedEnabled
             12: false,//requireSelection
         }
-        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
+        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
     }
 
     onDataUpdate() {
@@ -2494,9 +2498,9 @@ class DataGroup extends Group {
         var item = new p[1](data);
         item.index = index;
         item.$setList(p[0]);
-        item.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
-        item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
-        item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
         if (item.data == p[8]) {
             if (item.data == p[9]) {
                 item.currentState = "selectedDown";
@@ -2515,7 +2519,7 @@ class DataGroup extends Group {
         return item;
     }
 
-    _onTouchItem(e) {
+    __onTouchItem(e) {
         var p = this.$DataGroup;
         var item = e.currentTarget;
         switch (e.type) {
@@ -2600,7 +2604,7 @@ class DataGroup extends Group {
             itemRenderer.selected = true;
         }
         data.selectedItem = itemData;
-        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, itemData));
+        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, false, itemData));
         if (!selectedItem) {
             this._canSelecteItem();
         }
@@ -2772,6 +2776,9 @@ class DataGroup extends Group {
         }
     }
 }
+
+UIComponent.registerEvent(DataGroup, 1101, "clickItem", DataGroupEvent.CLICK_ITEM);
+UIComponent.registerEvent(DataGroup, 1102, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
 
 black.DataGroup = DataGroup;
 //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
@@ -4116,7 +4123,7 @@ class Combox extends Group {
         }
         if (this.$combox[2]) {
             this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-            this.$combox[2].addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+            this.$combox[2].addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
         }
         this.$combox[2] = val;
         if (val) {
@@ -4125,7 +4132,7 @@ class Combox extends Group {
             val.requireSelection = true;
             val.dataProvider = this.$combox[5];
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-            val.addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+            val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
         }
         this.__listSelectItemChange();
     }

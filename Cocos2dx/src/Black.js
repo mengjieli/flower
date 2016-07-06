@@ -191,10 +191,10 @@ var $root = eval("this");
                     return this.currentState;
                 };
 
-                p.$callUIComponentEvent = function (type) {
+                p.$callUIComponentEvent = function (type, args) {
                     var func = this.$UIComponent[type];
                     if (func) {
-                        func.call(this.eventThis);
+                        func.apply(this.eventThis, args);
                     }
                 };
 
@@ -506,7 +506,11 @@ var $root = eval("this");
                 if (val) {
                     if (!this.$UIComponent[1000 + index]) {
                         this.$UIComponent[1000 + index] = function () {
-                            this.$callUIComponentEvent(index);
+                            var args = [];
+                            for (var i = 0; i < arguments.length; i++) {
+                                args[i] = arguments[i];
+                            }
+                            this.$callUIComponentEvent(index, args);
                         };
                         this.addListener(eventType, this.$UIComponent[1000 + index], this);
                     }
@@ -569,7 +573,7 @@ var $root = eval("this");
         return DataGroupEvent;
     }(flower.Event);
 
-    DataGroupEvent.SELECT_ITEM_CHANGE = "select_item_change";
+    DataGroupEvent.SELECTED_ITEM_CHANGE = "selected_item_change";
     DataGroupEvent.CLICK_ITEM = "click_item";
 
 
@@ -2585,7 +2589,7 @@ var $root = eval("this");
                 11: true, //itemClickedEnabled
                 12: false };
             //requireSelection
-            _this16.addListener(flower.TouchEvent.TOUCH_RELEASE, _this16._onTouchItem, _this16);
+            _this16.addListener(flower.TouchEvent.TOUCH_RELEASE, _this16.__onTouchItem, _this16);
             return _this16;
         }
 
@@ -2743,9 +2747,9 @@ var $root = eval("this");
                 var item = new p[1](data);
                 item.index = index;
                 item.$setList(p[0]);
-                item.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
-                item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
-                item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
+                item.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchItem, this);
+                item.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchItem, this);
+                item.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
                 if (item.data == p[8]) {
                     if (item.data == p[9]) {
                         item.currentState = "selectedDown";
@@ -2764,8 +2768,8 @@ var $root = eval("this");
                 return item;
             }
         }, {
-            key: "_onTouchItem",
-            value: function _onTouchItem(e) {
+            key: "__onTouchItem",
+            value: function __onTouchItem(e) {
                 var p = this.$DataGroup;
                 var item = e.currentTarget;
                 switch (e.type) {
@@ -2853,7 +2857,7 @@ var $root = eval("this");
                     itemRenderer.selected = true;
                 }
                 data.selectedItem = itemData;
-                this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, itemData));
+                this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, false, itemData));
                 if (!selectedItem) {
                     this._canSelecteItem();
                 }
@@ -3037,6 +3041,9 @@ var $root = eval("this");
 
         return DataGroup;
     }(Group);
+
+    UIComponent.registerEvent(DataGroup, 1101, "clickItem", DataGroupEvent.CLICK_ITEM);
+    UIComponent.registerEvent(DataGroup, 1102, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
 
     black.DataGroup = DataGroup;
     //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
@@ -4561,7 +4568,7 @@ var $root = eval("this");
                 }
                 if (this.$combox[2]) {
                     this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-                    this.$combox[2].addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+                    this.$combox[2].addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
                 }
                 this.$combox[2] = val;
                 if (val) {
@@ -4570,7 +4577,7 @@ var $root = eval("this");
                     val.requireSelection = true;
                     val.dataProvider = this.$combox[5];
                     val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-                    val.addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+                    val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
                 }
                 this.__listSelectItemChange();
             },

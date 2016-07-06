@@ -79,7 +79,7 @@ class Combox extends Group {
         }
         if (this.$combox[2]) {
             this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-            this.$combox[2].addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+            this.$combox[2].addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
         }
         this.$combox[2] = val;
         if (val) {
@@ -88,7 +88,7 @@ class Combox extends Group {
             val.requireSelection = true;
             val.dataProvider = this.$combox[5];
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-            val.addListener(flower.DataGroupEvent.SELECT_ITEM_CHANGE, this.__listSelectItemChange, this);
+            val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
         }
         this.__listSelectItemChange();
     }

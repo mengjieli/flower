@@ -157,10 +157,10 @@ class UIComponent {
             return this.currentState;
         }
 
-        p.$callUIComponentEvent = function (type) {
+        p.$callUIComponentEvent = function (type, args) {
             var func = this.$UIComponent[type];
             if (func) {
-                func.call(this.eventThis);
+                func.apply(this.eventThis, args);
             }
         }
 
@@ -433,7 +433,7 @@ class UIComponent {
                 return this.$UIComponent[12];
             },
             set: function (val) {
-                if(val == "false") {
+                if (val == "false") {
                     val = false;
                 }
                 this.$UIComponent[12] = !!val;
@@ -470,7 +470,11 @@ class UIComponent {
                 if (val) {
                     if (!this.$UIComponent[1000 + index]) {
                         this.$UIComponent[1000 + index] = function () {
-                            this.$callUIComponentEvent(index);
+                            var args = [];
+                            for (var i = 0; i < arguments.length; i++) {
+                                args[i] = arguments[i];
+                            }
+                            this.$callUIComponentEvent(index, args);
                         };
                         this.addListener(eventType, this.$UIComponent[1000 + index], this);
                     }

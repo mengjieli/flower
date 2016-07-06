@@ -11,7 +11,7 @@ class DataGroupEvent extends flower.Event {
         return this.__item;
     }
 
-    static SELECT_ITEM_CHANGE = "select_item_change";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
     static CLICK_ITEM = "click_item";
 }
 

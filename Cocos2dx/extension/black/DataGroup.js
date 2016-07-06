@@ -19,7 +19,7 @@ class DataGroup extends Group {
             11: true,//itemClickedEnabled
             12: false,//requireSelection
         }
-        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
+        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
     }
 
     onDataUpdate() {
@@ -171,9 +171,9 @@ class DataGroup extends Group {
         var item = new p[1](data);
         item.index = index;
         item.$setList(p[0]);
-        item.addListener(flower.TouchEvent.TOUCH_BEGIN, this._onTouchItem, this);
-        item.addListener(flower.TouchEvent.TOUCH_END, this._onTouchItem, this);
-        item.addListener(flower.TouchEvent.TOUCH_RELEASE, this._onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchItem, this);
+        item.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
         if (item.data == p[8]) {
             if (item.data == p[9]) {
                 item.currentState = "selectedDown";
@@ -192,7 +192,7 @@ class DataGroup extends Group {
         return item;
     }
 
-    _onTouchItem(e) {
+    __onTouchItem(e) {
         var p = this.$DataGroup;
         var item = e.currentTarget;
         switch (e.type) {
@@ -277,7 +277,7 @@ class DataGroup extends Group {
             itemRenderer.selected = true;
         }
         data.selectedItem = itemData;
-        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECT_ITEM_CHANGE, false, itemData));
+        this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, false, itemData));
         if (!selectedItem) {
             this._canSelecteItem();
         }
@@ -449,5 +449,8 @@ class DataGroup extends Group {
         }
     }
 }
+
+UIComponent.registerEvent(DataGroup, 1101, "clickItem", DataGroupEvent.CLICK_ITEM);
+UIComponent.registerEvent(DataGroup, 1102, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
 
 exports.DataGroup = DataGroup;
