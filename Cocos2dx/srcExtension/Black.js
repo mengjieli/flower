@@ -287,7 +287,7 @@ class UIComponent {
                     this.x = parent.$getContentBounds().x + p[0];
                 }
                 if (p[1] != null) {
-                    this.x = parent.$getContentBounds().x + this.width - p[1] - this.width;
+                    this.x = parent.$getContentBounds().x + parent.$getContentBounds().width - p[1] - this.width;
                 }
                 if (p[2] != null) {
                     this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
@@ -307,10 +307,10 @@ class UIComponent {
                 this.y = parent.$getContentBounds().y + p[3];
             } else {
                 if (p[3] != null) {
-                    this.y = parent.$getContentBounds().y + p[0];
+                    this.y = parent.$getContentBounds().y + p[3];
                 }
                 if (p[4] != null) {
-                    this.y = parent.$getContentBounds().y + this.height - p[1] - this.height;
+                    this.y = parent.$getContentBounds().y + parent.$getContentBounds().height - p[4] - this.height;
                 }
                 if (p[5] != null) {
                     this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
