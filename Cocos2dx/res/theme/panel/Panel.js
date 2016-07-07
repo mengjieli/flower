@@ -3,7 +3,11 @@ function initPanel() {
 }
 
 function $onPanelAdded() {
-    flower.Tween.to(this, 0.3, {
+    //this.getAddedTween();
+}
+
+function getAddedTween() {
+    return flower.Tween.to(this, 0.3, {
         x: (this.parent.width - this.width) / 2,
         y: (this.parent.height - this.height) / 2,
         scaleX: 1,
@@ -16,8 +20,8 @@ function $onPanelAdded() {
     });
 }
 
-function close() {
-    flower.Tween.to(this, 0.3, {
+function getCloseTween() {
+    return flower.Tween.to(this, 0.3, {
         x: this.x + this.width / 2,
         y: this.y + this.height / 2,
         scaleX: 0,
@@ -27,7 +31,17 @@ function close() {
         y: this.y,
         scaleX: 1,
         scaleY: 1
-    }).call(this.__closeComplete, this);
+    });
+}
+
+
+function close() {
+    var tween = this.getCloseTween();
+    if (tween) {
+        tween.call(this.__closeComplete, this)
+    } else {
+        this.__closeComplete();
+    }
 }
 
 function __closeComplete() {

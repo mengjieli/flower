@@ -8,6 +8,7 @@ class Panel extends Group {
             0: "",//title
             1: null, //titleLabel
             2: null, //closeButton
+            3: PanelScaleMode.NO_SCALE, //scaleMode
         }
     }
 
@@ -16,6 +17,54 @@ class Panel extends Group {
         if (p[0] && p[1]) {
             p[1].text = p[0];
         }
+    }
+
+    $onFrameEnd() {
+        if (this.$hasFlags(0x1000) && this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
+            var scaleMode = this.$Panel[3];
+            var scaleX = this.parent.width / this.width;
+            var scaleY = this.parent.height / this.height;
+            if (scaleMode == PanelScaleMode.SHOW_ALL) {
+                this.scaleX = scaleX < scaleY ? scaleX : scaleY;
+                this.scaleY = scaleY < scaleY ? scaleX : scaleY;
+            } else if (scaleMode == PanelScaleMode.NO_BORDER) {
+                this.scaleX = scaleX > scaleY ? scaleX : scaleY;
+                this.scaleY = scaleX > scaleY ? scaleX : scaleY;
+            } else if (scaleMode == PanelScaleMode.SCALE_WIDTH) {
+                this.height = this.parent.height / scaleX;
+                this.scaleX = scaleX;
+                this.scaleY = scaleX;
+            } else if (scaleMode == PanelScaleMode.SCALE_HEIGHT) {
+                this.width = this.parent.width / scaleY;
+                this.scaleX = scaleY;
+                this.scaleY = scaleY;
+            }
+        }
+        super.$onFrameEnd();
+    }
+
+    $validateChildrenUIComponent() {
+        if (this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
+            var scaleMode = this.$Panel[3];
+            var scaleX = this.parent.width / this.width;
+            var scaleY = this.parent.height / this.height;
+            if (scaleMode == PanelScaleMode.SHOW_ALL) {
+                this.scaleX = scaleX < scaleY ? scaleX : scaleY;
+                this.scaleY = scaleX < scaleY ? scaleX : scaleY;
+            } else if (scaleMode == PanelScaleMode.NO_BORDER) {
+                this.scaleX = scaleX > scaleY ? scaleX : scaleY;
+                this.scaleY = scaleX > scaleY ? scaleX : scaleY;
+            } else if (scaleMode == PanelScaleMode.SCALE_WIDTH) {
+                this.height = this.parent.height / scaleX;
+                this.scaleX = scaleX;
+                this.scaleY = scaleX;
+            } else if (scaleMode == PanelScaleMode.SCALE_HEIGHT) {
+                this.width = this.parent.width / scaleY;
+                this.scaleX = scaleY;
+                this.scaleY = scaleY;
+            }
+        }
+        super.$validateChildrenUIComponent();
     }
 
     $onClose() {
@@ -73,6 +122,18 @@ class Panel extends Group {
             }
             val.addListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
         }
+    }
+
+    get scaleMode() {
+        return this.$Panel[3];
+    }
+
+    set scaleMode(val) {
+        if (this.$Panel[3] == val) {
+            return;
+        }
+        this.$Panel[3] = val;
+        this.$invalidateContentBounds();
     }
 }
 

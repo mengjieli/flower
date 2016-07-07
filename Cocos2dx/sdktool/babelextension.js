@@ -185,6 +185,8 @@ var list = [
     "HorizontalLayout",
     "VerticalLayout",
 
+    "PanelScaleMode",
+
     "Group",
     "UIParser",
     "DataGroup",

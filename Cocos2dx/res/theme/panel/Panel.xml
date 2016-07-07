@@ -1,4 +1,4 @@
-<f:Panel x="100" y="100" width="300" height="200" creationComplete="this.initPanel();" xmlns:f="flower">
+<f:Panel width="300" height="200" scaleMode="show_all" creationComplete="this.initPanel();" xmlns:f="flower">
     <f:script src="./Panel.js"/>
     <f:RectUI id="background" percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1"
               fillColor="0xE7E7E7"/>

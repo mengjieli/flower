@@ -1734,6 +1734,22 @@ var $root = eval("this");
     black.VerticalLayout = VerticalLayout;
     //////////////////////////End File:extension/black/layout/VerticalLayout.js///////////////////////////
 
+    //////////////////////////File:extension/black/utils/PanelScaleMode.js///////////////////////////
+
+    var PanelScaleMode = function PanelScaleMode() {
+        _classCallCheck(this, PanelScaleMode);
+    };
+
+    PanelScaleMode.NO_SCALE = "no_scale";
+    PanelScaleMode.SHOW_ALL = "show_all";
+    PanelScaleMode.NO_BORDER = "no_border";
+    PanelScaleMode.SCALE_WIDTH = "scale_width";
+    PanelScaleMode.SCALE_HEIGHT = "scale_height";
+
+
+    black.PanelScaleMode = PanelScaleMode;
+    //////////////////////////End File:extension/black/utils/PanelScaleMode.js///////////////////////////
+
     //////////////////////////File:extension/black/Group.js///////////////////////////
 
     var Group = function (_flower$Sprite) {
@@ -4670,18 +4686,69 @@ var $root = eval("this");
             _this35.$Panel = {
                 0: "", //title
                 1: null, //titleLabel
-                2: null };
+                2: null, //closeButton
+                3: PanelScaleMode.NO_SCALE };
             return _this35;
         }
 
         _createClass(Panel, [{
             key: "__changeTitle",
-            //closeButton
+            //scaleMode
             value: function __changeTitle() {
                 var p = this.$Panel;
                 if (p[0] && p[1]) {
                     p[1].text = p[0];
                 }
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                if (this.$hasFlags(0x1000) && this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
+                    var scaleMode = this.$Panel[3];
+                    var scaleX = this.parent.width / this.width;
+                    var scaleY = this.parent.height / this.height;
+                    if (scaleMode == PanelScaleMode.SHOW_ALL) {
+                        this.scaleX = scaleX < scaleY ? scaleX : scaleY;
+                        this.scaleY = scaleY < scaleY ? scaleX : scaleY;
+                    } else if (scaleMode == PanelScaleMode.NO_BORDER) {
+                        this.scaleX = scaleX > scaleY ? scaleX : scaleY;
+                        this.scaleY = scaleX > scaleY ? scaleX : scaleY;
+                    } else if (scaleMode == PanelScaleMode.SCALE_WIDTH) {
+                        this.height = this.parent.height / scaleX;
+                        this.scaleX = scaleX;
+                        this.scaleY = scaleX;
+                    } else if (scaleMode == PanelScaleMode.SCALE_HEIGHT) {
+                        this.width = this.parent.width / scaleY;
+                        this.scaleX = scaleY;
+                        this.scaleY = scaleY;
+                    }
+                }
+                _get(Object.getPrototypeOf(Panel.prototype), "$onFrameEnd", this).call(this);
+            }
+        }, {
+            key: "$validateChildrenUIComponent",
+            value: function $validateChildrenUIComponent() {
+                if (this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
+                    var scaleMode = this.$Panel[3];
+                    var scaleX = this.parent.width / this.width;
+                    var scaleY = this.parent.height / this.height;
+                    if (scaleMode == PanelScaleMode.SHOW_ALL) {
+                        this.scaleX = scaleX < scaleY ? scaleX : scaleY;
+                        this.scaleY = scaleX < scaleY ? scaleX : scaleY;
+                    } else if (scaleMode == PanelScaleMode.NO_BORDER) {
+                        this.scaleX = scaleX > scaleY ? scaleX : scaleY;
+                        this.scaleY = scaleX > scaleY ? scaleX : scaleY;
+                    } else if (scaleMode == PanelScaleMode.SCALE_WIDTH) {
+                        this.height = this.parent.height / scaleX;
+                        this.scaleX = scaleX;
+                        this.scaleY = scaleX;
+                    } else if (scaleMode == PanelScaleMode.SCALE_HEIGHT) {
+                        this.width = this.parent.width / scaleY;
+                        this.scaleX = scaleY;
+                        this.scaleY = scaleY;
+                    }
+                }
+                _get(Object.getPrototypeOf(Panel.prototype), "$validateChildrenUIComponent", this).call(this);
             }
         }, {
             key: "$onClose",
@@ -4741,6 +4808,18 @@ var $root = eval("this");
                     }
                     val.addListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
                 }
+            }
+        }, {
+            key: "scaleMode",
+            get: function get() {
+                return this.$Panel[3];
+            },
+            set: function set(val) {
+                if (this.$Panel[3] == val) {
+                    return;
+                }
+                this.$Panel[3] = val;
+                this.$invalidateContentBounds();
             }
         }]);
 
