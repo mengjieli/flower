@@ -3,10 +3,11 @@ function initPanel() {
 }
 
 function $onPanelAdded() {
-    //this.getAddedTween();
+    this.getAddedTween();
 }
 
 function getAddedTween() {
+    return null;
     return flower.Tween.to(this, 0.3, {
         x: (this.parent.width - this.width) / 2,
         y: (this.parent.height - this.height) / 2,
@@ -21,6 +22,7 @@ function getAddedTween() {
 }
 
 function getCloseTween() {
+    return null;
     return flower.Tween.to(this, 0.3, {
         x: this.x + this.width / 2,
         y: this.y + this.height / 2,
