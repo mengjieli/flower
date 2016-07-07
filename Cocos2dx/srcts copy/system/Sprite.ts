@@ -1,9 +1,0 @@
-class Sprite {
-
-
-    public constructor()
-    {
-    }
-
-}
-

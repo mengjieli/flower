@@ -21,6 +21,7 @@ class Label extends flower.TextField {
 
     dispose() {
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 }

@@ -176,9 +176,10 @@ var list = [
     "ObjectValue",
     "StringValue",
     "UIntValue",
-    "DataManager",
 
     "zh_CN",
+
+    "DataManager",
 
     "Layout",
     "LinearLayout",
@@ -186,6 +187,8 @@ var list = [
     "VerticalLayout",
 
     "PanelScaleMode",
+
+    "Theme",
 
     "Group",
     "UIParser",

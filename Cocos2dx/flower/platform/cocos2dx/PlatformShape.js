@@ -37,6 +37,7 @@ class PlatformShape extends PlatformDisplayObject {
     setFilters(filters) {
 
     }
+
     release() {
         this.clear();
         super.release();

@@ -987,6 +987,18 @@ var $root = eval("this");
                 return list;
             }
         }, {
+            key: "dispose",
+            value: function dispose() {
+                var list = this.list;
+                for (var i = 0; i < list.length; i++) {
+                    var value = this.list[i];
+                    if (value instanceof Value) {
+                        value.dispose();
+                    }
+                }
+                _get(Object.getPrototypeOf(ArrayValue.prototype), "dispose", this).call(this);
+            }
+        }, {
             key: "key",
             set: function set(val) {
                 this._key = val;
@@ -1088,7 +1100,7 @@ var $root = eval("this");
         _createClass(IntValue, [{
             key: "$setValue",
             value: function $setValue(val) {
-                val = +val & ~0;
+                val = +val & ~0 || 0;
                 if (val == this.__value) {
                     return;
                 }
@@ -1123,7 +1135,7 @@ var $root = eval("this");
         _createClass(NumberValue, [{
             key: "$setValue",
             value: function $setValue(val) {
-                val = +val;
+                val = +val || 0;
                 if (val == this.__value) {
                     return;
                 }
@@ -1153,44 +1165,52 @@ var $root = eval("this");
             return _this8;
         }
 
+        //update(...args) {
+        //    var change = false;
+        //    for (var i = 0; i < args.length;) {
+        //        var name = args[i];
+        //        if (i + 1 >= args.length) {
+        //            break;
+        //        }
+        //        var value = args[i + 1];
+        //        var obj = this[name];
+        //        if (obj instanceof Value) {
+        //            if (obj.value != value) {
+        //                obj.value = value;
+        //                change = true;
+        //            }
+        //        } else {
+        //            if (obj != value) {
+        //                this[name] = value;
+        //                change = true;
+        //            }
+        //        }
+        //        i += 2;
+        //    }
+        //    if (change) {
+        //        this.dispatchWidth(flower.Event.UPDATE, this);
+        //    }
+        //}
+        //
+        //addMember(name, value) {
+        //    this[name] = value;
+        //    this.dispatchWidth(flower.Event.UPDATE, this);
+        //}
+        //
+        //
+        //deleteMember(name) {
+        //    delete this[name];
+        //}
+
         _createClass(ObjectValue, [{
-            key: "update",
-            value: function update() {
-                var change = false;
-                for (var i = 0; i < arguments.length;) {
-                    var name = arguments.length <= i + 0 ? undefined : arguments[i + 0];
-                    if (i + 1 >= arguments.length) {
-                        break;
+            key: "dispose",
+            value: function dispose() {
+                for (var key in this) {
+                    if (this[key] instanceof Value) {
+                        this[key].dispose();
                     }
-                    var value = arguments.length <= i + 1 + 0 ? undefined : arguments[i + 1 + 0];
-                    var obj = this[name];
-                    if (obj instanceof Value) {
-                        if (obj.value != value) {
-                            obj.value = value;
-                            change = true;
-                        }
-                    } else {
-                        if (obj != value) {
-                            this[name] = value;
-                            change = true;
-                        }
-                    }
-                    this[name] = value;
-                    i += 2;
                 }
-                if (change) {
-                    this.dispatchWidth(flower.Event.UPDATE, this);
-                }
-            }
-        }, {
-            key: "addMember",
-            value: function addMember(name, value) {
-                this[name] = value;
-            }
-        }, {
-            key: "deleteMember",
-            value: function deleteMember(name) {
-                delete this[name];
+                _get(Object.getPrototypeOf(ObjectValue.prototype), "dispose", this).call(this);
             }
         }]);
 
@@ -1254,7 +1274,7 @@ var $root = eval("this");
         _createClass(UIntValue, [{
             key: "$setValue",
             value: function $setValue(val) {
-                val = +val & ~0;
+                val = +val & ~0 || 0;
                 if (val < 0) {
                     val = 0;
                 }
@@ -1273,6 +1293,24 @@ var $root = eval("this");
     black.UIntValue = UIntValue;
     //////////////////////////End File:extension/black/data/member/UIntValue.js///////////////////////////
 
+    //////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
+    var locale_strings = flower.sys.$locale_strings["zh_CN"];
+
+    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+    locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+    locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+    locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
+    locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
+    locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
+    locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
+    locale_strings[3012] = "没有定义的数据结构 :{0}";
+    locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
+    locale_strings[3100] = "没有定义的数据类型 :{0}";
+    locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
+    //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
+
     //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
 
     var DataManager = function () {
@@ -1285,6 +1323,53 @@ var $root = eval("this");
             if (DataManager.instance) {
                 return;
             }
+            DataManager.instance = this;
+
+            this.addDefine({
+                "name": "Size",
+                "members": {
+                    "width": { "type": "int" },
+                    "height": { "type": "int" }
+                }
+            });
+            this.addDefine({
+                "name": "Point",
+                "members": {
+                    "x": { "type": "int" },
+                    "y": { "type": "int" }
+                }
+            });
+            this.addDefine({
+                "name": "Rectangle",
+                "members": {
+                    "x": { "type": "int" },
+                    "y": { "type": "int" },
+                    "width": { "type": "int" },
+                    "height": { "type": "int" }
+                }
+            });
+            this.addDefine({
+                "name": "ProgressData",
+                "members": {
+                    "current": { "type": "number" },
+                    "max": { "type": "number" },
+                    "percent": { "type": "number", "bind": "{this.current/this.max}" },
+                    "tip": { "type": "string" }
+                }
+            });
+            this.addDefine({
+                "name": "Flower_System",
+                "members": {
+                    "screen": { "type": "Size" }
+                }
+            });
+            this.addDefine({
+                "name": "Flower",
+                "members": {
+                    "system": { "type": "Flower_System" }
+                }
+            });
+            this.addRootData("flower", "Flower");
         }
 
         _createClass(DataManager, [{
@@ -1322,11 +1407,14 @@ var $root = eval("this");
                 }
                 var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "() {\n" + "\t\t_super.call(this);\n";
                 var members = config.members;
+                var bindContent = "";
                 if (members) {
                     var member;
                     for (var key in members) {
                         member = members[key];
-                        if (member.type == "int") {
+                        if (member.type == "number") {
+                            content += "\t\tthis." + key + " = new NumberValue(" + (member.init != null ? member.init : "") + ");\n";
+                        } else if (member.type == "int") {
                             content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
                         } else if (member.type == "uint") {
                             content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
@@ -1339,10 +1427,14 @@ var $root = eval("this");
                         } else if (member.type == "*") {
                             content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
                         } else {
-                            content += "\t\tthis." + key + " = DataManager.getInstance().createData(" + member.type + ");\n";
+                            content += "\t\tthis." + key + " = DataManager.getInstance().createData(\"" + member.type + "\");\n";
+                        }
+                        if (member.bind) {
+                            bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n";
                         }
                     }
                 }
+                content += bindContent;
                 content += "\t}\n" + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
                 content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
                 console.log("数据结构:\n" + content);
@@ -1394,6 +1486,9 @@ var $root = eval("this");
         }], [{
             key: "getInstance",
             value: function getInstance() {
+                if (DataManager.instance == null) {
+                    new DataManager();
+                }
                 return DataManager.instance;
             }
         }]);
@@ -1401,29 +1496,8 @@ var $root = eval("this");
         return DataManager;
     }();
 
-    DataManager.instance = new DataManager();
-
-
     black.DataManager = DataManager;
     //////////////////////////End File:extension/black/data/DataManager.js///////////////////////////
-
-    //////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
-    var locale_strings = flower.sys.$locale_strings["zh_CN"];
-
-    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
-    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
-    locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
-    locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
-    locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
-    locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
-    locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
-    locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
-    locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
-    locale_strings[3012] = "没有定义的数据结构 :{0}";
-    locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
-    locale_strings[3100] = "没有定义的数据类型 :{0}";
-    locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
-    //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
 
     //////////////////////////File:extension/black/layout/Layout.js///////////////////////////
 
@@ -1750,6 +1824,134 @@ var $root = eval("this");
     black.PanelScaleMode = PanelScaleMode;
     //////////////////////////End File:extension/black/utils/PanelScaleMode.js///////////////////////////
 
+    //////////////////////////File:extension/black/theme/Theme.js///////////////////////////
+
+    var Theme = function (_flower$EventDispatch2) {
+        _inherits(Theme, _flower$EventDispatch2);
+
+        function Theme(url) {
+            _classCallCheck(this, Theme);
+
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Theme).call(this));
+
+            Theme.instance = _this14;
+            _this14.__url = url;
+            _this14.__direction = flower.Path.getPathDirection(url);
+            _this14.__progress = flower.DataManager.getInstance().createData("ProgressData");
+            return _this14;
+        }
+
+        _createClass(Theme, [{
+            key: "load",
+            value: function load() {
+                var url = this.__url;
+                this.__progress.tip.value = url;
+                var loader = new flower.URLLoader(url);
+                loader.load();
+                loader.addListener(flower.Event.COMPLETE, this.__onLoadThemeComplete, this);
+                loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            }
+        }, {
+            key: "__onLoadThemeComplete",
+            value: function __onLoadThemeComplete(e) {
+                var cfg = e.data;
+                this.__list = [];
+                for (var i = 0; i < cfg.length; i++) {
+                    var key = cfg[i].class;
+                    var url = cfg[i].url;
+                    if (url.slice(0, 2) == "./") {
+                        url = this.__direction + url.slice(2, url.length);
+                    }
+                    this.__list.push({
+                        class: key,
+                        ui: new flower.UIParser(),
+                        url: url
+                    });
+                }
+                this.__index = 0;
+                this.__loadNext();
+            }
+        }, {
+            key: "__loadError",
+            value: function __loadError(e) {
+                if (this.hasListener(flower.Event.ERROR)) {
+                    this.dispatchWidth(flower.Event.ERROR, e.data);
+                } else {
+                    $error(e.data);
+                }
+            }
+        }, {
+            key: "__loadNext",
+            value: function __loadNext() {
+                this.__progress.max.value = this.__list.length;
+                this.__progress.current.value = this.__index;
+                if (this.__index == this.__list.length) {
+                    this.dispatchWidth(flower.Event.COMPLETE);
+                    return;
+                }
+                var ui = this.__list[this.__index].ui;
+                var url = this.__list[this.__index].url;
+                ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+                ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                ui.parseAsync(url);
+                this.__index++;
+            }
+        }, {
+            key: "getObject",
+            value: function getObject(className) {
+                for (var i = 0; i < this.__list.length; i++) {
+                    if (this.__list[i].class == className && this.__list[i].ui.className) {
+                        return new this.__list[i].ui.classDefine();
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "getClass",
+            value: function getClass(className) {
+                for (var i = 0; i < this.__list.length; i++) {
+                    if (this.__list[i].class == className && this.__list[i].ui.className) {
+                        return this.__list[i].ui.classDefine;
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "progress",
+            get: function get() {
+                return this.__progress;
+            }
+        }], [{
+            key: "getInstance",
+            value: function getInstance() {
+                return Theme.instance;
+            }
+        }, {
+            key: "getObject",
+            value: function getObject(className) {
+                var theme = Theme.getInstance();
+                if (theme) {
+                    return theme.getObject(className);
+                }
+                return null;
+            }
+        }, {
+            key: "getClass",
+            value: function getClass(className) {
+                var theme = Theme.getInstance();
+                if (theme) {
+                    return theme.getClass(className);
+                }
+                return null;
+            }
+        }]);
+
+        return Theme;
+    }(flower.EventDispatcher);
+
+    black.Theme = Theme;
+    //////////////////////////End File:extension/black/theme/Theme.js///////////////////////////
+
     //////////////////////////File:extension/black/Group.js///////////////////////////
 
     var Group = function (_flower$Sprite) {
@@ -1758,10 +1960,10 @@ var $root = eval("this");
         function Group() {
             _classCallCheck(this, Group);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
-            _this14.$initUIComponent();
-            return _this14;
+            _this15.$initUIComponent();
+            return _this15;
         }
 
         _createClass(Group, [{
@@ -1812,6 +2014,7 @@ var $root = eval("this");
             key: "dispose",
             value: function dispose() {
                 this.removeAllBindProperty();
+                this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Group.prototype), "dispose", this).call(this);
             }
         }]);
@@ -1832,11 +2035,11 @@ var $root = eval("this");
         function UIParser() {
             _classCallCheck(this, UIParser);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
-            _this15.classes = flower.UIParser.classes;
-            _this15.percentWidth = _this15.percentHeight = 100;
-            return _this15;
+            _this16.classes = flower.UIParser.classes;
+            _this16.percentWidth = _this16.percentHeight = 100;
+            return _this16;
         }
 
         _createClass(UIParser, [{
@@ -1865,8 +2068,8 @@ var $root = eval("this");
         }, {
             key: "loadContentError",
             value: function loadContentError(e) {
-                if (this.hasListener(Event.ERROR)) {
-                    this.dispatchWidth(Event.ERROR, getLanguage(3001, e.currentTarget.url));
+                if (this.hasListener(flower.Event.ERROR)) {
+                    this.dispatchWidth(flower.Event.ERROR, getLanguage(3001, e.currentTarget.url));
                 } else {
                     sys.$error(3001, e.currentTarget.url);
                 }
@@ -1947,20 +2150,20 @@ var $root = eval("this");
                         this.parseUI(this.loadContent, this.loadData);
                     } else {
                         var data = this.parse(this.loadContent);
-                        this.dispatchWidth(Event.COMPLETE, data);
+                        this.dispatchWidth(flower.Event.COMPLETE, data);
                     }
                 } else {
                     var parser = new UIParser();
                     parser.parseAsync(this.relationUI[this.relationIndex]);
                     parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
-                    parser.addListener(Event.ERROR, this.relationLoadError, this);
+                    parser.addListener(flower.ERROR, this.relationLoadError, this);
                 }
             }
         }, {
             key: "relationLoadError",
             value: function relationLoadError(e) {
-                if (this.hasListener(Event.ERROR)) {
-                    this.dispatchWidth(Event.ERROR, e.data);
+                if (this.hasListener(flower.Event.ERROR)) {
+                    this.dispatchWidth(flower.Event.ERROR, e.data);
                 } else {
                     $error(e.data);
                 }
@@ -1984,7 +2187,7 @@ var $root = eval("this");
                 if (!ui.parent) {
                     this.addChild(ui);
                 }
-                this.dispatchWidth(Event.COMPLETE, ui);
+                this.dispatchWidth(flower.Event.COMPLETE, ui);
             }
         }, {
             key: "parse",
@@ -2088,7 +2291,7 @@ var $root = eval("this");
                 content += before + "\t}\n\n";
                 content += before + "\treturn " + className + ";\n";
                 if (uinameNS == "f") {
-                    content += before + "})(" + extendClass + ");\n";
+                    content += before + "})(flower.Theme.getClass(\"" + extendClass + "\") || " + extendClass + ");\n";
                 } else {
                     content += before + "})(flower.UIParser.getLocalUIClass(\"" + extendClass + "\"));\n";
                 }
@@ -2369,7 +2572,7 @@ var $root = eval("this");
                         if (createClassNameSpace == "local") {
                             setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\"))();\n";
                         } else {
-                            setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
+                            setObject += before + "\tvar " + thisObj + " = flower.Theme.getObject(\"" + createClassName + "\") || new " + createClassName + "();\n";
                         }
                         setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
                     }
@@ -2495,6 +2698,11 @@ var $root = eval("this");
             get: function get() {
                 return this._className;
             }
+        }, {
+            key: "classDefine",
+            get: function get() {
+                return flower.UIParser.classes.local[this._className];
+            }
         }], [{
             key: "registerLocalUIClass",
             value: function registerLocalUIClass(name, cls) {
@@ -2594,9 +2802,9 @@ var $root = eval("this");
         function DataGroup() {
             _classCallCheck(this, DataGroup);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
 
-            _this16.$DataGroup = {
+            _this17.$DataGroup = {
                 0: null, //data
                 1: null, //itemRenderer
                 2: null, //items
@@ -2611,8 +2819,8 @@ var $root = eval("this");
                 11: true, //itemClickedEnabled
                 12: false };
             //requireSelection
-            _this16.addListener(flower.TouchEvent.TOUCH_RELEASE, _this16.__onTouchItem, _this16);
-            return _this16;
+            _this17.addListener(flower.TouchEvent.TOUCH_RELEASE, _this17.__onTouchItem, _this17);
+            return _this17;
         }
 
         _createClass(DataGroup, [{
@@ -3078,12 +3286,12 @@ var $root = eval("this");
         function ItemRenderer() {
             _classCallCheck(this, ItemRenderer);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
 
-            _this17._selected = false;
+            _this18._selected = false;
 
-            _this17.absoluteState = true;
-            return _this17;
+            _this18.absoluteState = true;
+            return _this18;
         }
 
         _createClass(ItemRenderer, [{
@@ -3196,10 +3404,10 @@ var $root = eval("this");
 
             _classCallCheck(this, Label);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
 
-            _this18.$initUIComponent();
-            return _this18;
+            _this19.$initUIComponent();
+            return _this19;
         }
 
         _createClass(Label, [{
@@ -3222,6 +3430,7 @@ var $root = eval("this");
             key: "dispose",
             value: function dispose() {
                 this.removeAllBindProperty();
+                this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Label.prototype), "dispose", this).call(this);
             }
         }]);
@@ -3242,15 +3451,15 @@ var $root = eval("this");
         function RectUI() {
             _classCallCheck(this, RectUI);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
 
-            _this19.$RectUI = {
+            _this20.$RectUI = {
                 0: 0, //width
                 1: 0 };
             //height
-            _this19.drawRect = null;
-            _this19.$initUIComponent();
-            return _this19;
+            _this20.drawRect = null;
+            _this20.$initUIComponent();
+            return _this20;
         }
 
         _createClass(RectUI, [{
@@ -3258,6 +3467,9 @@ var $root = eval("this");
             value: function $addFlags(flags) {
                 if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
                     this.__flags |= 0x1000;
+                }
+                if (flags == 0x0002) {
+                    this.__flags |= 0x0400;
                 }
                 this.__flags |= flags;
             }
@@ -3351,6 +3563,7 @@ var $root = eval("this");
             key: "dispose",
             value: function dispose() {
                 this.removeAllBindProperty();
+                this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(RectUI.prototype), "dispose", this).call(this);
             }
         }]);
@@ -3373,11 +3586,11 @@ var $root = eval("this");
 
             _classCallCheck(this, Image);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
 
-            _this20.$initUIComponent();
-            _this20.source = source;
-            return _this20;
+            _this21.$initUIComponent();
+            _this21.source = source;
+            return _this21;
         }
 
         _createClass(Image, [{
@@ -3435,6 +3648,7 @@ var $root = eval("this");
                     this.__loader.dispose();
                 }
                 this.removeAllBindProperty();
+                this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Image.prototype), "dispose", this).call(this);
             }
         }, {
@@ -3485,10 +3699,10 @@ var $root = eval("this");
         function MaskUI() {
             _classCallCheck(this, MaskUI);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
 
-            _this22.$initUIComponent();
-            return _this22;
+            _this23.$initUIComponent();
+            return _this23;
         }
 
         _createClass(MaskUI, [{
@@ -3547,6 +3761,13 @@ var $root = eval("this");
                 this.shape.$onFrameEnd();
                 this.$resetLayout();
             }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                this.removeAllBindProperty();
+                this.$UIComponent[11].dispose();
+                _get(Object.getPrototypeOf(MaskUI.prototype), "dispose", this).call(this);
+            }
         }]);
 
         return MaskUI;
@@ -3565,17 +3786,17 @@ var $root = eval("this");
         function Button() {
             _classCallCheck(this, Button);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-            _this23._enabled = true;
+            _this24._enabled = true;
 
-            _this23.absoluteState = true;
-            _this23.currentState = "up";
+            _this24.absoluteState = true;
+            _this24.currentState = "up";
 
-            _this23.addListener(flower.TouchEvent.TOUCH_BEGIN, _this23.__onTouch, _this23);
-            _this23.addListener(flower.TouchEvent.TOUCH_END, _this23.__onTouch, _this23);
-            _this23.addListener(flower.TouchEvent.TOUCH_RELEASE, _this23.__onTouch, _this23);
-            return _this23;
+            _this24.addListener(flower.TouchEvent.TOUCH_BEGIN, _this24.__onTouch, _this24);
+            _this24.addListener(flower.TouchEvent.TOUCH_END, _this24.__onTouch, _this24);
+            _this24.addListener(flower.TouchEvent.TOUCH_RELEASE, _this24.__onTouch, _this24);
+            return _this24;
         }
 
         _createClass(Button, [{
@@ -3648,10 +3869,10 @@ var $root = eval("this");
         function ToggleButton() {
             _classCallCheck(this, ToggleButton);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-            _this24.__selected = false;
-            return _this24;
+            _this25.__selected = false;
+            return _this25;
         }
 
         _createClass(ToggleButton, [{
@@ -3821,17 +4042,17 @@ var $root = eval("this");
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
 
-            _this27._buttons = [];
-            _this27._enabled = true;
+            _this28._buttons = [];
+            _this28._enabled = true;
 
             if (groupName == null || groupName == "") {
-                groupName = "group" + _this27.id;
+                groupName = "group" + _this28.id;
             }
-            _this27._groupName = groupName;
-            RadioButtonGroup.groups.push(_this27);
-            return _this27;
+            _this28._groupName = groupName;
+            RadioButtonGroup.groups.push(_this28);
+            return _this28;
         }
 
         _createClass(RadioButtonGroup, [{
@@ -4012,12 +4233,12 @@ var $root = eval("this");
         function ListBase() {
             _classCallCheck(this, ListBase);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
 
-            _this29.requireSelection = true;
-            _this29.itemSelectedEnabled = true;
-            _this29.itemClickedEnabled = true;
-            return _this29;
+            _this30.requireSelection = true;
+            _this30.itemSelectedEnabled = true;
+            _this30.itemClickedEnabled = true;
+            return _this30;
         }
 
         return ListBase;
@@ -4034,10 +4255,10 @@ var $root = eval("this");
         function List() {
             _classCallCheck(this, List);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
 
-            _this30.layout = new VerticalLayout();
-            return _this30;
+            _this31.layout = new VerticalLayout();
+            return _this31;
         }
 
         return List;
@@ -4054,11 +4275,11 @@ var $root = eval("this");
         function TabBar() {
             _classCallCheck(this, TabBar);
 
-            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
 
-            _this31.layout = new HorizontalLayout();
-            _this31.layout.fixElementSize = false;
-            return _this31;
+            _this32.layout = new HorizontalLayout();
+            _this32.layout.fixElementSize = false;
+            return _this32;
         }
 
         _createClass(TabBar, [{
@@ -4083,11 +4304,11 @@ var $root = eval("this");
         function ViewStack() {
             _classCallCheck(this, ViewStack);
 
-            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
 
-            _this32._items = [];
-            _this32._selectedIndex = -1;
-            return _this32;
+            _this33._items = [];
+            _this33._selectedIndex = -1;
+            return _this33;
         }
 
         _createClass(ViewStack, [{
@@ -4267,25 +4488,25 @@ var $root = eval("this");
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this33._viewSize = flower.Size.create(0, 0);
-            _this33._scrollDisX = [];
-            _this33._scrollDisY = [];
-            _this33._scrollTime = [];
-            _this33._upGap = 18;
+            _this34._viewSize = flower.Size.create(0, 0);
+            _this34._scrollDisX = [];
+            _this34._scrollDisY = [];
+            _this34._scrollTime = [];
+            _this34._upGap = 18;
 
-            _this33.addListener(flower.TouchEvent.TOUCH_BEGIN, _this33.__onTouchScroller, _this33);
-            _this33.addListener(flower.TouchEvent.TOUCH_MOVE, _this33.__onTouchScroller, _this33);
-            _this33.addListener(flower.TouchEvent.TOUCH_END, _this33.__onTouchScroller, _this33);
-            _this33.addListener(flower.TouchEvent.TOUCH_RELEASE, _this33.__onTouchScroller, _this33);
-            _this33.width = _this33.height = 100;
+            _this34.addListener(flower.TouchEvent.TOUCH_BEGIN, _this34.__onTouchScroller, _this34);
+            _this34.addListener(flower.TouchEvent.TOUCH_MOVE, _this34.__onTouchScroller, _this34);
+            _this34.addListener(flower.TouchEvent.TOUCH_END, _this34.__onTouchScroller, _this34);
+            _this34.addListener(flower.TouchEvent.TOUCH_RELEASE, _this34.__onTouchScroller, _this34);
+            _this34.width = _this34.height = 100;
             //var bg = new RectUI();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this33;
+            return _this34;
         }
 
         _createClass(Scroller, [{
@@ -4509,16 +4730,16 @@ var $root = eval("this");
         function Combox() {
             _classCallCheck(this, Combox);
 
-            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(Combox).call(this));
+            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(Combox).call(this));
 
-            _this34.$combox = {
+            _this35.$combox = {
                 0: null, //label
                 1: null, //button
                 2: null, //list
                 3: false, //openFlags
                 4: "label", //labelField
                 5: null };
-            return _this34;
+            return _this35;
         }
 
         _createClass(Combox, [{
@@ -4681,14 +4902,14 @@ var $root = eval("this");
         function Panel() {
             _classCallCheck(this, Panel);
 
-            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
+            var _this36 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
 
-            _this35.$Panel = {
+            _this36.$Panel = {
                 0: "", //title
                 1: null, //titleLabel
                 2: null, //closeButton
                 3: PanelScaleMode.NO_SCALE };
-            return _this35;
+            return _this36;
         }
 
         _createClass(Panel, [{

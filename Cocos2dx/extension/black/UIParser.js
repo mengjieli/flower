@@ -94,8 +94,8 @@ class UIParser extends Group {
     }
 
     loadContentError(e) {
-        if (this.hasListener(Event.ERROR)) {
-            this.dispatchWidth(Event.ERROR, getLanguage(3001, e.currentTarget.url));
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatchWidth(flower.Event.ERROR, getLanguage(3001, e.currentTarget.url));
         } else {
             sys.$error(3001, e.currentTarget.url);
         }
@@ -173,19 +173,19 @@ class UIParser extends Group {
                 this.parseUI(this.loadContent, this.loadData);
             } else {
                 var data = this.parse(this.loadContent);
-                this.dispatchWidth(Event.COMPLETE, data);
+                this.dispatchWidth(flower.Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
             parser.parseAsync(this.relationUI[this.relationIndex]);
             parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
-            parser.addListener(Event.ERROR, this.relationLoadError, this);
+            parser.addListener(flower.ERROR, this.relationLoadError, this);
         }
     }
 
     relationLoadError(e) {
-        if (this.hasListener(Event.ERROR)) {
-            this.dispatchWidth(Event.ERROR, e.data);
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatchWidth(flower.Event.ERROR, e.data);
         } else {
             $error(e.data);
         }
@@ -205,7 +205,7 @@ class UIParser extends Group {
         if (!ui.parent) {
             this.addChild(ui);
         }
-        this.dispatchWidth(Event.COMPLETE, ui);
+        this.dispatchWidth(flower.Event.COMPLETE, ui);
     }
 
     parse(content) {
@@ -231,6 +231,10 @@ class UIParser extends Group {
 
     get className() {
         return this._className;
+    }
+
+    get classDefine() {
+        return flower.UIParser.classes.local[this._className];
     }
 
     decodeRootComponent(xml, classContent) {
@@ -312,7 +316,7 @@ class UIParser extends Group {
         content += before + "\t}\n\n";
         content += before + "\treturn " + className + ";\n";
         if (uinameNS == "f") {
-            content += before + "})(" + extendClass + ");\n";
+            content += before + "})(flower.Theme.getClass(\"" + extendClass + "\") || " + extendClass + ");\n";
         } else {
             content += before + "})(flower.UIParser.getLocalUIClass(\"" + extendClass + "\"));\n";
         }
@@ -589,7 +593,7 @@ class UIParser extends Group {
                 if (createClassNameSpace == "local") {
                     setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\"))();\n";
                 } else {
-                    setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
+                    setObject += before + "\tvar " + thisObj + " = flower.Theme.getObject(\"" + createClassName + "\") || new " + createClassName + "();\n";
                 }
                 setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
             }

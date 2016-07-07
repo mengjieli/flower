@@ -6,7 +6,7 @@ class UIntValue extends Value {
     }
 
     $setValue(val) {
-        val = +val & ~0;
+        val = +val & ~0 || 0;
         if (val < 0) {
             val = 0;
         }

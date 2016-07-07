@@ -307,6 +307,17 @@ class ArrayValue extends Value {
         return list;
     }
 
+    dispose() {
+        var list = this.list;
+        for (var i = 0; i < list.length; i++) {
+            var value = this.list[i];
+            if (value instanceof Value) {
+                value.dispose();
+            }
+        }
+        super.dispose();
+    }
+
     set key(val) {
         this._key = val;
     }

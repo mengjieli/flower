@@ -6,7 +6,7 @@ class NumberValue extends Value {
     }
 
     $setValue(val) {
-        val = +val;
+        val = +val || 0;
         if (val == this.__value) {
             return;
         }

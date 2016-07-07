@@ -6,7 +6,7 @@ class IntValue extends Value {
     }
 
     $setValue(val) {
-        val = +val & ~0;
+        val = +val & ~0 || 0;
         if (val == this.__value) {
             return;
         }

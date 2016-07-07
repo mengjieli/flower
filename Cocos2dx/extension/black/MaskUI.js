@@ -55,6 +55,12 @@ class MaskUI extends flower.Mask {
         this.shape.$onFrameEnd();
         this.$resetLayout();
     }
+
+    dispose() {
+        this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
+        super.dispose();
+    }
 }
 UIComponent.register(MaskUI, true);
 MaskUI.prototype.__UIComponent = true;

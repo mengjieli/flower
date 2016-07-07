@@ -31,9 +31,9 @@ class Group extends flower.Sprite {
     }
 
     $resetLayout() {
-        if(this.$hasFlags(0x2000)) {
+        if (this.$hasFlags(0x2000)) {
             this.$removeFlags(0x2000);
-            if(this.layout) {
+            if (this.layout) {
                 this.layout.updateList(this.width, this.height);
             }
         }
@@ -49,9 +49,10 @@ class Group extends flower.Sprite {
 
     dispose() {
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 }
-UIComponent.register(Group,true);
+UIComponent.register(Group, true);
 Group.prototype.__UIComponent = true;
 exports.Group = Group;

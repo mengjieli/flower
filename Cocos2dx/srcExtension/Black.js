@@ -883,6 +883,17 @@ class ArrayValue extends Value {
         return list;
     }
 
+    dispose() {
+        var list = this.list;
+        for (var i = 0; i < list.length; i++) {
+            var value = this.list[i];
+            if (value instanceof Value) {
+                value.dispose();
+            }
+        }
+        super.dispose();
+    }
+
     set key(val) {
         this._key = val;
     }
@@ -963,7 +974,7 @@ class IntValue extends Value {
     }
 
     $setValue(val) {
-        val = +val & ~0;
+        val = +val & ~0 || 0;
         if (val == this.__value) {
             return;
         }
@@ -987,7 +998,7 @@ class NumberValue extends Value {
     }
 
     $setValue(val) {
-        val = +val;
+        val = +val || 0;
         if (val == this.__value) {
             return;
         }
@@ -1010,40 +1021,50 @@ class ObjectValue extends Value {
         this.__old = this.__value = {};
     }
 
-    update(...args) {
-        var change = false;
-        for (var i = 0; i < args.length;) {
-            var name = args[i];
-            if (i + 1 >= args.length) {
-                break;
-            }
-            var value = args[i + 1];
-            var obj = this[name];
-            if (obj instanceof Value) {
-                if (obj.value != value) {
-                    obj.value = value;
-                    change = true;
-                }
-            } else {
-                if (obj != value) {
-                    this[name] = value;
-                    change = true;
-                }
-            }
-            this[name] = value;
-            i += 2;
-        }
-        if (change) {
-            this.dispatchWidth(flower.Event.UPDATE, this);
-        }
-    }
+    //update(...args) {
+    //    var change = false;
+    //    for (var i = 0; i < args.length;) {
+    //        var name = args[i];
+    //        if (i + 1 >= args.length) {
+    //            break;
+    //        }
+    //        var value = args[i + 1];
+    //        var obj = this[name];
+    //        if (obj instanceof Value) {
+    //            if (obj.value != value) {
+    //                obj.value = value;
+    //                change = true;
+    //            }
+    //        } else {
+    //            if (obj != value) {
+    //                this[name] = value;
+    //                change = true;
+    //            }
+    //        }
+    //        i += 2;
+    //    }
+    //    if (change) {
+    //        this.dispatchWidth(flower.Event.UPDATE, this);
+    //    }
+    //}
+    //
+    //addMember(name, value) {
+    //    this[name] = value;
+    //    this.dispatchWidth(flower.Event.UPDATE, this);
+    //}
+    //
+    //
+    //deleteMember(name) {
+    //    delete this[name];
+    //}
 
-    addMember(name, value) {
-        this[name] = value;
-    }
-
-    deleteMember(name) {
-        delete this[name];
+    dispose() {
+        for (var key in this) {
+            if (this[key] instanceof Value) {
+                this[key].dispose();
+            }
+        }
+        super.dispose();
     }
 }
 
@@ -1085,7 +1106,7 @@ class UIntValue extends Value {
     }
 
     $setValue(val) {
-        val = +val & ~0;
+        val = +val & ~0 || 0;
         if (val < 0) {
             val = 0;
         }
@@ -1103,6 +1124,27 @@ black.UIntValue = UIntValue;
 
 
 
+//////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
+var locale_strings = flower.sys.$locale_strings["zh_CN"];
+
+
+locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
+locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
+locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
+locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
+locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
+locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
+locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
+locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
+locale_strings[3012] = "没有定义的数据结构 :{0}";
+locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
+locale_strings[3100] = "没有定义的数据类型 :{0}";
+locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
+//////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
+
+
+
 //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
 class DataManager {
     _defines = {};
@@ -1112,6 +1154,53 @@ class DataManager {
         if (DataManager.instance) {
             return;
         }
+        DataManager.instance = this;
+
+        this.addDefine({
+            "name": "Size",
+            "members": {
+                "width": {"type": "int"},
+                "height": {"type": "int"}
+            }
+        });
+        this.addDefine({
+            "name": "Point",
+            "members": {
+                "x": {"type": "int"},
+                "y": {"type": "int"}
+            }
+        });
+        this.addDefine({
+            "name": "Rectangle",
+            "members": {
+                "x": {"type": "int"},
+                "y": {"type": "int"},
+                "width": {"type": "int"},
+                "height": {"type": "int"}
+            }
+        });
+        this.addDefine({
+            "name": "ProgressData",
+            "members": {
+                "current": {"type": "number"},
+                "max": {"type": "number"},
+                "percent": {"type": "number", "bind": "{this.current/this.max}"},
+                "tip": {"type": "string"}
+            }
+        });
+        this.addDefine({
+            "name": "Flower_System",
+            "members": {
+                "screen": {"type": "Size"},
+            }
+        });
+        this.addDefine({
+            "name": "Flower",
+            "members": {
+                "system": {"type": "Flower_System"},
+            }
+        });
+        this.addRootData("flower", "Flower");
     }
 
     addRootData(name, className) {
@@ -1149,11 +1238,14 @@ class DataManager {
             "\tfunction " + defineClass + "() {\n" +
             "\t\t_super.call(this);\n";
         var members = config.members;
+        var bindContent = "";
         if (members) {
             var member;
             for (var key in members) {
                 member = members[key];
-                if (member.type == "int") {
+                if (member.type == "number") {
+                    content += "\t\tthis." + key + " = new NumberValue(" + (member.init != null ? member.init : "") + ");\n";
+                } else if (member.type == "int") {
                     content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
                 } else if (member.type == "uint") {
                     content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
@@ -1166,10 +1258,14 @@ class DataManager {
                 } else if (member.type == "*") {
                     content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
                 } else {
-                    content += "\t\tthis." + key + " = DataManager.getInstance().createData(" + member.type + ");\n";
+                    content += "\t\tthis." + key + " = DataManager.getInstance().createData(\"" + member.type + "\");\n";
+                }
+                if (member.bind) {
+                    bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
                 }
             }
         }
+        content += bindContent;
         content += "\t}\n" +
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
@@ -1217,36 +1313,18 @@ class DataManager {
         this._defines = {};
     }
 
-    static instance = new DataManager();
+    static instance;
 
     static getInstance() {
+        if (DataManager.instance == null) {
+            new DataManager();
+        }
         return DataManager.instance;
     }
 }
 
 black.DataManager = DataManager;
 //////////////////////////End File:extension/black/data/DataManager.js///////////////////////////
-
-
-
-//////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
-var locale_strings = flower.sys.$locale_strings["zh_CN"];
-
-
-locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
-locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
-locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
-locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
-locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
-locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
-locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
-locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
-locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
-locale_strings[3012] = "没有定义的数据结构 :{0}";
-locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
-locale_strings[3100] = "没有定义的数据类型 :{0}";
-locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
-//////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
 
 
 
@@ -1536,6 +1614,124 @@ black.PanelScaleMode = PanelScaleMode;
 
 
 
+//////////////////////////File:extension/black/theme/Theme.js///////////////////////////
+class Theme extends flower.EventDispatcher {
+
+    __progress;
+    __list;
+    __index;
+    __url;
+    __direction;
+
+    constructor(url) {
+        super();
+        Theme.instance = this;
+        this.__url = url;
+        this.__direction = flower.Path.getPathDirection(url);
+        this.__progress = flower.DataManager.getInstance().createData("ProgressData");
+    }
+
+    load() {
+        var url = this.__url;
+        this.__progress.tip.value = url;
+        var loader = new flower.URLLoader(url);
+        loader.load();
+        loader.addListener(flower.Event.COMPLETE, this.__onLoadThemeComplete, this);
+        loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+    }
+
+    __onLoadThemeComplete(e) {
+        var cfg = e.data;
+        this.__list = [];
+        for (var i = 0; i < cfg.length; i++) {
+            var key = cfg[i].class;
+            var url = cfg[i].url;
+            if (url.slice(0, 2) == "./") {
+                url = this.__direction + url.slice(2, url.length);
+            }
+            this.__list.push({
+                class: key,
+                ui: new flower.UIParser(),
+                url: url
+            });
+        }
+        this.__index = 0;
+        this.__loadNext();
+    }
+
+    __loadError(e) {
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatchWidth(flower.Event.ERROR, e.data);
+        } else {
+            $error(e.data);
+        }
+    }
+
+    __loadNext() {
+        this.__progress.max.value = this.__list.length;
+        this.__progress.current.value = this.__index;
+        if (this.__index == this.__list.length) {
+            this.dispatchWidth(flower.Event.COMPLETE);
+            return;
+        }
+        var ui = this.__list[this.__index].ui;
+        var url = this.__list[this.__index].url;
+        ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+        ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+        ui.parseAsync(url);
+        this.__index++;
+    }
+
+    getObject(className) {
+        for (var i = 0; i < this.__list.length; i++) {
+            if (this.__list[i].class == className && this.__list[i].ui.className) {
+                return new this.__list[i].ui.classDefine();
+            }
+        }
+        return null;
+    }
+
+    getClass(className) {
+        for (var i = 0; i < this.__list.length; i++) {
+            if (this.__list[i].class == className && this.__list[i].ui.className) {
+                return this.__list[i].ui.classDefine;
+            }
+        }
+        return null;
+    }
+
+    get progress() {
+        return this.__progress;
+    }
+
+    static instance;
+
+    static getInstance() {
+        return Theme.instance;
+    }
+
+    static getObject(className) {
+        var theme = Theme.getInstance();
+        if (theme) {
+            return theme.getObject(className);
+        }
+        return null;
+    }
+
+    static getClass(className) {
+        var theme = Theme.getInstance();
+        if (theme) {
+            return theme.getClass(className);
+        }
+        return null;
+    }
+}
+
+black.Theme = Theme;
+//////////////////////////End File:extension/black/theme/Theme.js///////////////////////////
+
+
+
 //////////////////////////File:extension/black/Group.js///////////////////////////
 class Group extends flower.Sprite {
 
@@ -1570,9 +1766,9 @@ class Group extends flower.Sprite {
     }
 
     $resetLayout() {
-        if(this.$hasFlags(0x2000)) {
+        if (this.$hasFlags(0x2000)) {
             this.$removeFlags(0x2000);
-            if(this.layout) {
+            if (this.layout) {
                 this.layout.updateList(this.width, this.height);
             }
         }
@@ -1588,10 +1784,11 @@ class Group extends flower.Sprite {
 
     dispose() {
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 }
-UIComponent.register(Group,true);
+UIComponent.register(Group, true);
 Group.prototype.__UIComponent = true;
 black.Group = Group;
 //////////////////////////End File:extension/black/Group.js///////////////////////////
@@ -1695,8 +1892,8 @@ class UIParser extends Group {
     }
 
     loadContentError(e) {
-        if (this.hasListener(Event.ERROR)) {
-            this.dispatchWidth(Event.ERROR, getLanguage(3001, e.currentTarget.url));
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatchWidth(flower.Event.ERROR, getLanguage(3001, e.currentTarget.url));
         } else {
             sys.$error(3001, e.currentTarget.url);
         }
@@ -1774,19 +1971,19 @@ class UIParser extends Group {
                 this.parseUI(this.loadContent, this.loadData);
             } else {
                 var data = this.parse(this.loadContent);
-                this.dispatchWidth(Event.COMPLETE, data);
+                this.dispatchWidth(flower.Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
             parser.parseAsync(this.relationUI[this.relationIndex]);
             parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
-            parser.addListener(Event.ERROR, this.relationLoadError, this);
+            parser.addListener(flower.ERROR, this.relationLoadError, this);
         }
     }
 
     relationLoadError(e) {
-        if (this.hasListener(Event.ERROR)) {
-            this.dispatchWidth(Event.ERROR, e.data);
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatchWidth(flower.Event.ERROR, e.data);
         } else {
             $error(e.data);
         }
@@ -1806,7 +2003,7 @@ class UIParser extends Group {
         if (!ui.parent) {
             this.addChild(ui);
         }
-        this.dispatchWidth(Event.COMPLETE, ui);
+        this.dispatchWidth(flower.Event.COMPLETE, ui);
     }
 
     parse(content) {
@@ -1832,6 +2029,10 @@ class UIParser extends Group {
 
     get className() {
         return this._className;
+    }
+
+    get classDefine() {
+        return flower.UIParser.classes.local[this._className];
     }
 
     decodeRootComponent(xml, classContent) {
@@ -1913,7 +2114,7 @@ class UIParser extends Group {
         content += before + "\t}\n\n";
         content += before + "\treturn " + className + ";\n";
         if (uinameNS == "f") {
-            content += before + "})(" + extendClass + ");\n";
+            content += before + "})(flower.Theme.getClass(\"" + extendClass + "\") || " + extendClass + ");\n";
         } else {
             content += before + "})(flower.UIParser.getLocalUIClass(\"" + extendClass + "\"));\n";
         }
@@ -2190,7 +2391,7 @@ class UIParser extends Group {
                 if (createClassNameSpace == "local") {
                     setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\"))();\n";
                 } else {
-                    setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
+                    setObject += before + "\tvar " + thisObj + " = flower.Theme.getObject(\"" + createClassName + "\") || new " + createClassName + "();\n";
                 }
                 setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
             }
@@ -2938,6 +3139,7 @@ class Label extends flower.TextField {
 
     dispose() {
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 }
@@ -2965,6 +3167,9 @@ class RectUI extends flower.Shape {
     $addFlags(flags) {
         if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
             this.__flags |= 0x1000;
+        }
+        if (flags == 0x0002) {
+            this.__flags |= 0x0400;
         }
         this.__flags |= flags;
     }
@@ -3052,6 +3257,7 @@ class RectUI extends flower.Shape {
 
     dispose() {
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 }
@@ -3125,6 +3331,7 @@ class Image extends flower.Bitmap {
             this.__loader.dispose();
         }
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 
@@ -3218,6 +3425,12 @@ class MaskUI extends flower.Mask {
         super.$onFrameEnd();
         this.shape.$onFrameEnd();
         this.$resetLayout();
+    }
+
+    dispose() {
+        this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
+        super.dispose();
     }
 }
 UIComponent.register(MaskUI, true);

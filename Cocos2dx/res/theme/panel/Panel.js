@@ -7,32 +7,38 @@ function $onPanelAdded() {
 }
 
 function getAddedTween() {
-    return null;
     return flower.Tween.to(this, 0.3, {
-        x: (this.parent.width - this.width) / 2,
-        y: (this.parent.height - this.height) / 2,
-        scaleX: 1,
-        scaleY: 1
+        alpha: 1,
+        //x:0,
+        //y:100
+        //x: (this.parent.width - this.width) / 2,
+        //y: (this.parent.height - this.height) / 2,
+        //scaleX: 1,
+        //scaleY: 1
     }, flower.Ease.BACK_EASE_OUT, {
-        x: this.parent.width / 2,
-        y: this.parent.height / 2,
-        scaleX: 0,
-        scaleY: 0
+        alpha: 0,
+        //y:0
+        //x: this.parent.width / 2,
+        //y: this.parent.height / 2,
+        //scaleX: 0,
+        //scaleY: 0
     });
 }
 
 function getCloseTween() {
     return null;
     return flower.Tween.to(this, 0.3, {
-        x: this.x + this.width / 2,
-        y: this.y + this.height / 2,
-        scaleX: 0,
-        scaleY: 0
+        fillAlpha: 0,
+        //x: this.x + this.width / 2,
+        //y: this.y + this.height / 2,
+        //scaleX: 0,
+        //scaleY: 0
     }, flower.Ease.SINE_EASE_IN_OUT, {
-        x: this.x,
-        y: this.y,
-        scaleX: 1,
-        scaleY: 1
+        fillAlpha: 1,
+        //x: this.x,
+        //y: this.y,
+        //scaleX: 1,
+        //scaleY: 1
     });
 }
 

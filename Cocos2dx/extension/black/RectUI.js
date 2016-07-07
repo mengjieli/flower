@@ -14,6 +14,9 @@ class RectUI extends flower.Shape {
         if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
             this.__flags |= 0x1000;
         }
+        if (flags == 0x0002) {
+            this.__flags |= 0x0400;
+        }
         this.__flags |= flags;
     }
 
@@ -100,6 +103,7 @@ class RectUI extends flower.Shape {
 
     dispose() {
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 }

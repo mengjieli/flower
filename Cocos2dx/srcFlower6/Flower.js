@@ -1070,6 +1070,7 @@ class PlatformShape extends PlatformDisplayObject {
     setFilters(filters) {
 
     }
+
     release() {
         this.clear();
         super.release();
@@ -4154,8 +4155,8 @@ class Shape extends DisplayObject {
     }
 
     clear() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.$nativeShow.clear();
@@ -4173,8 +4174,8 @@ class Shape extends DisplayObject {
     }
 
     $drawPolygon(points) {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         var p = this.$Shape;
@@ -4367,8 +4368,8 @@ class Shape extends DisplayObject {
     }
 
     dispose() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         super.dispose();

@@ -59,6 +59,7 @@ class Image extends flower.Bitmap {
             this.__loader.dispose();
         }
         this.removeAllBindProperty();
+        this.$UIComponent[11].dispose();
         super.dispose();
     }
 

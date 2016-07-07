@@ -5,7 +5,12 @@ class Main {
 
     ready() {
         new Test();
-        flower.Stage.getInstance().backgroundColor = 0xffffff;
+        flower.Stage.getInstance().backgroundColor = 0x555555;
+        var theme = new flower.Theme("res/theme/theme.json");
+        theme.load();
+        theme.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
+
+        return;
 
         var container = new flower.Sprite();
         flower.Stage.getInstance().addChild(container);
@@ -169,6 +174,12 @@ class Main {
         ////load.language = "cn";
         //load.addListener(flower.Event.COMPLETE, this.loadImageComplete, this);
         //load.load();
+    }
+
+    loadThemeComplete(e) {
+        var ui = new flower.UIParser();
+        ui.parseUIAsync("res/Panel.xml");
+        flower.Stage.getInstance().addChild(ui);
     }
 
     set text(val) {
