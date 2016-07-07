@@ -3,7 +3,7 @@ function initPanel() {
 }
 
 function $onPanelAdded() {
-    this.getAddedTween();
+    //this.getAddedTween();
 }
 
 function getAddedTween() {

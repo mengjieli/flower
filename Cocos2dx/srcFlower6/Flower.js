@@ -2799,7 +2799,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     $setVisible(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;

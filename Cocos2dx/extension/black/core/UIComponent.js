@@ -244,72 +244,42 @@ class UIComponent {
             this.$invalidateContentBounds();
         }
 
-        /**
-         * 验证 UI 属性
-         */
-        p.$validateUIComponent = function (parent) {
-            this.$removeFlags(0x1000);
-            //开始验证属性
-            //console.log("验证 ui 属性");
-            var p = this.$UIComponent;
-            if (this.$hasFlags(0x0001)) {
-                this.$getContentBounds();
-            }
-            parent = parent || this.parent;
-            //if (this instanceof Group) {
-            //    console.log("验证 ui 属性",flower.EnterFrame.frame);
-            //}
-            if (p[0] != null && p[1] == null && p [2] != null) {
-                this.width = (p[2] - p[0]) * 2;
-                this.x = parent.$getContentBounds().x + p[0];
-            }
-            else if (p[0] == null && p[1] != null && p[2] != null) {
-                this.width = (p[1] - p[2]) * 2;
-                this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
-            } else if (p[0] != null && p[1] != null) {
-                this.width = parent.width - p[1] - p[0];
-                this.x = parent.$getContentBounds().x + p[0];
-            } else {
-                if (p[0] != null) {
-                    this.x = parent.$getContentBounds().x + p[0];
-                }
-                if (p[1] != null) {
-                    this.x = parent.$getContentBounds().x + parent.$getContentBounds().width - p[1] - this.width;
-                }
-                if (p[2] != null) {
-                    this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
-                }
-                if (p[6]) {
-                    this.width = parent.width * p[6] / 100;
-                }
-            }
-            if (p[3] != null && p[4] == null && p [5] != null) {
-                this.height = (p[5] - p[3]) * 2;
-                this.y = parent.$getContentBounds().y + p[3];
-            } else if (p[3] == null && p[4] != null && p[5] != null) {
-                this.height = (p[4] - p[5]) * 2;
-                this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
-            } else if (p[3] != null && p[4] != null) {
-                this.height = parent.height - p[4] - p[3];
-                this.y = parent.$getContentBounds().y + p[3];
-            } else {
-                if (p[3] != null) {
-                    this.y = parent.$getContentBounds().y + p[3];
-                }
-                if (p[4] != null) {
-                    this.y = parent.$getContentBounds().y + parent.$getContentBounds().height - p[4] - this.height;
-                }
-                if (p[5] != null) {
-                    this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
-                }
-                if (p[7]) {
-                    this.height = parent.height * p[7] / 100;
-                }
-            }
-            if (this instanceof flower.Sprite) {
-                this.$validateChildrenUIComponent();
-            }
-        }
+        //p.$getWidth = function () {
+        //    var p = this.$UIComponent;
+        //    if (p[0] != null && p[1] == null && p [2] != null) {
+        //        return (p[2] - p[0]) * 2;
+        //    }
+        //    else if (p[0] == null && p[1] != null && p[2] != null) {
+        //        return (p[1] - p[2]) * 2;
+        //    } else if (p[0] != null && p[1] != null) {
+        //        if (this.parent) {
+        //            return parent.width - p[1] - p[0];
+        //        }
+        //    } else {
+        //        if (p[6] && this.parent) {
+        //            this.width = parent.width * p[6] / 100;
+        //        }
+        //    }
+        //    return $root._get(Object.getPrototypeOf(p), "$getWidth", this).call(this);
+        //}
+        //
+        //p.$getHeight = function () {
+        //    var p = this.$UIComponent;
+        //    if (p[3] != null && p[4] == null && p [5] != null) {
+        //        return (p[5] - p[3]) * 2;
+        //    } else if (p[3] == null && p[4] != null && p[5] != null) {
+        //        return (p[4] - p[5]) * 2;
+        //    } else if (p[3] != null && p[4] != null) {
+        //        if (this.parent) {
+        //            return parent.height - p[4] - p[3];
+        //        }
+        //    } else {
+        //        if (p[7] && this.parent) {
+        //            return parent.height * p[7] / 100;
+        //        }
+        //    }
+        //    return $root._get(Object.getPrototypeOf(p), "$getHeight", this).call(this);
+        //}
 
         Object.defineProperty(p, "left", {
             get: function () {

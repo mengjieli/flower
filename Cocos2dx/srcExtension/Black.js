@@ -257,72 +257,42 @@ class UIComponent {
             this.$invalidateContentBounds();
         }
 
-        /**
-         * 验证 UI 属性
-         */
-        p.$validateUIComponent = function (parent) {
-            this.$removeFlags(0x1000);
-            //开始验证属性
-            //console.log("验证 ui 属性");
-            var p = this.$UIComponent;
-            if (this.$hasFlags(0x0001)) {
-                this.$getContentBounds();
-            }
-            parent = parent || this.parent;
-            //if (this instanceof Group) {
-            //    console.log("验证 ui 属性",flower.EnterFrame.frame);
-            //}
-            if (p[0] != null && p[1] == null && p [2] != null) {
-                this.width = (p[2] - p[0]) * 2;
-                this.x = parent.$getContentBounds().x + p[0];
-            }
-            else if (p[0] == null && p[1] != null && p[2] != null) {
-                this.width = (p[1] - p[2]) * 2;
-                this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
-            } else if (p[0] != null && p[1] != null) {
-                this.width = parent.width - p[1] - p[0];
-                this.x = parent.$getContentBounds().x + p[0];
-            } else {
-                if (p[0] != null) {
-                    this.x = parent.$getContentBounds().x + p[0];
-                }
-                if (p[1] != null) {
-                    this.x = parent.$getContentBounds().x + parent.$getContentBounds().width - p[1] - this.width;
-                }
-                if (p[2] != null) {
-                    this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
-                }
-                if (p[6]) {
-                    this.width = parent.width * p[6] / 100;
-                }
-            }
-            if (p[3] != null && p[4] == null && p [5] != null) {
-                this.height = (p[5] - p[3]) * 2;
-                this.y = parent.$getContentBounds().y + p[3];
-            } else if (p[3] == null && p[4] != null && p[5] != null) {
-                this.height = (p[4] - p[5]) * 2;
-                this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
-            } else if (p[3] != null && p[4] != null) {
-                this.height = parent.height - p[4] - p[3];
-                this.y = parent.$getContentBounds().y + p[3];
-            } else {
-                if (p[3] != null) {
-                    this.y = parent.$getContentBounds().y + p[3];
-                }
-                if (p[4] != null) {
-                    this.y = parent.$getContentBounds().y + parent.$getContentBounds().height - p[4] - this.height;
-                }
-                if (p[5] != null) {
-                    this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
-                }
-                if (p[7]) {
-                    this.height = parent.height * p[7] / 100;
-                }
-            }
-            if (this instanceof flower.Sprite) {
-                this.$validateChildrenUIComponent();
-            }
-        }
+        //p.$getWidth = function () {
+        //    var p = this.$UIComponent;
+        //    if (p[0] != null && p[1] == null && p [2] != null) {
+        //        return (p[2] - p[0]) * 2;
+        //    }
+        //    else if (p[0] == null && p[1] != null && p[2] != null) {
+        //        return (p[1] - p[2]) * 2;
+        //    } else if (p[0] != null && p[1] != null) {
+        //        if (this.parent) {
+        //            return parent.width - p[1] - p[0];
+        //        }
+        //    } else {
+        //        if (p[6] && this.parent) {
+        //            this.width = parent.width * p[6] / 100;
+        //        }
+        //    }
+        //    return $root._get(Object.getPrototypeOf(p), "$getWidth", this).call(this);
+        //}
+        //
+        //p.$getHeight = function () {
+        //    var p = this.$UIComponent;
+        //    if (p[3] != null && p[4] == null && p [5] != null) {
+        //        return (p[5] - p[3]) * 2;
+        //    } else if (p[3] == null && p[4] != null && p[5] != null) {
+        //        return (p[4] - p[5]) * 2;
+        //    } else if (p[3] != null && p[4] != null) {
+        //        if (this.parent) {
+        //            return parent.height - p[4] - p[3];
+        //        }
+        //    } else {
+        //        if (p[7] && this.parent) {
+        //            return parent.height * p[7] / 100;
+        //        }
+        //    }
+        //    return $root._get(Object.getPrototypeOf(p), "$getHeight", this).call(this);
+        //}
 
         Object.defineProperty(p, "left", {
             get: function () {
@@ -1752,6 +1722,67 @@ class Group extends flower.Sprite {
         this.__flags |= flags;
     }
 
+    /**
+     * 验证 UI 属性
+     */
+    $validateUIComponent(parent) {
+        this.$removeFlags(0x1000);
+        //开始验证属性
+        var p = this.$UIComponent;
+        if (this.$hasFlags(0x0001)) {
+            this.$getContentBounds();
+        }
+        parent = parent || this.parent;
+        if (p[0] != null && p[1] == null && p [2] != null) {
+            this.width = (p[2] - p[0]) * 2;
+            this.x = parent.$getContentBounds().x + p[0];
+        }
+        else if (p[0] == null && p[1] != null && p[2] != null) {
+            this.width = (p[1] - p[2]) * 2;
+            this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+        } else if (p[0] != null && p[1] != null) {
+            this.width = parent.width - p[1] - p[0];
+            this.x = parent.$getContentBounds().x + p[0];
+        } else {
+            if (p[0] != null) {
+                this.x = parent.$getContentBounds().x + p[0];
+            }
+            if (p[1] != null) {
+                this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+            }
+            if (p[2] != null) {
+                this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+            }
+            if (p[6]) {
+                this.width = parent.width * p[6] / 100;
+            }
+        }
+        if (p[3] != null && p[4] == null && p [5] != null) {
+            this.height = (p[5] - p[3]) * 2;
+            this.y = parent.$getContentBounds().y + p[3];
+        } else if (p[3] == null && p[4] != null && p[5] != null) {
+            this.height = (p[4] - p[5]) * 2;
+            this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+        } else if (p[3] != null && p[4] != null) {
+            this.height = parent.height - p[4] - p[3];
+            this.y = parent.$getContentBounds().y + p[3];
+        } else {
+            if (p[3] != null) {
+                this.y = parent.$getContentBounds().y + p[3];
+            }
+            if (p[4] != null) {
+                this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+            }
+            if (p[5] != null) {
+                this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+            }
+            if (p[7]) {
+                this.height = parent.height * p[7] / 100;
+            }
+        }
+        this.$validateChildrenUIComponent();
+    }
+
     $validateChildrenUIComponent() {
         var children = this.__children;
         if (children) {
@@ -1766,11 +1797,9 @@ class Group extends flower.Sprite {
     }
 
     $resetLayout() {
-        if (this.$hasFlags(0x2000)) {
+        if (this.$hasFlags(this.layout && 0x2000)) {
             this.$removeFlags(0x2000);
-            if (this.layout) {
-                this.layout.updateList(this.width, this.height);
-            }
+            this.layout.updateList(this.width, this.height);
         }
     }
 
@@ -3130,6 +3159,70 @@ class Label extends flower.TextField {
         this.__flags |= flags;
     }
 
+    /**
+     * 验证 UI 属性
+     */
+    $validateUIComponent(parent) {
+        this.$removeFlags(0x1000);
+        //开始验证属性
+        //console.log("验证 ui 属性");
+        var p = this.$UIComponent;
+        if (this.$hasFlags(0x0001)) {
+            this.$getContentBounds();
+        }
+        parent = parent || this.parent;
+        //if (this instanceof flower.Panel) {
+        //    console.log("验证 ui 属性",flower.EnterFrame.frame);
+        //}
+        if (p[0] != null && p[1] == null && p [2] != null) {
+            this.width = (p[2] - p[0]) * 2;
+            this.x = parent.$getContentBounds().x + p[0];
+        }
+        else if (p[0] == null && p[1] != null && p[2] != null) {
+            this.width = (p[1] - p[2]) * 2;
+            this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+        } else if (p[0] != null && p[1] != null) {
+            this.width = parent.width - p[1] - p[0];
+            this.x = parent.$getContentBounds().x + p[0];
+        } else {
+            if (p[0] != null) {
+                this.x = parent.$getContentBounds().x + p[0];
+            }
+            if (p[1] != null) {
+                this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+            }
+            if (p[2] != null) {
+                this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+            }
+            if (p[6]) {
+                this.width = parent.width * p[6] / 100;
+            }
+        }
+        if (p[3] != null && p[4] == null && p [5] != null) {
+            this.height = (p[5] - p[3]) * 2;
+            this.y = parent.$getContentBounds().y + p[3];
+        } else if (p[3] == null && p[4] != null && p[5] != null) {
+            this.height = (p[4] - p[5]) * 2;
+            this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+        } else if (p[3] != null && p[4] != null) {
+            this.height = parent.height - p[4] - p[3];
+            this.y = parent.$getContentBounds().y + p[3];
+        } else {
+            if (p[3] != null) {
+                this.y = parent.$getContentBounds().y + p[3];
+            }
+            if (p[4] != null) {
+                this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+            }
+            if (p[5] != null) {
+                this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+            }
+            if (p[7]) {
+                this.height = parent.height * p[7] / 100;
+            }
+        }
+    }
+
     $onFrameEnd() {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
@@ -3172,6 +3265,70 @@ class RectUI extends flower.Shape {
             this.__flags |= 0x0400;
         }
         this.__flags |= flags;
+    }
+
+    /**
+     * 验证 UI 属性
+     */
+    $validateUIComponent(parent) {
+        this.$removeFlags(0x1000);
+        //开始验证属性
+        //console.log("验证 ui 属性");
+        var p = this.$UIComponent;
+        if (this.$hasFlags(0x0001)) {
+            this.$getContentBounds();
+        }
+        parent = parent || this.parent;
+        //if (this instanceof flower.Panel) {
+        //    console.log("验证 ui 属性",flower.EnterFrame.frame);
+        //}
+        if (p[0] != null && p[1] == null && p [2] != null) {
+            this.width = (p[2] - p[0]) * 2;
+            this.x = parent.$getContentBounds().x + p[0];
+        }
+        else if (p[0] == null && p[1] != null && p[2] != null) {
+            this.width = (p[1] - p[2]) * 2;
+            this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+        } else if (p[0] != null && p[1] != null) {
+            this.width = parent.width - p[1] - p[0];
+            this.x = parent.$getContentBounds().x + p[0];
+        } else {
+            if (p[0] != null) {
+                this.x = parent.$getContentBounds().x + p[0];
+            }
+            if (p[1] != null) {
+                this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+            }
+            if (p[2] != null) {
+                this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+            }
+            if (p[6]) {
+                this.width = parent.width * p[6] / 100;
+            }
+        }
+        if (p[3] != null && p[4] == null && p [5] != null) {
+            this.height = (p[5] - p[3]) * 2;
+            this.y = parent.$getContentBounds().y + p[3];
+        } else if (p[3] == null && p[4] != null && p[5] != null) {
+            this.height = (p[4] - p[5]) * 2;
+            this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+        } else if (p[3] != null && p[4] != null) {
+            this.height = parent.height - p[4] - p[3];
+            this.y = parent.$getContentBounds().y + p[3];
+        } else {
+            if (p[3] != null) {
+                this.y = parent.$getContentBounds().y + p[3];
+            }
+            if (p[4] != null) {
+                this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+            }
+            if (p[5] != null) {
+                this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+            }
+            if (p[7]) {
+                this.height = parent.height * p[7] / 100;
+            }
+        }
     }
 
     $setFillColor(val) {
@@ -3289,6 +3446,70 @@ class Image extends flower.Bitmap {
         this.__flags |= flags;
     }
 
+    /**
+     * 验证 UI 属性
+     */
+    $validateUIComponent(parent) {
+        this.$removeFlags(0x1000);
+        //开始验证属性
+        //console.log("验证 ui 属性");
+        var p = this.$UIComponent;
+        if (this.$hasFlags(0x0001)) {
+            this.$getContentBounds();
+        }
+        parent = parent || this.parent;
+        //if (this instanceof flower.Panel) {
+        //    console.log("验证 ui 属性",flower.EnterFrame.frame);
+        //}
+        if (p[0] != null && p[1] == null && p [2] != null) {
+            this.width = (p[2] - p[0]) * 2;
+            this.x = parent.$getContentBounds().x + p[0];
+        }
+        else if (p[0] == null && p[1] != null && p[2] != null) {
+            this.width = (p[1] - p[2]) * 2;
+            this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+        } else if (p[0] != null && p[1] != null) {
+            this.width = parent.width - p[1] - p[0];
+            this.x = parent.$getContentBounds().x + p[0];
+        } else {
+            if (p[0] != null) {
+                this.x = parent.$getContentBounds().x + p[0];
+            }
+            if (p[1] != null) {
+                this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+            }
+            if (p[2] != null) {
+                this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+            }
+            if (p[6]) {
+                this.width = parent.width * p[6] / 100;
+            }
+        }
+        if (p[3] != null && p[4] == null && p [5] != null) {
+            this.height = (p[5] - p[3]) * 2;
+            this.y = parent.$getContentBounds().y + p[3];
+        } else if (p[3] == null && p[4] != null && p[5] != null) {
+            this.height = (p[4] - p[5]) * 2;
+            this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+        } else if (p[3] != null && p[4] != null) {
+            this.height = parent.height - p[4] - p[3];
+            this.y = parent.$getContentBounds().y + p[3];
+        } else {
+            if (p[3] != null) {
+                this.y = parent.$getContentBounds().y + p[3];
+            }
+            if (p[4] != null) {
+                this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+            }
+            if (p[5] != null) {
+                this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+            }
+            if (p[7]) {
+                this.height = parent.height * p[7] / 100;
+            }
+        }
+    }
+
     $setSource(val) {
         if (this.__source == val) {
             return;
@@ -3381,6 +3602,67 @@ class MaskUI extends flower.Mask {
         shape.percentWidth = 100;
         shape.percentHeight = 100;
         return shape;
+    }
+
+    /**
+     * 验证 UI 属性
+     */
+    $validateUIComponent(parent) {
+        this.$removeFlags(0x1000);
+        //开始验证属性
+        var p = this.$UIComponent;
+        if (this.$hasFlags(0x0001)) {
+            this.$getContentBounds();
+        }
+        parent = parent || this.parent;
+        if (p[0] != null && p[1] == null && p [2] != null) {
+            this.width = (p[2] - p[0]) * 2;
+            this.x = parent.$getContentBounds().x + p[0];
+        }
+        else if (p[0] == null && p[1] != null && p[2] != null) {
+            this.width = (p[1] - p[2]) * 2;
+            this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+        } else if (p[0] != null && p[1] != null) {
+            this.width = parent.width - p[1] - p[0];
+            this.x = parent.$getContentBounds().x + p[0];
+        } else {
+            if (p[0] != null) {
+                this.x = parent.$getContentBounds().x + p[0];
+            }
+            if (p[1] != null) {
+                this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+            }
+            if (p[2] != null) {
+                this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+            }
+            if (p[6]) {
+                this.width = parent.width * p[6] / 100;
+            }
+        }
+        if (p[3] != null && p[4] == null && p [5] != null) {
+            this.height = (p[5] - p[3]) * 2;
+            this.y = parent.$getContentBounds().y + p[3];
+        } else if (p[3] == null && p[4] != null && p[5] != null) {
+            this.height = (p[4] - p[5]) * 2;
+            this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+        } else if (p[3] != null && p[4] != null) {
+            this.height = parent.height - p[4] - p[3];
+            this.y = parent.$getContentBounds().y + p[3];
+        } else {
+            if (p[3] != null) {
+                this.y = parent.$getContentBounds().y + p[3];
+            }
+            if (p[4] != null) {
+                this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+            }
+            if (p[5] != null) {
+                this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+            }
+            if (p[7]) {
+                this.height = parent.height * p[7] / 100;
+            }
+        }
+        this.$validateChildrenUIComponent();
     }
 
     $addFlags(flags) {
@@ -4461,31 +4743,71 @@ class Panel extends Group {
         }
     }
 
-    $onFrameEnd() {
-        if (this.$hasFlags(0x1000) && this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
-            var scaleMode = this.$Panel[3];
-            var scaleX = this.parent.width / this.width;
-            var scaleY = this.parent.height / this.height;
-            if (scaleMode == PanelScaleMode.SHOW_ALL) {
-                this.scaleX = scaleX < scaleY ? scaleX : scaleY;
-                this.scaleY = scaleY < scaleY ? scaleX : scaleY;
-            } else if (scaleMode == PanelScaleMode.NO_BORDER) {
-                this.scaleX = scaleX > scaleY ? scaleX : scaleY;
-                this.scaleY = scaleX > scaleY ? scaleX : scaleY;
-            } else if (scaleMode == PanelScaleMode.SCALE_WIDTH) {
-                this.height = this.parent.height / scaleX;
-                this.scaleX = scaleX;
-                this.scaleY = scaleX;
-            } else if (scaleMode == PanelScaleMode.SCALE_HEIGHT) {
-                this.width = this.parent.width / scaleY;
-                this.scaleX = scaleY;
-                this.scaleY = scaleY;
+    /**
+     * 验证 UI 属性
+     */
+    $validateUIComponent(parent) {
+        this.$removeFlags(0x1000);
+        //开始验证属性
+        //console.log("验证 ui 属性");
+        var p = this.$UIComponent;
+        if (this.$hasFlags(0x0001)) {
+            this.$getContentBounds();
+        }
+        parent = parent || this.parent;
+        //console.log("验证 ui 属性",flower.EnterFrame.frame);
+        if (p[0] != null && p[1] == null && p [2] != null) {
+            this.width = (p[2] - p[0]) * 2;
+            this.x = parent.$getContentBounds().x + p[0];
+        }
+        else if (p[0] == null && p[1] != null && p[2] != null) {
+            this.width = (p[1] - p[2]) * 2;
+            this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+        } else if (p[0] != null && p[1] != null) {
+            this.width = parent.width - p[1] - p[0];
+            this.x = parent.$getContentBounds().x + p[0];
+        } else {
+            if (p[0] != null) {
+                this.x = parent.$getContentBounds().x + p[0];
+            }
+            if (p[1] != null) {
+                this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+            }
+            if (p[2] != null) {
+                this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+            }
+            if (p[6]) {
+                this.width = parent.width * p[6] / 100;
             }
         }
-        super.$onFrameEnd();
+        if (p[3] != null && p[4] == null && p [5] != null) {
+            this.height = (p[5] - p[3]) * 2;
+            this.y = parent.$getContentBounds().y + p[3];
+        } else if (p[3] == null && p[4] != null && p[5] != null) {
+            this.height = (p[4] - p[5]) * 2;
+            this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+        } else if (p[3] != null && p[4] != null) {
+            this.height = parent.height - p[4] - p[3];
+            this.y = parent.$getContentBounds().y + p[3];
+        } else {
+            if (p[3] != null) {
+                this.y = parent.$getContentBounds().y + p[3];
+            }
+            if (p[4] != null) {
+                this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+            }
+            if (p[5] != null) {
+                this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+            }
+            if (p[7]) {
+                this.height = parent.height * p[7] / 100;
+            }
+        }
+        this.$checkSetting();
+        this.$validateChildrenUIComponent();
     }
 
-    $validateChildrenUIComponent() {
+    $checkSetting() {
         if (this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
             var scaleMode = this.$Panel[3];
             var scaleX = this.parent.width / this.width;
@@ -4506,7 +4828,6 @@ class Panel extends Group {
                 this.scaleY = scaleY;
             }
         }
-        super.$validateChildrenUIComponent();
     }
 
     $onClose() {
