@@ -67,7 +67,8 @@ class PlatformTextField extends PlatformDisplayObject {
                 }
             }
         }
-        return txt.getContentSize();
+        $mesureTxt.setString(txt.getString());
+        return $mesureTxt.getContentSize();
     }
 
     setFilters(filters) {

@@ -43,6 +43,7 @@ class UIParser extends Group {
             "ViewStack": "flower.ViewStack",
             "Combox": "flower.Combox",
             "Panel": "flower.Panel",
+            "Alert": "flower.Alert",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -57,6 +58,7 @@ class UIParser extends Group {
     };
 
     _className;
+    _classNameSpace;
     classes;
     parseContent;
     parseUIAsyncFlag;
@@ -67,6 +69,7 @@ class UIParser extends Group {
     scriptURL;
     scriptContent;
     loadURL;
+    localNameSpace = "local";
 
     constructor() {
         super();
@@ -111,21 +114,21 @@ class UIParser extends Group {
             var name = list[i].name;
             var nameSpace = name.split(":")[0];
             name = name.split(":")[1];
-            if (nameSpace == "local") {
-                if (!this.classes.local[name] && !this.classes.localContent[name]) {
-                    if (!this.classes.localURL[name]) {
+            if (nameSpace != "f") {
+                if (!this.classes[nameSpace][name] && !this.classes[nameSpace + "Content"][name]) {
+                    if (!this.classes[nameSpace + "URL"][name]) {
                         sys.$error(3002, name);
                         return;
                     }
                     var find = false;
                     for (var f = 0; f < this.relationUI.length; f++) {
-                        if (this.relationUI[f] == this.classes.localURL[name]) {
+                        if (this.relationUI[f] == this.classes[nameSpace + "URL"][name]) {
                             find = true;
                             break;
                         }
                     }
                     if (!find) {
-                        this.relationUI.push(this.classes.localURL[name]);
+                        this.relationUI.push(this.classes[nameSpace + "URL"][name]);
                     }
                 }
             }
@@ -196,8 +199,10 @@ class UIParser extends Group {
     }
 
     __parseUI(content, data) {
-        var className = this.parse(content);
-        var UIClass = this.classes.local[className];
+        this.parse(content);
+        var className = this._className;
+        var namesapce = this.localNameSpace;
+        var UIClass = this.classes[namesapce][className];
         if (data) {
             return new UIClass(data);
         }
@@ -222,11 +227,14 @@ class UIParser extends Group {
             return null;
         }
         this.rootXML = xml;
-        var className = this.decodeRootComponent(xml, content);
+        var classInfo = this.decodeRootComponent(xml, content);
+        var namesapce = classInfo.namesapce;
+        var className = classInfo.className;
         this.parseContent = "";
         this._className = className;
+        this._classNameSpace = classInfo.namesapce;
         this.rootXML = null;
-        return className;
+        return classInfo.className;
     }
 
     get className() {
@@ -234,12 +242,17 @@ class UIParser extends Group {
     }
 
     get classDefine() {
-        return flower.UIParser.classes.local[this._className];
+        return this.classes[this._classNameSpace][this._className];
     }
 
     decodeRootComponent(xml, classContent) {
         var content = "";
-        var hasLocalNS = xml.getNameSapce("local") ? true : false;
+        var namespacesList = xml.namesapces;
+        var namespaces = {};
+        for (var i = 0; i < namespacesList.length; i++) {
+            namespaces[namespacesList[i]] = namespacesList[i].value;
+        }
+        //= xml.getNameSapce("local") ? true : false;
         var uiname = xml.name;
         var uinameNS = uiname.split(":")[0];
         var extendClass = "";
@@ -247,12 +260,12 @@ class UIParser extends Group {
         var className = "";
         var allClassName = "";
         var packages = [];
-        if (uinameNS == "local") {
+        if (uinameNS != "f") {
             extendClass = uiname;
         } else {
             extendClass = this.classes[uinameNS][uiname];
-            if (!extendClass && this.classes.localContent[extendClass]) {
-                this.parse(this.classes.localContent[extendClass]);
+            if (!extendClass && this.classes[uinameNS + "Content"][extendClass]) {
+                this.parse(this.classes[uinameNS + "Content"][extendClass]);
             }
         }
         var classAtr = xml.getAttribute("class");
@@ -271,8 +284,8 @@ class UIParser extends Group {
             allClassName = className;
         }
         var changeAllClassName = allClassName;
-        if (this.classes.local[allClassName]) {
-            if (this.classes.localContent[allClassName] == classContent) {
+        if (uinameNS != "f" && this.classes[uinameNS][allClassName]) {
+            if (this.classes[uinameNS + "Content"][allClassName] == classContent) {
                 return allClassName;
             } else {
                 changeAllClassName = changeAllClassName.slice(0, changeAllClassName.length - className.length);
@@ -299,7 +312,7 @@ class UIParser extends Group {
         content += this.decodeScripts(before, className, xml.getElements("f:script"), scriptInfo);
         content += before + "\t\tthis." + className + "_initMain(this);\n";
         var propertyList = [];
-        this.decodeObject(before + "\t", className, className + "_initMain", false, xml, hasLocalNS, propertyList, {});
+        this.decodeObject(before + "\t", className, className + "_initMain", false, xml, namespaces, propertyList, {});
         if (this.hasInitFunction) {
             content += before + "\t\tthis." + className + "_init();\n";
         }
@@ -316,9 +329,9 @@ class UIParser extends Group {
         content += before + "\t}\n\n";
         content += before + "\treturn " + className + ";\n";
         if (uinameNS == "f") {
-            content += before + "})(flower.Theme.getClass(\"" + extendClass + "\") || " + extendClass + ");\n";
+            content += before + "})(" + extendClass + ");\n";
         } else {
-            content += before + "})(flower.UIParser.getLocalUIClass(\"" + extendClass + "\"));\n";
+            content += before + "})(flower.UIParser.getLocalUIClass(\"" + extendClass + "\",\"" + uinameNS + "\"));\n";
         }
         before = "";
         var classEnd = "";
@@ -334,7 +347,7 @@ class UIParser extends Group {
             }
         }
         content += classEnd;
-        content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ");\n";
+        content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
         //trace("解析后内容:\n", content);
         if (sys.DEBUG) {
             try {
@@ -345,9 +358,12 @@ class UIParser extends Group {
         } else {
             eval(content);
         }
-        flower.UIParser.setLocalUIClassContent(allClassName, classContent);
+        flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
         trace("解析类:\n", content);
-        return allClassName;
+        return {
+            "namesapce": uinameNS,
+            "className": allClassName,
+        };
     }
 
     decodeScripts(before, className, scripts, script) {
@@ -574,26 +590,26 @@ class UIParser extends Group {
         return res;
     }
 
-    decodeObject(before, className, funcName, createClass, xml, hasLocalNS, propertyFunc, nameIndex) {
+    decodeObject(before, className, funcName, createClass, xml, namespaces, propertyFunc, nameIndex) {
         var setObject = before + className + ".prototype." + funcName + " = function(parentObject) {\n";
         var thisObj = "parentObject";
         var createClassName;
         if (createClass) {
             var createClassNameSpace = xml.name.split(":")[0];
             createClassName = xml.name.split(":")[1];
-            if (createClassNameSpace == "local" && createClassName == "Object") {
+            if (createClassNameSpace != "f" && createClassName == "Object") {
                 thisObj = "object";
                 setObject += before + "\t" + thisObj + " = {};\n";
             } else {
-                if (createClassNameSpace != "local") {
+                if (createClassNameSpace != "f") {
                     createClassName = this.classes[createClassNameSpace][createClassName];
                 }
                 thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                 thisObj = thisObj.toLocaleLowerCase();
-                if (createClassNameSpace == "local") {
-                    setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\"))();\n";
+                if (createClassNameSpace != "f") {
+                    setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + createClassNameSpace + "\"))();\n";
                 } else {
-                    setObject += before + "\tvar " + thisObj + " = flower.Theme.getObject(\"" + createClassName + "\") || new " + createClassName + "();\n";
+                    setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
                 }
                 setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
             }
@@ -637,16 +653,16 @@ class UIParser extends Group {
                 } else if (item.value != null && item.value != "") { //属性
                     setObject += before + "\t" + thisObj + "." + childName + " = \"" + flower.StringDo.changeStringToInner(item.value) + "\";\n";
                     continue;
-                } else if (childNameNS == "local") {
-                    if (!hasLocalNS) {
+                } else if (childNameNS != "f") {
+                    if (!namespaces[childNameNS]) {
                         $warn(3004, childNameNS, this.parseContent);
                     }
-                    if (this.classes.local[childName]) {
+                    if (this.classes[childNameNS][childName]) {
                         childClass = childName;
                     } else {
-                        if (this.classes.localContent[childName]) {
-                            this.parse(this.classes.localContent[childName]);
-                            childClass = this.classes.local[childName];
+                        if (this.classes[childNameNS + "Content"][childName]) {
+                            this.parse(this.classes[childNameNS + "Content"][childName]);
+                            childClass = this.classes[childNameNS][childName];
                         } else {
                             $warn(3005, childName, this.parseContent);
                         }
@@ -673,16 +689,16 @@ class UIParser extends Group {
                         for (var n = 0; n < this.rootXML.namesapces.length; n++) {
                             item.addNameSpace(this.rootXML.namesapces[n]);
                         }
-                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + (new UIParser()).parse(item) + "\");\n";
+                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + (new UIParser()).parse(item) + "\",\"" + childNameNS + "\");\n";
                     } else {
                         funcName = className + "_get" + itemClassName;
                         setObject += before + "\t" + thisObj + "." + childName + " = this." + funcName + "(" + thisObj + ");\n";
-                        this.decodeObject(before, className, funcName, true, item, hasLocalNS, propertyFunc, nameIndex);
+                        this.decodeObject(before, className, funcName, true, item, namespaces, propertyFunc, nameIndex);
                     }
                 } else {
                     funcName = className + "_get" + itemClassName;
                     setObject += before + "\t" + thisObj + "." + (UIParser.classes.addChild[createClassName] ? UIParser.classes.addChild[createClassName] : "addChild") + "(this." + funcName + "(" + thisObj + "));\n";
-                    this.decodeObject(before, className, funcName, true, item, hasLocalNS, propertyFunc, nameIndex);
+                    this.decodeObject(before, className, funcName, true, item, namespaces, propertyFunc, nameIndex);
                 }
             }
         }
@@ -720,24 +736,32 @@ class UIParser extends Group {
         return true;
     }
 
-    static registerLocalUIClass(name, cls) {
-        flower.UIParser.classes.local[name] = cls;
+    static registerLocalUIClass(name, cls, namespace = "local") {
+        flower.UIParser.classes[namespace][name] = cls;
     }
 
-    static setLocalUIClassContent(name, content) {
-        flower.UIParser.classes.localContent[name] = content;
+    static setLocalUIClassContent(name, content, namespace = "local") {
+        flower.UIParser.classes[namespace + "Content"][name] = content;
     }
 
-    static getLocalUIClassContent(name) {
-        return flower.UIParser.classes.localContent[name];
+    static getLocalUIClassContent(name, namespace = "local") {
+        return flower.UIParser.classes[namespace + "Content"][name];
     }
 
-    static getLocalUIClass(name) {
-        return this.classes.local[name];
+    static getLocalUIClass(name, namespace = "local") {
+        return this.classes[namespace][name];
     }
 
-    static setLocalUIURL(name, url) {
-        this.classes.localURL[name] = url;
+    static setLocalUIURL(name, url, namespace = "local") {
+        this.classes[namespace + "URL"][name] = url;
+    }
+
+    static addNameSapce(name) {
+        if (!flower.UIParser.classes[name]) {
+            flower.UIParser.classes[name] = {};
+            flower.UIParser.classes[name + "Content"] = {};
+            flower.UIParser.classes[name + "URL"] = {};
+        }
     }
 }
 

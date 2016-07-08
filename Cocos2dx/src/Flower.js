@@ -716,7 +716,8 @@ var flower = {};
                         }
                     }
                 }
-                return txt.getContentSize();
+                $mesureTxt.setString(txt.getString());
+                return $mesureTxt.getContentSize();
             }
         }, {
             key: "setFilters",
@@ -1899,6 +1900,8 @@ var flower = {};
     Event.UPDATE = "update";
     Event.FOCUS_IN = "focus_in";
     Event.FOCUS_OUT = "focus_out";
+    Event.CONFIRM = "confirm";
+    Event.CANCEL = "cancel";
     Event._eventPool = [];
 
 
@@ -4218,6 +4221,7 @@ var flower = {};
             key: "$measureText",
             value: function $measureText(rect) {
                 if (this.$hasFlags(0x0800)) {
+                    this.$removeFlags(0x0800);
                     var d = this.$DisplayObject;
                     var p = this.$TextField;
                     //text, width, height, size, wordWrap, multiline, autoSize
@@ -4226,7 +4230,6 @@ var flower = {};
                     rect.y = 0;
                     rect.width = size.width;
                     rect.height = size.height;
-                    this.$removeFlags(0x0800);
                 }
             }
         }, {
@@ -4310,7 +4313,7 @@ var flower = {};
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 if (this.$hasFlags(0x0800)) {
-                    var width = this.width;
+                    this.$getContentBounds();
                 }
                 _get(Object.getPrototypeOf(TextField.prototype), "$onFrameEnd", this).call(this);
             }

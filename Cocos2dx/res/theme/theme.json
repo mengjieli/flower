@@ -1,6 +1,9 @@
-[
-  {
-    "class": "flower.Panel",
-    "url": "./panel/Panel.xml"
-  }
-]
+{
+  "namespace": "p",
+  "components": [
+    "./label/Label.xml",
+    "./panel/Panel.xml",
+    "./panel/Alert.xml",
+    "./list/List.xml"
+  ]
+}

@@ -50,6 +50,8 @@ class Event {
     static UPDATE = "update";
     static FOCUS_IN = "focus_in";
     static FOCUS_OUT = "focus_out";
+    static CONFIRM = "confirm";
+    static CANCEL = "cancel";
 
     static _eventPool = [];
 

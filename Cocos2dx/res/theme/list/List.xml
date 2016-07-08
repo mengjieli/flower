@@ -1,0 +1,7 @@
+<f:List class="List" xmlns:f="flower">
+    <f:itemRenderer>
+        <f:ItemRenderer>
+            <f:Label text="{this.data.label}"/>
+        </f:ItemRenderer>
+    </f:itemRenderer>
+</f:List>

@@ -1826,16 +1826,19 @@ var $root = eval("this");
             key: "__onLoadThemeComplete",
             value: function __onLoadThemeComplete(e) {
                 var cfg = e.data;
+                var namespace = cfg.namespace || "local";
+                flower.UIParser.addNameSapce(namespace);
+                var components = cfg.components;
                 this.__list = [];
-                for (var i = 0; i < cfg.length; i++) {
-                    var key = cfg[i].class;
-                    var url = cfg[i].url;
+                for (var i = 0; i < components.length; i++) {
+                    var url = components[i];
                     if (url.slice(0, 2) == "./") {
                         url = this.__direction + url.slice(2, url.length);
                     }
+                    var parser = new flower.UIParser();
+                    parser.localNameSpace = namespace;
                     this.__list.push({
-                        class: key,
-                        ui: new flower.UIParser(),
+                        ui: parser,
                         url: url
                     });
                 }
@@ -1868,52 +1871,9 @@ var $root = eval("this");
                 this.__index++;
             }
         }, {
-            key: "getObject",
-            value: function getObject(className) {
-                for (var i = 0; i < this.__list.length; i++) {
-                    if (this.__list[i].class == className && this.__list[i].ui.className) {
-                        return new this.__list[i].ui.classDefine();
-                    }
-                }
-                return null;
-            }
-        }, {
-            key: "getClass",
-            value: function getClass(className) {
-                for (var i = 0; i < this.__list.length; i++) {
-                    if (this.__list[i].class == className && this.__list[i].ui.className) {
-                        return this.__list[i].ui.classDefine;
-                    }
-                }
-                return null;
-            }
-        }, {
             key: "progress",
             get: function get() {
                 return this.__progress;
-            }
-        }], [{
-            key: "getInstance",
-            value: function getInstance() {
-                return Theme.instance;
-            }
-        }, {
-            key: "getObject",
-            value: function getObject(className) {
-                var theme = Theme.getInstance();
-                if (theme) {
-                    return theme.getObject(className);
-                }
-                return null;
-            }
-        }, {
-            key: "getClass",
-            value: function getClass(className) {
-                var theme = Theme.getInstance();
-                if (theme) {
-                    return theme.getClass(className);
-                }
-                return null;
             }
         }]);
 
@@ -1965,22 +1925,22 @@ var $root = eval("this");
                 parent = parent || this.parent;
                 if (p[0] != null && p[1] == null && p[2] != null) {
                     this.width = (p[2] - p[0]) * 2;
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else if (p[0] == null && p[1] != null && p[2] != null) {
                     this.width = (p[1] - p[2]) * 2;
-                    this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+                    this.x = 2 * p[2] - p[1];
                 } else if (p[0] != null && p[1] != null) {
                     this.width = parent.width - p[1] - p[0];
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else {
                     if (p[0] != null) {
-                        this.x = parent.$getContentBounds().x + p[0];
+                        this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width;
                     }
                     if (p[2] != null) {
-                        this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+                        this.x = (parent.width - this.width) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -1988,22 +1948,22 @@ var $root = eval("this");
                 }
                 if (p[3] != null && p[4] == null && p[5] != null) {
                     this.height = (p[5] - p[3]) * 2;
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else if (p[3] == null && p[4] != null && p[5] != null) {
                     this.height = (p[4] - p[5]) * 2;
-                    this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+                    this.y = 2 * p[5] - p[4];
                 } else if (p[3] != null && p[4] != null) {
                     this.height = parent.height - p[4] - p[3];
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else {
                     if (p[3] != null) {
-                        this.y = parent.$getContentBounds().y + p[3];
+                        this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height;
                     }
                     if (p[5] != null) {
-                        this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+                        this.y = (parent.height - this.height) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -2069,6 +2029,8 @@ var $root = eval("this");
 
             var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
+            _this16.localNameSpace = "local";
+
             _this16.classes = flower.UIParser.classes;
             _this16.percentWidth = _this16.percentHeight = 100;
             return _this16;
@@ -2118,21 +2080,21 @@ var $root = eval("this");
                     var name = list[i].name;
                     var nameSpace = name.split(":")[0];
                     name = name.split(":")[1];
-                    if (nameSpace == "local") {
-                        if (!this.classes.local[name] && !this.classes.localContent[name]) {
-                            if (!this.classes.localURL[name]) {
+                    if (nameSpace != "f") {
+                        if (!this.classes[nameSpace][name] && !this.classes[nameSpace + "Content"][name]) {
+                            if (!this.classes[nameSpace + "URL"][name]) {
                                 sys.$error(3002, name);
                                 return;
                             }
                             var find = false;
                             for (var f = 0; f < this.relationUI.length; f++) {
-                                if (this.relationUI[f] == this.classes.localURL[name]) {
+                                if (this.relationUI[f] == this.classes[nameSpace + "URL"][name]) {
                                     find = true;
                                     break;
                                 }
                             }
                             if (!find) {
-                                this.relationUI.push(this.classes.localURL[name]);
+                                this.relationUI.push(this.classes[nameSpace + "URL"][name]);
                             }
                         }
                     }
@@ -2210,8 +2172,10 @@ var $root = eval("this");
         }, {
             key: "__parseUI",
             value: function __parseUI(content, data) {
-                var className = this.parse(content);
-                var UIClass = this.classes.local[className];
+                this.parse(content);
+                var className = this._className;
+                var namesapce = this.localNameSpace;
+                var UIClass = this.classes[namesapce][className];
                 if (data) {
                     return new UIClass(data);
                 }
@@ -2236,17 +2200,25 @@ var $root = eval("this");
                     return null;
                 }
                 this.rootXML = xml;
-                var className = this.decodeRootComponent(xml, content);
+                var classInfo = this.decodeRootComponent(xml, content);
+                var namesapce = classInfo.namesapce;
+                var className = classInfo.className;
                 this.parseContent = "";
                 this._className = className;
+                this._classNameSpace = classInfo.namesapce;
                 this.rootXML = null;
-                return className;
+                return classInfo.className;
             }
         }, {
             key: "decodeRootComponent",
             value: function decodeRootComponent(xml, classContent) {
                 var content = "";
-                var hasLocalNS = xml.getNameSapce("local") ? true : false;
+                var namespacesList = xml.namesapces;
+                var namespaces = {};
+                for (var i = 0; i < namespacesList.length; i++) {
+                    namespaces[namespacesList[i]] = namespacesList[i].value;
+                }
+                //= xml.getNameSapce("local") ? true : false;
                 var uiname = xml.name;
                 var uinameNS = uiname.split(":")[0];
                 var extendClass = "";
@@ -2254,12 +2226,12 @@ var $root = eval("this");
                 var className = "";
                 var allClassName = "";
                 var packages = [];
-                if (uinameNS == "local") {
+                if (uinameNS != "f") {
                     extendClass = uiname;
                 } else {
                     extendClass = this.classes[uinameNS][uiname];
-                    if (!extendClass && this.classes.localContent[extendClass]) {
-                        this.parse(this.classes.localContent[extendClass]);
+                    if (!extendClass && this.classes[uinameNS + "Content"][extendClass]) {
+                        this.parse(this.classes[uinameNS + "Content"][extendClass]);
                     }
                 }
                 var classAtr = xml.getAttribute("class");
@@ -2278,8 +2250,8 @@ var $root = eval("this");
                     allClassName = className;
                 }
                 var changeAllClassName = allClassName;
-                if (this.classes.local[allClassName]) {
-                    if (this.classes.localContent[allClassName] == classContent) {
+                if (uinameNS != "f" && this.classes[uinameNS][allClassName]) {
+                    if (this.classes[uinameNS + "Content"][allClassName] == classContent) {
                         return allClassName;
                     } else {
                         changeAllClassName = changeAllClassName.slice(0, changeAllClassName.length - className.length);
@@ -2306,7 +2278,7 @@ var $root = eval("this");
                 content += this.decodeScripts(before, className, xml.getElements("f:script"), scriptInfo);
                 content += before + "\t\tthis." + className + "_initMain(this);\n";
                 var propertyList = [];
-                this.decodeObject(before + "\t", className, className + "_initMain", false, xml, hasLocalNS, propertyList, {});
+                this.decodeObject(before + "\t", className, className + "_initMain", false, xml, namespaces, propertyList, {});
                 if (this.hasInitFunction) {
                     content += before + "\t\tthis." + className + "_init();\n";
                 }
@@ -2323,9 +2295,9 @@ var $root = eval("this");
                 content += before + "\t}\n\n";
                 content += before + "\treturn " + className + ";\n";
                 if (uinameNS == "f") {
-                    content += before + "})(flower.Theme.getClass(\"" + extendClass + "\") || " + extendClass + ");\n";
+                    content += before + "})(" + extendClass + ");\n";
                 } else {
-                    content += before + "})(flower.UIParser.getLocalUIClass(\"" + extendClass + "\"));\n";
+                    content += before + "})(flower.UIParser.getLocalUIClass(\"" + extendClass + "\",\"" + uinameNS + "\"));\n";
                 }
                 before = "";
                 var classEnd = "";
@@ -2341,7 +2313,7 @@ var $root = eval("this");
                     }
                 }
                 content += classEnd;
-                content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ");\n";
+                content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
                 //trace("解析后内容:\n", content);
                 if (sys.DEBUG) {
                     try {
@@ -2352,9 +2324,12 @@ var $root = eval("this");
                 } else {
                     eval(content);
                 }
-                flower.UIParser.setLocalUIClassContent(allClassName, classContent);
+                flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
                 trace("解析类:\n", content);
-                return allClassName;
+                return {
+                    "namesapce": uinameNS,
+                    "className": allClassName
+                };
             }
         }, {
             key: "decodeScripts",
@@ -2585,26 +2560,26 @@ var $root = eval("this");
             }
         }, {
             key: "decodeObject",
-            value: function decodeObject(before, className, funcName, createClass, xml, hasLocalNS, propertyFunc, nameIndex) {
+            value: function decodeObject(before, className, funcName, createClass, xml, namespaces, propertyFunc, nameIndex) {
                 var setObject = before + className + ".prototype." + funcName + " = function(parentObject) {\n";
                 var thisObj = "parentObject";
                 var createClassName;
                 if (createClass) {
                     var createClassNameSpace = xml.name.split(":")[0];
                     createClassName = xml.name.split(":")[1];
-                    if (createClassNameSpace == "local" && createClassName == "Object") {
+                    if (createClassNameSpace != "f" && createClassName == "Object") {
                         thisObj = "object";
                         setObject += before + "\t" + thisObj + " = {};\n";
                     } else {
-                        if (createClassNameSpace != "local") {
+                        if (createClassNameSpace != "f") {
                             createClassName = this.classes[createClassNameSpace][createClassName];
                         }
                         thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                         thisObj = thisObj.toLocaleLowerCase();
-                        if (createClassNameSpace == "local") {
-                            setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\"))();\n";
+                        if (createClassNameSpace != "f") {
+                            setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + createClassNameSpace + "\"))();\n";
                         } else {
-                            setObject += before + "\tvar " + thisObj + " = flower.Theme.getObject(\"" + createClassName + "\") || new " + createClassName + "();\n";
+                            setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
                         }
                         setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
                     }
@@ -2647,16 +2622,16 @@ var $root = eval("this");
                             //属性
                             setObject += before + "\t" + thisObj + "." + childName + " = \"" + flower.StringDo.changeStringToInner(item.value) + "\";\n";
                             continue;
-                        } else if (childNameNS == "local") {
-                            if (!hasLocalNS) {
+                        } else if (childNameNS != "f") {
+                            if (!namespaces[childNameNS]) {
                                 $warn(3004, childNameNS, this.parseContent);
                             }
-                            if (this.classes.local[childName]) {
+                            if (this.classes[childNameNS][childName]) {
                                 childClass = childName;
                             } else {
-                                if (this.classes.localContent[childName]) {
-                                    this.parse(this.classes.localContent[childName]);
-                                    childClass = this.classes.local[childName];
+                                if (this.classes[childNameNS + "Content"][childName]) {
+                                    this.parse(this.classes[childNameNS + "Content"][childName]);
+                                    childClass = this.classes[childNameNS][childName];
                                 } else {
                                     $warn(3005, childName, this.parseContent);
                                 }
@@ -2683,16 +2658,16 @@ var $root = eval("this");
                                 for (var n = 0; n < this.rootXML.namesapces.length; n++) {
                                     item.addNameSpace(this.rootXML.namesapces[n]);
                                 }
-                                setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + new UIParser().parse(item) + "\");\n";
+                                setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + new UIParser().parse(item) + "\",\"" + childNameNS + "\");\n";
                             } else {
                                 funcName = className + "_get" + itemClassName;
                                 setObject += before + "\t" + thisObj + "." + childName + " = this." + funcName + "(" + thisObj + ");\n";
-                                this.decodeObject(before, className, funcName, true, item, hasLocalNS, propertyFunc, nameIndex);
+                                this.decodeObject(before, className, funcName, true, item, namespaces, propertyFunc, nameIndex);
                             }
                         } else {
                             funcName = className + "_get" + itemClassName;
                             setObject += before + "\t" + thisObj + "." + (UIParser.classes.addChild[createClassName] ? UIParser.classes.addChild[createClassName] : "addChild") + "(this." + funcName + "(" + thisObj + "));\n";
-                            this.decodeObject(before, className, funcName, true, item, hasLocalNS, propertyFunc, nameIndex);
+                            this.decodeObject(before, className, funcName, true, item, namespaces, propertyFunc, nameIndex);
                         }
                     }
                 }
@@ -2733,32 +2708,51 @@ var $root = eval("this");
         }, {
             key: "classDefine",
             get: function get() {
-                return flower.UIParser.classes.local[this._className];
+                return this.classes[this._classNameSpace][this._className];
             }
         }], [{
             key: "registerLocalUIClass",
             value: function registerLocalUIClass(name, cls) {
-                flower.UIParser.classes.local[name] = cls;
+                var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
+
+                flower.UIParser.classes[namespace][name] = cls;
             }
         }, {
             key: "setLocalUIClassContent",
             value: function setLocalUIClassContent(name, content) {
-                flower.UIParser.classes.localContent[name] = content;
+                var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
+
+                flower.UIParser.classes[namespace + "Content"][name] = content;
             }
         }, {
             key: "getLocalUIClassContent",
             value: function getLocalUIClassContent(name) {
-                return flower.UIParser.classes.localContent[name];
+                var namespace = arguments.length <= 1 || arguments[1] === undefined ? "local" : arguments[1];
+
+                return flower.UIParser.classes[namespace + "Content"][name];
             }
         }, {
             key: "getLocalUIClass",
             value: function getLocalUIClass(name) {
-                return this.classes.local[name];
+                var namespace = arguments.length <= 1 || arguments[1] === undefined ? "local" : arguments[1];
+
+                return this.classes[namespace][name];
             }
         }, {
             key: "setLocalUIURL",
             value: function setLocalUIURL(name, url) {
-                this.classes.localURL[name] = url;
+                var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
+
+                this.classes[namespace + "URL"][name] = url;
+            }
+        }, {
+            key: "addNameSapce",
+            value: function addNameSapce(name) {
+                if (!flower.UIParser.classes[name]) {
+                    flower.UIParser.classes[name] = {};
+                    flower.UIParser.classes[name + "Content"] = {};
+                    flower.UIParser.classes[name + "URL"] = {};
+                }
             }
         }]);
 
@@ -2809,6 +2803,7 @@ var $root = eval("this");
             "ViewStack": "flower.ViewStack",
             "Combox": "flower.Combox",
             "Panel": "flower.Panel",
+            "Alert": "flower.Alert",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -3471,22 +3466,22 @@ var $root = eval("this");
                 //}
                 if (p[0] != null && p[1] == null && p[2] != null) {
                     this.width = (p[2] - p[0]) * 2;
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else if (p[0] == null && p[1] != null && p[2] != null) {
                     this.width = (p[1] - p[2]) * 2;
-                    this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+                    this.x = 2 * p[2] - p[1];
                 } else if (p[0] != null && p[1] != null) {
                     this.width = parent.width - p[1] - p[0];
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else {
                     if (p[0] != null) {
-                        this.x = parent.$getContentBounds().x + p[0];
+                        this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width;
                     }
                     if (p[2] != null) {
-                        this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+                        this.x = (parent.width - this.width) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -3494,22 +3489,22 @@ var $root = eval("this");
                 }
                 if (p[3] != null && p[4] == null && p[5] != null) {
                     this.height = (p[5] - p[3]) * 2;
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else if (p[3] == null && p[4] != null && p[5] != null) {
                     this.height = (p[4] - p[5]) * 2;
-                    this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+                    this.y = 2 * p[5] - p[4];
                 } else if (p[3] != null && p[4] != null) {
                     this.height = parent.height - p[4] - p[3];
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else {
                     if (p[3] != null) {
-                        this.y = parent.$getContentBounds().y + p[3];
+                        this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height;
                     }
                     if (p[5] != null) {
-                        this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+                        this.y = (parent.height - this.height) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -3592,22 +3587,22 @@ var $root = eval("this");
                 //}
                 if (p[0] != null && p[1] == null && p[2] != null) {
                     this.width = (p[2] - p[0]) * 2;
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else if (p[0] == null && p[1] != null && p[2] != null) {
                     this.width = (p[1] - p[2]) * 2;
-                    this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+                    this.x = 2 * p[2] - p[1];
                 } else if (p[0] != null && p[1] != null) {
                     this.width = parent.width - p[1] - p[0];
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else {
                     if (p[0] != null) {
-                        this.x = parent.$getContentBounds().x + p[0];
+                        this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width;
                     }
                     if (p[2] != null) {
-                        this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+                        this.x = (parent.width - this.width) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -3615,22 +3610,22 @@ var $root = eval("this");
                 }
                 if (p[3] != null && p[4] == null && p[5] != null) {
                     this.height = (p[5] - p[3]) * 2;
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else if (p[3] == null && p[4] != null && p[5] != null) {
                     this.height = (p[4] - p[5]) * 2;
-                    this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+                    this.y = 2 * p[5] - p[4];
                 } else if (p[3] != null && p[4] != null) {
                     this.height = parent.height - p[4] - p[3];
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else {
                     if (p[3] != null) {
-                        this.y = parent.$getContentBounds().y + p[3];
+                        this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height;
                     }
                     if (p[5] != null) {
-                        this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+                        this.y = (parent.height - this.height) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -3786,22 +3781,22 @@ var $root = eval("this");
                 //}
                 if (p[0] != null && p[1] == null && p[2] != null) {
                     this.width = (p[2] - p[0]) * 2;
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else if (p[0] == null && p[1] != null && p[2] != null) {
                     this.width = (p[1] - p[2]) * 2;
-                    this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+                    this.x = 2 * p[2] - p[1];
                 } else if (p[0] != null && p[1] != null) {
                     this.width = parent.width - p[1] - p[0];
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else {
                     if (p[0] != null) {
-                        this.x = parent.$getContentBounds().x + p[0];
+                        this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width;
                     }
                     if (p[2] != null) {
-                        this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+                        this.x = (parent.width - this.width) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -3809,22 +3804,22 @@ var $root = eval("this");
                 }
                 if (p[3] != null && p[4] == null && p[5] != null) {
                     this.height = (p[5] - p[3]) * 2;
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else if (p[3] == null && p[4] != null && p[5] != null) {
                     this.height = (p[4] - p[5]) * 2;
-                    this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+                    this.y = 2 * p[5] - p[4];
                 } else if (p[3] != null && p[4] != null) {
                     this.height = parent.height - p[4] - p[3];
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else {
                     if (p[3] != null) {
-                        this.y = parent.$getContentBounds().y + p[3];
+                        this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height;
                     }
                     if (p[5] != null) {
-                        this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+                        this.y = (parent.height - this.height) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -3838,7 +3833,7 @@ var $root = eval("this");
                     return;
                 }
                 this.__source = val;
-                if (val == null) {
+                if (val == "" || val == null) {
                     this.texture = null;
                 } else if (val instanceof flower.Texture) {
                     this.texture = val;
@@ -3960,22 +3955,22 @@ var $root = eval("this");
                 parent = parent || this.parent;
                 if (p[0] != null && p[1] == null && p[2] != null) {
                     this.width = (p[2] - p[0]) * 2;
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = +p[0];
                 } else if (p[0] == null && p[1] != null && p[2] != null) {
                     this.width = (p[1] - p[2]) * 2;
-                    this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+                    this.x = +2 * p[2] - p[1];
                 } else if (p[0] != null && p[1] != null) {
                     this.width = parent.width - p[1] - p[0];
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = +p[0];
                 } else {
                     if (p[0] != null) {
-                        this.x = parent.$getContentBounds().x + p[0];
+                        this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width;
                     }
                     if (p[2] != null) {
-                        this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+                        this.x = (parent.width - this.width) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -3983,22 +3978,22 @@ var $root = eval("this");
                 }
                 if (p[3] != null && p[4] == null && p[5] != null) {
                     this.height = (p[5] - p[3]) * 2;
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = +p[3];
                 } else if (p[3] == null && p[4] != null && p[5] != null) {
                     this.height = (p[4] - p[5]) * 2;
-                    this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+                    this.y = 2 * p[5] - p[4];
                 } else if (p[3] != null && p[4] != null) {
                     this.height = parent.height - p[4] - p[3];
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = +p[3];
                 } else {
                     if (p[3] != null) {
-                        this.y = parent.$getContentBounds().y + p[3];
+                        this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height;
                     }
                     if (p[5] != null) {
-                        this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+                        this.y = (parent.height - this.height) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -5201,13 +5196,15 @@ var $root = eval("this");
                 0: "", //title
                 1: null, //titleLabel
                 2: null, //closeButton
-                3: PanelScaleMode.NO_SCALE };
+                3: PanelScaleMode.NO_SCALE, //scaleMode
+                4: null, //iconImage
+                5: "" };
             return _this36;
         }
 
         _createClass(Panel, [{
             key: "__changeTitle",
-            //scaleMode
+            //icon
             value: function __changeTitle() {
                 var p = this.$Panel;
                 if (p[0] && p[1]) {
@@ -5233,22 +5230,22 @@ var $root = eval("this");
                 //console.log("验证 ui 属性",flower.EnterFrame.frame);
                 if (p[0] != null && p[1] == null && p[2] != null) {
                     this.width = (p[2] - p[0]) * 2;
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else if (p[0] == null && p[1] != null && p[2] != null) {
                     this.width = (p[1] - p[2]) * 2;
-                    this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+                    this.x = 2 * p[2] - p[1];
                 } else if (p[0] != null && p[1] != null) {
                     this.width = parent.width - p[1] - p[0];
-                    this.x = parent.$getContentBounds().x + p[0];
+                    this.x = p[0];
                 } else {
                     if (p[0] != null) {
-                        this.x = parent.$getContentBounds().x + p[0];
+                        this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width;
                     }
                     if (p[2] != null) {
-                        this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+                        this.x = (parent.width - this.width) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -5256,22 +5253,22 @@ var $root = eval("this");
                 }
                 if (p[3] != null && p[4] == null && p[5] != null) {
                     this.height = (p[5] - p[3]) * 2;
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else if (p[3] == null && p[4] != null && p[5] != null) {
                     this.height = (p[4] - p[5]) * 2;
-                    this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+                    this.y = 2 * p[5] - p[4];
                 } else if (p[3] != null && p[4] != null) {
                     this.height = parent.height - p[4] - p[3];
-                    this.y = parent.$getContentBounds().y + p[3];
+                    this.y = p[3];
                 } else {
                     if (p[3] != null) {
-                        this.y = parent.$getContentBounds().y + p[3];
+                        this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height;
                     }
                     if (p[5] != null) {
-                        this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+                        this.y = (parent.height - this.height) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -5307,11 +5304,12 @@ var $root = eval("this");
         }, {
             key: "$onClose",
             value: function $onClose() {
-                this.close();
+                this.dispatchWidth(flower.Event.CLOSE);
+                this.closePanel();
             }
         }, {
-            key: "close",
-            value: function close() {
+            key: "closePanel",
+            value: function closePanel() {
                 if (this.parent) {
                     this.parent.removeChild(this);
                 }
@@ -5337,6 +5335,9 @@ var $root = eval("this");
                 if (this.$Panel[1] == val) {
                     return;
                 }
+                if (this.$Panel[1] && this.$Panel[1].parent && this.$Panel[1].parent != this) {
+                    this.$Panel[1].parent.removeChild(this.$Panel[1]);
+                }
                 this.$Panel[1] = val;
                 if (val.parent != this) {
                     this.addChild(val);
@@ -5353,6 +5354,9 @@ var $root = eval("this");
                     return;
                 }
                 if (this.$Panel[2]) {
+                    if (this.$Panel[2].parent && this.$Panel[2].parent != this) {
+                        this.$Panel[2].parent.removeChild(this.$Panel[2]);
+                    }
                     this.$Panel[2].removeListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
                 }
                 this.$Panel[2] = val;
@@ -5361,6 +5365,39 @@ var $root = eval("this");
                         this.addChild(val);
                     }
                     val.addListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
+                }
+            }
+        }, {
+            key: "iconImage",
+            get: function get() {
+                return this.$Panel[4];
+            },
+            set: function set(val) {
+                if (this.$Panel[4] == val) {
+                    return;
+                }
+                if (this.$Panel[4] && this.$Panel[4].parent && this.$Panel[4].parent != this) {
+                    this.$Panel[4].parent.removeChild(this.$Panel[4]);
+                }
+                this.$Panel[4] = val;
+                if (val) {
+                    val.source = this.$Panel[5];
+                    if (val.parent != this) {
+                        this.addChild(val);
+                    }
+                }
+            }
+        }, {
+            key: "icon",
+            get: function get() {
+                return this.$Panel[5];
+            },
+            set: function set(val) {
+                if (this.$Panel[5] == val) {
+                    return;
+                }
+                if (this.$Panel[4]) {
+                    this.$Panel[4].source = val;
                 }
             }
         }, {
@@ -5380,8 +5417,132 @@ var $root = eval("this");
         return Panel;
     }(Group);
 
+    UIComponent.registerEvent(Panel, 1120, "close", flower.Event.CLOSE);
+
     black.Panel = Panel;
     //////////////////////////End File:extension/black/Panel.js///////////////////////////
+
+    //////////////////////////File:extension/black/Alert.js///////////////////////////
+
+    var Alert = function (_Panel) {
+        _inherits(Alert, _Panel);
+
+        function Alert() {
+            _classCallCheck(this, Alert);
+
+            var _this37 = _possibleConstructorReturn(this, Object.getPrototypeOf(Alert).call(this));
+
+            _this37.$Alert = {
+                0: null, //confirmButton
+                1: null, //cancelButton
+                2: null, //contentLabel
+                3: "" };
+            return _this37;
+        }
+
+        _createClass(Alert, [{
+            key: "$onConfirm",
+            //content
+            value: function $onConfirm(e) {
+                this.dispatchWidth(flower.Event.CONFIRM);
+                this.closePanel();
+            }
+        }, {
+            key: "$onCancel",
+            value: function $onCancel(e) {
+                this.dispatchWidth(flower.Event.CANCEL);
+                this.closePanel();
+            }
+        }, {
+            key: "confirmButton",
+            get: function get() {
+                return this.$Alert[0];
+            },
+            set: function set(val) {
+                if (this.$Alert[0] == val) {
+                    return;
+                }
+                if (this.$Alert[0]) {
+                    this.$Alert[0].removeListener(flower.TouchEvent.TOUCH_END, this.$onConfirm, this);
+                    if (this.$Alert[0].parent && this.$Alert[0].parent != this) {
+                        this.$Alert[0].parent.removeChild(this.$Alert[0]);
+                    }
+                }
+                this.$Alert[0] = val;
+                if (val) {
+                    val.addListener(flower.TouchEvent.TOUCH_END, this.$onConfirm, this);
+                    if (val.parent != this) {
+                        this.addChild(val);
+                    }
+                }
+            }
+        }, {
+            key: "cancelButton",
+            get: function get() {
+                return this.$Alert[1];
+            },
+            set: function set(val) {
+                if (this.$Alert[1] == val) {
+                    return;
+                }
+                if (this.$Alert[1]) {
+                    this.$Alert[1].removeListener(flower.TouchEvent.TOUCH_END, this.$onCancel, this);
+                    if (this.$Alert[1].parent && this.$Alert[1].parent != this) {
+                        this.$Alert[1].parent.removeChild(this.$Alert[1]);
+                    }
+                }
+                this.$Alert[1] = val;
+                if (val) {
+                    this.$Alert[1].addListener(flower.TouchEvent.TOUCH_END, this.$onCancel, this);
+                    if (val.parent != this) {
+                        this.addChild(val);
+                    }
+                }
+            }
+        }, {
+            key: "contentLabel",
+            get: function get() {
+                return this.$Alert[2];
+            },
+            set: function set(val) {
+                if (this.$Alert[2] == val) {
+                    return;
+                }
+                if (this.$Alert[2] && this.$Alert[2].parent && this.$Alert[2].parent != this) {
+                    this.$Alert[2].parent.removeChild(this.$Alert[2]);
+                }
+                this.$Alert[2] = val;
+                if (val) {
+                    val.text = this.$Alert[3];
+                    if (val.parent != this) {
+                        this.addChild(val);
+                    }
+                }
+            }
+        }, {
+            key: "content",
+            get: function get() {
+                return this.$Alert[3];
+            },
+            set: function set(val) {
+                if (this.$Alert[3] == val) {
+                    return this.$Alert[3];
+                }
+                this.$Alert[3] = val;
+                if (this.$Alert[2]) {
+                    this.$Alert[2].text = val;
+                }
+            }
+        }]);
+
+        return Alert;
+    }(Panel);
+
+    UIComponent.registerEvent(Panel, 1130, "confirm", flower.Event.CONFIRM);
+    UIComponent.registerEvent(Panel, 1131, "cancel", flower.Event.CANCEL);
+
+    black.Alert = Alert;
+    //////////////////////////End File:extension/black/Alert.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];

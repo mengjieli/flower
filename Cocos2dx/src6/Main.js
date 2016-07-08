@@ -5,7 +5,7 @@ class Main {
 
     ready() {
         new Test();
-        flower.Stage.getInstance().backgroundColor = 0x555555;
+        flower.Stage.getInstance().backgroundColor = 0xffffff;
         var theme = new flower.Theme("res/theme/theme.json");
         theme.load();
         theme.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);

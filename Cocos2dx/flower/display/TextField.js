@@ -36,6 +36,7 @@ class TextField extends DisplayObject {
 
     $measureText(rect) {
         if (this.$hasFlags(0x0800)) {
+            this.$removeFlags(0x0800);
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
@@ -44,7 +45,6 @@ class TextField extends DisplayObject {
             rect.y = 0;
             rect.width = size.width;
             rect.height = size.height;
-            this.$removeFlags(0x0800);
         }
     }
 
@@ -75,8 +75,8 @@ class TextField extends DisplayObject {
     }
 
     $setFontColor(val) {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         val = +val || 0;
@@ -162,14 +162,14 @@ class TextField extends DisplayObject {
 
     $onFrameEnd() {
         if (this.$hasFlags(0x0800)) {
-            var width = this.width;
+            this.$getContentBounds();
         }
         super.$onFrameEnd();
     }
 
     dispose() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         super.dispose();

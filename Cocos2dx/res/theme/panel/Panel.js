@@ -27,7 +27,7 @@ function getAddedTween() {
 
 function getCloseTween() {
     return null;
-    return flower.Tween.to(this, 0.3, {
+    return flower.Tween.to(this, 0.25, {
         fillAlpha: 0,
         //x: this.x + this.width / 2,
         //y: this.y + this.height / 2,
@@ -43,7 +43,7 @@ function getCloseTween() {
 }
 
 
-function close() {
+function closePanel() {
     var tween = this.getCloseTween();
     if (tween) {
         tween.call(this.__closeComplete, this)

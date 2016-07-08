@@ -25,16 +25,19 @@ class Theme extends flower.EventDispatcher {
 
     __onLoadThemeComplete(e) {
         var cfg = e.data;
+        var namespace = cfg.namespace || "local";
+        flower.UIParser.addNameSapce(namespace);
+        var components = cfg.components;
         this.__list = [];
-        for (var i = 0; i < cfg.length; i++) {
-            var key = cfg[i].class;
-            var url = cfg[i].url;
+        for (var i = 0; i < components.length; i++) {
+            var url = components[i];
             if (url.slice(0, 2) == "./") {
                 url = this.__direction + url.slice(2, url.length);
             }
+            var parser = new flower.UIParser();
+            parser.localNameSpace = namespace;
             this.__list.push({
-                class: key,
-                ui: new flower.UIParser(),
+                ui: parser,
                 url: url
             });
         }
@@ -65,48 +68,8 @@ class Theme extends flower.EventDispatcher {
         this.__index++;
     }
 
-    getObject(className) {
-        for (var i = 0; i < this.__list.length; i++) {
-            if (this.__list[i].class == className && this.__list[i].ui.className) {
-                return new this.__list[i].ui.classDefine();
-            }
-        }
-        return null;
-    }
-
-    getClass(className) {
-        for (var i = 0; i < this.__list.length; i++) {
-            if (this.__list[i].class == className && this.__list[i].ui.className) {
-                return this.__list[i].ui.classDefine;
-            }
-        }
-        return null;
-    }
-
     get progress() {
         return this.__progress;
-    }
-
-    static instance;
-
-    static getInstance() {
-        return Theme.instance;
-    }
-
-    static getObject(className) {
-        var theme = Theme.getInstance();
-        if (theme) {
-            return theme.getObject(className);
-        }
-        return null;
-    }
-
-    static getClass(className) {
-        var theme = Theme.getInstance();
-        if (theme) {
-            return theme.getClass(className);
-        }
-        return null;
     }
 }
 

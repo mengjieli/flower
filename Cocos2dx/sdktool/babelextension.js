@@ -212,6 +212,7 @@ var list = [
     "Scroller",
     "Combox",
     "Panel",
+    "Alert",
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";

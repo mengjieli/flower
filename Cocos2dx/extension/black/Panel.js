@@ -9,6 +9,8 @@ class Panel extends Group {
             1: null, //titleLabel
             2: null, //closeButton
             3: PanelScaleMode.NO_SCALE, //scaleMode
+            4: null, //iconImage
+            5: "", //icon
         }
     }
 
@@ -34,23 +36,22 @@ class Panel extends Group {
         //console.log("验证 ui 属性",flower.EnterFrame.frame);
         if (p[0] != null && p[1] == null && p [2] != null) {
             this.width = (p[2] - p[0]) * 2;
-            this.x = parent.$getContentBounds().x + p[0];
-        }
-        else if (p[0] == null && p[1] != null && p[2] != null) {
+            this.x = p[0];
+        } else if (p[0] == null && p[1] != null && p[2] != null) {
             this.width = (p[1] - p[2]) * 2;
-            this.x = parent.$getContentBounds().x + 2 * p[2] - p[1];
+            this.x = 2 * p[2] - p[1];
         } else if (p[0] != null && p[1] != null) {
             this.width = parent.width - p[1] - p[0];
-            this.x = parent.$getContentBounds().x + p[0];
+            this.x = p[0];
         } else {
             if (p[0] != null) {
-                this.x = parent.$getContentBounds().x + p[0];
+                this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.$getContentBounds().x + parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width;
             }
             if (p[2] != null) {
-                this.x = parent.$getContentBounds().x + (parent.width - this.width) * 0.5;
+                this.x = (parent.width - this.width) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -58,22 +59,22 @@ class Panel extends Group {
         }
         if (p[3] != null && p[4] == null && p [5] != null) {
             this.height = (p[5] - p[3]) * 2;
-            this.y = parent.$getContentBounds().y + p[3];
+            this.y = p[3];
         } else if (p[3] == null && p[4] != null && p[5] != null) {
             this.height = (p[4] - p[5]) * 2;
-            this.y = parent.$getContentBounds().y + 2 * p[5] - p[4];
+            this.y = 2 * p[5] - p[4];
         } else if (p[3] != null && p[4] != null) {
             this.height = parent.height - p[4] - p[3];
-            this.y = parent.$getContentBounds().y + p[3];
+            this.y = p[3];
         } else {
             if (p[3] != null) {
-                this.y = parent.$getContentBounds().y + p[3];
+                this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.$getContentBounds().y + parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height;
             }
             if (p[5] != null) {
-                this.y = parent.$getContentBounds().y + (parent.height - this.height) * 0.5;
+                this.y = (parent.height - this.height) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -107,10 +108,11 @@ class Panel extends Group {
     }
 
     $onClose() {
-        this.close();
+        this.dispatchWidth(flower.Event.CLOSE);
+        this.closePanel();
     }
 
-    close() {
+    closePanel() {
         if (this.parent) {
             this.parent.removeChild(this);
         }
@@ -136,6 +138,9 @@ class Panel extends Group {
         if (this.$Panel[1] == val) {
             return;
         }
+        if (this.$Panel[1] && this.$Panel[1].parent && this.$Panel[1].parent != this) {
+            this.$Panel[1].parent.removeChild(this.$Panel[1]);
+        }
         this.$Panel[1] = val;
         if (val.parent != this) {
             this.addChild(val);
@@ -152,6 +157,9 @@ class Panel extends Group {
             return;
         }
         if (this.$Panel[2]) {
+            if (this.$Panel[2].parent && this.$Panel[2].parent != this) {
+                this.$Panel[2].parent.removeChild(this.$Panel[2]);
+            }
             this.$Panel[2].removeListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
         }
         this.$Panel[2] = val;
@@ -160,6 +168,39 @@ class Panel extends Group {
                 this.addChild(val);
             }
             val.addListener(flower.TouchEvent.TOUCH_END, this.$onClose, this);
+        }
+    }
+
+    get iconImage() {
+        return this.$Panel[4];
+    }
+
+    set iconImage(val) {
+        if (this.$Panel[4] == val) {
+            return;
+        }
+        if (this.$Panel[4] && this.$Panel[4].parent && this.$Panel[4].parent != this) {
+            this.$Panel[4].parent.removeChild(this.$Panel[4]);
+        }
+        this.$Panel[4] = val;
+        if (val) {
+            val.source = this.$Panel[5];
+            if (val.parent != this) {
+                this.addChild(val);
+            }
+        }
+    }
+
+    get icon() {
+        return this.$Panel[5];
+    }
+
+    set icon(val) {
+        if (this.$Panel[5] == val) {
+            return;
+        }
+        if (this.$Panel[4]) {
+            this.$Panel[4].source = val;
         }
     }
 
@@ -175,5 +216,7 @@ class Panel extends Group {
         this.$invalidateContentBounds();
     }
 }
+
+UIComponent.registerEvent(Panel, 1120, "close", flower.Event.CLOSE);
 
 exports.Panel = Panel;
