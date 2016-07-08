@@ -4652,7 +4652,7 @@ var flower = {};
                 if (flags == 0x0002) {
                     this.$addFlags(0x0400);
                 }
-                _get(Object.getPrototypeOf(Shape.prototype), "$addFlags", this).call(this, flags);
+                this.__flags |= flags;
             }
         }, {
             key: "$drawPolygon",

@@ -348,6 +348,7 @@ class UIParser extends Group {
         }
         content += classEnd;
         content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
+        content += "$root." + allClassName + " = " + allClassName;
         //trace("解析后内容:\n", content);
         if (sys.DEBUG) {
             try {
@@ -359,7 +360,7 @@ class UIParser extends Group {
             eval(content);
         }
         flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
-        trace("解析类:\n", content);
+        //trace("解析类:\n", content);
         return {
             "namesapce": uinameNS,
             "className": allClassName,
@@ -388,7 +389,7 @@ class UIParser extends Group {
             for (var i = 0; i < list.length; i++) {
                 var func = list[i];
                 if (func.gset == 0) {
-                    script.content += before + "\t" + className + ".prototype." + func.name + " = function(" +
+                    script.content += before + "\t" + className + (func.isStatic ? "." : ".prototype.") + func.name + " = function(" +
                         func.params + ") " + func.content + "\n";
                 } else {
                     var setContent = func.gset == 1 ? "" : func.content;
@@ -486,10 +487,17 @@ class UIParser extends Group {
         var res;
         var gset = 0;
         var funcName;
+        var isStatic = false;
         //跳过空格和注释
         i = flower.StringDo.jumpProgramSpace(content, start);
         if (i == content.length) {
             return null;
+        }
+        if (content.slice(i, i + "static".length) == "static") {
+            isStatic = true;
+            i += "static".length;
+            //跳过空格和注释
+            i = flower.StringDo.jumpProgramSpace(content, i);
         }
         if (content.slice(i, i + len) == "function") {
             if (i != 0) {
@@ -587,6 +595,7 @@ class UIParser extends Group {
         }
         res.content = content;
         res.endIndex = i + content.length + 1;
+        res.isStatic = isStatic;
         return res;
     }
 
@@ -689,7 +698,8 @@ class UIParser extends Group {
                         for (var n = 0; n < this.rootXML.namesapces.length; n++) {
                             item.addNameSpace(this.rootXML.namesapces[n]);
                         }
-                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + (new UIParser()).parse(item) + "\",\"" + childNameNS + "\");\n";
+                        var itemRenderer = (new UIParser());
+                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.localNameSpace + "\");\n";
                     } else {
                         funcName = className + "_get" + itemClassName;
                         setObject += before + "\t" + thisObj + "." + childName + " = this." + funcName + "(" + thisObj + ");\n";

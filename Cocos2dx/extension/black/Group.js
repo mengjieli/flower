@@ -98,11 +98,19 @@ class Group extends flower.Sprite {
     }
 
     $onFrameEnd() {
-        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+        var flag = false;
+        var count = 3;
+        while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
+            super.$onFrameEnd();
+            this.$resetLayout();
+            flag = true;
+            count--;
         }
-        super.$onFrameEnd();
-        this.$resetLayout();
+        if (!flag) {
+            super.$onFrameEnd();
+            this.$resetLayout();
+        }
     }
 
     dispose() {

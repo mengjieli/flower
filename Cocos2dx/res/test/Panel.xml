@@ -1,0 +1,3 @@
+<s:Alert confirm="flower.trace('确认',this);" cancel="flower.trace('取消',this);" close="flower.trace('关闭',this)"
+         icon="res/qq.png" title="提示" content="是否花费 100点券 购买【激光剑】？" xmlns:f="flower" xmlns:s="software">
+</s:Alert>

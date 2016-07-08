@@ -1240,7 +1240,7 @@ class DataManager {
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
         content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
-        console.log("数据结构:\n" + content);
+        //console.log("数据结构:\n" + content);
         if (sys.DEBUG) {
             try {
                 eval(content);
@@ -1766,11 +1766,19 @@ class Group extends flower.Sprite {
     }
 
     $onFrameEnd() {
-        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+        var flag = false;
+        var count = 3;
+        while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
+            super.$onFrameEnd();
+            this.$resetLayout();
+            flag = true;
+            count--;
         }
-        super.$onFrameEnd();
-        this.$resetLayout();
+        if (!flag) {
+            super.$onFrameEnd();
+            this.$resetLayout();
+        }
     }
 
     dispose() {
@@ -2137,6 +2145,7 @@ class UIParser extends Group {
         }
         content += classEnd;
         content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
+        content += "$root." + allClassName + " = " + allClassName;
         //trace("解析后内容:\n", content);
         if (sys.DEBUG) {
             try {
@@ -2148,7 +2157,7 @@ class UIParser extends Group {
             eval(content);
         }
         flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
-        trace("解析类:\n", content);
+        //trace("解析类:\n", content);
         return {
             "namesapce": uinameNS,
             "className": allClassName,
@@ -2177,7 +2186,7 @@ class UIParser extends Group {
             for (var i = 0; i < list.length; i++) {
                 var func = list[i];
                 if (func.gset == 0) {
-                    script.content += before + "\t" + className + ".prototype." + func.name + " = function(" +
+                    script.content += before + "\t" + className + (func.isStatic ? "." : ".prototype.") + func.name + " = function(" +
                         func.params + ") " + func.content + "\n";
                 } else {
                     var setContent = func.gset == 1 ? "" : func.content;
@@ -2275,10 +2284,17 @@ class UIParser extends Group {
         var res;
         var gset = 0;
         var funcName;
+        var isStatic = false;
         //跳过空格和注释
         i = flower.StringDo.jumpProgramSpace(content, start);
         if (i == content.length) {
             return null;
+        }
+        if (content.slice(i, i + "static".length) == "static") {
+            isStatic = true;
+            i += "static".length;
+            //跳过空格和注释
+            i = flower.StringDo.jumpProgramSpace(content, i);
         }
         if (content.slice(i, i + len) == "function") {
             if (i != 0) {
@@ -2376,6 +2392,7 @@ class UIParser extends Group {
         }
         res.content = content;
         res.endIndex = i + content.length + 1;
+        res.isStatic = isStatic;
         return res;
     }
 
@@ -2478,7 +2495,8 @@ class UIParser extends Group {
                         for (var n = 0; n < this.rootXML.namesapces.length; n++) {
                             item.addNameSpace(this.rootXML.namesapces[n]);
                         }
-                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + (new UIParser()).parse(item) + "\",\"" + childNameNS + "\");\n";
+                        var itemRenderer = (new UIParser());
+                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.localNameSpace + "\");\n";
                     } else {
                         funcName = className + "_get" + itemClassName;
                         setObject += before + "\t" + thisObj + "." + childName + " = this." + funcName + "(" + thisObj + ");\n";
@@ -2764,7 +2782,7 @@ class DataGroup extends Group {
                 this.__setSelectedItemData(item.data);
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
-                this.__releaseItem();
+                this.$releaseItem();
                 break;
             case flower.TouchEvent.TOUCH_END:
                 if (p[8] == item.data) {
@@ -2774,13 +2792,13 @@ class DataGroup extends Group {
                         this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
                     }
                 } else {
-                    this.__releaseItem();
+                    this.$releaseItem();
                 }
                 break;
         }
     }
 
-    __releaseItem() {
+    $releaseItem() {
         var p = this.$DataGroup;
         var clickItem = this.getItemByData(p[8]);
         if (clickItem) {
@@ -2919,15 +2937,15 @@ class DataGroup extends Group {
     }
 
     set viewer(display) {
-        p[3] = display;
+        this.$DataGroup[3] = display;
     }
 
     get contentWidth() {
-        return p[6];
+        return this.$DataGroup[6];
     }
 
     get contentHeight() {
-        return p[7];
+        return this.$DataGroup[7];
     }
 
     get scrollEnabled() {
@@ -3684,12 +3702,21 @@ class MaskUI extends flower.Mask {
     }
 
     $onFrameEnd() {
-        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+        var flag = false;
+        var count = 3;
+        while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
+            super.$onFrameEnd();
+            this.shape.$onFrameEnd();
+            this.$resetLayout();
+            flag = true;
+            count--;
         }
-        super.$onFrameEnd();
-        this.shape.$onFrameEnd();
-        this.$resetLayout();
+        if (!flag) {
+            super.$onFrameEnd();
+            this.shape.$onFrameEnd();
+            this.$resetLayout();
+        }
     }
 
     dispose() {

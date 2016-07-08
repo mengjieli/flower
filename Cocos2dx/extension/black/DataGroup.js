@@ -202,7 +202,7 @@ class DataGroup extends Group {
                 this.__setSelectedItemData(item.data);
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
-                this.__releaseItem();
+                this.$releaseItem();
                 break;
             case flower.TouchEvent.TOUCH_END:
                 if (p[8] == item.data) {
@@ -212,13 +212,13 @@ class DataGroup extends Group {
                         this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
                     }
                 } else {
-                    this.__releaseItem();
+                    this.$releaseItem();
                 }
                 break;
         }
     }
 
-    __releaseItem() {
+    $releaseItem() {
         var p = this.$DataGroup;
         var clickItem = this.getItemByData(p[8]);
         if (clickItem) {
@@ -357,15 +357,15 @@ class DataGroup extends Group {
     }
 
     set viewer(display) {
-        p[3] = display;
+        this.$DataGroup[3] = display;
     }
 
     get contentWidth() {
-        return p[6];
+        return this.$DataGroup[6];
     }
 
     get contentHeight() {
-        return p[7];
+        return this.$DataGroup[7];
     }
 
     get scrollEnabled() {

@@ -122,7 +122,7 @@ class DataManager {
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
         content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
-        console.log("数据结构:\n" + content);
+        //console.log("数据结构:\n" + content);
         if (sys.DEBUG) {
             try {
                 eval(content);

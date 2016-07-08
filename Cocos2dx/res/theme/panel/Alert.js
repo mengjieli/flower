@@ -47,3 +47,9 @@ function closePanel() {
 function __closeComplete() {
     this.parent.dispose();
 }
+
+static function show(content) {
+    var alert = new Alert();
+    alert.content = content;
+    flower.PopManager.pop(alert,true);
+}

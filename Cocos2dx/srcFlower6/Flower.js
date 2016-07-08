@@ -4173,7 +4173,7 @@ class Shape extends DisplayObject {
         if (flags == 0x0002) {
             this.$addFlags(0x0400);
         }
-        super.$addFlags(flags);
+        this.__flags |= flags;
     }
 
     $drawPolygon(points) {
