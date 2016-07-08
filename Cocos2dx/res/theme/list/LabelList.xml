@@ -1,0 +1,9 @@
+<f:List class="LabelList" id="viewport" selectTime="touch_end" xmlns:f="flower">
+    <f:itemRenderer>
+        <f:ItemRenderer class="LabelItemRenderer" percentWidth="100" height="30">
+            <f:RectUI percentWidth="100" percentHeight="100" fillColor="0xaaaaaa" visible.up="false"
+                      visible.selectedUp="true"/>
+            <f:Label text="{data.label}" horizontalCenter="0" verticalCenter="0"/>
+        </f:ItemRenderer>
+    </f:itemRenderer>
+</f:List>

@@ -4,6 +4,7 @@
     "./label/Label.xml",
     "./panel/Panel.xml",
     "./panel/Alert.xml",
+    "./list/LabelList.xml",
     "./list/ScrollerList.xml"
   ]
 }

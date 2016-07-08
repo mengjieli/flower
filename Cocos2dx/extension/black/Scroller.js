@@ -166,6 +166,16 @@ class Scroller extends MaskUI {
     }
 
     $setViewport(val) {
+        if (typeof val == "string") {
+            var clazz = $root[val];
+            if (!clazz) {
+                clazz = flower.UIParser.getLocalUIClass(val.split(":")[val.split(":").length - 1], val.split(":").length > 1 ? val.split(":")[0] : "");
+                if (!clazz) {
+                    sys.$error(3201, val);
+                }
+            }
+            val = new clazz();
+        }
         if (this._viewport == val) {
             return;
         }

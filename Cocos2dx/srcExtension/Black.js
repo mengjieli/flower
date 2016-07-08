@@ -1111,6 +1111,8 @@ locale_strings[3012] = "没有定义的数据结构 :{0}";
 locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
 locale_strings[3100] = "没有定义的数据类型 :{0}";
 locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
+locale_strings[3201] = "没有找到对应的类 :{0}";
+
 //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
 
 
@@ -2552,11 +2554,11 @@ class UIParser extends Group {
     }
 
     static getLocalUIClassContent(name, namespace = "local") {
-        return flower.UIParser.classes[namespace + "Content"][name];
+        return flower.UIParser.classes[namespace + "Content"] ? flower.UIParser.classes[namespace + "Content"][name] : null;
     }
 
     static getLocalUIClass(name, namespace = "local") {
-        return this.classes[namespace][name];
+        return this.classes[namespace] ? this.classes[namespace][name] : null;
     }
 
     static setLocalUIURL(name, url, namespace = "local") {
@@ -2598,6 +2600,7 @@ class DataGroup extends Group {
             10: false,//itemSelectedEnabled
             11: true,//itemClickedEnabled
             12: false,//requireSelection
+            13: flower.TouchEvent.TOUCH_BEGIN, //selectTime
         }
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
     }
@@ -2779,7 +2782,9 @@ class DataGroup extends Group {
             case flower.TouchEvent.TOUCH_BEGIN:
                 p[8] = item.data;
                 item.currentState = "down";
-                this.__setSelectedItemData(item.data);
+                if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
+                    this.__setSelectedItemData(item.data);
+                }
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
                 this.$releaseItem();
@@ -2787,6 +2792,9 @@ class DataGroup extends Group {
             case flower.TouchEvent.TOUCH_END:
                 if (p[8] == item.data) {
                     p[8] = null;
+                    if (p[13] == flower.TouchEvent.TOUCH_END) {
+                        this.__setSelectedItemData(item.data);
+                    }
                     if (p[11]) {
                         item.$onClick();
                         this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
@@ -2922,6 +2930,16 @@ class DataGroup extends Group {
     }
 
     set itemRenderer(val) {
+        if (typeof val == "string") {
+            var clazz = $root[val];
+            if (!clazz) {
+                clazz = flower.UIParser.getLocalUIClass(val.split(":")[val.split(":").length - 1], val.split(":").length > 1 ? val.split(":")[0] : "");
+                if (!clazz) {
+                    sys.$error(3201, val);
+                }
+            }
+            val = clazz;
+        }
         var p = this.$DataGroup;
         if (p[1] == val) {
             return;
@@ -3027,6 +3045,18 @@ class DataGroup extends Group {
         if (val) {
             this._canSelecteItem();
         }
+    }
+
+    get selectTime() {
+        return this.$DataGroup[13];
+    }
+
+    set selectTime(val) {
+        if (val != flower.TouchEvent.TOUCH_BEGIN && val != flower.TouchEvent.TOUCH_END) {
+            sys.$error(1008, val, "DataGroup", "selectTime");
+            return;
+        }
+        this.$DataGroup[13] = val;
     }
 }
 
@@ -4506,6 +4536,16 @@ class Scroller extends MaskUI {
     }
 
     $setViewport(val) {
+        if (typeof val == "string") {
+            var clazz = $root[val];
+            if (!clazz) {
+                clazz = flower.UIParser.getLocalUIClass(val.split(":")[val.split(":").length - 1], val.split(":").length > 1 ? val.split(":")[0] : "");
+                if (!clazz) {
+                    sys.$error(3201, val);
+                }
+            }
+            val = new clazz();
+        }
         if (this._viewport == val) {
             return;
         }

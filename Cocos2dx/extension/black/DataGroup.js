@@ -18,6 +18,7 @@ class DataGroup extends Group {
             10: false,//itemSelectedEnabled
             11: true,//itemClickedEnabled
             12: false,//requireSelection
+            13: flower.TouchEvent.TOUCH_BEGIN, //selectTime
         }
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
     }
@@ -199,7 +200,9 @@ class DataGroup extends Group {
             case flower.TouchEvent.TOUCH_BEGIN:
                 p[8] = item.data;
                 item.currentState = "down";
-                this.__setSelectedItemData(item.data);
+                if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
+                    this.__setSelectedItemData(item.data);
+                }
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
                 this.$releaseItem();
@@ -207,6 +210,9 @@ class DataGroup extends Group {
             case flower.TouchEvent.TOUCH_END:
                 if (p[8] == item.data) {
                     p[8] = null;
+                    if (p[13] == flower.TouchEvent.TOUCH_END) {
+                        this.__setSelectedItemData(item.data);
+                    }
                     if (p[11]) {
                         item.$onClick();
                         this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
@@ -342,6 +348,16 @@ class DataGroup extends Group {
     }
 
     set itemRenderer(val) {
+        if (typeof val == "string") {
+            var clazz = $root[val];
+            if (!clazz) {
+                clazz = flower.UIParser.getLocalUIClass(val.split(":")[val.split(":").length - 1], val.split(":").length > 1 ? val.split(":")[0] : "");
+                if (!clazz) {
+                    sys.$error(3201, val);
+                }
+            }
+            val = clazz;
+        }
         var p = this.$DataGroup;
         if (p[1] == val) {
             return;
@@ -447,6 +463,18 @@ class DataGroup extends Group {
         if (val) {
             this._canSelecteItem();
         }
+    }
+
+    get selectTime() {
+        return this.$DataGroup[13];
+    }
+
+    set selectTime(val) {
+        if (val != flower.TouchEvent.TOUCH_BEGIN && val != flower.TouchEvent.TOUCH_END) {
+            sys.$error(1008, val, "DataGroup", "selectTime");
+            return;
+        }
+        this.$DataGroup[13] = val;
     }
 }
 

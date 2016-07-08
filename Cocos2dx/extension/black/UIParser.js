@@ -755,11 +755,11 @@ class UIParser extends Group {
     }
 
     static getLocalUIClassContent(name, namespace = "local") {
-        return flower.UIParser.classes[namespace + "Content"][name];
+        return flower.UIParser.classes[namespace + "Content"] ? flower.UIParser.classes[namespace + "Content"][name] : null;
     }
 
     static getLocalUIClass(name, namespace = "local") {
-        return this.classes[namespace][name];
+        return this.classes[namespace] ? this.classes[namespace][name] : null;
     }
 
     static setLocalUIURL(name, url, namespace = "local") {
