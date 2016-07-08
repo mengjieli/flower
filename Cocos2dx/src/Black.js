@@ -3054,7 +3054,7 @@ var $root = eval("this");
                     case flower.TouchEvent.TOUCH_BEGIN:
                         p[8] = item.data;
                         item.currentState = "down";
-                        if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
+                        if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                             this.__setSelectedItemData(item.data);
                         }
                         break;
@@ -3104,8 +3104,10 @@ var $root = eval("this");
             value: function __setSelectedItemData(itemData) {
                 var p = this.$DataGroup;
                 var selectedItem = p[9];
+                var changeFlag = true;
                 if (itemData == selectedItem || !p[10]) {
-                    return;
+                    changeFlag = false;
+                    //return;
                 }
                 var data = p[0];
                 var find = false;
@@ -3121,7 +3123,7 @@ var $root = eval("this");
                 if (selectedItem) {
                     itemRenderer = this.getItemByData(selectedItem);
                     if (itemRenderer) {
-                        if (itemRenderer == p[8]) {
+                        if (itemRenderer.data == p[8]) {
                             itemRenderer.currentState = "down";
                         } else {
                             itemRenderer.currentState = "up";
@@ -3132,7 +3134,7 @@ var $root = eval("this");
                 selectedItem = p[9] = itemData;
                 itemRenderer = this.getItemByData(selectedItem);
                 if (itemRenderer) {
-                    if (itemRenderer == p[8]) {
+                    if (itemRenderer.data == p[8]) {
                         itemRenderer.currentState = "selectedDown";
                     } else {
                         itemRenderer.currentState = "selectedUp";
@@ -3140,7 +3142,9 @@ var $root = eval("this");
                     itemRenderer.selected = true;
                 }
                 data.selectedItem = itemData;
-                this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, false, itemData));
+                if (changeFlag) {
+                    this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, false, itemData));
+                }
                 if (!selectedItem) {
                     this._canSelecteItem();
                 }
