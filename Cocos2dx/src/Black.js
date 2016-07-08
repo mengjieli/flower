@@ -2325,7 +2325,7 @@ var $root = eval("this");
                 content += classEnd;
                 content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
                 content += "$root." + allClassName + " = " + allClassName;
-                //trace("解析后内容:\n", content);
+                trace("解析后内容:\n", content);
                 if (sys.DEBUG) {
                     try {
                         eval(content);

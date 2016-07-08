@@ -12,7 +12,7 @@ class Main {
     }
 
     loadThemeComplete(e) {
-        //Alert.show("测试啊");
+        Alert.show("测试啊");
         var ui = new flower.UIParser();
         ui.parseUIAsync("res/test/ScrollerList.xml");
         flower.Stage.getInstance().addChild(ui);

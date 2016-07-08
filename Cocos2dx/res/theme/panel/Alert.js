@@ -38,14 +38,14 @@ function getCloseTween() {
 function closePanel() {
     var tween = this.getCloseTween();
     if (tween) {
-        tween.call(this.__closeComplete, this)
+        tween.call(this.onCloseComplete, this)
     } else {
-        this.__closeComplete();
+        this.onCloseComplete();
     }
 }
 
-function __closeComplete() {
-    this.parent.dispose();
+function onCloseComplete() {
+    this.dispose();
 }
 
 static function show(content) {

@@ -1,4 +1,4 @@
-<s:ScrollerList viewport="LabelList" xmlns:f="flower" xmlns:s="software">
+<s:ScrollerList viewport="LabelList" clickItem="$root.Alert.show(arguments[0].itemData.label);" xmlns:f="flower" xmlns:s="software">
     <f:dataProvider>
         <f:ArrayValue>
             <f:Object label="文字aaaa1"/>

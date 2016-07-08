@@ -46,12 +46,12 @@ function getCloseTween() {
 function closePanel() {
     var tween = this.getCloseTween();
     if (tween) {
-        tween.call(this.__closeComplete, this)
+        tween.call(this.onCloseComplete, this)
     } else {
-        this.__closeComplete();
+        this.onCloseComplete();
     }
 }
 
-function __closeComplete() {
+function onCloseComplete() {
     this.parent.dispose();
 }

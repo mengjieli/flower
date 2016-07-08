@@ -1536,7 +1536,7 @@ var flower = {};
         }, {
             key: "getTime",
             value: function getTime() {
-                return CoreTime.getTime();
+                return CoreTime.currentTime;
             }
         }]);
 
@@ -7877,6 +7877,7 @@ var flower = {};
                 this._isPlaying = value;
                 if (value) {
                     flower.EnterFrame.add(this.update, this);
+                    this.update(flower.CoreTime.currentTime, 0);
                 } else {
                     flower.EnterFrame.del(this.update, this);
                 }

@@ -12,7 +12,7 @@ class CoreTime {
     }
 
     static getTime() {
-        return CoreTime.getTime();
+        return CoreTime.currentTime;
     }
 }
 

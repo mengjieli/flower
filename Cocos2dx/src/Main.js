@@ -23,7 +23,7 @@ var Main = function () {
     }, {
         key: "loadThemeComplete",
         value: function loadThemeComplete(e) {
-            //Alert.show("测试啊");
+            Alert.show("测试啊");
             var ui = new flower.UIParser();
             ui.parseUIAsync("res/test/ScrollerList.xml");
             flower.Stage.getInstance().addChild(ui);

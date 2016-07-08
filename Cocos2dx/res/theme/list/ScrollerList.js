@@ -15,3 +15,13 @@ function set viewport(val) {
 function get viewport() {
     return this.scroller.viewport;
 }
+
+function set clickItem(val) {
+    if (this.scroller.viewport) {
+        this.scroller.viewport.clickItem = val;
+    }
+}
+
+function get clickItem() {
+    return this.scroller.viewport ? this.scroller.viewport.clickItem : null;
+}
