@@ -19,7 +19,7 @@ class DataGroup extends Group {
             11: true,//itemClickedEnabled
             12: false,//requireSelection
             13: flower.TouchEvent.TOUCH_BEGIN, //selectTime
-            14: 200, //validTouchTime
+            14: 100, //validDownStateTime
             15: 0, //touchTime
             16: null, //touchItemData
         }
@@ -97,9 +97,9 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i] = item;
-                    if (item.data == p[9]) {
-                        findSelected = true;
-                    }
+                    //if (item.data == p[9]) {
+                    //    findSelected = true;
+                    //}
                 }
             } else {
                 this.layout.$clear();
@@ -135,18 +135,18 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i - firstItemIndex] = item;
-                    if (item.data == p[9]) {
-                        findSelected = true;
-                    }
+                    //if (item.data == p[9]) {
+                    //    findSelected = true;
+                    //}
                     this.layout.updateList(p[4], p[5], firstItemIndex);
                     if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                         break;
                     }
                 }
             }
-            if (findSelected == false && p[9]) {
-                p[9] = null;
-            }
+            //if (findSelected == false && p[9]) {
+            //    p[9] = null;
+            //}
             measureSize = true;
             while (items.length) {
                 items.pop().dispose();
@@ -209,6 +209,7 @@ class DataGroup extends Group {
                 } else {
                     p[15] = flower.CoreTime.currentTime;
                     p[16] = item.data;
+                    p[8] = p[16];
                     flower.EnterFrame.add(this.__onTouchUpdate, this);
                 }
                 break;
@@ -238,7 +239,6 @@ class DataGroup extends Group {
         var p = this.$DataGroup;
         if (timeStamp > p[15] + p[14]) {
             flower.EnterFrame.remove(this.__onTouchUpdate, this);
-            p[8] = p[16];
             var item = this.getItemByData(p[8]);
             if (item) {
                 item.currentState = "down";
@@ -506,15 +506,15 @@ class DataGroup extends Group {
         this.$DataGroup[13] = val;
     }
 
-    get validTouchTime() {
+    get validDownStateTime() {
         return this.$DataGroup[14];
     }
 
     /**
-     * 有效触摸时间，即按下多少秒之后才触发按下和选择 item 的操作
+     * 有效触摸时间，即按下多少秒之后才触发按下 item 的操作
      * @param val
      */
-    set validTouchTime(val) {
+    set validDownStateTime(val) {
         this.$DataGroup[14] = (+val) * 1000 || 0;
     }
 }

@@ -2866,7 +2866,7 @@ var $root = eval("this");
                 11: true, //itemClickedEnabled
                 12: false, //requireSelection
                 13: flower.TouchEvent.TOUCH_BEGIN, //selectTime
-                14: 200, //validTouchTime
+                14: 100, //validDownStateTime
                 15: 0, //touchTime
                 16: null };
             //touchItemData
@@ -2950,56 +2950,56 @@ var $root = eval("this");
                             }
                             item.$setItemIndex(i);
                             newItems[i] = item;
-                            if (item.data == p[9]) {
-                                findSelected = true;
-                            }
+                            //if (item.data == p[9]) {
+                            //    findSelected = true;
+                            //}
                         }
                     } else {
-                        this.layout.$clear();
-                        var elementWidth;
-                        var elementHeight;
-                        if (!items.length) {
-                            item = this.createItem(list.getItemAt(0), 0);
-                            item.data = list.getItemAt(0);
-                            items.push(item);
-                        }
-                        elementWidth = items[0].width;
-                        elementHeight = items[0].height;
-                        var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
-                        firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
-                        for (var i = firstItemIndex; i < list.length; i++) {
-                            item = null;
-                            itemData = list.getItemAt(i);
-                            for (var f = 0; f < items.length; f++) {
-                                if (items[f].data == itemData) {
-                                    item = items[f];
-                                    items.splice(f, 1);
+                            this.layout.$clear();
+                            var elementWidth;
+                            var elementHeight;
+                            if (!items.length) {
+                                item = this.createItem(list.getItemAt(0), 0);
+                                item.data = list.getItemAt(0);
+                                items.push(item);
+                            }
+                            elementWidth = items[0].width;
+                            elementHeight = items[0].height;
+                            var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
+                            firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
+                            for (var i = firstItemIndex; i < list.length; i++) {
+                                item = null;
+                                itemData = list.getItemAt(i);
+                                for (var f = 0; f < items.length; f++) {
+                                    if (items[f].data == itemData) {
+                                        item = items[f];
+                                        items.splice(f, 1);
+                                        break;
+                                    }
+                                }
+                                if (!item) {
+                                    item = this.createItem(itemData, i);
+                                    item.data = itemData;
+                                }
+                                if (item.parent == this) {
+                                    this.setChildIndex(item, i - firstItemIndex);
+                                } else {
+                                    this.addChild(item);
+                                }
+                                item.$setItemIndex(i);
+                                newItems[i - firstItemIndex] = item;
+                                //if (item.data == p[9]) {
+                                //    findSelected = true;
+                                //}
+                                this.layout.updateList(p[4], p[5], firstItemIndex);
+                                if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                                     break;
                                 }
                             }
-                            if (!item) {
-                                item = this.createItem(itemData, i);
-                                item.data = itemData;
-                            }
-                            if (item.parent == this) {
-                                this.setChildIndex(item, i - firstItemIndex);
-                            } else {
-                                this.addChild(item);
-                            }
-                            item.$setItemIndex(i);
-                            newItems[i - firstItemIndex] = item;
-                            if (item.data == p[9]) {
-                                findSelected = true;
-                            }
-                            this.layout.updateList(p[4], p[5], firstItemIndex);
-                            if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
-                                break;
-                            }
                         }
-                    }
-                    if (findSelected == false && p[9]) {
-                        p[9] = null;
-                    }
+                    //if (findSelected == false && p[9]) {
+                    //    p[9] = null;
+                    //}
                     measureSize = true;
                     while (items.length) {
                         items.pop().dispose();
@@ -3063,6 +3063,7 @@ var $root = eval("this");
                         } else {
                             p[15] = flower.CoreTime.currentTime;
                             p[16] = item.data;
+                            p[8] = p[16];
                             flower.EnterFrame.add(this.__onTouchUpdate, this);
                         }
                         break;
@@ -3093,7 +3094,6 @@ var $root = eval("this");
                 var p = this.$DataGroup;
                 if (timeStamp > p[15] + p[14]) {
                     flower.EnterFrame.remove(this.__onTouchUpdate, this);
-                    p[8] = p[16];
                     var item = this.getItemByData(p[8]);
                     if (item) {
                         item.currentState = "down";
@@ -3373,13 +3373,13 @@ var $root = eval("this");
                 this.$DataGroup[13] = val;
             }
         }, {
-            key: "validTouchTime",
+            key: "validDownStateTime",
             get: function get() {
                 return this.$DataGroup[14];
             }
 
             /**
-             * 有效触摸时间，即按下多少秒之后才触发按下和选择 item 的操作
+             * 有效触摸时间，即按下多少秒之后才触发按下 item 的操作
              * @param val
              */
             ,
