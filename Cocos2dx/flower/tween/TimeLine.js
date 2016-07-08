@@ -131,7 +131,7 @@ class TimeLine {
             this.update(flower.CoreTime.currentTime, 0);
         }
         else {
-            flower.EnterFrame.del(this.update, this);
+            flower.EnterFrame.remove(this.update, this);
         }
     }
 

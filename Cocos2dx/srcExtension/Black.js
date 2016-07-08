@@ -2601,6 +2601,9 @@ class DataGroup extends Group {
             11: true,//itemClickedEnabled
             12: false,//requireSelection
             13: flower.TouchEvent.TOUCH_BEGIN, //selectTime
+            14: 200, //validTouchTime
+            15: 0, //touchTime
+            16: null, //touchItemData
         }
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
     }
@@ -2780,16 +2783,23 @@ class DataGroup extends Group {
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                p[8] = item.data;
-                item.currentState = "down";
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
-                    this.__setSelectedItemData(item.data);
+                    p[15] = -1;
+                    p[8] = item.data;
+                    item.currentState = "down";
+                    this.__setSelectedItemData(p[8]);
+                } else {
+                    p[15] = flower.CoreTime.currentTime;
+                    p[16] = item.data;
+                    flower.EnterFrame.add(this.__onTouchUpdate, this);
                 }
                 break;
             case flower.TouchEvent.TOUCH_RELEASE:
+                flower.EnterFrame.remove(this.__onTouchUpdate, this);
                 this.$releaseItem();
                 break;
             case flower.TouchEvent.TOUCH_END:
+                flower.EnterFrame.remove(this.__onTouchUpdate, this);
                 if (p[8] == item.data) {
                     p[8] = null;
                     if (p[13] == flower.TouchEvent.TOUCH_END) {
@@ -2803,6 +2813,21 @@ class DataGroup extends Group {
                     this.$releaseItem();
                 }
                 break;
+        }
+    }
+
+    __onTouchUpdate(timeStamp, gap) {
+        var p = this.$DataGroup;
+        if (timeStamp > p[15] + p[14]) {
+            flower.EnterFrame.remove(this.__onTouchUpdate, this);
+            p[8] = p[16];
+            var item = this.getItemByData(p[8]);
+            if (item) {
+                item.currentState = "down";
+            }
+            if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == p[8]) {
+                this.__setSelectedItemData(p[8]);
+            }
         }
     }
 
@@ -3061,6 +3086,18 @@ class DataGroup extends Group {
             return;
         }
         this.$DataGroup[13] = val;
+    }
+
+    get validTouchTime() {
+        return this.$DataGroup[14];
+    }
+
+    /**
+     * 有效触摸时间，即按下多少秒之后才触发按下和选择 item 的操作
+     * @param val
+     */
+    set validTouchTime(val) {
+        this.$DataGroup[14] = (+val) * 1000 || 0;
     }
 }
 

@@ -6,7 +6,7 @@ class PlatformTextField extends PlatformDisplayObject {
 
     constructor() {
         super();
-        this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 1.5 : 1) * 12);
+        this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 2.0 : 1) * 12);
         this.show.setAnchorPoint(0, 1);
         this.setFontColor(0);
         this.show.retain();
@@ -25,7 +25,7 @@ class PlatformTextField extends PlatformDisplayObject {
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.setFontSize(size);
-        this.show.setFontSize((RETINA ? 1.5 : 1) * size);
+        this.show.setFontSize((RETINA ? 2.0 : 1) * size);
         var txt = this.show;
         txt.text = "";
         var txtText = "";
@@ -77,18 +77,18 @@ class PlatformTextField extends PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val * (RETINA ? (1 / 1.5) : 1));
+        this.show.setScaleX(val * (RETINA ? (1 / 2.0) : 1));
     }
 
     setScaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val * (RETINA ? (1 / 1.5) : 1));
+        this.show.setScaleY(val * (RETINA ? (1 / 2.0) : 1));
     }
 
     release() {
         var show = this.show;
         show.setString("");
-        show.setFontSize((RETINA ? 1.5 : 1) * 12);
+        show.setFontSize((RETINA ? 2.0 : 1) * 12);
         this.setFontColor(0);
         super.release();
     }

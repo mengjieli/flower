@@ -16,7 +16,7 @@ class EnterFrame {
         flower.EnterFrame.waitAdd.push({"call": call, "owner": owner});
     }
 
-    static del(call, owner) {
+    static remove(call, owner) {
         for (var i = 0; i < flower.EnterFrame.enterFrames.length; i++) {
             if (flower.EnterFrame.enterFrames[i].call == call && flower.EnterFrame.enterFrames[i].owner == owner) {
                 flower.EnterFrame.enterFrames.splice(i, 1);

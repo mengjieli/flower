@@ -651,7 +651,7 @@ var flower = {};
 
             var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformTextField).call(this));
 
-            _this2.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 1.5 : 1) * 12);
+            _this2.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 2.0 : 1) * 12);
             _this2.show.setAnchorPoint(0, 1);
             _this2.setFontColor(0);
             _this2.show.retain();
@@ -674,7 +674,7 @@ var flower = {};
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
                 var $mesureTxt = PlatformTextField.$mesureTxt;
                 $mesureTxt.setFontSize(size);
-                this.show.setFontSize((RETINA ? 1.5 : 1) * size);
+                this.show.setFontSize((RETINA ? 2.0 : 1) * size);
                 var txt = this.show;
                 txt.text = "";
                 var txtText = "";
@@ -726,20 +726,20 @@ var flower = {};
             key: "setScaleX",
             value: function setScaleX(val) {
                 this.__scaleX = val;
-                this.show.setScaleX(val * (RETINA ? 1 / 1.5 : 1));
+                this.show.setScaleX(val * (RETINA ? 1 / 2.0 : 1));
             }
         }, {
             key: "setScaleY",
             value: function setScaleY(val) {
                 this.__scaleY = val;
-                this.show.setScaleY(val * (RETINA ? 1 / 1.5 : 1));
+                this.show.setScaleY(val * (RETINA ? 1 / 2.0 : 1));
             }
         }, {
             key: "release",
             value: function release() {
                 var show = this.show;
                 show.setString("");
-                show.setFontSize((RETINA ? 1.5 : 1) * 12);
+                show.setFontSize((RETINA ? 2.0 : 1) * 12);
                 this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextField.prototype), "release", this).call(this);
             }
@@ -7879,7 +7879,7 @@ var flower = {};
                     flower.EnterFrame.add(this.update, this);
                     this.update(flower.CoreTime.currentTime, 0);
                 } else {
-                    flower.EnterFrame.del(this.update, this);
+                    flower.EnterFrame.remove(this.update, this);
                 }
             }
         }, {
@@ -8325,8 +8325,8 @@ var flower = {};
                 flower.EnterFrame.waitAdd.push({ "call": call, "owner": owner });
             }
         }, {
-            key: "del",
-            value: function del(call, owner) {
+            key: "remove",
+            value: function remove(call, owner) {
                 for (var i = 0; i < flower.EnterFrame.enterFrames.length; i++) {
                     if (flower.EnterFrame.enterFrames[i].call == call && flower.EnterFrame.enterFrames[i].owner == owner) {
                         flower.EnterFrame.enterFrames.splice(i, 1);
