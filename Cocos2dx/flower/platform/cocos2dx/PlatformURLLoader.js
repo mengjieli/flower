@@ -3,7 +3,7 @@ class PlatformURLLoader {
     static isLoading = false;
     static loadingList = [];
 
-    static loadText(url, back, errorBack, thisObj) {
+    static loadText(url, back, errorBack, thisObj, method, params, contentType) {
         if (PlatformURLLoader.isLoading) {
             PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
             return;
@@ -15,16 +15,50 @@ class PlatformURLLoader {
         if (url.slice(0, "http://".length) == "http://") {
             flower.trace("http加载,", url);
             var xhr = cc.loader.getXMLHttpRequest();
-            xhr.open("GET", url, true);
+            if (method == null || method == "") {
+                method = "GET";
+            }
+            if (method == "GET") {
+                xhr.open("GET", url, true);
+            } else if (method == "POST") {
+                xhr.open("POST", url, true);
+                if (!contentType) {
+                    contentType = "application/x-www-form-urlencoded";
+                }
+                xhr.setRequestHeader("Content-Type", contentType);
+            } else if (method == "HEAD") {
+                xhr.open("HEAD", url, true);
+                xhr.open("HEAD", url, true);
+            }
             xhr.onloadend = function () {
                 if (xhr.status != 200) {
                     errorBack.call(thisObj);
                 } else {
-                    back.call(thisObj, xhr.responseText);
+                    if (method == "HEAD") {
+                        back.call(thisObj, xhr.getAllResponseHeaders());
+                    } else {
+                        back.call(thisObj, xhr.responseText);
+                    }
                 }
                 PlatformURLLoader.isLoading = false;
             };
-            xhr.send();
+            //xhr.onreadystatechange = function () {
+            //    if (xhr.readyState == 4 && xhr.status == 200) {
+            //        if (method == "HEAD") {
+            //            back.call(thisObj, xhr.getAllResponseHeaders());
+            //        } else {
+            //            back.call(thisObj, xhr.responseText);
+            //        }
+            //    }
+            //    else if (xhr.readyState == 4 && xhr.status != 200) {
+            //        errorBack.call(thisObj);
+            //    }
+            //};
+            if (params && params != "") {
+                xhr.send(params);
+            } else {
+                xhr.send();
+            }
         } else {
             var res;
             var end = url.split(".")[url.split(".").length - 1];

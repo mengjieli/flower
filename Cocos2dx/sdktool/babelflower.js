@@ -222,6 +222,9 @@ var list = [
 
     "URLLoader",
     "URLLoaderList",
+    "URLLoaderMethod",
+    "WebSocket",
+    "VBWebSocket",
 
     "Plist",
     "PlistFrame",
@@ -246,6 +249,7 @@ var list = [
     "CallLater",
     "ObjectDo",
     "StringDo",
+    "VByteArray",
     "Path",
     "XMLAttribute",
     "XMLElement",

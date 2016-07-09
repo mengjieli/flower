@@ -11,6 +11,8 @@ class URLLoader extends EventDispatcher {
     _language;
     _scale;
     _loadInfo;
+    _method;
+    _params;
 
     constructor(res) {
         super();
@@ -53,6 +55,22 @@ class URLLoader extends EventDispatcher {
         this._scale = val * (SCALE ? SCALE : 1);
     }
 
+    set method(val) {
+        this._method = val;
+    }
+
+    get method() {
+        return this._method;
+    }
+
+    set params(val) {
+        this._params = val;
+    }
+
+    get params() {
+        return this._params;
+    }
+
     $addLink(loader) {
         if (!this._links) {
             this._links = [];
@@ -70,10 +88,12 @@ class URLLoader extends EventDispatcher {
         }
         this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
         this._isLoading = true;
-        for (var i = 0; i < URLLoader.list.length; i++) {
-            if (URLLoader.list[i].loadURL == this.loadURL && URLLoader.list[i].type == this.type) {
-                this._linkLoader = URLLoader.list[i];
-                break;
+        if (this.type != ResType.TEXT) {
+            for (var i = 0; i < URLLoader.list.length; i++) {
+                if (URLLoader.list[i].loadURL == this.loadURL && URLLoader.list[i].type == this.type) {
+                    this._linkLoader = URLLoader.list[i];
+                    break;
+                }
             }
         }
         if (this._linkLoader) {
@@ -163,7 +183,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this);
+        PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, this._params);
     }
 
     loadTextComplete(content) {
@@ -251,7 +271,7 @@ class URLLoader extends EventDispatcher {
             this._data.$delCount();
             this._data = null;
         }
-        if (this._createRes) {
+        if (this._createRes && this._res) {
             ResItem.release(this._res);
         }
         this._res = null;

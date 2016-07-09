@@ -1132,7 +1132,7 @@ class PlatformURLLoader {
     static isLoading = false;
     static loadingList = [];
 
-    static loadText(url, back, errorBack, thisObj) {
+    static loadText(url, back, errorBack, thisObj, method, params, contentType) {
         if (PlatformURLLoader.isLoading) {
             PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
             return;
@@ -1144,16 +1144,50 @@ class PlatformURLLoader {
         if (url.slice(0, "http://".length) == "http://") {
             flower.trace("http加载,", url);
             var xhr = cc.loader.getXMLHttpRequest();
-            xhr.open("GET", url, true);
+            if (method == null || method == "") {
+                method = "GET";
+            }
+            if (method == "GET") {
+                xhr.open("GET", url, true);
+            } else if (method == "POST") {
+                xhr.open("POST", url, true);
+                if (!contentType) {
+                    contentType = "application/x-www-form-urlencoded";
+                }
+                xhr.setRequestHeader("Content-Type", contentType);
+            } else if (method == "HEAD") {
+                xhr.open("HEAD", url, true);
+                xhr.open("HEAD", url, true);
+            }
             xhr.onloadend = function () {
                 if (xhr.status != 200) {
                     errorBack.call(thisObj);
                 } else {
-                    back.call(thisObj, xhr.responseText);
+                    if (method == "HEAD") {
+                        back.call(thisObj, xhr.getAllResponseHeaders());
+                    } else {
+                        back.call(thisObj, xhr.responseText);
+                    }
                 }
                 PlatformURLLoader.isLoading = false;
             };
-            xhr.send();
+            //xhr.onreadystatechange = function () {
+            //    if (xhr.readyState == 4 && xhr.status == 200) {
+            //        if (method == "HEAD") {
+            //            back.call(thisObj, xhr.getAllResponseHeaders());
+            //        } else {
+            //            back.call(thisObj, xhr.responseText);
+            //        }
+            //    }
+            //    else if (xhr.readyState == 4 && xhr.status != 200) {
+            //        errorBack.call(thisObj);
+            //    }
+            //};
+            if (params && params != "") {
+                xhr.send(params);
+            } else {
+                xhr.send();
+            }
         } else {
             var res;
             var end = url.split(".")[url.split(".").length - 1];
@@ -1448,7 +1482,7 @@ locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docs
 locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
-locale_strings[2003] = "[加载纹理失败] {0}";
+locale_strings[2003] = "[加载失败] {0}";
 locale_strings[2004] = "[加载Plist失败] {0}";
 
 flower.sys.$locale_strings = $locale_strings;
@@ -5330,6 +5364,8 @@ class URLLoader extends EventDispatcher {
     _language;
     _scale;
     _loadInfo;
+    _method;
+    _params;
 
     constructor(res) {
         super();
@@ -5372,6 +5408,22 @@ class URLLoader extends EventDispatcher {
         this._scale = val * (SCALE ? SCALE : 1);
     }
 
+    set method(val) {
+        this._method = val;
+    }
+
+    get method() {
+        return this._method;
+    }
+
+    set params(val) {
+        this._params = val;
+    }
+
+    get params() {
+        return this._params;
+    }
+
     $addLink(loader) {
         if (!this._links) {
             this._links = [];
@@ -5389,10 +5441,12 @@ class URLLoader extends EventDispatcher {
         }
         this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
         this._isLoading = true;
-        for (var i = 0; i < URLLoader.list.length; i++) {
-            if (URLLoader.list[i].loadURL == this.loadURL && URLLoader.list[i].type == this.type) {
-                this._linkLoader = URLLoader.list[i];
-                break;
+        if (this.type != ResType.TEXT) {
+            for (var i = 0; i < URLLoader.list.length; i++) {
+                if (URLLoader.list[i].loadURL == this.loadURL && URLLoader.list[i].type == this.type) {
+                    this._linkLoader = URLLoader.list[i];
+                    break;
+                }
             }
         }
         if (this._linkLoader) {
@@ -5482,7 +5536,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this);
+        PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, this._params);
     }
 
     loadTextComplete(content) {
@@ -5570,7 +5624,7 @@ class URLLoader extends EventDispatcher {
             this._data.$delCount();
             this._data = null;
         }
-        if (this._createRes) {
+        if (this._createRes && this._res) {
             ResItem.release(this._res);
         }
         this._res = null;
@@ -5662,6 +5716,18 @@ class URLLoaderList extends EventDispatcher {
 
 flower.URLLoaderList = URLLoaderList;
 //////////////////////////End File:flower/net/URLLoaderList.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/URLLoaderMethod.js///////////////////////////
+class URLLoaderMethod {
+    static GET = "GET";
+    static POST = "POST";
+    static HEAD = "HEAD";
+}
+
+flower.URLLoaderMethod = URLLoaderMethod;
+//////////////////////////End File:flower/net/URLLoaderMethod.js///////////////////////////
 
 
 

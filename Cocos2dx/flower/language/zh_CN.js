@@ -16,7 +16,7 @@ locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docs
 locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
-locale_strings[2003] = "[加载纹理失败] {0}";
+locale_strings[2003] = "[加载失败] {0}";
 locale_strings[2004] = "[加载Plist失败] {0}";
 
 exports.sys.$locale_strings = $locale_strings;

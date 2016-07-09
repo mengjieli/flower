@@ -4,6 +4,13 @@ class Main {
     }
 
     ready() {
+        var loader = new flower.URLLoader("http://192.168.1.145:11001/project.manifest");
+        //loader.method = flower.URLLoaderMethod.HEAD;
+        loader.load();
+        loader.addListener(flower.Event.COMPLETE, function (e) {
+            flower.trace(flower.ObjectDo.toString(e.data));
+        })
+        return;
         new Test();
         flower.Stage.getInstance().backgroundColor = 0xf6f6f6;
         var theme = new flower.Theme("res/theme/theme.json");
