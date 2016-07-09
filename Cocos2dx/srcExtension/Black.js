@@ -5175,6 +5175,7 @@ class Tree extends DataGroup {
             0: null,//dataProvider
             1: new flower.ArrayValue(),//dataGroupDataProvider;
             2: {}, //openCloseTable
+            3: "path" //pathField
         }
         this.requireSelection = true;
         this.itemSelectedEnabled = true;
@@ -5212,9 +5213,11 @@ class Tree extends DataGroup {
     }
 
     __onTreeDataUpdate(e) {
-        var treeData = this.$Tree[0];
-        var parentData = this.$Tree[1];
-        var openURL = this.$Tree[2];
+        var p = this.$Tree;
+        var treeData = p[0];
+        var parentData = p[1];
+        var openURL = p[2];
+        var pathField = p[3];
         if (!treeData || !treeData.length) {
             parentData.removeAll();
         } else {
@@ -5245,7 +5248,7 @@ class Tree extends DataGroup {
                     openURL[url].open = false;
 
                 } else {
-                    url = item.url;
+                    url = item[pathField] || "";
                     if (!openURL[url]) {
                         openURL[url] = {
                             open: false,
@@ -5335,6 +5338,18 @@ class Tree extends DataGroup {
                 this.__readTreeShowItem(children[i], urlList, openURL, rootURLDepth, parentData);
             }
         }
+    }
+
+    get pathField() {
+        return this.$Tree[3];
+    }
+
+    set pathField(val) {
+        if (this.$Tree[3] == val) {
+            return;
+        }
+        this.$Tree[3] = val;
+        this.__onTreeDataUpdate(null);
     }
 }
 

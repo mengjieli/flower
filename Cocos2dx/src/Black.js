@@ -5683,8 +5683,9 @@ var $root = eval("this");
             _this38.$Tree = {
                 0: null, //dataProvider
                 1: new flower.ArrayValue(), //dataGroupDataProvider;
-                2: {} };
-            //openCloseTable
+                2: {}, //openCloseTable
+                3: "path" //pathField
+            };
             _this38.requireSelection = true;
             _this38.itemSelectedEnabled = true;
             _this38.itemClickedEnabled = true;
@@ -5727,9 +5728,11 @@ var $root = eval("this");
         }, {
             key: "__onTreeDataUpdate",
             value: function __onTreeDataUpdate(e) {
-                var treeData = this.$Tree[0];
-                var parentData = this.$Tree[1];
-                var openURL = this.$Tree[2];
+                var p = this.$Tree;
+                var treeData = p[0];
+                var parentData = p[1];
+                var openURL = p[2];
+                var pathField = p[3];
                 if (!treeData || !treeData.length) {
                     parentData.removeAll();
                 } else {
@@ -5759,7 +5762,7 @@ var $root = eval("this");
                             }
                             openURL[url].open = false;
                         } else {
-                            url = item.url;
+                            url = item[pathField] || "";
                             if (!openURL[url]) {
                                 openURL[url] = {
                                     open: false,
@@ -5849,6 +5852,18 @@ var $root = eval("this");
                         this.__readTreeShowItem(children[i], urlList, openURL, rootURLDepth, parentData);
                     }
                 }
+            }
+        }, {
+            key: "pathField",
+            get: function get() {
+                return this.$Tree[3];
+            },
+            set: function set(val) {
+                if (this.$Tree[3] == val) {
+                    return;
+                }
+                this.$Tree[3] = val;
+                this.__onTreeDataUpdate(null);
             }
         }]);
 
