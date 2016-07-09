@@ -1,0 +1,6 @@
+class Remote {
+
+    constructor() {
+        
+    }
+}

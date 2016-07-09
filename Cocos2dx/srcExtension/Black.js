@@ -2117,7 +2117,7 @@ class UIParser extends Group {
             content += before + "\t\tthis." + className + "_init();\n";
         }
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tthis.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
+        content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
@@ -2410,8 +2410,11 @@ class UIParser extends Group {
                 thisObj = "object";
                 setObject += before + "\t" + thisObj + " = {};\n";
             } else {
-                if (createClassNameSpace != "f") {
-                    createClassName = this.classes[createClassNameSpace][createClassName];
+                //if (createClassNameSpace != "f") {
+                //    createClassName = this.classes[createClassNameSpace][createClassName];
+                //}
+                if (!createClassName.split) {
+                    console.log("???");
                 }
                 thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                 thisObj = thisObj.toLocaleLowerCase();
@@ -2464,7 +2467,7 @@ class UIParser extends Group {
                     continue;
                 } else if (childNameNS != "f") {
                     if (!namespaces[childNameNS]) {
-                        $warn(3004, childNameNS, this.parseContent);
+                        sys.$warn(3004, childNameNS, this.parseContent);
                     }
                     if (this.classes[childNameNS][childName]) {
                         childClass = childName;
@@ -2473,14 +2476,14 @@ class UIParser extends Group {
                             this.parse(this.classes[childNameNS + "Content"][childName]);
                             childClass = this.classes[childNameNS][childName];
                         } else {
-                            $warn(3005, childName, this.parseContent);
+                            sys.$warn(3005, childName, this.parseContent);
                         }
                     }
                 } else {
                     if (this.classes[childNameNS]) {
                         childClass = this.classes[childNameNS][childName];
                     } else {
-                        $warn(3004, childNameNS, this.parseContent);
+                        sys.$warn(3004, childNameNS, this.parseContent);
                     }
                 }
                 if (childClass == null) {

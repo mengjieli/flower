@@ -7,6 +7,7 @@
     "./list/LabelList.xml",
     "./list/ScrollerList.xml",
     "./tree/LabelTree.xml",
-    "./tree/ScrollerTree.xml"
+    "./tree/ScrollerTree.xml",
+    "./tree/PathObject.xml"
   ]
 }

@@ -8783,8 +8783,8 @@ var flower = {};
         }
 
         _createClass(Path, null, [{
-            key: "getFileEnd",
-            value: function getFileEnd(url) {
+            key: "getFileType",
+            value: function getFileType(url) {
                 var end = url.split("?")[0];
                 end = end.split("/")[end.split("/").length - 1];
                 if (end.split(".").length == 1) {
@@ -8800,6 +8800,12 @@ var flower = {};
                     return "";
                 }
                 return url.slice(0, url.length - arr[arr.length - 1].length);
+            }
+        }, {
+            key: "getName",
+            value: function getName(url) {
+                var arr = url.split("/");
+                return arr[arr.length - 1];
             }
         }]);
 

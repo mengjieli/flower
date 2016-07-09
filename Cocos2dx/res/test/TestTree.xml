@@ -1,10 +1,10 @@
 <s:ScrollerTree width="300" height="500" viewport="LabelTree" xmlns:f="flower" xmlns:s="software">
     <f:dataProvider>
         <f:ArrayValue>
-            <f:Object path="paik" isDirection="true"/>
-            <f:Object path="paik/article" isDirection="true"/>
-            <f:Object path="paik/project.json" isDirection="false"/>
-            <f:Object path="paik/article/bg.png" isDirection="false"/>
+            <s:PathObject path="paik" isDirection="true"/>
+            <s:PathObject path="paik/article" isDirection="true"/>
+            <s:PathObject path="paik/project.json" isDirection="false"/>
+            <s:PathObject path="paik/article/bg.png" isDirection="false"/>
         </f:ArrayValue>
     </f:dataProvider>
 </s:ScrollerTree>

@@ -7964,7 +7964,7 @@ flower.StringDo = StringDo;
 
 //////////////////////////File:flower/utils/Path.js///////////////////////////
 class Path {
-    static getFileEnd(url) {
+    static getFileType(url) {
         var end = url.split("?")[0];
         end = end.split("/")[end.split("/").length - 1];
         if (end.split(".").length == 1) {
@@ -7975,10 +7975,15 @@ class Path {
 
     static getPathDirection(url) {
         var arr = url.split("/");
-        if(arr.length == 1) {
+        if (arr.length == 1) {
             return "";
         }
-        return url.slice(0,url.length-arr[arr.length-1].length);
+        return url.slice(0, url.length - arr[arr.length - 1].length);
+    }
+
+    static getName(url) {
+        var arr = url.split("/");
+        return arr[arr.length - 1];
     }
 }
 
