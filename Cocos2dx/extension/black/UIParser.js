@@ -44,6 +44,7 @@ class UIParser extends Group {
             "Combox": "flower.Combox",
             "Panel": "flower.Panel",
             "Alert": "flower.Alert",
+            "Tree": "flower.Tree",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"

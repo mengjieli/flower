@@ -89,6 +89,9 @@ var $root = eval("this");
             if (type == "int") {
                 this.expr1 = parseInt(expr1);
             }
+            if (type == "string") {
+                this.expr1 = this.expr1.slice(1, this.expr1.length - 1);
+            }
         }
 
         _createClass(Expr, [{

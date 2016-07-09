@@ -2612,6 +2612,7 @@ class DisplayObject extends EventDispatcher {
             13: new Matrix(), //reverseMatrix
             14: 0, //radian
             20: id, //id
+            21: true, //dispatchEventToParent
             50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
@@ -2953,6 +2954,13 @@ class DisplayObject extends EventDispatcher {
         return true;
     }
 
+    $setDispatchEventToParent(val) {
+        if (val == "false") {
+            val = false;
+        }
+        this.$DisplayObject[21] = !!val;
+    }
+
     $setParentFilters(val) {
         if (val == null) {
             val = [];
@@ -2977,7 +2985,7 @@ class DisplayObject extends EventDispatcher {
 
     dispatch(e) {
         super.dispatch(e);
-        if (e.bubbles && this.__parent) {
+        if (e.bubbles && this.__parent && this.$DisplayObject[21]) {
             this.__parent.dispatch(e);
         }
     }
@@ -3221,6 +3229,14 @@ class DisplayObject extends EventDispatcher {
 
     get id() {
         return this.$DisplayObject[20];
+    }
+
+    get dispatchEventToParent() {
+        return this.$DisplayObject[21];
+    }
+
+    set dispatchEventToParent(val) {
+        this.$setDispatchEventToParent(val);
     }
 }
 //////////////////////////End File:flower/display/DisplayObject.js///////////////////////////

@@ -26,7 +26,7 @@ class DataGroup extends Group {
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
     }
 
-    onDataUpdate() {
+    __onDataUpdate() {
         this.$addFlags(0x4000);
     }
 
@@ -152,20 +152,25 @@ class DataGroup extends Group {
                 items.pop().dispose();
             }
             p[2] = newItems;
+            if(!p[9]) {
+                this._canSelecteItem();
+            }
         }
         super.$onFrameEnd();
         if (measureSize) {
-            if (!p[3] || !this.layout || !this.layout.fixElementSize) {
-                var size = this.layout.getContentSize();
-                p[6] = size.width;
-                p[7] = size.height;
-                flower.Size.release(size);
-            }
-            else if (p[2].length) {
-                var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                p[6] = size.width;
-                p[7] = size.height;
-                flower.Size.release(size);
+            if (this.layout) {
+                if (!p[3] || !this.layout.fixElementSize) {
+                    var size = this.layout.getContentSize();
+                    p[6] = size.width;
+                    p[7] = size.height;
+                    flower.Size.release(size);
+                }
+                else if (p[2].length) {
+                    var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                    p[6] = size.width;
+                    p[7] = size.height;
+                    flower.Size.release(size);
+                }
             }
         }
     }
@@ -345,19 +350,17 @@ class DataGroup extends Group {
         return -1;
     }
 
-    //////////////////////////////////get&set//////////////////////////////////
-    get dataProvider() {
-        var p = this.$DataGroup;
-        return p[0];
+    $getDataProvider() {
+        return this.$DataGroup[0];
     }
 
-    set dataProvider(val) {
+    $setDataProvider(val) {
         var p = this.$DataGroup;
         if (p[0] == val) {
             return;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
+            p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
         }
         this.removeAll();
         p[2] = null;
@@ -367,8 +370,17 @@ class DataGroup extends Group {
             if (!p[9]) {
                 this._canSelecteItem();
             }
-            p[0].addListener(flower.Event.UPDATE, this.onDataUpdate, this);
+            p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
         }
+    }
+
+    //////////////////////////////////get&set//////////////////////////////////
+    get dataProvider() {
+        return this.$getDataProvider();
+    }
+
+    set dataProvider(val) {
+        this.$setDataProvider(val);
     }
 
     get itemRenderer() {

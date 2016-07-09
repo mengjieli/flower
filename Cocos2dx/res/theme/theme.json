@@ -5,6 +5,8 @@
     "./panel/Panel.xml",
     "./panel/Alert.xml",
     "./list/LabelList.xml",
-    "./list/ScrollerList.xml"
+    "./list/ScrollerList.xml",
+    "./tree/LabelTree.xml",
+    "./tree/ScrollerTree.xml"
   ]
 }

@@ -1843,6 +1843,7 @@ class UIParser extends Group {
             "Combox": "flower.Combox",
             "Panel": "flower.Panel",
             "Alert": "flower.Alert",
+            "Tree": "flower.Tree",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -2608,7 +2609,7 @@ class DataGroup extends Group {
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
     }
 
-    onDataUpdate() {
+    __onDataUpdate() {
         this.$addFlags(0x4000);
     }
 
@@ -2734,20 +2735,25 @@ class DataGroup extends Group {
                 items.pop().dispose();
             }
             p[2] = newItems;
+            if(!p[9]) {
+                this._canSelecteItem();
+            }
         }
         super.$onFrameEnd();
         if (measureSize) {
-            if (!p[3] || !this.layout || !this.layout.fixElementSize) {
-                var size = this.layout.getContentSize();
-                p[6] = size.width;
-                p[7] = size.height;
-                flower.Size.release(size);
-            }
-            else if (p[2].length) {
-                var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                p[6] = size.width;
-                p[7] = size.height;
-                flower.Size.release(size);
+            if (this.layout) {
+                if (!p[3] || !this.layout.fixElementSize) {
+                    var size = this.layout.getContentSize();
+                    p[6] = size.width;
+                    p[7] = size.height;
+                    flower.Size.release(size);
+                }
+                else if (p[2].length) {
+                    var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                    p[6] = size.width;
+                    p[7] = size.height;
+                    flower.Size.release(size);
+                }
             }
         }
     }
@@ -2927,19 +2933,17 @@ class DataGroup extends Group {
         return -1;
     }
 
-    //////////////////////////////////get&set//////////////////////////////////
-    get dataProvider() {
-        var p = this.$DataGroup;
-        return p[0];
+    $getDataProvider() {
+        return this.$DataGroup[0];
     }
 
-    set dataProvider(val) {
+    $setDataProvider(val) {
         var p = this.$DataGroup;
         if (p[0] == val) {
             return;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
+            p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
         }
         this.removeAll();
         p[2] = null;
@@ -2949,8 +2953,17 @@ class DataGroup extends Group {
             if (!p[9]) {
                 this._canSelecteItem();
             }
-            p[0].addListener(flower.Event.UPDATE, this.onDataUpdate, this);
+            p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
         }
+    }
+
+    //////////////////////////////////get&set//////////////////////////////////
+    get dataProvider() {
+        return this.$getDataProvider();
+    }
+
+    set dataProvider(val) {
+        this.$setDataProvider(val);
     }
 
     get itemRenderer() {
@@ -3298,9 +3311,9 @@ class Label extends flower.TextField {
     }
 
     $onFrameEnd() {
-        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-            this.$validateUIComponent();
-        }
+        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+        //    this.$validateUIComponent();
+        //}
         super.$onFrameEnd();
     }
 
@@ -3613,9 +3626,9 @@ class Image extends flower.Bitmap {
     }
 
     $onFrameEnd() {
-        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-            this.$validateUIComponent();
-        }
+        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+        //    this.$validateUIComponent();
+        //}
         super.$onFrameEnd();
     }
 
@@ -5150,6 +5163,183 @@ UIComponent.registerEvent(Panel, 1131, "cancel", flower.Event.CANCEL);
 
 black.Alert = Alert;
 //////////////////////////End File:extension/black/Alert.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/Tree.js///////////////////////////
+class Tree extends DataGroup {
+
+    constructor() {
+        super();
+        this.$Tree = {
+            0: null,//dataProvider
+            1: new flower.ArrayValue(),//dataGroupDataProvider;
+            2: {}, //openCloseTable
+        }
+        this.requireSelection = true;
+        this.itemSelectedEnabled = true;
+        this.itemClickedEnabled = true;
+        this.layout = new VerticalLayout();
+        super.$setDataProvider(this.$Tree[1]);
+    }
+
+    $getDataProvider() {
+        return this.$Tree[0];
+    }
+
+    $setDataProvider(val) {
+        var p = this.$Tree;
+        if (p[0] == val) {
+            return;
+        }
+        if (p[0]) {
+            p[0].removeListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].removeListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
+        }
+        p[0] = val;
+        if (p[0]) {
+            p[0].addListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].addListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
+        }
+        this.__onTreeDataUpdate(null);
+    }
+
+    __onRemovedTreeDataUpdate(e) {
+        var item = e.data;
+        if (item.open && item.open instanceof flower.EventDispatcher) {
+            item.open.removeListener(flower.Event.UPDATE, this.__onOpenItem, this);
+        }
+    }
+
+    __onTreeDataUpdate(e) {
+        var treeData = this.$Tree[0];
+        var parentData = this.$Tree[1];
+        var openURL = this.$Tree[2];
+        if (!treeData || !treeData.length) {
+            parentData.removeAll();
+        } else {
+            parentData.removeAll();
+            var item;
+            var url;
+            var depth;
+            var keys = Object.keys(openURL);
+            var rootURL;
+            var rootURLDepth = -1;
+            var rootList = [];
+            var urlList = {};
+            for (var i = 0, len = keys.length; i < len; i++) {
+                openURL[keys[i]].state = false;
+            }
+            for (var i = 0, len = treeData.length; i < len; i++) {
+                item = treeData.list[i];
+                if (typeof item == "string") {
+                    url = item;
+                    if (!openURL[url]) {
+                        openURL[url] = {
+                            open: false,
+                            state: true
+                        }
+                    } else {
+                        openURL[url].state = true;
+                    }
+                    openURL[url].open = false;
+
+                } else {
+                    url = item.url;
+                    if (!openURL[url]) {
+                        openURL[url] = {
+                            open: false,
+                            state: true
+                        }
+                    } else {
+                        openURL[url].state = true;
+                    }
+                    if (item.open != null) {
+                        if (item.open instanceof flower.Value) {
+                            openURL[url].open = !!item.open.value;
+                            item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                        } else {
+                            openURL[url].open = !!item.open;
+                        }
+                    } else {
+                        openURL[url].open = false;
+                    }
+                }
+                depth = url.split("/").length;
+                if (rootURLDepth == -1 || rootURLDepth > depth) {
+                    rootURLDepth = depth;
+                    rootURL = url;
+                    rootList = []
+                }
+                if (depth == rootURLDepth) {
+                    rootList.push(url);
+                }
+                if (!urlList[url]) {
+                    urlList[url] = {
+                        item: item,
+                        depth: depth,
+                        children: []
+                    }
+                } else {
+                    urlList[url].item = item;
+                }
+                if (url.split("/").length > 1) {
+                    var parentURL = url.slice(0, url.length - (url.split("/")[url.split("/").length - 1].length + 1));
+                    if (!urlList[parentURL]) {
+                        urlList[parentURL] = {
+                            item: null,
+                            depth: null,
+                            children: [url]
+                        }
+                    } else {
+                        urlList[parentURL].children.push(url);
+                    }
+                }
+            }
+            keys = Object.keys(openURL);
+            for (var i = 0, len = keys.length; i < len; i++) {
+                if (openURL[keys[i]].state == false) {
+                    delete openURL[keys[i]];
+                }
+            }
+            for (var i = 0; i < rootList.length; i++) {
+                this.__readTreeShowItem(rootList[i], urlList, openURL, rootURLDepth, parentData);
+            }
+        }
+    }
+
+    __onOpenItem(e) {
+        this.__onTreeDataUpdate(null);
+    }
+
+    __readTreeShowItem(url, urlList, openURL, rootURLDepth, parentData) {
+        var info = urlList[url];
+        var item = info.item;
+        if (typeof item == "string") {
+
+        } else {
+            item.depth = info.depth - rootURLDepth;
+            if (item.open != null) {
+                if (item.open instanceof flower.Value) {
+                    item.open.value = openURL[url].open;
+                }
+            } else {
+                item.open = new BooleanValue(openURL[url].open);
+                item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+            }
+        }
+        parentData.push(item);
+        if (openURL[url].open) {
+            var children = info.children;
+            for (var i = 0, len = children.length; i < len; i++) {
+                this.__readTreeShowItem(children[i], urlList, openURL, rootURLDepth, parentData);
+            }
+        }
+    }
+}
+
+black.Tree = Tree;
+//////////////////////////End File:extension/black/Tree.js///////////////////////////
 
 
 

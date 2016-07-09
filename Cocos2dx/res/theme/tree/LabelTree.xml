@@ -1,0 +1,17 @@
+<f:Tree class="LabelTree" selectTime="touch_end" xmlns:f="flower">
+    <f:itemRenderer>
+        <f:ItemRenderer class="LabelItemRenderer" percentWidth="100" height="30">
+            <f:RectUI percentWidth="100" percentHeight="100" fillColor.down="0xd6d4d0"
+                      fillColor.selectedDown="0x96b97d" fillColor.selectedUp="0x96b97d" visible.up="false"
+                      visible.down="true" visible.selectedDown="true"
+                      visible.selectedUp="true"/>
+            <f:Button dispatchEventToParent="false" percentHeight="100"
+                      click="this.data.open.value = !this.data.open.value;"
+                      visible="{data.isDirection}">
+                <f:RectUI x="{data.depth*20}" width="20" percentHeight="100" fillAlpha="0"/>
+                <f:Label x="{7 + data.depth*20}" text="{data.open?'-':'+'}" verticalCenter="0"/>
+            </f:Button>
+            <f:Label x="{20 + data.depth*20}" text="{data.url}" verticalCenter="0" fontColor="0x000000"/>
+        </f:ItemRenderer>
+    </f:itemRenderer>
+</f:Tree>

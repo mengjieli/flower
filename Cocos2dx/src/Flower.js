@@ -2919,6 +2919,7 @@ var flower = {};
                 13: new Matrix(), //reverseMatrix
                 14: 0, //radian
                 20: id, //id
+                21: true, //dispatchEventToParent
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
@@ -3308,6 +3309,14 @@ var flower = {};
                 return true;
             }
         }, {
+            key: "$setDispatchEventToParent",
+            value: function $setDispatchEventToParent(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                this.$DisplayObject[21] = !!val;
+            }
+        }, {
             key: "$setParentFilters",
             value: function $setParentFilters(val) {
                 if (val == null) {
@@ -3336,7 +3345,7 @@ var flower = {};
             key: "dispatch",
             value: function dispatch(e) {
                 _get(Object.getPrototypeOf(DisplayObject.prototype), "dispatch", this).call(this, e);
-                if (e.bubbles && this.__parent) {
+                if (e.bubbles && this.__parent && this.$DisplayObject[21]) {
                     this.__parent.dispatch(e);
                 }
             }
@@ -3608,6 +3617,14 @@ var flower = {};
             key: "id",
             get: function get() {
                 return this.$DisplayObject[20];
+            }
+        }, {
+            key: "dispatchEventToParent",
+            get: function get() {
+                return this.$DisplayObject[21];
+            },
+            set: function set(val) {
+                this.$setDispatchEventToParent(val);
             }
         }]);
 

@@ -2824,6 +2824,7 @@ var $root = eval("this");
             "Combox": "flower.Combox",
             "Panel": "flower.Panel",
             "Alert": "flower.Alert",
+            "Tree": "flower.Tree",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout"
@@ -2875,8 +2876,8 @@ var $root = eval("this");
         }
 
         _createClass(DataGroup, [{
-            key: "onDataUpdate",
-            value: function onDataUpdate() {
+            key: "__onDataUpdate",
+            value: function __onDataUpdate() {
                 this.$addFlags(0x4000);
             }
         }, {
@@ -3005,19 +3006,24 @@ var $root = eval("this");
                         items.pop().dispose();
                     }
                     p[2] = newItems;
+                    if (!p[9]) {
+                        this._canSelecteItem();
+                    }
                 }
                 _get(Object.getPrototypeOf(DataGroup.prototype), "$onFrameEnd", this).call(this);
                 if (measureSize) {
-                    if (!p[3] || !this.layout || !this.layout.fixElementSize) {
-                        var size = this.layout.getContentSize();
-                        p[6] = size.width;
-                        p[7] = size.height;
-                        flower.Size.release(size);
-                    } else if (p[2].length) {
-                        var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                        p[6] = size.width;
-                        p[7] = size.height;
-                        flower.Size.release(size);
+                    if (this.layout) {
+                        if (!p[3] || !this.layout.fixElementSize) {
+                            var size = this.layout.getContentSize();
+                            p[6] = size.width;
+                            p[7] = size.height;
+                            flower.Size.release(size);
+                        } else if (p[2].length) {
+                            var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                            p[6] = size.width;
+                            p[7] = size.height;
+                            flower.Size.release(size);
+                        }
                     }
                 }
             }
@@ -3205,22 +3211,20 @@ var $root = eval("this");
                 }
                 return -1;
             }
-
-            //////////////////////////////////get&set//////////////////////////////////
-
         }, {
-            key: "dataProvider",
-            get: function get() {
-                var p = this.$DataGroup;
-                return p[0];
-            },
-            set: function set(val) {
+            key: "$getDataProvider",
+            value: function $getDataProvider() {
+                return this.$DataGroup[0];
+            }
+        }, {
+            key: "$setDataProvider",
+            value: function $setDataProvider(val) {
                 var p = this.$DataGroup;
                 if (p[0] == val) {
                     return;
                 }
                 if (p[0]) {
-                    p[0].removeListener(flower.Event.UPDATE, this.onDataUpdate, this);
+                    p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
                 }
                 this.removeAll();
                 p[2] = null;
@@ -3230,8 +3234,19 @@ var $root = eval("this");
                     if (!p[9]) {
                         this._canSelecteItem();
                     }
-                    p[0].addListener(flower.Event.UPDATE, this.onDataUpdate, this);
+                    p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
                 }
+            }
+
+            //////////////////////////////////get&set//////////////////////////////////
+
+        }, {
+            key: "dataProvider",
+            get: function get() {
+                return this.$getDataProvider();
+            },
+            set: function set(val) {
+                this.$setDataProvider(val);
             }
         }, {
             key: "itemRenderer",
@@ -3606,9 +3621,9 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                    this.$validateUIComponent();
-                }
+                //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+                //    this.$validateUIComponent();
+                //}
                 _get(Object.getPrototypeOf(Label.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
@@ -3953,9 +3968,9 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                    this.$validateUIComponent();
-                }
+                //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+                //    this.$validateUIComponent();
+                //}
                 _get(Object.getPrototypeOf(Image.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
@@ -5654,6 +5669,194 @@ var $root = eval("this");
 
     black.Alert = Alert;
     //////////////////////////End File:extension/black/Alert.js///////////////////////////
+
+    //////////////////////////File:extension/black/Tree.js///////////////////////////
+
+    var Tree = function (_DataGroup2) {
+        _inherits(Tree, _DataGroup2);
+
+        function Tree() {
+            _classCallCheck(this, Tree);
+
+            var _this38 = _possibleConstructorReturn(this, Object.getPrototypeOf(Tree).call(this));
+
+            _this38.$Tree = {
+                0: null, //dataProvider
+                1: new flower.ArrayValue(), //dataGroupDataProvider;
+                2: {} };
+            //openCloseTable
+            _this38.requireSelection = true;
+            _this38.itemSelectedEnabled = true;
+            _this38.itemClickedEnabled = true;
+            _this38.layout = new VerticalLayout();
+            _get(Object.getPrototypeOf(Tree.prototype), "$setDataProvider", _this38).call(_this38, _this38.$Tree[1]);
+            return _this38;
+        }
+
+        _createClass(Tree, [{
+            key: "$getDataProvider",
+            value: function $getDataProvider() {
+                return this.$Tree[0];
+            }
+        }, {
+            key: "$setDataProvider",
+            value: function $setDataProvider(val) {
+                var p = this.$Tree;
+                if (p[0] == val) {
+                    return;
+                }
+                if (p[0]) {
+                    p[0].removeListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+                    p[0].removeListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
+                }
+                p[0] = val;
+                if (p[0]) {
+                    p[0].addListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+                    p[0].addListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
+                }
+                this.__onTreeDataUpdate(null);
+            }
+        }, {
+            key: "__onRemovedTreeDataUpdate",
+            value: function __onRemovedTreeDataUpdate(e) {
+                var item = e.data;
+                if (item.open && item.open instanceof flower.EventDispatcher) {
+                    item.open.removeListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                }
+            }
+        }, {
+            key: "__onTreeDataUpdate",
+            value: function __onTreeDataUpdate(e) {
+                var treeData = this.$Tree[0];
+                var parentData = this.$Tree[1];
+                var openURL = this.$Tree[2];
+                if (!treeData || !treeData.length) {
+                    parentData.removeAll();
+                } else {
+                    parentData.removeAll();
+                    var item;
+                    var url;
+                    var depth;
+                    var keys = Object.keys(openURL);
+                    var rootURL;
+                    var rootURLDepth = -1;
+                    var rootList = [];
+                    var urlList = {};
+                    for (var i = 0, len = keys.length; i < len; i++) {
+                        openURL[keys[i]].state = false;
+                    }
+                    for (var i = 0, len = treeData.length; i < len; i++) {
+                        item = treeData.list[i];
+                        if (typeof item == "string") {
+                            url = item;
+                            if (!openURL[url]) {
+                                openURL[url] = {
+                                    open: false,
+                                    state: true
+                                };
+                            } else {
+                                openURL[url].state = true;
+                            }
+                            openURL[url].open = false;
+                        } else {
+                            url = item.url;
+                            if (!openURL[url]) {
+                                openURL[url] = {
+                                    open: false,
+                                    state: true
+                                };
+                            } else {
+                                openURL[url].state = true;
+                            }
+                            if (item.open != null) {
+                                if (item.open instanceof flower.Value) {
+                                    openURL[url].open = !!item.open.value;
+                                    item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                                } else {
+                                    openURL[url].open = !!item.open;
+                                }
+                            } else {
+                                openURL[url].open = false;
+                            }
+                        }
+                        depth = url.split("/").length;
+                        if (rootURLDepth == -1 || rootURLDepth > depth) {
+                            rootURLDepth = depth;
+                            rootURL = url;
+                            rootList = [];
+                        }
+                        if (depth == rootURLDepth) {
+                            rootList.push(url);
+                        }
+                        if (!urlList[url]) {
+                            urlList[url] = {
+                                item: item,
+                                depth: depth,
+                                children: []
+                            };
+                        } else {
+                            urlList[url].item = item;
+                        }
+                        if (url.split("/").length > 1) {
+                            var parentURL = url.slice(0, url.length - (url.split("/")[url.split("/").length - 1].length + 1));
+                            if (!urlList[parentURL]) {
+                                urlList[parentURL] = {
+                                    item: null,
+                                    depth: null,
+                                    children: [url]
+                                };
+                            } else {
+                                urlList[parentURL].children.push(url);
+                            }
+                        }
+                    }
+                    keys = Object.keys(openURL);
+                    for (var i = 0, len = keys.length; i < len; i++) {
+                        if (openURL[keys[i]].state == false) {
+                            delete openURL[keys[i]];
+                        }
+                    }
+                    for (var i = 0; i < rootList.length; i++) {
+                        this.__readTreeShowItem(rootList[i], urlList, openURL, rootURLDepth, parentData);
+                    }
+                }
+            }
+        }, {
+            key: "__onOpenItem",
+            value: function __onOpenItem(e) {
+                this.__onTreeDataUpdate(null);
+            }
+        }, {
+            key: "__readTreeShowItem",
+            value: function __readTreeShowItem(url, urlList, openURL, rootURLDepth, parentData) {
+                var info = urlList[url];
+                var item = info.item;
+                if (typeof item == "string") {} else {
+                    item.depth = info.depth - rootURLDepth;
+                    if (item.open != null) {
+                        if (item.open instanceof flower.Value) {
+                            item.open.value = openURL[url].open;
+                        }
+                    } else {
+                        item.open = new BooleanValue(openURL[url].open);
+                        item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                    }
+                }
+                parentData.push(item);
+                if (openURL[url].open) {
+                    var children = info.children;
+                    for (var i = 0, len = children.length; i < len; i++) {
+                        this.__readTreeShowItem(children[i], urlList, openURL, rootURLDepth, parentData);
+                    }
+                }
+            }
+        }]);
+
+        return Tree;
+    }(DataGroup);
+
+    black.Tree = Tree;
+    //////////////////////////End File:extension/black/Tree.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];

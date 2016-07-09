@@ -1,0 +1,8 @@
+<s:ScrollerTree width="300" height="500" viewport="LabelTree" xmlns:f="flower" xmlns:s="software">
+    <f:dataProvider>
+        <f:ArrayValue>
+            <f:Object url="paik" isDirection="true"/>
+            <f:Object url="paik/project.json" isDirection="false"/>
+        </f:ArrayValue>
+    </f:dataProvider>
+</s:ScrollerTree>
