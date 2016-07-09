@@ -3,7 +3,7 @@ class PlatformWebSocket {
     websocket;
 
     bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-        var websocket = new WebSocket("ws://" + ip + ":" + port);
+        var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
         this.websocket = websocket;
         var openFunc = function () {
             onConnect.call(thisObj);
@@ -60,5 +60,5 @@ class PlatformWebSocket {
         }
     }
 
-    static webSockets;
+    static webSockets = [];
 }

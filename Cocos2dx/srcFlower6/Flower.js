@@ -1,4 +1,5 @@
 
+var LocalWebSocket = WebSocket;
 var $root = eval("this");
 var __define = $root.__define || function (o, p, g, s) {
         Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
@@ -1330,6 +1331,75 @@ class PlatformProgram {
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformProgram.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/cocos2dx/PlatformWebSocket.js///////////////////////////
+class PlatformWebSocket {
+    
+    websocket;
+
+    bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
+        var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
+        this.websocket = websocket;
+        var openFunc = function () {
+            onConnect.call(thisObj);
+        };
+        websocket.onopen = openFunc;
+        var receiveFunc = function (event) {
+            if (event.data instanceof ArrayBuffer) {
+                var list = [];
+                var data = new Uint8Array(event.data);
+                for (var i = 0; i < data.length; i++) {
+                    list.push(data[i]);
+                }
+                onReceiveMessage.call(thisObj, "buffer", list);
+            } else {
+                onReceiveMessage.call(thisObj, "string", event.data);
+            }
+        };
+        websocket.onmessage = receiveFunc;
+        var errorFunc = function () {
+            onError.call(thisObj);
+        };
+        websocket.onerror = errorFunc;
+        var closeFunc = function () {
+            onClose.call(thisObj);
+        };
+        websocket.onclose = closeFunc;
+        PlatformWebSocket.webSockets.push({
+            "webSocket": websocket
+        });
+        return websocket;
+    }
+
+    sendWebSocketUTF(data) {
+        this.webSocket.send(data);
+    }
+
+    sendWebSocketBytes(data) {
+        this.webSocket.send(new Uint8Array(data));
+    }
+
+    releaseWebSocket() {
+        var item = null;
+        var list = PlatformWebSocket.webSockets;
+        for (var i = 0; i < list.length; i++) {
+            if (websocket == list[i].webSocket) {
+                websocket.close();
+                websocket.onopen = null;
+                websocket.onmessage = null;
+                websocket.onerror = null;
+                websocket.onclose = null;
+                list.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    static webSockets = [];
+}
+//////////////////////////End File:flower/platform/cocos2dx/PlatformWebSocket.js///////////////////////////
 
 
 
@@ -5731,6 +5801,253 @@ flower.URLLoaderMethod = URLLoaderMethod;
 
 
 
+//////////////////////////File:flower/net/WebSocket.js///////////////////////////
+class WebSocket extends flower.EventDispatcher {
+    _ip;
+    _port;
+    _localWebSocket;
+
+    constructor() {
+        super();
+    }
+
+    connect(ip, port) {
+        if (this._localWebSocket) {
+            this._localWebSocket.releaseWebSocket(this.localWebSocket);
+        }
+        this._ip = ip;
+        this._port = port;
+        this._localWebSocket = new PlatformWebSocket();
+        this._localWebSocket.bindWebSocket(ip, port, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
+    }
+
+    get ip() {
+        return this._ip;
+    }
+
+    get port() {
+        return this._port;
+    }
+
+    onConnect() {
+        this.dispatchWidth(flower.Event.CONNECT);
+    }
+
+    onReceiveMessage(type, data) {
+    }
+
+    send(data) {
+        this._localWebSocket.sendWebSocketUTF(data);
+    }
+
+    onError() {
+        this.dispatchWidth(flower.Event.ERROR);
+    }
+
+    onClose() {
+        this.dispatchWidth(flower.Event.CLOSE);
+    }
+
+    close() {
+        if (this._localWebSocket) {
+            this._localWebSocket.releaseWebSocket();
+            this._localWebSocket = null;
+        }
+    }
+}
+
+flower.WebSocket = WebSocket;
+//////////////////////////End File:flower/net/WebSocket.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/VBWebSocket.js///////////////////////////
+class VBWebSocket extends WebSocket {
+    static id = 0;
+    _remote;
+    remotes = {};
+    backs = {};
+    zbacks = {};
+
+    constructor(remote = false) {
+        super();
+        this._remote = remote;
+        this.remotes = {};
+        this.backs = {};
+        this.zbacks = {};
+    }
+
+    get remote() {
+        return this._remote;
+    }
+
+    onReceiveMessage(type, data) {
+        var bytes = new VByteArray();
+        if (type == "string") {
+            bytes.readFromArray(Json.parse(data));
+        } else {
+            bytes.readFromArray(data);
+        }
+        var pos;
+        var cmd = bytes.readUInt();
+        var removeList;
+        var a;
+        var i;
+        var f;
+        var backList;
+        //trace("[receive] cmd = ",cmd," data = ",bytes.toString());
+        if (cmd == 0) {
+            var backCmd = bytes.readUInt();
+            var zbackList = this.zbacks[backCmd];
+            if (zbackList) {
+                removeList = [];
+                var errorCode = bytes.readUInt();
+                a = zbackList.concat();
+                for (i = 0; i < a.length; i++) {
+                    a[i].func.call(a[i].thisObj, backCmd, errorCode);
+                    if (a[i].once) {
+                        removeList.push(a[i].id);
+                    }
+                }
+                for (i = 0; i < removeList.length; i++) {
+                    for (f = 0; f < this.zbacks[cmd].length; f++) {
+                        if (this.zbacks[cmd][f].id == removeList[i]) {
+                            this.zbacks[cmd].splice(f, 1);
+                            break;
+                        }
+                    }
+                }
+            }
+            bytes.position = 0;
+            bytes.readUInt();
+            pos = bytes.position;
+            backList = this.backs[cmd];
+            if (backList) {
+                removeList = [];
+                a = backList.concat();
+                for (i = 0; i < a.length; i++) {
+                    bytes.position = pos;
+                    a[i].func.call(a[i].thisObj, cmd, bytes);
+                    if (a[i].once) {
+                        removeList.push(a[i].id);
+                    }
+                }
+                for (i = 0; i < removeList.length; i++) {
+                    for (f = 0; f < this.backs[cmd].length; f++) {
+                        if (this.backs[cmd][f].id == removeList[i]) {
+                            this.backs[cmd].splice(f, 1);
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            var remoteId = 0;
+            if (this._remote) {
+                remoteId = bytes.readUInt();
+            }
+            pos = bytes.position;
+            if (remoteId) {
+                var remote = this.remotes[remoteId];
+                if (remote) {
+                    remote.doNext(cmd, bytes);
+                }
+            }
+            else {
+                backList = this.backs[cmd];
+                if (backList) {
+                    removeList = [];
+                    a = backList.concat();
+                    for (i = 0; i < a.length; i++) {
+                        bytes.position = pos;
+                        a[i].func.call(a[i].thisObj, cmd, bytes);
+                        if (a[i].once) {
+                            removeList.push(a[i].id);
+                        }
+                    }
+                    for (i = 0; i < removeList.length; i++) {
+                        for (f = 0; f < this.backs[cmd].length; f++) {
+                            if (this.backs[cmd][f].id == removeList[i]) {
+                                this.backs[cmd].splice(f, 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    send(data) {
+        this.sendWebSocketBytes(data.data);
+    }
+
+    registerRemote(remote) {
+        this.remotes[remote.id] = remote;
+    }
+
+    removeRemote(remote) {
+        delete this.remotes[remote.id];
+    }
+
+    register(cmd, back, thisObj) {
+        if (this.backs[cmd] == null) {
+            this.backs[cmd] = [];
+        }
+        this.backs[cmd].push({func: back, thisObj: thisObj, id: VBWebSocket.id++});
+    }
+
+    registerOnce(cmd, back, thisObj) {
+        if (this.backs[cmd] == null) {
+            this.backs[cmd] = [];
+        }
+        this.backs[cmd].push({func: back, thisObj: thisObj, once: true, id: VBWebSocket.id++});
+    }
+
+    remove(cmd, back, thisObj) {
+        var list = this.backs[cmd];
+        if (list) {
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].func == back && list[i].thisObj == thisObj) {
+                    list.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+    }
+
+    registerZero(cmd, back, thisObj) {
+        if (this.zbacks[cmd] == null) {
+            this.zbacks[cmd] = [];
+        }
+        this.zbacks[cmd].push({func: back, thisObj: thisObj, id: VBWebSocket.id++});
+    }
+
+    removeZeroe(cmd, back, thisObj) {
+        var list = this.zbacks[cmd];
+        if (list) {
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].func == back && list[i].thisObj == thisObj) {
+                    list.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+    }
+
+    registerZeroOnce(cmd, back, thisObj) {
+        if (this.zbacks[cmd] == null) {
+            this.zbacks[cmd] = [];
+        }
+        this.zbacks[cmd].push({func: back, thisObj: thisObj, once: true, id: VBWebSocket.id++});
+    }
+}
+
+flower.VBWebSocket = VBWebSocket;
+//////////////////////////End File:flower/net/VBWebSocket.js///////////////////////////
+
+
+
 //////////////////////////File:flower/plist/Plist.js///////////////////////////
 class Plist {
 
@@ -8021,10 +8338,331 @@ class StringDo {
         }
         return pos;
     }
+
+    static numberToString(arr) {
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i] < 0) arr[i] += 256;
+        }
+        var res = [];
+        for (i = 0; i < arr.length; i++) {
+            if (arr[i] == 0)break;
+            if ((arr[i] & 128) == 0) res.push(arr[i]);				//1位
+            else if ((arr[i] & 64) == 0) res.push(arr[i] % 128);		//1位
+            else if ((arr[i] & 32) == 0)	//2位
+            {
+                res.push((arr[i] % 32) * 64 + (arr[i + 1] % 64));
+                i++;
+            }
+            else if ((arr[i] & 16) == 0)	//3位
+            {
+                res.push((arr[i] % 16) * 64 * 64 + (arr[i + 1] % 64) * 64 + (arr[i + 2] % 64));
+                i++;
+                i++;
+            }
+            else if ((arr[i] & 8) == 0)	//4位
+            {
+                res.push((arr[i] % 8) * 64 * 64 * 64 + (arr[i + 1] % 64) * 64 * 64 + (arr[i + 2] % 64) * 64 + (arr[i + 2] % 64));
+                i++;
+                i++;
+                i++;
+            }
+        }
+        var str = "";
+        for (i = 0; i < res.length; i++) {
+            str += String.fromCharCode(res[i]);
+        }
+        return str;
+    }
+
+    static stringToBytes(str) {
+        var res = [];
+        var num;
+        for (var i = 0; i < str.length; i++) {
+            num = str.charCodeAt(i);
+            if (num < 128) {
+                res.push(num);
+            }
+            else if (num < 2048) {
+                res.push(Math.floor(num / 64) + 128 + 64);
+                res.push((num % 64) + 128);
+            }
+            else if (num < 65536) {
+                res.push(Math.floor(num / 4096) + 128 + 64 + 32);
+                res.push(Math.floor((num % 4096) / 64) + 128);
+                res.push((num % 64) + 128);
+            }
+            else {
+                res.push(Math.floor(num / 262144) + 128 + 64 + 32 + 16);
+                res.push(Math.floor((num % 262144) / 4096) + 128);
+                res.push(Math.floor((num % 4096) / 64) + 128);
+                res.push((num % 64) + 128);
+            }
+        }
+        return res;
+    }
 }
 
 flower.StringDo = StringDo;
 //////////////////////////End File:flower/utils/StringDo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/VByteArray.js///////////////////////////
+class VByteArray {
+    bytes;
+    big;
+    _position;
+    length;
+
+    constructor(big = true) {
+        this.bytes = [];
+        this.big = big;
+        this.position = 0;
+        this.length = 0;
+    }
+
+    readFromArray(bytes) {
+        this.bytes.length = 0;
+        this.position = 0;
+        this.length = 0;
+        this.bytes = bytes;
+        this.length = this.bytes.length;
+    }
+
+    writeInt(val) {
+        val = +val & ~0;
+        if (val >= 0) {
+            val *= 2;
+        }
+        else {
+            val = ~val;
+            val *= 2;
+            val++;
+        }
+        this.writeUInt(val);
+    }
+
+    writeUInt(val) {
+        val = val < 0 ? 0 : val;
+        val = +val & ~0;
+        var flag = false;
+        val = val < 0 ? -val : val;
+        var val2 = 0;
+        if (val >= 0x10000000) {
+            val2 = val / 0x10000000;
+            val = val & 0xFFFFFFF;
+            flag = true;
+        }
+        if (flag || val >> 7) {
+            this.bytes.splice(this.position, 0, 0x80 | val & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        else {
+            this.bytes.splice(this.position, 0, val & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        if (flag || val >> 14) {
+            this.bytes.splice(this.position, 0, 0x80 | (val >> 7) & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        else if (val >> 7) {
+            this.bytes.splice(this.position, 0, (val >> 7) & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        if (flag || val >> 21) {
+            this.bytes.splice(this.position, 0, 0x80 | (val >> 14) & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        else if (val >> 14) {
+            this.bytes.splice(this.position, 0, (val >> 14) & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        if (flag || val >> 28) {
+            this.bytes.splice(this.position, 0, 0x80 | (val >> 21) & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        else if (val >> 21) {
+            this.bytes.splice(this.position, 0, (val >> 21) & 0x7F);
+            this.position++;
+            this.length++;
+        }
+        if (flag) {
+            this.writeUInt(Math.floor(val2));
+        }
+    }
+
+    get position() {
+        return this._position;
+    }
+
+    set position(val) {
+        this._position = val;
+    }
+
+    writeByte(val) {
+        val = +val & ~0;
+        this.bytes.splice(this.position, 0, val);
+        this.length += 1;
+        this.position += 1;
+    }
+
+    writeBoolean(val) {
+        val = !!val;
+        this.bytes.splice(this.position, 0, val == true ? 1 : 0);
+        this.length += 1;
+        this.position += 1;
+    }
+
+    writeUTF(val) {
+        val = "" + val;
+        var arr = StringDo.stringToBytes(val);
+        this.writeUInt(arr.length);
+        for (var i = 0; i < arr.length; i++) {
+            this.bytes.splice(this.position, 0, arr[i]);
+            this.position++;
+        }
+        this.length += arr.length;
+    }
+
+    writeUTFBytes(val, len) {
+        val = "" + val;
+        var arr = StringDo.stringToBytes(val);
+        for (var i = 0; i < len; i++) {
+            if (i < arr.length)
+                this.bytes.splice(this.position, 0, arr[i]);
+            else
+                this.bytes.splice(this.position, 0, 0);
+            this.position++;
+        }
+        this.length += len;
+    }
+
+    writeBytes(b, start = null, len = null) {
+        start = +start & ~0;
+        len = +len & ~0;
+        var copy = b.data;
+        for (var i = start; i < copy.length && i < start + len; i++) {
+            this.bytes.splice(this.position, 0, copy[i]);
+            this.position++;
+        }
+        this.length += len;
+    }
+
+    writeByteArray(byteArray) {
+        this.bytes = this.bytes.concat(byteArray);
+        this.length += byteArray.length;
+    }
+
+    readBoolean() {
+        var val = this.bytes[this.position] == 0 ? false : true;
+        this.position += 1;
+        return val;
+    }
+
+    readInt() {
+        var val = this.readUInt();
+        if (val % 2 == 1) {
+            val = Math.floor(val / 2);
+            val = ~val;
+        }
+        else {
+            val = Math.floor(val / 2);
+        }
+        return val;
+    }
+
+    readUInt() {
+        var val = 0;
+        val += this.bytes[this.position] & 0x7F;
+        if (this.bytes[this.position] >> 7) {
+            this.position++;
+            val += (this.bytes[this.position] & 0x7F) << 7;
+            if (this.bytes[this.position] >> 7) {
+                this.position++;
+                val += (this.bytes[this.position] & 0x7F) << 14;
+                if (this.bytes[this.position] >> 7) {
+                    this.position++;
+                    val += (this.bytes[this.position] & 0x7F) << 21;
+                    if (this.bytes[this.position] >> 7) {
+                        this.position++;
+                        val += ((this.bytes[this.position] & 0x7F) << 24) * 16;
+                        if (this.bytes[this.position] >> 7) {
+                            this.position++;
+                            val += ((this.bytes[this.position] & 0x7F) << 24) * 0x800;
+                            if (this.bytes[this.position] >> 7) {
+                                this.position++;
+                                val += (this.bytes[this.position] << 24) * 0x40000;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.position++;
+        return val;
+    }
+
+    readByte() {
+        var val = this.bytes[this.position];
+        this.position += 1;
+        return val;
+    }
+
+    readShort() {
+        var val;
+        var bytes = this.bytes;
+        if (this.big) {
+            val = bytes[this.position] | bytes[this.position + 1] << 8;
+        }
+        else {
+            val = bytes[this.position] << 8 | bytes[this.position + 1];
+        }
+        if (val > (1 << 15))
+            val = val - (1 << 16);
+        this.position += 2;
+        return val;
+    }
+
+    readUTF() {
+        var len = this.readUInt();
+        var val = StringDo.numberToString(this.bytes.slice(this.position, this.position + len));
+        this.position += len;
+        return val;
+    }
+
+    readUTFBytes(len) {
+        len = +len & ~0;
+        var val = StringDo.numberToString(this.bytes.slice(this.position, this.position + len));
+        this.position += len;
+        return val;
+    }
+
+    get bytesAvailable() {
+        return this.length - this.position;
+    }
+
+    get data() {
+        return this.bytes;
+    }
+
+    toString() {
+        var str = "";
+        for (var i = 0; i < this.bytes.length; i++) {
+            str += this.bytes[i] + (i < this.bytes.length - 1 ? "," : "");
+        }
+        return str;
+    }
+}
+
+flower.VByteArray = VByteArray;
+//////////////////////////End File:flower/utils/VByteArray.js///////////////////////////
 
 
 

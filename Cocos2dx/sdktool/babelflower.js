@@ -175,6 +175,7 @@ var list = [
     "PlatformURLLoader",
     "PlatformProgram",
     "PlatformShaderType",
+    "PlatformWebSocket",
 
     "DebugInfo",
     "TextureInfo",
@@ -257,6 +258,7 @@ var list = [
 ];
 var fileContent = "";
 fileContent += `
+var LocalWebSocket = WebSocket;
 var $root = eval(\"this\");
 var __define = $root.__define || function (o, p, g, s) {
         Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});

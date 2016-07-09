@@ -20,7 +20,6 @@ function babel(list, index) {
         return;
     }
     var jsFile = list[index];
-    console.log(jsFile,index);
     new ShellCommand("node", [list[index]], function () {
             index++;
             babel(list, index);
@@ -33,44 +32,5 @@ function babel(list, index) {
         }, null);
 }
 
-//function babel() {
-//    new ShellCommand("node", ["./sdktool/babel.js"], function () {
-//            new ShellCommand("node", ["./sdktool/babelextension.js"], function () {
-//                    new ShellCommand("node", ["./sdktool/babelremoteserver.js"], function () {
-//                            complete();
-//                        }, null,
-//                        function (data) {
-//                            console.log(data);
-//                        }, null,
-//                        function (data) {
-//                            console.log(data);
-//                        }, null);
-//
-//                    //new ShellCommand("node", ["./sdktool/babelbinding.js"], function () {
-//                    //        complete();
-//                    //}, null,
-//                    //function (data) {
-//                    //    console.log(data);
-//                    //}, null,
-//                    //function (data) {
-//                    //    console.log(data);
-//                    //}, null);
-//
-//                }, null,
-//                function (data) {
-//                    console.log(data);
-//                }, null,
-//                function (data) {
-//                    console.log(data);
-//                }, null);
-//        }, null,
-//        function (data) {
-//            console.log(data);
-//        }, null,
-//        function (data) {
-//            console.log(data);
-//        }, null);
-//}
-
-
+//babelextension
 babel(["./sdktool/babel.js", "./sdktool/babelremoteserver.js"], 0);

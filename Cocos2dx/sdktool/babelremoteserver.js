@@ -162,12 +162,16 @@ function compressComplete() {
 var file = new File("remoteServer/");
 var files = file.readFilesWidthEnd("js");
 var fileContent = "";
-//fileContent += "var binding = {};\n";
-//fileContent += "var $root = eval(\"this\");\n";
-//fileContent += "(function(){\n";
+
+fileContent += 'require("./com/requirecom");\n';
+fileContent += 'require("./ftp/requireftp");\n';
+fileContent += 'require("./net/requirenet");\n';
+fileContent += 'require("./shell/requireshell");\n';
+
 for (var i = 0; i < files.length; i++) {
     var f = files[i];
     if (f.url.slice(0, "remoteServer/com/".length) == "remoteServer/com/" ||
+        f.url.slice(0, "remoteServer/ES6".length) == "remoteServer/ES6" ||
         f.url.slice(0, "remoteServer/es6/".length) == "remoteServer/es6/" ||
         f.url.slice(0, "remoteServer/ftp/".length) == "remoteServer/ftp/" ||
         f.url.slice(0, "remoteServer/net/".length) == "remoteServer/net/" ||
@@ -178,7 +182,9 @@ for (var i = 0; i < files.length; i++) {
     fileContent += files[i].readContent() + "\n";
     fileContent += "//////////////////////////End File:" + files[i].url + "///////////////////////////\n\n\n\n";
 }
-//fileContent += "})();\n";
+fileContent += "var server = new RemoteServer();\n";
+fileContent += "server.start(serverPort);\n";
+
 file = new File("remoteServer/es6/ES6RemoteServer.js");
 //fileContent = StringDo.replaceString(fileContent, "exports.", "binding.");
 //fileContent += "for(var key in binding) {\n";

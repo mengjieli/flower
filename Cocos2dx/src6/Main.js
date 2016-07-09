@@ -4,12 +4,11 @@ class Main {
     }
 
     ready() {
-        var loader = new flower.URLLoader("http://192.168.1.145:11001/project.manifest");
-        //loader.method = flower.URLLoaderMethod.HEAD;
-        loader.load();
-        loader.addListener(flower.Event.COMPLETE, function (e) {
-            flower.trace(flower.ObjectDo.toString(e.data));
-        })
+        var socket = new flower.VBWebSocket();
+        socket.connect("192.168.1.7", 9900);
+        socket.addListener(flower.Event.CONNECT, this.onConnect, this);
+
+
         return;
         new Test();
         flower.Stage.getInstance().backgroundColor = 0xf6f6f6;
@@ -23,5 +22,9 @@ class Main {
         var ui = new flower.UIParser();
         ui.parseUIAsync("res/test/TestTree.xml");
         flower.Stage.getInstance().addChild(ui);
+    }
+
+    onConnect(e) {
+        console.log(e.type);
     }
 }

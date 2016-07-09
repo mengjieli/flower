@@ -2,17 +2,49 @@
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-//////////////////////////File:remoteServer/RemoteServer.js///////////////////////////
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 require("./com/requirecom");
 require("./ftp/requireftp");
 require("./net/requirenet");
 require("./shell/requireshell");
+//////////////////////////File:remoteServer/RemoteClient.js///////////////////////////
 
-var RemoteServer = function RemoteServer() {
-    _classCallCheck(this, RemoteServer);
+var RemoteClient = function (_WebSocketServerClien) {
+    _inherits(RemoteClient, _WebSocketServerClien);
 
-    var file = new File("./");
-    files = file.readDirectionList();
-    console.log(files);
-};
+    function RemoteClient(connection, big) {
+        _classCallCheck(this, RemoteClient);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RemoteClient).call(this, connection, big));
+
+        console.log(connection.remoteAddress);
+        return _this;
+    }
+
+    return RemoteClient;
+}(WebSocketServerClient);
+//////////////////////////End File:remoteServer/RemoteClient.js///////////////////////////
+
+//////////////////////////File:remoteServer/RemoteServer.js///////////////////////////
+
+
+var RemoteServer = function (_WebSocketServer) {
+    _inherits(RemoteServer, _WebSocketServer);
+
+    function RemoteServer() {
+        _classCallCheck(this, RemoteServer);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(RemoteServer).call(this, RemoteClient));
+    }
+
+    return RemoteServer;
+}(WebSocketServer);
+
+var serverPort = 9900;
 //////////////////////////End File:remoteServer/RemoteServer.js///////////////////////////
+
+var server = new RemoteServer();
+server.start(serverPort);
