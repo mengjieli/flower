@@ -1,3 +1,3 @@
-class RemoteServer {
+class RemoteServer extends flower.VBWebSocket {
     
 }
