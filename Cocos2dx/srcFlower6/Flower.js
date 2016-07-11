@@ -36,33 +36,46 @@ var CACHE = true;
 var UPDATE_RESOURCE = true;
 var RETINA = false;
 var programmers = {};
+var config = {};
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, scale, language) {
-    SCALE = scale;
-    LANGUAGE = language || "";
+function start(completeFunc) {
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
     Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
-    //completeFunc();
-    var loader = new URLLoader("res/blank.png");
+    var loader = new URLLoader("flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
-        Texture.$blank = e.data;
-        Texture.$blank.$addCount();
-        loader = new URLLoader("res/shaders/Bitmap.fsh");
+        var cfg = e.data;
+        for (var key in cfg) {
+            config[key] = cfg;
+        }
+        SCALE = config.scale || 1;
+        LANGUAGE = config.language || "";
+
+        loader = new URLLoader("res/blank.png");
         loader.addListener(Event.COMPLETE, function (e) {
-            programmers[loader.url] = e.data;
-            loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
+            Texture.$blank = e.data;
+            Texture.$blank.$addCount();
+            loader = new URLLoader("res/shaders/Bitmap.fsh");
             loader.addListener(Event.COMPLETE, function (e) {
                 programmers[loader.url] = e.data;
-                loader = new URLLoader("res/shaders/Source.fsh");
+                loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
                 loader.addListener(Event.COMPLETE, function (e) {
                     programmers[loader.url] = e.data;
-                    completeFunc();
+                    loader = new URLLoader("res/shaders/Source.fsh");
+                    loader.addListener(Event.COMPLETE, function (e) {
+                        programmers[loader.url] = e.data;
+                        if (config.remote) {
+                            flower.RemoteServer.start(completeFunc);
+                        } else {
+                            completeFunc();
+                        }
+                    });
+                    loader.load();
                 });
                 loader.load();
             });
@@ -133,6 +146,7 @@ flower.start = start;
 flower.getLanguage = $getLanguage;
 flower.trace = trace;
 flower.sys = {
+    config: config,
     DEBUG: DEBUG,
     $tip: $tip,
     $warn: $warn,
@@ -707,12 +721,14 @@ class PlatformTextInput extends PlatformDisplayObject {
         super();
         this.show = new cc.TextFieldTTF();
         if (Platform.native) {
-            this.show.setSystemFontSize(12);
+            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
         } else {
-            this.show.setFontSize(12);
+            this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
         }
         this.show.setAnchorPoint(0, 1);
         this.show.retain();
+        this.setScaleX(1);
+        this.setScaleY(1);
         if (Platform.native) {
         } else {
             this.show.setDelegate(this);
@@ -755,10 +771,10 @@ class PlatformTextInput extends PlatformDisplayObject {
         var $mesureTxt = PlatformTextInput.$mesureTxt;
         if (Platform.native) {
             $mesureTxt.setFontSize(size);
-            this.show.setSystemFontSize(size);
+            this.show.setSystemFontSize( (RETINA ? 2.0 : 1) * size);
         } else {
             $mesureTxt.setFontSize(size);
-            this.show.setFontSize(size);
+            this.show.setFontSize( (RETINA ? 2.0 : 1) * size);
         }
         var txt = this.show;
         txt.text = "";
@@ -801,7 +817,8 @@ class PlatformTextInput extends PlatformDisplayObject {
                 }
             }
         }
-        return txt.getContentSize();
+        $mesureTxt.setString(txt.getString());
+        return $mesureTxt.getContentSize();
     }
 
     setFilters(filters) {
@@ -816,15 +833,25 @@ class PlatformTextInput extends PlatformDisplayObject {
         this.show.detachWithIME();
     }
 
+    setScaleX(val) {
+        this.__scaleX = val;
+        this.show.setScaleX(val * (RETINA ? (1 / 2.0) : 1));
+    }
+
+    setScaleY(val) {
+        this.__scaleY = val;
+        this.show.setScaleY(val * (RETINA ? (1 / 2.0) : 1));
+    }
+
     release() {
         this.__changeBack = null;
         this.__changeBackThis = null;
         var show = this.show;
         show.setString("");
         if (Platform.native) {
-            this.show.setSystemFontSize(12);
+            this.show.setSystemFontSize((RETINA ? 2.0 : 1)*12);
         } else {
-            this.show.setFontSize(12);
+            this.show.setFontSize((RETINA ? 2.0 : 1)*12);
         }
         show.setTextColor({r: 0, g: 0, b: 0, a: 255});
         super.release();
@@ -1336,18 +1363,29 @@ class PlatformProgram {
 
 //////////////////////////File:flower/platform/cocos2dx/PlatformWebSocket.js///////////////////////////
 class PlatformWebSocket {
-    
-    websocket;
+
+    webSocket;
 
     bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
         var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
-        this.websocket = websocket;
+        this.webSocket = websocket;
         var openFunc = function () {
             onConnect.call(thisObj);
         };
         websocket.onopen = openFunc;
         var receiveFunc = function (event) {
-            if (event.data instanceof ArrayBuffer) {
+            if (!cc.sys.isNative && event.data instanceof Blob) {
+                var reader = new FileReader();
+                reader.onloadend = function () {
+                    var list = [];
+                    var data = new Uint8Array(this.result);
+                    for (var i = 0; i < data.length; i++) {
+                        list.push(data[i]);
+                    }
+                    onReceiveMessage.call(thisObj, "buffer", list);
+                }
+                reader.readAsArrayBuffer(event.data);
+            } else if (cc.sys.isNative && event.data instanceof ArrayBuffer) {
                 var list = [];
                 var data = new Uint8Array(event.data);
                 for (var i = 0; i < data.length; i++) {
@@ -1384,6 +1422,7 @@ class PlatformWebSocket {
     releaseWebSocket() {
         var item = null;
         var list = PlatformWebSocket.webSockets;
+        var webSocket = this.webSocket;
         for (var i = 0; i < list.length; i++) {
             if (websocket == list[i].webSocket) {
                 websocket.close();
@@ -1391,6 +1430,7 @@ class PlatformWebSocket {
                 websocket.onmessage = null;
                 websocket.onerror = null;
                 websocket.onclose = null;
+                this.webSocket = null;
                 list.splice(i, 1);
                 break;
             }
@@ -5806,6 +5846,7 @@ class WebSocket extends flower.EventDispatcher {
     _ip;
     _port;
     _localWebSocket;
+    _isConnect = false;
 
     constructor() {
         super();
@@ -5815,6 +5856,7 @@ class WebSocket extends flower.EventDispatcher {
         if (this._localWebSocket) {
             this._localWebSocket.releaseWebSocket(this.localWebSocket);
         }
+        this._isConnect = false;
         this._ip = ip;
         this._port = port;
         this._localWebSocket = new PlatformWebSocket();
@@ -5829,7 +5871,12 @@ class WebSocket extends flower.EventDispatcher {
         return this._port;
     }
 
+    get isConnect() {
+        return this._isConnect;
+    }
+
     onConnect() {
+        this._isConnect = true;
         this.dispatchWidth(flower.Event.CONNECT);
     }
 
@@ -5837,7 +5884,11 @@ class WebSocket extends flower.EventDispatcher {
     }
 
     send(data) {
-        this._localWebSocket.sendWebSocketUTF(data);
+        if (data instanceof VByteArray) {
+            this._localWebSocket.sendWebSocketBytes(data.bytes);
+        } else {
+            this._localWebSocket.sendWebSocketBytes(data);
+        }
     }
 
     onError() {
@@ -5864,6 +5915,7 @@ flower.WebSocket = WebSocket;
 //////////////////////////File:flower/net/VBWebSocket.js///////////////////////////
 class VBWebSocket extends WebSocket {
     static id = 0;
+
     _remote;
     remotes = {};
     backs = {};
@@ -5884,7 +5936,7 @@ class VBWebSocket extends WebSocket {
     onReceiveMessage(type, data) {
         var bytes = new VByteArray();
         if (type == "string") {
-            bytes.readFromArray(Json.parse(data));
+            bytes.readFromArray(JSON.parse(data));
         } else {
             bytes.readFromArray(data);
         }
@@ -5950,10 +6002,9 @@ class VBWebSocket extends WebSocket {
             if (remoteId) {
                 var remote = this.remotes[remoteId];
                 if (remote) {
-                    remote.doNext(cmd, bytes);
+                    remote.receiveMessage(cmd, bytes);
                 }
-            }
-            else {
+            } else {
                 backList = this.backs[cmd];
                 if (backList) {
                     removeList = [];
@@ -5978,9 +6029,9 @@ class VBWebSocket extends WebSocket {
         }
     }
 
-    send(data) {
-        this.sendWebSocketBytes(data.data);
-    }
+    //send(data) {
+    //    this.sendWebSocketBytes(data.data);
+    //}
 
     registerRemote(remote) {
         this.remotes[remote.id] = remote;
@@ -6045,6 +6096,30 @@ class VBWebSocket extends WebSocket {
 
 flower.VBWebSocket = VBWebSocket;
 //////////////////////////End File:flower/net/VBWebSocket.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/Remote.js///////////////////////////
+class Remote {
+
+    static id = 1;
+
+    __id;
+
+    constructor() {
+        this.__id = Remote.id++;
+    }
+
+    get id() {
+        return this.__id;
+    }
+
+    receiveMessage(cmd, msg) {
+    }
+}
+
+flower.Remote = Remote;
+//////////////////////////End File:flower/net/Remote.js///////////////////////////
 
 
 

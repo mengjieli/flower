@@ -4,3 +4,4 @@ class Remote {
         
     }
 }
+exports.Remote = Remote;

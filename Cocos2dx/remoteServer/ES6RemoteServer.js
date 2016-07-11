@@ -20,7 +20,13 @@ var RemoteClient = function (_WebSocketServerClien) {
     function RemoteClient(connection, big) {
         _classCallCheck(this, RemoteClient);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(RemoteClient).call(this, connection, big));
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RemoteClient).call(this, connection, big));
+
+        _this.id = RemoteClient.id++;
+        _this.hasLogin = false;
+        _this.ip = connection.remoteAddress;
+        _this.information = {};
+        return _this;
     }
 
     _createClass(RemoteClient, [{
@@ -28,28 +34,29 @@ var RemoteClient = function (_WebSocketServerClien) {
         value: function receiveData(message) {
             var data;
             if (message.type == "utf8") {
-                this.type = "utf8";
+                this.type = message.type;
                 data = JSON.parse(message.utf8Data);
             } else if (message.type == "binary") {
+                this.type = message.type;
                 var data = message.binaryData;
             }
             var bytes = new VByteArray();
             bytes.readFromArray(data);
             var cmd = bytes.readUIntV();
+            //console.log(cmd, " [bytes] ", bytes.bytes);
             switch (cmd) {
                 case 0:
                     //this.receiveHeart(bytes);
                     return;
             }
-            //if (this.hasLogin == false && (cmd != 0 && cmd != 1)) {
-            //    this.sendFail(10, cmd, bytes);
-            //    this.close();
-            //    return;
-            //}
-            console.log(bytes.bytes);
+            if (this.hasLogin == false && cmd != 0 && cmd != 1) {
+                this.sendFail(10, cmd, bytes);
+                this.close();
+                return;
+            }
             if (Config.cmds[cmd]) {
-                console.log("[cmd]", cmd);
-                var cls = global[Config.cmds[cmd]];
+                var className = Config.cmds[cmd];
+                var cls = eval(className);
                 if (cls == null) {
                     this.sendFail(5, cmd, bytes);
                 } else {
@@ -123,7 +130,7 @@ var RemoteClient = function (_WebSocketServerClien) {
         value: function sendData(bytes) {
             if (this.type == "binary") {
                 this.connection.sendBytes(new Buffer(bytes.data));
-            } else if (this.type == "utf8") {
+            } else {
                 var str = "[";
                 var array = bytes.data;
                 for (var i = 0; i < array.length; i++) {
@@ -147,6 +154,8 @@ var RemoteClient = function (_WebSocketServerClien) {
 
 //////////////////////////File:remoteServer/RemoteServer.js///////////////////////////
 
+
+RemoteClient.id = 1;
 
 var RemoteServer = function (_WebSocketServer) {
     _inherits(RemoteServer, _WebSocketServer);
@@ -178,33 +187,76 @@ var serverPort = 9900;
 
 //////////////////////////File:remoteServer/data/Config.js///////////////////////////
 
-var Config = function Config() {
-    _classCallCheck(this, Config);
-};
+var Config = function () {
+    function Config() {
+        _classCallCheck(this, Config);
+    }
+
+    _createClass(Config, null, [{
+        key: "addClient",
+        value: function addClient(name, client) {
+            if (!Config.clients[name]) {
+                Config.clients[name] = [];
+            }
+            Config.clients[name].push(client);
+        }
+    }, {
+        key: "removeClient",
+        value: function removeClient(name, client) {
+            var list = Config.clients[name];
+            if (list) {
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] == client) {
+                        list.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "getClients",
+        value: function getClients(name) {
+            return Config.clients[name] || [];
+        }
+    }, {
+        key: "getClient",
+        value: function getClient(id) {
+            for (var key in Config.clients) {
+                var list = Config.clients[key];
+                if (list) {
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].id == id) {
+                            return list[i];
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+    }]);
+
+    return Config;
+}();
 //////////////////////////End File:remoteServer/data/Config.js///////////////////////////
 
 //////////////////////////File:remoteServer/tasks/Task.js///////////////////////////
 
 
 Config.cmds = [];
-var Task = function () {
+Config.clients = {};
 
-    function Task() {}
-
-    var d = __define,
-        c = Task;
-    p = c.prototype;
-
-    return Task;
-}();
-
-global.Task = Task;
+var Task = function Task() {
+    _classCallCheck(this, Task);
+};
 //////////////////////////End File:remoteServer/tasks/Task.js///////////////////////////
 
 //////////////////////////File:remoteServer/tasks/TaskBase.js///////////////////////////
-var TaskBase = function () {
 
+
+var TaskBase = function () {
     function TaskBase(user, client, cmd, msg) {
+        _classCallCheck(this, TaskBase);
+
         this.id = TaskBase.id++;
         this.user = user;
         this.client = client;
@@ -224,109 +276,300 @@ var TaskBase = function () {
         this.startTask(cmd, msg);
     }
 
-    var d = __define,
-        c = TaskBase;
-    p = c.prototype;
-
     /**
      * 开始执行任务
      * @param cmd
      * @param msg
      */
-    p.startTask = function (cmd, msg) {};
 
-    /**
-     * 执行任务
-     * @param msg
-     */
-    p.excute = function (msg) {};
 
-    /**
-     * 任务执行失败
-     * @param errorCode
-     */
-    p.fail = function (errorCode, message) {
-        message = message || "";
-        if (this.client) {
-            var msg = new VByteArray();
-            msg.writeUIntV(0);
-            msg.writeUIntV(this.cmd);
-            msg.writeUIntV(errorCode);
-            msg.writeUTFV(message);
-            this.msg.position = 0;
-            this.msg.readUIntV();
-            msg.writeBytes(this.msg, this.msg.position, this.msg.length - this.msg.position);
-            this.client.sendData(msg);
+    _createClass(TaskBase, [{
+        key: "startTask",
+        value: function startTask(cmd, msg) {}
+
+        /**
+         * 执行任务
+         * @param msg
+         */
+
+    }, {
+        key: "excute",
+        value: function excute(msg) {}
+
+        /**
+         * 任务执行失败
+         * @param errorCode
+         */
+
+    }, {
+        key: "fail",
+        value: function fail(errorCode, message) {
+            message = message || "";
+            if (this.client) {
+                var msg = new VByteArray();
+                msg.writeUIntV(0);
+                msg.writeUIntV(this.cmd);
+                msg.writeUIntV(errorCode);
+                msg.writeUTFV(message);
+                this.msg.position = 0;
+                this.msg.readUIntV();
+                msg.writeBytes(this.msg, this.msg.position, this.msg.length - this.msg.position);
+                this.client.sendData(msg);
+            }
+            if (this.user) {
+                this.user.delTask(this.id);
+            }
         }
-        if (this.user) {
-            this.user.delTask(this.id);
+
+        /**
+         * 任务执行成功
+         */
+
+    }, {
+        key: "success",
+        value: function success() {
+            if (this.client) {
+                var msg = new VByteArray();
+                msg.writeUIntV(0);
+                msg.writeUIntV(this.cmd);
+                msg.writeUIntV(0);
+                this.client.sendData(msg);
+            }
+            if (this.user) {
+                this.user.delTask(this.id);
+            }
         }
-    };
 
-    /**
-     * 任务执行成功
-     */
-    p.success = function () {
-        if (this.client) {
-            var msg = new VByteArray();
-            msg.writeUIntV(0);
-            msg.writeUIntV(this.cmd);
-            msg.writeUIntV(0);
-            this.client.sendData(msg);
+        /**
+         * 发送消息给任务开始的客户端
+         * @param bytes
+         */
+
+    }, {
+        key: "sendData",
+        value: function sendData(bytes) {
+            this.client.sendData(bytes);
         }
-        if (this.user) {
-            this.user.delTask(this.id);
+
+        /**
+         * 关闭接收任务的客户端链接
+         */
+
+    }, {
+        key: "close",
+        value: function close() {
+            this.client.close();
         }
-    };
-
-    /**
-     * 发送消息给任务开始的客户端
-     * @param bytes
-     */
-    p.sendData = function (bytes) {
-        this.client.sendData(bytes);
-    };
-
-    /**
-     * 关闭接收任务的客户端链接
-     */
-    p.close = function () {
-        this.client.close();
-    };
-
-    TaskBase.id = 0;
+    }]);
 
     return TaskBase;
 }();
-
-global.TaskBase = TaskBase;
 //////////////////////////End File:remoteServer/tasks/TaskBase.js///////////////////////////
 
 //////////////////////////File:remoteServer/tasks/TaskSample.js///////////////////////////
-var TaskSample = function (_super) {
 
-    __extends(TaskSample, _super);
+
+TaskBase.id = 0;
+
+var TaskSample = function (_TaskBase) {
+    _inherits(TaskSample, _TaskBase);
 
     function TaskSample(user, fromClient, cmd, msg) {
-        _super.call(this, user, fromClient, cmd, msg);
-    }
+        _classCallCheck(this, TaskSample);
 
-    var d = __define,
-        c = TaskSample;
-    var p = c.prototype;
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(TaskSample).call(this, user, fromClient, cmd, msg));
+    }
 
     /**
      * 开始执行任务
      * @param cmd
      * @param msg
      */
-    p.startTask = function (cmd, msg) {};
+
+
+    _createClass(TaskSample, [{
+        key: "startTask",
+        value: function startTask(cmd, msg) {}
+    }]);
 
     return TaskSample;
 }(TaskBase);
-
-global.TaskSample = TaskSample;
 //////////////////////////End File:remoteServer/tasks/TaskSample.js///////////////////////////
+
+//////////////////////////File:remoteServer/tasks/center/ExcuteTask.js///////////////////////////
+
+
+var ExcuteTask = function (_TaskBase2) {
+    _inherits(ExcuteTask, _TaskBase2);
+
+    function ExcuteTask(user, fromClient, cmd, msg) {
+        _classCallCheck(this, ExcuteTask);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(ExcuteTask).call(this, user, fromClient, cmd, msg));
+    }
+
+    /**
+     * 开始执行任务
+     * @param cmd
+     * @param msg
+     */
+
+
+    _createClass(ExcuteTask, [{
+        key: "startTask",
+        value: function startTask(cmd, msg) {
+            var taskId = msg.readUIntV();
+            //console.log("excute task back",taskId);
+            if (this.user) {
+                this.user.excuteTask(taskId, msg);
+            } else {
+                var list = User.list;
+                for (var i = 0; i < list.length; i++) {
+                    var user = list[i];
+                    if (user.excuteTask(taskId, msg) == true) {
+                        break;
+                    }
+                }
+            }
+            this.success();
+        }
+    }]);
+
+    return ExcuteTask;
+}(TaskBase);
+//////////////////////////End File:remoteServer/tasks/center/ExcuteTask.js///////////////////////////
+
+//////////////////////////File:remoteServer/tasks/center/GetClientListTask.js///////////////////////////
+
+
+var GetClientListTask = function (_TaskBase3) {
+    _inherits(GetClientListTask, _TaskBase3);
+
+    function GetClientListTask(user, fromClient, cmd, msg) {
+        _classCallCheck(this, GetClientListTask);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(GetClientListTask).call(this, user, fromClient, cmd, msg));
+    }
+
+    /**
+     * 开始执行任务
+     * @param cmd
+     * @param msg
+     */
+
+
+    _createClass(GetClientListTask, [{
+        key: "startTask",
+        value: function startTask(cmd, msg) {
+            var name = msg.readUTFV();
+            var clients = Config.getClients(name);
+            var bytes = new VByteArray();
+            bytes.writeUIntV(clients.length);
+            for (var i = 0; i < clients.length; i++) {
+                bytes.writeUTFV(JSON.stringify(clients[i].information));
+            }
+            this.sendData(bytes);
+            this.success();
+        }
+    }]);
+
+    return GetClientListTask;
+}(TaskBase);
+//////////////////////////End File:remoteServer/tasks/center/GetClientListTask.js///////////////////////////
+
+//////////////////////////File:remoteServer/tasks/center/LoginTask.js///////////////////////////
+
+
+var LoginTask = function (_TaskBase4) {
+    _inherits(LoginTask, _TaskBase4);
+
+    function LoginTask(user, fromClient, cmd, msg) {
+        _classCallCheck(this, LoginTask);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(LoginTask).call(this, user, fromClient, cmd, msg));
+    }
+
+    /**
+     * 开始执行任务
+     * @param cmd
+     * @param msg
+     */
+
+
+    _createClass(LoginTask, [{
+        key: "startTask",
+        value: function startTask(cmd, msg) {
+            var client = this.client;
+            var type = msg.readUTFV();
+            console.log("[login]", type);
+            if (type == "local") {
+                var root = msg.readUTFV();
+                client.information = {
+                    id: client.id,
+                    ip: client.ip,
+                    root: root
+                };
+                client.hasLogin = true;
+                this.success();
+            } else if (type == "game") {
+                var gameName = msg.readUTFV();
+                client.information = {
+                    id: client.id,
+                    ip: client.ip,
+                    name: gameName
+                };
+                client.hasLogin = true;
+                this.success();
+            }
+        }
+    }]);
+
+    return LoginTask;
+}(TaskBase);
+//////////////////////////End File:remoteServer/tasks/center/LoginTask.js///////////////////////////
+
+//////////////////////////File:remoteServer/tasks/center/TransformTask.js///////////////////////////
+
+
+var TransformTask = function (_TaskBase5) {
+    _inherits(TransformTask, _TaskBase5);
+
+    function TransformTask(user, fromClient, cmd, msg) {
+        _classCallCheck(this, TransformTask);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(TransformTask).call(this, user, fromClient, cmd, msg));
+    }
+
+    /**
+     * 开始执行任务
+     * @param cmd
+     * @param msg
+     */
+
+
+    _createClass(TransformTask, [{
+        key: "startTask",
+        value: function startTask(cmd, msg) {
+            var id = msg.readUIntV();
+            var client = Config.getClient(id);
+            if (client) {
+                var bytes = new VByteArray();
+                var cmd = msg.readUIntV();
+                bytes.writeUIntV(cmd);
+                bytes.writeUIntV(this.client.id);
+                while (msg.bytesAvailable) {
+                    bytes.writeByte(msg.readByte());
+                }
+                client.sendData(bytes);
+            } else {
+                this.fail(1030);
+            }
+        }
+    }]);
+
+    return TransformTask;
+}(TaskBase);
+//////////////////////////End File:remoteServer/tasks/center/TransformTask.js///////////////////////////
 
 var server = new RemoteServer();
 server.start(serverPort);

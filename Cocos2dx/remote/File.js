@@ -4,3 +4,4 @@ class File extends Remote {
         super();
     }
 }
+exports.File = File;

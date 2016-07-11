@@ -1,16 +1,27 @@
 class PlatformWebSocket {
-    
-    websocket;
+
+    webSocket;
 
     bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
         var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
-        this.websocket = websocket;
+        this.webSocket = websocket;
         var openFunc = function () {
             onConnect.call(thisObj);
         };
         websocket.onopen = openFunc;
         var receiveFunc = function (event) {
-            if (event.data instanceof ArrayBuffer) {
+            if (!cc.sys.isNative && event.data instanceof Blob) {
+                var reader = new FileReader();
+                reader.onloadend = function () {
+                    var list = [];
+                    var data = new Uint8Array(this.result);
+                    for (var i = 0; i < data.length; i++) {
+                        list.push(data[i]);
+                    }
+                    onReceiveMessage.call(thisObj, "buffer", list);
+                }
+                reader.readAsArrayBuffer(event.data);
+            } else if (cc.sys.isNative && event.data instanceof ArrayBuffer) {
                 var list = [];
                 var data = new Uint8Array(event.data);
                 for (var i = 0; i < data.length; i++) {
@@ -47,6 +58,7 @@ class PlatformWebSocket {
     releaseWebSocket() {
         var item = null;
         var list = PlatformWebSocket.webSockets;
+        var webSocket = this.webSocket;
         for (var i = 0; i < list.length; i++) {
             if (websocket == list[i].webSocket) {
                 websocket.close();
@@ -54,6 +66,7 @@ class PlatformWebSocket {
                 websocket.onmessage = null;
                 websocket.onerror = null;
                 websocket.onclose = null;
+                this.webSocket = null;
                 list.splice(i, 1);
                 break;
             }

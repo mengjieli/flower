@@ -33,4 +33,4 @@ function babel(list, index) {
 }
 
 //babelextension
-babel(["./sdktool/babel.js", "./sdktool/babelremoteserver.js"], 0);
+babel(["./sdktool/babel.js", "./sdktool/babelremoteserver.js", "./sdktool/babelremote.js"], 0);

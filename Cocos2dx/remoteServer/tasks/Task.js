@@ -1,12 +1,5 @@
-var Task = (function () {
+class Task {
+    constructor() {
 
-    function Task() {
     }
-
-    var d = __define, c = Task;
-    p = c.prototype;
-
-    return Task;
-})();
-
-global.Task = Task;
+}

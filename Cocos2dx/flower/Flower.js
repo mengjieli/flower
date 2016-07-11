@@ -12,33 +12,46 @@ var CACHE = true;
 var UPDATE_RESOURCE = true;
 var RETINA = false;
 var programmers = {};
+var config = {};
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, scale, language) {
-    SCALE = scale;
-    LANGUAGE = language || "";
+function start(completeFunc) {
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
     Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
-    //completeFunc();
-    var loader = new URLLoader("res/blank.png");
+    var loader = new URLLoader("flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
-        Texture.$blank = e.data;
-        Texture.$blank.$addCount();
-        loader = new URLLoader("res/shaders/Bitmap.fsh");
+        var cfg = e.data;
+        for (var key in cfg) {
+            config[key] = cfg;
+        }
+        SCALE = config.scale || 1;
+        LANGUAGE = config.language || "";
+
+        loader = new URLLoader("res/blank.png");
         loader.addListener(Event.COMPLETE, function (e) {
-            programmers[loader.url] = e.data;
-            loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
+            Texture.$blank = e.data;
+            Texture.$blank.$addCount();
+            loader = new URLLoader("res/shaders/Bitmap.fsh");
             loader.addListener(Event.COMPLETE, function (e) {
                 programmers[loader.url] = e.data;
-                loader = new URLLoader("res/shaders/Source.fsh");
+                loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
                 loader.addListener(Event.COMPLETE, function (e) {
                     programmers[loader.url] = e.data;
-                    completeFunc();
+                    loader = new URLLoader("res/shaders/Source.fsh");
+                    loader.addListener(Event.COMPLETE, function (e) {
+                        programmers[loader.url] = e.data;
+                        if (config.remote) {
+                            flower.RemoteServer.start(completeFunc);
+                        } else {
+                            completeFunc();
+                        }
+                    });
+                    loader.load();
                 });
                 loader.load();
             });
@@ -109,6 +122,7 @@ exports.start = start;
 exports.getLanguage = $getLanguage;
 exports.trace = trace;
 exports.sys = {
+    config: config,
     DEBUG: DEBUG,
     $tip: $tip,
     $warn: $warn,

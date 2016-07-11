@@ -46,33 +46,46 @@ var flower = {};
     var UPDATE_RESOURCE = true;
     var RETINA = false;
     var programmers = {};
+    var config = {};
 
     /**
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc, scale, language) {
-        SCALE = scale;
-        LANGUAGE = language || "";
+    function start(completeFunc) {
         var stage = new Stage();
         Platform._runBack = CoreTime.$run;
         Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
-        //completeFunc();
-        var loader = new URLLoader("res/blank.png");
+        var loader = new URLLoader("flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
-            Texture.$blank = e.data;
-            Texture.$blank.$addCount();
-            loader = new URLLoader("res/shaders/Bitmap.fsh");
+            var cfg = e.data;
+            for (var key in cfg) {
+                config[key] = cfg;
+            }
+            SCALE = config.scale || 1;
+            LANGUAGE = config.language || "";
+
+            loader = new URLLoader("res/blank.png");
             loader.addListener(Event.COMPLETE, function (e) {
-                programmers[loader.url] = e.data;
-                loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
+                Texture.$blank = e.data;
+                Texture.$blank.$addCount();
+                loader = new URLLoader("res/shaders/Bitmap.fsh");
                 loader.addListener(Event.COMPLETE, function (e) {
                     programmers[loader.url] = e.data;
-                    loader = new URLLoader("res/shaders/Source.fsh");
+                    loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
                     loader.addListener(Event.COMPLETE, function (e) {
                         programmers[loader.url] = e.data;
-                        completeFunc();
+                        loader = new URLLoader("res/shaders/Source.fsh");
+                        loader.addListener(Event.COMPLETE, function (e) {
+                            programmers[loader.url] = e.data;
+                            if (config.remote) {
+                                flower.RemoteServer.start(completeFunc);
+                            } else {
+                                completeFunc();
+                            }
+                        });
+                        loader.load();
                     });
                     loader.load();
                 });
@@ -155,6 +168,7 @@ var flower = {};
     flower.getLanguage = $getLanguage;
     flower.trace = trace;
     flower.sys = {
+        config: config,
         DEBUG: DEBUG,
         $tip: $tip,
         $warn: $warn,
@@ -768,12 +782,14 @@ var flower = {};
 
             _this3.show = new cc.TextFieldTTF();
             if (Platform.native) {
-                _this3.show.setSystemFontSize(12);
+                _this3.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
             } else {
-                _this3.show.setFontSize(12);
+                _this3.show.setFontSize((RETINA ? 2.0 : 1) * 12);
             }
             _this3.show.setAnchorPoint(0, 1);
             _this3.show.retain();
+            _this3.setScaleX(1);
+            _this3.setScaleY(1);
             if (Platform.native) {} else {
                 _this3.show.setDelegate(_this3);
             }
@@ -823,10 +839,10 @@ var flower = {};
                 var $mesureTxt = PlatformTextInput.$mesureTxt;
                 if (Platform.native) {
                     $mesureTxt.setFontSize(size);
-                    this.show.setSystemFontSize(size);
+                    this.show.setSystemFontSize((RETINA ? 2.0 : 1) * size);
                 } else {
                     $mesureTxt.setFontSize(size);
-                    this.show.setFontSize(size);
+                    this.show.setFontSize((RETINA ? 2.0 : 1) * size);
                 }
                 var txt = this.show;
                 txt.text = "";
@@ -869,7 +885,8 @@ var flower = {};
                         }
                     }
                 }
-                return txt.getContentSize();
+                $mesureTxt.setString(txt.getString());
+                return $mesureTxt.getContentSize();
             }
         }, {
             key: "setFilters",
@@ -885,6 +902,18 @@ var flower = {};
                 this.show.detachWithIME();
             }
         }, {
+            key: "setScaleX",
+            value: function setScaleX(val) {
+                this.__scaleX = val;
+                this.show.setScaleX(val * (RETINA ? 1 / 2.0 : 1));
+            }
+        }, {
+            key: "setScaleY",
+            value: function setScaleY(val) {
+                this.__scaleY = val;
+                this.show.setScaleY(val * (RETINA ? 1 / 2.0 : 1));
+            }
+        }, {
             key: "release",
             value: function release() {
                 this.__changeBack = null;
@@ -892,9 +921,9 @@ var flower = {};
                 var show = this.show;
                 show.setString("");
                 if (Platform.native) {
-                    this.show.setSystemFontSize(12);
+                    this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
                 } else {
-                    this.show.setFontSize(12);
+                    this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
                 }
                 show.setTextColor({ r: 0, g: 0, b: 0, a: 255 });
                 _get(Object.getPrototypeOf(PlatformTextInput.prototype), "release", this).call(this);
@@ -1470,13 +1499,24 @@ var flower = {};
             key: "bindWebSocket",
             value: function bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
                 var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
-                this.websocket = websocket;
+                this.webSocket = websocket;
                 var openFunc = function openFunc() {
                     onConnect.call(thisObj);
                 };
                 websocket.onopen = openFunc;
                 var receiveFunc = function receiveFunc(event) {
-                    if (event.data instanceof ArrayBuffer) {
+                    if (!cc.sys.isNative && event.data instanceof Blob) {
+                        var reader = new FileReader();
+                        reader.onloadend = function () {
+                            var list = [];
+                            var data = new Uint8Array(this.result);
+                            for (var i = 0; i < data.length; i++) {
+                                list.push(data[i]);
+                            }
+                            onReceiveMessage.call(thisObj, "buffer", list);
+                        };
+                        reader.readAsArrayBuffer(event.data);
+                    } else if (cc.sys.isNative && event.data instanceof ArrayBuffer) {
                         var list = [];
                         var data = new Uint8Array(event.data);
                         for (var i = 0; i < data.length; i++) {
@@ -1516,6 +1556,7 @@ var flower = {};
             value: function releaseWebSocket() {
                 var item = null;
                 var list = PlatformWebSocket.webSockets;
+                var webSocket = this.webSocket;
                 for (var i = 0; i < list.length; i++) {
                     if (websocket == list[i].webSocket) {
                         websocket.close();
@@ -1523,6 +1564,7 @@ var flower = {};
                         websocket.onmessage = null;
                         websocket.onerror = null;
                         websocket.onclose = null;
+                        this.webSocket = null;
                         list.splice(i, 1);
                         break;
                     }
@@ -6420,7 +6462,10 @@ var flower = {};
         function WebSocket() {
             _classCallCheck(this, WebSocket);
 
-            return _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
+
+            _this27._isConnect = false;
+            return _this27;
         }
 
         _createClass(WebSocket, [{
@@ -6429,6 +6474,7 @@ var flower = {};
                 if (this._localWebSocket) {
                     this._localWebSocket.releaseWebSocket(this.localWebSocket);
                 }
+                this._isConnect = false;
                 this._ip = ip;
                 this._port = port;
                 this._localWebSocket = new PlatformWebSocket();
@@ -6437,6 +6483,7 @@ var flower = {};
         }, {
             key: "onConnect",
             value: function onConnect() {
+                this._isConnect = true;
                 this.dispatchWidth(flower.Event.CONNECT);
             }
         }, {
@@ -6445,7 +6492,11 @@ var flower = {};
         }, {
             key: "send",
             value: function send(data) {
-                this._localWebSocket.sendWebSocketUTF(data);
+                if (data instanceof VByteArray) {
+                    this._localWebSocket.sendWebSocketBytes(data.bytes);
+                } else {
+                    this._localWebSocket.sendWebSocketBytes(data);
+                }
             }
         }, {
             key: "onError",
@@ -6474,6 +6525,11 @@ var flower = {};
             key: "port",
             get: function get() {
                 return this._port;
+            }
+        }, {
+            key: "isConnect",
+            get: function get() {
+                return this._isConnect;
             }
         }]);
 
@@ -6511,7 +6567,7 @@ var flower = {};
             value: function onReceiveMessage(type, data) {
                 var bytes = new VByteArray();
                 if (type == "string") {
-                    bytes.readFromArray(Json.parse(data));
+                    bytes.readFromArray(JSON.parse(data));
                 } else {
                     bytes.readFromArray(data);
                 }
@@ -6577,7 +6633,7 @@ var flower = {};
                     if (remoteId) {
                         var remote = this.remotes[remoteId];
                         if (remote) {
-                            remote.doNext(cmd, bytes);
+                            remote.receiveMessage(cmd, bytes);
                         }
                     } else {
                         backList = this.backs[cmd];
@@ -6603,11 +6659,11 @@ var flower = {};
                     }
                 }
             }
-        }, {
-            key: "send",
-            value: function send(data) {
-                this.sendWebSocketBytes(data.data);
-            }
+
+            //send(data) {
+            //    this.sendWebSocketBytes(data.data);
+            //}
+
         }, {
             key: "registerRemote",
             value: function registerRemote(remote) {
@@ -6691,6 +6747,34 @@ var flower = {};
 
     flower.VBWebSocket = VBWebSocket;
     //////////////////////////End File:flower/net/VBWebSocket.js///////////////////////////
+
+    //////////////////////////File:flower/net/Remote.js///////////////////////////
+
+    var Remote = function () {
+        function Remote() {
+            _classCallCheck(this, Remote);
+
+            this.__id = Remote.id++;
+        }
+
+        _createClass(Remote, [{
+            key: "receiveMessage",
+            value: function receiveMessage(cmd, msg) {}
+        }, {
+            key: "id",
+            get: function get() {
+                return this.__id;
+            }
+        }]);
+
+        return Remote;
+    }();
+
+    Remote.id = 1;
+
+
+    flower.Remote = Remote;
+    //////////////////////////End File:flower/net/Remote.js///////////////////////////
 
     //////////////////////////File:flower/plist/Plist.js///////////////////////////
 

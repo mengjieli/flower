@@ -4,3 +4,5 @@ class Direction extends Remote {
         super();
     }
 }
+
+exports.Direction = Direction;

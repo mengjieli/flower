@@ -195,6 +195,7 @@ var list = [
     "DataGroup",
     "ItemRenderer",
     "Label",
+    "Input",
     "RectUI",
     "Image",
     "TileImage",

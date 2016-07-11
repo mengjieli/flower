@@ -2,6 +2,7 @@ class WebSocket extends flower.EventDispatcher {
     _ip;
     _port;
     _localWebSocket;
+    _isConnect = false;
 
     constructor() {
         super();
@@ -11,6 +12,7 @@ class WebSocket extends flower.EventDispatcher {
         if (this._localWebSocket) {
             this._localWebSocket.releaseWebSocket(this.localWebSocket);
         }
+        this._isConnect = false;
         this._ip = ip;
         this._port = port;
         this._localWebSocket = new PlatformWebSocket();
@@ -25,7 +27,12 @@ class WebSocket extends flower.EventDispatcher {
         return this._port;
     }
 
+    get isConnect() {
+        return this._isConnect;
+    }
+
     onConnect() {
+        this._isConnect = true;
         this.dispatchWidth(flower.Event.CONNECT);
     }
 
@@ -33,7 +40,11 @@ class WebSocket extends flower.EventDispatcher {
     }
 
     send(data) {
-        this._localWebSocket.sendWebSocketUTF(data);
+        if (data instanceof VByteArray) {
+            this._localWebSocket.sendWebSocketBytes(data.bytes);
+        } else {
+            this._localWebSocket.sendWebSocketBytes(data);
+        }
     }
 
     onError() {

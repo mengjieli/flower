@@ -3,7 +3,6 @@ class RemoteServer extends WebSocketServer {
     constructor() {
         super(RemoteClient);
 
-
         var txt = (new File("./data/Command.json")).readContent();
         Config.cmds = JSON.parse(txt);
     }

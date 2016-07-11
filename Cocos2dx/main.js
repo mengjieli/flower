@@ -59,6 +59,7 @@ cc.game.onStart = function () {
         jsFiles.push("src/Flower.js");
         jsFiles.push("src/Black.js");
         jsFiles.push("src/Binding.js");
+        jsFiles.push("src/Remote.js");
         cc.loader.loadJs(jsFiles, function (err) {
             new Main();
         });

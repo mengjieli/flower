@@ -8,18 +8,24 @@ var Main = function () {
     function Main() {
         _classCallCheck(this, Main);
 
-        flower.start(this.ready.bind(this), 2, "cn");
+        flower.start(this.ready.bind(this));
     }
 
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
-            var socket = new flower.VBWebSocket();
-            socket.connect("192.168.1.7", 9900);
-            socket.addListener(flower.Event.CONNECT, this.onConnect, this);
-
-            return;
+            //var socket = new flower.VBWebSocket(true);
+            //this.socket = socket;
+            //socket.connect("192.168.1.159", 9900);
+            //socket.addListener(flower.Event.CONNECT, this.onConnect, this);
+            //socket.register(102, this.onReceive, this);
+            //return;
             new Test();
+
+            //var ui = new flower.UIParser();
+            //ui.parseUIAsync("res/test/Server.xml");
+            //flower.Stage.getInstance().addChild(ui);
+
             flower.Stage.getInstance().backgroundColor = 0xf6f6f6;
             var theme = new flower.Theme("res/theme/theme.json");
             theme.load();
@@ -34,9 +40,18 @@ var Main = function () {
             flower.Stage.getInstance().addChild(ui);
         }
     }, {
+        key: "onReceive",
+        value: function onReceive(cmd, bytes) {
+            flower.trace(bytes.readBoolean());
+        }
+    }, {
         key: "onConnect",
         value: function onConnect(e) {
-            console.log(e.type);
+            flower.trace(e.type);
+            var msg = new flower.VByteArray();
+            msg.writeUInt(101);
+            msg.writeUTF("com1");
+            this.socket.send(msg);
         }
     }]);
 

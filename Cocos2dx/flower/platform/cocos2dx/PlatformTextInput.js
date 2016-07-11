@@ -12,12 +12,14 @@ class PlatformTextInput extends PlatformDisplayObject {
         super();
         this.show = new cc.TextFieldTTF();
         if (Platform.native) {
-            this.show.setSystemFontSize(12);
+            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
         } else {
-            this.show.setFontSize(12);
+            this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
         }
         this.show.setAnchorPoint(0, 1);
         this.show.retain();
+        this.setScaleX(1);
+        this.setScaleY(1);
         if (Platform.native) {
         } else {
             this.show.setDelegate(this);
@@ -60,10 +62,10 @@ class PlatformTextInput extends PlatformDisplayObject {
         var $mesureTxt = PlatformTextInput.$mesureTxt;
         if (Platform.native) {
             $mesureTxt.setFontSize(size);
-            this.show.setSystemFontSize(size);
+            this.show.setSystemFontSize( (RETINA ? 2.0 : 1) * size);
         } else {
             $mesureTxt.setFontSize(size);
-            this.show.setFontSize(size);
+            this.show.setFontSize( (RETINA ? 2.0 : 1) * size);
         }
         var txt = this.show;
         txt.text = "";
@@ -106,7 +108,8 @@ class PlatformTextInput extends PlatformDisplayObject {
                 }
             }
         }
-        return txt.getContentSize();
+        $mesureTxt.setString(txt.getString());
+        return $mesureTxt.getContentSize();
     }
 
     setFilters(filters) {
@@ -121,15 +124,25 @@ class PlatformTextInput extends PlatformDisplayObject {
         this.show.detachWithIME();
     }
 
+    setScaleX(val) {
+        this.__scaleX = val;
+        this.show.setScaleX(val * (RETINA ? (1 / 2.0) : 1));
+    }
+
+    setScaleY(val) {
+        this.__scaleY = val;
+        this.show.setScaleY(val * (RETINA ? (1 / 2.0) : 1));
+    }
+
     release() {
         this.__changeBack = null;
         this.__changeBackThis = null;
         var show = this.show;
         show.setString("");
         if (Platform.native) {
-            this.show.setSystemFontSize(12);
+            this.show.setSystemFontSize((RETINA ? 2.0 : 1)*12);
         } else {
-            this.show.setFontSize(12);
+            this.show.setFontSize((RETINA ? 2.0 : 1)*12);
         }
         show.setTextColor({r: 0, g: 0, b: 0, a: 255});
         super.release();

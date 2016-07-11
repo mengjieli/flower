@@ -1,3 +1,6 @@
+var remote = {};
+(function(){
+//////////////////////////File:remote/RemoteServer.js///////////////////////////
 class RemoteServer extends flower.VBWebSocket {
 
     __readyBack;
@@ -108,4 +111,49 @@ class RemoteServer extends flower.VBWebSocket {
     }
 }
 
-exports.RemoteServer = RemoteServer;
+remote.RemoteServer = RemoteServer;
+//////////////////////////End File:remote/RemoteServer.js///////////////////////////
+
+
+
+//////////////////////////File:remote/Remote.js///////////////////////////
+class Remote {
+
+    constructor() {
+        
+    }
+}
+remote.Remote = Remote;
+//////////////////////////End File:remote/Remote.js///////////////////////////
+
+
+
+//////////////////////////File:remote/File.js///////////////////////////
+class File extends Remote {
+    
+    constructor() {
+        super();
+    }
+}
+remote.File = File;
+//////////////////////////End File:remote/File.js///////////////////////////
+
+
+
+//////////////////////////File:remote/Direction.js///////////////////////////
+class Direction extends Remote {
+
+    constructor() {
+        super();
+    }
+}
+
+remote.Direction = Direction;
+//////////////////////////End File:remote/Direction.js///////////////////////////
+
+
+
+})();
+for(var key in remote) {
+	flower[key] = remote[key];
+}

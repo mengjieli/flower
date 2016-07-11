@@ -2,13 +2,13 @@ require("./help/com/requirecom");
 require("./help/shell/requireshell");
 
 function compressComplete() {
-    new ShellCommand("babel", ["./srcFlower6", "-d", "./src"], function () {
+    new ShellCommand("babel", ["./srcRemote", "-d", "./src"], function () {
             //console.log("complete!")
 
 //生成 js 依赖关系的文件
 
             return;
-            var readDir = "./srcFlower6";
+            var readDir = "./srcExtension";
             var writeFile = "./src/require.js";
 
             function DoFile(file) {
@@ -34,11 +34,12 @@ function compressComplete() {
                         begin = begin + name.length;
                         begin = StringDo.jumpStrings(content, begin, [" ", "\t"]);
                         if (content.slice(begin, begin + "extends".length) == "extends" && (content.charAt(begin + "extends".length) == " " || content.charAt(begin + "extends".length) == "\t")) {
+                            console.log(file.url, "extends");
                             begin = begin + "extends".length;
                             begin = StringDo.jumpStrings(content, begin, [" ", "\t"]);
                             var superClass = content.slice(begin, StringDo.findCharNotABC(content, begin));
                             this.dependClasses.push(superClass);
-                            //console.log(name + " -> " + this.dependClasses);
+                            console.log(name + " -> " + this.dependClasses);
                         }
                     }
                     if (this.className) {
@@ -83,7 +84,7 @@ function compressComplete() {
             var list = [];
             for (var i = 0; i < files.length; i++) {
                 //console.log(files[i].url)
-                if (files[i].url.slice(0, "./srcFlower6/flower/".length) == "./srcFlower6/flower/") {
+                if (files[i].url.slice(0, "./srcExtension/flower/".length) == "./srcExtension/flower/") {
                     continue;
                 }
                 //if (files[i].url.slice(0, "../src/com/".length) == "../src/com/") {
@@ -134,7 +135,7 @@ function compressComplete() {
                     }
                     if (find) {
                         list.splice(i, 1);
-                        info.url = StringDo.replaceString(info.url, "srcFlower6", "src");
+                        info.url = StringDo.replaceString(info.url, "srcExtension", "src");
                         str += "jsFiles.push(\"" + info.url.slice(2, info.url.length) + "\" );\n";
                         break;
                     }
@@ -146,7 +147,6 @@ function compressComplete() {
 
 
             //str = beginStr + str;
-            //str += "jsFiles.push(\"UI.js\");\n";
             //var saveFile = new File(writeFile);
             //saveFile.save(str, "utf-8");
 
@@ -159,128 +159,16 @@ function compressComplete() {
         })
 }
 
-var file = new File("flower/");
+var file = new File("remote/");
 var files = file.readFilesWidthEnd("js");
 var list = [
-    "Flower",
-    "Platform",
-    "PlatformDisplayObject",
-    "PlatformSprite",
-    "PlatformTextField",
-    "PlatformTextInput",
-    "PlatformBitmap",
-    "PlatformShape",
-    "PlatformMask",
-    "PlatformTexture",
-    "PlatformURLLoader",
-    "PlatformProgram",
-    "PlatformShaderType",
-    "PlatformWebSocket",
-
-    "DebugInfo",
-    "TextureInfo",
-
-    "CoreTime",
-
-    "Language",
-    "zh_CN",
-
-    "EventDispatcher",
-    "Event",
-    "TouchEvent",
-    "MouseEvent",
-    "DragEvent",
-    "IOErrorEvent",
-
-
-    "Filter",
-    "ColorFilter",
-    "StrokeFilter",
-    "BlurFilter",
-
-    "Matrix",
-    "Point",
-    "Rectangle",
-    "Size",
-
-    "BlendMode",
-
-    "DisplayObject",
-    "Sprite",
-    "Mask",
-    "Bitmap",
-    "TextField",
-    "TextInput",
-    "Shape",
-    "Stage",
-
-    "DragManager",
-    "MenuManager",
-    "PopManager",
-
-    "Texture",
-    "TextureManager",
-
-    "URLLoader",
-    "URLLoaderList",
-    "URLLoaderMethod",
-    "WebSocket",
-    "VBWebSocket",
+    "RemoteServer",
     "Remote",
-
-    "Plist",
-    "PlistFrame",
-    "PlistLoader",
-    "PlistManager",
-
-    "Res",
-    "ResItem",
-    "ResItemInfo",
-    "ResType",
-
-    "TweenCenter",
-    "TweenPath",
-    "TweenPhysicMove",
-    "BasicPlugin",
-    "Ease",
-    "EaseFunction",
-    "TimeLine",
-    "Tween",
-
-    "EnterFrame",
-    "CallLater",
-    "ObjectDo",
-    "StringDo",
-    "VByteArray",
-    "Path",
-    "XMLAttribute",
-    "XMLElement",
-    "XMLNameSpace",
+    "File",
+    "Direction"
 ];
 var fileContent = "";
-fileContent += `
-var LocalWebSocket = WebSocket;
-var $root = eval(\"this\");
-var __define = $root.__define || function (o, p, g, s) {
-        Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
-    };
-
-function __extends(d, b) {
-    if (b == null) {
-        console.log("bug !!", arguments.callee.caller);
-    }
-    for (var p in b)
-        if (b.hasOwnProperty(p))
-            d[p] = b[p];
-    function __() {
-        this.constructor = d;
-    }
-
-    __.prototype = b.prototype;
-    d.prototype = new __();
-}
-var flower = {};
-`;
+fileContent += "var remote = {};\n";
 fileContent += "(function(){\n";
 while (list.length) {
     var name = list.shift();
@@ -295,11 +183,11 @@ while (list.length) {
     }
 }
 fileContent += "})();\n";
-fileContent += "var trace = flower.trace;\n";
-fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
-//fileContent += "var flower = exports;\n";
-file = new File("srcFlower6/Flower.js");
+file = new File("srcRemote/Remote.js");
+fileContent = StringDo.replaceString(fileContent, "exports.", "remote.");
+fileContent += "for(var key in remote) {\n";
+fileContent += "\tflower[key] = remote[key];\n";
+fileContent += "}\n";
 file.save(fileContent);
-
 
 compressComplete();

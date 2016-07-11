@@ -24,6 +24,7 @@ class UIParser extends Group {
             "UIntValue": "flower.UIntValue",
 
             "Label": "flower.Label",
+            "Input": "flower.Input",
             "Image": "flower.Image",
             "Group": "flower.Group",
             "Button": "flower.Button",

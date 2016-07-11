@@ -1,19 +1,23 @@
-<f:Panel class="Alert" width="300" height="200" scaleMode="no_scale" creationComplete="this.initPanel();" xmlns:f="flower">
-    <f:script src="./Alert.js"/>
+<f:Panel width="350" height="250" scaleMode="no_scale" xmlns:f="flower">
     <f:RectUI id="background" percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1"
               fillColor="0xE7E7E7"/>
     <f:Group left="1" right="1" height="24" top="1">
         <f:RectUI id="titleBar" percentWidth="100" percentHeight="100" fillColor="0xc2c2c2"
                   touchBegin="this.startDrag();"/>
         <f:Image id="iconImage"/>
-        <f:Label id="titleLabel" y="3" touchEnabled="false" text="Panel" horizontalCenter="0" fontSize="16"
+        <f:Label id="titleLabel" y="3" touchEnabled="false" text="链接 Remote 服务器" horizontalCenter="0" fontSize="16"
                  fontColor="0x252325"/>
         <f:Button id="closeButton" width="30" height="24" right="0">
             <f:RectUI percentWidth="100" percentHeight="100" fillColor.up="0xFC4A4A" fillColor.down="0x7D2525"/>
         </f:Button>
     </f:Group>
     <f:Group id="container" left="1" right="1" top="25" bottom="50">
-        <f:Label id="contentLabel" horizontalCenter="0" verticalCenter="0"/>
+        <f:Label horizontalCenter="-60" verticalCenter="-25" text="服务器地址 : "/>
+        <f:RectUI horizontalCenter="40" verticalCenter="-25" width="120" height="20"/>
+        <f:Input id="serverInput" horizontalCenter="40" verticalCenter="-25" text="192.168.1.159" width="120" fontColor="0xff6666"/>
+        <f:Label x="10" horizontalCenter="-60"  verticalCenter="25" text="服务器端口 : "/>
+        <f:RectUI horizontalCenter="40" verticalCenter="25" width="120" height="20"/>
+        <f:Input id="portInput" horizontalCenter="40" verticalCenter="25" text="9900" width="120" fontColor="0xff6666"/>
     </f:Group>
     <f:Group left="1" right="1" height="50" bottom="0">
         <f:Button id="confirmButton" horizontalCenter="-50" bottom="10" width="60" height="30">

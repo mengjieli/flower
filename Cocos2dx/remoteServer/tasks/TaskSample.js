@@ -1,25 +1,15 @@
-var TaskSample = (function (_super) {
+class TaskSample extends TaskBase {
 
-    __extends(TaskSample, _super);
-
-    function TaskSample(user, fromClient, cmd, msg) {
-        _super.call(this, user, fromClient, cmd, msg);
+    constructor(user, fromClient, cmd, msg) {
+        super(user, fromClient, cmd, msg);
     }
-
-    var d = __define, c = TaskSample;
-    var p = c.prototype;
 
     /**
      * 开始执行任务
      * @param cmd
      * @param msg
      */
-    p.startTask = function (cmd, msg) {
+    startTask(cmd, msg) {
 
     }
-
-    return TaskSample;
-
-})(TaskBase);
-
-global.TaskSample = TaskSample;
+}

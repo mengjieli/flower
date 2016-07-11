@@ -1,21 +1,8 @@
 {
-  "1":"LoginTask",
-  "2":"LoadJSTask",
-  "3":"LoadCommandConfigTask",
-  "4":"LoadUserConfigTask",
-  "20":"SendMessageToClientTask",
-
-  "100":"ReadDirectionTask",
-  "120":"SaveFileTask",
-  "122":"CreateDirectionTask",
-  "124":"IsFileExistTask",
-
-  "502":"ExcuteTask",
-  "602":"HttpServerTask",
-
-  "1002":"GameLogTask",
-  "1004":"LinkClient",
-
-  "2002":"GetGameClientListTask",
-  "2004":"ConnectGameClientTask"
+  "1": "LoginTask",
+  "2": "LoadJSTask",
+  "3": "LoadCommandConfigTask",
+  "4": "LoadUserConfigTask",
+  "18": "GetClientListTask",
+  "20": "TransformTask"
 }

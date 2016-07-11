@@ -1,34 +1,46 @@
 class RemoteClient extends WebSocketServerClient {
+
+
+    id;
+    hasLogin;
+    ip;
+    information;
+
     constructor(connection, big) {
         super(connection, big);
+        this.id = RemoteClient.id++;
+        this.hasLogin = false;
+        this.ip = connection.remoteAddress;
+        this.information = {};
     }
 
     receiveData(message) {
         var data;
         if (message.type == "utf8") {
-            this.type = "utf8";
+            this.type = message.type;
             data = JSON.parse(message.utf8Data);
         }
         else if (message.type == "binary") {
+            this.type = message.type;
             var data = message.binaryData;
         }
         var bytes = new VByteArray();
         bytes.readFromArray(data);
         var cmd = bytes.readUIntV();
+        //console.log(cmd, " [bytes] ", bytes.bytes);
         switch (cmd) {
             case 0:
                 //this.receiveHeart(bytes);
                 return;
         }
-        //if (this.hasLogin == false && (cmd != 0 && cmd != 1)) {
-        //    this.sendFail(10, cmd, bytes);
-        //    this.close();
-        //    return;
-        //}
-        console.log(bytes.bytes);
+        if (this.hasLogin == false && (cmd != 0 && cmd != 1)) {
+            this.sendFail(10, cmd, bytes);
+            this.close();
+            return;
+        }
         if (Config.cmds[cmd]) {
-            console.log("[cmd]", cmd);
-            var cls = global[Config.cmds[cmd]];
+            var className = Config.cmds[cmd];
+            var cls = eval(className);
             if (cls == null) {
                 this.sendFail(5, cmd, bytes);
             } else {
@@ -95,7 +107,7 @@ class RemoteClient extends WebSocketServerClient {
     sendData(bytes) {
         if (this.type == "binary") {
             this.connection.sendBytes(new Buffer(bytes.data));
-        } else if (this.type == "utf8") {
+        } else {
             var str = "[";
             var array = bytes.data;
             for (var i = 0; i < array.length; i++) {
@@ -110,4 +122,6 @@ class RemoteClient extends WebSocketServerClient {
         console.log("close connection!");
         this.connection.close();
     }
+
+    static id = 1;
 }

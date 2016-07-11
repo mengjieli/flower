@@ -1,5 +1,6 @@
 class VBWebSocket extends WebSocket {
     static id = 0;
+
     _remote;
     remotes = {};
     backs = {};
@@ -20,7 +21,7 @@ class VBWebSocket extends WebSocket {
     onReceiveMessage(type, data) {
         var bytes = new VByteArray();
         if (type == "string") {
-            bytes.readFromArray(Json.parse(data));
+            bytes.readFromArray(JSON.parse(data));
         } else {
             bytes.readFromArray(data);
         }
@@ -86,10 +87,9 @@ class VBWebSocket extends WebSocket {
             if (remoteId) {
                 var remote = this.remotes[remoteId];
                 if (remote) {
-                    remote.doNext(cmd, bytes);
+                    remote.receiveMessage(cmd, bytes);
                 }
-            }
-            else {
+            } else {
                 backList = this.backs[cmd];
                 if (backList) {
                     removeList = [];
@@ -114,9 +114,9 @@ class VBWebSocket extends WebSocket {
         }
     }
 
-    send(data) {
-        this.sendWebSocketBytes(data.data);
-    }
+    //send(data) {
+    //    this.sendWebSocketBytes(data.data);
+    //}
 
     registerRemote(remote) {
         this.remotes[remote.id] = remote;
