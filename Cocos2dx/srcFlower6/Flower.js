@@ -51,7 +51,7 @@ function start(completeFunc) {
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
         for (var key in cfg) {
-            config[key] = cfg;
+            config[key] = cfg[key];
         }
         SCALE = config.scale || 1;
         LANGUAGE = config.language || "";
@@ -5956,7 +5956,7 @@ class VBWebSocket extends WebSocket {
                 var errorCode = bytes.readUInt();
                 a = zbackList.concat();
                 for (i = 0; i < a.length; i++) {
-                    a[i].func.call(a[i].thisObj, backCmd, errorCode);
+                    a[i].func.call(a[i].thisObj, backCmd, errorCode,bytes);
                     if (a[i].once) {
                         removeList.push(a[i].id);
                     }
@@ -6002,7 +6002,7 @@ class VBWebSocket extends WebSocket {
             if (remoteId) {
                 var remote = this.remotes[remoteId];
                 if (remote) {
-                    remote.receiveMessage(cmd, bytes);
+                    remote.receive(cmd, bytes);
                 }
             } else {
                 backList = this.backs[cmd];

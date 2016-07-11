@@ -10,20 +10,25 @@ class LoginTask extends TaskBase {
      * @param msg
      */
     startTask(cmd, msg) {
+        msg.readUIntV();
         var client = this.client;
         var type = msg.readUTFV();
         console.log("[login]", type);
         if (type == "local") {
+            var user = msg.readUTFV();
             var root = msg.readUTFV();
+            client.clientType = type;
             client.information = {
                 id: client.id,
                 ip: client.ip,
+                user: user,
                 root: root
             }
             client.hasLogin = true;
             this.success();
         } else if (type == "game") {
             var gameName = msg.readUTFV();
+            client.clientType = type;
             client.information = {
                 id: client.id,
                 ip: client.ip,
@@ -32,5 +37,6 @@ class LoginTask extends TaskBase {
             client.hasLogin = true;
             this.success();
         }
+        Config.addClient(type, client);
     }
 }

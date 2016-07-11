@@ -1,4 +1,4 @@
-class TransformTask extends TaskBase {
+class SendToClientTask extends TaskBase {
 
     constructor(user, fromClient, cmd, msg) {
         super(user, fromClient, cmd, msg);
@@ -16,7 +16,6 @@ class TransformTask extends TaskBase {
             var bytes = new VByteArray();
             var cmd = msg.readUIntV();
             bytes.writeUIntV(cmd);
-            bytes.writeUIntV(this.client.id);
             bytes.writeBytes(msg,msg.position,msg.length - msg.position);
             client.sendData(bytes);
         } else {

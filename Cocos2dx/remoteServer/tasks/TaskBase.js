@@ -94,6 +94,6 @@ class TaskBase {
     close() {
         this.client.close();
     }
-    
+
     static id = 0;
 }

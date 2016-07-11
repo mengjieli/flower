@@ -31,6 +31,12 @@ var LocalClient = (function (_super) {
                         console.log("[ErrorCode]", code);
                     }
                     break;
+                case 100:
+                    this.isFileExist(bytes);
+                    break;
+                case 102:
+                    this.readDirectionList(bytes);
+                    break;
                 case 501:
                     this.receiveRemote(bytes);
                     break;
@@ -39,43 +45,31 @@ var LocalClient = (function (_super) {
         }
     }
 
-    p.receiveRemote = function (msg) {
-        var taskId = msg.readUIntV();
-        var cmd = msg.readUIntV();
+    p.isFileExist = function (msg) {
+        var clientId = msg.readUIntV();
+        var remoteId = msg.readUIntV();
+        var url = msg.readUTFV();
+        var file = new File(this.root + url);
         var bytes = new VByteArray();
-        bytes.writeUIntV(502);
-        bytes.writeUIntV(taskId);
-        console.log("[Task]", cmd);
-        switch (cmd) {
-            case 100: //读取文件夹文件列表
-                this.readWorkDirection(msg, bytes);
-                break;
-            case 102:
-                this.readFile(msg, bytes);
-                break;
-            case 120: //保存文件
-                this.saveFile(msg, bytes);
-                break;
-            case 122: //创建文件夹
-                this.makeDirection(msg, bytes);
-                break;
-            case 124: //文件或者文件夹是否存在
-                this.isFileExist(msg, bytes);
-                break;
-        }
-        if (bytes) {
-            this.sendData(bytes);
-        }
+        bytes.writeUIntV(22);
+        bytes.writeUIntV(clientId);
+        bytes.writeUIntV(101);
+        bytes.writeUIntV(remoteId);
+        bytes.writeBoolean(file.isExist());
+        this.sendData(bytes);
     }
 
-    p.readWorkDirection = function (msg, bytes) {
+    p.readDirectionList = function (msg) {
+        var clientId = msg.readUIntV();
+        var remoteId = msg.readUIntV();
+        var bytes = new VByteArray();
+        bytes.writeUIntV(22);
+        bytes.writeUIntV(clientId);
+        bytes.writeUIntV(103);
+        bytes.writeUIntV(remoteId);
+
         var url = msg.readUTFV();
-        bytes.writeUTFV(url);
-        if (url.charAt(0) == "/") {
-            url = url.slice(1, url.length);
-        }
-        url = this.root + url;
-        var file = new File(url);
+        var file = new File(this.root + url);
         if (file.isExist() == false) {
             bytes.writeUIntV(0);
         } else {
@@ -91,78 +85,69 @@ var LocalClient = (function (_super) {
             for (var i = 0; i < list.length; i++) {
                 var file = list[i];
                 if (file.url == url) continue;
-                if (file.type == FileType.DIRECTION) {
+                if (file.isDirection()) {
                     bytes.writeByte(0);
                 } else {
                     bytes.writeByte(1);
                 }
-                bytes.writeUTFV(file.url);
+                bytes.writeUTFV(file.url.slice(this.root.length, file.url.length));
             }
         }
+        this.sendData(bytes);
     }
-
-    p.readFile = function (msg, bytes) {
-        var url = msg.readUTFV();
-        bytes.writeUTFV(url);
-        if (url.charAt(0) == "/") {
-            url = url.slice(1, url.length);
-        }
-        url = this.root + url;
-        var format = msg.readByte();
-        if (format == 0) {
-            bytes.writeUTFV("");
-            var list = (new File(url)).readContent("binary");
-            var buffer = new Buffer(list);
-            var array = [];
-            for (var i = 0; i < buffer.length; i++) {
-                array[i] = buffer[i];
-            }
-            bytes.writeByteArray(array);
-        } else if (format == 1) {
-            bytes.writeUTFV((new File(url)).readContent());
-        }
-    }
-
-    p.saveFile = function (msg, bytes) {
-        var url = msg.readUTFV();
-        bytes.writeUTFV(url);
-        if (url.charAt(0) == "/") {
-            url = url.slice(1, url.length);
-        }
-        url = this.root + url;
-        var type = msg.readByte();
-        var content;
-        if (type == 0) { //保存二进制内容
-            content = msg.readUTFV();
-            (new File(url)).save(new Buffer(content), "binary");
-            bytes.writeByte(0);
-        }
-        else if (type == 1) { //保存为 utf-8
-            content = msg.readUTFV();
-            (new File(url)).save(content);
-            bytes.writeByte(0);
-        }
-    }
-
-    p.makeDirection = function (msg, bytes) {
-        var url = msg.readUTFV();
-        bytes.writeUTFV(url);
-        if (url.charAt(0) == "/") {
-            url = url.slice(1, url.length);
-        }
-        url = this.root + url;
-        File.mkdirsSync(url);
-    }
-
-    p.isFileExist = function (msg, bytes) {
-        var url = msg.readUTFV();
-        bytes.writeUTFV(url);
-        if (url.charAt(0) == "/") {
-            url = url.slice(1, url.length);
-        }
-        url = this.root + url;
-        bytes.writeBoolean((new File(url)).isExist());
-    }
+    //
+    //p.readFile = function (msg, bytes) {
+    //    var url = msg.readUTFV();
+    //    bytes.writeUTFV(url);
+    //    if (url.charAt(0) == "/") {
+    //        url = url.slice(1, url.length);
+    //    }
+    //    url = this.root + url;
+    //    var format = msg.readByte();
+    //    if (format == 0) {
+    //        bytes.writeUTFV("");
+    //        var list = (new File(url)).readContent("binary");
+    //        var buffer = new Buffer(list);
+    //        var array = [];
+    //        for (var i = 0; i < buffer.length; i++) {
+    //            array[i] = buffer[i];
+    //        }
+    //        bytes.writeByteArray(array);
+    //    } else if (format == 1) {
+    //        bytes.writeUTFV((new File(url)).readContent());
+    //    }
+    //}
+    //
+    //p.saveFile = function (msg, bytes) {
+    //    var url = msg.readUTFV();
+    //    bytes.writeUTFV(url);
+    //    if (url.charAt(0) == "/") {
+    //        url = url.slice(1, url.length);
+    //    }
+    //    url = this.root + url;
+    //    var type = msg.readByte();
+    //    var content;
+    //    if (type == 0) { //保存二进制内容
+    //        content = msg.readUTFV();
+    //        (new File(url)).save(new Buffer(content), "binary");
+    //        bytes.writeByte(0);
+    //    }
+    //    else if (type == 1) { //保存为 utf-8
+    //        content = msg.readUTFV();
+    //        (new File(url)).save(content);
+    //        bytes.writeByte(0);
+    //    }
+    //}
+    //
+    //p.makeDirection = function (msg, bytes) {
+    //    var url = msg.readUTFV();
+    //    bytes.writeUTFV(url);
+    //    if (url.charAt(0) == "/") {
+    //        url = url.slice(1, url.length);
+    //    }
+    //    url = this.root + url;
+    //    File.mkdirsSync(url);
+    //}
 
     p.onConnect = function (connection) {
         _super.prototype.onConnect.call(this, connection);
@@ -175,7 +160,9 @@ var LocalClient = (function (_super) {
         }
         var bytes = new VByteArray();
         bytes.writeUIntV(1);
+        bytes.writeUIntV(0);
         bytes.writeUTFV("local");
+        bytes.writeUTFV(this.config.user);
         bytes.writeUTFV(this.root);
         //bytes.writeUTFV(cfg.name);
         //bytes.writeUTFV(cfg.password);

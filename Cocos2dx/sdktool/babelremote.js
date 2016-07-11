@@ -165,7 +165,9 @@ var list = [
     "RemoteServer",
     "Remote",
     "File",
-    "Direction"
+    "Direction",
+    "IsDirectionExistRemote",
+    "ReadDirectionListRemote"
 ];
 var fileContent = "";
 fileContent += "var remote = {};\n";

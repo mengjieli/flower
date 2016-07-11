@@ -10,6 +10,7 @@ class RemoteClient extends WebSocketServerClient {
     hasLogin;
     ip;
     information;
+    clientType;
 
     constructor(connection, big) {
         super(connection, big);
@@ -32,7 +33,7 @@ class RemoteClient extends WebSocketServerClient {
         var bytes = new VByteArray();
         bytes.readFromArray(data);
         var cmd = bytes.readUIntV();
-        //console.log(cmd, " [bytes] ", bytes.bytes);
+        //console.log(cmd, this.hasLogin, " [bytes] ", bytes.bytes);
         switch (cmd) {
             case 0:
                 //this.receiveHeart(bytes);
@@ -45,6 +46,7 @@ class RemoteClient extends WebSocketServerClient {
         }
         if (Config.cmds[cmd]) {
             var className = Config.cmds[cmd];
+            //console.log(className);
             var cls = eval(className);
             if (cls == null) {
                 this.sendFail(5, cmd, bytes);
@@ -124,8 +126,12 @@ class RemoteClient extends WebSocketServerClient {
     }
 
     close() {
-        console.log("close connection!");
         this.connection.close();
+    }
+
+    onClose() {
+        Config.removeClient(this.clientType,this);
+        super.onClose();
     }
 
     static id = 1;
@@ -310,7 +316,7 @@ class TaskBase {
     close() {
         this.client.close();
     }
-    
+
     static id = 0;
 }
 //////////////////////////End File:remoteServer/tasks/TaskBase.js///////////////////////////
@@ -383,9 +389,12 @@ class GetClientListTask extends TaskBase {
      * @param msg
      */
     startTask(cmd, msg) {
+        var remoteId = msg.readUIntV();
         var name = msg.readUTFV();
         var clients = Config.getClients(name);
         var bytes = new VByteArray();
+        bytes.writeUIntV(this.cmd + 1);
+        bytes.writeUIntV(remoteId);
         bytes.writeUIntV(clients.length);
         for (var i = 0; i < clients.length; i++) {
             bytes.writeUTFV(JSON.stringify(clients[i].information));
@@ -411,20 +420,25 @@ class LoginTask extends TaskBase {
      * @param msg
      */
     startTask(cmd, msg) {
+        msg.readUIntV();
         var client = this.client;
         var type = msg.readUTFV();
         console.log("[login]", type);
         if (type == "local") {
+            var user = msg.readUTFV();
             var root = msg.readUTFV();
+            client.clientType = type;
             client.information = {
                 id: client.id,
                 ip: client.ip,
+                user: user,
                 root: root
             }
             client.hasLogin = true;
             this.success();
         } else if (type == "game") {
             var gameName = msg.readUTFV();
+            client.clientType = type;
             client.information = {
                 id: client.id,
                 ip: client.ip,
@@ -433,9 +447,40 @@ class LoginTask extends TaskBase {
             client.hasLogin = true;
             this.success();
         }
+        Config.addClient(type, client);
     }
 }
 //////////////////////////End File:remoteServer/tasks/center/LoginTask.js///////////////////////////
+
+
+
+//////////////////////////File:remoteServer/tasks/center/SendToClientTask.js///////////////////////////
+class SendToClientTask extends TaskBase {
+
+    constructor(user, fromClient, cmd, msg) {
+        super(user, fromClient, cmd, msg);
+    }
+
+    /**
+     * 开始执行任务
+     * @param cmd
+     * @param msg
+     */
+    startTask(cmd, msg) {
+        var id = msg.readUIntV();
+        var client = Config.getClient(id);
+        if (client) {
+            var bytes = new VByteArray();
+            var cmd = msg.readUIntV();
+            bytes.writeUIntV(cmd);
+            bytes.writeBytes(msg,msg.position,msg.length - msg.position);
+            client.sendData(bytes);
+        } else {
+            this.fail(1030);
+        }
+    }
+}
+//////////////////////////End File:remoteServer/tasks/center/SendToClientTask.js///////////////////////////
 
 
 
@@ -459,9 +504,7 @@ class TransformTask extends TaskBase {
             var cmd = msg.readUIntV();
             bytes.writeUIntV(cmd);
             bytes.writeUIntV(this.client.id);
-            while (msg.bytesAvailable) {
-                bytes.writeByte(msg.readByte());
-            }
+            bytes.writeBytes(msg,msg.position,msg.length - msg.position);
             client.sendData(bytes);
         } else {
             this.fail(1030);

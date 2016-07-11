@@ -5,15 +5,23 @@ class RemoteServer extends flower.VBWebSocket {
 
     __readyBack;
     __config;
+    __clients;
+    __client;
 
     constructor() {
-        super();
+        super(true);
     }
 
     start(readyBack) {
         this.__readyBack = readyBack;
         this.__config = flower.sys.config.remote;
-        this.__showConnectPanel();
+        if (this.__config.autoLink) {
+            this.connect(this.__config.server, +this.__config.port);
+        } else {
+            this.__showConnectPanel();
+        }
+        this.register(19, this.__receiveClientList, this);
+        this.registerZero(19, this.__onRemoteClientError, this);
     }
 
     __showConnectPanel() {
@@ -75,16 +83,127 @@ class RemoteServer extends flower.VBWebSocket {
         };
     }
 
+    resetClient(readyBack) {
+        this.__readyBack = readyBack;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(18);
+        msg.writeUInt(0);
+        msg.writeUTF("local");
+        this.send(msg);
+    }
+
+    __onRemoteClientError(cmd, errorCode, msg) {
+        this.resetClient();
+    }
+
+    __receiveClientList(cmd, msg) {
+        var len = msg.readUInt();
+        var clients = new flower.ArrayValue();
+        var linkUser = this.__config.linkUser;
+        var findClients = [];
+        for (var i = 0; i < len; i++) {
+            var client = JSON.parse(msg.readUTF());
+            clients.push(client);
+            if (client.user == linkUser) {
+                findClients.push(client);
+            }
+        }
+        this.__clients = clients;
+        if(findClients.length == 1) {
+            this.__client = findClients[0];
+            if (this.__readyBack) {
+                this.__readyBack();
+                this.__readyBack = null;
+            }
+        } else {
+            this.__showSelectClient();
+        }
+    }
+
+    __showSelectClient() {
+        var content = `
+        <f:Panel width="300" height="400" scaleMode="no_scale" xmlns:f="flower">
+            <f:RectUI id="background" percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1"
+                      fillColor="0xE7E7E7"/>
+            <f:Group left="1" right="1" height="24" top="1">
+                <f:RectUI id="titleBar" percentWidth="100" percentHeight="100" fillColor="0xc2c2c2"
+                          touchBegin="this.startDrag();"/>
+                <f:Image id="iconImage"/>
+                <f:Label id="titleLabel" y="3" touchEnabled="false" text="选择本地资源服务器" horizontalCenter="0" fontSize="16"
+                         fontColor="0x252325"/>
+            </f:Group>
+            <f:Group id="container" left="1" right="1" top="25" bottom="50">
+                <f:Group percentWidth="100" percentHeight="100">
+                    <f:RectUI percentWidth="100" percentHeight="100" fillColor="0xffffff" lineColor="0xcccccc" lineWidth="1"/>
+                    <f:Scroller left="5" right="5" top="5" bottom="5">
+                        <f:RectUI percentWidth="100" percentHeight="100" fillColor="0xf6f4f0"/>
+                        <f:List id="list" percentWidth="100" percentHeight="100" selectTime="touch_end" xmlns:f="flower">
+                            <f:itemRenderer>
+                                <f:ItemRenderer percentWidth="100" height="30">
+                                    <f:RectUI percentWidth="100" percentHeight="100" fillColor.down="0xd6d4d0"
+                                              fillColor.selectedDown="0x64834e" fillColor.selectedUp="0x96b97d" visible.up="false"
+                                              visible.down="true" visible.selectedDown="true"
+                                              visible.selectedUp="true"/>
+                                    <f:Label text="id: {data.id}   name: {data.user}   ip: {data.ip}" horizontalCenter="0" verticalCenter="0" fontColor="0x000000"/>
+                                </f:ItemRenderer>
+                            </f:itemRenderer>
+                        </f:List>
+                    </f:Scroller>
+                </f:Group>
+            </f:Group>
+            <f:Group left="1" right="1" height="50" bottom="0">
+                <f:Button id="confirmButton" horizontalCenter="0" bottom="10" width="60" height="30">
+                    <f:RectUI percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor.up="0xE7E7E7"
+                              fillColor.down="0xb3b3b3"/>
+                    <f:Label text="确定" horizontalCenter="0" verticalCenter="0"/>
+                </f:Button>
+            </f:Group>
+        </f:Panel>
+        `;
+        var ui = new flower.UIParser();
+        ui.parseUI(content);
+        ui.addListener(flower.Event.COMPLETE, this.__clientChooseComplete, this);
+    }
+
+    __clientChooseComplete(e) {
+        var ui = e.data;
+        flower.PopManager.pop(ui, true);
+        flower.Tween.to(ui, 0.3, {
+            x: (ui.parent.width - ui.width) / 2,
+            y: (ui.parent.height - ui.height) / 2,
+            scaleX: 1,
+            scaleY: 1
+        }, flower.Ease.BACK_EASE_OUT, {
+            x: ui.parent.width / 2,
+            y: ui.parent.height / 2,
+            scaleX: 0,
+            scaleY: 0
+        });
+        var _this = this;
+        var list = ui.list;
+        ui.list.dataProvider = this.__clients;
+        ui.confirmButton.click = function (e) {
+            ui.dispose();
+            if (list.selectedItem) {
+                _this.__client = list.selectedItem;
+                if (_this.__readyBack) {
+                    _this.__readyBack();
+                    _this.__readyBack = null;
+                }
+            }
+        };
+    }
+
+
     onConnect() {
         super.onConnect();
-        if (this.__readyBack) {
-            this.__readyBack();
-        }
         var msg = new flower.VByteArray();
         msg.writeUInt(1);
+        msg.writeUInt(0);
         msg.writeUTF("game");
         msg.writeUTF("paik");
         this.send(msg);
+        this.resetClient(this.__readyBack);
     }
 
     onError() {
@@ -95,6 +214,10 @@ class RemoteServer extends flower.VBWebSocket {
     onClose() {
         super.onConnect();
         this.__showConnectPanel();
+    }
+
+    get remoteClientId() {
+        return this.__client.id;
     }
 
     static instance;
@@ -119,9 +242,33 @@ remote.RemoteServer = RemoteServer;
 //////////////////////////File:remote/Remote.js///////////////////////////
 class Remote {
 
+    __id;
+
     constructor() {
-        
+        this.__id = Remote.id++;
+        RemoteServer.getInstance().registerRemote(this);
     }
+
+    send(msg) {
+        RemoteServer.getInstance().send(msg);
+    }
+
+    receive(cmd, bytes) {
+    }
+
+    dispose() {
+        RemoteServer.getInstance().removeRemote(this);
+    }
+
+    get id() {
+        return this.__id;
+    }
+
+    get remoteClientId() {
+        return RemoteServer.getInstance().remoteClientId;
+    }
+
+    static id = 1;
 }
 remote.Remote = Remote;
 //////////////////////////End File:remote/Remote.js///////////////////////////
@@ -129,10 +276,9 @@ remote.Remote = Remote;
 
 
 //////////////////////////File:remote/File.js///////////////////////////
-class File extends Remote {
-    
+class File {
+
     constructor() {
-        super();
     }
 }
 remote.File = File;
@@ -141,15 +287,142 @@ remote.File = File;
 
 
 //////////////////////////File:remote/Direction.js///////////////////////////
-class Direction extends Remote {
+class Direction {
 
-    constructor() {
-        super();
+    __path;
+    __autoUpdate;
+    __list;
+    __fileClass;
+
+    constructor(path, autoUpdate = true) {
+        this.__path = path;
+        this.__autoUpdate = autoUpdate;
+        this.__list = new flower.ArrayValue();
+        if (this.__autoUpdate) {
+            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
+        }
+    }
+
+    isExist(back, thisObj) {
+        new IsDirectionExistRemote(back, thisObj, this.__path);
+    }
+
+    readDirectionList(back, thisObj) {
+        new ReadDirectionListRemote(back, thisObj, this.__path);
+    }
+
+    __updateDirectionList(fileList) {
+        var list = this.__list;
+        list.length = 0;
+        var clazz = this.__fileClass;
+        for (var i = 0, len = fileList.length; i < len; i++) {
+            if (clazz) {
+                list.push(new clazz(fileList[i]));
+            } else {
+                list.push(fileList[i]);
+            }
+        }
+    }
+
+    get list() {
+        return this.__list;
+    }
+
+    get fileClass() {
+        return this.__fileClass;
+    }
+
+    set fileClass(clazz) {
+        this.__fileClass = clazz;
+        var list = this.__list;
+        var fileList = list.list;
+        list.length = 0;
+        for (var i = 0, len = fileList.length; i < len; i++) {
+            if (clazz) {
+                list.push(new clazz(fileList));
+            } else {
+                list.push(fileList);
+            }
+        }
     }
 }
 
 remote.Direction = Direction;
 //////////////////////////End File:remote/Direction.js///////////////////////////
+
+
+
+//////////////////////////File:remote/remotes/IsDirectionExistRemote.js///////////////////////////
+class IsDirectionExistRemote extends Remote {
+
+    __back;
+    __thisObj;
+
+    constructor(back, thisObj, path) {
+        super();
+        this.__back = back;
+        this.__thisObj = thisObj;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(20);
+        msg.writeUInt(this.remoteClientId);
+        msg.writeUInt(100);
+        msg.writeUInt(this.id);
+        msg.writeUTF(path);
+        this.send(msg);
+    }
+
+    receive(cmd, msg) {
+        if (this.__back) {
+            this.__back.call(this.__thisObj, msg.readBoolean());
+        }
+        this.__back = this.__thisObj = null;
+    }
+}
+//////////////////////////End File:remote/remotes/IsDirectionExistRemote.js///////////////////////////
+
+
+
+//////////////////////////File:remote/remotes/ReadDirectionListRemote.js///////////////////////////
+class ReadDirectionListRemote extends Remote {
+
+    __back;
+    __thisObj;
+
+    constructor(back, thisObj, path) {
+        super();
+        this.__back = back;
+        this.__thisObj = thisObj;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(20);
+        msg.writeUInt(this.remoteClientId);
+        msg.writeUInt(102);
+        msg.writeUInt(this.id);
+        msg.writeUTF(path);
+        this.send(msg);
+    }
+
+    receive(cmd, msg) {
+        var list = [];
+        var len = msg.readUInt();
+        for (var i = 0; i < len; i++) {
+            var isDirection = msg.readUInt();
+            var path = msg.readUTF();
+            list.push({
+                isDirection: isDirection == 0 ? true : false,
+                path: path,
+                name: flower.Path.getName(path),
+                fileType: flower.Path.getFileType(path)
+            });
+        }
+        if (this.__back) {
+            this.__back.call(this.__thisObj, list);
+        }
+        this.__back = this.__thisObj = null;
+    }
+}
+//////////////////////////End File:remote/remotes/ReadDirectionListRemote.js///////////////////////////
 
 
 

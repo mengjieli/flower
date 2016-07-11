@@ -1,7 +1,6 @@
-class File extends Remote {
-    
+class File {
+
     constructor() {
-        super();
     }
 }
 exports.File = File;

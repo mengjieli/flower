@@ -27,7 +27,7 @@ function start(completeFunc) {
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
         for (var key in cfg) {
-            config[key] = cfg;
+            config[key] = cfg[key];
         }
         SCALE = config.scale || 1;
         LANGUAGE = config.language || "";

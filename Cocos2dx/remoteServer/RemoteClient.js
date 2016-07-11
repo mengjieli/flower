@@ -5,6 +5,7 @@ class RemoteClient extends WebSocketServerClient {
     hasLogin;
     ip;
     information;
+    clientType;
 
     constructor(connection, big) {
         super(connection, big);
@@ -27,7 +28,7 @@ class RemoteClient extends WebSocketServerClient {
         var bytes = new VByteArray();
         bytes.readFromArray(data);
         var cmd = bytes.readUIntV();
-        //console.log(cmd, " [bytes] ", bytes.bytes);
+        //console.log(cmd, this.hasLogin, " [bytes] ", bytes.bytes);
         switch (cmd) {
             case 0:
                 //this.receiveHeart(bytes);
@@ -40,6 +41,7 @@ class RemoteClient extends WebSocketServerClient {
         }
         if (Config.cmds[cmd]) {
             var className = Config.cmds[cmd];
+            //console.log(className);
             var cls = eval(className);
             if (cls == null) {
                 this.sendFail(5, cmd, bytes);
@@ -119,8 +121,12 @@ class RemoteClient extends WebSocketServerClient {
     }
 
     close() {
-        console.log("close connection!");
         this.connection.close();
+    }
+
+    onClose() {
+        Config.removeClient(this.clientType,this);
+        super.onClose();
     }
 
     static id = 1;

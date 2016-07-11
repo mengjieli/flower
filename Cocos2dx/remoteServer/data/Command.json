@@ -4,5 +4,6 @@
   "3": "LoadCommandConfigTask",
   "4": "LoadUserConfigTask",
   "18": "GetClientListTask",
-  "20": "TransformTask"
+  "20": "TransformTask",
+  "22": "SendToClientTask"
 }

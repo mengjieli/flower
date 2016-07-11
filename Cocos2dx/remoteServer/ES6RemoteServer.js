@@ -2,6 +2,8 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -43,7 +45,7 @@ var RemoteClient = function (_WebSocketServerClien) {
             var bytes = new VByteArray();
             bytes.readFromArray(data);
             var cmd = bytes.readUIntV();
-            //console.log(cmd, " [bytes] ", bytes.bytes);
+            //console.log(cmd, this.hasLogin, " [bytes] ", bytes.bytes);
             switch (cmd) {
                 case 0:
                     //this.receiveHeart(bytes);
@@ -56,6 +58,7 @@ var RemoteClient = function (_WebSocketServerClien) {
             }
             if (Config.cmds[cmd]) {
                 var className = Config.cmds[cmd];
+                //console.log(className);
                 var cls = eval(className);
                 if (cls == null) {
                     this.sendFail(5, cmd, bytes);
@@ -143,8 +146,13 @@ var RemoteClient = function (_WebSocketServerClien) {
     }, {
         key: "close",
         value: function close() {
-            console.log("close connection!");
             this.connection.close();
+        }
+    }, {
+        key: "onClose",
+        value: function onClose() {
+            Config.removeClient(this.clientType, this);
+            _get(Object.getPrototypeOf(RemoteClient.prototype), "onClose", this).call(this);
         }
     }]);
 
@@ -461,9 +469,12 @@ var GetClientListTask = function (_TaskBase3) {
     _createClass(GetClientListTask, [{
         key: "startTask",
         value: function startTask(cmd, msg) {
+            var remoteId = msg.readUIntV();
             var name = msg.readUTFV();
             var clients = Config.getClients(name);
             var bytes = new VByteArray();
+            bytes.writeUIntV(this.cmd + 1);
+            bytes.writeUIntV(remoteId);
             bytes.writeUIntV(clients.length);
             for (var i = 0; i < clients.length; i++) {
                 bytes.writeUTFV(JSON.stringify(clients[i].information));
@@ -499,20 +510,25 @@ var LoginTask = function (_TaskBase4) {
     _createClass(LoginTask, [{
         key: "startTask",
         value: function startTask(cmd, msg) {
+            msg.readUIntV();
             var client = this.client;
             var type = msg.readUTFV();
             console.log("[login]", type);
             if (type == "local") {
+                var user = msg.readUTFV();
                 var root = msg.readUTFV();
+                client.clientType = type;
                 client.information = {
                     id: client.id,
                     ip: client.ip,
+                    user: user,
                     root: root
                 };
                 client.hasLogin = true;
                 this.success();
             } else if (type == "game") {
                 var gameName = msg.readUTFV();
+                client.clientType = type;
                 client.information = {
                     id: client.id,
                     ip: client.ip,
@@ -521,6 +537,7 @@ var LoginTask = function (_TaskBase4) {
                 client.hasLogin = true;
                 this.success();
             }
+            Config.addClient(type, client);
         }
     }]);
 
@@ -528,11 +545,51 @@ var LoginTask = function (_TaskBase4) {
 }(TaskBase);
 //////////////////////////End File:remoteServer/tasks/center/LoginTask.js///////////////////////////
 
+//////////////////////////File:remoteServer/tasks/center/SendToClientTask.js///////////////////////////
+
+
+var SendToClientTask = function (_TaskBase5) {
+    _inherits(SendToClientTask, _TaskBase5);
+
+    function SendToClientTask(user, fromClient, cmd, msg) {
+        _classCallCheck(this, SendToClientTask);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(SendToClientTask).call(this, user, fromClient, cmd, msg));
+    }
+
+    /**
+     * 开始执行任务
+     * @param cmd
+     * @param msg
+     */
+
+
+    _createClass(SendToClientTask, [{
+        key: "startTask",
+        value: function startTask(cmd, msg) {
+            var id = msg.readUIntV();
+            var client = Config.getClient(id);
+            if (client) {
+                var bytes = new VByteArray();
+                var cmd = msg.readUIntV();
+                bytes.writeUIntV(cmd);
+                bytes.writeBytes(msg, msg.position, msg.length - msg.position);
+                client.sendData(bytes);
+            } else {
+                this.fail(1030);
+            }
+        }
+    }]);
+
+    return SendToClientTask;
+}(TaskBase);
+//////////////////////////End File:remoteServer/tasks/center/SendToClientTask.js///////////////////////////
+
 //////////////////////////File:remoteServer/tasks/center/TransformTask.js///////////////////////////
 
 
-var TransformTask = function (_TaskBase5) {
-    _inherits(TransformTask, _TaskBase5);
+var TransformTask = function (_TaskBase6) {
+    _inherits(TransformTask, _TaskBase6);
 
     function TransformTask(user, fromClient, cmd, msg) {
         _classCallCheck(this, TransformTask);
@@ -557,9 +614,7 @@ var TransformTask = function (_TaskBase5) {
                 var cmd = msg.readUIntV();
                 bytes.writeUIntV(cmd);
                 bytes.writeUIntV(this.client.id);
-                while (msg.bytesAvailable) {
-                    bytes.writeByte(msg.readByte());
-                }
+                bytes.writeBytes(msg, msg.position, msg.length - msg.position);
                 client.sendData(bytes);
             } else {
                 this.fail(1030);

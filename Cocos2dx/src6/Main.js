@@ -6,18 +6,7 @@ class Main {
     }
 
     ready() {
-        //var socket = new flower.VBWebSocket(true);
-        //this.socket = socket;
-        //socket.connect("192.168.1.159", 9900);
-        //socket.addListener(flower.Event.CONNECT, this.onConnect, this);
-        //socket.register(102, this.onReceive, this);
-        //return;
         new Test();
-
-        //var ui = new flower.UIParser();
-        //ui.parseUIAsync("res/test/Server.xml");
-        //flower.Stage.getInstance().addChild(ui);
-
 
         flower.Stage.getInstance().backgroundColor = 0xf6f6f6;
         var theme = new flower.Theme("res/theme/theme.json");
@@ -29,18 +18,13 @@ class Main {
         //Alert.show("测试啊");
         var ui = new flower.UIParser();
         ui.parseUIAsync("res/test/TestTree.xml");
+        ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
         flower.Stage.getInstance().addChild(ui);
     }
 
-    onReceive(cmd, bytes) {
-        flower.trace(bytes.readBoolean());
-    }
-
-    onConnect(e) {
-        flower.trace(e.type);
-        var msg = new flower.VByteArray();
-        msg.writeUInt(101);
-        msg.writeUTF("com1");
-        this.socket.send(msg);
+    loadUIComplete(e) {
+        var ui = e.data;
+        var dir = new flower.Direction("res");
+        ui.dataProvider = dir.list;
     }
 }
