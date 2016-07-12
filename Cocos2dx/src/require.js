@@ -1,5 +1,6 @@
 var jsFiles = jsFiles||[];
 jsFiles.push("src/Main.js" );
+jsFiles.push("src/PreLoading.js" );
 jsFiles.push("src/testcase/Test.js" );
 jsFiles.push("src/testcase/TestBase.js" );
 jsFiles.push("src/testcase/TestCase.js" );

@@ -14,29 +14,31 @@ var Main = function () {
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
-            new Test();
-
-            flower.Stage.getInstance().backgroundColor = 0xf6f6f6;
-            var theme = new flower.Theme("res/theme/theme.json");
-            theme.load();
-            theme.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
+            var preloading = new PreLoading();
+            preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }
     }, {
         key: "loadThemeComplete",
         value: function loadThemeComplete(e) {
-            //Alert.show("测试啊");
-            var ui = new flower.UIParser();
-            ui.parseUIAsync("res/test/TestTree.xml");
-            ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
-            flower.Stage.getInstance().addChild(ui);
+            e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
+
+            var panel = new PanelTab();
+            panel.x = 100;
+            panel.y = 100;
+            flower.Stage.getInstance().addChild(panel);
+
+            //var ui = new flower.UIParser();
+            //ui.parseUIAsync("res/test/TestTree.xml");
+            //ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
+            //flower.Stage.getInstance().addChild(ui);
         }
-    }, {
-        key: "loadUIComplete",
-        value: function loadUIComplete(e) {
-            var ui = e.data;
-            var dir = new flower.Direction("res");
-            ui.dataProvider = dir.list;
-        }
+
+        //loadUIComplete(e) {
+        //    var ui = e.data;
+        //    var dir = new flower.Direction("res");
+        //    ui.dataProvider = dir.list;
+        //}
+
     }]);
 
     return Main;

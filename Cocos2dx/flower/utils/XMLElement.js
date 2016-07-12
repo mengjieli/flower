@@ -88,9 +88,16 @@ class XMLElement extends XMLAttribute {
             }
         }
         this.readInfo(content);
-        if (this.value == "") {
-            this.value = null;
+    }
+
+    __isStringEmpty(str) {
+        for(var i = 0,len = str.length; i < len; i++) {
+            var char = str.charAt(i);
+            if(char != " " && char != "\t" && char != "\r" && char != "\n" && char != "　") {
+                return false;
+            }
         }
+        return true;
     }
 
     readInfo(content, startIndex = 0) {
@@ -219,6 +226,9 @@ class XMLElement extends XMLAttribute {
                             }
                         }
                         this.value = content.slice(contentStart, i + 1);
+                        if (this.value == "" || this.__isStringEmpty(this.value)) {
+                            this.value = null;
+                        }
                     }
                     for (; j < len; j++) {
                         c = content.charAt(j);

@@ -17,6 +17,14 @@ class RemoteClient extends WebSocketServerClient {
         this.id = RemoteClient.id++;
         this.hasLogin = false;
         this.ip = connection.remoteAddress;
+        while (true) {
+            var code = this.ip.charCodeAt(0);
+            if (code < 48 || code > 57) {
+                this.ip = this.ip.slice(1, this.ip.length);
+            } else {
+                break;
+            }
+        }
         this.information = {};
     }
 
@@ -130,7 +138,7 @@ class RemoteClient extends WebSocketServerClient {
     }
 
     onClose() {
-        Config.removeClient(this.clientType,this);
+        Config.removeClient(this.clientType, this);
         super.onClose();
     }
 
@@ -159,6 +167,7 @@ class RemoteServer extends WebSocketServer {
 }
 
 var serverPort = 9900;
+var httpPort = 19999;
 //////////////////////////End File:remoteServer/RemoteServer.js///////////////////////////
 
 
@@ -427,10 +436,12 @@ class LoginTask extends TaskBase {
         if (type == "local") {
             var user = msg.readUTFV();
             var root = msg.readUTFV();
+            var httpServerPort = msg.readUIntV();
             client.clientType = type;
             client.information = {
                 id: client.id,
                 ip: client.ip,
+                httpServerPort:httpServerPort,
                 user: user,
                 root: root
             }

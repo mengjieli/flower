@@ -17,10 +17,12 @@ class LoginTask extends TaskBase {
         if (type == "local") {
             var user = msg.readUTFV();
             var root = msg.readUTFV();
+            var httpServerPort = msg.readUIntV();
             client.clientType = type;
             client.information = {
                 id: client.id,
                 ip: client.ip,
+                httpServerPort:httpServerPort,
                 user: user,
                 root: root
             }

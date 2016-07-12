@@ -102,6 +102,9 @@ var remote = {};
                 this.__clients = clients;
                 if (findClients.length == 1) {
                     this.__client = findClients[0];
+                    if (this.__config.useHttpServer) {
+                        flower.URLLoader.urlHead = "http://" + this.__client.ip + ":" + this.__client.httpServerPort + "/";
+                    }
                     if (this.__readyBack) {
                         this.__readyBack();
                         this.__readyBack = null;

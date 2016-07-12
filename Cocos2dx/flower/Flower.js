@@ -29,35 +29,40 @@ function start(completeFunc) {
         for (var key in cfg) {
             config[key] = cfg[key];
         }
+        stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;
         LANGUAGE = config.language || "";
 
-        loader = new URLLoader("res/blank.png");
-        loader.addListener(Event.COMPLETE, function (e) {
-            Texture.$blank = e.data;
-            Texture.$blank.$addCount();
-            loader = new URLLoader("res/shaders/Bitmap.fsh");
+        function startLoad() {
+            loader = new URLLoader("res/blank.png");
             loader.addListener(Event.COMPLETE, function (e) {
-                programmers[loader.url] = e.data;
-                loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
+                Texture.$blank = e.data;
+                Texture.$blank.$addCount();
+                loader = new URLLoader("res/shaders/Bitmap.fsh");
                 loader.addListener(Event.COMPLETE, function (e) {
                     programmers[loader.url] = e.data;
-                    loader = new URLLoader("res/shaders/Source.fsh");
+                    loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
                     loader.addListener(Event.COMPLETE, function (e) {
                         programmers[loader.url] = e.data;
-                        if (config.remote) {
-                            flower.RemoteServer.start(completeFunc);
-                        } else {
+                        loader = new URLLoader("res/shaders/Source.fsh");
+                        loader.addListener(Event.COMPLETE, function (e) {
+                            programmers[loader.url] = e.data;
                             completeFunc();
-                        }
+                        });
+                        loader.load();
                     });
                     loader.load();
                 });
                 loader.load();
             });
             loader.load();
-        });
-        loader.load();
+        }
+
+        if (config.remote) {
+            flower.RemoteServer.start(startLoad);
+        } else {
+            startLoad();
+        }
     });
     loader.load();
 }

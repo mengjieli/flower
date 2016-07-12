@@ -1,8 +1,27 @@
 class MaskUI extends flower.Mask {
 
-    constructor() {
+    constructor(data) {
         super();
+        if(data != null) {
+            this._data = data;
+        }
         this.$initUIComponent();
+    }
+
+    setData(val) {
+        if (this._data == val) {
+            return;
+        }
+        this._data = val;
+        this.resetAllBindProperty();
+    }
+
+    get data() {
+        return this._data;
+    }
+
+    set data(val) {
+        this.setData(val);
     }
 
     $createShape() {
@@ -25,23 +44,23 @@ class MaskUI extends flower.Mask {
         parent = parent || this.parent;
         if (p[0] != null && p[1] == null && p [2] != null) {
             this.width = (p[2] - p[0]) * 2;
-            this.x =  + p[0];
+            this.x = +p[0];
         }
         else if (p[0] == null && p[1] != null && p[2] != null) {
             this.width = (p[1] - p[2]) * 2;
-            this.x =  + 2 * p[2] - p[1];
+            this.x = +2 * p[2] - p[1];
         } else if (p[0] != null && p[1] != null) {
             this.width = parent.width - p[1] - p[0];
-            this.x =  + p[0];
+            this.x = +p[0];
         } else {
             if (p[0] != null) {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x =  parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width;
             }
             if (p[2] != null) {
-                this.x =  (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -49,13 +68,13 @@ class MaskUI extends flower.Mask {
         }
         if (p[3] != null && p[4] == null && p [5] != null) {
             this.height = (p[5] - p[3]) * 2;
-            this.y =  + p[3];
+            this.y = +p[3];
         } else if (p[3] == null && p[4] != null && p[5] != null) {
             this.height = (p[4] - p[5]) * 2;
-            this.y =  2 * p[5] - p[4];
+            this.y = 2 * p[5] - p[4];
         } else if (p[3] != null && p[4] != null) {
             this.height = parent.height - p[4] - p[3];
-            this.y =  + p[3];
+            this.y = +p[3];
         } else {
             if (p[3] != null) {
                 this.y = p[3];

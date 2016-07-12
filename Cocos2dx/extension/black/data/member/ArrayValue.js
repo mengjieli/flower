@@ -257,6 +257,16 @@ class ArrayValue extends Value {
         this.dispatchWidth(flower.Event.UPDATE, this);
     }
 
+    setItemIndex(item, index) {
+        var itemIndex = this.getItemIndex(item);
+        if (itemIndex < 0 || itemIndex == index) {
+            return;
+        }
+        this.list.splice(itemIndex, 1);
+        this.list.splice(index, 0,item);
+        this.dispatchWidth(flower.Event.UPDATE, this);
+    }
+
     getItemAt(index) {
         index = +index & ~0;
         if (index < 0 || index >= this.list.length) {

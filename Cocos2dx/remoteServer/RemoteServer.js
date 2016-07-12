@@ -16,3 +16,4 @@ class RemoteServer extends WebSocketServer {
 }
 
 var serverPort = 9900;
+var httpPort = 19999;

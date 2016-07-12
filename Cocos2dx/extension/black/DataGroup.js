@@ -75,6 +75,9 @@ class DataGroup extends Group {
             var itemData;
             var measureSize = false;
             var findSelected = false;
+            if (p[9] && p[9] != list.selectedItem) {
+                this.__setSelectedItemData(list.selectedItem);
+            }
             if (!p[3] || !this.layout || !this.layout.fixElementSize) {
                 for (var i = 0, len = list.length; i < len; i++) {
                     item = null;
@@ -97,9 +100,6 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i] = item;
-                    //if (item.data == p[9]) {
-                    //    findSelected = true;
-                    //}
                 }
             } else {
                 this.layout.$clear();
@@ -135,24 +135,30 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i - firstItemIndex] = item;
-                    //if (item.data == p[9]) {
-                    //    findSelected = true;
-                    //}
                     this.layout.updateList(p[4], p[5], firstItemIndex);
                     if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                         break;
                     }
                 }
             }
-            //if (findSelected == false && p[9]) {
-            //    p[9] = null;
-            //}
+            if (p[9]) {
+                findSelected = false;
+                for (var i = 0, len = list.length; i < len; i++) {
+                    if (list.getItemAt(i) == p[9]) {
+                        findSelected = true;
+                        break;
+                    }
+                }
+                if (!findSelected) {
+                    p[9] = null;
+                }
+            }
             measureSize = true;
             while (items.length) {
                 items.pop().dispose();
             }
             p[2] = newItems;
-            if(!p[9]) {
+            if (!p[9]) {
                 this._canSelecteItem();
             }
         }
@@ -206,6 +212,7 @@ class DataGroup extends Group {
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
+                this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                     p[15] = -1;
                     p[8] = item.data;
@@ -225,6 +232,7 @@ class DataGroup extends Group {
             case flower.TouchEvent.TOUCH_END:
                 flower.EnterFrame.remove(this.__onTouchUpdate, this);
                 if (p[8] == item.data) {
+                    this.$releaseItem();
                     p[8] = null;
                     if (p[13] == flower.TouchEvent.TOUCH_END) {
                         this.__setSelectedItemData(item.data);
@@ -287,6 +295,7 @@ class DataGroup extends Group {
         for (var i = 0, len = data.length; i < data.length; i++) {
             if (data.getItemAt(i) == itemData) {
                 find = true;
+                break;
             }
         }
         if (!find) {
@@ -533,5 +542,6 @@ class DataGroup extends Group {
 
 UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
 UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
+UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", DataGroupEvent.TOUCH_BEGIN_ITEM);
 
 exports.DataGroup = DataGroup;

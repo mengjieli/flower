@@ -151,19 +151,21 @@ var LocalClient = (function (_super) {
 
     p.onConnect = function (connection) {
         _super.prototype.onConnect.call(this, connection);
-        var content = (new File("config.json")).readContent();
-        var cfg = JSON.parse(content);
         this.config = cfg.local;
         this.root = this.config.root;
         if (this.root.charAt(this.root.length - 1) != "/") {
             this.root += "/";
         }
+        this.httpServer = cfg.httpServer;
+        var httpServer = new HttpServer(this.httpServer.port, this.root);
+        httpServer.start();
         var bytes = new VByteArray();
         bytes.writeUIntV(1);
         bytes.writeUIntV(0);
         bytes.writeUTFV("local");
         bytes.writeUTFV(this.config.user);
         bytes.writeUTFV(this.root);
+        bytes.writeUIntV(this.httpServer.port);
         //bytes.writeUTFV(cfg.name);
         //bytes.writeUTFV(cfg.password);
         this.sendData(bytes);
@@ -195,5 +197,6 @@ var LocalClient = (function (_super) {
 })(WebScoektClient);
 
 var client = new LocalClient();
-
-client.connect("localhost", 9900);
+var content = (new File("config.json")).readContent();
+var cfg = JSON.parse(content);
+client.connect(cfg.server.ip, cfg.server.port);

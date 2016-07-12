@@ -1223,6 +1223,7 @@ var $root = eval("this");
                     checks.push(Binding.bindingChecks[i]);
                 }
             }
+            this.checks = checks;
             checks.push(thisObj);
             var lastEnd = 0;
             var parseError = false;

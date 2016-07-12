@@ -53,35 +53,40 @@ function start(completeFunc) {
         for (var key in cfg) {
             config[key] = cfg[key];
         }
+        stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;
         LANGUAGE = config.language || "";
 
-        loader = new URLLoader("res/blank.png");
-        loader.addListener(Event.COMPLETE, function (e) {
-            Texture.$blank = e.data;
-            Texture.$blank.$addCount();
-            loader = new URLLoader("res/shaders/Bitmap.fsh");
+        function startLoad() {
+            loader = new URLLoader("res/blank.png");
             loader.addListener(Event.COMPLETE, function (e) {
-                programmers[loader.url] = e.data;
-                loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
+                Texture.$blank = e.data;
+                Texture.$blank.$addCount();
+                loader = new URLLoader("res/shaders/Bitmap.fsh");
                 loader.addListener(Event.COMPLETE, function (e) {
                     programmers[loader.url] = e.data;
-                    loader = new URLLoader("res/shaders/Source.fsh");
+                    loader = new URLLoader(Platform.native ? "res/shaders/Bitmap.vsh" : "res/shaders/BitmapWeb.vsh");
                     loader.addListener(Event.COMPLETE, function (e) {
                         programmers[loader.url] = e.data;
-                        if (config.remote) {
-                            flower.RemoteServer.start(completeFunc);
-                        } else {
+                        loader = new URLLoader("res/shaders/Source.fsh");
+                        loader.addListener(Event.COMPLETE, function (e) {
+                            programmers[loader.url] = e.data;
                             completeFunc();
-                        }
+                        });
+                        loader.load();
                     });
                     loader.load();
                 });
                 loader.load();
             });
             loader.load();
-        });
-        loader.load();
+        }
+
+        if (config.remote) {
+            flower.RemoteServer.start(startLoad);
+        } else {
+            startLoad();
+        }
     });
     loader.load();
 }
@@ -5463,6 +5468,8 @@ class TextureManager {
 //////////////////////////File:flower/net/URLLoader.js///////////////////////////
 class URLLoader extends EventDispatcher {
 
+    static urlHead = "";
+
     _createRes = false;
     _res;
     _isLoading = false;
@@ -5590,7 +5597,7 @@ class URLLoader extends EventDispatcher {
                 loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
                 loader.load();
             } else {
-                PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextureComplete, this.loadError, this);
             }
         }
     }
@@ -5646,7 +5653,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, this._params);
+        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextComplete, this.loadError, this, this._method, this._params);
     }
 
     loadTextComplete(content) {
@@ -8878,9 +8885,16 @@ class XMLElement extends XMLAttribute {
             }
         }
         this.readInfo(content);
-        if (this.value == "") {
-            this.value = null;
+    }
+
+    __isStringEmpty(str) {
+        for(var i = 0,len = str.length; i < len; i++) {
+            var char = str.charAt(i);
+            if(char != " " && char != "\t" && char != "\r" && char != "\n" && char != "　") {
+                return false;
+            }
         }
+        return true;
     }
 
     readInfo(content, startIndex = 0) {
@@ -9009,6 +9023,9 @@ class XMLElement extends XMLAttribute {
                             }
                         }
                         this.value = content.slice(contentStart, i + 1);
+                        if (this.value == "" || this.__isStringEmpty(this.value)) {
+                            this.value = null;
+                        }
                     }
                     for (; j < len; j++) {
                         c = content.charAt(j);

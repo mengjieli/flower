@@ -175,7 +175,8 @@ class UIParser extends Group {
         }
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
-                this.parseUI(this.loadContent, this.loadData);
+                var ui = this.parseUI(this.loadContent, this.loadData);
+                this.dispatchWidth(flower.Event.COMPLETE, ui);
             } else {
                 var data = this.parse(this.loadContent);
                 this.dispatchWidth(flower.Event.COMPLETE, data);
@@ -197,22 +198,20 @@ class UIParser extends Group {
     }
 
     parseUI(content, data = null) {
-        new flower.CallLater(this.__parseUI, this, [content, data]);
-    }
-
-    __parseUI(content, data) {
         this.parse(content);
         var className = this._className;
         var namesapce = this.localNameSpace;
         var UIClass = this.classes[namesapce][className];
+        var ui;
         if (data) {
-            return new UIClass(data);
+            ui = new UIClass(data);
+        } else {
+            ui = new UIClass();
         }
-        var ui = new UIClass();
         if (!ui.parent) {
             this.addChild(ui);
         }
-        this.dispatchWidth(flower.Event.COMPLETE, ui);
+        return ui;
     }
 
     parse(content) {
@@ -303,8 +302,8 @@ class UIParser extends Group {
         }
         content += (packages.length ? before : "") + "var " + className + " = (function (_super) {\n";
         content += before + "\t__extends(" + className + ", _super);\n";
-        content += before + "\tfunction " + className + "(_data) {\n";
-        content += before + "\t\tif(_data) this._data = _data;\n";
+        content += before + "\tfunction " + className + "(data) {\n";
+        content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\t _super.call(this);\n";
         content += before + "\t\tthis." + className + "_binds = [];\n";
         var scriptInfo = {
@@ -448,10 +447,10 @@ class UIParser extends Group {
                         var initValue = item.getAttribute("init");
                         content += before + "\t\tthis." + childName + " = " + (initValue == null ? "null" : initValue.value) + ";\n";
                     } else {
-                        if (childName == "init") {
-                            childName = className + "_" + childName;
-                            this.hasInitFunction = true;
-                        }
+                        //if (childName == "init") {
+                        //    childName = className + "_" + childName;
+                        //    this.hasInitFunction = true;
+                        //}
                         script.content += before + "\t" + className + ".prototype." + childName + " = function(";
                         var params = item.getAttribute("params");
                         if (params) {

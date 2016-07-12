@@ -1,5 +1,7 @@
 class URLLoader extends EventDispatcher {
 
+    static urlHead = "";
+
     _createRes = false;
     _res;
     _isLoading = false;
@@ -127,7 +129,7 @@ class URLLoader extends EventDispatcher {
                 loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
                 loader.load();
             } else {
-                PlatformURLLoader.loadTexture(this._loadInfo.url, this.loadTextureComplete, this.loadError, this);
+                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextureComplete, this.loadError, this);
             }
         }
     }
@@ -183,7 +185,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, this._params);
+        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextComplete, this.loadError, this, this._method, this._params);
     }
 
     loadTextComplete(content) {

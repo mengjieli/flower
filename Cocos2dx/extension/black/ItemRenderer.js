@@ -9,18 +9,6 @@ class ItemRenderer extends Group {
         this.absoluteState = true;
     }
 
-    get data() {
-        return this._data;
-    }
-
-    set data(val) {
-        this._data = val;
-        this.setData(this._data);
-    }
-
-    setData(val) {
-    }
-
     get itemIndex() {
         return this._itemIndex;
     }

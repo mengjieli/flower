@@ -12,6 +12,14 @@ class RemoteClient extends WebSocketServerClient {
         this.id = RemoteClient.id++;
         this.hasLogin = false;
         this.ip = connection.remoteAddress;
+        while (true) {
+            var code = this.ip.charCodeAt(0);
+            if (code < 48 || code > 57) {
+                this.ip = this.ip.slice(1, this.ip.length);
+            } else {
+                break;
+            }
+        }
         this.information = {};
     }
 
@@ -125,7 +133,7 @@ class RemoteClient extends WebSocketServerClient {
     }
 
     onClose() {
-        Config.removeClient(this.clientType,this);
+        Config.removeClient(this.clientType, this);
         super.onClose();
     }
 

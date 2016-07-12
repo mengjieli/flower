@@ -1211,6 +1211,7 @@ class Binding {
     thisObj;
     property;
     content;
+    checks;
 
     constructor(thisObj, checks, property, content) {
         var i;
@@ -1222,6 +1223,7 @@ class Binding {
                 checks.push(Binding.bindingChecks[i]);
             }
         }
+        this.checks = checks;
         checks.push(thisObj);
         var lastEnd = 0;
         var parseError = false;

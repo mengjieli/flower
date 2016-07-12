@@ -120,6 +120,7 @@ class ViewStack extends Group {
             this._selectedIndex = val;
             super.addChildAt(this._selectedItem, this.numChildren);
         }
+        this.dispatchWidth(flower.Event.UPDATE, this);
     }
 
     get length() {
@@ -132,6 +133,22 @@ class ViewStack extends Group {
 
     getItemIndex(item) {
         return this.getChildIndex(item);
+    }
+
+    setItemIndex(item, index) {
+        var itemIndex = this.getItemIndex(item);
+        if (itemIndex < 0 || itemIndex == index) {
+            return;
+        }
+        this._items.splice(itemIndex, 1);
+        if (this._selectedIndex != -1 && this._selectedIndex > itemIndex) {
+            this._selectedIndex--;
+        }
+        this._items.splice(index, 0, item);
+        if (this._selectedIndex != -1 && this._selectedIndex >= index) {
+            this._selectedIndex++;
+        }
+        this.dispatchWidth(flower.Event.UPDATE, this);
     }
 
     set selectedIndex(val) {
@@ -152,6 +169,10 @@ class ViewStack extends Group {
     set selectedItem(val) {
         var index = this.getChildIndex(val);
         this._setSelectedIndex(index);
+    }
+
+    get selectedItem() {
+        return this._selectedItem;
     }
 }
 

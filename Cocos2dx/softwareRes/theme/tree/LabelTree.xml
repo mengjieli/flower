@@ -1,6 +1,6 @@
 <f:Tree class="LabelTree" selectTime="touch_end" xmlns:f="flower">
     <f:itemRenderer>
-        <f:ItemRenderer class="LabelItemRenderer" percentWidth="100" height="20">
+        <f:ItemRenderer percentWidth="100" height="20">
             <f:RectUI percentWidth="100" percentHeight="100" fillColor.down="0xd6d4d0"
                       fillColor.selectedDown="0x96b97d" fillColor.selectedUp="0x96b97d" visible.up="false"
                       visible.down="true" visible.selectedDown="true"

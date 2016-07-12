@@ -1,10 +1,30 @@
 class Group extends flower.Sprite {
 
     $UIComponent;
+    _data;
 
-    constructor() {
+    constructor(data) {
         super();
+        if(data != null) {
+            this._data = data;
+        }
         this.$initUIComponent();
+    }
+
+    setData(val) {
+        if (this._data == val) {
+            return;
+        }
+        this._data = val;
+        this.resetAllBindProperty();
+    }
+
+    get data() {
+        return this._data;
+    }
+
+    set data(val) {
+        this.setData(val);
     }
 
     $addFlags(flags) {

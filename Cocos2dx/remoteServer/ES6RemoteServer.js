@@ -27,6 +27,14 @@ var RemoteClient = function (_WebSocketServerClien) {
         _this.id = RemoteClient.id++;
         _this.hasLogin = false;
         _this.ip = connection.remoteAddress;
+        while (true) {
+            var code = _this.ip.charCodeAt(0);
+            if (code < 48 || code > 57) {
+                _this.ip = _this.ip.slice(1, _this.ip.length);
+            } else {
+                break;
+            }
+        }
         _this.information = {};
         return _this;
     }
@@ -191,6 +199,7 @@ var RemoteServer = function (_WebSocketServer) {
 }(WebSocketServer);
 
 var serverPort = 9900;
+var httpPort = 19999;
 //////////////////////////End File:remoteServer/RemoteServer.js///////////////////////////
 
 //////////////////////////File:remoteServer/data/Config.js///////////////////////////
@@ -517,10 +526,12 @@ var LoginTask = function (_TaskBase4) {
             if (type == "local") {
                 var user = msg.readUTFV();
                 var root = msg.readUTFV();
+                var httpServerPort = msg.readUIntV();
                 client.clientType = type;
                 client.information = {
                     id: client.id,
                     ip: client.ip,
+                    httpServerPort: httpServerPort,
                     user: user,
                     root: root
                 };

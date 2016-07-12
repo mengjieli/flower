@@ -148,6 +148,19 @@ var $root = eval("this");
                     }
                 };
 
+                p.resetAllBindProperty = function () {
+                    if (this.$UIComponent) {
+                        var binds = this.$UIComponent[10];
+                        for (var key in binds) {
+                            var checks = binds[key].checks;
+                            var property = binds[key].property;
+                            var content = binds[key].content;
+                            binds[key].dispose();
+                            binds[key] = new flower.Binding(this, checks, property, content);
+                        }
+                    }
+                };
+
                 p.removeAllBindProperty = function () {
                     var binds = this.$UIComponent[10];
                     for (var key in binds) {
@@ -546,6 +559,8 @@ var $root = eval("this");
 
     DataGroupEvent.SELECTED_ITEM_CHANGE = "selected_item_change";
     DataGroupEvent.CLICK_ITEM = "click_item";
+    DataGroupEvent.TOUCH_BEGIN_ITEM = "touch_begin_item";
+    DataGroupEvent.SELECTED_CHANGE = "selected_change";
 
 
     black.DataGroupEvent = DataGroupEvent;
@@ -901,6 +916,17 @@ var $root = eval("this");
                     _arguments__ = arguments[argumentsLength];
                 }
                 this.list.sort.apply(this.list.sort, _arguments__);
+                this.dispatchWidth(flower.Event.UPDATE, this);
+            }
+        }, {
+            key: "setItemIndex",
+            value: function setItemIndex(item, index) {
+                var itemIndex = this.getItemIndex(item);
+                if (itemIndex < 0 || itemIndex == index) {
+                    return;
+                }
+                this.list.splice(itemIndex, 1);
+                this.list.splice(index, 0, item);
                 this.dispatchWidth(flower.Event.UPDATE, this);
             }
         }, {
@@ -1890,16 +1916,28 @@ var $root = eval("this");
     var Group = function (_flower$Sprite) {
         _inherits(Group, _flower$Sprite);
 
-        function Group() {
+        function Group(data) {
             _classCallCheck(this, Group);
 
             var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
+            if (data != null) {
+                _this15._data = data;
+            }
             _this15.$initUIComponent();
             return _this15;
         }
 
         _createClass(Group, [{
+            key: "setData",
+            value: function setData(val) {
+                if (this._data == val) {
+                    return;
+                }
+                this._data = val;
+                this.resetAllBindProperty();
+            }
+        }, {
             key: "$addFlags",
             value: function $addFlags(flags) {
                 if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
@@ -2018,6 +2056,14 @@ var $root = eval("this");
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Group.prototype), "dispose", this).call(this);
+            }
+        }, {
+            key: "data",
+            get: function get() {
+                return this._data;
+            },
+            set: function set(val) {
+                this.setData(val);
             }
         }]);
 
@@ -2151,7 +2197,8 @@ var $root = eval("this");
                 }
                 if (this.relationIndex >= this.relationUI.length) {
                     if (this.parseUIAsyncFlag) {
-                        this.parseUI(this.loadContent, this.loadData);
+                        var ui = this.parseUI(this.loadContent, this.loadData);
+                        this.dispatchWidth(flower.Event.COMPLETE, ui);
                     } else {
                         var data = this.parse(this.loadContent);
                         this.dispatchWidth(flower.Event.COMPLETE, data);
@@ -2177,23 +2224,20 @@ var $root = eval("this");
             value: function parseUI(content) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
-                new flower.CallLater(this.__parseUI, this, [content, data]);
-            }
-        }, {
-            key: "__parseUI",
-            value: function __parseUI(content, data) {
                 this.parse(content);
                 var className = this._className;
                 var namesapce = this.localNameSpace;
                 var UIClass = this.classes[namesapce][className];
+                var ui;
                 if (data) {
-                    return new UIClass(data);
+                    ui = new UIClass(data);
+                } else {
+                    ui = new UIClass();
                 }
-                var ui = new UIClass();
                 if (!ui.parent) {
                     this.addChild(ui);
                 }
-                this.dispatchWidth(flower.Event.COMPLETE, ui);
+                return ui;
             }
         }, {
             key: "parse",
@@ -2277,8 +2321,8 @@ var $root = eval("this");
                 }
                 content += (packages.length ? before : "") + "var " + className + " = (function (_super) {\n";
                 content += before + "\t__extends(" + className + ", _super);\n";
-                content += before + "\tfunction " + className + "(_data) {\n";
-                content += before + "\t\tif(_data) this._data = _data;\n";
+                content += before + "\tfunction " + className + "(data) {\n";
+                content += before + "\t\tif(data) this.data = data;\n";
                 content += before + "\t\t _super.call(this);\n";
                 content += before + "\t\tthis." + className + "_binds = [];\n";
                 var scriptInfo = {
@@ -2422,10 +2466,10 @@ var $root = eval("this");
                                 var initValue = item.getAttribute("init");
                                 content += before + "\t\tthis." + childName + " = " + (initValue == null ? "null" : initValue.value) + ";\n";
                             } else {
-                                if (childName == "init") {
-                                    childName = className + "_" + childName;
-                                    this.hasInitFunction = true;
-                                }
+                                //if (childName == "init") {
+                                //    childName = className + "_" + childName;
+                                //    this.hasInitFunction = true;
+                                //}
                                 script.content += before + "\t" + className + ".prototype." + childName + " = function(";
                                 var params = item.getAttribute("params");
                                 if (params) {
@@ -2933,6 +2977,9 @@ var $root = eval("this");
                     var itemData;
                     var measureSize = false;
                     var findSelected = false;
+                    if (p[9] && p[9] != list.selectedItem) {
+                        this.__setSelectedItemData(list.selectedItem);
+                    }
                     if (!p[3] || !this.layout || !this.layout.fixElementSize) {
                         for (var i = 0, len = list.length; i < len; i++) {
                             item = null;
@@ -2955,56 +3002,59 @@ var $root = eval("this");
                             }
                             item.$setItemIndex(i);
                             newItems[i] = item;
-                            //if (item.data == p[9]) {
-                            //    findSelected = true;
-                            //}
                         }
                     } else {
-                            this.layout.$clear();
-                            var elementWidth;
-                            var elementHeight;
-                            if (!items.length) {
-                                item = this.createItem(list.getItemAt(0), 0);
-                                item.data = list.getItemAt(0);
-                                items.push(item);
-                            }
-                            elementWidth = items[0].width;
-                            elementHeight = items[0].height;
-                            var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
-                            firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
-                            for (var i = firstItemIndex; i < list.length; i++) {
-                                item = null;
-                                itemData = list.getItemAt(i);
-                                for (var f = 0; f < items.length; f++) {
-                                    if (items[f].data == itemData) {
-                                        item = items[f];
-                                        items.splice(f, 1);
-                                        break;
-                                    }
-                                }
-                                if (!item) {
-                                    item = this.createItem(itemData, i);
-                                    item.data = itemData;
-                                }
-                                if (item.parent == this) {
-                                    this.setChildIndex(item, i - firstItemIndex);
-                                } else {
-                                    this.addChild(item);
-                                }
-                                item.$setItemIndex(i);
-                                newItems[i - firstItemIndex] = item;
-                                //if (item.data == p[9]) {
-                                //    findSelected = true;
-                                //}
-                                this.layout.updateList(p[4], p[5], firstItemIndex);
-                                if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
+                        this.layout.$clear();
+                        var elementWidth;
+                        var elementHeight;
+                        if (!items.length) {
+                            item = this.createItem(list.getItemAt(0), 0);
+                            item.data = list.getItemAt(0);
+                            items.push(item);
+                        }
+                        elementWidth = items[0].width;
+                        elementHeight = items[0].height;
+                        var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
+                        firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
+                        for (var i = firstItemIndex; i < list.length; i++) {
+                            item = null;
+                            itemData = list.getItemAt(i);
+                            for (var f = 0; f < items.length; f++) {
+                                if (items[f].data == itemData) {
+                                    item = items[f];
+                                    items.splice(f, 1);
                                     break;
                                 }
                             }
+                            if (!item) {
+                                item = this.createItem(itemData, i);
+                                item.data = itemData;
+                            }
+                            if (item.parent == this) {
+                                this.setChildIndex(item, i - firstItemIndex);
+                            } else {
+                                this.addChild(item);
+                            }
+                            item.$setItemIndex(i);
+                            newItems[i - firstItemIndex] = item;
+                            this.layout.updateList(p[4], p[5], firstItemIndex);
+                            if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
+                                break;
+                            }
                         }
-                    //if (findSelected == false && p[9]) {
-                    //    p[9] = null;
-                    //}
+                    }
+                    if (p[9]) {
+                        findSelected = false;
+                        for (var i = 0, len = list.length; i < len; i++) {
+                            if (list.getItemAt(i) == p[9]) {
+                                findSelected = true;
+                                break;
+                            }
+                        }
+                        if (!findSelected) {
+                            p[9] = null;
+                        }
+                    }
                     measureSize = true;
                     while (items.length) {
                         items.pop().dispose();
@@ -3065,6 +3115,7 @@ var $root = eval("this");
                 var item = e.currentTarget;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
+                        this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
                         if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                             p[15] = -1;
                             p[8] = item.data;
@@ -3084,6 +3135,7 @@ var $root = eval("this");
                     case flower.TouchEvent.TOUCH_END:
                         flower.EnterFrame.remove(this.__onTouchUpdate, this);
                         if (p[8] == item.data) {
+                            this.$releaseItem();
                             p[8] = null;
                             if (p[13] == flower.TouchEvent.TOUCH_END) {
                                 this.__setSelectedItemData(item.data);
@@ -3150,6 +3202,7 @@ var $root = eval("this");
                 for (var i = 0, len = data.length; i < data.length; i++) {
                     if (data.getItemAt(i) == itemData) {
                         find = true;
+                        break;
                     }
                 }
                 if (!find) {
@@ -3412,6 +3465,7 @@ var $root = eval("this");
 
     UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
     UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
+    UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", DataGroupEvent.TOUCH_BEGIN_ITEM);
 
     black.DataGroup = DataGroup;
     //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
@@ -3433,9 +3487,6 @@ var $root = eval("this");
         }
 
         _createClass(ItemRenderer, [{
-            key: "setData",
-            value: function setData(val) {}
-        }, {
             key: "$setItemIndex",
             value: function $setItemIndex(val) {
                 this._itemIndex = val;
@@ -3461,15 +3512,6 @@ var $root = eval("this");
             key: "$setList",
             value: function $setList(val) {
                 this._list = val;
-            }
-        }, {
-            key: "data",
-            get: function get() {
-                return this._data;
-            },
-            set: function set(val) {
-                this._data = val;
-                this.setData(this._data);
             }
         }, {
             key: "itemIndex",
@@ -4147,16 +4189,28 @@ var $root = eval("this");
     var MaskUI = function (_flower$Mask) {
         _inherits(MaskUI, _flower$Mask);
 
-        function MaskUI() {
+        function MaskUI(data) {
             _classCallCheck(this, MaskUI);
 
             var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
 
+            if (data != null) {
+                _this24._data = data;
+            }
             _this24.$initUIComponent();
             return _this24;
         }
 
         _createClass(MaskUI, [{
+            key: "setData",
+            value: function setData(val) {
+                if (this._data == val) {
+                    return;
+                }
+                this._data = val;
+                this.resetAllBindProperty();
+            }
+        }, {
             key: "$createShape",
             value: function $createShape() {
                 var shape = new RectUI();
@@ -4290,6 +4344,14 @@ var $root = eval("this");
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(MaskUI.prototype), "dispose", this).call(this);
+            }
+        }, {
+            key: "data",
+            get: function get() {
+                return this._data;
+            },
+            set: function set(val) {
+                this.setData(val);
             }
         }]);
 
@@ -4958,6 +5020,7 @@ var $root = eval("this");
                     this._selectedIndex = val;
                     _get(Object.getPrototypeOf(ViewStack.prototype), "addChildAt", this).call(this, this._selectedItem, this.numChildren);
                 }
+                this.dispatchWidth(flower.Event.UPDATE, this);
             }
         }, {
             key: "getItemAt",
@@ -4968,6 +5031,23 @@ var $root = eval("this");
             key: "getItemIndex",
             value: function getItemIndex(item) {
                 return this.getChildIndex(item);
+            }
+        }, {
+            key: "setItemIndex",
+            value: function setItemIndex(item, index) {
+                var itemIndex = this.getItemIndex(item);
+                if (itemIndex < 0 || itemIndex == index) {
+                    return;
+                }
+                this._items.splice(itemIndex, 1);
+                if (this._selectedIndex != -1 && this._selectedIndex > itemIndex) {
+                    this._selectedIndex--;
+                }
+                this._items.splice(index, 0, item);
+                if (this._selectedIndex != -1 && this._selectedIndex >= index) {
+                    this._selectedIndex++;
+                }
+                this.dispatchWidth(flower.Event.UPDATE, this);
             }
         }, {
             key: "length",
@@ -4994,6 +5074,9 @@ var $root = eval("this");
             set: function set(val) {
                 var index = this.getChildIndex(val);
                 this._setSelectedIndex(index);
+            },
+            get: function get() {
+                return this._selectedItem;
             }
         }]);
 

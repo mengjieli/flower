@@ -1,4 +1,4 @@
-<s:ScrollerTree width="300" height="500" viewport="LabelTree" xmlns:f="flower" xmlns:s="software">
+<s:ScrollerTree width="250" height="500" viewport="LabelTree" xmlns:f="flower" xmlns:s="software">
     <f:dataProvider>
         <f:ArrayValue>
             <s:PathObject path="paik" isDirection="true"/>
