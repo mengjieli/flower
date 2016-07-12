@@ -119,13 +119,14 @@ class Group extends flower.Sprite {
 
     $onFrameEnd() {
         var flag = false;
-        var count = 3;
+        var count = 15;
         while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
             super.$onFrameEnd();
             this.$resetLayout();
             flag = true;
             count--;
+            flower.trace("group frame:", flower.EnterFrame.frame, count, this.$hasFlags(0x1000));
         }
         if (!flag) {
             super.$onFrameEnd();

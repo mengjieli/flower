@@ -6,18 +6,20 @@
                   lineWidth="1"/>
         <s:TabBar id="tabBar" dataProvider="{this.viewStack}"/>
     </f:Group>
-    <f:ViewStack id="viewStack" percentWidth="100" top="25" bottom="0">
-        <f:Group title="Alert.js" percentWidth="100" percentHeight="100">
-            <f:Label text="Alert" horizontalCenter="0" verticalCenter="0"/>
-        </f:Group>
-        <f:Group title="Tween.js" percentWidth="100" percentHeight="100">
-            <f:Label text="Tween" horizontalCenter="0" verticalCenter="0"/>
-        </f:Group>
-        <f:Group title="TweenMoveCenter.js" percentWidth="100" percentHeight="100">
-            <f:Label text="TweenMoveCenter" horizontalCenter="0" verticalCenter="0"/>
-        </f:Group>
-        <f:Group title="Test.js" percentWidth="100" percentHeight="100">
-            <f:Label text="Test" horizontalCenter="0" verticalCenter="0"/>
-        </f:Group>
-    </f:ViewStack>
+    <f:MaskUI percentWidth="100" top="25" bottom="0">
+        <f:ViewStack id="viewStack" percentWidth="100" percentHeight="100">
+            <f:Group title="Alert.js" percentWidth="100" percentHeight="100">
+                <f:Label text="Alert" horizontalCenter="0" verticalCenter="0"/>
+            </f:Group>
+            <f:Group title="Tween.js" percentWidth="100" percentHeight="100">
+                <f:Label text="Tween" horizontalCenter="0" verticalCenter="0"/>
+            </f:Group>
+            <f:Group title="TweenMoveCenter.js" percentWidth="100" percentHeight="100">
+                <f:Label text="TweenMoveCenter" horizontalCenter="0" verticalCenter="0"/>
+            </f:Group>
+            <f:Group title="Test.js" percentWidth="100" percentHeight="100">
+                <f:Label text="Test" horizontalCenter="0" verticalCenter="0"/>
+            </f:Group>
+        </f:ViewStack>
+    </f:MaskUI>
 </f:MaskUI>

@@ -2037,13 +2037,14 @@ var $root = eval("this");
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 var flag = false;
-                var count = 3;
+                var count = 15;
                 while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
                     _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
                     this.$resetLayout();
                     flag = true;
                     count--;
+                    flower.trace("group frame:", flower.EnterFrame.frame, count, this.$hasFlags(0x1000));
                 }
                 if (!flag) {
                     _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
@@ -4323,7 +4324,7 @@ var $root = eval("this");
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 var flag = false;
-                var count = 3;
+                var count = 15;
                 while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
                     _get(Object.getPrototypeOf(MaskUI.prototype), "$onFrameEnd", this).call(this);
@@ -4331,6 +4332,7 @@ var $root = eval("this");
                     this.$resetLayout();
                     flag = true;
                     count--;
+                    flower.trace("mask frame:", flower.EnterFrame.frame, count, this.$hasFlags(0x1000));
                 }
                 if (!flag) {
                     _get(Object.getPrototypeOf(MaskUI.prototype), "$onFrameEnd", this).call(this);
