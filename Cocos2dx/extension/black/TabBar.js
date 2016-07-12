@@ -43,7 +43,9 @@ class TabBar extends ListBase {
             if (p[9] && p[9] != list.selectedItem) {
                 this.__setSelectedItemData(list.selectedItem);
             }
-            if (!p[3] || !this.layout || !this.layout.fixElementSize) {
+            var layout = this.layout;
+            var addMoreButton = false;
+            if (!p[3] || !layout || !layout.fixElementSize) {
                 for (var i = 0, len = list.length; i < len; i++) {
                     item = null;
                     itemData = list.getItemAt(i);
@@ -58,22 +60,41 @@ class TabBar extends ListBase {
                         item = this.createItem(itemData, i);
                         item.data = itemData;
                     }
+                    //检查 more 里面的数据
                     if (this.more && item.x + item.width > this.width) {
+                        addMoreButton = true;
                         if (item.parent) {
                             item.parent.removeChild(item);
                         }
                         if (this.moreButton) {
                             this.moreButton.width = this.width - item.x;
-                            this.addChild(this.moreButton);
+                            if (this.moreButton.parent != this) {
+                                this.addChild(this.moreButton);
+                            }
                         }
                         var more = this.moreData;
+                        var saveList = more.list.concat();
+                        var moreItem;
                         more.removeAll();
                         for (; i < len; i++) {
                             itemData = list.getItemAt(i);
-                            more.push({
-                                label: itemData.title,
-                                panel: itemData
-                            });
+                            moreItem = null;
+                            for (var j = 0; j < saveList.length; j++) {
+                                if (saveList[j].panel == itemData) {
+                                    moreItem = saveList[j];
+                                    saveList.splice(j, 1);
+                                    break;
+                                }
+                            }
+                            if (!moreItem) {
+                                moreItem = {
+                                    label: itemData.title,
+                                    panel: itemData
+                                };
+                            } else {
+                                moreItem.label = itemData.title;
+                            }
+                            more.push(moreItem);
                         }
                         break;
                     }
@@ -85,8 +106,13 @@ class TabBar extends ListBase {
                     item.$setItemIndex(i);
                     newItems[i] = item;
                 }
+                if (!addMoreButton) {
+                    if (this.moreButton && this.moreButton.parent == this) {
+                        this.removeChild(this.moreButton);
+                    }
+                }
             } else {
-                this.layout.$clear();
+                layout.$clear();
                 var elementWidth;
                 var elementHeight;
                 if (!items.length) {
@@ -96,7 +122,7 @@ class TabBar extends ListBase {
                 }
                 elementWidth = items[0].width;
                 elementHeight = items[0].height;
-                var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
+                var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
                 for (var i = firstItemIndex; i < list.length; i++) {
                     item = null;
@@ -119,8 +145,8 @@ class TabBar extends ListBase {
                     }
                     item.$setItemIndex(i);
                     newItems[i - firstItemIndex] = item;
-                    this.layout.updateList(p[4], p[5], firstItemIndex);
-                    if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
+                    layout.updateList(p[4], p[5], firstItemIndex);
+                    if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                         break;
                     }
                 }
@@ -148,15 +174,15 @@ class TabBar extends ListBase {
         }
         super.$onFrameEnd();
         if (measureSize) {
-            if (this.layout) {
-                if (!p[3] || !this.layout.fixElementSize) {
-                    var size = this.layout.getContentSize();
+            if (layout) {
+                if (!p[3] || !layout.fixElementSize) {
+                    var size = layout.getContentSize();
                     p[6] = size.width;
                     p[7] = size.height;
                     flower.Size.release(size);
                 }
                 else if (p[2].length) {
-                    var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                    var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
                     p[6] = size.width;
                     p[7] = size.height;
                     flower.Size.release(size);
@@ -196,7 +222,7 @@ class TabBar extends ListBase {
     }
 
     get moreData() {
-        if(!this.$TabBar[2]) {
+        if (!this.$TabBar[2]) {
             this.$TabBar[2] = new flower.ArrayValue();
         }
         return this.$TabBar[2];

@@ -23,8 +23,8 @@ var Main = function () {
             e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
 
             var panel = new Tab();
-            panel.x = 100;
-            panel.y = 100;
+            panel.x = 10;
+            panel.y = 10;
             flower.Stage.getInstance().addChild(panel);
 
             //var ui = new flower.UIParser();

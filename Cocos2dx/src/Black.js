@@ -2036,17 +2036,28 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                var flag = false;
-                var count = 15;
-                while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                    this.$validateUIComponent();
-                    _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
-                    this.$resetLayout();
-                    flag = true;
-                    count--;
-                    flower.trace("group frame:", flower.EnterFrame.frame, count, this.$hasFlags(0x1000));
-                }
-                if (!flag) {
+                if (!this.parent.__UIComponent) {
+                    var flag = false;
+                    var count = 6;
+                    while (count && this.$hasFlags(0x1000)) {
+                        this.$validateUIComponent();
+                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        this.$resetLayout();
+                        flag = true;
+                        count--;
+                    }
+                    if (!flag) {
+                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        this.$resetLayout();
+                    }
+                    while (count && this.$hasFlags(0x1000)) {
+                        this.$validateUIComponent();
+                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        this.$resetLayout();
+                        flag = true;
+                        count--;
+                    }
+                } else {
                     _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
                     this.$resetLayout();
                 }
@@ -2978,10 +2989,11 @@ var $root = eval("this");
                     var itemData;
                     var measureSize = false;
                     var findSelected = false;
+                    var layout = this.layout;
                     if (p[9] && p[9] != list.selectedItem) {
                         this.__setSelectedItemData(list.selectedItem);
                     }
-                    if (!p[3] || !this.layout || !this.layout.fixElementSize) {
+                    if (!p[3] || !layout || !layout.fixElementSize) {
                         for (var i = 0, len = list.length; i < len; i++) {
                             item = null;
                             itemData = list.getItemAt(i);
@@ -3005,7 +3017,7 @@ var $root = eval("this");
                             newItems[i] = item;
                         }
                     } else {
-                        this.layout.$clear();
+                        layout.$clear();
                         var elementWidth;
                         var elementHeight;
                         if (!items.length) {
@@ -3015,7 +3027,7 @@ var $root = eval("this");
                         }
                         elementWidth = items[0].width;
                         elementHeight = items[0].height;
-                        var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
+                        var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                         firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
                         for (var i = firstItemIndex; i < list.length; i++) {
                             item = null;
@@ -3038,8 +3050,8 @@ var $root = eval("this");
                             }
                             item.$setItemIndex(i);
                             newItems[i - firstItemIndex] = item;
-                            this.layout.updateList(p[4], p[5], firstItemIndex);
-                            if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
+                            layout.updateList(p[4], p[5], firstItemIndex);
+                            if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                                 break;
                             }
                         }
@@ -3067,14 +3079,14 @@ var $root = eval("this");
                 }
                 _get(Object.getPrototypeOf(DataGroup.prototype), "$onFrameEnd", this).call(this);
                 if (measureSize) {
-                    if (this.layout) {
-                        if (!p[3] || !this.layout.fixElementSize) {
-                            var size = this.layout.getContentSize();
+                    if (layout) {
+                        if (!p[3] || !layout.fixElementSize) {
+                            var size = layout.getContentSize();
                             p[6] = size.width;
                             p[7] = size.height;
                             flower.Size.release(size);
                         } else if (p[2].length) {
-                            var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                            var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
                             p[6] = size.width;
                             p[7] = size.height;
                             flower.Size.release(size);
@@ -4323,18 +4335,31 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                var flag = false;
-                var count = 15;
-                while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                    this.$validateUIComponent();
-                    _get(Object.getPrototypeOf(MaskUI.prototype), "$onFrameEnd", this).call(this);
-                    this.shape.$onFrameEnd();
-                    this.$resetLayout();
-                    flag = true;
-                    count--;
-                    flower.trace("mask frame:", flower.EnterFrame.frame, count, this.$hasFlags(0x1000));
-                }
-                if (!flag) {
+                if (!this.parent.__UIComponent) {
+                    var flag = false;
+                    var count = 6;
+                    while (count && this.$hasFlags(0x1000)) {
+                        this.$validateUIComponent();
+                        _get(Object.getPrototypeOf(MaskUI.prototype), "$onFrameEnd", this).call(this);
+                        this.shape.$onFrameEnd();
+                        this.$resetLayout();
+                        flag = true;
+                        count--;
+                    }
+                    if (!flag) {
+                        _get(Object.getPrototypeOf(MaskUI.prototype), "$onFrameEnd", this).call(this);
+                        this.shape.$onFrameEnd();
+                        this.$resetLayout();
+                    }
+                    while (count && this.$hasFlags(0x1000)) {
+                        this.$validateUIComponent();
+                        _get(Object.getPrototypeOf(MaskUI.prototype), "$onFrameEnd", this).call(this);
+                        this.shape.$onFrameEnd();
+                        this.$resetLayout();
+                        flag = true;
+                        count--;
+                    }
+                } else {
                     _get(Object.getPrototypeOf(MaskUI.prototype), "$onFrameEnd", this).call(this);
                     this.shape.$onFrameEnd();
                     this.$resetLayout();
@@ -4907,7 +4932,9 @@ var $root = eval("this");
                     if (p[9] && p[9] != list.selectedItem) {
                         this.__setSelectedItemData(list.selectedItem);
                     }
-                    if (!p[3] || !this.layout || !this.layout.fixElementSize) {
+                    var layout = this.layout;
+                    var addMoreButton = false;
+                    if (!p[3] || !layout || !layout.fixElementSize) {
                         for (var i = 0, len = list.length; i < len; i++) {
                             item = null;
                             itemData = list.getItemAt(i);
@@ -4922,22 +4949,41 @@ var $root = eval("this");
                                 item = this.createItem(itemData, i);
                                 item.data = itemData;
                             }
+                            //检查 more 里面的数据
                             if (this.more && item.x + item.width > this.width) {
+                                addMoreButton = true;
                                 if (item.parent) {
                                     item.parent.removeChild(item);
                                 }
                                 if (this.moreButton) {
                                     this.moreButton.width = this.width - item.x;
-                                    this.addChild(this.moreButton);
+                                    if (this.moreButton.parent != this) {
+                                        this.addChild(this.moreButton);
+                                    }
                                 }
                                 var more = this.moreData;
+                                var saveList = more.list.concat();
+                                var moreItem;
                                 more.removeAll();
                                 for (; i < len; i++) {
                                     itemData = list.getItemAt(i);
-                                    more.push({
-                                        label: itemData.title,
-                                        panel: itemData
-                                    });
+                                    moreItem = null;
+                                    for (var j = 0; j < saveList.length; j++) {
+                                        if (saveList[j].panel == itemData) {
+                                            moreItem = saveList[j];
+                                            saveList.splice(j, 1);
+                                            break;
+                                        }
+                                    }
+                                    if (!moreItem) {
+                                        moreItem = {
+                                            label: itemData.title,
+                                            panel: itemData
+                                        };
+                                    } else {
+                                        moreItem.label = itemData.title;
+                                    }
+                                    more.push(moreItem);
                                 }
                                 break;
                             }
@@ -4949,8 +4995,13 @@ var $root = eval("this");
                             item.$setItemIndex(i);
                             newItems[i] = item;
                         }
+                        if (!addMoreButton) {
+                            if (this.moreButton && this.moreButton.parent == this) {
+                                this.removeChild(this.moreButton);
+                            }
+                        }
                     } else {
-                        this.layout.$clear();
+                        layout.$clear();
                         var elementWidth;
                         var elementHeight;
                         if (!items.length) {
@@ -4960,7 +5011,7 @@ var $root = eval("this");
                         }
                         elementWidth = items[0].width;
                         elementHeight = items[0].height;
-                        var firstItemIndex = this.layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
+                        var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                         firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
                         for (var i = firstItemIndex; i < list.length; i++) {
                             item = null;
@@ -4983,8 +5034,8 @@ var $root = eval("this");
                             }
                             item.$setItemIndex(i);
                             newItems[i - firstItemIndex] = item;
-                            this.layout.updateList(p[4], p[5], firstItemIndex);
-                            if (this.layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
+                            layout.updateList(p[4], p[5], firstItemIndex);
+                            if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                                 break;
                             }
                         }
@@ -5012,14 +5063,14 @@ var $root = eval("this");
                 }
                 _get(Object.getPrototypeOf(TabBar.prototype), "$onFrameEnd", this).call(this);
                 if (measureSize) {
-                    if (this.layout) {
-                        if (!p[3] || !this.layout.fixElementSize) {
-                            var size = this.layout.getContentSize();
+                    if (layout) {
+                        if (!p[3] || !layout.fixElementSize) {
+                            var size = layout.getContentSize();
                             p[6] = size.width;
                             p[7] = size.height;
                             flower.Size.release(size);
                         } else if (p[2].length) {
-                            var size = this.layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                            var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
                             p[6] = size.width;
                             p[7] = size.height;
                             flower.Size.release(size);

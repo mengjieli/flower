@@ -17,7 +17,7 @@
             <f:RectUI percentWidth="100" percentHeight="100" fillColor.up="0xcccccc" fillColor.down="0xffffff"
                       lineColor="0x333333"
                       lineWidth="1"/>
-            <f:Label text="  ..." verticalCenter="0"/>
+            <f:Label text="..." horizontalCenter="0" verticalCenter="0"/>
         </f:Button>
     </f:moreButton>
 </f:TabBar>

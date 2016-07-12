@@ -5,7 +5,7 @@ class Group extends flower.Sprite {
 
     constructor(data) {
         super();
-        if(data != null) {
+        if (data != null) {
             this._data = data;
         }
         this.$initUIComponent();
@@ -118,17 +118,28 @@ class Group extends flower.Sprite {
     }
 
     $onFrameEnd() {
-        var flag = false;
-        var count = 15;
-        while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-            this.$validateUIComponent();
-            super.$onFrameEnd();
-            this.$resetLayout();
-            flag = true;
-            count--;
-            flower.trace("group frame:", flower.EnterFrame.frame, count, this.$hasFlags(0x1000));
-        }
-        if (!flag) {
+        if(!this.parent.__UIComponent) {
+            var flag = false;
+            var count = 6;
+            while (count && this.$hasFlags(0x1000)) {
+                this.$validateUIComponent();
+                super.$onFrameEnd();
+                this.$resetLayout();
+                flag = true;
+                count--;
+            }
+            if (!flag) {
+                super.$onFrameEnd();
+                this.$resetLayout();
+            }
+            while (count && this.$hasFlags(0x1000)) {
+                this.$validateUIComponent();
+                super.$onFrameEnd();
+                this.$resetLayout();
+                flag = true;
+                count--;
+            }
+        } else {
             super.$onFrameEnd();
             this.$resetLayout();
         }

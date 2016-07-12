@@ -128,18 +128,31 @@ class MaskUI extends flower.Mask {
     }
 
     $onFrameEnd() {
-        var flag = false;
-        var count = 15;
-        while (count && this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-            this.$validateUIComponent();
-            super.$onFrameEnd();
-            this.shape.$onFrameEnd();
-            this.$resetLayout();
-            flag = true;
-            count--;
-            flower.trace("mask frame:", flower.EnterFrame.frame, count, this.$hasFlags(0x1000));
-        }
-        if (!flag) {
+        if(!this.parent.__UIComponent) {
+            var flag = false;
+            var count = 6;
+            while (count && this.$hasFlags(0x1000)) {
+                this.$validateUIComponent();
+                super.$onFrameEnd();
+                this.shape.$onFrameEnd();
+                this.$resetLayout();
+                flag = true;
+                count--;
+            }
+            if(!flag) {
+                super.$onFrameEnd();
+                this.shape.$onFrameEnd();
+                this.$resetLayout();
+            }
+            while (count && this.$hasFlags(0x1000)) {
+                this.$validateUIComponent();
+                super.$onFrameEnd();
+                this.shape.$onFrameEnd();
+                this.$resetLayout();
+                flag = true;
+                count--;
+            }
+        } else {
             super.$onFrameEnd();
             this.shape.$onFrameEnd();
             this.$resetLayout();
