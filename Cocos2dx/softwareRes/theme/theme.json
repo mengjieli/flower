@@ -10,6 +10,6 @@
     "./tree/ScrollerTree.xml",
     "./tree/PathObject.xml",
     "./tab/TabBar.xml",
-    "./tab/PanelTab.xml"
+    "./tab/Tab.xml"
   ]
 }

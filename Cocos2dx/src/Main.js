@@ -22,7 +22,7 @@ var Main = function () {
         value: function loadThemeComplete(e) {
             e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
 
-            var panel = new PanelTab();
+            var panel = new Tab();
             panel.x = 100;
             panel.y = 100;
             flower.Stage.getInstance().addChild(panel);
