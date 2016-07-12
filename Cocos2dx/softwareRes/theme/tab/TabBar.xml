@@ -1,4 +1,5 @@
-<f:TabBar class="TabBar" selectTime="touch_begin" percentWidth="100" height="25" creationComplete="this.init();" xmlns:f="flower"
+<f:TabBar class="TabBar" more="true" selectTime="touch_begin" percentWidth="100" height="25"
+          creationComplete="this.init();" xmlns:f="flower"
           xmlns:s="software">
     <f:script src="./TabBar.js"/>
     <f:itemRenderer>
