@@ -1,6 +1,6 @@
 {
   "name": "派克帝国",
-  "modules": {
+  "direction": {
     "ui": {
       "name": "界面",
       "list": [

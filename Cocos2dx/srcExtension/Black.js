@@ -578,6 +578,11 @@ class ArrayValue extends Value {
         super();
         this.list = init || [];
         this._length = this.list.length;
+        this.__value = this;
+    }
+
+    $setValue(val) {
+        return;
     }
 
     push(item) {
@@ -824,7 +829,7 @@ class ArrayValue extends Value {
             return;
         }
         this.list.splice(itemIndex, 1);
-        this.list.splice(index, 0,item);
+        this.list.splice(index, 0, item);
         this.dispatchWidth(flower.Event.UPDATE, this);
     }
 
@@ -1014,6 +1019,11 @@ class ObjectValue extends Value {
     constructor() {
         super();
         this.__old = this.__value = {};
+        this.__value = this;
+    }
+
+    $setValue(val) {
+        return;
     }
 
     //update(...args) {
@@ -1622,128 +1632,6 @@ class PanelScaleMode {
 
 black.PanelScaleMode = PanelScaleMode;
 //////////////////////////End File:extension/black/utils/PanelScaleMode.js///////////////////////////
-
-
-
-//////////////////////////File:extension/black/theme/Theme.js///////////////////////////
-class Theme extends flower.EventDispatcher {
-
-    __progress;
-    __list;
-    __index;
-    __url;
-    __direction;
-
-    constructor(url) {
-        super();
-        Theme.instance = this;
-        this.__url = url;
-        this.__direction = flower.Path.getPathDirection(url);
-        this.__progress = flower.DataManager.getInstance().createData("ProgressData");
-    }
-
-    load() {
-        var url = this.__url;
-        this.__progress.tip.value = url;
-        var loader = new flower.URLLoader(url);
-        loader.load();
-        loader.addListener(flower.Event.COMPLETE, this.__onLoadThemeComplete, this);
-        loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-    }
-
-    __onLoadThemeComplete(e) {
-        var cfg = e.data;
-        var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace, cfg.packageURL);
-        var classes = cfg.classes;
-        if (classes) {
-            for (var key in  classes) {
-                var url = classes[key];
-                if (url.slice(0, 2) == "./") {
-                    url = this.__direction + url.slice(2, url.length);
-                }
-                flower.UIParser.setLocalUIURL(key, url, namespace);
-            }
-        }
-        this.__list = [];
-        var data = cfg.data;
-        if (data) {
-            for (var i = 0; i < data.length; i++) {
-                var url = data[i];
-                if (url.slice(0, 2) == "./") {
-                    url = this.__direction + url.slice(2, url.length);
-                }
-                this.__list.push({
-                    type: "data",
-                    url: url
-                });
-            }
-        }
-        var components = cfg.components;
-        if (components) {
-            for (var i = 0; i < components.length; i++) {
-                var url = components[i];
-                if (url.slice(0, 2) == "./") {
-                    url = this.__direction + url.slice(2, url.length);
-                }
-                var parser = new flower.UIParser();
-                parser.localNameSpace = namespace;
-                this.__list.push({
-                    type: "ui",
-                    ui: parser,
-                    url: url
-                });
-            }
-        }
-        this.__index = 0;
-        this.__loadNext();
-    }
-
-    __loadError(e) {
-        if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, e.data);
-        } else {
-            $error(e.data);
-        }
-    }
-
-    __loadNext(e) {
-        var item;
-        if (this.__index != 0) {
-            item = this.__list[this.__index - 1];
-            if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data);
-            }
-        }
-        this.__progress.max.value = this.__list.length;
-        this.__progress.current.value = this.__index;
-        if (this.__index == this.__list.length) {
-            this.dispatchWidth(flower.Event.COMPLETE);
-            return;
-        }
-        item = this.__list[this.__index];
-        if (item.type == "ui") {
-            var ui = this.__list[this.__index].ui;
-            var url = this.__list[this.__index].url;
-            ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-            ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-            ui.parseAsync(url);
-        } else if (item.type == "data") {
-            var loader = new flower.URLLoader(item.url);
-            loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-            loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-            loader.load();
-        }
-        this.__index++;
-    }
-
-    get progress() {
-        return this.__progress;
-    }
-}
-
-black.Theme = Theme;
-//////////////////////////End File:extension/black/theme/Theme.js///////////////////////////
 
 
 
@@ -5925,6 +5813,128 @@ class Tree extends DataGroup {
 
 black.Tree = Tree;
 //////////////////////////End File:extension/black/Tree.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/Module.js///////////////////////////
+class Module extends flower.EventDispatcher {
+
+    __progress;
+    __list;
+    __index;
+    __url;
+    __direction;
+
+    constructor(url) {
+        super();
+        Module.instance = this;
+        this.__url = url;
+        this.__direction = flower.Path.getPathDirection(url);
+        this.__progress = flower.DataManager.getInstance().createData("ProgressData");
+    }
+
+    load() {
+        var url = this.__url;
+        this.__progress.tip.value = url;
+        var loader = new flower.URLLoader(url);
+        loader.load();
+        loader.addListener(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
+        loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+    }
+
+    __onLoadModuleComplete(e) {
+        var cfg = e.data;
+        var namespace = cfg.namespace || "local";
+        flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+        var classes = cfg.classes;
+        if (classes) {
+            for (var key in  classes) {
+                var url = classes[key];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                flower.UIParser.setLocalUIURL(key, url, namespace);
+            }
+        }
+        this.__list = [];
+        var data = cfg.data;
+        if (data) {
+            for (var i = 0; i < data.length; i++) {
+                var url = data[i];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                this.__list.push({
+                    type: "data",
+                    url: url
+                });
+            }
+        }
+        var components = cfg.components;
+        if (components) {
+            for (var i = 0; i < components.length; i++) {
+                var url = components[i];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                var parser = new flower.UIParser();
+                parser.localNameSpace = namespace;
+                this.__list.push({
+                    type: "ui",
+                    ui: parser,
+                    url: url
+                });
+            }
+        }
+        this.__index = 0;
+        this.__loadNext();
+    }
+
+    __loadError(e) {
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatchWidth(flower.Event.ERROR, e.data);
+        } else {
+            $error(e.data);
+        }
+    }
+
+    __loadNext(e) {
+        var item;
+        if (this.__index != 0) {
+            item = this.__list[this.__index - 1];
+            if (item.type == "data") {
+                flower.DataManager.getInstance().addDefine(e.data);
+            }
+        }
+        this.__progress.max.value = this.__list.length;
+        this.__progress.current.value = this.__index;
+        if (this.__index == this.__list.length) {
+            this.dispatchWidth(flower.Event.COMPLETE);
+            return;
+        }
+        item = this.__list[this.__index];
+        if (item.type == "ui") {
+            var ui = this.__list[this.__index].ui;
+            var url = this.__list[this.__index].url;
+            ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+            ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            ui.parseAsync(url);
+        } else if (item.type == "data") {
+            var loader = new flower.URLLoader(item.url);
+            loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+            loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            loader.load();
+        }
+        this.__index++;
+    }
+
+    get progress() {
+        return this.__progress;
+    }
+}
+
+black.Module = Module;
+//////////////////////////End File:extension/black/Module.js///////////////////////////
 
 
 

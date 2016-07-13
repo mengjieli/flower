@@ -17,6 +17,11 @@ class ArrayValue extends Value {
         super();
         this.list = init || [];
         this._length = this.list.length;
+        this.__value = this;
+    }
+
+    $setValue(val) {
+        return;
     }
 
     push(item) {
@@ -263,7 +268,7 @@ class ArrayValue extends Value {
             return;
         }
         this.list.splice(itemIndex, 1);
-        this.list.splice(index, 0,item);
+        this.list.splice(index, 0, item);
         this.dispatchWidth(flower.Event.UPDATE, this);
     }
 

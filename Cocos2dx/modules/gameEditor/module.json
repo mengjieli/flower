@@ -10,5 +10,7 @@
   },
   "data": [
     "./data/ProjectData.json"
+  ],
+  "scripts:": [
   ]
 }

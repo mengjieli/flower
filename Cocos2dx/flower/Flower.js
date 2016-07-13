@@ -123,13 +123,18 @@ function trace() {
     console.log(str);
 }
 
+function breakPoint(name) {
+    trace(name);
+}
+
 exports.start = start;
 exports.getLanguage = $getLanguage;
 exports.trace = trace;
+exports.breakPoint = breakPoint;
 exports.sys = {
     config: config,
     DEBUG: DEBUG,
-    TIP:TIP,
+    TIP: TIP,
     $tip: $tip,
     $warn: $warn,
     $error: $error

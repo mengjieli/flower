@@ -77,12 +77,12 @@ class Binding {
     update(value = null, old = null) {
         var value;
         if (this.singleValue) {
-            this.thisObj[this.property] = this.stmts[0].getValue();
             try {
                 value = this.stmts[0].getValue();
             } catch (e) {
+                value = null;
             }
-            this.thisObj[this.property]
+            this.thisObj[this.property] = value;
         }
         else {
             var str = "";

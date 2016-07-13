@@ -19,21 +19,21 @@ var PreLoading = function (_flower$EventDispatch) {
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PreLoading).call(this));
 
         _this.progress = new flower.NumberValue();
-        _this.themes = [new flower.Theme("res/software/theme.json"), new flower.Theme("res/gameEditor/theme.json")];
+        _this.modules = [new flower.Module("modules/software/module.json"), new flower.Module("modules/gameEditor/module.json")];
         _this.progressBar = new flower.UIParser().parseUI("\n        <f:Group width=\"150\" height=\"20\" class=\"PreLoading\" xmlns:f=\"flower\">\n            <f:script src=\"./PreLoading.js\"/>\n            <f:RectUI percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor=\"0xE7E7E7\"/>\n            <f:RectUI percentWidth=\"{data*100}\" percentHeight=\"100\" fillColor=\"0x3d3d3d\"/>\n        </f:Group>\n        ", _this.progress);
         flower.PopManager.pop(_this.progressBar, true, true);
         _this.index = 0;
-        _this.loadNextTheme();
+        _this.loadNextModule();
         return _this;
     }
 
     _createClass(PreLoading, [{
-        key: "loadNextTheme",
-        value: function loadNextTheme() {
-            if (this.index < this.themes.length) {
-                this.theme = this.themes[this.index];
-                this.theme.progress.percent.addListener(flower.Event.UPDATE, this.onUpdate, this);
-                this.theme.load();
+        key: "loadNextModule",
+        value: function loadNextModule() {
+            if (this.index < this.modules.length) {
+                this.module = this.modules[this.index];
+                this.module.progress.percent.addListener(flower.Event.UPDATE, this.onUpdate, this);
+                this.module.load();
             } else {
                 this.dispose();
             }
@@ -41,11 +41,11 @@ var PreLoading = function (_flower$EventDispatch) {
     }, {
         key: "onUpdate",
         value: function onUpdate(e) {
-            var data = this.theme.progress;
-            this.progress.value = (this.index + data.percent.value) / this.themes.length;
+            var data = this.module.progress;
+            this.progress.value = (this.index + data.percent.value) / this.modules.length;
             if (data.percent.value == 1) {
                 this.index++;
-                this.loadNextTheme();
+                this.loadNextModule();
             }
         }
     }, {

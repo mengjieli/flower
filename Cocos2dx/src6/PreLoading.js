@@ -1,18 +1,18 @@
 class PreLoading extends flower.EventDispatcher {
 
     progressBar;
-    themes;
+    modules;
     index;
-    theme;
+    module;
     progress;
 
     constructor() {
         super();
 
         this.progress = new flower.NumberValue();
-        this.themes = [
-            new flower.Theme("res/software/theme.json"),
-            new flower.Theme("res/gameEditor/theme.json")
+        this.modules = [
+            new flower.Module("modules/software/module.json"),
+            new flower.Module("modules/gameEditor/module.json")
         ];
         this.progressBar = (new flower.UIParser()).parseUI(`
         <f:Group width="150" height="20" class="PreLoading" xmlns:f="flower">
@@ -23,25 +23,25 @@ class PreLoading extends flower.EventDispatcher {
         `, this.progress);
         flower.PopManager.pop(this.progressBar, true, true);
         this.index = 0;
-        this.loadNextTheme();
+        this.loadNextModule();
     }
 
-    loadNextTheme() {
-        if (this.index < this.themes.length) {
-            this.theme = this.themes[this.index];
-            this.theme.progress.percent.addListener(flower.Event.UPDATE, this.onUpdate, this);
-            this.theme.load();
+    loadNextModule() {
+        if (this.index < this.modules.length) {
+            this.module = this.modules[this.index];
+            this.module.progress.percent.addListener(flower.Event.UPDATE, this.onUpdate, this);
+            this.module.load();
         } else {
             this.dispose();
         }
     }
 
     onUpdate(e) {
-        var data = this.theme.progress;
-        this.progress.value = (this.index + data.percent.value) / this.themes.length;
+        var data = this.module.progress;
+        this.progress.value = (this.index + data.percent.value) / this.modules.length;
         if (data.percent.value == 1) {
             this.index++;
-            this.loadNextTheme();
+            this.loadNextModule();
         }
     }
 

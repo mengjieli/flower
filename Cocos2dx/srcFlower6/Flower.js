@@ -147,13 +147,18 @@ function trace() {
     console.log(str);
 }
 
+function breakPoint(name) {
+    trace(name);
+}
+
 flower.start = start;
 flower.getLanguage = $getLanguage;
 flower.trace = trace;
+flower.breakPoint = breakPoint;
 flower.sys = {
     config: config,
     DEBUG: DEBUG,
-    TIP:TIP,
+    TIP: TIP,
     $tip: $tip,
     $warn: $warn,
     $error: $error

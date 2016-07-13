@@ -1,4 +1,4 @@
-class Theme extends flower.EventDispatcher {
+class Module extends flower.EventDispatcher {
 
     __progress;
     __list;
@@ -8,7 +8,7 @@ class Theme extends flower.EventDispatcher {
 
     constructor(url) {
         super();
-        Theme.instance = this;
+        Module.instance = this;
         this.__url = url;
         this.__direction = flower.Path.getPathDirection(url);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
@@ -19,11 +19,11 @@ class Theme extends flower.EventDispatcher {
         this.__progress.tip.value = url;
         var loader = new flower.URLLoader(url);
         loader.load();
-        loader.addListener(flower.Event.COMPLETE, this.__onLoadThemeComplete, this);
+        loader.addListener(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
         loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
     }
 
-    __onLoadThemeComplete(e) {
+    __onLoadModuleComplete(e) {
         var cfg = e.data;
         var namespace = cfg.namespace || "local";
         flower.UIParser.addNameSapce(namespace, cfg.packageURL);
@@ -114,4 +114,4 @@ class Theme extends flower.EventDispatcher {
     }
 }
 
-exports.Theme = Theme;
+exports.Module = Module;

@@ -23,7 +23,7 @@ var Main = function () {
             e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
 
             var ui = new flower.UIParser();
-            ui.parseUIAsync("res/gameEditor/EditorMain.xml");
+            ui.parseUIAsync("modules/gameEditor/EditorMain.xml");
             flower.Stage.getInstance().addChild(ui);
         }
     }]);

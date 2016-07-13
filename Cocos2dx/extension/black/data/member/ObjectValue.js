@@ -3,6 +3,11 @@ class ObjectValue extends Value {
     constructor() {
         super();
         this.__old = this.__value = {};
+        this.__value = this;
+    }
+
+    $setValue(val) {
+        return;
     }
 
     //update(...args) {

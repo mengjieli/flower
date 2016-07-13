@@ -188,8 +188,6 @@ var list = [
 
     "PanelScaleMode",
 
-    "Theme",
-
     "Group",
     "UIParser",
     "DataGroup",
@@ -214,7 +212,8 @@ var list = [
     "Combox",
     "Panel",
     "Alert",
-    "Tree"
+    "Tree",
+    "Module",
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";

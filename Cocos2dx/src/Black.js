@@ -640,10 +640,16 @@ var $root = eval("this");
 
             _this4.list = init || [];
             _this4._length = _this4.list.length;
+            _this4.__value = _this4;
             return _this4;
         }
 
         _createClass(ArrayValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                return;
+            }
+        }, {
             key: "push",
             value: function push(item) {
                 this.list.push(item);
@@ -1159,47 +1165,54 @@ var $root = eval("this");
             var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
 
             _this8.__old = _this8.__value = {};
+            _this8.__value = _this8;
             return _this8;
         }
 
-        //update(...args) {
-        //    var change = false;
-        //    for (var i = 0; i < args.length;) {
-        //        var name = args[i];
-        //        if (i + 1 >= args.length) {
-        //            break;
-        //        }
-        //        var value = args[i + 1];
-        //        var obj = this[name];
-        //        if (obj instanceof Value) {
-        //            if (obj.value != value) {
-        //                obj.value = value;
-        //                change = true;
-        //            }
-        //        } else {
-        //            if (obj != value) {
-        //                this[name] = value;
-        //                change = true;
-        //            }
-        //        }
-        //        i += 2;
-        //    }
-        //    if (change) {
-        //        this.dispatchWidth(flower.Event.UPDATE, this);
-        //    }
-        //}
-        //
-        //addMember(name, value) {
-        //    this[name] = value;
-        //    this.dispatchWidth(flower.Event.UPDATE, this);
-        //}
-        //
-        //
-        //deleteMember(name) {
-        //    delete this[name];
-        //}
-
         _createClass(ObjectValue, [{
+            key: "$setValue",
+            value: function $setValue(val) {
+                return;
+            }
+
+            //update(...args) {
+            //    var change = false;
+            //    for (var i = 0; i < args.length;) {
+            //        var name = args[i];
+            //        if (i + 1 >= args.length) {
+            //            break;
+            //        }
+            //        var value = args[i + 1];
+            //        var obj = this[name];
+            //        if (obj instanceof Value) {
+            //            if (obj.value != value) {
+            //                obj.value = value;
+            //                change = true;
+            //            }
+            //        } else {
+            //            if (obj != value) {
+            //                this[name] = value;
+            //                change = true;
+            //            }
+            //        }
+            //        i += 2;
+            //    }
+            //    if (change) {
+            //        this.dispatchWidth(flower.Event.UPDATE, this);
+            //    }
+            //}
+            //
+            //addMember(name, value) {
+            //    this[name] = value;
+            //    this.dispatchWidth(flower.Event.UPDATE, this);
+            //}
+            //
+            //
+            //deleteMember(name) {
+            //    delete this[name];
+            //}
+
+        }, {
             key: "dispose",
             value: function dispose() {
                 for (var key in this) {
@@ -1837,135 +1850,6 @@ var $root = eval("this");
     black.PanelScaleMode = PanelScaleMode;
     //////////////////////////End File:extension/black/utils/PanelScaleMode.js///////////////////////////
 
-    //////////////////////////File:extension/black/theme/Theme.js///////////////////////////
-
-    var Theme = function (_flower$EventDispatch2) {
-        _inherits(Theme, _flower$EventDispatch2);
-
-        function Theme(url) {
-            _classCallCheck(this, Theme);
-
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Theme).call(this));
-
-            Theme.instance = _this14;
-            _this14.__url = url;
-            _this14.__direction = flower.Path.getPathDirection(url);
-            _this14.__progress = flower.DataManager.getInstance().createData("ProgressData");
-            return _this14;
-        }
-
-        _createClass(Theme, [{
-            key: "load",
-            value: function load() {
-                var url = this.__url;
-                this.__progress.tip.value = url;
-                var loader = new flower.URLLoader(url);
-                loader.load();
-                loader.addListener(flower.Event.COMPLETE, this.__onLoadThemeComplete, this);
-                loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-            }
-        }, {
-            key: "__onLoadThemeComplete",
-            value: function __onLoadThemeComplete(e) {
-                var cfg = e.data;
-                var namespace = cfg.namespace || "local";
-                flower.UIParser.addNameSapce(namespace, cfg.packageURL);
-                var classes = cfg.classes;
-                if (classes) {
-                    for (var key in classes) {
-                        var url = classes[key];
-                        if (url.slice(0, 2) == "./") {
-                            url = this.__direction + url.slice(2, url.length);
-                        }
-                        flower.UIParser.setLocalUIURL(key, url, namespace);
-                    }
-                }
-                this.__list = [];
-                var data = cfg.data;
-                if (data) {
-                    for (var i = 0; i < data.length; i++) {
-                        var url = data[i];
-                        if (url.slice(0, 2) == "./") {
-                            url = this.__direction + url.slice(2, url.length);
-                        }
-                        this.__list.push({
-                            type: "data",
-                            url: url
-                        });
-                    }
-                }
-                var components = cfg.components;
-                if (components) {
-                    for (var i = 0; i < components.length; i++) {
-                        var url = components[i];
-                        if (url.slice(0, 2) == "./") {
-                            url = this.__direction + url.slice(2, url.length);
-                        }
-                        var parser = new flower.UIParser();
-                        parser.localNameSpace = namespace;
-                        this.__list.push({
-                            type: "ui",
-                            ui: parser,
-                            url: url
-                        });
-                    }
-                }
-                this.__index = 0;
-                this.__loadNext();
-            }
-        }, {
-            key: "__loadError",
-            value: function __loadError(e) {
-                if (this.hasListener(flower.Event.ERROR)) {
-                    this.dispatchWidth(flower.Event.ERROR, e.data);
-                } else {
-                    $error(e.data);
-                }
-            }
-        }, {
-            key: "__loadNext",
-            value: function __loadNext(e) {
-                var item;
-                if (this.__index != 0) {
-                    item = this.__list[this.__index - 1];
-                    if (item.type == "data") {
-                        flower.DataManager.getInstance().addDefine(e.data);
-                    }
-                }
-                this.__progress.max.value = this.__list.length;
-                this.__progress.current.value = this.__index;
-                if (this.__index == this.__list.length) {
-                    this.dispatchWidth(flower.Event.COMPLETE);
-                    return;
-                }
-                item = this.__list[this.__index];
-                if (item.type == "ui") {
-                    var ui = this.__list[this.__index].ui;
-                    var url = this.__list[this.__index].url;
-                    ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-                    ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-                    ui.parseAsync(url);
-                } else if (item.type == "data") {
-                    var loader = new flower.URLLoader(item.url);
-                    loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-                    loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-                    loader.load();
-                }
-                this.__index++;
-            }
-        }, {
-            key: "progress",
-            get: function get() {
-                return this.__progress;
-            }
-        }]);
-
-        return Theme;
-    }(flower.EventDispatcher);
-
-    black.Theme = Theme;
-    //////////////////////////End File:extension/black/theme/Theme.js///////////////////////////
-
     //////////////////////////File:extension/black/Group.js///////////////////////////
 
     var Group = function (_flower$Sprite) {
@@ -1974,13 +1858,13 @@ var $root = eval("this");
         function Group(data) {
             _classCallCheck(this, Group);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
             if (data != null) {
-                _this15._data = data;
+                _this14._data = data;
             }
-            _this15.$initUIComponent();
-            return _this15;
+            _this14.$initUIComponent();
+            return _this14;
         }
 
         _createClass(Group, [{
@@ -2153,14 +2037,14 @@ var $root = eval("this");
         function UIParser() {
             _classCallCheck(this, UIParser);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
-            _this16.defaultClassName = "";
-            _this16.localNameSpace = "local";
+            _this15.defaultClassName = "";
+            _this15.localNameSpace = "local";
 
-            _this16.classes = flower.UIParser.classes;
-            _this16.percentWidth = _this16.percentHeight = 100;
-            return _this16;
+            _this15.classes = flower.UIParser.classes;
+            _this15.percentWidth = _this15.percentHeight = 100;
+            return _this15;
         }
 
         _createClass(UIParser, [{
@@ -3017,9 +2901,9 @@ var $root = eval("this");
         function DataGroup() {
             _classCallCheck(this, DataGroup);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
 
-            _this17.$DataGroup = {
+            _this16.$DataGroup = {
                 0: null, //data
                 1: null, //itemRenderer
                 2: null, //items
@@ -3038,8 +2922,8 @@ var $root = eval("this");
                 15: 0, //touchTime
                 16: null };
             //touchItemData
-            _this17.addListener(flower.TouchEvent.TOUCH_RELEASE, _this17.__onTouchItem, _this17);
-            return _this17;
+            _this16.addListener(flower.TouchEvent.TOUCH_RELEASE, _this16.__onTouchItem, _this16);
+            return _this16;
         }
 
         _createClass(DataGroup, [{
@@ -3598,12 +3482,12 @@ var $root = eval("this");
         function ItemRenderer() {
             _classCallCheck(this, ItemRenderer);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
 
-            _this18._selected = false;
+            _this17._selected = false;
 
-            _this18.absoluteState = true;
-            return _this18;
+            _this17.absoluteState = true;
+            return _this17;
         }
 
         _createClass(ItemRenderer, [{
@@ -3704,10 +3588,10 @@ var $root = eval("this");
 
             _classCallCheck(this, Label);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
 
-            _this19.$initUIComponent();
-            return _this19;
+            _this18.$initUIComponent();
+            return _this18;
         }
 
         _createClass(Label, [{
@@ -3819,10 +3703,10 @@ var $root = eval("this");
 
             _classCallCheck(this, Input);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Input).call(this, text));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Input).call(this, text));
 
-            _this20.$initUIComponent();
-            return _this20;
+            _this19.$initUIComponent();
+            return _this19;
         }
 
         _createClass(Input, [{
@@ -3932,15 +3816,15 @@ var $root = eval("this");
         function RectUI() {
             _classCallCheck(this, RectUI);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
 
-            _this21.$RectUI = {
+            _this20.$RectUI = {
                 0: 0, //width
                 1: 0 };
             //height
-            _this21.drawRect = null;
-            _this21.$initUIComponent();
-            return _this21;
+            _this20.drawRect = null;
+            _this20.$initUIComponent();
+            return _this20;
         }
 
         _createClass(RectUI, [{
@@ -4133,11 +4017,11 @@ var $root = eval("this");
 
             _classCallCheck(this, Image);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
 
-            _this22.$initUIComponent();
-            _this22.source = source;
-            return _this22;
+            _this21.$initUIComponent();
+            _this21.source = source;
+            return _this21;
         }
 
         _createClass(Image, [{
@@ -4312,13 +4196,13 @@ var $root = eval("this");
         function MaskUI(data) {
             _classCallCheck(this, MaskUI);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
 
             if (data != null) {
-                _this24._data = data;
+                _this23._data = data;
             }
-            _this24.$initUIComponent();
-            return _this24;
+            _this23.$initUIComponent();
+            return _this23;
         }
 
         _createClass(MaskUI, [{
@@ -4508,17 +4392,17 @@ var $root = eval("this");
         function Button() {
             _classCallCheck(this, Button);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-            _this25._enabled = true;
+            _this24._enabled = true;
 
-            _this25.absoluteState = true;
-            _this25.currentState = "up";
+            _this24.absoluteState = true;
+            _this24.currentState = "up";
 
-            _this25.addListener(flower.TouchEvent.TOUCH_BEGIN, _this25.__onTouch, _this25);
-            _this25.addListener(flower.TouchEvent.TOUCH_END, _this25.__onTouch, _this25);
-            _this25.addListener(flower.TouchEvent.TOUCH_RELEASE, _this25.__onTouch, _this25);
-            return _this25;
+            _this24.addListener(flower.TouchEvent.TOUCH_BEGIN, _this24.__onTouch, _this24);
+            _this24.addListener(flower.TouchEvent.TOUCH_END, _this24.__onTouch, _this24);
+            _this24.addListener(flower.TouchEvent.TOUCH_RELEASE, _this24.__onTouch, _this24);
+            return _this24;
         }
 
         _createClass(Button, [{
@@ -4591,10 +4475,10 @@ var $root = eval("this");
         function ToggleButton() {
             _classCallCheck(this, ToggleButton);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-            _this26.__selected = false;
-            return _this26;
+            _this25.__selected = false;
+            return _this25;
         }
 
         _createClass(ToggleButton, [{
@@ -4764,17 +4648,17 @@ var $root = eval("this");
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
 
-            _this29._buttons = [];
-            _this29._enabled = true;
+            _this28._buttons = [];
+            _this28._enabled = true;
 
             if (groupName == null || groupName == "") {
-                groupName = "group" + _this29.id;
+                groupName = "group" + _this28.id;
             }
-            _this29._groupName = groupName;
-            RadioButtonGroup.groups.push(_this29);
-            return _this29;
+            _this28._groupName = groupName;
+            RadioButtonGroup.groups.push(_this28);
+            return _this28;
         }
 
         _createClass(RadioButtonGroup, [{
@@ -4955,12 +4839,12 @@ var $root = eval("this");
         function ListBase() {
             _classCallCheck(this, ListBase);
 
-            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
 
-            _this31.requireSelection = true;
-            _this31.itemSelectedEnabled = true;
-            _this31.itemClickedEnabled = true;
-            return _this31;
+            _this30.requireSelection = true;
+            _this30.itemSelectedEnabled = true;
+            _this30.itemClickedEnabled = true;
+            return _this30;
         }
 
         return ListBase;
@@ -4977,10 +4861,10 @@ var $root = eval("this");
         function List() {
             _classCallCheck(this, List);
 
-            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
 
-            _this32.layout = new VerticalLayout();
-            return _this32;
+            _this31.layout = new VerticalLayout();
+            return _this31;
         }
 
         return List;
@@ -4997,17 +4881,17 @@ var $root = eval("this");
         function TabBar() {
             _classCallCheck(this, TabBar);
 
-            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
 
-            _this33.$TabBar = {
+            _this32.$TabBar = {
                 0: false, //more
                 1: null, //moreButton
                 2: null, //moreData
                 3: null };
             //moreList
-            _this33.layout = new HorizontalLayout();
-            _this33.layout.fixElementSize = false;
-            return _this33;
+            _this32.layout = new HorizontalLayout();
+            _this32.layout.fixElementSize = false;
+            return _this32;
         }
 
         _createClass(TabBar, [{
@@ -5276,11 +5160,11 @@ var $root = eval("this");
         function ViewStack() {
             _classCallCheck(this, ViewStack);
 
-            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
 
-            _this34._items = [];
-            _this34._selectedIndex = -1;
-            return _this34;
+            _this33._items = [];
+            _this33._selectedIndex = -1;
+            return _this33;
         }
 
         _createClass(ViewStack, [{
@@ -5481,25 +5365,25 @@ var $root = eval("this");
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this35._viewSize = flower.Size.create(0, 0);
-            _this35._scrollDisX = [];
-            _this35._scrollDisY = [];
-            _this35._scrollTime = [];
-            _this35._upGap = 18;
+            _this34._viewSize = flower.Size.create(0, 0);
+            _this34._scrollDisX = [];
+            _this34._scrollDisY = [];
+            _this34._scrollTime = [];
+            _this34._upGap = 18;
 
-            _this35.addListener(flower.TouchEvent.TOUCH_BEGIN, _this35.__onTouchScroller, _this35);
-            _this35.addListener(flower.TouchEvent.TOUCH_MOVE, _this35.__onTouchScroller, _this35);
-            _this35.addListener(flower.TouchEvent.TOUCH_END, _this35.__onTouchScroller, _this35);
-            _this35.addListener(flower.TouchEvent.TOUCH_RELEASE, _this35.__onTouchScroller, _this35);
-            _this35.width = _this35.height = 100;
+            _this34.addListener(flower.TouchEvent.TOUCH_BEGIN, _this34.__onTouchScroller, _this34);
+            _this34.addListener(flower.TouchEvent.TOUCH_MOVE, _this34.__onTouchScroller, _this34);
+            _this34.addListener(flower.TouchEvent.TOUCH_END, _this34.__onTouchScroller, _this34);
+            _this34.addListener(flower.TouchEvent.TOUCH_RELEASE, _this34.__onTouchScroller, _this34);
+            _this34.width = _this34.height = 100;
             //var bg = new RectUI();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this35;
+            return _this34;
         }
 
         _createClass(Scroller, [{
@@ -5733,16 +5617,16 @@ var $root = eval("this");
         function Combox() {
             _classCallCheck(this, Combox);
 
-            var _this36 = _possibleConstructorReturn(this, Object.getPrototypeOf(Combox).call(this));
+            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(Combox).call(this));
 
-            _this36.$combox = {
+            _this35.$combox = {
                 0: null, //label
                 1: null, //button
                 2: null, //list
                 3: false, //openFlags
                 4: "label", //labelField
                 5: null };
-            return _this36;
+            return _this35;
         }
 
         _createClass(Combox, [{
@@ -5905,16 +5789,16 @@ var $root = eval("this");
         function Panel() {
             _classCallCheck(this, Panel);
 
-            var _this37 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
+            var _this36 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
 
-            _this37.$Panel = {
+            _this36.$Panel = {
                 0: "", //title
                 1: null, //titleLabel
                 2: null, //closeButton
                 3: PanelScaleMode.NO_SCALE, //scaleMode
                 4: null, //iconImage
                 5: "" };
-            return _this37;
+            return _this36;
         }
 
         _createClass(Panel, [{
@@ -6145,14 +6029,14 @@ var $root = eval("this");
         function Alert() {
             _classCallCheck(this, Alert);
 
-            var _this38 = _possibleConstructorReturn(this, Object.getPrototypeOf(Alert).call(this));
+            var _this37 = _possibleConstructorReturn(this, Object.getPrototypeOf(Alert).call(this));
 
-            _this38.$Alert = {
+            _this37.$Alert = {
                 0: null, //confirmButton
                 1: null, //cancelButton
                 2: null, //contentLabel
                 3: "" };
-            return _this38;
+            return _this37;
         }
 
         _createClass(Alert, [{
@@ -6267,20 +6151,20 @@ var $root = eval("this");
         function Tree() {
             _classCallCheck(this, Tree);
 
-            var _this39 = _possibleConstructorReturn(this, Object.getPrototypeOf(Tree).call(this));
+            var _this38 = _possibleConstructorReturn(this, Object.getPrototypeOf(Tree).call(this));
 
-            _this39.$Tree = {
+            _this38.$Tree = {
                 0: null, //dataProvider
                 1: new flower.ArrayValue(), //dataGroupDataProvider;
                 2: {}, //openCloseTable
                 3: "path" //pathField
             };
-            _this39.requireSelection = true;
-            _this39.itemSelectedEnabled = true;
-            _this39.itemClickedEnabled = true;
-            _this39.layout = new VerticalLayout();
-            _get(Object.getPrototypeOf(Tree.prototype), "$setDataProvider", _this39).call(_this39, _this39.$Tree[1]);
-            return _this39;
+            _this38.requireSelection = true;
+            _this38.itemSelectedEnabled = true;
+            _this38.itemClickedEnabled = true;
+            _this38.layout = new VerticalLayout();
+            _get(Object.getPrototypeOf(Tree.prototype), "$setDataProvider", _this38).call(_this38, _this38.$Tree[1]);
+            return _this38;
         }
 
         _createClass(Tree, [{
@@ -6461,6 +6345,135 @@ var $root = eval("this");
 
     black.Tree = Tree;
     //////////////////////////End File:extension/black/Tree.js///////////////////////////
+
+    //////////////////////////File:extension/black/Module.js///////////////////////////
+
+    var Module = function (_flower$EventDispatch2) {
+        _inherits(Module, _flower$EventDispatch2);
+
+        function Module(url) {
+            _classCallCheck(this, Module);
+
+            var _this39 = _possibleConstructorReturn(this, Object.getPrototypeOf(Module).call(this));
+
+            Module.instance = _this39;
+            _this39.__url = url;
+            _this39.__direction = flower.Path.getPathDirection(url);
+            _this39.__progress = flower.DataManager.getInstance().createData("ProgressData");
+            return _this39;
+        }
+
+        _createClass(Module, [{
+            key: "load",
+            value: function load() {
+                var url = this.__url;
+                this.__progress.tip.value = url;
+                var loader = new flower.URLLoader(url);
+                loader.load();
+                loader.addListener(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
+                loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            }
+        }, {
+            key: "__onLoadModuleComplete",
+            value: function __onLoadModuleComplete(e) {
+                var cfg = e.data;
+                var namespace = cfg.namespace || "local";
+                flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+                var classes = cfg.classes;
+                if (classes) {
+                    for (var key in classes) {
+                        var url = classes[key];
+                        if (url.slice(0, 2) == "./") {
+                            url = this.__direction + url.slice(2, url.length);
+                        }
+                        flower.UIParser.setLocalUIURL(key, url, namespace);
+                    }
+                }
+                this.__list = [];
+                var data = cfg.data;
+                if (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var url = data[i];
+                        if (url.slice(0, 2) == "./") {
+                            url = this.__direction + url.slice(2, url.length);
+                        }
+                        this.__list.push({
+                            type: "data",
+                            url: url
+                        });
+                    }
+                }
+                var components = cfg.components;
+                if (components) {
+                    for (var i = 0; i < components.length; i++) {
+                        var url = components[i];
+                        if (url.slice(0, 2) == "./") {
+                            url = this.__direction + url.slice(2, url.length);
+                        }
+                        var parser = new flower.UIParser();
+                        parser.localNameSpace = namespace;
+                        this.__list.push({
+                            type: "ui",
+                            ui: parser,
+                            url: url
+                        });
+                    }
+                }
+                this.__index = 0;
+                this.__loadNext();
+            }
+        }, {
+            key: "__loadError",
+            value: function __loadError(e) {
+                if (this.hasListener(flower.Event.ERROR)) {
+                    this.dispatchWidth(flower.Event.ERROR, e.data);
+                } else {
+                    $error(e.data);
+                }
+            }
+        }, {
+            key: "__loadNext",
+            value: function __loadNext(e) {
+                var item;
+                if (this.__index != 0) {
+                    item = this.__list[this.__index - 1];
+                    if (item.type == "data") {
+                        flower.DataManager.getInstance().addDefine(e.data);
+                    }
+                }
+                this.__progress.max.value = this.__list.length;
+                this.__progress.current.value = this.__index;
+                if (this.__index == this.__list.length) {
+                    this.dispatchWidth(flower.Event.COMPLETE);
+                    return;
+                }
+                item = this.__list[this.__index];
+                if (item.type == "ui") {
+                    var ui = this.__list[this.__index].ui;
+                    var url = this.__list[this.__index].url;
+                    ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+                    ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                    ui.parseAsync(url);
+                } else if (item.type == "data") {
+                    var loader = new flower.URLLoader(item.url);
+                    loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+                    loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                    loader.load();
+                }
+                this.__index++;
+            }
+        }, {
+            key: "progress",
+            get: function get() {
+                return this.__progress;
+            }
+        }]);
+
+        return Module;
+    }(flower.EventDispatcher);
+
+    black.Module = Module;
+    //////////////////////////End File:extension/black/Module.js///////////////////////////
 })();
 for (var key in black) {
     flower[key] = black[key];
