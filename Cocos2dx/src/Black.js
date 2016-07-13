@@ -1357,18 +1357,18 @@ var $root = eval("this");
                 }
             });
             this.addDefine({
-                "name": "Flower_System",
+                "name": "flower.System",
                 "members": {
                     "screen": { "type": "Size" }
                 }
             });
             this.addDefine({
-                "name": "Flower",
+                "name": "FlowerData",
                 "members": {
-                    "system": { "type": "Flower_System" }
+                    "system": { "type": "flower.System" }
                 }
             });
-            this.addRootData("flower", "Flower");
+            this.addRootData("flower", "FlowerData");
         }
 
         _createClass(DataManager, [{
@@ -1393,7 +1393,9 @@ var $root = eval("this");
                     };
                 }
                 var item = this._defines[className];
-                var defineClass = "Data_" + className + (item.id != 0 ? item.id : "");
+                var packages = className.split(".");
+                className = packages.splice(packages.length - 1, 1)[0];
+                var defineClass = "" + className + (item.id != 0 ? item.id : "");
                 item.className = defineClass;
                 var extendClassName = "ObjectValue";
                 if (config.extends) {
@@ -1411,19 +1413,19 @@ var $root = eval("this");
                     var member;
                     for (var key in members) {
                         member = members[key];
-                        if (member.type == "number") {
+                        if (member.type === "number" || member.type === "Number") {
                             content += "\t\tthis." + key + " = new NumberValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "int") {
+                        } else if (member.type === "int" || member.type === "Int") {
                             content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "uint") {
+                        } else if (member.type === "uint" || member.type === "Uint") {
                             content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "string") {
-                            content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "boolean") {
+                        } else if (member.type === "string" || member.type === "String") {
+                            content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + ");\n";
+                        } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
                             content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "array") {
+                        } else if (member.type === "array" || member.type === "Array") {
                             content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
-                        } else if (member.type == "*") {
+                        } else if (member.type === "*") {
                             content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
                         } else {
                             content += "\t\tthis." + key + " = DataManager.getInstance().createData(\"" + member.type + "\");\n";
@@ -1435,8 +1437,20 @@ var $root = eval("this");
                 }
                 content += bindContent;
                 content += "\t}\n" + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
-                content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
-                //console.log("数据结构:\n" + content);
+                content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + config.name + "\");\n";
+                if (config.exports) {
+                    var name = "";
+                    for (var i = 0; i < packages.length; i++) {
+                        name += packages[i];
+                        content += "$root." + name + " = $root." + name + " || {}\n";
+                        name += ".";
+                    }
+                    name += className;
+                    content += "$root." + name + " = " + defineClass + ";\n";
+                }
+                if (sys.TIP) {
+                    flower.trace("数据结构:\n" + content);
+                }
                 if (sys.DEBUG) {
                     try {
                         eval(content);
@@ -1866,19 +1880,35 @@ var $root = eval("this");
                         flower.UIParser.setLocalUIURL(key, url, namespace);
                     }
                 }
-                var components = cfg.components;
                 this.__list = [];
-                for (var i = 0; i < components.length; i++) {
-                    var url = components[i];
-                    if (url.slice(0, 2) == "./") {
-                        url = this.__direction + url.slice(2, url.length);
+                var data = cfg.data;
+                if (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var url = data[i];
+                        if (url.slice(0, 2) == "./") {
+                            url = this.__direction + url.slice(2, url.length);
+                        }
+                        this.__list.push({
+                            type: "data",
+                            url: url
+                        });
                     }
-                    var parser = new flower.UIParser();
-                    parser.localNameSpace = namespace;
-                    this.__list.push({
-                        ui: parser,
-                        url: url
-                    });
+                }
+                var components = cfg.components;
+                if (components) {
+                    for (var i = 0; i < components.length; i++) {
+                        var url = components[i];
+                        if (url.slice(0, 2) == "./") {
+                            url = this.__direction + url.slice(2, url.length);
+                        }
+                        var parser = new flower.UIParser();
+                        parser.localNameSpace = namespace;
+                        this.__list.push({
+                            type: "ui",
+                            ui: parser,
+                            url: url
+                        });
+                    }
                 }
                 this.__index = 0;
                 this.__loadNext();
@@ -1894,18 +1924,33 @@ var $root = eval("this");
             }
         }, {
             key: "__loadNext",
-            value: function __loadNext() {
+            value: function __loadNext(e) {
+                var item;
+                if (this.__index != 0) {
+                    item = this.__list[this.__index - 1];
+                    if (item.type == "data") {
+                        flower.DataManager.getInstance().addDefine(e.data);
+                    }
+                }
                 this.__progress.max.value = this.__list.length;
                 this.__progress.current.value = this.__index;
                 if (this.__index == this.__list.length) {
                     this.dispatchWidth(flower.Event.COMPLETE);
                     return;
                 }
-                var ui = this.__list[this.__index].ui;
-                var url = this.__list[this.__index].url;
-                ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-                ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-                ui.parseAsync(url);
+                item = this.__list[this.__index];
+                if (item.type == "ui") {
+                    var ui = this.__list[this.__index].ui;
+                    var url = this.__list[this.__index].url;
+                    ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+                    ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                    ui.parseAsync(url);
+                } else if (item.type == "data") {
+                    var loader = new flower.URLLoader(item.url);
+                    loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+                    loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                    loader.load();
+                }
                 this.__index++;
             }
         }, {
@@ -1941,6 +1986,9 @@ var $root = eval("this");
         _createClass(Group, [{
             key: "setData",
             value: function setData(val) {
+                if (val && typeof val == "string") {
+                    val = flower.DataManager.getInstance().createData(val);
+                }
                 if (this._data == val) {
                     return;
                 }
@@ -2423,7 +2471,7 @@ var $root = eval("this");
                     pkg += ".";
                 }
                 content += "$root." + pkg + allClassName + " = " + allClassName;
-                trace("解析后内容:\n", content);
+                //trace("解析后内容:\n", content);
                 if (sys.DEBUG) {
                     try {
                         eval(content);
@@ -4276,6 +4324,9 @@ var $root = eval("this");
         _createClass(MaskUI, [{
             key: "setData",
             value: function setData(val) {
+                if (val && typeof val == "string") {
+                    val = flower.DataManager.getInstance().createData(val);
+                }
                 if (this._data == val) {
                     return;
                 }

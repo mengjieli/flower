@@ -9,6 +9,9 @@ class MaskUI extends flower.Mask {
     }
 
     setData(val) {
+        if(val && typeof val == "string") {
+            val = flower.DataManager.getInstance().createData(val);
+        }
         if (this._data == val) {
             return;
         }

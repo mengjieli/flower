@@ -41,18 +41,18 @@ class DataManager {
             }
         });
         this.addDefine({
-            "name": "Flower_System",
+            "name": "flower.System",
             "members": {
                 "screen": {"type": "Size"},
             }
         });
         this.addDefine({
-            "name": "Flower",
+            "name": "FlowerData",
             "members": {
-                "system": {"type": "Flower_System"},
+                "system": {"type": "flower.System"},
             }
         });
-        this.addRootData("flower", "Flower");
+        this.addRootData("flower", "FlowerData");
     }
 
     addRootData(name, className) {
@@ -74,7 +74,9 @@ class DataManager {
             };
         }
         var item = this._defines[className];
-        var defineClass = "Data_" + className + (item.id != 0 ? item.id : "");
+        var packages = className.split(".");
+        className = packages.splice(packages.length - 1, 1)[0];
+        var defineClass = "" + className + (item.id != 0 ? item.id : "");
         item.className = defineClass;
         var extendClassName = "ObjectValue";
         if (config.extends) {
@@ -95,19 +97,19 @@ class DataManager {
             var member;
             for (var key in members) {
                 member = members[key];
-                if (member.type == "number") {
+                if (member.type === "number" || member.type === "Number") {
                     content += "\t\tthis." + key + " = new NumberValue(" + (member.init != null ? member.init : "") + ");\n";
-                } else if (member.type == "int") {
+                } else if (member.type === "int" || member.type === "Int") {
                     content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
-                } else if (member.type == "uint") {
+                } else if (member.type === "uint" || member.type === "Uint") {
                     content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
-                } else if (member.type == "string") {
-                    content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? member.init : "") + ");\n";
-                } else if (member.type == "boolean") {
+                } else if (member.type === "string" || member.type === "String") {
+                    content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + ");\n";
+                } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
                     content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
-                } else if (member.type == "array") {
+                } else if (member.type === "array" || member.type === "Array") {
                     content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
-                } else if (member.type == "*") {
+                } else if (member.type === "*") {
                     content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
                 } else {
                     content += "\t\tthis." + key + " = DataManager.getInstance().createData(\"" + member.type + "\");\n";
@@ -121,8 +123,20 @@ class DataManager {
         content += "\t}\n" +
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
-        content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + className + "\");\n";
-        //console.log("数据结构:\n" + content);
+        content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + config.name + "\");\n";
+        if (config.exports) {
+            var name = "";
+            for (var i = 0; i < packages.length; i++) {
+                name += packages[i];
+                content += "$root." + name + " = $root." + name + " || {}\n";
+                name += ".";
+            }
+            name += className;
+            content += "$root." + name + " = " + defineClass + ";\n";
+        }
+        if(sys.TIP) {
+            flower.trace("数据结构:\n" + content);
+        }
         if (sys.DEBUG) {
             try {
                 eval(content);

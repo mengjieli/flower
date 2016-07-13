@@ -390,7 +390,7 @@ class UIParser extends Group {
             pkg += ".";
         }
         content += "$root." + pkg + allClassName + " = " + allClassName;
-        trace("解析后内容:\n", content);
+        //trace("解析后内容:\n", content);
         if (sys.DEBUG) {
             try {
                 eval(content);

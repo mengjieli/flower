@@ -1,0 +1,16 @@
+{
+  "name": "editor.ProjectData",
+  "exports":true,
+  "desc": "项目数据",
+  "members": {
+    "name": {
+      "desc": "项目名称",
+      "type": "string",
+      "init": "项目名称"
+    },
+    "direction": {
+      "desc": "项目目录",
+      "type": "Array"
+    }
+  }
+}

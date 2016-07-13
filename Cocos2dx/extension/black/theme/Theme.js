@@ -37,19 +37,35 @@ class Theme extends flower.EventDispatcher {
                 flower.UIParser.setLocalUIURL(key, url, namespace);
             }
         }
-        var components = cfg.components;
         this.__list = [];
-        for (var i = 0; i < components.length; i++) {
-            var url = components[i];
-            if (url.slice(0, 2) == "./") {
-                url = this.__direction + url.slice(2, url.length);
+        var data = cfg.data;
+        if (data) {
+            for (var i = 0; i < data.length; i++) {
+                var url = data[i];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                this.__list.push({
+                    type: "data",
+                    url: url
+                });
             }
-            var parser = new flower.UIParser();
-            parser.localNameSpace = namespace;
-            this.__list.push({
-                ui: parser,
-                url: url
-            });
+        }
+        var components = cfg.components;
+        if (components) {
+            for (var i = 0; i < components.length; i++) {
+                var url = components[i];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                var parser = new flower.UIParser();
+                parser.localNameSpace = namespace;
+                this.__list.push({
+                    type: "ui",
+                    ui: parser,
+                    url: url
+                });
+            }
         }
         this.__index = 0;
         this.__loadNext();
@@ -63,18 +79,33 @@ class Theme extends flower.EventDispatcher {
         }
     }
 
-    __loadNext() {
+    __loadNext(e) {
+        var item;
+        if (this.__index != 0) {
+            item = this.__list[this.__index - 1];
+            if (item.type == "data") {
+                flower.DataManager.getInstance().addDefine(e.data);
+            }
+        }
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;
         if (this.__index == this.__list.length) {
             this.dispatchWidth(flower.Event.COMPLETE);
             return;
         }
-        var ui = this.__list[this.__index].ui;
-        var url = this.__list[this.__index].url;
-        ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-        ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
-        ui.parseAsync(url);
+        item = this.__list[this.__index];
+        if (item.type == "ui") {
+            var ui = this.__list[this.__index].ui;
+            var url = this.__list[this.__index].url;
+            ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+            ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            ui.parseAsync(url);
+        } else if (item.type == "data") {
+            var loader = new flower.URLLoader(item.url);
+            loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
+            loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            loader.load();
+        }
         this.__index++;
     }
 

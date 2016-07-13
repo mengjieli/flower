@@ -13,7 +13,6 @@ class PlatformURLLoader {
             $tip(2001, url);
         }
         if (url.slice(0, "http://".length) == "http://") {
-            flower.trace("http加载,", url);
             var xhr = cc.loader.getXMLHttpRequest();
             if (method == null || method == "") {
                 method = "GET";

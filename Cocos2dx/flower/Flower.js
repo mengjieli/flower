@@ -1,5 +1,5 @@
 var DEBUG = true;
-var TIP = true;
+var TIP = false;
 var $language = "zh_CN";
 var NATIVE = true;
 /**
@@ -129,6 +129,7 @@ exports.trace = trace;
 exports.sys = {
     config: config,
     DEBUG: DEBUG,
+    TIP:TIP,
     $tip: $tip,
     $warn: $warn,
     $error: $error

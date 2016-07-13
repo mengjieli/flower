@@ -89,4 +89,7 @@ cc.game.onStart = function () {
     //}, this);
 };
 cc.game.run();
-cc.Director.getInstance().setDisplayStats(false);
+if (cc.sys.isNative) {
+    cc.Director.getInstance().setDisplayStats(false);
+} else {
+}

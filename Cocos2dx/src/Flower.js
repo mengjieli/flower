@@ -33,7 +33,7 @@ var flower = {};
 (function () {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
-    var TIP = true;
+    var TIP = false;
     var $language = "zh_CN";
     var NATIVE = true;
     /**
@@ -175,6 +175,7 @@ var flower = {};
     flower.sys = {
         config: config,
         DEBUG: DEBUG,
+        TIP: TIP,
         $tip: $tip,
         $warn: $warn,
         $error: $error
@@ -1289,7 +1290,6 @@ var flower = {};
                     $tip(2001, url);
                 }
                 if (url.slice(0, "http://".length) == "http://") {
-                    flower.trace("http加载,", url);
                     var xhr = cc.loader.getXMLHttpRequest();
                     if (method == null || method == "") {
                         method = "GET";

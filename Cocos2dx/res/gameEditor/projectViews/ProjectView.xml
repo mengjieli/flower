@@ -1,3 +1,5 @@
-<s:ScrollerTree title="项目目录" percentWidth="100" percentHeight="100" viewport="LabelTree"
+<s:ScrollerTree data="editor.ProjectData" title="{data.name}" percentWidth="100" percentHeight="100" viewport="LabelTree"
+                creationComplete="this.init();"
                 xmlns:f="flower" xmlns:s="software">
+    <f:script src="./ProjectView.js"/>
 </s:ScrollerTree>
