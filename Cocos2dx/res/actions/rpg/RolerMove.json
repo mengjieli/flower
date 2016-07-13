@@ -1,5 +1,0 @@
-{
-  "desc": "角色移动",
-  "detail": "控制角色从当前地点移动到另外一个地点",
-  "script": "./RolerMove.js"
-}

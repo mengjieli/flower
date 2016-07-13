@@ -18,31 +18,41 @@ var PreLoading = function (_flower$EventDispatch) {
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PreLoading).call(this));
 
-        var theme = new flower.Theme("softwareRes/theme/theme.json");
-        theme.load();
-
-        _this.progressBar = new flower.UIParser().parseUI("\n        <f:Group width=\"150\" height=\"20\" class=\"PreLoading\" xmlns:f=\"flower\">\n            <f:script src=\"./PreLoading.js\"/>\n            <f:RectUI percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor=\"0xE7E7E7\"/>\n            <f:RectUI percentWidth=\"{data.percent*100}\" percentHeight=\"100\" fillColor=\"0x3d3d3d\"/>\n        </f:Group>\n        ", theme.progress);
-
-        var data = _this.progressBar.data;
-        data.percent.addListener(flower.Event.UPDATE, _this.onUpdate, _this);
+        _this.progress = new flower.NumberValue();
+        _this.themes = [new flower.Theme("res/software/theme.json"), new flower.Theme("res/gameEditor/theme.json")];
+        _this.progressBar = new flower.UIParser().parseUI("\n        <f:Group width=\"150\" height=\"20\" class=\"PreLoading\" xmlns:f=\"flower\">\n            <f:script src=\"./PreLoading.js\"/>\n            <f:RectUI percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor=\"0xE7E7E7\"/>\n            <f:RectUI percentWidth=\"{data*100}\" percentHeight=\"100\" fillColor=\"0x3d3d3d\"/>\n        </f:Group>\n        ", _this.progress);
         flower.PopManager.pop(_this.progressBar, true, true);
+        _this.index = 0;
+        _this.loadNextTheme();
         return _this;
     }
 
     _createClass(PreLoading, [{
+        key: "loadNextTheme",
+        value: function loadNextTheme() {
+            if (this.index < this.themes.length) {
+                this.theme = this.themes[this.index];
+                this.theme.progress.percent.addListener(flower.Event.UPDATE, this.onUpdate, this);
+                this.theme.load();
+            } else {
+                this.dispose();
+            }
+        }
+    }, {
         key: "onUpdate",
         value: function onUpdate(e) {
-            var data = this.progressBar.data;
+            var data = this.theme.progress;
+            this.progress.value = (this.index + data.percent.value) / this.themes.length;
             if (data.percent.value == 1) {
-                this.dispose();
-                //new flower.CallLater(this.dispose, this);
+                this.index++;
+                this.loadNextTheme();
             }
         }
     }, {
         key: "dispose",
         value: function dispose() {
             this.dispatchWidth(flower.Event.COMPLETE);
-            this.progressBar.data.percent.removeListener(flower.Event.UPDATE, this.onUpdate, this);
+            this.progress.dispose();
             this.progressBar.dispose();
             _get(Object.getPrototypeOf(PreLoading.prototype), "dispose", this).call(this);
         }

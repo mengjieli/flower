@@ -1286,12 +1286,13 @@ var $root = eval("this");
                 var value = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
                 var old = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
+                var value;
                 if (this.singleValue) {
+                    this.thisObj[this.property] = this.stmts[0].getValue();
                     try {
-                        this.thisObj[this.property] = this.stmts[0].getValue();
-                    } catch (e) {
-                        this.thisObj[this.property] = null;
-                    }
+                        value = this.stmts[0].getValue();
+                    } catch (e) {}
+                    this.thisObj[this.property];
                 } else {
                     var str = "";
                     for (var i = 0; i < this.stmts.length; i++) {

@@ -1,0 +1,4 @@
+<f:Group class="PluginBase" xmlns:f="flower">
+    <f:script src="./PluginBase.script"/>
+    <f:Label text="Plugin base"/>
+</f:Group>

@@ -1,6 +1,0 @@
-{
-  "desc": "关闭",
-  "detail": "所有可视化对象都可以使用，使用后会移除其显示，但不会回收其内存，如果需要回收内存，请用 Dispose",
-  "display": "DisplayObject",
-  "script":"if(this.parent) this.parent.removeChild(this);"
-}

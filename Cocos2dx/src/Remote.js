@@ -264,7 +264,7 @@ var remote = {};
             this.__path = path;
             this.__autoUpdate = autoUpdate;
             this.__list = new flower.ArrayValue();
-            if (this.__autoUpdate) {
+            if (this.__path && this.__autoUpdate) {
                 new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
             }
         }
@@ -294,6 +294,9 @@ var remote = {};
                 }
             }
         }, {
+            key: "dispose",
+            value: function dispose() {}
+        }, {
             key: "list",
             get: function get() {
                 return this.__list;
@@ -316,6 +319,21 @@ var remote = {};
                     }
                 }
             }
+        }, {
+            key: "path",
+            get: function get() {
+                return this.__path;
+            },
+            set: function set(val) {
+                if (this.__path) {
+                    sys.$error(4001, val);
+                    return;
+                }
+                this.__path = val;
+                if (this.__path && this.__autoUpdate) {
+                    new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
+                }
+            }
         }]);
 
         return Direction;
@@ -323,6 +341,13 @@ var remote = {};
 
     remote.Direction = Direction;
     //////////////////////////End File:remote/Direction.js///////////////////////////
+
+    //////////////////////////File:remote/language/zh_CN.js///////////////////////////
+    var locale_strings = flower.sys.$locale_strings["zh_CN"];
+
+    locale_strings[4001] = "Direction 设置过 path 不可重新赋值:{0}";
+
+    //////////////////////////End File:remote/language/zh_CN.js///////////////////////////
 
     //////////////////////////File:remote/remotes/IsDirectionExistRemote.js///////////////////////////
 

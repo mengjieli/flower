@@ -166,6 +166,7 @@ var list = [
     "Remote",
     "File",
     "Direction",
+    "zh_CN",
     "IsDirectionExistRemote",
     "ReadDirectionListRemote"
 ];

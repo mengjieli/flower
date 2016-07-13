@@ -1,5 +1,4 @@
-<f:Group
-        creationComplete="this.start();" xmlns:f="flower">
+<f:Group creationComplete="this.start();" xmlns:f="flower">
     <f:MaskUI percentWidth="100" percentHeight="100">
         <f:Group id="content">
             <f:RectUI percentWidth="100" percentHeight="100" fillColor="0x00ff00"/>
@@ -14,6 +13,6 @@
                 </f:itemRenderer>
             </f:List>
         </f:Group>
-        <f:script src="./Debug.js"/>
+        <f:script src="./Debug.script"/>
     </f:MaskUI>
 </f:Group>

@@ -25,6 +25,9 @@ class RemoteClient extends WebSocketServerClient {
                 break;
             }
         }
+        if(this.ip == "127.0.0.1") {
+            this.ip = System.IP;
+        }
         this.information = {};
     }
 

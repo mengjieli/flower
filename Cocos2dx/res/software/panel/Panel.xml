@@ -1,6 +1,6 @@
 <f:Panel class="Panel" width="300" height="200" scaleMode="show_all" creationComplete="this.initPanel();"
          xmlns:f="flower">
-    <f:script src="./Panel.js"/>
+    <f:script src="./Panel.script"/>
     <f:RectUI id="background" percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1"
               fillColor="0xE7E7E7"/>
     <f:Group left="1" right="1" height="24" top="1">

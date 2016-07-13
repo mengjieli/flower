@@ -1,0 +1,11 @@
+{
+  "namespace": "e",
+  "packageURL": "editor",
+  "components": [
+    "./plugins/PluginBase.xml"
+  ],
+  "classes": {
+    "EditorMain": "./EditorMain.xml",
+    "ProjectView": "./projectViews/ProjectView.xml"
+  }
+}

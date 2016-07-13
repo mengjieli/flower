@@ -23,7 +23,7 @@ function start(completeFunc) {
     Platform._runBack = CoreTime.$run;
     Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
-    var loader = new URLLoader("flower.json");
+    var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
         for (var key in cfg) {

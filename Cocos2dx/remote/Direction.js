@@ -4,12 +4,13 @@ class Direction {
     __autoUpdate;
     __list;
     __fileClass;
+    __updateRemote;
 
     constructor(path, autoUpdate = true) {
         this.__path = path;
         this.__autoUpdate = autoUpdate;
         this.__list = new flower.ArrayValue();
-        if (this.__autoUpdate) {
+        if (this.__path && this.__autoUpdate) {
             new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
         }
     }
@@ -35,6 +36,10 @@ class Direction {
         }
     }
 
+    dispose() {
+
+    }
+
     get list() {
         return this.__list;
     }
@@ -54,6 +59,21 @@ class Direction {
             } else {
                 list.push(fileList);
             }
+        }
+    }
+
+    get path() {
+        return this.__path;
+    }
+
+    set path(val) {
+        if (this.__path) {
+            sys.$error(4001, val);
+            return;
+        }
+        this.__path = val;
+        if (this.__path && this.__autoUpdate) {
+            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
         }
     }
 }

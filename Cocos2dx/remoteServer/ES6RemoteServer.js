@@ -35,6 +35,9 @@ var RemoteClient = function (_WebSocketServerClien) {
                 break;
             }
         }
+        if (_this.ip == "127.0.0.1") {
+            _this.ip = System.IP;
+        }
         _this.information = {};
         return _this;
     }

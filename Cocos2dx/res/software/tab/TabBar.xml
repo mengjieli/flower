@@ -1,7 +1,7 @@
 <f:TabBar class="TabBar" more="true" selectTime="touch_begin" percentWidth="100" height="25"
           creationComplete="this.init();" xmlns:f="flower"
           xmlns:s="software">
-    <f:script src="./TabBar.js"/>
+    <f:script src="./TabBar.script"/>
     <f:itemRenderer>
         <f:ItemRenderer percentHeight="100">
             <f:RectUI percentWidth="100" percentHeight="100" fillColor.up="0xcccccc" fillColor.down="0xcccccc"

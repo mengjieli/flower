@@ -75,10 +75,8 @@ class EventDispatcher {
     }
 
     removeListener(type, listener, thisObject) {
-        if (DEBUG) {
-            if (this.__hasDispose) {
-                $error(1002);
-            }
+        if (this.__hasDispose) {
+            return;
         }
         var values = this.__EventDispatcher;
         var events = values[1];
@@ -97,10 +95,7 @@ class EventDispatcher {
     }
 
     removeAllListener() {
-        if (DEBUG) {
-            if (this.__hasDispose) {
-                $error(1002);
-            }
+        if (this.__hasDispose) {
             return;
         }
         var values = this.__EventDispatcher;

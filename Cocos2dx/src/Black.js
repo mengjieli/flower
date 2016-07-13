@@ -1855,7 +1855,17 @@ var $root = eval("this");
             value: function __onLoadThemeComplete(e) {
                 var cfg = e.data;
                 var namespace = cfg.namespace || "local";
-                flower.UIParser.addNameSapce(namespace);
+                flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+                var classes = cfg.classes;
+                if (classes) {
+                    for (var key in classes) {
+                        var url = classes[key];
+                        if (url.slice(0, 2) == "./") {
+                            url = this.__direction + url.slice(2, url.length);
+                        }
+                        flower.UIParser.setLocalUIURL(key, url, namespace);
+                    }
+                }
                 var components = cfg.components;
                 this.__list = [];
                 for (var i = 0; i < components.length; i++) {
@@ -2097,6 +2107,7 @@ var $root = eval("this");
 
             var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
+            _this16.defaultClassName = "";
             _this16.localNameSpace = "local";
 
             _this16.classes = flower.UIParser.classes;
@@ -2109,6 +2120,12 @@ var $root = eval("this");
             value: function parseUIAsync(url) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
+                if (this.classes.namesapces[url]) {
+                    this.localNameSpace = this.classes.namesapces[url];
+                }
+                if (this.classes.defaultClassNames[url]) {
+                    this.defaultClassName = this.classes.defaultClassNames[url];
+                }
                 this.loadURL = url;
                 this.loadData = data;
                 var loader = new flower.URLLoader(url);
@@ -2120,6 +2137,12 @@ var $root = eval("this");
         }, {
             key: "parseAsync",
             value: function parseAsync(url) {
+                if (this.classes.namesapces[url]) {
+                    this.localNameSpace = this.classes.namesapces[url];
+                }
+                if (this.classes.defaultClassNames[url]) {
+                    this.defaultClassName = this.classes.defaultClassNames[url];
+                }
                 this.loadURL = url;
                 var loader = new flower.URLLoader(url);
                 loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
@@ -2156,13 +2179,17 @@ var $root = eval("this");
                             }
                             var find = false;
                             for (var f = 0; f < this.relationUI.length; f++) {
-                                if (this.relationUI[f] == this.classes[nameSpace + "URL"][name]) {
+                                if (this.relationUI[f].url == this.classes[nameSpace + "URL"][name]) {
                                     find = true;
                                     break;
                                 }
                             }
                             if (!find) {
-                                this.relationUI.push(this.classes[nameSpace + "URL"][name]);
+                                this.relationUI.push({
+                                    "namesapce": nameSpace,
+                                    "url": this.classes[nameSpace + "URL"][name],
+                                    "name": name
+                                });
                             }
                         }
                     }
@@ -2217,7 +2244,9 @@ var $root = eval("this");
                     }
                 } else {
                     var parser = new UIParser();
-                    parser.parseAsync(this.relationUI[this.relationIndex]);
+                    parser.defaultClassName = this.relationUI[this.relationIndex].name;
+                    parser.localNameSpace = this.relationUI[this.relationIndex].namesapce;
+                    parser.parseAsync(this.relationUI[this.relationIndex].url);
                     parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
                     parser.addListener(flower.ERROR, this.relationLoadError, this);
                 }
@@ -2312,8 +2341,13 @@ var $root = eval("this");
                         packages = [];
                     }
                 } else {
-                    className = "$UI" + UIParser.id++;
-                    allClassName = className;
+                    if (this.defaultClassName && this.defaultClassName != "") {
+                        className = this.defaultClassName;
+                        allClassName = className;
+                    } else {
+                        className = "$UI" + UIParser.id++;
+                        allClassName = className;
+                    }
                 }
                 var changeAllClassName = allClassName;
                 if (uinameNS != "f" && this.classes[uinameNS][allClassName]) {
@@ -2380,7 +2414,15 @@ var $root = eval("this");
                 }
                 content += classEnd;
                 content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
-                content += "$root." + allClassName + " = " + allClassName;
+                var pkg = "";
+                var pkgs = flower.UIParser.classes.packages[this.localNameSpace] || [];
+                pkgs = pkgs.concat(packages);
+                for (var i = 0; i < pkgs.length; i++) {
+                    pkg = pkgs[i];
+                    content += "if($root." + pkg + " == null) $root." + pkg + " = {};\n";
+                    pkg += ".";
+                }
+                content += "$root." + pkg + allClassName + " = " + allClassName;
                 trace("解析后内容:\n", content);
                 if (sys.DEBUG) {
                     try {
@@ -2649,15 +2691,15 @@ var $root = eval("this");
                         //if (createClassNameSpace != "f") {
                         //    createClassName = this.classes[createClassNameSpace][createClassName];
                         //}
-                        if (!createClassName.split) {
-                            console.log("???");
-                        }
+                        //if (!createClassName.split) {
+                        //    console.log("???");
+                        //}
                         thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                         thisObj = thisObj.toLocaleLowerCase();
                         if (createClassNameSpace != "f") {
                             setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + createClassNameSpace + "\"))();\n";
                         } else {
-                            setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
+                            setObject += before + "\tvar " + thisObj + " = new " + this.classes.f[createClassName] + "();\n";
                         }
                         setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
                     }
@@ -2823,11 +2865,20 @@ var $root = eval("this");
                 var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
 
                 this.classes[namespace + "URL"][name] = url;
+                this.classes.namesapces[url] = namespace;
+                this.classes.defaultClassNames[url] = name;
             }
         }, {
             key: "addNameSapce",
             value: function addNameSapce(name) {
+                var packageURL = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+
                 if (!flower.UIParser.classes[name]) {
+                    var pkgs = packageURL.split(".");
+                    if (pkgs[0] == "") {
+                        pkgs = [];
+                    }
+                    flower.UIParser.classes.packages[name] = pkgs;
                     flower.UIParser.classes[name] = {};
                     flower.UIParser.classes[name + "Content"] = {};
                     flower.UIParser.classes[name + "URL"] = {};
@@ -2887,7 +2938,10 @@ var $root = eval("this");
             "Tree": "flower.Tree",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
-            "VerticalLayout": "flower.VerticalLayout"
+            "VerticalLayout": "flower.VerticalLayout",
+
+            "Direction": "flower.Direction",
+            "File": "flower.File"
         },
         local: {},
         localContent: {},
@@ -2895,6 +2949,11 @@ var $root = eval("this");
         addChild: {
             "Array": "push",
             "ArrayValue": "push"
+        },
+        namesapces: {},
+        defaultClassNames: {},
+        packages: {
+            "local": ""
         }
     };
 

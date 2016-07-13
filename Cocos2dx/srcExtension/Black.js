@@ -1640,7 +1640,17 @@ class Theme extends flower.EventDispatcher {
     __onLoadThemeComplete(e) {
         var cfg = e.data;
         var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace);
+        flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+        var classes = cfg.classes;
+        if (classes) {
+            for (var key in  classes) {
+                var url = classes[key];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                flower.UIParser.setLocalUIURL(key, url, namespace);
+            }
+        }
         var components = cfg.components;
         this.__list = [];
         for (var i = 0; i < components.length; i++) {
@@ -1904,7 +1914,10 @@ class UIParser extends Group {
             "Tree": "flower.Tree",
             "LinearLayoutBase": "flower.LinearLayoutBase",
             "HorizontalLayout": "flower.HorizontalLayout",
-            "VerticalLayout": "flower.VerticalLayout"
+            "VerticalLayout": "flower.VerticalLayout",
+
+            "Direction": "flower.Direction",
+            "File": "flower.File"
         },
         local: {},
         localContent: {},
@@ -1912,11 +1925,17 @@ class UIParser extends Group {
         addChild: {
             "Array": "push",
             "ArrayValue": "push"
+        },
+        namesapces: {},
+        defaultClassNames: {},
+        packages: {
+            "local": ""
         }
     };
 
     _className;
     _classNameSpace;
+    defaultClassName = "";
     classes;
     parseContent;
     parseUIAsyncFlag;
@@ -1936,6 +1955,12 @@ class UIParser extends Group {
     }
 
     parseUIAsync(url, data = null) {
+        if (this.classes.namesapces[url]) {
+            this.localNameSpace = this.classes.namesapces[url];
+        }
+        if (this.classes.defaultClassNames[url]) {
+            this.defaultClassName = this.classes.defaultClassNames[url];
+        }
         this.loadURL = url;
         this.loadData = data;
         var loader = new flower.URLLoader(url);
@@ -1946,6 +1971,12 @@ class UIParser extends Group {
     }
 
     parseAsync(url) {
+        if (this.classes.namesapces[url]) {
+            this.localNameSpace = this.classes.namesapces[url];
+        }
+        if (this.classes.defaultClassNames[url]) {
+            this.defaultClassName = this.classes.defaultClassNames[url];
+        }
         this.loadURL = url;
         var loader = new flower.URLLoader(url);
         loader.addListener(flower.Event.COMPLETE, this.loadContentComplete, this);
@@ -1980,13 +2011,17 @@ class UIParser extends Group {
                     }
                     var find = false;
                     for (var f = 0; f < this.relationUI.length; f++) {
-                        if (this.relationUI[f] == this.classes[nameSpace + "URL"][name]) {
+                        if (this.relationUI[f].url == this.classes[nameSpace + "URL"][name]) {
                             find = true;
                             break;
                         }
                     }
                     if (!find) {
-                        this.relationUI.push(this.classes[nameSpace + "URL"][name]);
+                        this.relationUI.push({
+                            "namesapce": nameSpace,
+                            "url": this.classes[nameSpace + "URL"][name],
+                            "name": name
+                        });
                     }
                 }
             }
@@ -2039,7 +2074,9 @@ class UIParser extends Group {
             }
         } else {
             var parser = new UIParser();
-            parser.parseAsync(this.relationUI[this.relationIndex]);
+            parser.defaultClassName = this.relationUI[this.relationIndex].name;
+            parser.localNameSpace = this.relationUI[this.relationIndex].namesapce;
+            parser.parseAsync(this.relationUI[this.relationIndex].url);
             parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
             parser.addListener(flower.ERROR, this.relationLoadError, this);
         }
@@ -2137,8 +2174,13 @@ class UIParser extends Group {
                 packages = [];
             }
         } else {
-            className = "$UI" + UIParser.id++;
-            allClassName = className;
+            if (this.defaultClassName && this.defaultClassName != "") {
+                className = this.defaultClassName;
+                allClassName = className
+            } else {
+                className = "$UI" + UIParser.id++;
+                allClassName = className;
+            }
         }
         var changeAllClassName = allClassName;
         if (uinameNS != "f" && this.classes[uinameNS][allClassName]) {
@@ -2205,7 +2247,15 @@ class UIParser extends Group {
         }
         content += classEnd;
         content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
-        content += "$root." + allClassName + " = " + allClassName;
+        var pkg = "";
+        var pkgs = flower.UIParser.classes.packages[this.localNameSpace] || [];
+        pkgs = pkgs.concat(packages);
+        for (var i = 0; i < pkgs.length; i++) {
+            pkg = pkgs[i];
+            content += "if($root." + pkg + " == null) $root." + pkg + " = {};\n";
+            pkg += ".";
+        }
+        content += "$root." + pkg + allClassName + " = " + allClassName;
         trace("解析后内容:\n", content);
         if (sys.DEBUG) {
             try {
@@ -2470,15 +2520,15 @@ class UIParser extends Group {
                 //if (createClassNameSpace != "f") {
                 //    createClassName = this.classes[createClassNameSpace][createClassName];
                 //}
-                if (!createClassName.split) {
-                    console.log("???");
-                }
+                //if (!createClassName.split) {
+                //    console.log("???");
+                //}
                 thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                 thisObj = thisObj.toLocaleLowerCase();
                 if (createClassNameSpace != "f") {
                     setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + createClassNameSpace + "\"))();\n";
                 } else {
-                    setObject += before + "\tvar " + thisObj + " = new " + createClassName + "();\n";
+                    setObject += before + "\tvar " + thisObj + " = new " + this.classes.f[createClassName] + "();\n";
                 }
                 setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
             }
@@ -2624,10 +2674,17 @@ class UIParser extends Group {
 
     static setLocalUIURL(name, url, namespace = "local") {
         this.classes[namespace + "URL"][name] = url;
+        this.classes.namesapces[url] = namespace;
+        this.classes.defaultClassNames[url] = name;
     }
 
-    static addNameSapce(name) {
+    static addNameSapce(name, packageURL = "") {
         if (!flower.UIParser.classes[name]) {
+            var pkgs = packageURL.split(".");
+            if (pkgs[0] == "") {
+                pkgs = [];
+            }
+            flower.UIParser.classes.packages[name] = pkgs;
             flower.UIParser.classes[name] = {};
             flower.UIParser.classes[name + "Content"] = {};
             flower.UIParser.classes[name + "URL"] = {};

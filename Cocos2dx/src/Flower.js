@@ -57,7 +57,7 @@ var flower = {};
         Platform._runBack = CoreTime.$run;
         Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
 
-        var loader = new URLLoader("flower.json");
+        var loader = new URLLoader("res/flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
             var cfg = e.data;
             for (var key in cfg) {
@@ -1855,10 +1855,8 @@ var flower = {};
         }, {
             key: "removeListener",
             value: function removeListener(type, listener, thisObject) {
-                if (DEBUG) {
-                    if (this.__hasDispose) {
-                        $error(1002);
-                    }
+                if (this.__hasDispose) {
+                    return;
                 }
                 var values = this.__EventDispatcher;
                 var events = values[1];
@@ -1878,10 +1876,7 @@ var flower = {};
         }, {
             key: "removeAllListener",
             value: function removeAllListener() {
-                if (DEBUG) {
-                    if (this.__hasDispose) {
-                        $error(1002);
-                    }
+                if (this.__hasDispose) {
                     return;
                 }
                 var values = this.__EventDispatcher;

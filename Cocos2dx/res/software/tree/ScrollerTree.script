@@ -1,4 +1,7 @@
 function set dataProvider(val) {
+    if(val instanceof flower.Direction) {
+        val = val.list;
+    }
     if (this.scroller.viewport) {
         this.scroller.viewport.dataProvider = val;
     }

@@ -1,6 +1,0 @@
-{
-  "desc": "清除",
-  "detail": "所有可视化对象都可以使用，使用后会移除其显示和内存，这个对象就不可以再使用了",
-  "display": "DisplayObject",
-  "script": "this.dispose();"
-}

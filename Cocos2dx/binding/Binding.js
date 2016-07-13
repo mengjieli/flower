@@ -75,14 +75,14 @@ class Binding {
     }
 
     update(value = null, old = null) {
+        var value;
         if (this.singleValue) {
+            this.thisObj[this.property] = this.stmts[0].getValue();
             try {
-                this.thisObj[this.property] = this.stmts[0].getValue();
+                value = this.stmts[0].getValue();
+            } catch (e) {
             }
-            catch (e) {
-                this.thisObj[this.property] = null;
-            }
-
+            this.thisObj[this.property]
         }
         else {
             var str = "";
@@ -91,13 +91,11 @@ class Binding {
                 if (expr instanceof Stmts) {
                     try {
                         str += expr.getValue();
-                    }
-                    catch (e) {
+                    } catch (e) {
                         str += "null";
                     }
 
-                }
-                else {
+                } else {
                     str += expr;
                 }
             }

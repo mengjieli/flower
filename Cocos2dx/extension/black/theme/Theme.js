@@ -26,7 +26,17 @@ class Theme extends flower.EventDispatcher {
     __onLoadThemeComplete(e) {
         var cfg = e.data;
         var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace);
+        flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+        var classes = cfg.classes;
+        if (classes) {
+            for (var key in  classes) {
+                var url = classes[key];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                flower.UIParser.setLocalUIURL(key, url, namespace);
+            }
+        }
         var components = cfg.components;
         this.__list = [];
         for (var i = 0; i < components.length; i++) {
