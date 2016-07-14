@@ -1,14 +1,14 @@
 class DataGroupEvent extends flower.Event {
 
-    __itemData;
+    __item;
 
-    constructor(type, bubbles = false, itemData = null) {
+    constructor(type, bubbles = false, item = null) {
         super(type, bubbles);
-        this.__itemData = itemData;
+        this.__item = item;
     }
 
-    get itemData() {
-        return this.__itemData;
+    get item() {
+        return this.__item;
     }
 
     static SELECTED_ITEM_CHANGE = "selected_item_change";

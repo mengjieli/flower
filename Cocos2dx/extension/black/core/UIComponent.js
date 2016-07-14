@@ -115,19 +115,6 @@ class UIComponent {
             }
         }
 
-        p.resetAllBindProperty = function () {
-            if(this.$UIComponent) {
-                var binds = this.$UIComponent[10];
-                for (var key in binds) {
-                    var checks = binds[key].checks;
-                    var property = binds[key].property;
-                    var content = binds[key].content;
-                    binds[key].dispose();
-                    binds[key] = new flower.Binding(this, checks, property, content);
-                }
-            }
-        }
-
         p.removeAllBindProperty = function () {
             var binds = this.$UIComponent[10];
             for (var key in binds) {

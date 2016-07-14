@@ -231,7 +231,7 @@ class URLLoader extends EventDispatcher {
         }
         this._links = null;
         this._isLoading = false;
-        if (!this._res || !this._data) {
+        if (this._res == null || this._data == null) {
             this._selfDispose = true;
             this.dispose();
             this._selfDispose = false;

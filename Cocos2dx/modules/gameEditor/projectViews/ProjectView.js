@@ -1,5 +1,14 @@
 function init() {
+    this.clickItem = this.onClickItem.bind(this);
     this.loadPorject("flower.json");
+}
+
+function onClickItem(e) {
+    var item = e.item;
+    //console.log("item:", item);
+    if (item.plugin) {
+        editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.VIEW_FILE, item);
+    }
 }
 
 function loadPorject(url) {
@@ -11,7 +20,7 @@ function loadPorject(url) {
 function __onLoadConfig(e) {
     var cfg = this.config = e.data;
     this.title = cfg.name;
-    flower.breakPoint();
+    //flower.breakPoint();
     var direction = this.data.direction;
     direction.removeAll();
     for (var key in cfg.direction) {
@@ -22,9 +31,11 @@ function __onLoadConfig(e) {
         });
         var list = cfg.direction[key].list;
         for (var i = 0; i < list.length; i++) {
+            var item = list[i];
             direction.push({
-                path: list[i],
-                name: flower.Path.getName(list[i]),
+                path: item.path,
+                name: flower.Path.getName(item.path),
+                plugin: item.plugin,
                 fileType: key
             });
         }

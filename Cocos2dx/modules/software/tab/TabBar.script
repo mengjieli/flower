@@ -4,10 +4,9 @@ function init() {
     moreList.viewport.requireSelection = false;
     var _this = this;
     moreList.viewport.touchBeginItem = function (e) {
-        var panel = e.itemData.panel;
+        var panel = e.item.panel;
         var list = _this.dataProvider;
-        list.setItemIndex(panel, 0);
-        list.selectedIndex = 0;
+        list.selectedItem = panel;
     };
     this.moreList = moreList;
 }

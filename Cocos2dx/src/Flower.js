@@ -33,7 +33,7 @@ var flower = {};
 (function () {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
-    var TIP = false;
+    var TIP = true;
     var $language = "zh_CN";
     var NATIVE = true;
     /**
@@ -5426,6 +5426,7 @@ var flower = {};
                 this.$background.clear();
                 this.$background.drawRect(0, 0, this.width, this.height);
                 this.$pop.$resize(width, height);
+                this.$menu.$resize(width, height);
             }
         }, {
             key: "stageWidth",
@@ -5629,6 +5630,32 @@ var flower = {};
             value: function addChildAt(child, index) {
                 this.__addFrame = flower.EnterFrame.frame;
                 _get(Object.getPrototypeOf(MenuManager.prototype), "addChildAt", this).call(this, child, index);
+            }
+        }, {
+            key: "$resize",
+            value: function $resize(width, height) {
+                this.width = width;
+                this.height = height;
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                for (var i = 0; i < this.numChildren; i++) {
+                    var child = this.getChildAt(i);
+                    if (child.x < 0) {
+                        child.x = 0;
+                    }
+                    if (child.y < 0) {
+                        child.y = 0;
+                    }
+                    if (child.x + child.width > this.width) {
+                        child.x = this.width - child.width;
+                    }
+                    if (child.y + child.height > this.height) {
+                        child.y = this.height - child.height;
+                    }
+                }
+                _get(Object.getPrototypeOf(MenuManager.prototype), "$onFrameEnd", this).call(this);
             }
         }], [{
             key: "getInstance",
@@ -6256,7 +6283,7 @@ var flower = {};
                 }
                 this._links = null;
                 this._isLoading = false;
-                if (!this._res || !this._data) {
+                if (this._res == null || this._data == null) {
                     this._selfDispose = true;
                     this.dispose();
                     this._selfDispose = false;

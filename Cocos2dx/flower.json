@@ -1,22 +1,47 @@
 {
   "name": "派克帝国",
   "direction": {
-    "ui": {
-      "name": "界面",
+    "module": {
+      "name": "模块",
       "list": [
-        "res/ui/MainUI.xml"
+        {
+          "path": "res/module/MainUI.xml",
+          "plugin": "UIPlugin"
+        },
+        {
+          "path": "res/module/MainUI1.xml",
+          "plugin": "UIPlugin"
+        },
+        {
+          "path": "res/module/MainUI2.xml",
+          "plugin": "UIPlugin"
+        },
+        {
+          "path": "res/module/MainUI3.xml",
+          "plugin": "UIPlugin"
+        },
+        {
+          "path": "res/module/MainUI4.xml",
+          "plugin": "UIPlugin"
+        }
       ]
     },
     "data": {
       "name": "数据结构",
       "list": [
-        "res/data/Paik.json"
+        {
+          "path": "res/data/Paik.json",
+          "plugin": "DataPlugin"
+        }
       ]
     },
     "language": {
       "name": "语言配置",
       "list": [
-        "res/language/zh_CN.json"
+        {
+          "path": "res/language/zh_CN.json",
+          "plugin": "LanguagePlugin"
+        }
       ]
     }
   }

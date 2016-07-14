@@ -9,14 +9,16 @@ class MaskUI extends flower.Mask {
     }
 
     setData(val) {
-        if(val && typeof val == "string") {
+        if (val && typeof val == "string") {
             val = flower.DataManager.getInstance().createData(val);
         }
         if (this._data == val) {
             return;
         }
         this._data = val;
-        this.resetAllBindProperty();
+        if(this.$UIComponent) {
+            flower.Binding.changeData(this);
+        }
     }
 
     get data() {
@@ -131,7 +133,7 @@ class MaskUI extends flower.Mask {
     }
 
     $onFrameEnd() {
-        if(!this.parent.__UIComponent) {
+        if (!this.parent.__UIComponent) {
             var flag = false;
             var count = 6;
             while (count && this.$hasFlags(0x1000)) {
@@ -142,7 +144,7 @@ class MaskUI extends flower.Mask {
                 flag = true;
                 count--;
             }
-            if(!flag) {
+            if (!flag) {
                 super.$onFrameEnd();
                 this.shape.$onFrameEnd();
                 this.$resetLayout();
@@ -163,6 +165,7 @@ class MaskUI extends flower.Mask {
     }
 
     dispose() {
+        flower.Binding.removeChangeObject(this);
         this.removeAllBindProperty();
         this.$UIComponent[11].dispose();
         super.dispose();

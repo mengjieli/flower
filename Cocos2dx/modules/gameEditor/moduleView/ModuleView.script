@@ -1,0 +1,21 @@
+function init() {
+    editor.EventManager.instance.addListener(editor.ModuleEvent.VIEW_FILE, this.onViewFile, this);
+}
+
+function onViewFile(e) {
+    var file = e.data;
+    for(var i = 0,len = this.viewStack.length; i < len; i++) {
+        if(this.viewStack.getItemAt(i).data == file) {
+            this.viewStack.selectedIndex = i;
+            return;
+        }
+    }
+    var plugin;
+    if (!plugin) {
+        flower.breakPoint();
+        plugin = new editor.PluginBase();
+        plugin.data = file;
+        this.viewStack.addChild(plugin);
+        this.viewStack.selectedItem = plugin;
+    }
+}

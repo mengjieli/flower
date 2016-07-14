@@ -1,0 +1,20 @@
+var PluginManager = (function () {
+
+    function PluginManager() {
+    }
+
+    var plugins = {};
+
+    PluginManager.getPlugin = function (name) {
+        return plugins[name];
+    }
+
+    PluginManager.register = function (name, clazz) {
+        plugins[name] = clazz;
+    }
+
+    return PluginManager;
+})();
+
+
+module.PluginManager = PluginManager;

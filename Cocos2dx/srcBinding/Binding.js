@@ -1205,15 +1205,44 @@ class TokenType {
 
 //////////////////////////File:binding/Binding.js///////////////////////////
 class Binding {
-    singleValue = false;
-    list = [];
-    stmts = [];
+    singleValue;
+    list;
+    stmts;
     thisObj;
     property;
     content;
     checks;
 
     constructor(thisObj, checks, property, content) {
+        this.thisObj = thisObj;
+        this.checks = checks = checks || [];
+        this.property = property;
+        this.content = content;
+        if (checks && content.search("data") != -1) {
+            for (var i = 0; i < checks.length; i++) {
+                var display = checks[i];
+                if (display.id) {
+                    if (!Binding.changeList[display.id]) {
+                        Binding.changeList[display.id] = [];
+                    }
+                    Binding.changeList[display.id].push(this);
+                }
+            }
+        }
+        this.__bind(thisObj, checks.concat(), property, content);
+    }
+
+    $reset() {
+        for (var i = 0; i < this.list.length; i++) {
+            this.list[i].removeListener(flower.Event.UPDATE, this.update, this);
+        }
+        this.__bind(this.thisObj, this.checks.concat(), this.property, this.content);
+    }
+
+    __bind(thisObj, checks, property, content) {
+        this.list = [];
+        this.stmts = [];
+        this.singleValue = false;
         var i;
         if (checks == null) {
             checks = Binding.bindingChecks.concat();
@@ -1223,7 +1252,6 @@ class Binding {
                 checks.push(Binding.bindingChecks[i]);
             }
         }
-        this.checks = checks;
         checks.push(thisObj);
         var lastEnd = 0;
         var parseError = false;
@@ -1283,12 +1311,12 @@ class Binding {
     update(value = null, old = null) {
         var value;
         if (this.singleValue) {
-            this.thisObj[this.property] = this.stmts[0].getValue();
             try {
                 value = this.stmts[0].getValue();
             } catch (e) {
+                value = null;
             }
-            this.thisObj[this.property]
+            this.thisObj[this.property] = value;
         }
         else {
             var str = "";
@@ -1326,8 +1354,26 @@ class Binding {
         Binding.bindingChecks.push(check);
     }
 
+    static changeList = {};
+
+    static changeData(display) {
+        var id = display.id;
+        var list = Binding.changeList[id];
+        if (list) {
+            for (var i = 0; i < list.length; i++) {
+                list[i].$reset();
+            }
+        }
+    }
+
+    static removeChangeObject(display) {
+        var id = display.id;
+        delete Binding.changeList[id];
+    }
+
     static clearBindingChecks() {
-        Binding.bindingChecks = null;
+        Binding.bindingChecks = null
+        Binding.changeList = [];
     }
 
 }

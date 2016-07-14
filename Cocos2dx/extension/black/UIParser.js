@@ -390,7 +390,9 @@ class UIParser extends Group {
             pkg += ".";
         }
         content += "$root." + pkg + allClassName + " = " + allClassName;
-        //trace("解析后内容:\n", content);
+        if (sys.TIP) {
+            trace("解析类:\n", content);
+        }
         if (sys.DEBUG) {
             try {
                 eval(content);
@@ -401,7 +403,6 @@ class UIParser extends Group {
             eval(content);
         }
         flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
-        //trace("解析类:\n", content);
         return {
             "namesapce": uinameNS,
             "className": allClassName,

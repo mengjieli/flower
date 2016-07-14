@@ -1,16 +1,20 @@
 {
   "namespace": "e",
   "packageURL": "editor",
+  "scripts": [
+    "./events/EventManager.script",
+    "./events/ModuleEvent.script",
+    "./plugins/PluginManager.script"
+  ],
   "components": [
     "./plugins/PluginBase.xml"
   ],
   "classes": {
     "EditorMain": "./EditorMain.xml",
-    "ProjectView": "./projectViews/ProjectView.xml"
+    "ProjectView": "./projectViews/ProjectView.xml",
+    "ModuleView": "./moduleView/ModuleView.xml"
   },
   "data": [
     "./data/ProjectData.json"
-  ],
-  "scripts:": [
   ]
 }

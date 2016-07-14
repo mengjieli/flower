@@ -1,4 +1,4 @@
-<f:Group class="PluginBase" xmlns:f="flower">
+<f:Group class="PluginBase" title="{data.name}" pluginName="*" percentWidth="100" percentHeight="100" xmlns:f="flower">
     <f:script src="./PluginBase.script"/>
-    <f:Label text="Plugin base"/>
+    <f:Label text="未找到对应的插件: {data.name}" horizontalCenter="0" verticalCenter="0"/>
 </f:Group>

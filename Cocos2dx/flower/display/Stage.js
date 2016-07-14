@@ -360,6 +360,7 @@ class Stage extends Sprite {
         this.$background.clear();
         this.$background.drawRect(0, 0, this.width, this.height);
         this.$pop.$resize(width, height);
+        this.$menu.$resize(width, height);
     }
 
     set backgroundColor(val) {

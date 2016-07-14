@@ -1,0 +1,16 @@
+var ModuleEvent = (function (_super) {
+
+    __extends(ModuleEvent, _super);
+
+    function ModuleEvent(type, data) {
+        _super.call(this, type);
+        this.data = data;
+    }
+
+    ModuleEvent.VIEW_FILE = "view_file";
+    //ModuleEvent.VIEW_MODULE = "view_module";
+
+    return ModuleEvent;
+})(flower.Event);
+
+module.ModuleEvent = ModuleEvent;

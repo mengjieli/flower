@@ -14,8 +14,8 @@ class TabBar extends ListBase {
         this.layout.fixElementSize = false;
     }
 
-    _setSelectedItem(item) {
-        super._setSelectedItem(item);
+    __setSelectedItem(item) {
+        super.__setSelectedItem(item);
         (this.dataProvider).selectedItem = item.data;
     }
 
@@ -49,6 +49,9 @@ class TabBar extends ListBase {
                 for (var i = 0, len = list.length; i < len; i++) {
                     item = null;
                     itemData = list.getItemAt(i);
+                    if (itemData == p[9]) {
+                        findSelected = true;
+                    }
                     for (var f = 0; f < items.length; f++) {
                         if (items[f].data == itemData) {
                             item = items[f];
@@ -61,7 +64,13 @@ class TabBar extends ListBase {
                         item.data = itemData;
                     }
                     //检查 more 里面的数据
-                    if (this.more && item.x + item.width > this.width) {
+                    if (this.width > 20 && this.more && item.x + item.width > this.width - 20) {
+                        if (itemData == p[9]) {
+                            findSelected = false;
+                        }
+                        if (!findSelected && list instanceof flower.ViewStack) {
+                            list.setItemIndex(p[9], 0);
+                        }
                         addMoreButton = true;
                         if (item.parent) {
                             item.parent.removeChild(item);

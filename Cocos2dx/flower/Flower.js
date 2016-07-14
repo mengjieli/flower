@@ -1,5 +1,5 @@
 var DEBUG = true;
-var TIP = false;
+var TIP = true;
 var $language = "zh_CN";
 var NATIVE = true;
 /**

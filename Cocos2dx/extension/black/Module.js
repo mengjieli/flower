@@ -27,6 +27,7 @@ class Module extends flower.EventDispatcher {
         var cfg = e.data;
         var namespace = cfg.namespace || "local";
         flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+        this.__list = [];
         var classes = cfg.classes;
         if (classes) {
             for (var key in  classes) {
@@ -37,7 +38,21 @@ class Module extends flower.EventDispatcher {
                 flower.UIParser.setLocalUIURL(key, url, namespace);
             }
         }
-        this.__list = [];
+        this.script = "var module = $root." + cfg.packageURL + " = $root." + cfg.packageURL + "||{};\n";
+        //this.script += "var " + cfg.packageURL + " = module;\n\n";
+        var scripts = cfg.scripts;
+        if (scripts) {
+            for (var i = 0; i < scripts.length; i++) {
+                var url = scripts[i];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                this.__list.push({
+                    type: "script",
+                    url: url
+                });
+            }
+        }
         var data = cfg.data;
         if (data) {
             for (var i = 0; i < data.length; i++) {
@@ -85,6 +100,12 @@ class Module extends flower.EventDispatcher {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
                 flower.DataManager.getInstance().addDefine(e.data);
+            } else if (item.type == "script") {
+                this.script += e.data + "\n\n\n";
+                if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
+                    trace("执行script", this.script);
+                    eval(this.script);
+                }
             }
         }
         this.__progress.max.value = this.__list.length;
@@ -100,7 +121,7 @@ class Module extends flower.EventDispatcher {
             ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
             ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
             ui.parseAsync(url);
-        } else if (item.type == "data") {
+        } else if (item.type == "data" || item.type == "script") {
             var loader = new flower.URLLoader(item.url);
             loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
             loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);

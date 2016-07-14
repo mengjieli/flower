@@ -12,14 +12,16 @@ class Group extends flower.Sprite {
     }
 
     setData(val) {
-        if(val && typeof val == "string") {
+        if (val && typeof val == "string") {
             val = flower.DataManager.getInstance().createData(val);
         }
         if (this._data == val) {
             return;
         }
         this._data = val;
-        this.resetAllBindProperty();
+        if(this.$UIComponent) {
+            flower.Binding.changeData(this);
+        }
     }
 
     get data() {
@@ -121,7 +123,7 @@ class Group extends flower.Sprite {
     }
 
     $onFrameEnd() {
-        if(!this.parent.__UIComponent) {
+        if (!this.parent.__UIComponent) {
             var flag = false;
             var count = 6;
             while (count && this.$hasFlags(0x1000)) {
@@ -149,6 +151,7 @@ class Group extends flower.Sprite {
     }
 
     dispose() {
+        flower.Binding.removeChangeObject(this);
         this.removeAllBindProperty();
         this.$UIComponent[11].dispose();
         super.dispose();

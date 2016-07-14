@@ -1,0 +1,15 @@
+var EventManager = (function (_super) {
+
+    __extends(EventManager, _super);
+
+    function EventManager() {
+        _super.call(this);
+    }
+
+    EventManager.instance = new EventManager();
+
+    return EventManager;
+
+})(flower.EventDispatcher);
+
+module.EventManager = EventManager;

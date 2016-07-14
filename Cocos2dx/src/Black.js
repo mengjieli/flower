@@ -148,19 +148,6 @@ var $root = eval("this");
                     }
                 };
 
-                p.resetAllBindProperty = function () {
-                    if (this.$UIComponent) {
-                        var binds = this.$UIComponent[10];
-                        for (var key in binds) {
-                            var checks = binds[key].checks;
-                            var property = binds[key].property;
-                            var content = binds[key].content;
-                            binds[key].dispose();
-                            binds[key] = new flower.Binding(this, checks, property, content);
-                        }
-                    }
-                };
-
                 p.removeAllBindProperty = function () {
                     var binds = this.$UIComponent[10];
                     for (var key in binds) {
@@ -537,20 +524,20 @@ var $root = eval("this");
 
         function DataGroupEvent(type) {
             var bubbles = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-            var itemData = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+            var item = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, DataGroupEvent);
 
             var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroupEvent).call(this, type, bubbles));
 
-            _this2.__itemData = itemData;
+            _this2.__item = item;
             return _this2;
         }
 
         _createClass(DataGroupEvent, [{
-            key: "itemData",
+            key: "item",
             get: function get() {
-                return this.__itemData;
+                return this.__item;
             }
         }]);
 
@@ -1877,7 +1864,9 @@ var $root = eval("this");
                     return;
                 }
                 this._data = val;
-                this.resetAllBindProperty();
+                if (this.$UIComponent) {
+                    flower.Binding.changeData(this);
+                }
             }
         }, {
             key: "$addFlags",
@@ -2007,6 +1996,7 @@ var $root = eval("this");
         }, {
             key: "dispose",
             value: function dispose() {
+                flower.Binding.removeChangeObject(this);
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Group.prototype), "dispose", this).call(this);
@@ -2355,7 +2345,9 @@ var $root = eval("this");
                     pkg += ".";
                 }
                 content += "$root." + pkg + allClassName + " = " + allClassName;
-                //trace("解析后内容:\n", content);
+                if (sys.TIP) {
+                    trace("解析类:\n", content);
+                }
                 if (sys.DEBUG) {
                     try {
                         eval(content);
@@ -2366,7 +2358,6 @@ var $root = eval("this");
                     eval(content);
                 }
                 flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
-                //trace("解析类:\n", content);
                 return {
                     "namesapce": uinameNS,
                     "className": allClassName
@@ -4215,7 +4206,9 @@ var $root = eval("this");
                     return;
                 }
                 this._data = val;
-                this.resetAllBindProperty();
+                if (this.$UIComponent) {
+                    flower.Binding.changeData(this);
+                }
             }
         }, {
             key: "$createShape",
@@ -4362,6 +4355,7 @@ var $root = eval("this");
         }, {
             key: "dispose",
             value: function dispose() {
+                flower.Binding.removeChangeObject(this);
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(MaskUI.prototype), "dispose", this).call(this);
@@ -4895,9 +4889,9 @@ var $root = eval("this");
         }
 
         _createClass(TabBar, [{
-            key: "_setSelectedItem",
-            value: function _setSelectedItem(item) {
-                _get(Object.getPrototypeOf(TabBar.prototype), "_setSelectedItem", this).call(this, item);
+            key: "__setSelectedItem",
+            value: function __setSelectedItem(item) {
+                _get(Object.getPrototypeOf(TabBar.prototype), "__setSelectedItem", this).call(this, item);
                 this.dataProvider.selectedItem = item.data;
             }
         }, {
@@ -4932,6 +4926,9 @@ var $root = eval("this");
                         for (var i = 0, len = list.length; i < len; i++) {
                             item = null;
                             itemData = list.getItemAt(i);
+                            if (itemData == p[9]) {
+                                findSelected = true;
+                            }
                             for (var f = 0; f < items.length; f++) {
                                 if (items[f].data == itemData) {
                                     item = items[f];
@@ -4944,7 +4941,13 @@ var $root = eval("this");
                                 item.data = itemData;
                             }
                             //检查 more 里面的数据
-                            if (this.more && item.x + item.width > this.width) {
+                            if (this.width > 20 && this.more && item.x + item.width > this.width - 20) {
+                                if (itemData == p[9]) {
+                                    findSelected = false;
+                                }
+                                if (!findSelected && list instanceof flower.ViewStack) {
+                                    list.setItemIndex(p[9], 0);
+                                }
                                 addMoreButton = true;
                                 if (item.parent) {
                                     item.parent.removeChild(item);
@@ -6379,6 +6382,7 @@ var $root = eval("this");
                 var cfg = e.data;
                 var namespace = cfg.namespace || "local";
                 flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+                this.__list = [];
                 var classes = cfg.classes;
                 if (classes) {
                     for (var key in classes) {
@@ -6389,7 +6393,21 @@ var $root = eval("this");
                         flower.UIParser.setLocalUIURL(key, url, namespace);
                     }
                 }
-                this.__list = [];
+                this.script = "var module = $root." + cfg.packageURL + " = $root." + cfg.packageURL + "||{};\n";
+                //this.script += "var " + cfg.packageURL + " = module;\n\n";
+                var scripts = cfg.scripts;
+                if (scripts) {
+                    for (var i = 0; i < scripts.length; i++) {
+                        var url = scripts[i];
+                        if (url.slice(0, 2) == "./") {
+                            url = this.__direction + url.slice(2, url.length);
+                        }
+                        this.__list.push({
+                            type: "script",
+                            url: url
+                        });
+                    }
+                }
                 var data = cfg.data;
                 if (data) {
                     for (var i = 0; i < data.length; i++) {
@@ -6439,6 +6457,12 @@ var $root = eval("this");
                     item = this.__list[this.__index - 1];
                     if (item.type == "data") {
                         flower.DataManager.getInstance().addDefine(e.data);
+                    } else if (item.type == "script") {
+                        this.script += e.data + "\n\n\n";
+                        if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
+                            trace("执行script", this.script);
+                            eval(this.script);
+                        }
                     }
                 }
                 this.__progress.max.value = this.__list.length;
@@ -6454,7 +6478,7 @@ var $root = eval("this");
                     ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
                     ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
                     ui.parseAsync(url);
-                } else if (item.type == "data") {
+                } else if (item.type == "data" || item.type == "script") {
                     var loader = new flower.URLLoader(item.url);
                     loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
                     loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
