@@ -7,7 +7,8 @@
     "./plugins/PluginManager.script"
   ],
   "components": [
-    "./plugins/PluginBase.xml"
+    "./plugins/PluginBase.xml",
+    "./plugins/uiPlugin/UIPlugin.xml"
   ],
   "classes": {
     "EditorMain": "./EditorMain.xml",

@@ -170,7 +170,7 @@ var flower = {};
     }
 
     function breakPoint(name) {
-        trace(name);
+        trace("breakPoint:", name);
     }
 
     flower.start = start;

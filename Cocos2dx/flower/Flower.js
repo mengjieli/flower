@@ -124,7 +124,7 @@ function trace() {
 }
 
 function breakPoint(name) {
-    trace(name);
+    trace("breakPoint:", name);
 }
 
 exports.start = start;

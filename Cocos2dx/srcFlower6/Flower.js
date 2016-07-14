@@ -148,7 +148,7 @@ function trace() {
 }
 
 function breakPoint(name) {
-    trace(name);
+    trace("breakPoint:", name);
 }
 
 flower.start = start;

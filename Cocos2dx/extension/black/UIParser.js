@@ -79,6 +79,7 @@ class UIParser extends Group {
     hasInitFunction;
     scriptURL;
     scriptContent;
+    staticScript;
     loadURL;
     localNameSpace = "local";
 
@@ -360,6 +361,7 @@ class UIParser extends Group {
         content += before + "\t" + className + ".prototype." + className + "_setBindProperty = function() {\n";
         content += before + "\t\tfor(var i = 0; i < this." + className + "_binds.length; i++) this." + className + "_binds[i][0].bindProperty(this." + className + "_binds[i][1],this." + className + "_binds[i][2],[this]);\n";
         content += before + "\t}\n\n";
+        content += this.staticScript || "";
         content += before + "\treturn " + className + ";\n";
         if (uinameNS == "f") {
             content += before + "})(" + extendClass + ");\n";
@@ -419,9 +421,11 @@ class UIParser extends Group {
             var len = scriptContent.length;
             var pos = 0;
             var list = [];
+            this.staticScript = "";
             while (true) {
                 var nextFunction = this.findNextFunction(scriptContent, pos);
                 if (nextFunction) {
+                    this.staticScript += nextFunction.staticScript;
                     pos = nextFunction.endIndex;
                     list.push(nextFunction);
                 } else {
@@ -535,6 +539,19 @@ class UIParser extends Group {
         if (i == content.length) {
             return null;
         }
+        var j = i;
+        while (j < content.length) {
+            if (content.slice(j, j + "static".length) == "static" || content.slice(j, j + len) == "function") {
+                break;
+            }
+            j++;
+        }
+        if (j == content.length) {
+            this.staticScript += content.slice(i, j);
+            return null;
+        }
+        var staticScript = content.slice(i, j);
+        i = j;
         if (content.slice(i, i + "static".length) == "static") {
             isStatic = true;
             i += "static".length;
@@ -635,6 +652,7 @@ class UIParser extends Group {
         if (content == "") {
             sys.$error(3007, this.scriptURL, this.scriptContent);
         }
+        res.staticScript = staticScript || "";
         res.content = content;
         res.endIndex = i + content.length + 1;
         res.isStatic = isStatic;

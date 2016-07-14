@@ -1,0 +1,3 @@
+<f:Group class="UIPlugin" title="{data.name}" xmlns:f="flower" xmlns:s="software" xmlns:e="editor">
+    <f:script src="./UIPlugin.script"/>
+</f:Group>

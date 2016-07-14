@@ -4,18 +4,20 @@ function init() {
 
 function onViewFile(e) {
     var file = e.data;
-    for(var i = 0,len = this.viewStack.length; i < len; i++) {
-        if(this.viewStack.getItemAt(i).data == file) {
+    for (var i = 0, len = this.viewStack.length; i < len; i++) {
+        if (this.viewStack.getItemAt(i).data == file) {
             this.viewStack.selectedIndex = i;
             return;
         }
     }
+    var pluginClass = editor.PluginManager.getPlugin(file.plugin);
     var plugin;
-    if (!plugin) {
-        flower.breakPoint();
-        plugin = new editor.PluginBase();
-        plugin.data = file;
-        this.viewStack.addChild(plugin);
-        this.viewStack.selectedItem = plugin;
+    if (pluginClass) {
+        plugin = new pluginClass(file);
+    } else {
+        plugin = new editor.PluginBase(file);
     }
+    flower.breakPoint();
+    this.viewStack.addChild(plugin);
+    this.viewStack.selectedItem = plugin;
 }
