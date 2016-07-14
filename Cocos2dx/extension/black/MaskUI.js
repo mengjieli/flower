@@ -13,12 +13,13 @@ class MaskUI extends flower.Mask {
             val = flower.DataManager.getInstance().createData(val);
         }
         if (this._data == val) {
-            return;
+            return false;
         }
         this._data = val;
         if(this.$UIComponent) {
             flower.Binding.changeData(this);
         }
+        return true;
     }
 
     get data() {

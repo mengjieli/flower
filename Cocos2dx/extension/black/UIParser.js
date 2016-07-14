@@ -336,8 +336,8 @@ class UIParser extends Group {
         content += (packages.length ? before : "") + "var " + className + " = (function (_super) {\n";
         content += before + "\t__extends(" + className + ", _super);\n";
         content += before + "\tfunction " + className + "(data) {\n";
-        content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\t _super.call(this);\n";
+        content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_binds = [];\n";
         var scriptInfo = {
             content: ""

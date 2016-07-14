@@ -1641,12 +1641,13 @@ class Group extends flower.Sprite {
             val = flower.DataManager.getInstance().createData(val);
         }
         if (this._data == val) {
-            return;
+            return false;
         }
         this._data = val;
         if(this.$UIComponent) {
             flower.Binding.changeData(this);
         }
+        return true;
     }
 
     get data() {
@@ -2128,8 +2129,8 @@ class UIParser extends Group {
         content += (packages.length ? before : "") + "var " + className + " = (function (_super) {\n";
         content += before + "\t__extends(" + className + ", _super);\n";
         content += before + "\tfunction " + className + "(data) {\n";
-        content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\t _super.call(this);\n";
+        content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_binds = [];\n";
         var scriptInfo = {
             content: ""
@@ -3850,12 +3851,13 @@ class MaskUI extends flower.Mask {
             val = flower.DataManager.getInstance().createData(val);
         }
         if (this._data == val) {
-            return;
+            return false;
         }
         this._data = val;
         if(this.$UIComponent) {
             flower.Binding.changeData(this);
         }
+        return true;
     }
 
     get data() {

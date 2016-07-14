@@ -1,1 +1,18 @@
+function setData(val) {
+    if (_super.prototype.setData.call(this, val)) {
+        if (this.ui) {
+            this.ui.dispose();
+        }
+        this.ui = null;
+        if (this.data) {
+            var parser = new UIParser();
+            console.log(this.data);
+            parser.parseUIAsync(this.data.path);
+            flower.breakPoint();
+            this.addChild(parser);
+            this.ui = parser;
+        }
+    }
+}
+
 editor.PluginManager.register("UIPlugin", UIPlugin);
