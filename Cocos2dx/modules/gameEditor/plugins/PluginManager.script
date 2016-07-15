@@ -4,13 +4,23 @@ var PluginManager = (function () {
     }
 
     var plugins = {};
+    var parsers = {};
 
     PluginManager.getPlugin = function (name) {
         return plugins[name];
     }
 
-    PluginManager.register = function (name, clazz) {
+    PluginManager.registerPlugin = function (name, clazz) {
         plugins[name] = clazz;
+    }
+
+    PluginManager.getParser = function (name) {
+        return parsers[name];
+    }
+
+
+    PluginManager.registerParser = function (name, clazz) {
+        parsers[name] = clazz;
     }
 
     return PluginManager;

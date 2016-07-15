@@ -1,0 +1,17 @@
+var Parser = (function (_super) {
+
+    __extends(Parser, _super);
+
+    function Parser(file) {
+        this.file = file;
+    }
+
+    Parser.prototype.load = function () {
+        this.dispatchWidth(flower.Event.COMPLETE);
+    }
+
+    return Parser;
+})(flower.EventDispatcher);
+
+
+module.Parser = Parser;

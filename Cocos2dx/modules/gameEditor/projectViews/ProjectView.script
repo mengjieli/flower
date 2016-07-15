@@ -5,9 +5,8 @@ function init() {
 
 function onClickItem(e) {
     var item = e.item;
-    //console.log("item:", item);
     if (item.plugin) {
-        editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.VIEW_FILE, item);
+        item.open();
     }
 }
 
@@ -24,20 +23,11 @@ function __onLoadConfig(e) {
     var direction = this.data.direction;
     direction.removeAll();
     for (var key in cfg.direction) {
-        direction.push({
-            isDirection: true,
-            path: "res/" + key,
-            name: cfg.direction[key].name,
-        });
+        direction.push(new editor.File(true, "res" + key, cfg.direction[key].name));
         var list = cfg.direction[key].list;
         for (var i = 0; i < list.length; i++) {
             var item = list[i];
-            direction.push({
-                path: item.path,
-                name: flower.Path.getName(item.path),
-                plugin: item.plugin,
-                fileType: key
-            });
+            direction.push(new editor.File(false, item.path, flower.Path.getName(item.path), item.type));
         }
     }
     this.openItem("res/module/MainUI.xml");
@@ -46,14 +36,14 @@ function __onLoadConfig(e) {
 function openItem(url) {
     var direction = this.data.direction;
     var item;
-    for(var i = 0; i < direction.length; i++) {
-        if(direction.getItemAt(i).path == url) {
+    for (var i = 0; i < direction.length; i++) {
+        if (direction.getItemAt(i).path == url) {
             item = direction.getItemAt(i);
             break;
         }
     }
     if (item) {
-        editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.VIEW_FILE, item);
+        item.open();
     }
 }
 

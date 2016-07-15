@@ -6,23 +6,23 @@
       "list": [
         {
           "path": "res/module/MainUI.xml",
-          "plugin": "UIPlugin"
+          "type": "UI"
         },
         {
           "path": "res/module/MainUI1.xml",
-          "plugin": "UIPlugin"
+          "type": "UI"
         },
         {
           "path": "res/module/MainUI2.xml",
-          "plugin": "UIPlugin"
+          "type": "UI"
         },
         {
           "path": "res/module/MainUI3.xml",
-          "plugin": "UIPlugin"
+          "type": "UI"
         },
         {
           "path": "res/module/MainUI4.xml",
-          "plugin": "UIPlugin"
+          "type": "UI"
         }
       ]
     },
@@ -31,7 +31,7 @@
       "list": [
         {
           "path": "res/data/Paik.json",
-          "plugin": "DataPlugin"
+          "type": "Data"
         }
       ]
     },
@@ -40,7 +40,7 @@
       "list": [
         {
           "path": "res/language/zh_CN.json",
-          "plugin": "LanguagePlugin"
+          "type": "Language"
         }
       ]
     }

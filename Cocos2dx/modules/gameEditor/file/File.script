@@ -1,0 +1,139 @@
+var File = (function (_super) {
+
+    __extends(File, _super);
+    /**
+     *
+     * @param isDirection
+     * @param path
+     * @param name
+     * @param type
+     * @constructor
+     */
+    function File(isDirection, path, name, type) {
+        this.__isDirection = isDirection;
+        this.__path = path;
+        this.__name = name;
+        this.__type = type;
+        this.__parser = null;
+        this.ready = false;
+        this.waitForOpen = false;
+        this.isLoading = false;
+        this.content = null;
+    }
+
+    File.prototype.load = function () {
+        this.isLoading = true;
+        var loader = new flower.URLLoader(this.path);
+        loader.addListener(flower.Event.COMPLETE, this.onLoadConfig, this);
+        loader.addListener(flower.Event.ERROR, this.onLoadConfigError, this);
+        loader.load();
+    }
+
+    File.prototype.onLoadConfig = function (e) {
+        this.content = e.data;
+        flower.breakPoint();
+        var clazz = editor.PluginManager.getParser(this.__type);
+        this.__parser = new clazz(this);
+        if (this.__parser) {
+            this.__parser.load();
+            this.__parser.addEventListener(flower.Event.COMPLETE, this.onLoadComplete, this);
+            this.__parser.addEventListener(flower.Event.ERROR, this.onParserLoadError, this);
+        } else {
+            this.onLoadComplete();
+        }
+    }
+
+    File.prototype.onLoadComplete = function () {
+        this.isLoading = false;
+        if (this.waitForOpen) {
+            this.waitForOpen = false;
+        }
+        this.dispatchWidth(flower.Event.COMPLETE);
+    }
+
+    File.prototype.onLoadConfigError = function (e) {
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatch(e);
+        } else {
+            throw "加载置文件错误:" + e.currentTarget.url;
+        }
+    }
+
+    File.prototype.onParserLoadError = function (e) {
+        if (this.hasListener(flower.Event.ERROR)) {
+            this.dispatch(e);
+        } else {
+            throw e.data;
+        }
+    }
+
+    File.prototype.open = function () {
+        if (!this.ready) {
+            this.waitForOpen = true;
+            if (!this.isLoading) {
+                this.load();
+            }
+        } else {
+            editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.VIEW_FILE, this);
+        }
+    }
+
+    File.prototype.__getParser = function () {
+        return this.__parser;
+    }
+
+    Object.defineProperty(File.prototype, "isDirection", {
+        get: function () {
+            return this.__isDirection;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(File.prototype, "path", {
+        get: function () {
+            return this.__path;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(File.prototype, "name", {
+        get: function () {
+            return this.__name;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(File.prototype, "type", {
+        get: function () {
+            return this.__type;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(File.prototype, "parser", {
+        get: function () {
+            return this.__getParser();
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    return File;
+})(flower.EventDispatcher);
+
+
+module.File = File;

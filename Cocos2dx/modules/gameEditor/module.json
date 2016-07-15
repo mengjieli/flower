@@ -2,9 +2,13 @@
   "namespace": "e",
   "packageURL": "editor",
   "scripts": [
-    "./events/EventManager.script",
+    "./file/File.script",
+    "./parser/Parser.script",
     "./events/ModuleEvent.script",
     "./plugins/PluginManager.script",
+    "./parser/ui/UIParser.script",
+    "./parser/ui/UIElement.script",
+    "./events/EventManager.script",
     "./plugins/uiPlugin/UI.script",
     "./plugins/uiPlugin/UIEditor.script"
   ],

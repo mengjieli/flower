@@ -20,4 +20,4 @@ function touchBackground(e) {
     }
 }
 
-editor.PluginManager.register("UIPlugin", UIPlugin);
+editor.PluginManager.registerPlugin("UI", UIPlugin);
