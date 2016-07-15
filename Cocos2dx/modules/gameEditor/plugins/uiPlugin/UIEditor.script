@@ -2,11 +2,12 @@ var UIEditor = (function (_super) {
 
     __extends(UIEditor, _super);
 
-    function UIEditor(xml, display) {
+    function UIEditor(data, display) {
         _super.call(this);
+        this.data = data;
         this.attributes = {};
-        for (var i = 0; i < xml.attributes.length; i++) {
-            var attribute = xml.attributes[i];
+        for (var i = 0; i < data.numAttribute; i++) {
+            var attribute = data.getAttributeAt(i);
             switch (attribute.name) {
                 case "x":
                 case "y":
@@ -35,11 +36,10 @@ var UIEditor = (function (_super) {
         }
         this.display = display;
         this.width = this.height = 0;
-
-        if (display instanceof flower.Sprite) {
+        if (data.isContainer) {
             var nameTxt = new flower.TextField();
             this.nameTxt = nameTxt;
-            nameTxt.text = xml.name.split(":")[1];
+            nameTxt.text = data.name;
             nameTxt.fontColor = 0;
             nameTxt.alpha = 0.2;
             this.addChild(nameTxt);

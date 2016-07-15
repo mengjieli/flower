@@ -2042,8 +2042,8 @@ var $root = eval("this");
             value: function parseUIAsync(url) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
-                if (this.classes.namesapces[url]) {
-                    this.localNameSpace = this.classes.namesapces[url];
+                if (this.classes.namespaces[url]) {
+                    this.localNameSpace = this.classes.namespaces[url];
                 }
                 if (this.classes.defaultClassNames[url]) {
                     this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2059,8 +2059,8 @@ var $root = eval("this");
         }, {
             key: "parseAsync",
             value: function parseAsync(url) {
-                if (this.classes.namesapces[url]) {
-                    this.localNameSpace = this.classes.namesapces[url];
+                if (this.classes.namespaces[url]) {
+                    this.localNameSpace = this.classes.namespaces[url];
                 }
                 if (this.classes.defaultClassNames[url]) {
                     this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2230,7 +2230,7 @@ var $root = eval("this");
             key: "decodeRootComponent",
             value: function decodeRootComponent(xml, classContent) {
                 var content = "";
-                var namespacesList = xml.namesapces;
+                var namespacesList = xml.namespaces;
                 var namespaces = {};
                 for (var i = 0; i < namespacesList.length; i++) {
                     namespaces[namespacesList[i]] = namespacesList[i].value;
@@ -2715,8 +2715,8 @@ var $root = eval("this");
                         }
                         if (childClass == null) {
                             if (childName == "itemRenderer") {
-                                for (var n = 0; n < this.rootXML.namesapces.length; n++) {
-                                    item.addNameSpace(this.rootXML.namesapces[n]);
+                                for (var n = 0; n < this.rootXML.namespaces.length; n++) {
+                                    item.addNameSpace(this.rootXML.namespaces[n]);
                                 }
                                 var itemRenderer = new UIParser();
                                 setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.localNameSpace + "\");\n";
@@ -2805,7 +2805,7 @@ var $root = eval("this");
                 var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
 
                 this.classes[namespace + "URL"][name] = url;
-                this.classes.namesapces[url] = namespace;
+                this.classes.namespaces[url] = namespace;
                 this.classes.defaultClassNames[url] = name;
             }
         }, {
@@ -2890,7 +2890,7 @@ var $root = eval("this");
             "Array": "push",
             "ArrayValue": "push"
         },
-        namesapces: {},
+        namespaces: {},
         defaultClassNames: {},
         packages: {
             "local": ""
@@ -6478,7 +6478,7 @@ var $root = eval("this");
                     } else if (item.type == "script") {
                         this.script += e.data + "\n\n\n";
                         if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                            trace("执行script", this.script);
+                            //trace("执行script", this.script);
                             eval(this.script);
                         }
                     }

@@ -7,7 +7,7 @@ function setData(val) {
         this.background.addListener(flower.TouchEvent.TOUCH_BEGIN, this.touchBackground, this);
         this.info = {select: null};
         if (this.data) {
-            this.ui = new editor.UI(null, this.data.path, this.info);
+            this.ui = new editor.UI(this.data.parser.element, this.info);
             this.addChild(this.ui);
         }
     }

@@ -1,5 +1,5 @@
 class XMLElement extends XMLAttribute {
-    namesapces;
+    namespaces;
     attributes;
     list;
     elements;
@@ -7,13 +7,13 @@ class XMLElement extends XMLAttribute {
 
     constructor() {
         super();
-        this.namesapces = [];
+        this.namespaces = [];
         this.attributes = [];
         this.elements = this.list = [];
     }
 
     addNameSpace(nameSpace) {
-        this.namesapces.push(nameSpace);
+        this.namespaces.push(nameSpace);
     }
 
     getAttribute(name) {
@@ -26,9 +26,9 @@ class XMLElement extends XMLAttribute {
     }
 
     getNameSapce(name) {
-        for (var i = 0; i < this.namesapces.length; i++) {
-            if (this.namesapces[i].name == name) {
-                return this.namesapces[i];
+        for (var i = 0; i < this.namespaces.length; i++) {
+            if (this.namespaces[i].name == name) {
+                return this.namespaces[i];
             }
         }
         return null;
@@ -148,7 +148,7 @@ class XMLElement extends XMLAttribute {
                         var atrName = content.slice(i, j);
                         if (atrName.split(":").length == 2) {
                             nameSpace = new XMLNameSpace();
-                            this.namesapces.push(nameSpace);
+                            this.namespaces.push(nameSpace);
                             nameSpace.name = atrName.split(":")[1];
                         }
                         else {

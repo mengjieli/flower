@@ -34,7 +34,7 @@ var flower = {};
 (function () {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
-    var TIP = true;
+    var TIP = false;
     var $language = "zh_CN";
     var NATIVE = true;
     /**
@@ -9725,7 +9725,7 @@ var flower = {};
 
             var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
 
-            _this29.namesapces = [];
+            _this29.namespaces = [];
             _this29.attributes = [];
             _this29.elements = _this29.list = [];
             return _this29;
@@ -9734,7 +9734,7 @@ var flower = {};
         _createClass(XMLElement, [{
             key: "addNameSpace",
             value: function addNameSpace(nameSpace) {
-                this.namesapces.push(nameSpace);
+                this.namespaces.push(nameSpace);
             }
         }, {
             key: "getAttribute",
@@ -9749,9 +9749,9 @@ var flower = {};
         }, {
             key: "getNameSapce",
             value: function getNameSapce(name) {
-                for (var i = 0; i < this.namesapces.length; i++) {
-                    if (this.namesapces[i].name == name) {
-                        return this.namesapces[i];
+                for (var i = 0; i < this.namespaces.length; i++) {
+                    if (this.namespaces[i].name == name) {
+                        return this.namespaces[i];
                     }
                 }
                 return null;
@@ -9876,7 +9876,7 @@ var flower = {};
                                 var atrName = content.slice(i, j);
                                 if (atrName.split(":").length == 2) {
                                     nameSpace = new XMLNameSpace();
-                                    this.namesapces.push(nameSpace);
+                                    this.namespaces.push(nameSpace);
                                     nameSpace.name = atrName.split(":")[1];
                                 } else {
                                     attribute = new XMLAttribute();

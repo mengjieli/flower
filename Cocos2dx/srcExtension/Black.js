@@ -1852,7 +1852,7 @@ class UIParser extends Group {
             "Array": "push",
             "ArrayValue": "push"
         },
-        namesapces: {},
+        namespaces: {},
         defaultClassNames: {},
         packages: {
             "local": ""
@@ -1882,8 +1882,8 @@ class UIParser extends Group {
     }
 
     parseUIAsync(url, data = null) {
-        if (this.classes.namesapces[url]) {
-            this.localNameSpace = this.classes.namesapces[url];
+        if (this.classes.namespaces[url]) {
+            this.localNameSpace = this.classes.namespaces[url];
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -1898,8 +1898,8 @@ class UIParser extends Group {
     }
 
     parseAsync(url) {
-        if (this.classes.namesapces[url]) {
-            this.localNameSpace = this.classes.namesapces[url];
+        if (this.classes.namespaces[url]) {
+            this.localNameSpace = this.classes.namespaces[url];
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2068,7 +2068,7 @@ class UIParser extends Group {
 
     decodeRootComponent(xml, classContent) {
         var content = "";
-        var namespacesList = xml.namesapces;
+        var namespacesList = xml.namespaces;
         var namespaces = {};
         for (var i = 0; i < namespacesList.length; i++) {
             namespaces[namespacesList[i]] = namespacesList[i].value;
@@ -2550,8 +2550,8 @@ class UIParser extends Group {
                 }
                 if (childClass == null) {
                     if (childName == "itemRenderer") {
-                        for (var n = 0; n < this.rootXML.namesapces.length; n++) {
-                            item.addNameSpace(this.rootXML.namesapces[n]);
+                        for (var n = 0; n < this.rootXML.namespaces.length; n++) {
+                            item.addNameSpace(this.rootXML.namespaces[n]);
                         }
                         var itemRenderer = (new UIParser());
                         setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.localNameSpace + "\");\n";
@@ -2619,7 +2619,7 @@ class UIParser extends Group {
 
     static setLocalUIURL(name, url, namespace = "local") {
         this.classes[namespace + "URL"][name] = url;
-        this.classes.namesapces[url] = namespace;
+        this.classes.namespaces[url] = namespace;
         this.classes.defaultClassNames[url] = name;
     }
 
@@ -5726,7 +5726,6 @@ class Tree extends DataGroup {
                         openURL[url].state = true;
                     }
                     openURL[url].open = false;
-
                 } else {
                     url = item[pathField] || "";
                     if (!openURL[url]) {
@@ -5944,7 +5943,7 @@ class Module extends flower.EventDispatcher {
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                    trace("执行script", this.script);
+                    //trace("执行script", this.script);
                     eval(this.script);
                 }
             }

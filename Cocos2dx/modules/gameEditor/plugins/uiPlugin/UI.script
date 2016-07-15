@@ -2,67 +2,37 @@ var UI = (function (_super) {
 
     __extends(UI, _super);
 
-    function UI(xml, url, info) {
+    function UI(data,info) {
         _super.call(this);
+        this.data = data;
         this.info = info;
-        if (url) {
-            var loader = new flower.URLLoader(url);
-            loader.addListener(flower.Event.COMPLETE, this.onLoadConfig, this);
-            loader.addListener(flower.Event.ERROR, this.onLoadConfigError, this);
-            loader.load();
-        } else {
-            this.xml = xml;
-            this.parse();
-        }
+        this.init();
         this.focusEnabeld = true;
     }
 
-    UI.prototype.onLoadConfig = function (e) {
-        this.xml = new flower.XMLElement();
-        this.xml.parse(e.data);
-        this.parse();
-    }
-
-    UI.prototype.onLoadConfigError = function (e) {
-        this.percentWidth = 100;
-        this.percentHeight = 100;
-        var label = new flower.Label(e.data);
-        label.horizontalCenter = 0;
-        label.verticalCenter = 0;
-        this.addChild(label);
-    }
-
-    UI.prototype.parse = function () {
-        var isContainer = false;
-        var xml = this.xml;
-        var name = xml.name;
-        var xmlNS = name.split(":")[0];
-        var name = name.split(":")[1];
-        if (xmlNS == "f") {
-            var clazz = root.flower[name];
-            this.display = new clazz();
-            isContainer = this.display instanceof flower.Sprite;
-            if (this.display instanceof flower.DisplayObject) {
-                this.addChild(this.display);
-            }
-        }
-        if (!isContainer) {
+    UI.prototype.init = function () {
+        var data = this.data;
+        this.display = new data.clazz();
+        this.addChild(this.display);
+        if (!data.isContainer) {
             this.percentWidth = 100;
             this.percentHeight = 100;
         }
-        this.editor = new editor.UIEditor(this.xml, this.display);
-        for (var i = 0; i < xml.attributes.length; i++) {
-            var attribute = xml.attributes[i];
-            if (isContainer) {
+        this.editor = new editor.UIEditor(this.data, this.display);
+        for (var i = 0; i < data.numAttribute; i++) {
+            var attribute = data.getAttributeAt(i);
+            if (data.isContainer) {
                 this[attribute.name] = attribute.value;
             } else {
                 this.display[attribute.name] = attribute.value;
             }
         }
-        for (var i = 0; i < xml.elements.length; i++) {
-            var childXML = xml.elements[i];
-            var child = new UI(childXML, null, this.info);
-            this.addChild(child);
+        for (var i = 0; i < data.numElement; i++) {
+            var childData = data.getElementAt(i);
+            if (childData.isDisplay) {
+                var child = new UI(childData,this.info);
+                this.addChild(child);
+            }
         }
         this.addChild(this.editor);
         this.display.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouchBegin, this);

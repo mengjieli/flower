@@ -2,15 +2,150 @@ var UIElement = (function (_super) {
 
     __extends(UIElement, _super);
 
-    function UIElement(xml) {
+    function UIElement(xml, namespaces) {
         _super.call(this);
 
         this.xml = xml;
+        this.elements = [];
+        this.attributes = [];
+        this.namespaces = namespaces || xml.namespaces;
     }
 
     UIElement.prototype.load = function () {
-        new flower.CallLater(this.dispatchWidth,this,[flower.Event.COMPLETE]);
+        var isContainer = false;
+        var xml = this.xml;
+        var name = xml.name;
+        var xmlNS = name.split(":")[0];
+        var name = name.split(":")[1];
+        this.xmlNS = xmlNS;
+        this.name = name;
+        var display = new this.clazz();
+        this.__isDisplay = display instanceof flower.DisplayObject;
+        this.__isContainer = display instanceof flower.Sprite;
+        this.__isUIComponent = display.__UIComponent ? true : false;
+        if (this.isDisplay) {
+            for (var i = 0; i < xml.elements.length; i++) {
+                var childXML = xml.elements[i];
+                var childName = childXML.name;
+                var childNameNS = childName.split(":")[1];
+                childName = childName.split(":")[0];
+                if (childName == "f" && (childName.charAt(0) < 48 || childName.charAt(0) > 57)) {
+                    this.attributes.push(new UIElement(childXML, this.namespaces));
+                } else {
+                    this.elements.push(new UIElement(childXML, this.namespaces));
+                }
+            }
+            this.loadIndex = this.attributes.length + this.elements.length;
+            if (!this.loadIndex) {
+                new flower.CallLater(this.dispatchWidth, this, [flower.Event.COMPLETE]);
+            } else {
+                for (var i = 0; i < this.attributes.length; i++) {
+                    this.attributes[i].load();
+                    this.attributes[i].addListener(flower.Event.COMPLETE, this.__onLoad, this);
+                    this.attributes[i].addListener(flower.Event.ERROR, this.__onLoadError, this);
+                }
+                for (var i = 0; i < this.elements.length; i++) {
+                    this.elements[i].load();
+                    this.elements[i].addListener(flower.Event.COMPLETE, this.__onLoad, this);
+                    this.elements[i].addListener(flower.Event.ERROR, this.__onLoadError, this);
+                }
+            }
+        } else {
+            new flower.CallLater(this.dispatchWidth, this, [flower.Event.COMPLETE]);
+        }
     }
+
+    UIElement.prototype.__onLoad = function (e) {
+        this.dispatch(e);
+    }
+
+    UIElement.prototype.__onLoadError = function (e) {
+        this.dispatch(e);
+    }
+
+    UIElement.prototype.getElementAt = function (index) {
+        return this.elements[index];
+    }
+
+    UIElement.prototype.getAttributeAt = function (index) {
+        return this.xml.attributes[index];
+    }
+
+    UIElement.prototype.getAttributeElementAt = function (index) {
+        return this.attributes[index];
+    }
+
+    Object.defineProperty(UIElement.prototype, "clazz", {
+        get: function () {
+            if (this.xmlNS == "f") {
+                return root.flower[this.name];
+            }
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(UIElement.prototype, "numElement", {
+        get: function () {
+            return this.elements.length;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(UIElement.prototype, "numAttributeElement", {
+        get: function () {
+            return this.attributes.length;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(UIElement.prototype, "numAttribute", {
+        get: function () {
+            return this.xml.attributes.length;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(UIElement.prototype, "isDisplay", {
+        get: function () {
+            return this.__isDisplay;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(UIElement.prototype, "isContainer", {
+        get: function () {
+            return this.__isContainer;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(UIElement.prototype, "isUIComponent", {
+        get: function () {
+            return this.__isUIComponent;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
 
     return UIElement;
 
