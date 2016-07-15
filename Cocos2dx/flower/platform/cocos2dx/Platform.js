@@ -7,7 +7,7 @@ class Platform {
     static height;
 
     static start(engine, root, background) {
-        RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
+        RETINA = true;//cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
             ctor: function () {

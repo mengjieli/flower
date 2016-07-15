@@ -137,5 +137,6 @@ exports.sys = {
     TIP: TIP,
     $tip: $tip,
     $warn: $warn,
-    $error: $error
+    $error: $error,
+    getLanguage:getLanguage
 }

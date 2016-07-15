@@ -1,4 +1,27 @@
 class StringDo {
+
+    static isNumberString(str) {
+        var hasDot = false;
+        for (var i = 0; i < str.length; i++) {
+            if (i == 0 && str.charAt(0) == "+" || str.charAt(0) == "-") {
+
+            } else {
+                if (str.charAt(i) == ".") {
+                    if (hasDot) {
+                        return false;
+                    }
+                    hasDot = true;
+                } else {
+                    var code = str.charCodeAt(i);
+                    if (code < 48 || code > 57) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     static changeStringToInner(content) {
         var len = content.length;
         for (var i = 0; i < len; i++) {

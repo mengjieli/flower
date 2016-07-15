@@ -17,7 +17,6 @@ function onViewFile(e) {
     } else {
         plugin = new editor.PluginBase(file);
     }
-    flower.breakPoint();
     this.viewStack.addChild(plugin);
     this.viewStack.selectedItem = plugin;
 }

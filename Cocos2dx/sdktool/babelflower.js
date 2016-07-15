@@ -190,7 +190,6 @@ var list = [
     "TouchEvent",
     "MouseEvent",
     "DragEvent",
-    "IOErrorEvent",
 
 
     "Filter",
@@ -261,6 +260,7 @@ var fileContent = "";
 fileContent += `
 var LocalWebSocket = WebSocket;
 var $root = eval(\"this\");
+var root = root || eval(\"this\");
 var __define = $root.__define || function (o, p, g, s) {
         Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
     };

@@ -126,10 +126,10 @@ class URLLoader extends EventDispatcher {
             if (this._loadInfo.plist) {
                 var loader = new URLLoader(this._loadInfo.plist);
                 loader.addListener(Event.COMPLETE, this.onLoadTexturePlistComplete, this);
-                loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+                loader.addListener(Event.ERROR, this.loadError, this);
                 loader.load();
             } else {
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextureComplete, this.loadError, this);
+                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextureComplete, this.loadError, this);
             }
         }
     }
@@ -170,7 +170,7 @@ class URLLoader extends EventDispatcher {
         } else {
             var load = PlistManager.getInstance().load(this.url, this._loadInfo.url);
             load.addListener(Event.COMPLETE, this.loadPlistComplete, this);
-            load.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            load.addListener(Event.ERROR, this.loadError, this);
         }
     }
 
@@ -185,7 +185,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextComplete, this.loadError, this, this._method, this._params);
+        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextComplete, this.loadError, this, this._method, this._params);
     }
 
     loadTextComplete(content) {
@@ -250,8 +250,8 @@ class URLLoader extends EventDispatcher {
     }
 
     loadError(e) {
-        if (this.hasListener(IOErrorEvent.ERROR)) {
-            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, getLanguage(2003, this._loadInfo.url)));
+        if (this.hasListener(Event.ERROR)) {
+            this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
             if (this._links) {
                 for (var i = 0; i < this._links.length; i++) {
                     this._links[i].loadError();

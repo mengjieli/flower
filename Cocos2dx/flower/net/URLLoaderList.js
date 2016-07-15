@@ -38,12 +38,12 @@ class URLLoaderList extends EventDispatcher {
         if (this.__language != null) load.language = this.__language;
         if (this.__scale != null) load.scale = this.__scale;
         load.addListener(flower.Event.COMPLETE, this.__onComplete, this);
-        load.addListener(IOErrorEvent.ERROR, this.__onError, this);
+        load.addListener(Event.ERROR, this.__onError, this);
         load.load();
     }
 
     __onError(e) {
-        if (this.hasListener(IOErrorEvent.ERROR)) {
+        if (this.hasListener(Event.ERROR)) {
             this.dispatch(e);
         }
         else {

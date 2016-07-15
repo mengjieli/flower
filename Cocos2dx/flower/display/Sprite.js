@@ -243,7 +243,7 @@ class Sprite extends DisplayObject {
         var childs = this.__children;
         var len = childs.length;
         for (var i = len - 1; i >= 0; i--) {
-            if (childs[i].touchEnabled && (multiply == false || (multiply == true && childs[i].multiplyTouchEnabled == true))) {
+            if (childs[i].touchEnabled && childs[i].visible && (multiply == false || (multiply == true && childs[i].multiplyTouchEnabled == true))) {
                 target = childs[i].$getMouseTarget(touchX, touchY, multiply);
                 if (target) {
                     break;

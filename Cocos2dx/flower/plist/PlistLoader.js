@@ -25,14 +25,14 @@ class PlistLoader extends EventDispatcher {
             res.addURL(this._nativeURL);
             var loader = new URLLoader(res);
             loader.addListener(Event.COMPLETE, this.loadPlistComplete, this);
-            loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            loader.addListener(Event.ERROR, this.loadError, this);
             loader.load();
         }
     }
 
     loadError(e) {
-        if (this.hasListener(IOErrorEvent.ERROR)) {
-            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, e.message));
+        if (this.hasListener(Event.ERROR)) {
+            this.dispatch(e);
         } else {
             $error(2004, this.url);
         }
@@ -103,7 +103,7 @@ class PlistLoader extends EventDispatcher {
         if (flag) {
             var loader = new URLLoader(this.textureURL || this.plist.texture.nativeURL);
             loader.addListener(Event.COMPLETE, this.loadTextureComplete, this);
-            loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            loader.addListener(Event.ERROR, this.loadError, this);
             loader.load();
         } else {
             CallLater.add(this.loadComplete, this, [this.plist]);

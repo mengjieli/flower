@@ -97,7 +97,7 @@ class Image extends flower.Bitmap {
             this.__loader = new flower.URLLoader(val);
             this.__loader.load();
             this.__loader.addListener(flower.Event.COMPLETE, this.__onLoadComplete, this);
-            this.__loader.addListener(flower.IOErrorEvent.ERROR, this.__onLoadError, this);
+            this.__loader.addListener(flower.Event.ERROR, this.__onLoadError, this);
         }
     }
 

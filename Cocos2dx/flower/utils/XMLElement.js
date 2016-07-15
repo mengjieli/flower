@@ -2,13 +2,14 @@ class XMLElement extends XMLAttribute {
     namesapces;
     attributes;
     list;
+    elements;
     value;
 
     constructor() {
         super();
         this.namesapces = [];
         this.attributes = [];
-        this.list = [];
+        this.elements = this.list = [];
     }
 
     addNameSpace(nameSpace) {

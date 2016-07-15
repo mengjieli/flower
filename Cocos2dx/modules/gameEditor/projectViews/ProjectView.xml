@@ -2,5 +2,5 @@
                 percentHeight="100" viewport="LabelTree"
                 creationComplete="this.init();"
                 xmlns:f="flower" xmlns:s="software">
-    <f:script src="./ProjectView.js"/>
+    <f:script src="./ProjectView.script"/>
 </s:ScrollerTree>

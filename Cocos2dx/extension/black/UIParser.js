@@ -122,7 +122,7 @@ class UIParser extends Group {
 
     loadContentError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, getLanguage(3001, e.currentTarget.url));
+            this.dispatchWidth(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
         } else {
             sys.$error(3001, e.currentTarget.url);
         }
@@ -183,7 +183,7 @@ class UIParser extends Group {
         this.scriptURL = url;
         var loader = new flower.URLLoader(url);
         loader.addListener(flower.Event.COMPLETE, this.loadScriptComplete, this);
-        loader.addListener(flower.IOErrorEvent.ERROR, this.loadContentError, this);
+        loader.addListener(flower.Event.ERROR, this.loadContentError, this);
         loader.load();
     }
 
@@ -337,7 +337,6 @@ class UIParser extends Group {
         content += before + "\t__extends(" + className + ", _super);\n";
         content += before + "\tfunction " + className + "(data) {\n";
         content += before + "\t\t _super.call(this);\n";
-        content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_binds = [];\n";
         var scriptInfo = {
             content: ""
@@ -350,6 +349,7 @@ class UIParser extends Group {
         if (this.hasInitFunction) {
             content += before + "\t\tthis." + className + "_init();\n";
         }
+        content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
         content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";

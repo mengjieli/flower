@@ -1,6 +1,6 @@
 <f:Group percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software"
          xmlns:e="editer">
-    <s:Tab left="0" right="250" percentHeight="100">
+    <s:Tab left="0" right="150" percentHeight="100">
         <f:panels>
             <f:Array>
                 <e:ProjectView/>
@@ -12,6 +12,6 @@
             </f:Array>
         </f:panels>
     </s:Tab>
-    <e:ModuleView left="250" right="0" percentHeight="100">
+    <e:ModuleView left="150" right="0" percentHeight="100">
     </e:ModuleView>
 </f:Group>

@@ -1293,21 +1293,20 @@ var $root = eval("this");
     //////////////////////////File:extension/black/language/zh_CN.js///////////////////////////
     var locale_strings = flower.sys.$locale_strings["zh_CN"];
 
-    locale_strings[3001] = "UIParse 异步加载资源出错:{0}";
-    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名:{0}";
+    locale_strings[3001] = "UIParse 异步加载资源出错 : {0}";
+    locale_strings[3002] = "找不到 UI 对应的路径， UI 类名: {0}";
     locale_strings[3003] = "解析 UI 出错,:\n{0}\n{1}\n\n解析后内容为:\n{2}";
     locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}";
     locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
     locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
     locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
     locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
-    locale_strings[3011] = "数据结构类定义解析出错 :{0}\n{1}";
-    locale_strings[3012] = "没有定义的数据结构 :{0}";
+    locale_strings[3011] = "数据结构类定义解析出错 : {0}\n{1}";
+    locale_strings[3012] = "没有定义的数据结构 : {0}";
     locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
-    locale_strings[3100] = "没有定义的数据类型 :{0}";
-    locale_strings[3101] = "超出索引范围 :{0}，当前索引范围 0 ~ {1}";
-    locale_strings[3201] = "没有找到对应的类 :{0}";
-
+    locale_strings[3100] = "没有定义的数据类型 : {0}";
+    locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
+    locale_strings[3201] = "没有找到对应的类 : {0}";
     //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
 
     //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
@@ -2077,7 +2076,7 @@ var $root = eval("this");
             key: "loadContentError",
             value: function loadContentError(e) {
                 if (this.hasListener(flower.Event.ERROR)) {
-                    this.dispatchWidth(flower.Event.ERROR, getLanguage(3001, e.currentTarget.url));
+                    this.dispatchWidth(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
                 } else {
                     sys.$error(3001, e.currentTarget.url);
                 }
@@ -2140,7 +2139,7 @@ var $root = eval("this");
                 this.scriptURL = url;
                 var loader = new flower.URLLoader(url);
                 loader.addListener(flower.Event.COMPLETE, this.loadScriptComplete, this);
-                loader.addListener(flower.IOErrorEvent.ERROR, this.loadContentError, this);
+                loader.addListener(flower.Event.ERROR, this.loadContentError, this);
                 loader.load();
             }
         }, {
@@ -2292,7 +2291,6 @@ var $root = eval("this");
                 content += before + "\t__extends(" + className + ", _super);\n";
                 content += before + "\tfunction " + className + "(data) {\n";
                 content += before + "\t\t _super.call(this);\n";
-                content += before + "\t\tif(data) this.data = data;\n";
                 content += before + "\t\tthis." + className + "_binds = [];\n";
                 var scriptInfo = {
                     content: ""
@@ -2305,6 +2303,7 @@ var $root = eval("this");
                 if (this.hasInitFunction) {
                     content += before + "\t\tthis." + className + "_init();\n";
                 }
+                content += before + "\t\tif(data) this.data = data;\n";
                 content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
                 content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
                 content += before + "\t}\n\n";
@@ -4125,7 +4124,7 @@ var $root = eval("this");
                     this.__loader = new flower.URLLoader(val);
                     this.__loader.load();
                     this.__loader.addListener(flower.Event.COMPLETE, this.__onLoadComplete, this);
-                    this.__loader.addListener(flower.IOErrorEvent.ERROR, this.__onLoadError, this);
+                    this.__loader.addListener(flower.Event.ERROR, this.__onLoadError, this);
                 }
             }
         }, {
@@ -6393,7 +6392,7 @@ var $root = eval("this");
                 var loader = new flower.URLLoader(url);
                 loader.load();
                 loader.addListener(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
-                loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                loader.addListener(flower.Event.ERROR, this.__loadError, this);
             }
         }, {
             key: "__onLoadModuleComplete",
@@ -6463,7 +6462,7 @@ var $root = eval("this");
             key: "__loadError",
             value: function __loadError(e) {
                 if (this.hasListener(flower.Event.ERROR)) {
-                    this.dispatchWidth(flower.Event.ERROR, e.data);
+                    this.dispatch(e);
                 } else {
                     $error(e.data);
                 }
@@ -6495,12 +6494,12 @@ var $root = eval("this");
                     var ui = this.__list[this.__index].ui;
                     var url = this.__list[this.__index].url;
                     ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-                    ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                    ui.addListener(flower.Event.ERROR, this.__loadError, this);
                     ui.parseAsync(url);
                 } else if (item.type == "data" || item.type == "script") {
                     var loader = new flower.URLLoader(item.url);
                     loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-                    loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+                    loader.addListener(flower.Event.ERROR, this.__loadError, this);
                     loader.load();
                 }
                 this.__index++;

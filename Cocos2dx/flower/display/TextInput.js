@@ -18,7 +18,7 @@ class TextInput extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
-        this.$focusEnabled = true;
+        this.focusEnabled = true;
         this.$nativeShow.setChangeBack(this.$onTextChange, this);
     }
 

@@ -491,8 +491,6 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
-        if (this.touchEnabled == false || this._visible == false)
-            return null;
         var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
         touchX = Math.floor(point.x);
         touchY = Math.floor(point.y);
@@ -667,12 +665,12 @@ class DisplayObject extends EventDispatcher {
         this.$setFilters(val);
     }
 
-    get $focusEnabled() {
+    get focusEnabled() {
         var p = this.$DisplayObject;
         return p[50];
     }
 
-    set $focusEnabled(val) {
+    set focusEnabled(val) {
         var p = this.$DisplayObject;
         p[50] = val;
     }
@@ -688,4 +686,10 @@ class DisplayObject extends EventDispatcher {
     set dispatchEventToParent(val) {
         this.$setDispatchEventToParent(val);
     }
+
+    get contentBounds() {
+        return this.$getContentBounds().clone();
+    }
 }
+
+exports.DisplayObject = DisplayObject;

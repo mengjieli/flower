@@ -41,6 +41,14 @@ class Shape extends DisplayObject {
         this.$nativeShow.draw([{x: 0, y: 0}, {x: 1, y: 0}], 0, 0, 0, 0, 0);
     }
 
+    $getMouseTarget(touchX, touchY, multiply) {
+        if (this.fillAlpha == 0) {
+            return null;
+        }
+        return super.$getMouseTarget(touchX, touchY, multiply);
+    }
+
+
     $addFlags(flags) {
         if (flags == 0x0002) {
             this.$addFlags(0x0400);

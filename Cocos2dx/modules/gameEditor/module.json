@@ -4,7 +4,9 @@
   "scripts": [
     "./events/EventManager.script",
     "./events/ModuleEvent.script",
-    "./plugins/PluginManager.script"
+    "./plugins/PluginManager.script",
+    "./plugins/uiPlugin/UI.script",
+    "./plugins/uiPlugin/UIEditor.script"
   ],
   "components": [
     "./plugins/PluginBase.xml",

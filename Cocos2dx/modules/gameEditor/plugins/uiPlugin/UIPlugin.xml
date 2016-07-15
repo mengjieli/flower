@@ -1,3 +1,4 @@
-<f:Group class="UIPlugin" title="{data.name}" xmlns:f="flower" xmlns:s="software" xmlns:e="editor">
+<f:Group percentWidth="100" percentHeight="100" class="UIPlugin" title="{data.name}" xmlns:f="flower" xmlns:s="software" xmlns:e="editor">
     <f:script src="./UIPlugin.script"/>
+    <f:RectUI id="background" percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
 </f:Group>

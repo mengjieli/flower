@@ -1,0 +1,171 @@
+var UIEditor = (function (_super) {
+
+    __extends(UIEditor, _super);
+
+    function UIEditor(xml, display) {
+        _super.call(this);
+        this.attributes = {};
+        for (var i = 0; i < xml.attributes.length; i++) {
+            var attribute = xml.attributes[i];
+            switch (attribute.name) {
+                case "x":
+                case "y":
+                case "scaleX":
+                case "scaleY":
+                case "rotaion":
+                case "width":
+                case "height":
+                    this.attributes[attribute.name] = flower.StringDo.isNumberString(attribute.value) ? (+attribute.value || 0) : attribute.value;
+                    break;
+            }
+            if (display.__UIComponent) {
+                switch (attribute.name) {
+                    case "left":
+                    case "right":
+                    case "top":
+                    case "bottom":
+                    case "horizontalCenter":
+                    case "verticalCenter":
+                    case "percentWidth":
+                    case "percentHeight":
+                        this.attributes[attribute.name] = flower.StringDo.isNumberString(attribute.value) ? (+attribute.value || 0) : attribute.value;
+                        break;
+                }
+            }
+        }
+        this.display = display;
+        this.width = this.height = 0;
+
+        if (display instanceof flower.Sprite) {
+            var nameTxt = new flower.TextField();
+            this.nameTxt = nameTxt;
+            nameTxt.text = xml.name.split(":")[1];
+            nameTxt.fontColor = 0;
+            nameTxt.alpha = 0.2;
+            this.addChild(nameTxt);
+        }
+        this.points = null;
+        this.box = null;
+    }
+
+
+    UIEditor.prototype.show = function () {
+        this.update();
+        this.box.visible = true;
+        for (var key in this.points) {
+            this.points[key].visible = true;
+        }
+    }
+
+    UIEditor.prototype.hide = function () {
+        this.box.visible = false;
+        for (var key in this.points) {
+            this.points[key].visible = false;
+        }
+    }
+
+    UIEditor.prototype.update = function () {
+        var bounds = this.display.contentBounds;
+        var width = bounds.width;
+        var height = bounds.height;
+        if (this.attributes.width != null && typeof this.attributes.width != "string") {
+            width = this.attributes.width;
+        }
+        if (this.attributes.height != null && typeof this.attributes.height != "string") {
+            height = this.attributes.height;
+        }
+        var x = bounds.x + (this.attributes.x || 0);
+        var y = bounds.y + (this.attributes.y || 0);
+        var scaleX = this.attributes.scaleX || 1;
+        var scaleY = this.attributes.scaleY || 1;
+        var rotation = this.attributes.rotation || 0;
+        if (!this.box) {
+            this.box = new flower.Shape();
+            this.box.fillAlpha = 0;
+            this.box.lineWidth = 1;
+            this.box.lineColor = 0x000000;
+            this.addChild(this.box);
+        }
+        this.box.clear();
+        this.box.drawRect(0, 0, width, height);
+        this.box.x = x;
+        this.box.y = y;
+        this.box.scaleX = scaleX;
+        this.box.scaleY = scaleY;
+        this.box.rotation = rotation;
+        if (!this.points) {
+            this.points = {};
+            var point;
+            //point = new flower.Shape();
+            //point.lineWidth = 1;
+            //point.lineColor = 0x000000;
+            //point.fillColor = 0xffffff;
+            //point.drawRect(-3, -3, 0, 0);
+            //this.addChild(point);
+            //this.points.center = point;
+
+            this.points.top1 = new flower.Shape();
+            this.points.top2 = new flower.Shape();
+            this.points.top3 = new flower.Shape();
+            this.points.left = new flower.Shape();
+            this.points.right = new flower.Shape();
+            this.points.bottom1 = new flower.Shape();
+            this.points.bottom2 = new flower.Shape();
+            this.points.bottom3 = new flower.Shape();
+            for (var key in this.points) {
+                point = this.points[key];
+                point.lineWidth = 1;
+                point.lineColor = 0xffffff;
+                point.fillColor = 0x000000;
+                point.drawRect(-3, -3, 6, 6);
+                this.addChild(point);
+            }
+        }
+        var rad = rotation * Math.PI / 180;
+        var sin = Math.sin(rad);
+        var cos = Math.cos(rad);
+        this.points.top1.x = x;
+        this.points.top1.y = y;
+        this.points.top2.x = x + (width * scaleX * 0.5) * cos;
+        this.points.top2.y = y + (width * scaleX * 0.5) * sin;
+        this.points.top3.x = x + width * scaleX * cos;
+        this.points.top3.y = y + width * scaleX * sin;
+
+        rad = rotation * Math.PI / 180 + Math.atan2(height, 0);
+        sin = Math.sin(rad);
+        cos = Math.cos(rad);
+        this.points.left.x = x + height * 0.5 * cos;
+        this.points.left.y = y + height * 0.5 * sin;
+
+        rad = rotation * Math.PI / 180 + Math.atan2(height * 0.5, width);
+        sin = Math.sin(rad);
+        cos = Math.cos(rad);
+        this.points.right.x = x + Math.sqrt(width * width + height * height * 0.25) * cos;
+        this.points.right.y = y + Math.sqrt(width * width + height * height * 0.25) * sin;
+
+
+        rad = rotation * Math.PI / 180 + Math.atan2(height, 0);
+        sin = Math.sin(rad);
+        cos = Math.cos(rad);
+        this.points.bottom1.x = x + height * cos;
+        this.points.bottom1.y = y + height * sin;
+
+        rad = rotation * Math.PI / 180 + Math.atan2(height, width * 0.5);
+        sin = Math.sin(rad);
+        cos = Math.cos(rad);
+        this.points.bottom2.x = x + Math.sqrt(width * width * 0.25 + height * height) * cos;
+        this.points.bottom2.y = y + Math.sqrt(width * width * 0.25 + height * height) * sin;
+
+        rad = rotation * Math.PI / 180 + Math.atan2(height, width);
+        sin = Math.sin(rad);
+        cos = Math.cos(rad);
+        this.points.bottom3.x = x + Math.sqrt(width * width + height * height) * cos;
+        this.points.bottom3.y = y + Math.sqrt(width * width + height * height) * sin;
+    }
+
+
+    return UIEditor;
+
+})(flower.Sprite);
+
+module.UIEditor = UIEditor;

@@ -55,6 +55,11 @@ cc.game.onStart = function () {
     //    document.body.removeChild(document.getElementById("cocosLoading"));
 
 
+    //if (document) {
+    //    var canvas = document.getElementById("gameCanvas");
+    //    //var context = canvas.getContext('2d') || canvas.getContext('webgl');
+    //    //context.globalCompositeOperation = 'source-atop';
+    //}
     cc.loader.loadJs(["src/require.js"], function (err) {
         jsFiles = [
             "src/Flower.js",

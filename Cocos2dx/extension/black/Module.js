@@ -20,7 +20,7 @@ class Module extends flower.EventDispatcher {
         var loader = new flower.URLLoader(url);
         loader.load();
         loader.addListener(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
-        loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+        loader.addListener(flower.Event.ERROR, this.__loadError, this);
     }
 
     __onLoadModuleComplete(e) {
@@ -88,7 +88,7 @@ class Module extends flower.EventDispatcher {
 
     __loadError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, e.data);
+            this.dispatch(e);
         } else {
             $error(e.data);
         }
@@ -119,12 +119,12 @@ class Module extends flower.EventDispatcher {
             var ui = this.__list[this.__index].ui;
             var url = this.__list[this.__index].url;
             ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-            ui.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            ui.addListener(flower.Event.ERROR, this.__loadError, this);
             ui.parseAsync(url);
         } else if (item.type == "data" || item.type == "script") {
             var loader = new flower.URLLoader(item.url);
             loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
-            loader.addListener(flower.IOErrorEvent.ERROR, this.__loadError, this);
+            loader.addListener(flower.Event.ERROR, this.__loadError, this);
             loader.load();
         }
         this.__index++;

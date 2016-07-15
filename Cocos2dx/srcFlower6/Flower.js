@@ -1,6 +1,7 @@
 
 var LocalWebSocket = WebSocket;
 var $root = eval("this");
+var root = root || eval("this");
 var __define = $root.__define || function (o, p, g, s) {
         Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
     };
@@ -161,7 +162,8 @@ flower.sys = {
     TIP: TIP,
     $tip: $tip,
     $warn: $warn,
-    $error: $error
+    $error: $error,
+    getLanguage:getLanguage
 }
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -177,7 +179,7 @@ class Platform {
     static height;
 
     static start(engine, root, background) {
-        RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
+        RETINA = true;//cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
             ctor: function () {
@@ -1566,14 +1568,14 @@ var $locale_strings = {};
  * @param args 替换字符串中{0}标志的参数列表
  * @returns 返回拼接后的字符串
  */
-function getLanguage(code, args) {
+function getLanguage(code, ...args) {
     var text = $locale_strings[$language][code];
     if (!text) {
         return "{" + code + "}";
     }
     var length = args.length;
     for (var i = 0; i < length; i++) {
-        text = text.replace("{" + i + "}", args[i]);
+        text = StringDo.replaceString(text,"{" + i + "}", args[i]);
     }
     return text;
 }
@@ -2025,28 +2027,6 @@ class DragEvent extends Event {
 
 flower.DragEvent = DragEvent;
 //////////////////////////End File:flower/event/DragEvent.js///////////////////////////
-
-
-
-//////////////////////////File:flower/event/IOErrorEvent.js///////////////////////////
-class IOErrorEvent extends Event {
-
-    static ERROR = "error";
-
-    _message;
-
-    constructor(type, message) {
-        super(type);
-    }
-
-    get message() {
-        return this._message;
-    }
-
-}
-
-flower.IOErrorEvent = IOErrorEvent;
-//////////////////////////End File:flower/event/IOErrorEvent.js///////////////////////////
 
 
 
@@ -3190,8 +3170,6 @@ class DisplayObject extends EventDispatcher {
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
-        if (this.touchEnabled == false || this._visible == false)
-            return null;
         var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
         touchX = Math.floor(point.x);
         touchY = Math.floor(point.y);
@@ -3366,12 +3344,12 @@ class DisplayObject extends EventDispatcher {
         this.$setFilters(val);
     }
 
-    get $focusEnabled() {
+    get focusEnabled() {
         var p = this.$DisplayObject;
         return p[50];
     }
 
-    set $focusEnabled(val) {
+    set focusEnabled(val) {
         var p = this.$DisplayObject;
         p[50] = val;
     }
@@ -3387,7 +3365,13 @@ class DisplayObject extends EventDispatcher {
     set dispatchEventToParent(val) {
         this.$setDispatchEventToParent(val);
     }
+
+    get contentBounds() {
+        return this.$getContentBounds().clone();
+    }
 }
+
+flower.DisplayObject = DisplayObject;
 //////////////////////////End File:flower/display/DisplayObject.js///////////////////////////
 
 
@@ -3638,7 +3622,7 @@ class Sprite extends DisplayObject {
         var childs = this.__children;
         var len = childs.length;
         for (var i = len - 1; i >= 0; i--) {
-            if (childs[i].touchEnabled && (multiply == false || (multiply == true && childs[i].multiplyTouchEnabled == true))) {
+            if (childs[i].touchEnabled && childs[i].visible && (multiply == false || (multiply == true && childs[i].multiplyTouchEnabled == true))) {
                 target = childs[i].$getMouseTarget(touchX, touchY, multiply);
                 if (target) {
                     break;
@@ -4110,7 +4094,7 @@ class TextInput extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
-        this.$focusEnabled = true;
+        this.focusEnabled = true;
         this.$nativeShow.setChangeBack(this.$onTextChange, this);
     }
 
@@ -4335,6 +4319,14 @@ class Shape extends DisplayObject {
         p[9] = [];
         this.$nativeShow.draw([{x: 0, y: 0}, {x: 1, y: 0}], 0, 0, 0, 0, 0);
     }
+
+    $getMouseTarget(touchX, touchY, multiply) {
+        if (this.fillAlpha == 0) {
+            return null;
+        }
+        return super.$getMouseTarget(touchX, touchY, multiply);
+    }
+
 
     $addFlags(flags) {
         if (flags == 0x0002) {
@@ -5619,10 +5611,10 @@ class URLLoader extends EventDispatcher {
             if (this._loadInfo.plist) {
                 var loader = new URLLoader(this._loadInfo.plist);
                 loader.addListener(Event.COMPLETE, this.onLoadTexturePlistComplete, this);
-                loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+                loader.addListener(Event.ERROR, this.loadError, this);
                 loader.load();
             } else {
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextureComplete, this.loadError, this);
+                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextureComplete, this.loadError, this);
             }
         }
     }
@@ -5663,7 +5655,7 @@ class URLLoader extends EventDispatcher {
         } else {
             var load = PlistManager.getInstance().load(this.url, this._loadInfo.url);
             load.addListener(Event.COMPLETE, this.loadPlistComplete, this);
-            load.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            load.addListener(Event.ERROR, this.loadError, this);
         }
     }
 
@@ -5678,7 +5670,7 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead!=""?"?r=" + Math.random():""), this.loadTextComplete, this.loadError, this, this._method, this._params);
+        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextComplete, this.loadError, this, this._method, this._params);
     }
 
     loadTextComplete(content) {
@@ -5743,8 +5735,8 @@ class URLLoader extends EventDispatcher {
     }
 
     loadError(e) {
-        if (this.hasListener(IOErrorEvent.ERROR)) {
-            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, getLanguage(2003, this._loadInfo.url)));
+        if (this.hasListener(Event.ERROR)) {
+            this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
             if (this._links) {
                 for (var i = 0; i < this._links.length; i++) {
                     this._links[i].loadError();
@@ -5836,12 +5828,12 @@ class URLLoaderList extends EventDispatcher {
         if (this.__language != null) load.language = this.__language;
         if (this.__scale != null) load.scale = this.__scale;
         load.addListener(flower.Event.COMPLETE, this.__onComplete, this);
-        load.addListener(IOErrorEvent.ERROR, this.__onError, this);
+        load.addListener(Event.ERROR, this.__onError, this);
         load.load();
     }
 
     __onError(e) {
-        if (this.hasListener(IOErrorEvent.ERROR)) {
+        if (this.hasListener(Event.ERROR)) {
             this.dispatch(e);
         }
         else {
@@ -6334,14 +6326,14 @@ class PlistLoader extends EventDispatcher {
             res.addURL(this._nativeURL);
             var loader = new URLLoader(res);
             loader.addListener(Event.COMPLETE, this.loadPlistComplete, this);
-            loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            loader.addListener(Event.ERROR, this.loadError, this);
             loader.load();
         }
     }
 
     loadError(e) {
-        if (this.hasListener(IOErrorEvent.ERROR)) {
-            this.dispatch(new IOErrorEvent(IOErrorEvent.ERROR, e.message));
+        if (this.hasListener(Event.ERROR)) {
+            this.dispatch(e);
         } else {
             $error(2004, this.url);
         }
@@ -6412,7 +6404,7 @@ class PlistLoader extends EventDispatcher {
         if (flag) {
             var loader = new URLLoader(this.textureURL || this.plist.texture.nativeURL);
             loader.addListener(Event.COMPLETE, this.loadTextureComplete, this);
-            loader.addListener(IOErrorEvent.ERROR, this.loadError, this);
+            loader.addListener(Event.ERROR, this.loadError, this);
             loader.load();
         } else {
             CallLater.add(this.loadComplete, this, [this.plist]);
@@ -8235,6 +8227,29 @@ flower.ObjectDo = ObjectDo;
 
 //////////////////////////File:flower/utils/StringDo.js///////////////////////////
 class StringDo {
+
+    static isNumberString(str) {
+        var hasDot = false;
+        for (var i = 0; i < str.length; i++) {
+            if (i == 0 && str.charAt(0) == "+" || str.charAt(0) == "-") {
+
+            } else {
+                if (str.charAt(i) == ".") {
+                    if (hasDot) {
+                        return false;
+                    }
+                    hasDot = true;
+                } else {
+                    var code = str.charCodeAt(i);
+                    if (code < 48 || code > 57) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     static changeStringToInner(content) {
         var len = content.length;
         for (var i = 0; i < len; i++) {
@@ -8824,13 +8839,14 @@ class XMLElement extends XMLAttribute {
     namesapces;
     attributes;
     list;
+    elements;
     value;
 
     constructor() {
         super();
         this.namesapces = [];
         this.attributes = [];
-        this.list = [];
+        this.elements = this.list = [];
     }
 
     addNameSpace(nameSpace) {

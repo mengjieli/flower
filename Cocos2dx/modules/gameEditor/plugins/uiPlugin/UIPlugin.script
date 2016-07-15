@@ -4,14 +4,19 @@ function setData(val) {
             this.ui.dispose();
         }
         this.ui = null;
+        this.background.addListener(flower.TouchEvent.TOUCH_BEGIN, this.touchBackground, this);
+        this.info = {select: null};
         if (this.data) {
-            var parser = new UIParser();
-            console.log(this.data);
-            parser.parseUIAsync(this.data.path);
-            flower.breakPoint();
-            this.addChild(parser);
-            this.ui = parser;
+            this.ui = new editor.UI(null, this.data.path, this.info);
+            this.addChild(this.ui);
         }
+    }
+}
+
+function touchBackground(e) {
+    if (this.info.select) {
+        this.info.select.unselected();
+        this.info.select = null;
     }
 }
 
