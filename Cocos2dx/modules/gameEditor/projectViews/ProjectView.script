@@ -6,7 +6,7 @@ function init() {
 function onClickItem(e) {
     var item = e.item;
     if (item.plugin) {
-        item.open();
+        item.openFile();
     }
 }
 
@@ -19,11 +19,10 @@ function loadPorject(url) {
 function __onLoadConfig(e) {
     var cfg = this.config = e.data;
     this.title = cfg.name;
-    //flower.breakPoint();
     var direction = this.data.direction;
     direction.removeAll();
     for (var key in cfg.direction) {
-        direction.push(new editor.File(true, "res" + key, cfg.direction[key].name));
+        direction.push(new editor.File(true, "res/" + key, cfg.direction[key].name));
         var list = cfg.direction[key].list;
         for (var i = 0; i < list.length; i++) {
             var item = list[i];
@@ -43,7 +42,7 @@ function openItem(url) {
         }
     }
     if (item) {
-        item.open();
+        item.openFile();
     }
 }
 

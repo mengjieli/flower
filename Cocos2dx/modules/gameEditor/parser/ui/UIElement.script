@@ -1,17 +1,19 @@
 var UIElement = (function (_super) {
 
-    __extends(UIParser, _super);
+    __extends(UIElement, _super);
 
     function UIElement(xml) {
+        _super.call(this);
+
         this.xml = xml;
     }
 
     UIElement.prototype.load = function () {
-        this.dispatchWidth(flower.Event.COMPLETE);
+        new flower.CallLater(this.dispatchWidth,this,[flower.Event.COMPLETE]);
     }
 
     return UIElement;
-    
+
 })(flower.EventDispatcher);
 
 

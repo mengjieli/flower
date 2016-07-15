@@ -10,6 +10,7 @@ var File = (function (_super) {
      * @constructor
      */
     function File(isDirection, path, name, type) {
+        _super.call(this);
         this.__isDirection = isDirection;
         this.__path = path;
         this.__name = name;
@@ -31,13 +32,12 @@ var File = (function (_super) {
 
     File.prototype.onLoadConfig = function (e) {
         this.content = e.data;
-        flower.breakPoint();
         var clazz = editor.PluginManager.getParser(this.__type);
         this.__parser = new clazz(this);
         if (this.__parser) {
             this.__parser.load();
-            this.__parser.addEventListener(flower.Event.COMPLETE, this.onLoadComplete, this);
-            this.__parser.addEventListener(flower.Event.ERROR, this.onParserLoadError, this);
+            this.__parser.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
+            this.__parser.addListener(flower.Event.ERROR, this.onParserLoadError, this);
         } else {
             this.onLoadComplete();
         }
@@ -47,6 +47,7 @@ var File = (function (_super) {
         this.isLoading = false;
         if (this.waitForOpen) {
             this.waitForOpen = false;
+            editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.VIEW_FILE, this);
         }
         this.dispatchWidth(flower.Event.COMPLETE);
     }
@@ -67,7 +68,7 @@ var File = (function (_super) {
         }
     }
 
-    File.prototype.open = function () {
+    File.prototype.openFile = function () {
         if (!this.ready) {
             this.waitForOpen = true;
             if (!this.isLoading) {

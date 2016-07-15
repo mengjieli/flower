@@ -77,7 +77,6 @@ class Tree extends DataGroup {
                         openURL[url].state = true;
                     }
                     openURL[url].open = false;
-
                 } else {
                     url = item[pathField] || "";
                     if (!openURL[url]) {

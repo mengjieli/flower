@@ -1,0 +1,32 @@
+var UIFileParser = (function (_super) {
+
+    __extends(UIFileParser, _super);
+
+    function UIFileParser(file) {
+        _super.call(this, file);
+    }
+
+    UIFileParser.prototype.load = function () {
+        var xml = new flower.XMLElement();
+        xml.parse(this.file.content);
+        this.element = new editor.UIElement(xml);
+        this.element.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
+        this.element.addListener(flower.Event.ERROR, this.onLoadError, this);
+        this.element.load();
+    }
+
+    UIFileParser.prototype.onLoadComplete = function (e) {
+        this.dispatch(e);
+    }
+
+    UIFileParser.prototype.onLoadError = function (e) {
+        this.dispatch(e);
+    }
+
+    return UIFileParser;
+
+})(editor.Parser);
+
+module.UIFileParser = UIFileParser;
+
+editor.PluginManager.registerParser("UI", UIFileParser);

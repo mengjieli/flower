@@ -6,7 +6,7 @@
     "./parser/Parser.script",
     "./events/ModuleEvent.script",
     "./plugins/PluginManager.script",
-    "./parser/ui/UIParser.script",
+    "./parser/ui/UIFileParser.script",
     "./parser/ui/UIElement.script",
     "./events/EventManager.script",
     "./plugins/uiPlugin/UI.script",
