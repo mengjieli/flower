@@ -1,83 +1,10 @@
-var ProjectView = (function (_super) {
-    __extends(ProjectView, _super);
-    function ProjectView(data) {
-        if(data) this.data = data;
-        _super.call(this);
-        this.ProjectView_binds = [];
-        this.ProjectView_initMain(this);
-        this.ProjectView_setBindProperty();
-        if(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);
-    }
+[20, 135, 1, 104, 1, 9, 114, 101, 115, 47, 97, 46, 112, 110, 103, 3, 112, 110, 103, 0, 0, 1,
 
-    ProjectView.prototype.ProjectView_initMain = function(parentObject) {
-        parentObject.data = "editor.ProjectData";
-        if(parentObject.__UIComponent) this.ProjectView_binds.push([parentObject,"dataProvider", "{data.direction}"]);
-        else parentObject.dataProvider = "{data.direction}";
-        parentObject.percentWidth = 100;
-        parentObject.percentHeight = 100;
-        parentObject.viewport = "LabelTree";
-        parentObject.creationComplete = "this.init();";
-    }
+    1, 4, 0, 246, 1, 246, 1, 246, 1, 255, 1]
 
-    ProjectView.prototype.init = function() {
-        this.clickItem = this.clickItem.bind(this);
-        this.loadPorject("flower.json");
-    }
-    ProjectView.prototype.clickItem = function(e) {
-        var item = e.item;
-        console.log("item:",item);
-    }
-    ProjectView.prototype.loadPorject = function(url) {
-        var loader = new flower.URLLoader(url);
-        loader.addListener(flower.Event.COMPLETE, this.__onLoadConfig, this);
-        loader.load();
-    }
-    ProjectView.prototype.__onLoadConfig = function(e) {
-        var cfg = this.config = e.data;
-        this.title = cfg.name;
-        flower.breakPoint();
-        var direction = this.data.direction;
-        direction.removeAll();
-        for (var key in cfg.direction) {
-            direction.push({
-                isDirection: true,
-                path: "res/" + key,
-                name: cfg.direction[key].name,
-            });
-            var list = cfg.direction[key].list;
-            for (var i = 0; i < list.length; i++) {
-                var item = list[i];
-                direction.push({
-                    path: item.path,
-                    name: flower.Path.getName(item.path),
-                    plugin: item.plugin,
-                    fileType: key
-                });
-            }
-        }
-    }
-    Object.defineProperty(ProjectView.prototype, "title", {
-        get: function () {
-            return this._title || (this._title = new flower.StringValue());
-        },
-        set: function (val) {
-            if (!this._title) {
-                this._title = new flower.StringValue();
-            }
-            this._title.value = val;
-        },
-        enumerable: true,
-        configurable: true
-    });
-
-    ProjectView.prototype.ProjectView_setBindProperty = function() {
-        for(var i = 0; i < this.ProjectView_binds.length; i++) this.ProjectView_binds[i][0].bindProperty(this.ProjectView_binds[i][1],this.ProjectView_binds[i][2],[this]);
-    }
-
-    return ProjectView;
-})(flower.UIParser.getLocalUIClass("ScrollerTree","s"));
-
-
-UIParser.registerLocalUIClass("ProjectView", ProjectView,"e");
-if($root.editor == null) $root.editor = {};
-$root.editor.ProjectView = ProjectView$error @ Flower.js:120decodeRootComponent @ Black.js:2363parse @ Black.js:2230loadNextRelationUI @ Black.js:2174loadScriptComplete @ Black.js:2159dispatch @ Flower.js:1940dispatchWidth @ Flower.js:1962loadComplete @ Flower.js:6271$call @ Flower.js:8920$run @ Flower.js:8948$update @ Flower.js:8879$run @ Flower.js:1697_run @ Flower.js:255(anonymous function) @ CCScheduler.js:628cc.Scheduler.cc.Class.extend.update @ CCScheduler.js:458cc.Director.cc.Class.extend.drawScene @ CCDirector.js:217cc.DisplayLinkDirector.cc.Director.extend.mainLoop @ CCDirector.js:867callback @ CCBoot.js:2324
+68 8f 01 01 09 72
+65 73 2f 61 2e 70
+6e 67 03 70 6e 67
+00 00 01 01 04 00
+f6 01 f6 01 f6 01
+ff 01

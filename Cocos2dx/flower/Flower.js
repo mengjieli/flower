@@ -140,3 +140,5 @@ exports.sys = {
     $error: $error,
     getLanguage:getLanguage
 }
+
+$root.trace = trace;

@@ -22,7 +22,7 @@ var LocalClient = (function (_super) {
             var bytes = new VByteArray();
             bytes.readFromArray(data);
             var cmd = bytes.readUIntV();
-            //console.log("[receive]", cmd);
+            //console.log("[receive]",cmd, bytes.bytes);
             switch (cmd) {
                 case 0:
                     var cmd = bytes.readUIntV();
@@ -36,6 +36,9 @@ var LocalClient = (function (_super) {
                     break;
                 case 102:
                     this.readDirectionList(bytes);
+                    break;
+                case 104:
+                    this.saveFile(bytes);
                     break;
                 case 501:
                     this.receiveRemote(bytes);
@@ -56,6 +59,80 @@ var LocalClient = (function (_super) {
         bytes.writeUIntV(101);
         bytes.writeUIntV(remoteId);
         bytes.writeBoolean(file.isExist());
+        this.sendData(bytes);
+    }
+
+    p.saveFile = function (msg) {
+        var clientId = msg.readUIntV();
+        var remoteId = msg.readUIntV();
+        var url = msg.readUTFV();
+        var type = msg.readUTFV();
+        var result = 0;
+        try {
+            if (type == "text") {
+                var content = msg.readUTFV();
+                var file = new File(this.root + url);
+                file.save(content);
+            } else if (type == "png") {
+                var msgIndex = msg.readUIntV();
+                var max = msg.readUIntV();
+                var width = msg.readUIntV();
+                var height = msg.readUIntV();
+                var len = msg.readUIntV();
+                var colors = [];
+                if (msgIndex == 0) {
+                    this.colors = colors;
+                    this.colorsIndex = 0;
+                } else {
+                    colors = this.colors;
+                }
+                var index = this.colorsIndex;
+                var all = width * height;
+                var row;
+                if (colors.length) {
+                    row = colors[colors.length - 1];
+                }
+                var i = 0;
+                while (index < all && i < len) {
+                    if (index % width == 0) {
+                        colors.push(row = []);
+                    }
+                    var r = msg.readUIntV();
+                    var g = msg.readUIntV();
+                    var b = msg.readUIntV();
+                    var a = msg.readUIntV();
+                    row.push(a << 24 | r << 16 | g << 8 | b);
+                    i += 4;
+                    index++;
+                    this.colorsIndex++;
+                }
+                if (msgIndex == max) {
+                    while (index < all) {
+                        if (index % width == 0) {
+                            colors.push(row = []);
+                        }
+                        row.push(0);
+                        index++;
+                    }
+                    var encoder = new PNGEncoder();
+                    encoder.encode(colors, 6);
+                    var buffer = new Buffer(encoder.getData());
+                    file = new File(this.root + url);
+                    file.save(buffer, "binary");
+                } else {
+                    result = 2;
+                }
+            }
+        } catch (e) {
+            console.log(e);
+            result = 1;
+        }
+        var bytes = new VByteArray();
+        bytes.writeUIntV(22);
+        bytes.writeUIntV(clientId);
+        bytes.writeUIntV(105);
+        bytes.writeUIntV(remoteId);
+        bytes.writeByte(result);
         this.sendData(bytes);
     }
 

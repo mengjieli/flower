@@ -246,9 +246,30 @@ var remote = {};
 
     //////////////////////////File:remote/File.js///////////////////////////
 
-    var File = function File() {
-        _classCallCheck(this, File);
-    };
+    var File = function () {
+        function File(path) {
+            var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            _classCallCheck(this, File);
+
+            this.__path = path;
+            this.__autoUpdate = autoUpdate;
+        }
+
+        _createClass(File, [{
+            key: "saveText",
+            value: function saveText(text, back, thisObj) {
+                new SaveFileRemote(back, thisObj, this.__path, text, "text");
+            }
+        }, {
+            key: "savePNG",
+            value: function savePNG(colors, width, height, back, thisObj) {
+                new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
+            }
+        }]);
+
+        return File;
+    }();
 
     remote.File = File;
     //////////////////////////End File:remote/File.js///////////////////////////
@@ -435,6 +456,76 @@ var remote = {};
         return ReadDirectionListRemote;
     }(Remote);
     //////////////////////////End File:remote/remotes/ReadDirectionListRemote.js///////////////////////////
+
+    //////////////////////////File:remote/remotes/SaveFileRemote.js///////////////////////////
+
+
+    var SaveFileRemote = function (_Remote3) {
+        _inherits(SaveFileRemote, _Remote3);
+
+        function SaveFileRemote(back, thisObj, path, data, type, width, height) {
+            _classCallCheck(this, SaveFileRemote);
+
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(SaveFileRemote).call(this));
+
+            _this5.__back = back;
+            _this5.__thisObj = thisObj;
+            if (typeof data == "string") {
+                var msg = new flower.VByteArray();
+                msg.writeUInt(20);
+                msg.writeUInt(_this5.remoteClientId);
+                msg.writeUInt(104);
+                msg.writeUInt(_this5.id);
+                msg.writeUTF(path);
+                msg.writeUTF(type);
+                msg.writeUTF(data);
+                _this5.send(msg);
+            } else {
+                var len = data.length;
+                var i = 0;
+                var index = 0;
+                while (i < len) {
+                    var msg = new flower.VByteArray();
+                    msg.writeUInt(20);
+                    msg.writeUInt(_this5.remoteClientId);
+                    msg.writeUInt(104);
+                    msg.writeUInt(_this5.id);
+                    msg.writeUTF(path);
+                    msg.writeUTF(type);
+                    msg.writeUInt(index);
+                    msg.writeUInt(Math.ceil(len / 1024) - 1);
+                    msg.writeUInt(width);
+                    msg.writeUInt(height);
+                    msg.writeUInt(i + 1024 < len ? 1024 : len - i);
+                    var count = 0;
+                    for (var j = 0; j < 1024 && i < len; j++) {
+                        msg.writeUInt(data[i]);
+                        i++;
+                        count++;
+                    }
+                    _this5.send(msg);
+                    index++;
+                }
+            }
+            return _this5;
+        }
+
+        _createClass(SaveFileRemote, [{
+            key: "receive",
+            value: function receive(cmd, msg) {
+                var result = msg.readByte();
+                if (result <= 1) {
+                    if (this.__back) {
+                        this.__back.call(this.__thisObj, result == 0 ? true : false);
+                    }
+                    this.__back = this.__thisObj = null;
+                }
+            }
+        }]);
+
+        return SaveFileRemote;
+    }(Remote);
+    //////////////////////////End File:remote/remotes/SaveFileRemote.js///////////////////////////
 })();
 for (var key in remote) {
     flower[key] = remote[key];

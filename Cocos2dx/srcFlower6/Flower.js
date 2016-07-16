@@ -24,7 +24,7 @@ var flower = {};
 (function(){
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
-var TIP = true;
+var TIP = false;
 var $language = "zh_CN";
 var NATIVE = true;
 /**
@@ -165,6 +165,8 @@ flower.sys = {
     $error: $error,
     getLanguage:getLanguage
 }
+
+$root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
 

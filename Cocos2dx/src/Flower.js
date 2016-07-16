@@ -187,6 +187,8 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
+
+    $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/Platform.js///////////////////////////
