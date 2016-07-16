@@ -396,6 +396,10 @@ class Stage extends Sprite {
             Stage.stages[i].$onFrameEnd();
         }
     }
+
+    static getShortcut() {
+        return Platform.getShortcut();
+    }
 }
 
 exports.Stage = Stage;

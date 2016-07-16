@@ -300,6 +300,40 @@ class Platform {
         pools[name].push(object);
 
     }
+
+
+    static getShortcut() {
+        var scene = cc.director.getRunningScene();
+        var hasScale = cc.sys.os === cc.sys.OS_OSX && cc.sys.isNative ? true : false;
+        var width = cc.director.getWinSize().width * (hasScale ? 2 : 1);
+        var height = cc.director.getWinSize().height * (hasScale ? 2 : 1);
+        var renderTexture = new cc.RenderTexture(width, height, 0, 0);
+        renderTexture.begin();
+        scene.visit();
+        renderTexture.end();
+        var w = width;
+        var h = height;
+        var pixels = new Uint8Array(w * h * 4);
+        gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        var colors = [];
+        var index;
+        for (var y = 0; y < h; y++) {
+            if (hasScale && y % 2 != 0) continue;
+            for (var x = 0; x < w; x++) {
+                if (hasScale && x % 2 != 0) continue;
+                index = (x + (h - 1 - y) * w) * 4;
+                colors.push(pixels[index]);
+                colors.push(pixels[index + 1]);
+                colors.push(pixels[index + 2]);
+                colors.push(pixels[index + 3]);
+            }
+        }
+        return {
+            colors: colors,
+            width: w * (hasScale ? 0.5 : 1),
+            height: h * (hasScale ? 0.5 : 1)
+        };
+    }
 }
 //////////////////////////End File:flower/platform/cocos2dx/Platform.js///////////////////////////
 
@@ -1151,16 +1185,17 @@ class PlatformTexture {
     textrue;
     url;
 
-    constructor(url,texture) {
+    constructor(url, texture) {
         this.url = url;
         this.textrue = texture;
     }
 
     dispose() {
-        if(Platform.native) {
+        if (Platform.native) {
             cc.TextureCache.getInstance().removeTextureForKey(this.url);
+            this.textrue.releaseData();
         } else {
-            this.textrue.releaseTexture();
+            this.textrue.releaseData();
         }
         this.textrue = null;
     }
@@ -4945,6 +4980,10 @@ class Stage extends Sprite {
         for (var i = 0; i < Stage.stages.length; i++) {
             Stage.stages[i].$onFrameEnd();
         }
+    }
+
+    static getShortcut() {
+        return Platform.getShortcut();
     }
 }
 
