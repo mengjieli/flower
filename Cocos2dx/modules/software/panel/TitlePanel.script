@@ -1,0 +1,10 @@
+function get title() {
+    return this._title || (this._title = new flower.StringValue());
+}
+
+function set title(val) {
+    if (!this._title) {
+        this._title = new flower.StringValue();
+    }
+    this._title.value = val;
+}

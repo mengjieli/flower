@@ -2299,6 +2299,9 @@ var $root = eval("this");
                 content += this.decodeScripts(before, className, xml.getElements("f:script"), scriptInfo);
                 content += before + "\t\tthis." + className + "_initMain(this);\n";
                 var propertyList = [];
+                if(className == "PositionEditor") {
+                    trace("/");
+                }
                 this.decodeObject(before + "\t", className, className + "_initMain", false, xml, namespaces, propertyList, {});
                 if (this.hasInitFunction) {
                     content += before + "\t\tthis." + className + "_init();\n";

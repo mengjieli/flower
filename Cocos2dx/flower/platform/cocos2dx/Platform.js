@@ -56,6 +56,19 @@ class Platform {
         Platform.stage.addChild(background.show);
         root.show.setPositionY(Platform.height);
         Platform.stage.addChild(root.show);
+        if ('keyboard' in cc.sys.capabilities) {
+            cc.eventManager.addListener({
+                event: cc.EventListener.KEYBOARD,
+                onKeyPressed: function (key, event) {
+                    trace("Key down:" + key);
+                },
+                onKeyReleased: function (key, event) {
+                    trace("Key up:" + key);
+                }
+            }, Platform.stage);
+        } else {
+            trace("KEYBOARD Not supported");
+        }
     }
 
 

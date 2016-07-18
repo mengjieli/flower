@@ -19,7 +19,9 @@
   "classes": {
     "EditorMain": "./EditorMain.xml",
     "ProjectView": "./projectViews/ProjectView.xml",
-    "ModuleView": "./moduleView/ModuleView.xml"
+    "ModuleView": "./moduleView/ModuleView.xml",
+    "AttributeEditor": "./panels/attributeEditor/AttributeEditor.xml",
+    "PositionEditor": "./panels/attributeEditor/PositionEditor.xml"
   },
   "data": [
     "./data/ProjectData.json"

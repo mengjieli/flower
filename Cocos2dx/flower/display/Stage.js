@@ -51,7 +51,7 @@ class Stage extends Sprite {
     __focus = null;
 
     $setFocus(val) {
-        if (val && !val.$focusEnabled) {
+        if (val && !val.focusEnabled) {
             val = null;
         }
         if (this.__focus == val) {

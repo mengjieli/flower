@@ -8,7 +8,7 @@ function setData(val) {
         this.info = {select: null};
         if (this.data) {
             this.ui = new editor.UI(this.data.parser.element, this.info);
-            this.addChild(this.ui);
+            this.container.addChild(this.ui);
         }
     }
 }

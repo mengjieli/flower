@@ -250,6 +250,19 @@ var flower = {};
                 Platform.stage.addChild(background.show);
                 root.show.setPositionY(Platform.height);
                 Platform.stage.addChild(root.show);
+                if ('keyboard' in cc.sys.capabilities) {
+                    cc.eventManager.addListener({
+                        event: cc.EventListener.KEYBOARD,
+                        onKeyPressed: function (key, event) {
+                            trace("Key down:" + key);
+                        },
+                        onKeyReleased: function (key, event) {
+                            trace("Key up:" + key);
+                        }
+                    }, Platform.stage);
+                } else {
+                    trace("KEYBOARD Not supported");
+                }
             }
         }, {
             key: "_run",
@@ -765,7 +778,7 @@ var flower = {};
                             txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                         }
                         //如果文字的高度已经大于设定的高，回退一次
-                        if (!autoSize && height && txt.getContentSize().height > height) {
+                        if (!autoSize && height && txt.getContentSize().height * (RETINA ? 1 / 2.0 : 1) > height) {
                             txt.setString(txtText);
                             break;
                         } else {
@@ -837,15 +850,26 @@ var flower = {};
             }
             _this3.show.setAnchorPoint(0, 1);
             _this3.show.retain();
+            _this3.setFontColor(0);
             _this3.setScaleX(1);
             _this3.setScaleY(1);
-            if (Platform.native) {} else {
-                _this3.show.setDelegate(_this3);
-            }
+            //if (Platform.native) {
+            //} else {
+            //    this.show.setDelegate(this);
+            //}
             return _this3;
         }
 
         _createClass(PlatformTextInput, [{
+            key: "setFontColor",
+            value: function setFontColor(color) {
+                if (Platform.native) {
+                    this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
+                } else {
+                    this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
+                }
+            }
+        }, {
             key: "setChangeBack",
             value: function setChangeBack(changeBack, thisObj) {
                 this.__changeBack = changeBack;
@@ -873,11 +897,6 @@ var flower = {};
             key: "onTextFieldDeleteBackward",
             value: function onTextFieldDeleteBackward() {}
         }, {
-            key: "setFontColor",
-            value: function setFontColor(color) {
-                this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
-            }
-        }, {
             key: "getNativeText",
             value: function getNativeText() {
                 return this.show.getString();
@@ -885,12 +904,11 @@ var flower = {};
         }, {
             key: "changeText",
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
-                var $mesureTxt = PlatformTextInput.$mesureTxt;
+                var $mesureTxt = PlatformTextField.$mesureTxt;
+                $mesureTxt.setFontSize(size);
                 if (Platform.native) {
-                    $mesureTxt.setFontSize(size);
                     this.show.setSystemFontSize((RETINA ? 2.0 : 1) * size);
                 } else {
-                    $mesureTxt.setFontSize(size);
                     this.show.setFontSize((RETINA ? 2.0 : 1) * size);
                 }
                 var txt = this.show;
@@ -919,7 +937,7 @@ var flower = {};
                             txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                         }
                         //如果文字的高度已经大于设定的高，回退一次
-                        if (!autoSize && height && txt.getContentSize().height > height) {
+                        if (!autoSize && height && txt.getContentSize().height * (RETINA ? 1 / 2.0 : 1) > height) {
                             txt.setString(txtText);
                             break;
                         } else {
@@ -974,7 +992,7 @@ var flower = {};
                 } else {
                     this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
                 }
-                show.setTextColor({ r: 0, g: 0, b: 0, a: 255 });
+                this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextInput.prototype), "release", this).call(this);
             }
         }]);
@@ -5135,7 +5153,7 @@ var flower = {};
         }, {
             key: "$setFocus",
             value: function $setFocus(val) {
-                if (val && !val.$focusEnabled) {
+                if (val && !val.focusEnabled) {
                     val = null;
                 }
                 if (this.__focus == val) {

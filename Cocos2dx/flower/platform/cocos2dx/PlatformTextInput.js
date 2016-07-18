@@ -18,11 +18,20 @@ class PlatformTextInput extends PlatformDisplayObject {
         }
         this.show.setAnchorPoint(0, 1);
         this.show.retain();
+        this.setFontColor(0);
         this.setScaleX(1);
         this.setScaleY(1);
+        //if (Platform.native) {
+        //} else {
+        //    this.show.setDelegate(this);
+        //}
+    }
+
+    setFontColor(color) {
         if (Platform.native) {
+            this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
         } else {
-            this.show.setDelegate(this);
+            this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
         }
     }
 
@@ -50,22 +59,17 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     }
 
-    setFontColor(color) {
-        this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
-    }
-
     getNativeText() {
         return this.show.getString();
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
-        var $mesureTxt = PlatformTextInput.$mesureTxt;
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.setFontSize(size);
         if (Platform.native) {
-            $mesureTxt.setFontSize(size);
-            this.show.setSystemFontSize( (RETINA ? 2.0 : 1) * size);
+            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * size);
         } else {
-            $mesureTxt.setFontSize(size);
-            this.show.setFontSize( (RETINA ? 2.0 : 1) * size);
+            this.show.setFontSize((RETINA ? 2.0 : 1) * size);
         }
         var txt = this.show;
         txt.text = "";
@@ -93,7 +97,7 @@ class PlatformTextInput extends PlatformDisplayObject {
                     txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 }
                 //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.getContentSize().height > height) {
+                if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
                     txt.setString(txtText);
                     break;
                 } else {
@@ -140,11 +144,11 @@ class PlatformTextInput extends PlatformDisplayObject {
         var show = this.show;
         show.setString("");
         if (Platform.native) {
-            this.show.setSystemFontSize((RETINA ? 2.0 : 1)*12);
+            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
         } else {
-            this.show.setFontSize((RETINA ? 2.0 : 1)*12);
+            this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
         }
-        show.setTextColor({r: 0, g: 0, b: 0, a: 255});
+        this.setFontColor(0);
         super.release();
     }
 }

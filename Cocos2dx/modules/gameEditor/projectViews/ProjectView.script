@@ -19,7 +19,7 @@ function loadPorject(url) {
 function __onLoadConfig(e) {
     var cfg = this.config = e.data;
     this.title = cfg.name;
-    var direction = this.data.direction;
+    var direction = this.tree.data.direction;
     direction.removeAll();
     for (var key in cfg.direction) {
         direction.push(new editor.File(true, "res/" + key, cfg.direction[key].name));
@@ -33,7 +33,7 @@ function __onLoadConfig(e) {
 }
 
 function openItem(url) {
-    var direction = this.data.direction;
+    var direction = this.tree.data.direction;
     var item;
     for (var i = 0; i < direction.length; i++) {
         if (direction.getItemAt(i).path == url) {
@@ -44,15 +44,4 @@ function openItem(url) {
     if (item) {
         item.openFile();
     }
-}
-
-function get title() {
-    return this._title || (this._title = new flower.StringValue());
-}
-
-function set title(val) {
-    if (!this._title) {
-        this._title = new flower.StringValue();
-    }
-    this._title.value = val;
 }

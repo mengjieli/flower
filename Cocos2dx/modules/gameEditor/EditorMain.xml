@@ -12,6 +12,7 @@
             </f:Array>
         </f:panels>
     </s:Tab>
-    <e:ModuleView left="150" right="0" percentHeight="100">
+    <e:ModuleView left="150" right="200" percentHeight="100">
     </e:ModuleView>
+    <e:AttributeEditor width="200" right="0" percentHeight="100"/>
 </f:Group>

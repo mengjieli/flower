@@ -55,12 +55,18 @@ var UIEditor = (function (_super) {
         for (var key in this.points) {
             this.points[key].visible = true;
         }
+        if(this.nameTxt) {
+            this.nameTxt.alpha = 0.5;
+        }
     }
 
     UIEditor.prototype.hide = function () {
         this.box.visible = false;
         for (var key in this.points) {
             this.points[key].visible = false;
+        }
+        if(this.nameTxt) {
+            this.nameTxt.alpha = 0.2;
         }
     }
 
