@@ -7,7 +7,8 @@ var UIElement = (function (_super) {
 
         this.xml = xml;
         this.elements = [];
-        this.attributes = [];
+        this.attributesElements = [];
+        this.attributes = {};
         this.namespaces = namespaces || xml.namespaces;
     }
 
@@ -18,31 +19,50 @@ var UIElement = (function (_super) {
         var xmlNS = name.split(":")[0];
         var name = name.split(":")[1];
         this.xmlNS = xmlNS;
-        this.name = name;
+        this.className = name;
         var display = new this.clazz();
         this.__isDisplay = display instanceof flower.DisplayObject;
         this.__isContainer = display instanceof flower.Sprite;
         this.__isUIComponent = display.__UIComponent ? true : false;
         if (this.isDisplay) {
+            for (var i = 0; i < xml.attributes.length; i++) {
+                var attribute = xml.attributes[i];
+                switch (attribute.name) {
+                    case "x":
+                    case "y":
+                    case "scaleX":
+                    case "scaleY":
+                    case "rotation":
+                    case "alpha":
+                        this.attributes[attribute.name] = new flower.NumberValue(attribute.value);
+                        break;
+                    case "width":
+                    case "height":
+                        this.attributes[attribute.name] = new flower.UIntValue(attribute.value);
+                        break;
+                    default :
+                        this.attributes[attribute.name] = new flower.StringValue(attribute.value);
+                }
+            }
             for (var i = 0; i < xml.elements.length; i++) {
                 var childXML = xml.elements[i];
                 var childName = childXML.name;
                 var childNameNS = childName.split(":")[1];
                 childName = childName.split(":")[0];
                 if (childName == "f" && (childName.charAt(0) < 48 || childName.charAt(0) > 57)) {
-                    this.attributes.push(new UIElement(childXML, this.namespaces));
+                    this.attributesElements.push(new UIElement(childXML, this.namespaces));
                 } else {
                     this.elements.push(new UIElement(childXML, this.namespaces));
                 }
             }
-            this.loadIndex = this.attributes.length + this.elements.length;
+            this.loadIndex = this.attributesElements.length + this.elements.length;
             if (!this.loadIndex) {
                 new flower.CallLater(this.dispatchWidth, this, [flower.Event.COMPLETE]);
             } else {
-                for (var i = 0; i < this.attributes.length; i++) {
-                    this.attributes[i].load();
-                    this.attributes[i].addListener(flower.Event.COMPLETE, this.__onLoad, this);
-                    this.attributes[i].addListener(flower.Event.ERROR, this.__onLoadError, this);
+                for (var i = 0; i < this.attributesElements.length; i++) {
+                    this.attributesElements[i].load();
+                    this.attributesElements[i].addListener(flower.Event.COMPLETE, this.__onLoad, this);
+                    this.attributesElements[i].addListener(flower.Event.ERROR, this.__onLoadError, this);
                 }
                 for (var i = 0; i < this.elements.length; i++) {
                     this.elements[i].load();
@@ -71,14 +91,18 @@ var UIElement = (function (_super) {
         return this.xml.attributes[index];
     }
 
+    UIElement.prototype.getAttribute = function (name) {
+        return this.attributes[name];
+    }
+
     UIElement.prototype.getAttributeElementAt = function (index) {
-        return this.attributes[index];
+        return this.attributesElements[index];
     }
 
     Object.defineProperty(UIElement.prototype, "clazz", {
         get: function () {
             if (this.xmlNS == "f") {
-                return root.flower[this.name];
+                return root.flower[this.className];
             }
         },
         set: function (val) {
@@ -99,7 +123,7 @@ var UIElement = (function (_super) {
 
     Object.defineProperty(UIElement.prototype, "numAttributeElement", {
         get: function () {
-            return this.attributes.length;
+            return this.attributesElements.length;
         },
         set: function (val) {
         },

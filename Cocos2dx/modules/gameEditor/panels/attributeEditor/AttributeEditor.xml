@@ -6,7 +6,8 @@
                     <f:layout>
                         <f:VerticalLayout/>
                     </f:layout>
-                    <e:PositionEditor/>
+                    <e:BasicAttribute/>
+                    <e:PositionAttribute/>
                 </f:Group>
             </s:TitlePanel>
         </f:Array>

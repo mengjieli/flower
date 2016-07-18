@@ -75,6 +75,9 @@ class PlatformTextInput extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
+        if(text == "") {
+            txt.setString("");
+        }
         for (var i = 0; i < text.length; i++) {
             //取一行文字进行处理
             if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {

@@ -6,6 +6,9 @@ class BooleanValue extends Value {
     }
 
     $setValue(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (val == this.__value) {
             return;

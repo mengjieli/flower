@@ -1,5 +1,6 @@
 class Stage extends Sprite {
 
+    __forntLayer;
     $background;
     $debugSprite
     $pop;
@@ -11,14 +12,16 @@ class Stage extends Sprite {
         this.__stage = this;
         Stage.stages.push(this);
         this.$background = new Shape();
+        this.__forntLayer = new Sprite();
+        this.addChild(this.__forntLayer);
         this.$debugSprite = new Sprite();
-        this.addChild(this.$debugSprite);
+        this.__forntLayer.addChild(this.$debugSprite);
         this.$pop = PopManager.getInstance();
-        this.addChild(this.$pop);
+        this.__forntLayer.addChild(this.$pop);
         this.$menu = MenuManager.getInstance();
-        this.addChild(this.$menu);
+        this.__forntLayer.addChild(this.$menu);
         this.$drag = DragManager.getInstance();
-        this.addChild(this.$drag);
+        this.__forntLayer.addChild(this.$drag);
         this.backgroundColor = 0;
     }
 
@@ -32,11 +35,8 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && child != this.$drag && child != this.$menu && child != this.$pop) {
-            this.addChild(this.$debugSprite);
-            this.addChild(this.$pop);
-            this.addChild(this.$menu);
-            this.addChild(this.$drag);
+        if (child != this.__forntLayer) {
+            this.addChild(this.__forntLayer);
         }
     }
 
@@ -321,6 +321,46 @@ class Stage extends Sprite {
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+
+    ///////////////////////////////////////键盘事件处理///////////////////////////////////////
+    $onKeyDown(key) {
+        if (key == 16) {
+            KeyboardEvent.$shift = true;
+        }
+        if (key == 17) {
+            KeyboardEvent.$control = true;
+        }
+        if (key == 18) {
+            KeyboardEvent.$alt = true;
+        }
+        var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, key);
+        if (this.__focus) {
+            this.__focus.dispatch(event);
+        } else {
+            this.dispatch(event);
+        }
+    }
+
+    $onKeyUp(key) {
+        if (key == 16) {
+            KeyboardEvent.$shift = false;
+        }
+        if (key == 17) {
+            KeyboardEvent.$control = false;
+        }
+        if (key == 18) {
+            KeyboardEvent.$alt = false;
+        }
+        var event = new KeyboardEvent(KeyboardEvent.KEY_UP, key);
+        if (this.__focus) {
+            this.__focus.dispatch(event);
+        } else {
+            this.dispatch(event);
+        }
+    }
+
+    ///////////////////////////////////////键盘事件处理///////////////////////////////////////
+
     $onFrameEnd() {
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;

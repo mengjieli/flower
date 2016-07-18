@@ -52,10 +52,12 @@ class Event {
     static FOCUS_OUT = "focus_out";
     static CONFIRM = "confirm";
     static CANCEL = "cancel";
+    static START_INPUT = "start_input";
+    static STOP_INPUT = "stop_input";
 
     static _eventPool = [];
 
-    static create(type, data = null) {
+    static create(type, data = null, bubbles = false) {
         var e;
         if (!flower.Event._eventPool.length) {
             e = new flower.Event(type);
@@ -65,7 +67,7 @@ class Event {
             e.$cycle = false;
         }
         e.$type = type;
-        e.$bubbles = false;
+        e.$bubbles = bubbles;
         e.data = data;
         return e;
     }

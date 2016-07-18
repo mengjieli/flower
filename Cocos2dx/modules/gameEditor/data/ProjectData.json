@@ -1,6 +1,6 @@
 {
   "name": "editor.ProjectData",
-  "exports":true,
+  "exports": true,
   "desc": "项目数据",
   "members": {
     "name": {
@@ -11,6 +11,14 @@
     "direction": {
       "desc": "项目目录",
       "type": "Array"
+    },
+    "selectModule": {
+      "desc": "当前选择编辑的模块",
+      "type": "*"
+    },
+    "selectElement": {
+      "desc": "当前选择编辑的元素",
+      "type": "*"
     }
   }
 }

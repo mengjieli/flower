@@ -8,6 +8,7 @@ var ModuleEvent = (function (_super) {
     }
 
     ModuleEvent.VIEW_FILE = "view_file";
+    ModuleEvent.SELECT_ELEMENT = "select_element";
     //ModuleEvent.VIEW_MODULE = "view_module";
 
     return ModuleEvent;

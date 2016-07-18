@@ -39,7 +39,7 @@ var UIEditor = (function (_super) {
         if (data.isContainer) {
             var nameTxt = new flower.TextField();
             this.nameTxt = nameTxt;
-            nameTxt.text = data.name;
+            nameTxt.text = data.className;
             nameTxt.fontColor = 0;
             nameTxt.alpha = 0.2;
             this.addChild(nameTxt);

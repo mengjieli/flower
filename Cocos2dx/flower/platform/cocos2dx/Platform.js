@@ -60,10 +60,10 @@ class Platform {
             cc.eventManager.addListener({
                 event: cc.EventListener.KEYBOARD,
                 onKeyPressed: function (key, event) {
-                    trace("Key down:" + key);
+                    engine.$onKeyDown(key);
                 },
                 onKeyReleased: function (key, event) {
-                    trace("Key up:" + key);
+                    engine.$onKeyUp(key);
                 }
             }, Platform.stage);
         } else {

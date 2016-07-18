@@ -1,0 +1,12 @@
+function init() {
+    editor.EventManager.instance.addListener(editor.ModuleEvent.SELECT_ELEMENT, this.onSelectElement, this);
+}
+
+function onSelectElement(e) {
+    this.data = e.data;
+    flower.breakPoint();
+    this.xInput.bindProperty("text", "{data.attributes.x==null?'':data.attributes.x}", [this]);
+    this.yInput.bindProperty("text", "{data.attributes.y==null?'':data.attributes.y}", [this]);
+    this.widthInput.bindProperty("text", "{data.attributes.width==null?'':data.attributes.width}", [this]);
+    this.heightInput.bindProperty("text", "{data.attributes.height==null?'':data.attributes.height}", [this]);
+}

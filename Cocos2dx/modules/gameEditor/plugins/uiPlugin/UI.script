@@ -2,7 +2,7 @@ var UI = (function (_super) {
 
     __extends(UI, _super);
 
-    function UI(data,info) {
+    function UI(data, info) {
         _super.call(this);
         this.data = data;
         this.info = info;
@@ -30,7 +30,7 @@ var UI = (function (_super) {
         for (var i = 0; i < data.numElement; i++) {
             var childData = data.getElementAt(i);
             if (childData.isDisplay) {
-                var child = new UI(childData,this.info);
+                var child = new UI(childData, this.info);
                 this.addChild(child);
             }
         }
@@ -48,6 +48,7 @@ var UI = (function (_super) {
         }
         this.info.select = this;
         this.info.select.selected();
+        editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.SELECT_ELEMENT, this.data);
     }
 
     UI.prototype.selected = function () {

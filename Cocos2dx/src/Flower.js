@@ -253,11 +253,11 @@ var flower = {};
                 if ('keyboard' in cc.sys.capabilities) {
                     cc.eventManager.addListener({
                         event: cc.EventListener.KEYBOARD,
-                        onKeyPressed: function (key, event) {
-                            trace("Key down:" + key);
+                        onKeyPressed: function onKeyPressed(key, event) {
+                            engine.$onKeyDown(key);
                         },
-                        onKeyReleased: function (key, event) {
-                            trace("Key up:" + key);
+                        onKeyReleased: function onKeyReleased(key, event) {
+                            engine.$onKeyUp(key);
                         }
                     }, Platform.stage);
                 } else {
@@ -756,6 +756,9 @@ var flower = {};
                 txt.text = "";
                 var txtText = "";
                 var start = 0;
+                if (text == "") {
+                    txt.setString("");
+                }
                 for (var i = 0; i < text.length; i++) {
                     //取一行文字进行处理
                     if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
@@ -915,6 +918,9 @@ var flower = {};
                 txt.text = "";
                 var txtText = "";
                 var start = 0;
+                if (text == "") {
+                    txt.setString("");
+                }
                 for (var i = 0; i < text.length; i++) {
                     //取一行文字进行处理
                     if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
@@ -2083,6 +2089,7 @@ var flower = {};
             key: "create",
             value: function create(type) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var bubbles = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
                 var e;
                 if (!flower.Event._eventPool.length) {
@@ -2092,7 +2099,7 @@ var flower = {};
                     e.$cycle = false;
                 }
                 e.$type = type;
-                e.$bubbles = false;
+                e.$bubbles = bubbles;
                 e.data = data;
                 return e;
             }
@@ -2126,6 +2133,8 @@ var flower = {};
     Event.FOCUS_OUT = "focus_out";
     Event.CONFIRM = "confirm";
     Event.CANCEL = "cancel";
+    Event.START_INPUT = "start_input";
+    Event.STOP_INPUT = "stop_input";
     Event._eventPool = [];
 
 
@@ -2322,7 +2331,65 @@ var flower = {};
     flower.DragEvent = DragEvent;
     //////////////////////////End File:flower/event/DragEvent.js///////////////////////////
 
+    //////////////////////////File:flower/event/KeyboardEvent.js///////////////////////////
+
+    var KeyboardEvent = function (_Event4) {
+        _inherits(KeyboardEvent, _Event4);
+
+        function KeyboardEvent(type, key) {
+            var bubbles = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+            _classCallCheck(this, KeyboardEvent);
+
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(KeyboardEvent).call(this, type, bubbles));
+
+            _this10.__keyCode = key;
+            _this10.__key = String.fromCharCode(key);
+            return _this10;
+        }
+
+        _createClass(KeyboardEvent, [{
+            key: "keyCode",
+            get: function get() {
+                return this.__keyCode;
+            }
+        }, {
+            key: "key",
+            get: function get() {
+                return this.__key;
+            }
+        }, {
+            key: "shift",
+            get: function get() {
+                return KeyboardEvent.$shift;
+            }
+        }, {
+            key: "control",
+            get: function get() {
+                return KeyboardEvent.$control;
+            }
+        }, {
+            key: "alt",
+            get: function get() {
+                return KeyboardEvent.$alt;
+            } //16
+            //17
+            //18
+
+        }]);
+
+        return KeyboardEvent;
+    }(Event);
+    //////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
+
     //////////////////////////File:flower/filters/Filter.js///////////////////////////
+
+
+    KeyboardEvent.$shift = false;
+    KeyboardEvent.$control = false;
+    KeyboardEvent.$alt = false;
+    KeyboardEvent.KEY_DOWN = "key_down";
+    KeyboardEvent.KEY_UP = "key_up";
 
     var Filter = function () {
         function Filter(type) {
@@ -2370,16 +2437,16 @@ var flower = {};
 
             _classCallCheck(this, ColorFilter);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
 
-            _this10.__h = 0;
-            _this10.__s = 0;
-            _this10.__l = 0;
+            _this11.__h = 0;
+            _this11.__s = 0;
+            _this11.__l = 0;
 
-            _this10.h = h;
-            _this10.s = s;
-            _this10.l = l;
-            return _this10;
+            _this11.h = h;
+            _this11.s = s;
+            _this11.l = l;
+            return _this11;
         }
 
         _createClass(ColorFilter, [{
@@ -2453,16 +2520,16 @@ var flower = {};
 
             _classCallCheck(this, StrokeFilter);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
 
-            _this11.__size = 0;
-            _this11.__r = 0;
-            _this11.__g = 0;
-            _this11.__b = 0;
+            _this12.__size = 0;
+            _this12.__r = 0;
+            _this12.__g = 0;
+            _this12.__b = 0;
 
-            _this11.size = size;
-            _this11.color = color;
-            return _this11;
+            _this12.size = size;
+            _this12.color = color;
+            return _this12;
         }
 
         _createClass(StrokeFilter, [{
@@ -2508,14 +2575,14 @@ var flower = {};
 
             _classCallCheck(this, BlurFilter);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
 
-            _this12.__blurX = 0;
-            _this12.__blurY = 0;
+            _this13.__blurX = 0;
+            _this13.__blurY = 0;
 
-            _this12.blurX = blurX;
-            _this12.blurY = blurY;
-            return _this12;
+            _this13.blurX = blurX;
+            _this13.blurY = blurY;
+            return _this13;
         }
 
         _createClass(BlurFilter, [{
@@ -3088,16 +3155,16 @@ var flower = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this13.__flags = 0;
-            _this13.__alpha = 1;
-            _this13.__parentAlpha = 1;
-            _this13.__concatAlpha = 1;
-            _this13.__visible = true;
+            _this14.__flags = 0;
+            _this14.__alpha = 1;
+            _this14.__parentAlpha = 1;
+            _this14.__concatAlpha = 1;
+            _this14.__visible = true;
 
             var id = DisplayObject.id++;
-            _this13.$DisplayObject = {
+            _this14.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -3118,7 +3185,7 @@ var flower = {};
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
-            return _this13;
+            return _this14;
         }
 
         /**
@@ -3844,10 +3911,10 @@ var flower = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this14.$initContainer();
-            return _this14;
+            _this15.$initContainer();
+            return _this15;
         }
 
         _createClass(Sprite, [{
@@ -4252,13 +4319,13 @@ var flower = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this16.$nativeShow = Platform.create("Bitmap");
-            _this16.texture = texture;
-            _this16.$Bitmap = {
+            _this17.$nativeShow = Platform.create("Bitmap");
+            _this17.texture = texture;
+            _this17.$Bitmap = {
                 0: null };
-            return _this16;
+            return _this17;
         }
 
         _createClass(Bitmap, [{
@@ -4404,10 +4471,10 @@ var flower = {};
 
             _classCallCheck(this, TextField);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
 
-            _this17.$nativeShow = Platform.create("TextField");
-            _this17.$TextField = {
+            _this18.$nativeShow = Platform.create("TextField");
+            _this18.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -4416,9 +4483,9 @@ var flower = {};
                 5: true //autoSize
             };
             if (text != "") {
-                _this17.text = text;
+                _this18.text = text;
             }
-            return _this17;
+            return _this18;
         }
 
         _createClass(TextField, [{
@@ -4608,10 +4675,10 @@ var flower = {};
 
             _classCallCheck(this, TextInput);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
 
-            _this18.$nativeShow = Platform.create("TextInput");
-            _this18.$TextField = {
+            _this19.$nativeShow = Platform.create("TextInput");
+            _this19.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -4619,14 +4686,15 @@ var flower = {};
                 4: false, //inputing
                 5: false //autoSize
             };
-            _this18.addListener(Event.FOCUS_IN, _this18.$onFocusIn, _this18);
-            _this18.addListener(Event.FOCUS_OUT, _this18.$onFocusOut, _this18);
+            _this19.addListener(Event.FOCUS_IN, _this19.$onFocusIn, _this19);
+            _this19.addListener(Event.FOCUS_OUT, _this19.$onFocusOut, _this19);
+            _this19.addListener(KeyboardEvent.KEY_DOWN, _this19.$keyDown, _this19);
             if (text != "") {
-                _this18.text = text;
+                _this19.text = text;
             }
-            _this18.focusEnabled = true;
-            _this18.$nativeShow.setChangeBack(_this18.$onTextChange, _this18);
-            return _this18;
+            _this19.focusEnabled = true;
+            _this19.$nativeShow.setChangeBack(_this19.$onTextChange, _this19);
+            return _this19;
         }
 
         _createClass(TextInput, [{
@@ -4752,6 +4820,7 @@ var flower = {};
                     var p = this.$TextField;
                     this.$nativeShow.startInput();
                     p[4] = true;
+                    this.dispatchWidth(Event.START_INPUT);
                 }
             }
         }, {
@@ -4761,11 +4830,24 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
+                this.$inputEnd();
+            }
+        }, {
+            key: "$inputEnd",
+            value: function $inputEnd() {
                 var p = this.$TextField;
                 if (p[4]) {
                     this.$nativeShow.stopInput();
                 }
                 this.text = this.$nativeShow.getNativeText();
+                this.dispatchWidth(Event.STOP_INPUT);
+            }
+        }, {
+            key: "$keyDown",
+            value: function $keyDown(e) {
+                if (e.key == 13) {
+                    this.$inputEnd();
+                }
             }
         }, {
             key: "$onFrameEnd",
@@ -4829,10 +4911,10 @@ var flower = {};
         function Shape() {
             _classCallCheck(this, Shape);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
 
-            _this19.$nativeShow = Platform.create("Shape");
-            _this19.$Shape = {
+            _this20.$nativeShow = Platform.create("Shape");
+            _this20.$Shape = {
                 0: 0xffffff, //fillColor
                 1: 1, //fillAlpha
                 2: 0, //lineWidth
@@ -4844,8 +4926,8 @@ var flower = {};
                 8: null, //maxY
                 9: [] //record
             };
-            _this19.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
-            return _this19;
+            _this20.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            return _this20;
         }
 
         _createClass(Shape, [{
@@ -5110,41 +5192,40 @@ var flower = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this20.__nativeMouseMoveEvent = [];
-            _this20.__nativeTouchEvent = [];
-            _this20.__mouseOverList = [_this20];
-            _this20.__dragOverList = [_this20];
-            _this20.__touchList = [];
-            _this20.__lastMouseX = -1;
-            _this20.__lastMouseY = -1;
-            _this20.__focus = null;
+            _this21.__nativeMouseMoveEvent = [];
+            _this21.__nativeTouchEvent = [];
+            _this21.__mouseOverList = [_this21];
+            _this21.__dragOverList = [_this21];
+            _this21.__touchList = [];
+            _this21.__lastMouseX = -1;
+            _this21.__lastMouseY = -1;
+            _this21.__focus = null;
 
-            _this20.__stage = _this20;
-            Stage.stages.push(_this20);
-            _this20.$background = new Shape();
-            _this20.$debugSprite = new Sprite();
-            _this20.addChild(_this20.$debugSprite);
-            _this20.$pop = PopManager.getInstance();
-            _this20.addChild(_this20.$pop);
-            _this20.$menu = MenuManager.getInstance();
-            _this20.addChild(_this20.$menu);
-            _this20.$drag = DragManager.getInstance();
-            _this20.addChild(_this20.$drag);
-            _this20.backgroundColor = 0;
-            return _this20;
+            _this21.__stage = _this21;
+            Stage.stages.push(_this21);
+            _this21.$background = new Shape();
+            _this21.__forntLayer = new Sprite();
+            _this21.addChild(_this21.__forntLayer);
+            _this21.$debugSprite = new Sprite();
+            _this21.__forntLayer.addChild(_this21.$debugSprite);
+            _this21.$pop = PopManager.getInstance();
+            _this21.__forntLayer.addChild(_this21.$pop);
+            _this21.$menu = MenuManager.getInstance();
+            _this21.__forntLayer.addChild(_this21.$menu);
+            _this21.$drag = DragManager.getInstance();
+            _this21.__forntLayer.addChild(_this21.$drag);
+            _this21.backgroundColor = 0;
+            return _this21;
         }
 
         _createClass(Stage, [{
             key: "addChildAt",
             value: function addChildAt(child, index) {
                 _get(Object.getPrototypeOf(Stage.prototype), "addChildAt", this).call(this, child, index);
-                if (child != this.$debugSprite && child != this.$drag && child != this.$menu && child != this.$pop) {
-                    this.addChild(this.$debugSprite);
-                    this.addChild(this.$pop);
-                    this.addChild(this.$menu);
-                    this.addChild(this.$drag);
+                if (child != this.__forntLayer) {
+                    this.addChild(this.__forntLayer);
                 }
             }
 
@@ -5431,6 +5512,49 @@ var flower = {};
 
             ///////////////////////////////////////触摸事件处理///////////////////////////////////////
 
+            ///////////////////////////////////////键盘事件处理///////////////////////////////////////
+
+        }, {
+            key: "$onKeyDown",
+            value: function $onKeyDown(key) {
+                if (key == 16) {
+                    KeyboardEvent.$shift = true;
+                }
+                if (key == 17) {
+                    KeyboardEvent.$control = true;
+                }
+                if (key == 18) {
+                    KeyboardEvent.$alt = true;
+                }
+                var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, key);
+                if (this.__focus) {
+                    this.__focus.dispatch(event);
+                } else {
+                    this.dispatch(event);
+                }
+            }
+        }, {
+            key: "$onKeyUp",
+            value: function $onKeyUp(key) {
+                if (key == 16) {
+                    KeyboardEvent.$shift = false;
+                }
+                if (key == 17) {
+                    KeyboardEvent.$control = false;
+                }
+                if (key == 18) {
+                    KeyboardEvent.$alt = false;
+                }
+                var event = new KeyboardEvent(KeyboardEvent.KEY_UP, key);
+                if (this.__focus) {
+                    this.__focus.dispatch(event);
+                } else {
+                    this.dispatch(event);
+                }
+            }
+
+            ///////////////////////////////////////键盘事件处理///////////////////////////////////////
+
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
@@ -5546,12 +5670,12 @@ var flower = {};
         function DragManager() {
             _classCallCheck(this, DragManager);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
 
-            _this21.__isDragging = false;
+            _this22.__isDragging = false;
 
-            _this21.touchEnabled = false;
-            return _this21;
+            _this22.touchEnabled = false;
+            return _this22;
         }
 
         _createClass(DragManager, [{
@@ -5657,12 +5781,12 @@ var flower = {};
         function MenuManager() {
             _classCallCheck(this, MenuManager);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
 
-            _this22.__addFrame = 0;
+            _this23.__addFrame = 0;
 
-            _this22.addListener(Event.ADDED_TO_STAGE, _this22.__addedToStage, _this22);
-            return _this22;
+            _this23.addListener(Event.ADDED_TO_STAGE, _this23.__addedToStage, _this23);
+            return _this23;
         }
 
         _createClass(MenuManager, [{
@@ -5741,10 +5865,10 @@ var flower = {};
         function PopManager() {
             _classCallCheck(this, PopManager);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
 
-            _this23.__panels = [];
-            return _this23;
+            _this24.__panels = [];
+            return _this24;
         }
 
         _createClass(PopManager, [{
@@ -6142,16 +6266,16 @@ var flower = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this24._createRes = false;
-            _this24._isLoading = false;
-            _this24._selfDispose = false;
+            _this25._createRes = false;
+            _this25._isLoading = false;
+            _this25._selfDispose = false;
 
-            _this24.$setResource(res);
-            _this24._language = LANGUAGE;
-            _this24._scale = SCALE ? SCALE : null;
-            return _this24;
+            _this25.$setResource(res);
+            _this25._language = LANGUAGE;
+            _this25._scale = SCALE ? SCALE : null;
+            return _this25;
         }
 
         _createClass(URLLoader, [{
@@ -6462,12 +6586,12 @@ var flower = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this25.__list = list;
-            _this25.__dataList = [];
-            _this25.__index = 0;
-            return _this25;
+            _this26.__list = list;
+            _this26.__dataList = [];
+            _this26.__index = 0;
+            return _this26;
         }
 
         _createClass(URLLoaderList, [{
@@ -6549,10 +6673,10 @@ var flower = {};
         function WebSocket() {
             _classCallCheck(this, WebSocket);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
 
-            _this26._isConnect = false;
-            return _this26;
+            _this27._isConnect = false;
+            return _this27;
         }
 
         _createClass(WebSocket, [{
@@ -6636,17 +6760,17 @@ var flower = {};
 
             _classCallCheck(this, VBWebSocket);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
 
-            _this27.remotes = {};
-            _this27.backs = {};
-            _this27.zbacks = {};
+            _this28.remotes = {};
+            _this28.backs = {};
+            _this28.zbacks = {};
 
-            _this27._remote = remote;
-            _this27.remotes = {};
-            _this27.backs = {};
-            _this27.zbacks = {};
-            return _this27;
+            _this28._remote = remote;
+            _this28.remotes = {};
+            _this28.backs = {};
+            _this28.zbacks = {};
+            return _this28;
         }
 
         _createClass(VBWebSocket, [{
@@ -7026,14 +7150,14 @@ var flower = {};
         function PlistLoader(url, nativeURL) {
             _classCallCheck(this, PlistLoader);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
 
-            _this28.disposeFlag = false;
+            _this29.disposeFlag = false;
 
-            _this28._url = url;
-            _this28._nativeURL = nativeURL;
-            _this28.__load();
-            return _this28;
+            _this29._url = url;
+            _this29._nativeURL = nativeURL;
+            _this29.__load();
+            return _this29;
         }
 
         _createClass(PlistLoader, [{
@@ -9783,12 +9907,12 @@ var flower = {};
         function XMLElement() {
             _classCallCheck(this, XMLElement);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
 
-            _this29.namespaces = [];
-            _this29.attributes = [];
-            _this29.elements = _this29.list = [];
-            return _this29;
+            _this30.namespaces = [];
+            _this30.attributes = [];
+            _this30.elements = _this30.list = [];
+            return _this30;
         }
 
         _createClass(XMLElement, [{

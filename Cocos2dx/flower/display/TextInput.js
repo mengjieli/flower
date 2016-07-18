@@ -15,6 +15,7 @@ class TextInput extends DisplayObject {
         };
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
+        this.addListener(KeyboardEvent.KEY_DOWN, this.$keyDown, this);
         if (text != "") {
             this.text = text;
         }
@@ -23,8 +24,8 @@ class TextInput extends DisplayObject {
     }
 
     $onTextChange() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.text = this.$nativeShow.getNativeText();
@@ -65,8 +66,8 @@ class TextInput extends DisplayObject {
     }
 
     $setFontColor(val) {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         val = +val || 0;
@@ -127,27 +128,39 @@ class TextInput extends DisplayObject {
     }
 
     $onFocusIn(e) {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         if (this.editEnabled) {
             var p = this.$TextField;
             this.$nativeShow.startInput();
             p[4] = true;
+            this.dispatchWidth(Event.START_INPUT);
         }
     }
 
     $onFocusOut() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
+        this.$inputEnd();
+    }
+
+    $inputEnd() {
         var p = this.$TextField;
         if (p[4]) {
             this.$nativeShow.stopInput();
         }
         this.text = this.$nativeShow.getNativeText();
+        this.dispatchWidth(Event.STOP_INPUT);
+    }
+
+    $keyDown(e) {
+        if (e.key == 13) {
+            this.$inputEnd();
+        }
     }
 
     get text() {
@@ -185,8 +198,8 @@ class TextInput extends DisplayObject {
     }
 
     dispose() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         super.dispose();

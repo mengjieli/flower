@@ -230,6 +230,19 @@ class Platform {
         Platform.stage.addChild(background.show);
         root.show.setPositionY(Platform.height);
         Platform.stage.addChild(root.show);
+        if ('keyboard' in cc.sys.capabilities) {
+            cc.eventManager.addListener({
+                event: cc.EventListener.KEYBOARD,
+                onKeyPressed: function (key, event) {
+                    engine.$onKeyDown(key);
+                },
+                onKeyReleased: function (key, event) {
+                    engine.$onKeyUp(key);
+                }
+            }, Platform.stage);
+        } else {
+            trace("KEYBOARD Not supported");
+        }
     }
 
 
@@ -685,6 +698,9 @@ class PlatformTextField extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
+        if(text == "") {
+            txt.setString("");
+        }
         for (var i = 0; i < text.length; i++) {
             //取一行文字进行处理
             if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
@@ -833,6 +849,9 @@ class PlatformTextInput extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
+        if(text == "") {
+            txt.setString("");
+        }
         for (var i = 0; i < text.length; i++) {
             //取一行文字进行处理
             if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
@@ -1889,10 +1908,12 @@ class Event {
     static FOCUS_OUT = "focus_out";
     static CONFIRM = "confirm";
     static CANCEL = "cancel";
+    static START_INPUT = "start_input";
+    static STOP_INPUT = "stop_input";
 
     static _eventPool = [];
 
-    static create(type, data = null) {
+    static create(type, data = null, bubbles = false) {
         var e;
         if (!flower.Event._eventPool.length) {
             e = new flower.Event(type);
@@ -1902,7 +1923,7 @@ class Event {
             e.$cycle = false;
         }
         e.$type = type;
-        e.$bubbles = false;
+        e.$bubbles = bubbles;
         e.data = data;
         return e;
     }
@@ -2068,6 +2089,50 @@ class DragEvent extends Event {
 
 flower.DragEvent = DragEvent;
 //////////////////////////End File:flower/event/DragEvent.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/KeyboardEvent.js///////////////////////////
+class KeyboardEvent extends Event {
+
+    __keyCode;
+    __key;
+
+
+    constructor(type, key, bubbles = true) {
+        super(type, bubbles);
+        this.__keyCode = key;
+        this.__key = String.fromCharCode(key);
+    }
+
+    get keyCode() {
+        return this.__keyCode;
+    }
+
+    get key() {
+        return this.__key;
+    }
+
+    get shift() {
+        return KeyboardEvent.$shift;
+    }
+
+    get control() {
+        return KeyboardEvent.$control;
+    }
+
+    get alt() {
+        return KeyboardEvent.$alt;
+    }
+
+    static $shift = false; //16
+    static $control = false; //17
+    static $alt = false; //18
+
+    static KEY_DOWN = "key_down";
+    static KEY_UP = "key_up";
+}
+//////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
 
 
 
@@ -4132,6 +4197,7 @@ class TextInput extends DisplayObject {
         };
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
+        this.addListener(KeyboardEvent.KEY_DOWN, this.$keyDown, this);
         if (text != "") {
             this.text = text;
         }
@@ -4140,8 +4206,8 @@ class TextInput extends DisplayObject {
     }
 
     $onTextChange() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         this.text = this.$nativeShow.getNativeText();
@@ -4182,8 +4248,8 @@ class TextInput extends DisplayObject {
     }
 
     $setFontColor(val) {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         val = +val || 0;
@@ -4244,27 +4310,39 @@ class TextInput extends DisplayObject {
     }
 
     $onFocusIn(e) {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         if (this.editEnabled) {
             var p = this.$TextField;
             this.$nativeShow.startInput();
             p[4] = true;
+            this.dispatchWidth(Event.START_INPUT);
         }
     }
 
     $onFocusOut() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
+        this.$inputEnd();
+    }
+
+    $inputEnd() {
         var p = this.$TextField;
         if (p[4]) {
             this.$nativeShow.stopInput();
         }
         this.text = this.$nativeShow.getNativeText();
+        this.dispatchWidth(Event.STOP_INPUT);
+    }
+
+    $keyDown(e) {
+        if (e.key == 13) {
+            this.$inputEnd();
+        }
     }
 
     get text() {
@@ -4302,8 +4380,8 @@ class TextInput extends DisplayObject {
     }
 
     dispose() {
-        if(!this.$nativeShow) {
-            $warn(1002,this.name);
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
             return;
         }
         super.dispose();
@@ -4589,6 +4667,7 @@ flower.Shape = Shape;
 //////////////////////////File:flower/display/Stage.js///////////////////////////
 class Stage extends Sprite {
 
+    __forntLayer;
     $background;
     $debugSprite
     $pop;
@@ -4600,14 +4679,16 @@ class Stage extends Sprite {
         this.__stage = this;
         Stage.stages.push(this);
         this.$background = new Shape();
+        this.__forntLayer = new Sprite();
+        this.addChild(this.__forntLayer);
         this.$debugSprite = new Sprite();
-        this.addChild(this.$debugSprite);
+        this.__forntLayer.addChild(this.$debugSprite);
         this.$pop = PopManager.getInstance();
-        this.addChild(this.$pop);
+        this.__forntLayer.addChild(this.$pop);
         this.$menu = MenuManager.getInstance();
-        this.addChild(this.$menu);
+        this.__forntLayer.addChild(this.$menu);
         this.$drag = DragManager.getInstance();
-        this.addChild(this.$drag);
+        this.__forntLayer.addChild(this.$drag);
         this.backgroundColor = 0;
     }
 
@@ -4621,11 +4702,8 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.$debugSprite && child != this.$drag && child != this.$menu && child != this.$pop) {
-            this.addChild(this.$debugSprite);
-            this.addChild(this.$pop);
-            this.addChild(this.$menu);
-            this.addChild(this.$drag);
+        if (child != this.__forntLayer) {
+            this.addChild(this.__forntLayer);
         }
     }
 
@@ -4910,6 +4988,46 @@ class Stage extends Sprite {
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
+
+    ///////////////////////////////////////键盘事件处理///////////////////////////////////////
+    $onKeyDown(key) {
+        if (key == 16) {
+            KeyboardEvent.$shift = true;
+        }
+        if (key == 17) {
+            KeyboardEvent.$control = true;
+        }
+        if (key == 18) {
+            KeyboardEvent.$alt = true;
+        }
+        var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, key);
+        if (this.__focus) {
+            this.__focus.dispatch(event);
+        } else {
+            this.dispatch(event);
+        }
+    }
+
+    $onKeyUp(key) {
+        if (key == 16) {
+            KeyboardEvent.$shift = false;
+        }
+        if (key == 17) {
+            KeyboardEvent.$control = false;
+        }
+        if (key == 18) {
+            KeyboardEvent.$alt = false;
+        }
+        var event = new KeyboardEvent(KeyboardEvent.KEY_UP, key);
+        if (this.__focus) {
+            this.__focus.dispatch(event);
+        } else {
+            this.dispatch(event);
+        }
+    }
+
+    ///////////////////////////////////////键盘事件处理///////////////////////////////////////
+
     $onFrameEnd() {
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;

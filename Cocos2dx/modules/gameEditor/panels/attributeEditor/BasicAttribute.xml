@@ -1,0 +1,6 @@
+<f:Group percentWidth="100" height="60" creationComplete="this.init();" xmlns:f="flower">
+    <f:script src="./BasicAttribute.script"/>
+    <f:Group percentWidth="100" horizontalCenter="0">
+        <f:Label x="5" y="5" text="{data.className}"/>
+    </f:Group>
+</f:Group>

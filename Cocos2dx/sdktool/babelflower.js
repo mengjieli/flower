@@ -190,6 +190,7 @@ var list = [
     "TouchEvent",
     "MouseEvent",
     "DragEvent",
+    "KeyboardEvent",
 
 
     "Filter",

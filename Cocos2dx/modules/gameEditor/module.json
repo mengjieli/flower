@@ -21,7 +21,8 @@
     "ProjectView": "./projectViews/ProjectView.xml",
     "ModuleView": "./moduleView/ModuleView.xml",
     "AttributeEditor": "./panels/attributeEditor/AttributeEditor.xml",
-    "PositionEditor": "./panels/attributeEditor/PositionEditor.xml"
+    "BasicAttribute": "./panels/attributeEditor/BasicAttribute.xml",
+    "PositionAttribute": "./panels/attributeEditor/PositionAttribute.xml"
   },
   "data": [
     "./data/ProjectData.json"
