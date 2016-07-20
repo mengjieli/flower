@@ -19,7 +19,7 @@ class Group extends flower.Sprite {
             return false;
         }
         this._data = val;
-        if(this.$UIComponent) {
+        if (this.$UIComponent) {
             flower.Binding.changeData(this);
         }
         return true;

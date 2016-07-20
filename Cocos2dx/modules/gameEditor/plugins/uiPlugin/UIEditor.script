@@ -6,34 +6,6 @@ var UIEditor = (function (_super) {
         _super.call(this);
         this.data = data;
         this.attributes = {};
-        for (var i = 0; i < data.numAttribute; i++) {
-            var attribute = data.getAttributeAt(i);
-            switch (attribute.name) {
-                case "x":
-                case "y":
-                case "scaleX":
-                case "scaleY":
-                case "rotaion":
-                case "width":
-                case "height":
-                    this.attributes[attribute.name] = flower.StringDo.isNumberString(attribute.value) ? (+attribute.value || 0) : attribute.value;
-                    break;
-            }
-            if (display.__UIComponent) {
-                switch (attribute.name) {
-                    case "left":
-                    case "right":
-                    case "top":
-                    case "bottom":
-                    case "horizontalCenter":
-                    case "verticalCenter":
-                    case "percentWidth":
-                    case "percentHeight":
-                        this.attributes[attribute.name] = flower.StringDo.isNumberString(attribute.value) ? (+attribute.value || 0) : attribute.value;
-                        break;
-                }
-            }
-        }
         this.display = display;
         this.width = this.height = 0;
         if (data.isContainer) {
@@ -55,7 +27,7 @@ var UIEditor = (function (_super) {
         for (var key in this.points) {
             this.points[key].visible = true;
         }
-        if(this.nameTxt) {
+        if (this.nameTxt) {
             this.nameTxt.alpha = 0.5;
         }
     }
@@ -65,26 +37,31 @@ var UIEditor = (function (_super) {
         for (var key in this.points) {
             this.points[key].visible = false;
         }
-        if(this.nameTxt) {
+        if (this.nameTxt) {
             this.nameTxt.alpha = 0.2;
         }
+    }
+
+    UIEditor.prototype.getAttribute = function (name) {
+        var value = this.data.getAttribute(name);
+        return this.data.getAttribute(name);
     }
 
     UIEditor.prototype.update = function () {
         var bounds = this.display.contentBounds;
         var width = bounds.width;
         var height = bounds.height;
-        if (this.attributes.width != null && typeof this.attributes.width != "string") {
+        if (this.getAttribute("width") != null && typeof this.getAttribute("width") != "string") {
             width = this.attributes.width;
         }
-        if (this.attributes.height != null && typeof this.attributes.height != "string") {
+        if (this.getAttribute("height") != null && typeof this.getAttribute("height") != "string") {
             height = this.attributes.height;
         }
-        var x = bounds.x + (this.attributes.x || 0);
-        var y = bounds.y + (this.attributes.y || 0);
-        var scaleX = this.attributes.scaleX || 1;
-        var scaleY = this.attributes.scaleY || 1;
-        var rotation = this.attributes.rotation || 0;
+        var x = bounds.x + this.getAttribute("x") || 0;
+        var y = bounds.y + this.getAttribute("y") || 0;
+        var scaleX = this.getAttribute("scaleX") || 1;
+        var scaleY = this.getAttribute("scaleY") || 1;
+        var rotation = this.getAttribute("rotation") || 0;
         if (!this.box) {
             this.box = new flower.Shape();
             this.box.fillAlpha = 0;

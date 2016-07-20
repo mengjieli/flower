@@ -182,7 +182,10 @@ class Platform {
 
     static start(engine, root, background) {
         RETINA = false;
-        Platform.native = cc.sys.isNative;
+        Platform.native = false;//cc.sys.isNative;
+        var div = document.getElementById("FlowerMain");
+        div.appendChild(root.show);
+        requestAnimationFrame.call(window, Platform._run);
         //var scene = cc.Scene.extend({
         //    ctor: function () {
         //        this._super();
@@ -259,6 +262,7 @@ class Platform {
             var item = PlatformURLLoader.loadingList.shift();
             item[0](item[1], item[2], item[3], item[4]);
         }
+        requestAnimationFrame.call(window, Platform._run);
     }
 
     static pools = {};
@@ -269,61 +273,36 @@ class Platform {
             //if (pools.Sprite && pools.Sprite.length) {
             //    return pools.Sprite.pop();
             //}
-            var div = document.createElement("div");
-            div.style.position = "absolute";
-            div.style.left = "0px";
-            div.style.top = "0px";
-            return div;
+            return new PlatformSprite();
         }
         if (name == "Bitmap") {
             //if (pools.Bitmap && pools.Bitmap.length) {
             //    return pools.Bitmap.pop();
             //}
-            var image = document.createElement("img");
-            image.style.position = "absolute";
-            image.style.left = "0px";
-            image.style.top = "0px";
-            return image;
+            return new PlatformBitmap();
         }
         if (name == "TextField") {
             //if (pools.TextField && pools.TextField.length) {
             //    return pools.TextField.pop();
             //}
-            var em = document.createElement("em");
-            em.style.position = "absolute";
-            em.style.left = "0px";
-            em.style.top = "0px";
-            em.style["font-style"] = "normal";
-            return em;
+            return new PlatformTextField();
         }
         if (name == "TextInput") {
             //if (pools.TextInput && pools.TextInput.length) {
             //    return pools.TextInput.pop();
             //}
-            var input = document.createElement("input");
-            input.style.position = "absolute";
-            input.style.left = "0px";
-            input.style.top = "0px";
-            return input;
+            return new PlatformTextInput();
         }
         if (name == "Shape") {
             //if (pools.Shape && pools.Shape.length) {
             //    return pools.Shape.pop();
             //}
-            var shape = document.createElement("div");
-            shape.style.position = "absolute";
-            shape.style.left = "0px";
-            shape.style.top = "0px";
-            return shape;
+            return new PlatformShape();
         }
         if (name == "Mask") {
             //if (pools.Mask && pools.Mask.length) {
             //    return pools.Mask.pop();
             //}
-            var mask = document.createElement("div");
-            mask.style.position = "absolute";
-            mask.style.left = "0px";
-            mask.style.top = "0px";
             return new PlatformMask();
         }
         return null;
@@ -403,12 +382,12 @@ class PlatformDisplayObject {
 
     setX(val) {
         this.__x = val;
-        this.show.setPositionX(val);
+        this.show.style.left = val + "px";
     }
 
     setY(val) {
         this.__y = val;
-        this.show.setPositionY(-val);
+        this.show.style.top = val + "px";
     }
 
     setVisible(val) {
@@ -662,13 +641,18 @@ class PlatformSprite extends PlatformDisplayObject {
     }
 
     initShow() {
-        this.show = new cc.Node();
-        this.show.setAnchorPoint(0, 0);
-        this.show.retain();
+        //this.show = new cc.Node();
+        //this.show.setAnchorPoint(0, 0);
+        //this.show.retain();
+        var div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.left = "0px";
+        div.style.top = "0px";
+        this.show = div;
     }
 
     addChild(child) {
-        this.show.addChild(child.show);
+        this.show.appendChild(child.show);
     }
 
     removeChild(child) {
@@ -676,9 +660,9 @@ class PlatformSprite extends PlatformDisplayObject {
     }
 
     resetChildIndex(children) {
-        for (var i = 0, len = children.length; i < len; i++) {
-            children[i].$nativeShow.show.setLocalZOrder(i);
-        }
+        //for (var i = 0, len = children.length; i < len; i++) {
+        //    children[i].$nativeShow.show.setLocalZOrder(i);
+        //}
     }
 
     setFilters(filters) {
@@ -698,12 +682,18 @@ class PlatformTextField extends PlatformDisplayObject {
 
     constructor() {
         super();
-        this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 2.0 : 1) * 12);
-        this.show.setAnchorPoint(0, 1);
-        this.setFontColor(0);
-        this.show.retain();
-        this.setScaleX(1);
-        this.setScaleY(1);
+        var em = document.createElement("em");
+        em.style.position = "absolute";
+        em.style.left = "0px";
+        em.style.top = "0px";
+        em.style["font-style"] = "normal";
+        this.show = em;
+        //this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 2.0 : 1) * 12);
+        //this.show.setAnchorPoint(0, 1);
+        //this.setFontColor(0);
+        //this.show.retain();
+        //this.setScaleX(1);
+        //this.setScaleY(1);
     }
 
     setFontColor(color) {
@@ -715,6 +705,11 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+        this.show.innerHTML = text;
+        return {
+            width: 0,
+            height: 0
+        };
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.setFontSize(size);
         this.show.setFontSize((RETINA ? 2.0 : 1) * size);
@@ -722,7 +717,7 @@ class PlatformTextField extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
-        if(text == "") {
+        if (text == "") {
             txt.setString("");
         }
         for (var i = 0; i < text.length; i++) {
@@ -808,17 +803,22 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     constructor() {
         super();
-        this.show = new cc.TextFieldTTF();
-        if (Platform.native) {
-            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
-        } else {
-            this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
-        }
-        this.show.setAnchorPoint(0, 1);
-        this.show.retain();
-        this.setFontColor(0);
-        this.setScaleX(1);
-        this.setScaleY(1);
+        var input = document.createElement("input");
+        input.style.position = "absolute";
+        input.style.left = "0px";
+        input.style.top = "0px";
+        this.show = input;
+        //this.show = new cc.TextFieldTTF();
+        //if (Platform.native) {
+        //    this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
+        //} else {
+        //    this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
+        //}
+        //this.show.setAnchorPoint(0, 1);
+        //this.show.retain();
+        //this.setFontColor(0);
+        //this.setScaleX(1);
+        //this.setScaleY(1);
         //if (Platform.native) {
         //} else {
         //    this.show.setDelegate(this);
@@ -873,7 +873,7 @@ class PlatformTextInput extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
-        if(text == "") {
+        if (text == "") {
             txt.setString("");
         }
         for (var i = 0; i < text.length; i++) {
@@ -954,8 +954,8 @@ class PlatformTextInput extends PlatformDisplayObject {
     }
 }
 
-PlatformTextInput.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
-PlatformTextInput.$mesureTxt.retain();
+//PlatformTextInput.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
+//PlatformTextInput.$mesureTxt.retain();
 //////////////////////////End File:flower/platform/dom/PlatformTextInput.js///////////////////////////
 
 
@@ -972,9 +972,16 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     constructor() {
         super();
-        this.show = new cc.Sprite();
-        this.show.setAnchorPoint(0, 1);
-        this.show.retain();
+
+        var image = document.createElement("img");
+        image.style.position = "absolute";
+        image.style.left = "0px";
+        image.style.top = "0px";
+        this.show = image;
+
+        //this.show = new cc.Sprite();
+        //this.show.setAnchorPoint(0, 1);
+        //this.show.retain();
     }
 
     setTexture(texture) {
@@ -1159,33 +1166,36 @@ class PlatformBitmap extends PlatformDisplayObject {
 class PlatformShape extends PlatformDisplayObject {
     constructor() {
         super();
-        this.show = new cc.DrawNode();
-        this.show.retain();
+        var shape = document.createElement("div");
+        shape.style.position = "absolute";
+        shape.style.left = "0px";
+        shape.style.top = "0px";
+        this.show = shape;
     }
 
     draw(points, fillColor, fillAlpha, lineWidth, lineColor, lineAlpha) {
-        var shape = this.show;
-        for (var i = 0; i < points.length; i++) {
-            points[i].y = -points[i].y;
-        }
-        shape.drawPoly(points, {
-            r: fillColor >> 16,
-            g: fillColor >> 8 & 0xFF,
-            b: fillColor & 0xFF,
-            a: fillAlpha * 255
-        }, lineWidth, {
-            r: lineColor >> 16,
-            g: lineColor >> 8 & 0xFF,
-            b: lineColor & 0xFF,
-            a: lineAlpha * 255
-        });
-        for (var i = 0; i < points.length; i++) {
-            points[i].y = -points[i].y;
-        }
+        //var shape = this.show;
+        //for (var i = 0; i < points.length; i++) {
+        //    points[i].y = points[i].y;
+        //}
+        //shape.drawPoly(points, {
+        //    r: fillColor >> 16,
+        //    g: fillColor >> 8 & 0xFF,
+        //    b: fillColor & 0xFF,
+        //    a: fillAlpha * 255
+        //}, lineWidth, {
+        //    r: lineColor >> 16,
+        //    g: lineColor >> 8 & 0xFF,
+        //    b: lineColor & 0xFF,
+        //    a: lineAlpha * 255
+        //});
+        //for (var i = 0; i < points.length; i++) {
+        //    points[i].y = -points[i].y;
+        //}
     }
 
     clear() {
-        this.show.clear();
+        //this.show.clear();
     }
 
     setAlpha(val) {
@@ -1213,9 +1223,11 @@ class PlatformMask extends PlatformSprite {
     }
 
     initShow() {
-        this.show = new cc.ClippingNode();
-        this.show.setAnchorPoint(0, 0);
-        this.show.retain();
+        var mask = document.createElement("div");
+        mask.style.position = "absolute";
+        mask.style.left = "0px";
+        mask.style.top = "0px";
+        this.show = mask;
     }
 
     setShape(shape) {
@@ -1266,78 +1278,38 @@ class PlatformURLLoader {
         if (TIP) {
             $tip(2001, url);
         }
-        if (url.slice(0, "http://".length) == "http://") {
-            var xhr = cc.loader.getXMLHttpRequest();
-            if (method == null || method == "") {
-                method = "GET";
+        var xhr = new XMLHttpRequest();
+        if (method == null || method == "") {
+            method = "GET";
+        }
+        if (method == "GET") {
+            xhr.open("GET", url, true);
+        } else if (method == "POST") {
+            xhr.open("POST", url, true);
+            if (!contentType) {
+                contentType = "application/x-www-form-urlencoded";
             }
-            if (method == "GET") {
-                xhr.open("GET", url, true);
-            } else if (method == "POST") {
-                xhr.open("POST", url, true);
-                if (!contentType) {
-                    contentType = "application/x-www-form-urlencoded";
-                }
-                xhr.setRequestHeader("Content-Type", contentType);
-            } else if (method == "HEAD") {
-                xhr.open("HEAD", url, true);
-                xhr.open("HEAD", url, true);
-            }
-            xhr.onloadend = function () {
-                if (xhr.status != 200) {
-                    errorBack.call(thisObj);
+            xhr.setRequestHeader("Content-Type", contentType);
+        } else if (method == "HEAD") {
+            xhr.open("HEAD", url, true);
+            xhr.open("HEAD", url, true);
+        }
+        xhr.onloadend = function () {
+            if (xhr.status != 200) {
+                errorBack.call(thisObj);
+            } else {
+                if (method == "HEAD") {
+                    back.call(thisObj, xhr.getAllResponseHeaders());
                 } else {
-                    if (method == "HEAD") {
-                        back.call(thisObj, xhr.getAllResponseHeaders());
-                    } else {
-                        back.call(thisObj, xhr.responseText);
-                    }
+                    back.call(thisObj, xhr.responseText);
                 }
-                PlatformURLLoader.isLoading = false;
-            };
-            //xhr.onreadystatechange = function () {
-            //    if (xhr.readyState == 4 && xhr.status == 200) {
-            //        if (method == "HEAD") {
-            //            back.call(thisObj, xhr.getAllResponseHeaders());
-            //        } else {
-            //            back.call(thisObj, xhr.responseText);
-            //        }
-            //    }
-            //    else if (xhr.readyState == 4 && xhr.status != 200) {
-            //        errorBack.call(thisObj);
-            //    }
-            //};
-            if (params && params != "") {
-                xhr.send(params);
-            } else {
-                xhr.send();
             }
+            PlatformURLLoader.isLoading = false;
+        };
+        if (params && params != "") {
+            xhr.send(params);
         } else {
-            var res;
-            var end = url.split(".")[url.split(".").length - 1];
-            if (end != "plist" && end != "xml" && end != "json") {
-                res = cc.loader.getRes(url);
-            }
-            if (res) {
-                back.call(thisObj, res);
-                PlatformURLLoader.isLoading = false;
-            } else {
-                cc.loader.loadTxt(url, function (error, data) {
-                    if (error) {
-                        errorBack.call(thisObj);
-                    }
-                    else {
-                        if (!CACHE) {
-                            cc.loader.release(url);
-                        }
-                        if (data instanceof Array) {
-                            data = JSON.stringify(data[0]);
-                        }
-                        back.call(thisObj, data);
-                    }
-                    PlatformURLLoader.isLoading = false;
-                });
-            }
+            xhr.send();
         }
     }
 
@@ -1350,6 +1322,14 @@ class PlatformURLLoader {
         if (TIP) {
             $tip(2002, url);
         }
+        var image = new Image();
+        image.src = url;
+        image.onload = function () {
+            back.call(thisObj, image, image.width, image.height);
+            PlatformURLLoader.isLoading = false;
+        }
+
+        return;
         cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
             if (err) {
                 errorBack.call(thisObj);
@@ -1374,7 +1354,6 @@ class PlatformURLLoader {
                 //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
                 //}
             }
-            PlatformURLLoader.isLoading = false;
         });
     }
 }
@@ -1470,7 +1449,7 @@ class PlatformWebSocket {
         };
         websocket.onopen = openFunc;
         var receiveFunc = function (event) {
-            if (!cc.sys.isNative && event.data instanceof Blob) {
+            if (event.data instanceof Blob) {
                 var reader = new FileReader();
                 reader.onloadend = function () {
                     var list = [];
@@ -1481,7 +1460,7 @@ class PlatformWebSocket {
                     onReceiveMessage.call(thisObj, "buffer", list);
                 }
                 reader.readAsArrayBuffer(event.data);
-            } else if (cc.sys.isNative && event.data instanceof ArrayBuffer) {
+            } else if (event.data instanceof ArrayBuffer) {
                 var list = [];
                 var data = new Uint8Array(event.data);
                 for (var i = 0; i < data.length; i++) {

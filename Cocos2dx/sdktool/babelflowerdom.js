@@ -2,13 +2,13 @@ require("./help/com/requirecom");
 require("./help/shell/requireshell");
 
 function compressComplete() {
-    new ShellCommand("babel", ["./srcExtension", "-d", "./src"], function () {
+    new ShellCommand("babel", ["./srcFlower6Dom", "-d", "./src"], function () {
             //console.log("complete!")
 
 //生成 js 依赖关系的文件
 
             return;
-            var readDir = "./srcExtension";
+            var readDir = "./srcFlower6";
             var writeFile = "./src/require.js";
 
             function DoFile(file) {
@@ -34,12 +34,11 @@ function compressComplete() {
                         begin = begin + name.length;
                         begin = StringDo.jumpStrings(content, begin, [" ", "\t"]);
                         if (content.slice(begin, begin + "extends".length) == "extends" && (content.charAt(begin + "extends".length) == " " || content.charAt(begin + "extends".length) == "\t")) {
-                            console.log(file.url, "extends");
                             begin = begin + "extends".length;
                             begin = StringDo.jumpStrings(content, begin, [" ", "\t"]);
                             var superClass = content.slice(begin, StringDo.findCharNotABC(content, begin));
                             this.dependClasses.push(superClass);
-                            console.log(name + " -> " + this.dependClasses);
+                            //console.log(name + " -> " + this.dependClasses);
                         }
                     }
                     if (this.className) {
@@ -84,7 +83,7 @@ function compressComplete() {
             var list = [];
             for (var i = 0; i < files.length; i++) {
                 //console.log(files[i].url)
-                if (files[i].url.slice(0, "./srcExtension/flower/".length) == "./srcExtension/flower/") {
+                if (files[i].url.slice(0, "./srcFlower6/flower/".length) == "./srcFlower6/flower/") {
                     continue;
                 }
                 //if (files[i].url.slice(0, "../src/com/".length) == "../src/com/") {
@@ -135,7 +134,7 @@ function compressComplete() {
                     }
                     if (find) {
                         list.splice(i, 1);
-                        info.url = StringDo.replaceString(info.url, "srcExtension", "src");
+                        info.url = StringDo.replaceString(info.url, "srcFlower6", "src");
                         str += "jsFiles.push(\"" + info.url.slice(2, info.url.length) + "\" );\n";
                         break;
                     }
@@ -147,6 +146,7 @@ function compressComplete() {
 
 
             //str = beginStr + str;
+            //str += "jsFiles.push(\"UI.js\");\n";
             //var saveFile = new File(writeFile);
             //saveFile.save(str, "utf-8");
 
@@ -159,71 +159,136 @@ function compressComplete() {
         })
 }
 
-var file = new File("extension/");
+var file = new File("flower/");
 var files = file.readFilesWidthEnd("js");
 var list = [
-    "Black",
-    "UIComponent",
+    "Flower",
+    "Platform",
+    "PlatformDisplayObject",
+    "PlatformSprite",
+    "PlatformTextField",
+    "PlatformTextInput",
+    "PlatformBitmap",
+    "PlatformShape",
+    "PlatformMask",
+    "PlatformTexture",
+    "PlatformURLLoader",
+    "PlatformProgram",
+    "PlatformShaderType",
+    "PlatformWebSocket",
 
-    "UIEvent",
-    "DataGroupEvent",
+    "DebugInfo",
+    "TextureInfo",
 
-    "Value",
-    "ArrayValue",
-    "BooleanValue",
-    "IntValue",
-    "NumberValue",
-    "ObjectValue",
-    "StringValue",
-    "UIntValue",
+    "CoreTime",
 
+    "Language",
     "zh_CN",
 
-    "DataManager",
+    "EventDispatcher",
+    "Event",
+    "TouchEvent",
+    "MouseEvent",
+    "DragEvent",
+    "KeyboardEvent",
 
-    "Layout",
-    "LinearLayout",
-    "HorizontalLayout",
-    "VerticalLayout",
 
-    "PanelScaleMode",
+    "Filter",
+    "ColorFilter",
+    "StrokeFilter",
+    "BlurFilter",
 
-    "Group",
-    "UIParser",
-    "DataGroup",
-    "ItemRenderer",
-    "Label",
-    "Input",
-    "Rect",
-    "Image",
-    "TileImage",
-    "MaskUI",
-    "Button",
-    "ToggleButton",
-    "CheckBox",
-    "RadioButton",
-    "RadioButtonGroup",
-    "ToggleSwitch",
-    "ListBase",
-    "List",
-    "TabBar",
-    "ViewStack",
-    "Scroller",
-    "Combox",
-    "Panel",
-    "Alert",
-    "Tree",
-    "Module",
+    "Matrix",
+    "Point",
+    "Rectangle",
+    "Size",
+
+    "BlendMode",
+
+    "DisplayObject",
+    "Sprite",
+    "Mask",
+    "Bitmap",
+    "TextField",
+    "TextInput",
+    "Shape",
+    "Stage",
+
+    "DragManager",
+    "MenuManager",
+    "PopManager",
+
+    "Texture",
+    "TextureManager",
+
+    "URLLoader",
+    "URLLoaderList",
+    "URLLoaderMethod",
+    "WebSocket",
+    "VBWebSocket",
+    "Remote",
+
+    "Plist",
+    "PlistFrame",
+    "PlistLoader",
+    "PlistManager",
+
+    "Res",
+    "ResItem",
+    "ResItemInfo",
+    "ResType",
+
+    "TweenCenter",
+    "TweenPath",
+    "TweenPhysicMove",
+    "BasicPlugin",
+    "Ease",
+    "EaseFunction",
+    "TimeLine",
+    "Tween",
+
+    "EnterFrame",
+    "CallLater",
+    "ObjectDo",
+    "StringDo",
+    "VByteArray",
+    "Path",
+    "XMLAttribute",
+    "XMLElement",
+    "XMLNameSpace",
 ];
 var fileContent = "";
-fileContent += "var black = {};\n";
-fileContent += "var $root = eval(\"this\");\n";
+fileContent += `
+var LocalWebSocket = WebSocket;
+var $root = eval(\"this\");
+var root = root || eval(\"this\");
+var __define = $root.__define || function (o, p, g, s) {
+        Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
+    };
+
+function __extends(d, b) {
+    if (b == null) {
+        console.log("bug !!", arguments.callee.caller);
+    }
+    for (var p in b)
+        if (b.hasOwnProperty(p))
+            d[p] = b[p];
+    function __() {
+        this.constructor = d;
+    }
+
+    __.prototype = b.prototype;
+    d.prototype = new __();
+}
+var flower = {};
+`;
 fileContent += "(function(){\n";
 while (list.length) {
     var name = list.shift();
     file = files[i];
     for (var i = 0; i < files.length; i++) {
         var f = files[i];
+        if (f.url.slice(0, "flower/platform/cocos2dx/".length) == "flower/platform/cocos2dx/") continue;
         if (f.name == name) {
             fileContent += "//////////////////////////File:" + files[i].url + "///////////////////////////\n";
             fileContent += files[i].readContent() + "\n";
@@ -232,11 +297,10 @@ while (list.length) {
     }
 }
 fileContent += "})();\n";
-file = new File("srcExtension/Black.js");
-fileContent = StringDo.replaceString(fileContent, "exports.", "black.");
-fileContent += "for(var key in black) {\n";
-fileContent += "\tflower[key] = black[key];\n";
-fileContent += "}\n";
+fileContent += "var trace = flower.trace;\n";
+fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
+//fileContent += "var flower = exports;\n";
+file = new File("srcFlower6Dom/FlowerDom.js");
 file.save(fileContent);
 
 

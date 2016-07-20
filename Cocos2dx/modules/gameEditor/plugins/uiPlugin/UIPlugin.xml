@@ -1,6 +1,6 @@
 <s:TitlePanel percentWidth="100" percentHeight="100" class="UIPlugin" title="{data.name}" xmlns:f="flower" xmlns:s="software">
     <f:script src="./UIPlugin.script"/>
     <f:Group id="container" left="1" right="1" top="1" bottom="1">
-        <f:RectUI percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
+        <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
     </f:Group>
 </s:TitlePanel>

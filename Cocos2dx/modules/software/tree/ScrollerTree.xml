@@ -1,7 +1,7 @@
 <f:Group class="ScrollerTree" width="150" height="300" xmlns:f="flower">
     <f:script src="./ScrollerTree.script"/>
-    <f:RectUI percentWidth="100" percentHeight="100" fillColor="0xffffff" lineColor="0xcccccc" lineWidth="1"/>
+    <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff" lineColor="0xcccccc" lineWidth="1"/>
     <f:Scroller id="scroller" left="5" right="5" top="5" bottom="5">
-        <f:RectUI percentWidth="100" percentHeight="100" fillColor="0xf6f4f0"/>
+        <f:Rect percentWidth="100" percentHeight="100" fillColor="0xf6f4f0"/>
     </f:Scroller>
 </f:Group>

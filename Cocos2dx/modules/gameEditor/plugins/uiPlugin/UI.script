@@ -19,14 +19,14 @@ var UI = (function (_super) {
             this.percentHeight = 100;
         }
         this.editor = new editor.UIEditor(this.data, this.display);
-        for (var i = 0; i < data.numAttribute; i++) {
+        /*for (var i = 0; i < data.numAttribute; i++) {
             var attribute = data.getAttributeAt(i);
             if (data.isContainer) {
                 this[attribute.name] = attribute.value;
             } else {
                 this.display[attribute.name] = attribute.value;
             }
-        }
+        }*/
         for (var i = 0; i < data.numElement; i++) {
             var childData = data.getElementAt(i);
             if (childData.isDisplay) {
@@ -40,6 +40,10 @@ var UI = (function (_super) {
     }
 
     UI.prototype.onTouchBegin = function (e) {
+        if (e.currentTarget == this.display) {
+            this.display.startDrag();
+            EnterFrame.add(this.dragUpdate, this);
+        }
         if (this.info.select == this) {
             return;
         }
@@ -49,6 +53,10 @@ var UI = (function (_super) {
         this.info.select = this;
         this.info.select.selected();
         editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.SELECT_ELEMENT, this.data);
+    }
+
+    UI.prototype.dragUpdate = function (gap, time) {
+        //this.data.
     }
 
     UI.prototype.selected = function () {

@@ -937,6 +937,9 @@ class BooleanValue extends Value {
     }
 
     $setValue(val) {
+        if(val == "false") {
+            val = false;
+        }
         val = !!val;
         if (val == this.__value) {
             return;
@@ -1599,7 +1602,6 @@ class VerticalLayout extends LinearLayout {
         super();
         this.align = flower.Layout.VerticalAlign;
     }
-
 }
 
 black.VerticalLayout = VerticalLayout;
@@ -1643,7 +1645,7 @@ class Group extends flower.Sprite {
             return false;
         }
         this._data = val;
-        if(this.$UIComponent) {
+        if (this.$UIComponent) {
             flower.Binding.changeData(this);
         }
         return true;
@@ -1820,7 +1822,7 @@ class UIParser extends Group {
             "Image": "flower.Image",
             "Group": "flower.Group",
             "Button": "flower.Button",
-            "RectUI": "flower.RectUI",
+            "Rect": "flower.Rect",
             "MaskUI": "flower.MaskUI",
             "Scroller": "flower.Scroller",
             "DataGroup": "flower.DataGroup",
@@ -3491,12 +3493,12 @@ black.Input = Input;
 
 
 
-//////////////////////////File:extension/black/RectUI.js///////////////////////////
-class RectUI extends flower.Shape {
+//////////////////////////File:extension/black/Rect.js///////////////////////////
+class Rect extends flower.Shape {
 
     constructor() {
         super();
-        this.$RectUI = {
+        this.$Rect = {
             0: 0, //width
             1: 0, //height
         };
@@ -3579,51 +3581,51 @@ class RectUI extends flower.Shape {
 
     $setFillColor(val) {
         if (super.$setFillColor(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setFillAlpha(val) {
         if (super.$setFillAlpha(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setLineWidth(val) {
         if (super.$setLineWidth(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setLineColor(val) {
         if (super.$setLineColor(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setLineAlpha(val) {
         if (super.$setLineAlpha(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setWidth(val) {
         val = +val || 0;
-        var p = this.$RectUI;
+        var p = this.$Rect;
         if (p[0] == val) {
             return;
         }
         p[0] = val;
-        this.$resetRectUI();
+        this.$resetRect();
     }
 
-    $resetRectUI() {
+    $resetRect() {
         var p = this.$Shape;
         if (p[9].length == 0) {
             p[9].push({});
         }
-        var width = this.$RectUI[0];
-        var height = this.$RectUI[1];
+        var width = this.$Rect[0];
+        var height = this.$Rect[1];
         var x = 0;
         var y = 0;
         p[9][0] = {
@@ -3643,12 +3645,12 @@ class RectUI extends flower.Shape {
 
     $setHeight(val) {
         val = +val || 0;
-        var p = this.$RectUI;
+        var p = this.$Rect;
         if (p[1] == val) {
             return;
         }
         p[1] = val;
-        this.$resetRectUI();
+        this.$resetRect();
     }
 
     $onFrameEnd() {
@@ -3665,10 +3667,10 @@ class RectUI extends flower.Shape {
     }
 }
 
-UIComponent.register(RectUI);
-RectUI.prototype.__UIComponent = true;
-black.RectUI = RectUI;
-//////////////////////////End File:extension/black/RectUI.js///////////////////////////
+UIComponent.register(Rect);
+Rect.prototype.__UIComponent = true;
+black.Rect = Rect;
+//////////////////////////End File:extension/black/Rect.js///////////////////////////
 
 
 
@@ -3868,7 +3870,7 @@ class MaskUI extends flower.Mask {
     }
 
     $createShape() {
-        var shape = new RectUI();
+        var shape = new Rect();
         shape.percentWidth = 100;
         shape.percentHeight = 100;
         return shape;
@@ -4922,7 +4924,7 @@ class Scroller extends MaskUI {
         this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
         this.width = this.height = 100;
-        //var bg = new RectUI();
+        //var bg = new Rect();
         //bg.fillColor = 0x555555;
         //bg.percentWidth = 100;
         //bg.percentHeight = 100;
@@ -4930,7 +4932,7 @@ class Scroller extends MaskUI {
     }
 
     $createShape() {
-        var shape = new RectUI();
+        var shape = new Rect();
         shape.percentWidth = 100;
         shape.percentHeight = 100;
         return shape;

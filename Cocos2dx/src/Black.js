@@ -1055,6 +1055,9 @@ var $root = eval("this");
         _createClass(BooleanValue, [{
             key: "$setValue",
             value: function $setValue(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 val = !!val;
                 if (val == this.__value) {
                     return;
@@ -2299,9 +2302,6 @@ var $root = eval("this");
                 content += this.decodeScripts(before, className, xml.getElements("f:script"), scriptInfo);
                 content += before + "\t\tthis." + className + "_initMain(this);\n";
                 var propertyList = [];
-                if(className == "PositionEditor") {
-                    trace("/");
-                }
                 this.decodeObject(before + "\t", className, className + "_initMain", false, xml, namespaces, propertyList, {});
                 if (this.hasInitFunction) {
                     content += before + "\t\tthis." + className + "_init();\n";
@@ -2861,7 +2861,7 @@ var $root = eval("this");
             "Image": "flower.Image",
             "Group": "flower.Group",
             "Button": "flower.Button",
-            "RectUI": "flower.RectUI",
+            "Rect": "flower.Rect",
             "MaskUI": "flower.MaskUI",
             "Scroller": "flower.Scroller",
             "DataGroup": "flower.DataGroup",
@@ -3819,17 +3819,17 @@ var $root = eval("this");
     black.Input = Input;
     //////////////////////////End File:extension/black/Input.js///////////////////////////
 
-    //////////////////////////File:extension/black/RectUI.js///////////////////////////
+    //////////////////////////File:extension/black/Rect.js///////////////////////////
 
-    var RectUI = function (_flower$Shape) {
-        _inherits(RectUI, _flower$Shape);
+    var Rect = function (_flower$Shape) {
+        _inherits(Rect, _flower$Shape);
 
-        function RectUI() {
-            _classCallCheck(this, RectUI);
+        function Rect() {
+            _classCallCheck(this, Rect);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(RectUI).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Rect).call(this));
 
-            _this20.$RectUI = {
+            _this20.$Rect = {
                 0: 0, //width
                 1: 0 };
             //height
@@ -3838,7 +3838,7 @@ var $root = eval("this");
             return _this20;
         }
 
-        _createClass(RectUI, [{
+        _createClass(Rect, [{
             key: "$addFlags",
             value: function $addFlags(flags) {
                 if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
@@ -3918,58 +3918,58 @@ var $root = eval("this");
         }, {
             key: "$setFillColor",
             value: function $setFillColor(val) {
-                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setFillColor", this).call(this, val)) {
-                    this.$resetRectUI();
+                if (_get(Object.getPrototypeOf(Rect.prototype), "$setFillColor", this).call(this, val)) {
+                    this.$resetRect();
                 }
             }
         }, {
             key: "$setFillAlpha",
             value: function $setFillAlpha(val) {
-                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setFillAlpha", this).call(this, val)) {
-                    this.$resetRectUI();
+                if (_get(Object.getPrototypeOf(Rect.prototype), "$setFillAlpha", this).call(this, val)) {
+                    this.$resetRect();
                 }
             }
         }, {
             key: "$setLineWidth",
             value: function $setLineWidth(val) {
-                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setLineWidth", this).call(this, val)) {
-                    this.$resetRectUI();
+                if (_get(Object.getPrototypeOf(Rect.prototype), "$setLineWidth", this).call(this, val)) {
+                    this.$resetRect();
                 }
             }
         }, {
             key: "$setLineColor",
             value: function $setLineColor(val) {
-                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setLineColor", this).call(this, val)) {
-                    this.$resetRectUI();
+                if (_get(Object.getPrototypeOf(Rect.prototype), "$setLineColor", this).call(this, val)) {
+                    this.$resetRect();
                 }
             }
         }, {
             key: "$setLineAlpha",
             value: function $setLineAlpha(val) {
-                if (_get(Object.getPrototypeOf(RectUI.prototype), "$setLineAlpha", this).call(this, val)) {
-                    this.$resetRectUI();
+                if (_get(Object.getPrototypeOf(Rect.prototype), "$setLineAlpha", this).call(this, val)) {
+                    this.$resetRect();
                 }
             }
         }, {
             key: "$setWidth",
             value: function $setWidth(val) {
                 val = +val || 0;
-                var p = this.$RectUI;
+                var p = this.$Rect;
                 if (p[0] == val) {
                     return;
                 }
                 p[0] = val;
-                this.$resetRectUI();
+                this.$resetRect();
             }
         }, {
-            key: "$resetRectUI",
-            value: function $resetRectUI() {
+            key: "$resetRect",
+            value: function $resetRect() {
                 var p = this.$Shape;
                 if (p[9].length == 0) {
                     p[9].push({});
                 }
-                var width = this.$RectUI[0];
-                var height = this.$RectUI[1];
+                var width = this.$Rect[0];
+                var height = this.$Rect[1];
                 var x = 0;
                 var y = 0;
                 p[9][0] = {
@@ -3986,12 +3986,12 @@ var $root = eval("this");
             key: "$setHeight",
             value: function $setHeight(val) {
                 val = +val || 0;
-                var p = this.$RectUI;
+                var p = this.$Rect;
                 if (p[1] == val) {
                     return;
                 }
                 p[1] = val;
-                this.$resetRectUI();
+                this.$resetRect();
             }
         }, {
             key: "$onFrameEnd",
@@ -3999,24 +3999,24 @@ var $root = eval("this");
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
                 }
-                _get(Object.getPrototypeOf(RectUI.prototype), "$onFrameEnd", this).call(this);
+                _get(Object.getPrototypeOf(Rect.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
             key: "dispose",
             value: function dispose() {
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
-                _get(Object.getPrototypeOf(RectUI.prototype), "dispose", this).call(this);
+                _get(Object.getPrototypeOf(Rect.prototype), "dispose", this).call(this);
             }
         }]);
 
-        return RectUI;
+        return Rect;
     }(flower.Shape);
 
-    UIComponent.register(RectUI);
-    RectUI.prototype.__UIComponent = true;
-    black.RectUI = RectUI;
-    //////////////////////////End File:extension/black/RectUI.js///////////////////////////
+    UIComponent.register(Rect);
+    Rect.prototype.__UIComponent = true;
+    black.Rect = Rect;
+    //////////////////////////End File:extension/black/Rect.js///////////////////////////
 
     //////////////////////////File:extension/black/Image.js///////////////////////////
 
@@ -4234,7 +4234,7 @@ var $root = eval("this");
         }, {
             key: "$createShape",
             value: function $createShape() {
-                var shape = new RectUI();
+                var shape = new Rect();
                 shape.percentWidth = 100;
                 shape.percentHeight = 100;
                 return shape;
@@ -5402,7 +5402,7 @@ var $root = eval("this");
             _this34.addListener(flower.TouchEvent.TOUCH_END, _this34.__onTouchScroller, _this34);
             _this34.addListener(flower.TouchEvent.TOUCH_RELEASE, _this34.__onTouchScroller, _this34);
             _this34.width = _this34.height = 100;
-            //var bg = new RectUI();
+            //var bg = new Rect();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
@@ -5413,7 +5413,7 @@ var $root = eval("this");
         _createClass(Scroller, [{
             key: "$createShape",
             value: function $createShape() {
-                var shape = new RectUI();
+                var shape = new Rect();
                 shape.percentWidth = 100;
                 shape.percentHeight = 100;
                 return shape;

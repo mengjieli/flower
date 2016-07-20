@@ -18,7 +18,7 @@ class Scroller extends MaskUI {
         this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
         this.width = this.height = 100;
-        //var bg = new RectUI();
+        //var bg = new Rect();
         //bg.fillColor = 0x555555;
         //bg.percentWidth = 100;
         //bg.percentHeight = 100;
@@ -26,7 +26,7 @@ class Scroller extends MaskUI {
     }
 
     $createShape() {
-        var shape = new RectUI();
+        var shape = new Rect();
         shape.percentWidth = 100;
         shape.percentHeight = 100;
         return shape;

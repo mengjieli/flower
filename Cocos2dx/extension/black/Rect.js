@@ -1,8 +1,8 @@
-class RectUI extends flower.Shape {
+class Rect extends flower.Shape {
 
     constructor() {
         super();
-        this.$RectUI = {
+        this.$Rect = {
             0: 0, //width
             1: 0, //height
         };
@@ -85,51 +85,51 @@ class RectUI extends flower.Shape {
 
     $setFillColor(val) {
         if (super.$setFillColor(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setFillAlpha(val) {
         if (super.$setFillAlpha(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setLineWidth(val) {
         if (super.$setLineWidth(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setLineColor(val) {
         if (super.$setLineColor(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setLineAlpha(val) {
         if (super.$setLineAlpha(val)) {
-            this.$resetRectUI();
+            this.$resetRect();
         }
     }
 
     $setWidth(val) {
         val = +val || 0;
-        var p = this.$RectUI;
+        var p = this.$Rect;
         if (p[0] == val) {
             return;
         }
         p[0] = val;
-        this.$resetRectUI();
+        this.$resetRect();
     }
 
-    $resetRectUI() {
+    $resetRect() {
         var p = this.$Shape;
         if (p[9].length == 0) {
             p[9].push({});
         }
-        var width = this.$RectUI[0];
-        var height = this.$RectUI[1];
+        var width = this.$Rect[0];
+        var height = this.$Rect[1];
         var x = 0;
         var y = 0;
         p[9][0] = {
@@ -149,12 +149,12 @@ class RectUI extends flower.Shape {
 
     $setHeight(val) {
         val = +val || 0;
-        var p = this.$RectUI;
+        var p = this.$Rect;
         if (p[1] == val) {
             return;
         }
         p[1] = val;
-        this.$resetRectUI();
+        this.$resetRect();
     }
 
     $onFrameEnd() {
@@ -171,6 +171,6 @@ class RectUI extends flower.Shape {
     }
 }
 
-UIComponent.register(RectUI);
-RectUI.prototype.__UIComponent = true;
-exports.RectUI = RectUI;
+UIComponent.register(Rect);
+Rect.prototype.__UIComponent = true;
+exports.Rect = Rect;

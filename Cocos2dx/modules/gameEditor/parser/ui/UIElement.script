@@ -12,6 +12,9 @@ var UIElement = (function (_super) {
         this.namespaces = namespaces || xml.namespaces;
     }
 
+    UIElement.prototype.updateX = function (x) {
+    }
+
     UIElement.prototype.load = function () {
         var isContainer = false;
         var xml = this.xml;
@@ -87,10 +90,6 @@ var UIElement = (function (_super) {
         return this.elements[index];
     }
 
-    UIElement.prototype.getAttributeAt = function (index) {
-        return this.xml.attributes[index];
-    }
-
     UIElement.prototype.getAttribute = function (name) {
         return this.attributes[name];
     }
@@ -124,16 +123,6 @@ var UIElement = (function (_super) {
     Object.defineProperty(UIElement.prototype, "numAttributeElement", {
         get: function () {
             return this.attributesElements.length;
-        },
-        set: function (val) {
-        },
-        enumerable: true,
-        configurable: true
-    });
-
-    Object.defineProperty(UIElement.prototype, "numAttribute", {
-        get: function () {
-            return this.xml.attributes.length;
         },
         set: function (val) {
         },

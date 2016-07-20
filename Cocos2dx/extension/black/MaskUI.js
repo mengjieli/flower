@@ -31,7 +31,7 @@ class MaskUI extends flower.Mask {
     }
 
     $createShape() {
-        var shape = new RectUI();
+        var shape = new Rect();
         shape.percentWidth = 100;
         shape.percentHeight = 100;
         return shape;

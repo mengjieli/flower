@@ -4,7 +4,6 @@ class VerticalLayout extends LinearLayout {
         super();
         this.align = flower.Layout.VerticalAlign;
     }
-
 }
 
 exports.VerticalLayout = VerticalLayout;

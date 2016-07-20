@@ -4,7 +4,7 @@
     <f:script src="./TabBar.script"/>
     <f:itemRenderer>
         <f:ItemRenderer percentHeight="100">
-            <f:RectUI percentWidth="100" percentHeight="100" fillColor.up="0xcccccc" fillColor.down="0xcccccc"
+            <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xcccccc" fillColor.down="0xcccccc"
                       fillColor.selectedDown="0xffffff" fillColor.selectedUp="0xffffff"
                       lineColor="0x333333"
                       lineWidth="1"/>
@@ -14,7 +14,7 @@
     </f:itemRenderer>
     <f:moreButton>
         <f:Button percentHeight="100">
-            <f:RectUI percentWidth="100" percentHeight="100" fillColor.up="0xcccccc" fillColor.down="0xffffff"
+            <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xcccccc" fillColor.down="0xffffff"
                       lineColor="0x333333"
                       lineWidth="1"/>
             <f:Label text="..." horizontalCenter="0" verticalCenter="0"/>

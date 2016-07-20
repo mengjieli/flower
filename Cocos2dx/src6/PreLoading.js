@@ -17,8 +17,8 @@ class PreLoading extends flower.EventDispatcher {
         this.progressBar = (new flower.UIParser()).parseUI(`
         <f:Group width="150" height="20" class="PreLoading" xmlns:f="flower">
             <f:script src="./PreLoading.js"/>
-            <f:RectUI percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor="0xE7E7E7"/>
-            <f:RectUI percentWidth="{data*100}" percentHeight="100" fillColor="0x3d3d3d"/>
+            <f:Rect percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor="0xE7E7E7"/>
+            <f:Rect percentWidth="{data*100}" percentHeight="100" fillColor="0x3d3d3d"/>
         </f:Group>
         `, this.progress);
         flower.PopManager.pop(this.progressBar, true, true);

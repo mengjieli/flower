@@ -28,7 +28,7 @@ class UIParser extends Group {
             "Image": "flower.Image",
             "Group": "flower.Group",
             "Button": "flower.Button",
-            "RectUI": "flower.RectUI",
+            "Rect": "flower.Rect",
             "MaskUI": "flower.MaskUI",
             "Scroller": "flower.Scroller",
             "DataGroup": "flower.DataGroup",
