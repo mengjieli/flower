@@ -2,6 +2,8 @@ class PlatformURLLoader {
 
     static isLoading = false;
     static loadingList = [];
+    static canvas;
+    static context;
 
     static loadText(url, back, errorBack, thisObj, method, params, contentType) {
         if (PlatformURLLoader.isLoading) {
@@ -11,6 +13,16 @@ class PlatformURLLoader {
         PlatformURLLoader.isLoading = true;
         if (TIP) {
             $tip(2001, url);
+        }
+        var pstr = "?";
+        for (var key in params) {
+            pstr += key + "=" + params[key] + "&";
+        }
+        if (pstr.charAt(pstr.length - 1) == "&") {
+            pstr = pstr.slice(0, pstr.length - 1);
+        }
+        if (pstr != "?") {
+            url += pstr;
         }
         var xhr = new XMLHttpRequest();
         if (method == null || method == "") {
@@ -40,14 +52,10 @@ class PlatformURLLoader {
             }
             PlatformURLLoader.isLoading = false;
         };
-        if (params && params != "") {
-            xhr.send(params);
-        } else {
-            xhr.send();
-        }
+        xhr.send();
     }
 
-    static loadTexture(url, back, errorBack, thisObj) {
+    static loadTexture(url, back, errorBack, thisObj, params) {
         if (PlatformURLLoader.isLoading) {
             PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
             return;
@@ -56,38 +64,48 @@ class PlatformURLLoader {
         if (TIP) {
             $tip(2002, url);
         }
-        var image = new Image();
-        image.src = url;
-        image.onload = function () {
-            back.call(thisObj, image, image.width, image.height);
-            PlatformURLLoader.isLoading = false;
+        params = params || {};
+        params.img = "base64";
+        var pstr = "?";
+        for (var key in params) {
+            pstr += key + "=" + params[key] + "&";
         }
-
-        return;
-        cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
-            if (err) {
+        if (pstr.charAt(pstr.length - 1) == "&") {
+            pstr = pstr.slice(0, pstr.length - 1);
+        }
+        if (pstr != "?") {
+            url += pstr;
+        }
+        var xhr = new XMLHttpRequest();
+        var method;
+        if (method == null || method == "") {
+            method = "GET";
+        }
+        if (method == "GET") {
+            xhr.open("GET", url, true);
+        } else if (method == "POST") {
+            xhr.open("POST", url, true);
+            if (!contentType) {
+                contentType = "application/x-www-form-urlencoded";
+            }
+            xhr.setRequestHeader("Content-Type", contentType);
+        } else if (method == "HEAD") {
+            xhr.open("HEAD", url, true);
+            xhr.open("HEAD", url, true);
+        }
+        xhr.onloadend = function () {
+            if (xhr.status != 200) {
                 errorBack.call(thisObj);
+            } else {
+                var str = xhr.responseText;
+                var size = str.split("|")[0];
+                var content = "data:image/png;base64," + str.split("|")[1];
+                var width = size.split(",")[0];
+                var height = size.split(",")[1];
+                back.call(thisObj, content, width, height);
             }
-            else {
-                if (!CACHE) {
-                    cc.loader.release(url);
-                }
-                var texture;
-                if (Platform.native) {
-                    texture = img;
-                } else {
-                    texture = new cc.Texture2D();
-                    texture.initWithElement(img);
-                    texture.handleLoadedTexture();
-                }
-                back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                //if (Platform.native) {
-                //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                //} else {
-                //
-                //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
-                //}
-            }
-        });
+            PlatformURLLoader.isLoading = false;
+        };
+        xhr.send();
     }
 }

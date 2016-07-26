@@ -10,7 +10,7 @@ class Mask extends Sprite {
         this.__children = [];
         this.$nativeShow = Platform.create("Mask");
         this.__shape = this.$createShape();
-        this.$nativeShow.setShape(this.__shape.$nativeShow);
+        this.$nativeShow.setShape(this.__shape.$nativeShow,this.__shape);
     }
 
     $createShape() {

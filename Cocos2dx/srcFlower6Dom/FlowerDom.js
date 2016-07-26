@@ -184,8 +184,30 @@ class Platform {
         RETINA = false;
         Platform.native = false;//cc.sys.isNative;
         var div = document.getElementById("FlowerMain");
+        var mask = document.createElement("div");
+        mask.style.position = "absolute";
+        mask.style.left = "0px";
+        mask.style.top = "0px";
+        mask.style.width = document.documentElement.clientWidth + "px";
+        mask.style.height = document.documentElement.clientHeight + "px";
+        document.body.appendChild(mask);
         div.appendChild(root.show);
         requestAnimationFrame.call(window, Platform._run);
+        var touchDown = false;
+        mask.onmousedown = function (e) {
+            touchDown = true;
+            engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+        }
+        mask.onmouseup = function (e) {
+            touchDown = false;
+            engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+        }
+        mask.onmousemove = function (e) {
+            engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+            if (touchDown) {
+                engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+            }
+        }
         //var scene = cc.Scene.extend({
         //    ctor: function () {
         //        this._super();
@@ -391,7 +413,7 @@ class PlatformDisplayObject {
     }
 
     setVisible(val) {
-        this.show.setVisible(val);
+        this.show.style.display = "none";
     }
 
     setWidth(val) {
@@ -424,21 +446,28 @@ class PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val);
+
+        //transform:rotate(7deg);
+        //-ms-transform:rotate(7deg); 	/* IE 9 */
+        //-moz-transform:rotate(7deg); 	/* Firefox */
+        //-webkit-transform:rotate(7deg); /* Safari 和 Chrome */
+        //-o-transform:rotate(7deg); 	/* Opera */
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
     }
 
     setScaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val);
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
     }
 
     setRotation(val) {
         this.__rotation = val;
-        this.show.setRotation(val);
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
     }
 
     setAlpha(val) {
-        this.show.setOpacity(val * 255);
+        this.show.style.opacity = val;
+        //this.show.setOpacity(val * 255);
     }
 
     addProgrammerFlag(flag) {
@@ -481,6 +510,7 @@ class PlatformDisplayObject {
     }
 
     setFilters(filters) {
+        return;
         this.__filters = filters;
         var types1 = [0, 0, 0, 0];
         var types2 = [0, 0, 0, 0];
@@ -648,6 +678,9 @@ class PlatformSprite extends PlatformDisplayObject {
         div.style.position = "absolute";
         div.style.left = "0px";
         div.style.top = "0px";
+        div.style.width = "auto";
+        div.style.height = "auto";
+        div.style["transform-origin"] = "left top";
         this.show = div;
     }
 
@@ -682,18 +715,13 @@ class PlatformTextField extends PlatformDisplayObject {
 
     constructor() {
         super();
-        var em = document.createElement("em");
+        var em = document.createElement("div");
         em.style.position = "absolute";
         em.style.left = "0px";
         em.style.top = "0px";
         em.style["font-style"] = "normal";
+        em.style["transform-origin"] = "left top";
         this.show = em;
-        //this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 2.0 : 1) * 12);
-        //this.show.setAnchorPoint(0, 1);
-        //this.setFontColor(0);
-        //this.show.retain();
-        //this.setScaleX(1);
-        //this.setScaleY(1);
     }
 
     setFontColor(color) {
@@ -705,45 +733,40 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
-        this.show.innerHTML = text;
-        return {
-            width: 0,
-            height: 0
-        };
         var $mesureTxt = PlatformTextField.$mesureTxt;
-        $mesureTxt.setFontSize(size);
-        this.show.setFontSize((RETINA ? 2.0 : 1) * size);
+        $mesureTxt.style.fontSize = size + "px";
         var txt = this.show;
+        txt.style.fontSize = size + "px";
         txt.text = "";
         var txtText = "";
         var start = 0;
         if (text == "") {
-            txt.setString("");
+            txt.innerHTML = "";
         }
         for (var i = 0; i < text.length; i++) {
             //取一行文字进行处理
             if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
                 var str = text.slice(start, i);
-                $mesureTxt.setString(str);
-                var lineWidth = $mesureTxt.getContentSize().width;
+                $mesureTxt.innerHTML = str;
+                var lineWidth = $mesureTxt.offsetWidth;
                 var findEnd = i;
                 var changeLine = false;
                 //如果这一行的文字宽大于设定宽
                 while (!autoSize && width && lineWidth > width) {
                     changeLine = true;
                     findEnd--;
-                    $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                    lineWidth = $mesureTxt.getContentSize().width;
+                    $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                    lineWidth = $mesureTxt.offsetWidth;
                 }
                 if (wordWrap && changeLine) {
                     i = findEnd;
-                    txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 } else {
-                    txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 }
                 //如果文字的高度已经大于设定的高，回退一次
                 if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
-                    txt.setString(txtText);
+                    txt.innerHTML = (txtText);
                     break;
                 } else {
                     txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
@@ -757,34 +780,35 @@ class PlatformTextField extends PlatformDisplayObject {
                 }
             }
         }
-        $mesureTxt.setString(txt.getString());
-        return $mesureTxt.getContentSize();
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
+        $mesureTxt.innerHTML = txt.innerHTML;
+        txt.style.width = $mesureTxt.offsetWidth + "px";
+        return {
+            width: $mesureTxt.offsetWidth,
+            height: $mesureTxt.offsetHeight
+        };
     }
 
     setFilters(filters) {
 
     }
 
-    setScaleX(val) {
-        this.__scaleX = val;
-        this.show.setScaleX(val * (RETINA ? (1 / 2.0) : 1));
-    }
-
-    setScaleY(val) {
-        this.__scaleY = val;
-        this.show.setScaleY(val * (RETINA ? (1 / 2.0) : 1));
-    }
-
     release() {
         var show = this.show;
-        show.setString("");
-        show.setFontSize((RETINA ? 2.0 : 1) * 12);
+        show.innerHTML = ("");
+        show.style.fontSize = "12px";
         this.setFontColor(0);
         super.release();
     }
 }
 
-//PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
+var measureTxt = document.createElement("span");
+measureTxt.style.visibility = "hidden";
+measureTxt.style.whiteSpace = "nowrap";
+document.body.appendChild(measureTxt);
+//measureTxt.style.width = "0px";
+PlatformTextField.$mesureTxt = measureTxt;
 //PlatformTextField.$mesureTxt.retain();
 //////////////////////////End File:flower/platform/dom/PlatformTextField.js///////////////////////////
 
@@ -807,6 +831,7 @@ class PlatformTextInput extends PlatformDisplayObject {
         input.style.position = "absolute";
         input.style.left = "0px";
         input.style.top = "0px";
+        input.style["transform-origin"] = "left top";
         this.show = input;
         //this.show = new cc.TextFieldTTF();
         //if (Platform.native) {
@@ -863,43 +888,39 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
-        $mesureTxt.setFontSize(size);
-        if (Platform.native) {
-            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * size);
-        } else {
-            this.show.setFontSize((RETINA ? 2.0 : 1) * size);
-        }
+        $mesureTxt.style.fontSize = size + "px";
         var txt = this.show;
+        txt.style.fontSize = size + "px";
         txt.text = "";
         var txtText = "";
         var start = 0;
         if (text == "") {
-            txt.setString("");
+            txt.innerHTML = "";
         }
         for (var i = 0; i < text.length; i++) {
             //取一行文字进行处理
             if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
                 var str = text.slice(start, i);
-                $mesureTxt.setString(str);
-                var lineWidth = $mesureTxt.getContentSize().width;
+                $mesureTxt.innerHTML = str;
+                var lineWidth = $mesureTxt.offsetWidth;
                 var findEnd = i;
                 var changeLine = false;
                 //如果这一行的文字宽大于设定宽
                 while (!autoSize && width && lineWidth > width) {
                     changeLine = true;
                     findEnd--;
-                    $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                    lineWidth = $mesureTxt.getContentSize().width;
+                    $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                    lineWidth = $mesureTxt.offsetWidth;
                 }
                 if (wordWrap && changeLine) {
                     i = findEnd;
-                    txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 } else {
-                    txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 }
                 //如果文字的高度已经大于设定的高，回退一次
                 if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
-                    txt.setString(txtText);
+                    txt.innerHTML = (txtText);
                     break;
                 } else {
                     txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
@@ -913,8 +934,14 @@ class PlatformTextInput extends PlatformDisplayObject {
                 }
             }
         }
-        $mesureTxt.setString(txt.getString());
-        return $mesureTxt.getContentSize();
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
+        $mesureTxt.innerHTML = txt.innerHTML;
+        txt.style.width = $mesureTxt.offsetWidth + "px";
+        return {
+            width: $mesureTxt.offsetWidth,
+            height: $mesureTxt.offsetHeight
+        };
     }
 
     setFilters(filters) {
@@ -929,26 +956,12 @@ class PlatformTextInput extends PlatformDisplayObject {
         this.show.detachWithIME();
     }
 
-    setScaleX(val) {
-        this.__scaleX = val;
-        this.show.setScaleX(val * (RETINA ? (1 / 2.0) : 1));
-    }
-
-    setScaleY(val) {
-        this.__scaleY = val;
-        this.show.setScaleY(val * (RETINA ? (1 / 2.0) : 1));
-    }
-
     release() {
         this.__changeBack = null;
         this.__changeBackThis = null;
         var show = this.show;
-        show.setString("");
-        if (Platform.native) {
-            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
-        } else {
-            this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
-        }
+        show.innerHTML = ("");
+        show.style.fontSize = "12px";
         this.setFontColor(0);
         super.release();
     }
@@ -969,6 +982,8 @@ class PlatformBitmap extends PlatformDisplayObject {
     __scale9Grid;
     __settingWidth;
     __settingHeight;
+    scaleX = 1;
+    scaleY = 1;
 
     constructor() {
         super();
@@ -977,6 +992,7 @@ class PlatformBitmap extends PlatformDisplayObject {
         image.style.position = "absolute";
         image.style.left = "0px";
         image.style.top = "0px";
+        image.style["transform-origin"] = "left top";
         this.show = image;
 
         //this.show = new cc.Sprite();
@@ -986,7 +1002,7 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setTexture(texture) {
         this.__texture = texture;
-        this.show.initWithTexture(texture.$nativeTexture.textrue);
+        this.show.src = (texture.$nativeTexture.textrue);
         var source = texture.source;
         if (source) {
             this.show.setTextureRect(source, texture.sourceRotation, {
@@ -994,22 +1010,22 @@ class PlatformBitmap extends PlatformDisplayObject {
                 height: source.height
             });
         }
-        this.__textureScaleX = texture.scaleX;
-        this.__textureScaleY = texture.scaleY;
-        this.show.setAnchorPoint(0, 1);
-        this.setX(this.__x);
-        this.setY(this.__y);
-        this.setScaleX(this.__scaleX);
-        this.setScaleY(this.__scaleY);
-        this.setScale9Grid(this.__scale9Grid);
-        this.setFilters(this.__filters);
-        if (this.__programmer) {
-            if (Platform.native) {
-                this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
-            } else {
-                this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
-            }
-        }
+        //this.__textureScaleX = texture.scaleX;
+        //this.__textureScaleY = texture.scaleY;
+        //this.setX(this.__x);
+        //this.setY(this.__y);
+        //this.setScaleX(this.__scaleX);
+        //this.setScaleY(this.__scaleY);
+        //this.setScale9Grid(this.__scale9Grid);
+        //this.setFilters(this.__filters);
+
+        //if (this.__programmer) {
+        //    if (Platform.native) {
+        //        this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+        //    } else {
+        //        this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+        //    }
+        //}
     }
 
 
@@ -1112,36 +1128,38 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setX(val) {
         this.__x = val;
-        this.show.setPositionX(this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX);
+        this.show.style.left = (this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX) + "px";
     }
 
     setY(val) {
         this.__y = val;
-        this.show.setPositionY(-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY);
+        this.show.style.top = (-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY) + "px";
     }
 
     setScaleX(val) {
         this.__scaleX = val;
         if (this.__texture && this.__settingWidth != null) {
-            this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+            this.scaleX = (val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
         } else {
-            this.show.setScaleX(val * this.__textureScaleX);
+            this.scaleX = (val * this.__textureScaleX);
         }
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
         if (this.__texture && this.__texture.offX) {
-            this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+            this.show.style.left = (this.__x + this.__texture.offX * this.__scaleX) + "px";
         }
-        this.setScale9Grid(this.__scale9Grid);
+        //this.setScale9Grid(this.__scale9Grid);
     }
 
     setScaleY(val) {
         this.__scaleY = val;
         if (this.__texture && this.__settingHeight != null) {
-            this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+            this.scaleY = (val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
         } else {
-            this.show.setScaleY(val * this.__textureScaleY);
+            this.scaleY = (val * this.__textureScaleY);
         }
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
         if (this.__texture && this.__texture.offY) {
-            this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+            this.show.style.top = (-this.__y - this.__texture.offY * this.__scaleY) + "px";
         }
         this.setScale9Grid(this.__scale9Grid);
     }
@@ -1149,6 +1167,7 @@ class PlatformBitmap extends PlatformDisplayObject {
     release() {
         this.setScale9Grid(null);
         this.__texture = null;
+        this.scaleX = this.scaleY = 1;
         this.__textureScaleX = 1;
         this.__textureScaleY = 1;
         this.__scale9Grid = null;
@@ -1171,9 +1190,76 @@ class PlatformShape extends PlatformDisplayObject {
         shape.style.left = "0px";
         shape.style.top = "0px";
         this.show = shape;
+        this.elements = [];
+    }
+
+    toColor16(color) {
+        var abc;
+        var num = Math.floor(color / 16);
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        var str = abc + "";
+        num = color % 16;
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        str += abc;
+        return str;
     }
 
     draw(points, fillColor, fillAlpha, lineWidth, lineColor, lineAlpha) {
+        if (points.length == 2) {
+            //var div = document.createElement("div");
+            //div.style.position = "absolute";
+            //div.style.left = points[0].x + "px";
+            //div.style.top = points[0].y + "px";
+            //div.style.backgroundColor = "#" + this.toColor16(lineColor.r) + this.toColor16(lineColor.g) + this.toColor16(lineColor.b);
+            //this.show.appendChild(div);
+        } else if (points.length == 5) {
+            var div = document.createElement("div");
+            div.style.position = "absolute";
+            div.style.left = points[0].x + "px";
+            div.style.top = points[0].y + "px";
+            div.style.width = points[1].x - points[0].x + "px";
+            div.style.height = points[2].y - points[0].y + "px";
+            var color = "#" + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF);
+            div.style.backgroundColor = color;
+            this.show.appendChild(div);
+            this.elements.push(div);
+        }
         //var shape = this.show;
         //for (var i = 0; i < points.length; i++) {
         //    points[i].y = points[i].y;
@@ -1195,6 +1281,9 @@ class PlatformShape extends PlatformDisplayObject {
     }
 
     clear() {
+        while(this.elements.length) {
+            this.show.removeChild(this.elements.pop());
+        }
         //this.show.clear();
     }
 
@@ -1218,9 +1307,36 @@ class PlatformShape extends PlatformDisplayObject {
 //////////////////////////File:flower/platform/dom/PlatformMask.js///////////////////////////
 class PlatformMask extends PlatformSprite {
 
+    static id = 0;
+
     constructor() {
         super();
+        this.shapeWidth = 0;
+        this.shapeHeight = 0;
+        this.shapeX = 0;
+        this.shapeY = 0;
+        flower.EnterFrame.add(this.update, this);
     }
+
+    update() {
+        var width = 0;
+        var height = 0;
+        var x = 0;
+        var y = 0;
+        if (this.flowerShape) {
+            var bounds = this.flowerShape.$getContentBounds();
+            width = bounds.width;
+            height = bounds.height;
+            x = bounds.x;
+            y = bounds.y;
+        }
+        if (width != this.shapeWidth || height != this.shapeHeight || x != this.shapeX || y != this.shapeY) {
+            this.shapeWidth = width;
+            this.shapeHeight = height;
+            this.show.style.clip = "rect(" + x + "px," + width + "px," + height + "px," + y + "px)";
+        }
+    }
+
 
     initShow() {
         var mask = document.createElement("div");
@@ -1230,8 +1346,15 @@ class PlatformMask extends PlatformSprite {
         this.show = mask;
     }
 
-    setShape(shape) {
-        this.show.setStencil(shape.show);
+    setShape(shape, flowerShape) {
+        this.shape = shape;
+        this.flowerShape = flowerShape;
+        //this.show.setStencil(shape.show);
+    }
+
+    dispose() {
+        flower.EnterFrame.remove(this.update, this);
+        super.dispose();
     }
 }
 //////////////////////////End File:flower/platform/dom/PlatformMask.js///////////////////////////
@@ -1268,6 +1391,8 @@ class PlatformURLLoader {
 
     static isLoading = false;
     static loadingList = [];
+    static canvas;
+    static context;
 
     static loadText(url, back, errorBack, thisObj, method, params, contentType) {
         if (PlatformURLLoader.isLoading) {
@@ -1277,6 +1402,16 @@ class PlatformURLLoader {
         PlatformURLLoader.isLoading = true;
         if (TIP) {
             $tip(2001, url);
+        }
+        var pstr = "?";
+        for (var key in params) {
+            pstr += key + "=" + params[key] + "&";
+        }
+        if (pstr.charAt(pstr.length - 1) == "&") {
+            pstr = pstr.slice(0, pstr.length - 1);
+        }
+        if (pstr != "?") {
+            url += pstr;
         }
         var xhr = new XMLHttpRequest();
         if (method == null || method == "") {
@@ -1306,14 +1441,10 @@ class PlatformURLLoader {
             }
             PlatformURLLoader.isLoading = false;
         };
-        if (params && params != "") {
-            xhr.send(params);
-        } else {
-            xhr.send();
-        }
+        xhr.send();
     }
 
-    static loadTexture(url, back, errorBack, thisObj) {
+    static loadTexture(url, back, errorBack, thisObj, params) {
         if (PlatformURLLoader.isLoading) {
             PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
             return;
@@ -1322,39 +1453,49 @@ class PlatformURLLoader {
         if (TIP) {
             $tip(2002, url);
         }
-        var image = new Image();
-        image.src = url;
-        image.onload = function () {
-            back.call(thisObj, image, image.width, image.height);
-            PlatformURLLoader.isLoading = false;
+        params = params || {};
+        params.img = "base64";
+        var pstr = "?";
+        for (var key in params) {
+            pstr += key + "=" + params[key] + "&";
         }
-
-        return;
-        cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
-            if (err) {
+        if (pstr.charAt(pstr.length - 1) == "&") {
+            pstr = pstr.slice(0, pstr.length - 1);
+        }
+        if (pstr != "?") {
+            url += pstr;
+        }
+        var xhr = new XMLHttpRequest();
+        var method;
+        if (method == null || method == "") {
+            method = "GET";
+        }
+        if (method == "GET") {
+            xhr.open("GET", url, true);
+        } else if (method == "POST") {
+            xhr.open("POST", url, true);
+            if (!contentType) {
+                contentType = "application/x-www-form-urlencoded";
+            }
+            xhr.setRequestHeader("Content-Type", contentType);
+        } else if (method == "HEAD") {
+            xhr.open("HEAD", url, true);
+            xhr.open("HEAD", url, true);
+        }
+        xhr.onloadend = function () {
+            if (xhr.status != 200) {
                 errorBack.call(thisObj);
+            } else {
+                var str = xhr.responseText;
+                var size = str.split("|")[0];
+                var content = "data:image/png;base64," + str.split("|")[1];
+                var width = size.split(",")[0];
+                var height = size.split(",")[1];
+                back.call(thisObj, content, width, height);
             }
-            else {
-                if (!CACHE) {
-                    cc.loader.release(url);
-                }
-                var texture;
-                if (Platform.native) {
-                    texture = img;
-                } else {
-                    texture = new cc.Texture2D();
-                    texture.initWithElement(img);
-                    texture.handleLoadedTexture();
-                }
-                back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                //if (Platform.native) {
-                //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                //} else {
-                //
-                //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
-                //}
-            }
-        });
+            PlatformURLLoader.isLoading = false;
+        };
+        xhr.send();
     }
 }
 //////////////////////////End File:flower/platform/dom/PlatformURLLoader.js///////////////////////////
@@ -3802,7 +3943,7 @@ class Mask extends Sprite {
         this.__children = [];
         this.$nativeShow = Platform.create("Mask");
         this.__shape = this.$createShape();
-        this.$nativeShow.setShape(this.__shape.$nativeShow);
+        this.$nativeShow.setShape(this.__shape.$nativeShow,this.__shape);
     }
 
     $createShape() {
@@ -5780,7 +5921,12 @@ class URLLoader extends EventDispatcher {
                 loader.addListener(Event.ERROR, this.loadError, this);
                 loader.load();
             } else {
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextureComplete, this.loadError, this);
+                var params = {};
+                params.r = Math.random();
+                for (var key in this._params) {
+                    params[key] = this._params;
+                }
+                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
             }
         }
     }
@@ -5836,7 +5982,12 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextComplete, this.loadError, this, this._method, this._params);
+        var params = {};
+        params.r = Math.random();
+        for (var key in this._params) {
+            params[key] = this._params;
+        }
+        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {

@@ -14,6 +14,7 @@ class PlatformTextInput extends PlatformDisplayObject {
         input.style.position = "absolute";
         input.style.left = "0px";
         input.style.top = "0px";
+        input.style["transform-origin"] = "left top";
         this.show = input;
         //this.show = new cc.TextFieldTTF();
         //if (Platform.native) {
@@ -70,43 +71,39 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
-        $mesureTxt.setFontSize(size);
-        if (Platform.native) {
-            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * size);
-        } else {
-            this.show.setFontSize((RETINA ? 2.0 : 1) * size);
-        }
+        $mesureTxt.style.fontSize = size + "px";
         var txt = this.show;
+        txt.style.fontSize = size + "px";
         txt.text = "";
         var txtText = "";
         var start = 0;
         if (text == "") {
-            txt.setString("");
+            txt.innerHTML = "";
         }
         for (var i = 0; i < text.length; i++) {
             //取一行文字进行处理
             if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
                 var str = text.slice(start, i);
-                $mesureTxt.setString(str);
-                var lineWidth = $mesureTxt.getContentSize().width;
+                $mesureTxt.innerHTML = str;
+                var lineWidth = $mesureTxt.offsetWidth;
                 var findEnd = i;
                 var changeLine = false;
                 //如果这一行的文字宽大于设定宽
                 while (!autoSize && width && lineWidth > width) {
                     changeLine = true;
                     findEnd--;
-                    $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                    lineWidth = $mesureTxt.getContentSize().width;
+                    $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                    lineWidth = $mesureTxt.offsetWidth;
                 }
                 if (wordWrap && changeLine) {
                     i = findEnd;
-                    txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 } else {
-                    txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 }
                 //如果文字的高度已经大于设定的高，回退一次
                 if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
-                    txt.setString(txtText);
+                    txt.innerHTML = (txtText);
                     break;
                 } else {
                     txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
@@ -120,8 +117,14 @@ class PlatformTextInput extends PlatformDisplayObject {
                 }
             }
         }
-        $mesureTxt.setString(txt.getString());
-        return $mesureTxt.getContentSize();
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
+        $mesureTxt.innerHTML = txt.innerHTML;
+        txt.style.width = $mesureTxt.offsetWidth + "px";
+        return {
+            width: $mesureTxt.offsetWidth,
+            height: $mesureTxt.offsetHeight
+        };
     }
 
     setFilters(filters) {
@@ -136,26 +139,12 @@ class PlatformTextInput extends PlatformDisplayObject {
         this.show.detachWithIME();
     }
 
-    setScaleX(val) {
-        this.__scaleX = val;
-        this.show.setScaleX(val * (RETINA ? (1 / 2.0) : 1));
-    }
-
-    setScaleY(val) {
-        this.__scaleY = val;
-        this.show.setScaleY(val * (RETINA ? (1 / 2.0) : 1));
-    }
-
     release() {
         this.__changeBack = null;
         this.__changeBackThis = null;
         var show = this.show;
-        show.setString("");
-        if (Platform.native) {
-            this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
-        } else {
-            this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
-        }
+        show.innerHTML = ("");
+        show.style.fontSize = "12px";
         this.setFontColor(0);
         super.release();
     }

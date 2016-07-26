@@ -1,6 +1,7 @@
 var http = require("http");
 var URL = require('url');
 var query = require("querystring");    //解析POST请求
+var getPixels = require("get-pixels")
 
 var mine = {
     "css": "text/css",
@@ -95,6 +96,14 @@ HttpServer.prototype.start = function () {
 
 HttpServer.prototype.sendResource = function (request, response) {
     var url = request.url;
+    var params = {};
+    if (url.split("?").length == 2) {
+        var pstr = url.split("?")[1];
+        var ps = pstr.split("&");
+        for (var i = 0; i < ps.length; i++) {
+            params[ps[i].split("=")[0]] = ps[i].split("=")[1];
+        }
+    }
     url = url.split("?")[0];
     var file = new File(this.root + url);
     if (!file.isExist()) {
@@ -105,20 +114,41 @@ HttpServer.prototype.sendResource = function (request, response) {
         response.write("This request URL " + URL.parse(request.url).pathname + " was not found on this server. from \"" + this.getRequestIP(request) + "\"");
         response.end();
     } else {
-        var content = file.readContent("binary");
+        var content;
         end = request.url.split("?")[0];
         end = end.split(".")[end.split(".").length - 1];
-        response.writeHead(200, {
-            "Content-Length": file.size,
-            "Content-Type": mine[end],
-            "Access-Control-Allow-Origin": "*",
-            "Accept-Ranges": "bytes",
-            "Last-Modified":file.state.mtime.toString()
-        });
-        if (request.method != "HEAD") {
-            response.write(content, "binary");
+        if (params.img == "base64") {
+            getPixels(file.url, function (err, pixels) {
+                end = "txt";
+                content = new Buffer(file.readContent("binary"), 'binary').toString('base64');
+                content = pixels.shape[0] + "," + pixels.shape[1] + "|" + content;
+                var buffer = new Buffer(content);
+                response.writeHead(200, {
+                    "Content-Length": buffer.length,
+                    "Content-Type": mine[end],
+                    "Access-Control-Allow-Origin": "*",
+                    "Accept-Ranges": "bytes",
+                    "Last-Modified": file.state.mtime.toString()
+                });
+                if (request.method != "HEAD") {
+                    response.write(buffer, "binary");
+                }
+                response.end();
+            })
+        } else {
+            content = file.readContent("binary");
+            response.writeHead(200, {
+                "Content-Length": file.size,
+                "Content-Type": mine[end],
+                "Access-Control-Allow-Origin": "*",
+                "Accept-Ranges": "bytes",
+                "Last-Modified": file.state.mtime.toString()
+            });
+            if (request.method != "HEAD") {
+                response.write(content, "binary");
+            }
+            response.end();
         }
-        response.end();
     }
 }
 
@@ -140,7 +170,7 @@ HttpServer.prototype.sendResourceWidthData = function (request, response, data) 
             "Content-Type": mine[end],
             "Access-Control-Allow-Origin": "*",
             "Accept-Ranges": "bytes",
-            "Last-Modified":file.state.mtime.toString()
+            "Last-Modified": file.state.mtime.toString()
         });
         if (request.method != "HEAD") {
             response.write(data, "binary");
@@ -164,7 +194,7 @@ HttpServer.prototype.sendContent = function (request, response, content) {
             "Content-Type": mine[end],
             "Access-Control-Allow-Origin": "*",
             "Accept-Ranges": "bytes",
-            "Last-Modified":file.state.mtime.toString()
+            "Last-Modified": file.state.mtime.toString()
         });
         response.write(content, "binary");
         response.end();

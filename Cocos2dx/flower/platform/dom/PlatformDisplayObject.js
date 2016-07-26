@@ -33,7 +33,7 @@ class PlatformDisplayObject {
     }
 
     setVisible(val) {
-        this.show.setVisible(val);
+        this.show.style.display = "none";
     }
 
     setWidth(val) {
@@ -66,21 +66,28 @@ class PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
-        this.show.setScaleX(val);
+
+        //transform:rotate(7deg);
+        //-ms-transform:rotate(7deg); 	/* IE 9 */
+        //-moz-transform:rotate(7deg); 	/* Firefox */
+        //-webkit-transform:rotate(7deg); /* Safari 和 Chrome */
+        //-o-transform:rotate(7deg); 	/* Opera */
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
     }
 
     setScaleY(val) {
         this.__scaleY = val;
-        this.show.setScaleY(val);
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
     }
 
     setRotation(val) {
         this.__rotation = val;
-        this.show.setRotation(val);
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
     }
 
     setAlpha(val) {
-        this.show.setOpacity(val * 255);
+        this.show.style.opacity = val;
+        //this.show.setOpacity(val * 255);
     }
 
     addProgrammerFlag(flag) {
@@ -123,6 +130,7 @@ class PlatformDisplayObject {
     }
 
     setFilters(filters) {
+        return;
         this.__filters = filters;
         var types1 = [0, 0, 0, 0];
         var types2 = [0, 0, 0, 0];

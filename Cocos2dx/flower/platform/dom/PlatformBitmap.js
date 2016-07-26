@@ -6,6 +6,8 @@ class PlatformBitmap extends PlatformDisplayObject {
     __scale9Grid;
     __settingWidth;
     __settingHeight;
+    scaleX = 1;
+    scaleY = 1;
 
     constructor() {
         super();
@@ -14,6 +16,7 @@ class PlatformBitmap extends PlatformDisplayObject {
         image.style.position = "absolute";
         image.style.left = "0px";
         image.style.top = "0px";
+        image.style["transform-origin"] = "left top";
         this.show = image;
 
         //this.show = new cc.Sprite();
@@ -23,7 +26,7 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setTexture(texture) {
         this.__texture = texture;
-        this.show.initWithTexture(texture.$nativeTexture.textrue);
+        this.show.src = (texture.$nativeTexture.textrue);
         var source = texture.source;
         if (source) {
             this.show.setTextureRect(source, texture.sourceRotation, {
@@ -31,22 +34,22 @@ class PlatformBitmap extends PlatformDisplayObject {
                 height: source.height
             });
         }
-        this.__textureScaleX = texture.scaleX;
-        this.__textureScaleY = texture.scaleY;
-        this.show.setAnchorPoint(0, 1);
-        this.setX(this.__x);
-        this.setY(this.__y);
-        this.setScaleX(this.__scaleX);
-        this.setScaleY(this.__scaleY);
-        this.setScale9Grid(this.__scale9Grid);
-        this.setFilters(this.__filters);
-        if (this.__programmer) {
-            if (Platform.native) {
-                this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
-            } else {
-                this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
-            }
-        }
+        //this.__textureScaleX = texture.scaleX;
+        //this.__textureScaleY = texture.scaleY;
+        //this.setX(this.__x);
+        //this.setY(this.__y);
+        //this.setScaleX(this.__scaleX);
+        //this.setScaleY(this.__scaleY);
+        //this.setScale9Grid(this.__scale9Grid);
+        //this.setFilters(this.__filters);
+
+        //if (this.__programmer) {
+        //    if (Platform.native) {
+        //        this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+        //    } else {
+        //        this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+        //    }
+        //}
     }
 
 
@@ -149,36 +152,38 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setX(val) {
         this.__x = val;
-        this.show.setPositionX(this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX);
+        this.show.style.left = (this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX) + "px";
     }
 
     setY(val) {
         this.__y = val;
-        this.show.setPositionY(-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY);
+        this.show.style.top = (-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY) + "px";
     }
 
     setScaleX(val) {
         this.__scaleX = val;
         if (this.__texture && this.__settingWidth != null) {
-            this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+            this.scaleX = (val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
         } else {
-            this.show.setScaleX(val * this.__textureScaleX);
+            this.scaleX = (val * this.__textureScaleX);
         }
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
         if (this.__texture && this.__texture.offX) {
-            this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+            this.show.style.left = (this.__x + this.__texture.offX * this.__scaleX) + "px";
         }
-        this.setScale9Grid(this.__scale9Grid);
+        //this.setScale9Grid(this.__scale9Grid);
     }
 
     setScaleY(val) {
         this.__scaleY = val;
         if (this.__texture && this.__settingHeight != null) {
-            this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+            this.scaleY = (val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
         } else {
-            this.show.setScaleY(val * this.__textureScaleY);
+            this.scaleY = (val * this.__textureScaleY);
         }
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
         if (this.__texture && this.__texture.offY) {
-            this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+            this.show.style.top = (-this.__y - this.__texture.offY * this.__scaleY) + "px";
         }
         this.setScale9Grid(this.__scale9Grid);
     }
@@ -186,6 +191,7 @@ class PlatformBitmap extends PlatformDisplayObject {
     release() {
         this.setScale9Grid(null);
         this.__texture = null;
+        this.scaleX = this.scaleY = 1;
         this.__textureScaleX = 1;
         this.__textureScaleY = 1;
         this.__scale9Grid = null;

@@ -129,7 +129,12 @@ class URLLoader extends EventDispatcher {
                 loader.addListener(Event.ERROR, this.loadError, this);
                 loader.load();
             } else {
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextureComplete, this.loadError, this);
+                var params = {};
+                params.r = Math.random();
+                for (var key in this._params) {
+                    params[key] = this._params;
+                }
+                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
             }
         }
     }
@@ -185,7 +190,12 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextComplete, this.loadError, this, this._method, this._params);
+        var params = {};
+        params.r = Math.random();
+        for (var key in this._params) {
+            params[key] = this._params;
+        }
+        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {

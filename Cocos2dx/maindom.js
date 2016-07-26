@@ -58,23 +58,25 @@ script.onload = function () {
         "src/Binding.js",
         "src/Remote.js"
     ].concat(jsFiles);
-    for (var i = 0; i < jsFiles.length; i++) {
+    var i = 0;
+    var addScript = function() {
         script = document.createElement("script");
         script.loadFlag = false;
         script.type = "text/javascript";
         script.src = jsFiles[i];
         script.onload = function () {
-            this.loadFlag = true;
-            for (var i = 0; i < scripts.length; i++) {
-                if (scripts[i].loadFlag == false) {
-                    return ''
-                }
+            script.loadFlag = true;
+            i++;
+            if(i < jsFiles.length) {
+                addScript();
+            } else {
+                new Main();
             }
-            new Main();
         }.bind(script);
         scripts.push(script);
         body.appendChild(script);
     }
+    addScript();
 }
 body.appendChild(script);
 

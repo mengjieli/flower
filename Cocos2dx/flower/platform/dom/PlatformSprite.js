@@ -13,6 +13,9 @@ class PlatformSprite extends PlatformDisplayObject {
         div.style.position = "absolute";
         div.style.left = "0px";
         div.style.top = "0px";
+        div.style.width = "auto";
+        div.style.height = "auto";
+        div.style["transform-origin"] = "left top";
         this.show = div;
     }
 

@@ -204,8 +204,30 @@ var flower = {};
                 RETINA = false;
                 Platform.native = false; //cc.sys.isNative;
                 var div = document.getElementById("FlowerMain");
+                var mask = document.createElement("div");
+                mask.style.position = "absolute";
+                mask.style.left = "0px";
+                mask.style.top = "0px";
+                mask.style.width = document.documentElement.clientWidth + "px";
+                mask.style.height = document.documentElement.clientHeight + "px";
+                document.body.appendChild(mask);
                 div.appendChild(root.show);
                 requestAnimationFrame.call(window, Platform._run);
+                var touchDown = false;
+                mask.onmousedown = function (e) {
+                    touchDown = true;
+                    engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+                };
+                mask.onmouseup = function (e) {
+                    touchDown = false;
+                    engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+                };
+                mask.onmousemove = function (e) {
+                    engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+                    if (touchDown) {
+                        engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+                    }
+                };
                 //var scene = cc.Scene.extend({
                 //    ctor: function () {
                 //        this._super();
@@ -419,7 +441,7 @@ var flower = {};
         }, {
             key: "setVisible",
             value: function setVisible(val) {
-                this.show.setVisible(val);
+                this.show.style.display = "none";
             }
         }, {
             key: "setWidth",
@@ -455,24 +477,31 @@ var flower = {};
             key: "setScaleX",
             value: function setScaleX(val) {
                 this.__scaleX = val;
-                this.show.setScaleX(val);
+
+                //transform:rotate(7deg);
+                //-ms-transform:rotate(7deg); 	/* IE 9 */
+                //-moz-transform:rotate(7deg); 	/* Firefox */
+                //-webkit-transform:rotate(7deg); /* Safari 和 Chrome */
+                //-o-transform:rotate(7deg); 	/* Opera */
+                this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
             }
         }, {
             key: "setScaleY",
             value: function setScaleY(val) {
                 this.__scaleY = val;
-                this.show.setScaleY(val);
+                this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
             }
         }, {
             key: "setRotation",
             value: function setRotation(val) {
                 this.__rotation = val;
-                this.show.setRotation(val);
+                this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.__scaleX + "," + this.__scaleY + ")";
             }
         }, {
             key: "setAlpha",
             value: function setAlpha(val) {
-                this.show.setOpacity(val * 255);
+                this.show.style.opacity = val;
+                //this.show.setOpacity(val * 255);
             }
         }, {
             key: "addProgrammerFlag",
@@ -519,6 +548,7 @@ var flower = {};
         }, {
             key: "setFilters",
             value: function setFilters(filters) {
+                return;
                 this.__filters = filters;
                 var types1 = [0, 0, 0, 0];
                 var types2 = [0, 0, 0, 0];
@@ -698,6 +728,9 @@ var flower = {};
                 div.style.position = "absolute";
                 div.style.left = "0px";
                 div.style.top = "0px";
+                div.style.width = "auto";
+                div.style.height = "auto";
+                div.style["transform-origin"] = "left top";
                 this.show = div;
             }
         }, {
@@ -737,18 +770,13 @@ var flower = {};
 
             var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformTextField).call(this));
 
-            var em = document.createElement("em");
+            var em = document.createElement("div");
             em.style.position = "absolute";
             em.style.left = "0px";
             em.style.top = "0px";
             em.style["font-style"] = "normal";
+            em.style["transform-origin"] = "left top";
             _this2.show = em;
-            //this.show = new cc.LabelTTF("", "Times Roman", (RETINA ? 2.0 : 1) * 12);
-            //this.show.setAnchorPoint(0, 1);
-            //this.setFontColor(0);
-            //this.show.retain();
-            //this.setScaleX(1);
-            //this.setScaleY(1);
             return _this2;
         }
 
@@ -764,45 +792,40 @@ var flower = {};
         }, {
             key: "changeText",
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
-                this.show.innerHTML = text;
-                return {
-                    width: 0,
-                    height: 0
-                };
                 var $mesureTxt = PlatformTextField.$mesureTxt;
-                $mesureTxt.setFontSize(size);
-                this.show.setFontSize((RETINA ? 2.0 : 1) * size);
+                $mesureTxt.style.fontSize = size + "px";
                 var txt = this.show;
+                txt.style.fontSize = size + "px";
                 txt.text = "";
                 var txtText = "";
                 var start = 0;
                 if (text == "") {
-                    txt.setString("");
+                    txt.innerHTML = "";
                 }
                 for (var i = 0; i < text.length; i++) {
                     //取一行文字进行处理
                     if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
                         var str = text.slice(start, i);
-                        $mesureTxt.setString(str);
-                        var lineWidth = $mesureTxt.getContentSize().width;
+                        $mesureTxt.innerHTML = str;
+                        var lineWidth = $mesureTxt.offsetWidth;
                         var findEnd = i;
                         var changeLine = false;
                         //如果这一行的文字宽大于设定宽
                         while (!autoSize && width && lineWidth > width) {
                             changeLine = true;
                             findEnd--;
-                            $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                            lineWidth = $mesureTxt.getContentSize().width;
+                            $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                            lineWidth = $mesureTxt.offsetWidth;
                         }
                         if (wordWrap && changeLine) {
                             i = findEnd;
-                            txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                            txt.innerHTML = txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
                         } else {
-                            txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                            txt.innerHTML = txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
                         }
                         //如果文字的高度已经大于设定的高，回退一次
                         if (!autoSize && height && txt.getContentSize().height * (RETINA ? 1 / 2.0 : 1) > height) {
-                            txt.setString(txtText);
+                            txt.innerHTML = txtText;
                             break;
                         } else {
                             txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
@@ -816,30 +839,24 @@ var flower = {};
                         }
                     }
                 }
-                $mesureTxt.setString(txt.getString());
-                return $mesureTxt.getContentSize();
+                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\n", "</br>");
+                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\r", "</br>");
+                $mesureTxt.innerHTML = txt.innerHTML;
+                txt.style.width = $mesureTxt.offsetWidth + "px";
+                return {
+                    width: $mesureTxt.offsetWidth,
+                    height: $mesureTxt.offsetHeight
+                };
             }
         }, {
             key: "setFilters",
             value: function setFilters(filters) {}
         }, {
-            key: "setScaleX",
-            value: function setScaleX(val) {
-                this.__scaleX = val;
-                this.show.setScaleX(val * (RETINA ? 1 / 2.0 : 1));
-            }
-        }, {
-            key: "setScaleY",
-            value: function setScaleY(val) {
-                this.__scaleY = val;
-                this.show.setScaleY(val * (RETINA ? 1 / 2.0 : 1));
-            }
-        }, {
             key: "release",
             value: function release() {
                 var show = this.show;
-                show.setString("");
-                show.setFontSize((RETINA ? 2.0 : 1) * 12);
+                show.innerHTML = "";
+                show.style.fontSize = "12px";
                 this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextField.prototype), "release", this).call(this);
             }
@@ -848,12 +865,16 @@ var flower = {};
         return PlatformTextField;
     }(PlatformDisplayObject);
 
-    //PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
+    var measureTxt = document.createElement("span");
+    measureTxt.style.visibility = "hidden";
+    measureTxt.style.whiteSpace = "nowrap";
+    document.body.appendChild(measureTxt);
+    //measureTxt.style.width = "0px";
+    PlatformTextField.$mesureTxt = measureTxt;
     //PlatformTextField.$mesureTxt.retain();
     //////////////////////////End File:flower/platform/dom/PlatformTextField.js///////////////////////////
 
     //////////////////////////File:flower/platform/dom/PlatformTextInput.js///////////////////////////
-
 
     var PlatformTextInput = function (_PlatformDisplayObjec3) {
         _inherits(PlatformTextInput, _PlatformDisplayObjec3);
@@ -870,6 +891,7 @@ var flower = {};
             input.style.position = "absolute";
             input.style.left = "0px";
             input.style.top = "0px";
+            input.style["transform-origin"] = "left top";
             _this3.show = input;
             //this.show = new cc.TextFieldTTF();
             //if (Platform.native) {
@@ -934,43 +956,39 @@ var flower = {};
             key: "changeText",
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
                 var $mesureTxt = PlatformTextField.$mesureTxt;
-                $mesureTxt.setFontSize(size);
-                if (Platform.native) {
-                    this.show.setSystemFontSize((RETINA ? 2.0 : 1) * size);
-                } else {
-                    this.show.setFontSize((RETINA ? 2.0 : 1) * size);
-                }
+                $mesureTxt.style.fontSize = size + "px";
                 var txt = this.show;
+                txt.style.fontSize = size + "px";
                 txt.text = "";
                 var txtText = "";
                 var start = 0;
                 if (text == "") {
-                    txt.setString("");
+                    txt.innerHTML = "";
                 }
                 for (var i = 0; i < text.length; i++) {
                     //取一行文字进行处理
                     if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
                         var str = text.slice(start, i);
-                        $mesureTxt.setString(str);
-                        var lineWidth = $mesureTxt.getContentSize().width;
+                        $mesureTxt.innerHTML = str;
+                        var lineWidth = $mesureTxt.offsetWidth;
                         var findEnd = i;
                         var changeLine = false;
                         //如果这一行的文字宽大于设定宽
                         while (!autoSize && width && lineWidth > width) {
                             changeLine = true;
                             findEnd--;
-                            $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                            lineWidth = $mesureTxt.getContentSize().width;
+                            $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                            lineWidth = $mesureTxt.offsetWidth;
                         }
                         if (wordWrap && changeLine) {
                             i = findEnd;
-                            txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                            txt.innerHTML = txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
                         } else {
-                            txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                            txt.innerHTML = txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
                         }
                         //如果文字的高度已经大于设定的高，回退一次
                         if (!autoSize && height && txt.getContentSize().height * (RETINA ? 1 / 2.0 : 1) > height) {
-                            txt.setString(txtText);
+                            txt.innerHTML = txtText;
                             break;
                         } else {
                             txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
@@ -984,8 +1002,14 @@ var flower = {};
                         }
                     }
                 }
-                $mesureTxt.setString(txt.getString());
-                return $mesureTxt.getContentSize();
+                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\n", "</br>");
+                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\r", "</br>");
+                $mesureTxt.innerHTML = txt.innerHTML;
+                txt.style.width = $mesureTxt.offsetWidth + "px";
+                return {
+                    width: $mesureTxt.offsetWidth,
+                    height: $mesureTxt.offsetHeight
+                };
             }
         }, {
             key: "setFilters",
@@ -1001,29 +1025,13 @@ var flower = {};
                 this.show.detachWithIME();
             }
         }, {
-            key: "setScaleX",
-            value: function setScaleX(val) {
-                this.__scaleX = val;
-                this.show.setScaleX(val * (RETINA ? 1 / 2.0 : 1));
-            }
-        }, {
-            key: "setScaleY",
-            value: function setScaleY(val) {
-                this.__scaleY = val;
-                this.show.setScaleY(val * (RETINA ? 1 / 2.0 : 1));
-            }
-        }, {
             key: "release",
             value: function release() {
                 this.__changeBack = null;
                 this.__changeBackThis = null;
                 var show = this.show;
-                show.setString("");
-                if (Platform.native) {
-                    this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
-                } else {
-                    this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
-                }
+                show.innerHTML = "";
+                show.style.fontSize = "12px";
                 this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextInput.prototype), "release", this).call(this);
             }
@@ -1050,12 +1058,15 @@ var flower = {};
             _this4.__texture = null;
             _this4.__textureScaleX = 1;
             _this4.__textureScaleY = 1;
+            _this4.scaleX = 1;
+            _this4.scaleY = 1;
 
 
             var image = document.createElement("img");
             image.style.position = "absolute";
             image.style.left = "0px";
             image.style.top = "0px";
+            image.style["transform-origin"] = "left top";
             _this4.show = image;
 
             //this.show = new cc.Sprite();
@@ -1068,7 +1079,7 @@ var flower = {};
             key: "setTexture",
             value: function setTexture(texture) {
                 this.__texture = texture;
-                this.show.initWithTexture(texture.$nativeTexture.textrue);
+                this.show.src = texture.$nativeTexture.textrue;
                 var source = texture.source;
                 if (source) {
                     this.show.setTextureRect(source, texture.sourceRotation, {
@@ -1076,22 +1087,22 @@ var flower = {};
                         height: source.height
                     });
                 }
-                this.__textureScaleX = texture.scaleX;
-                this.__textureScaleY = texture.scaleY;
-                this.show.setAnchorPoint(0, 1);
-                this.setX(this.__x);
-                this.setY(this.__y);
-                this.setScaleX(this.__scaleX);
-                this.setScaleY(this.__scaleY);
-                this.setScale9Grid(this.__scale9Grid);
-                this.setFilters(this.__filters);
-                if (this.__programmer) {
-                    if (Platform.native) {
-                        this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
-                    } else {
-                        this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
-                    }
-                }
+                //this.__textureScaleX = texture.scaleX;
+                //this.__textureScaleY = texture.scaleY;
+                //this.setX(this.__x);
+                //this.setY(this.__y);
+                //this.setScaleX(this.__scaleX);
+                //this.setScaleY(this.__scaleY);
+                //this.setScale9Grid(this.__scale9Grid);
+                //this.setFilters(this.__filters);
+
+                //if (this.__programmer) {
+                //    if (Platform.native) {
+                //        this.show.setGLProgramState(this.__programmer.$nativeProgrammer);
+                //    } else {
+                //        this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
+                //    }
+                //}
             }
         }, {
             key: "setFilters",
@@ -1198,39 +1209,41 @@ var flower = {};
             key: "setX",
             value: function setX(val) {
                 this.__x = val;
-                this.show.setPositionX(this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX);
+                this.show.style.left = this.__x + (this.__texture ? this.__texture.offX : 0) * this.__scaleX + "px";
             }
         }, {
             key: "setY",
             value: function setY(val) {
                 this.__y = val;
-                this.show.setPositionY(-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY);
+                this.show.style.top = -this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY + "px";
             }
         }, {
             key: "setScaleX",
             value: function setScaleX(val) {
                 this.__scaleX = val;
                 if (this.__texture && this.__settingWidth != null) {
-                    this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+                    this.scaleX = val * this.__textureScaleX * this.__settingWidth / this.__texture.width;
                 } else {
-                    this.show.setScaleX(val * this.__textureScaleX);
+                    this.scaleX = val * this.__textureScaleX;
                 }
+                this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
                 if (this.__texture && this.__texture.offX) {
-                    this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+                    this.show.style.left = this.__x + this.__texture.offX * this.__scaleX + "px";
                 }
-                this.setScale9Grid(this.__scale9Grid);
+                //this.setScale9Grid(this.__scale9Grid);
             }
         }, {
             key: "setScaleY",
             value: function setScaleY(val) {
                 this.__scaleY = val;
                 if (this.__texture && this.__settingHeight != null) {
-                    this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+                    this.scaleY = val * this.__textureScaleY * this.__settingHeight / this.__texture.height;
                 } else {
-                    this.show.setScaleY(val * this.__textureScaleY);
+                    this.scaleY = val * this.__textureScaleY;
                 }
+                this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
                 if (this.__texture && this.__texture.offY) {
-                    this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+                    this.show.style.top = -this.__y - this.__texture.offY * this.__scaleY + "px";
                 }
                 this.setScale9Grid(this.__scale9Grid);
             }
@@ -1239,6 +1252,7 @@ var flower = {};
             value: function release() {
                 this.setScale9Grid(null);
                 this.__texture = null;
+                this.scaleX = this.scaleY = 1;
                 this.__textureScaleX = 1;
                 this.__textureScaleY = 1;
                 this.__scale9Grid = null;
@@ -1269,12 +1283,80 @@ var flower = {};
             shape.style.left = "0px";
             shape.style.top = "0px";
             _this5.show = shape;
+            _this5.elements = [];
             return _this5;
         }
 
         _createClass(PlatformShape, [{
+            key: "toColor16",
+            value: function toColor16(color) {
+                var abc;
+                var num = Math.floor(color / 16);
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                var str = abc + "";
+                num = color % 16;
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                str += abc;
+                return str;
+            }
+        }, {
             key: "draw",
             value: function draw(points, fillColor, fillAlpha, lineWidth, lineColor, lineAlpha) {
+                if (points.length == 2) {
+                    //var div = document.createElement("div");
+                    //div.style.position = "absolute";
+                    //div.style.left = points[0].x + "px";
+                    //div.style.top = points[0].y + "px";
+                    //div.style.backgroundColor = "#" + this.toColor16(lineColor.r) + this.toColor16(lineColor.g) + this.toColor16(lineColor.b);
+                    //this.show.appendChild(div);
+                } else if (points.length == 5) {
+                        var div = document.createElement("div");
+                        div.style.position = "absolute";
+                        div.style.left = points[0].x + "px";
+                        div.style.top = points[0].y + "px";
+                        div.style.width = points[1].x - points[0].x + "px";
+                        div.style.height = points[2].y - points[0].y + "px";
+                        var color = "#" + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF);
+                        div.style.backgroundColor = color;
+                        this.show.appendChild(div);
+                        this.elements.push(div);
+                    }
                 //var shape = this.show;
                 //for (var i = 0; i < points.length; i++) {
                 //    points[i].y = points[i].y;
@@ -1297,6 +1379,9 @@ var flower = {};
         }, {
             key: "clear",
             value: function clear() {
+                while (this.elements.length) {
+                    this.show.removeChild(this.elements.pop());
+                }
                 //this.show.clear();
             }
         }, {
@@ -1326,10 +1411,37 @@ var flower = {};
         function PlatformMask() {
             _classCallCheck(this, PlatformMask);
 
-            return _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformMask).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformMask).call(this));
+
+            _this6.shapeWidth = 0;
+            _this6.shapeHeight = 0;
+            _this6.shapeX = 0;
+            _this6.shapeY = 0;
+            flower.EnterFrame.add(_this6.update, _this6);
+            return _this6;
         }
 
         _createClass(PlatformMask, [{
+            key: "update",
+            value: function update() {
+                var width = 0;
+                var height = 0;
+                var x = 0;
+                var y = 0;
+                if (this.flowerShape) {
+                    var bounds = this.flowerShape.$getContentBounds();
+                    width = bounds.width;
+                    height = bounds.height;
+                    x = bounds.x;
+                    y = bounds.y;
+                }
+                if (width != this.shapeWidth || height != this.shapeHeight || x != this.shapeX || y != this.shapeY) {
+                    this.shapeWidth = width;
+                    this.shapeHeight = height;
+                    this.show.style.clip = "rect(" + x + "px," + width + "px," + height + "px," + y + "px)";
+                }
+            }
+        }, {
             key: "initShow",
             value: function initShow() {
                 var mask = document.createElement("div");
@@ -1340,8 +1452,16 @@ var flower = {};
             }
         }, {
             key: "setShape",
-            value: function setShape(shape) {
-                this.show.setStencil(shape.show);
+            value: function setShape(shape, flowerShape) {
+                this.shape = shape;
+                this.flowerShape = flowerShape;
+                //this.show.setStencil(shape.show);
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                flower.EnterFrame.remove(this.update, this);
+                _get(Object.getPrototypeOf(PlatformMask.prototype), "dispose", this).call(this);
             }
         }]);
 
@@ -1351,6 +1471,8 @@ var flower = {};
 
     //////////////////////////File:flower/platform/dom/PlatformTexture.js///////////////////////////
 
+
+    PlatformMask.id = 0;
 
     var PlatformTexture = function () {
         function PlatformTexture(url, texture) {
@@ -1396,6 +1518,16 @@ var flower = {};
                 if (TIP) {
                     $tip(2001, url);
                 }
+                var pstr = "?";
+                for (var key in params) {
+                    pstr += key + "=" + params[key] + "&";
+                }
+                if (pstr.charAt(pstr.length - 1) == "&") {
+                    pstr = pstr.slice(0, pstr.length - 1);
+                }
+                if (pstr != "?") {
+                    url += pstr;
+                }
                 var xhr = new XMLHttpRequest();
                 if (method == null || method == "") {
                     method = "GET";
@@ -1424,15 +1556,11 @@ var flower = {};
                     }
                     PlatformURLLoader.isLoading = false;
                 };
-                if (params && params != "") {
-                    xhr.send(params);
-                } else {
-                    xhr.send();
-                }
+                xhr.send();
             }
         }, {
             key: "loadTexture",
-            value: function loadTexture(url, back, errorBack, thisObj) {
+            value: function loadTexture(url, back, errorBack, thisObj, params) {
                 if (PlatformURLLoader.isLoading) {
                     PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
                     return;
@@ -1441,38 +1569,49 @@ var flower = {};
                 if (TIP) {
                     $tip(2002, url);
                 }
-                var image = new Image();
-                image.src = url;
-                image.onload = function () {
-                    back.call(thisObj, image, image.width, image.height);
-                    PlatformURLLoader.isLoading = false;
-                };
-
-                return;
-                cc.loader.loadImg(url, { isCrossOrigin: true }, function (err, img) {
-                    if (err) {
+                params = params || {};
+                params.img = "base64";
+                var pstr = "?";
+                for (var key in params) {
+                    pstr += key + "=" + params[key] + "&";
+                }
+                if (pstr.charAt(pstr.length - 1) == "&") {
+                    pstr = pstr.slice(0, pstr.length - 1);
+                }
+                if (pstr != "?") {
+                    url += pstr;
+                }
+                var xhr = new XMLHttpRequest();
+                var method;
+                if (method == null || method == "") {
+                    method = "GET";
+                }
+                if (method == "GET") {
+                    xhr.open("GET", url, true);
+                } else if (method == "POST") {
+                    xhr.open("POST", url, true);
+                    if (!contentType) {
+                        contentType = "application/x-www-form-urlencoded";
+                    }
+                    xhr.setRequestHeader("Content-Type", contentType);
+                } else if (method == "HEAD") {
+                    xhr.open("HEAD", url, true);
+                    xhr.open("HEAD", url, true);
+                }
+                xhr.onloadend = function () {
+                    if (xhr.status != 200) {
                         errorBack.call(thisObj);
                     } else {
-                        if (!CACHE) {
-                            cc.loader.release(url);
-                        }
-                        var texture;
-                        if (Platform.native) {
-                            texture = img;
-                        } else {
-                            texture = new cc.Texture2D();
-                            texture.initWithElement(img);
-                            texture.handleLoadedTexture();
-                        }
-                        back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                        //if (Platform.native) {
-                        //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                        //} else {
-                        //
-                        //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
-                        //}
+                        var str = xhr.responseText;
+                        var size = str.split("|")[0];
+                        var content = "data:image/png;base64," + str.split("|")[1];
+                        var width = size.split(",")[0];
+                        var height = size.split(",")[1];
+                        back.call(thisObj, content, width, height);
                     }
-                });
+                    PlatformURLLoader.isLoading = false;
+                };
+                xhr.send();
             }
         }]);
 
@@ -4260,7 +4399,7 @@ var flower = {};
                 this.__children = [];
                 this.$nativeShow = Platform.create("Mask");
                 this.__shape = this.$createShape();
-                this.$nativeShow.setShape(this.__shape.$nativeShow);
+                this.$nativeShow.setShape(this.__shape.$nativeShow, this.__shape);
             }
         }, {
             key: "$createShape",
@@ -6359,7 +6498,12 @@ var flower = {};
                         loader.addListener(Event.ERROR, this.loadError, this);
                         loader.load();
                     } else {
-                        PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextureComplete, this.loadError, this);
+                        var params = {};
+                        params.r = Math.random();
+                        for (var key in this._params) {
+                            params[key] = this._params;
+                        }
+                        PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
                     }
                 }
             }
@@ -6422,7 +6566,12 @@ var flower = {};
         }, {
             key: "loadText",
             value: function loadText() {
-                PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextComplete, this.loadError, this, this._method, this._params);
+                var params = {};
+                params.r = Math.random();
+                for (var key in this._params) {
+                    params[key] = this._params;
+                }
+                PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
             }
         }, {
             key: "loadTextComplete",

@@ -10,8 +10,30 @@ class Platform {
         RETINA = false;
         Platform.native = false;//cc.sys.isNative;
         var div = document.getElementById("FlowerMain");
+        var mask = document.createElement("div");
+        mask.style.position = "absolute";
+        mask.style.left = "0px";
+        mask.style.top = "0px";
+        mask.style.width = document.documentElement.clientWidth + "px";
+        mask.style.height = document.documentElement.clientHeight + "px";
+        document.body.appendChild(mask);
         div.appendChild(root.show);
         requestAnimationFrame.call(window, Platform._run);
+        var touchDown = false;
+        mask.onmousedown = function (e) {
+            touchDown = true;
+            engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+        }
+        mask.onmouseup = function (e) {
+            touchDown = false;
+            engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+        }
+        mask.onmousemove = function (e) {
+            engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+            if (touchDown) {
+                engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+            }
+        }
         //var scene = cc.Scene.extend({
         //    ctor: function () {
         //        this._super();
