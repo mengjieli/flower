@@ -171,7 +171,7 @@ $root.trace = trace;
 
 
 
-//////////////////////////File:flower/platform/dom/Platform.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/Platform.js///////////////////////////
 class Platform {
     static type = "cocos2dx";
     static native;
@@ -181,68 +181,68 @@ class Platform {
     static height;
 
     static start(engine, root, background) {
-        RETINA = false;
+        RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
-        //var scene = cc.Scene.extend({
-        //    ctor: function () {
-        //        this._super();
-        //        this.scheduleUpdate();
-        //        //注册鼠标事件
-        //        cc.eventManager.addListener({
-        //            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-        //            swallowTouches: true,
-        //            onTouchBegan: this.onTouchesBegan.bind(this),
-        //            onTouchMoved: this.onTouchesMoved.bind(this),
-        //            onTouchEnded: this.onTouchesEnded.bind(this)
-        //        }, this);
-        //        cc.eventManager.addListener({
-        //            event: cc.EventListener.MOUSE,
-        //            onMouseMove: this.onMouseMove.bind(this)
-        //        }, this);
-        //    },
-        //    update: function (dt) {
-        //        trace("dt", dt);
-        //    },
-        //    onMouseMove: function (e) {
-        //        engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
-        //    },
-        //    onTouchesBegan: function (touch) {
-        //        engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-        //        return true;
-        //    },
-        //    onTouchesMoved: function (touch) {
-        //        engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-        //        return true;
-        //    },
-        //    onTouchesEnded: function (touch) {
-        //        engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-        //        return true;
-        //    },
-        //});
-        //Platform.stage2 = root.show;
-        //Platform.stage = new scene();
-        //Platform.stage.update = Platform._run;
-        //cc.director.runScene(Platform.stage);
-        //Platform.width = cc.director.getWinSize().width;
-        //Platform.height = cc.director.getWinSize().height;
-        //engine.$resize(Platform.width, Platform.height);
-        //background.show.setPositionY(Platform.height);
-        //Platform.stage.addChild(background.show);
-        //root.show.setPositionY(Platform.height);
-        //Platform.stage.addChild(root.show);
-        //if ('keyboard' in cc.sys.capabilities) {
-        //    cc.eventManager.addListener({
-        //        event: cc.EventListener.KEYBOARD,
-        //        onKeyPressed: function (key, event) {
-        //            engine.$onKeyDown(key);
-        //        },
-        //        onKeyReleased: function (key, event) {
-        //            engine.$onKeyUp(key);
-        //        }
-        //    }, Platform.stage);
-        //} else {
-        //    trace("KEYBOARD Not supported");
-        //}
+        var scene = cc.Scene.extend({
+            ctor: function () {
+                this._super();
+                this.scheduleUpdate();
+                //注册鼠标事件
+                cc.eventManager.addListener({
+                    event: cc.EventListener.TOUCH_ONE_BY_ONE,
+                    swallowTouches: true,
+                    onTouchBegan: this.onTouchesBegan.bind(this),
+                    onTouchMoved: this.onTouchesMoved.bind(this),
+                    onTouchEnded: this.onTouchesEnded.bind(this)
+                }, this);
+                cc.eventManager.addListener({
+                    event: cc.EventListener.MOUSE,
+                    onMouseMove: this.onMouseMove.bind(this)
+                }, this);
+            },
+            update: function (dt) {
+                trace("dt", dt);
+            },
+            onMouseMove: function (e) {
+                engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
+            },
+            onTouchesBegan: function (touch) {
+                engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                return true;
+            },
+            onTouchesMoved: function (touch) {
+                engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                return true;
+            },
+            onTouchesEnded: function (touch) {
+                engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                return true;
+            },
+        });
+        Platform.stage2 = root.show;
+        Platform.stage = new scene();
+        Platform.stage.update = Platform._run;
+        cc.director.runScene(Platform.stage);
+        Platform.width = cc.director.getWinSize().width;
+        Platform.height = cc.director.getWinSize().height;
+        engine.$resize(Platform.width, Platform.height);
+        background.show.setPositionY(Platform.height);
+        Platform.stage.addChild(background.show);
+        root.show.setPositionY(Platform.height);
+        Platform.stage.addChild(root.show);
+        if ('keyboard' in cc.sys.capabilities) {
+            cc.eventManager.addListener({
+                event: cc.EventListener.KEYBOARD,
+                onKeyPressed: function (key, event) {
+                    engine.$onKeyDown(key);
+                },
+                onKeyReleased: function (key, event) {
+                    engine.$onKeyUp(key);
+                }
+            }, Platform.stage);
+        } else {
+            trace("KEYBOARD Not supported");
+        }
     }
 
 
@@ -266,64 +266,39 @@ class Platform {
     static create(name) {
         var pools = Platform.pools;
         if (name == "Sprite") {
-            //if (pools.Sprite && pools.Sprite.length) {
-            //    return pools.Sprite.pop();
-            //}
-            var div = document.createElement("div");
-            div.style.position = "absolute";
-            div.style.left = "0px";
-            div.style.top = "0px";
-            return div;
+            if (pools.Sprite && pools.Sprite.length) {
+                return pools.Sprite.pop();
+            }
+            return new PlatformSprite();
         }
         if (name == "Bitmap") {
-            //if (pools.Bitmap && pools.Bitmap.length) {
-            //    return pools.Bitmap.pop();
-            //}
-            var image = document.createElement("img");
-            image.style.position = "absolute";
-            image.style.left = "0px";
-            image.style.top = "0px";
-            return image;
+            if (pools.Bitmap && pools.Bitmap.length) {
+                return pools.Bitmap.pop();
+            }
+            return new PlatformBitmap();
         }
         if (name == "TextField") {
-            //if (pools.TextField && pools.TextField.length) {
-            //    return pools.TextField.pop();
-            //}
-            var em = document.createElement("em");
-            em.style.position = "absolute";
-            em.style.left = "0px";
-            em.style.top = "0px";
-            em.style["font-style"] = "normal";
-            return em;
+            if (pools.TextField && pools.TextField.length) {
+                return pools.TextField.pop();
+            }
+            return new PlatformTextField();
         }
         if (name == "TextInput") {
-            //if (pools.TextInput && pools.TextInput.length) {
-            //    return pools.TextInput.pop();
-            //}
-            var input = document.createElement("input");
-            input.style.position = "absolute";
-            input.style.left = "0px";
-            input.style.top = "0px";
-            return input;
+            if (pools.TextInput && pools.TextInput.length) {
+                return pools.TextInput.pop();
+            }
+            return new PlatformTextInput();
         }
         if (name == "Shape") {
-            //if (pools.Shape && pools.Shape.length) {
-            //    return pools.Shape.pop();
-            //}
-            var shape = document.createElement("div");
-            shape.style.position = "absolute";
-            shape.style.left = "0px";
-            shape.style.top = "0px";
-            return shape;
+            if (pools.Shape && pools.Shape.length) {
+                return pools.Shape.pop();
+            }
+            return new PlatformShape();
         }
         if (name == "Mask") {
-            //if (pools.Mask && pools.Mask.length) {
-            //    return pools.Mask.pop();
-            //}
-            var mask = document.createElement("div");
-            mask.style.position = "absolute";
-            mask.style.left = "0px";
-            mask.style.top = "0px";
+            if (pools.Mask && pools.Mask.length) {
+                return pools.Mask.pop();
+            }
             return new PlatformMask();
         }
         return null;
@@ -336,6 +311,7 @@ class Platform {
             pools[name] = [];
         }
         pools[name].push(object);
+
     }
 
 
@@ -372,11 +348,11 @@ class Platform {
         };
     }
 }
-//////////////////////////End File:flower/platform/dom/Platform.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/Platform.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformDisplayObject.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformDisplayObject.js///////////////////////////
 class PlatformDisplayObject {
 
     show;
@@ -649,11 +625,11 @@ class PlatformDisplayObject {
         }
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformDisplayObject.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformDisplayObject.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformSprite.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
 class PlatformSprite extends PlatformDisplayObject {
 
     constructor() {
@@ -685,11 +661,11 @@ class PlatformSprite extends PlatformDisplayObject {
 
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformSprite.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformSprite.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformTextField.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
 class PlatformTextField extends PlatformDisplayObject {
 
     static $mesureTxt;
@@ -789,13 +765,13 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 }
 
-//PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
-//PlatformTextField.$mesureTxt.retain();
-//////////////////////////End File:flower/platform/dom/PlatformTextField.js///////////////////////////
+PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
+PlatformTextField.$mesureTxt.retain();
+//////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformTextInput.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
 class PlatformTextInput extends PlatformDisplayObject {
 
     static $mesureTxt;
@@ -823,6 +799,10 @@ class PlatformTextInput extends PlatformDisplayObject {
         //} else {
         //    this.show.setDelegate(this);
         //}
+    }
+
+    setSize(width,height) {
+
     }
 
     setFontColor(color) {
@@ -956,11 +936,11 @@ class PlatformTextInput extends PlatformDisplayObject {
 
 PlatformTextInput.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
 PlatformTextInput.$mesureTxt.retain();
-//////////////////////////End File:flower/platform/dom/PlatformTextInput.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformBitmap.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
 class PlatformBitmap extends PlatformDisplayObject {
 
     __texture = null;
@@ -1151,11 +1131,11 @@ class PlatformBitmap extends PlatformDisplayObject {
         super.release();
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformBitmap.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformBitmap.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformShape.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformShape.js///////////////////////////
 class PlatformShape extends PlatformDisplayObject {
     constructor() {
         super();
@@ -1201,11 +1181,11 @@ class PlatformShape extends PlatformDisplayObject {
         super.release();
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformShape.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformShape.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformMask.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformMask.js///////////////////////////
 class PlatformMask extends PlatformSprite {
 
     constructor() {
@@ -1222,11 +1202,11 @@ class PlatformMask extends PlatformSprite {
         this.show.setStencil(shape.show);
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformMask.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformMask.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformTexture.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
 class PlatformTexture {
 
     textrue;
@@ -1247,11 +1227,11 @@ class PlatformTexture {
         this.textrue = null;
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformTexture.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformTexture.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformURLLoader.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
 class PlatformURLLoader {
 
     static isLoading = false;
@@ -1267,6 +1247,16 @@ class PlatformURLLoader {
             $tip(2001, url);
         }
         if (url.slice(0, "http://".length) == "http://") {
+            var pstr = "?";
+            for (var key in params) {
+                pstr += key + "=" + params[key] + "&";
+            }
+            if (pstr.charAt(pstr.length - 1) == "&") {
+                pstr = pstr.slice(0, pstr.length - 1);
+            }
+            if (pstr != "?") {
+                url += pstr;
+            }
             var xhr = cc.loader.getXMLHttpRequest();
             if (method == null || method == "") {
                 method = "GET";
@@ -1307,11 +1297,7 @@ class PlatformURLLoader {
             //        errorBack.call(thisObj);
             //    }
             //};
-            if (params && params != "") {
-                xhr.send(params);
-            } else {
-                xhr.send();
-            }
+            xhr.send();
         } else {
             var res;
             var end = url.split(".")[url.split(".").length - 1];
@@ -1370,7 +1356,6 @@ class PlatformURLLoader {
                 //if (Platform.native) {
                 //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
                 //} else {
-                //
                 //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
                 //}
             }
@@ -1378,11 +1363,11 @@ class PlatformURLLoader {
         });
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformURLLoader.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformProgram.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformProgram.js///////////////////////////
 class PlatformProgram {
 
     $nativeProgrammer;
@@ -1453,11 +1438,11 @@ class PlatformProgram {
         return PlatformProgram.instance;
     }
 }
-//////////////////////////End File:flower/platform/dom/PlatformProgram.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformProgram.js///////////////////////////
 
 
 
-//////////////////////////File:flower/platform/dom/PlatformWebSocket.js///////////////////////////
+//////////////////////////File:flower/platform/cocos2dx/PlatformWebSocket.js///////////////////////////
 class PlatformWebSocket {
 
     webSocket;
@@ -1535,7 +1520,7 @@ class PlatformWebSocket {
 
     static webSockets = [];
 }
-//////////////////////////End File:flower/platform/dom/PlatformWebSocket.js///////////////////////////
+//////////////////////////End File:flower/platform/cocos2dx/PlatformWebSocket.js///////////////////////////
 
 
 
@@ -3823,7 +3808,7 @@ class Mask extends Sprite {
         this.__children = [];
         this.$nativeShow = Platform.create("Mask");
         this.__shape = this.$createShape();
-        this.$nativeShow.setShape(this.__shape.$nativeShow);
+        this.$nativeShow.setShape(this.__shape.$nativeShow,this.__shape);
     }
 
     $createShape() {
@@ -4225,6 +4210,8 @@ class TextInput extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
+        this.width = 100;
+        this.height = 21;
         this.focusEnabled = true;
         this.$nativeShow.setChangeBack(this.$onTextChange, this);
     }
@@ -4307,6 +4294,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
+        this.$nativeShow.setSize(this.width,this.height);
     }
 
     $setHeight(val) {
@@ -4322,6 +4310,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
+        this.$nativeShow.setSize(this.width,this.height);
     }
 
     $setEditEnabled(val) {
@@ -5801,7 +5790,12 @@ class URLLoader extends EventDispatcher {
                 loader.addListener(Event.ERROR, this.loadError, this);
                 loader.load();
             } else {
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextureComplete, this.loadError, this);
+                var params = {};
+                params.r = Math.random();
+                for (var key in this._params) {
+                    params[key] = this._params;
+                }
+                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
             }
         }
     }
@@ -5857,7 +5851,12 @@ class URLLoader extends EventDispatcher {
     }
 
     loadText() {
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url + (URLLoader.urlHead != "" ? "?r=" + Math.random() : ""), this.loadTextComplete, this.loadError, this, this._method, this._params);
+        var params = {};
+        params.r = Math.random();
+        for (var key in this._params) {
+            params[key] = this._params;
+        }
+        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {

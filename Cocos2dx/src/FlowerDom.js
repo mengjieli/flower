@@ -228,6 +228,10 @@ var flower = {};
                         engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
                     }
                 };
+                Platform.width = document.documentElement.clientWidth;
+                Platform.height = document.documentElement.clientHeight;
+                engine.$resize(Platform.width, Platform.height);
+
                 //var scene = cc.Scene.extend({
                 //    ctor: function () {
                 //        this._super();
@@ -824,7 +828,7 @@ var flower = {};
                             txt.innerHTML = txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
                         }
                         //如果文字的高度已经大于设定的高，回退一次
-                        if (!autoSize && height && txt.getContentSize().height * (RETINA ? 1 / 2.0 : 1) > height) {
+                        if (!autoSize && height && txt.offsetHeight > height) {
                             txt.innerHTML = txtText;
                             break;
                         } else {
@@ -891,23 +895,9 @@ var flower = {};
             input.style.position = "absolute";
             input.style.left = "0px";
             input.style.top = "0px";
+            input.style["font-style"] = "normal";
             input.style["transform-origin"] = "left top";
             _this3.show = input;
-            //this.show = new cc.TextFieldTTF();
-            //if (Platform.native) {
-            //    this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
-            //} else {
-            //    this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
-            //}
-            //this.show.setAnchorPoint(0, 1);
-            //this.show.retain();
-            //this.setFontColor(0);
-            //this.setScaleX(1);
-            //this.setScaleY(1);
-            //if (Platform.native) {
-            //} else {
-            //    this.show.setDelegate(this);
-            //}
             return _this3;
         }
 
@@ -919,6 +909,13 @@ var flower = {};
                 } else {
                     this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
                 }
+            }
+        }, {
+            key: "setSize",
+            value: function setSize(width, height) {
+                var txt = this.show;
+                txt.style.width = width + "px";
+                txt.style.width = height + "px";
             }
         }, {
             key: "setChangeBack",
@@ -950,7 +947,7 @@ var flower = {};
         }, {
             key: "getNativeText",
             value: function getNativeText() {
-                return this.show.getString();
+                return this.show.value;
             }
         }, {
             key: "changeText",
@@ -959,11 +956,11 @@ var flower = {};
                 $mesureTxt.style.fontSize = size + "px";
                 var txt = this.show;
                 txt.style.fontSize = size + "px";
-                txt.text = "";
+                txt.value = "";
                 var txtText = "";
                 var start = 0;
                 if (text == "") {
-                    txt.innerHTML = "";
+                    txt.value = "";
                 }
                 for (var i = 0; i < text.length; i++) {
                     //取一行文字进行处理
@@ -982,13 +979,13 @@ var flower = {};
                         }
                         if (wordWrap && changeLine) {
                             i = findEnd;
-                            txt.innerHTML = txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                            txt.value = txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
                         } else {
-                            txt.innerHTML = txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                            txt.value = txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
                         }
                         //如果文字的高度已经大于设定的高，回退一次
-                        if (!autoSize && height && txt.getContentSize().height * (RETINA ? 1 / 2.0 : 1) > height) {
-                            txt.innerHTML = txtText;
+                        if (!autoSize && height && txt.offsetHeight > height) {
+                            txt.value = txtText;
                             break;
                         } else {
                             txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
@@ -1002,10 +999,9 @@ var flower = {};
                         }
                     }
                 }
-                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\n", "</br>");
-                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\r", "</br>");
-                $mesureTxt.innerHTML = txt.innerHTML;
-                txt.style.width = $mesureTxt.offsetWidth + "px";
+                txt.value = flower.StringDo.replaceString(txt.value, "\n", "</br>");
+                txt.value = flower.StringDo.replaceString(txt.value, "\r", "</br>");
+                $mesureTxt.innerHTML = txt.value;
                 return {
                     width: $mesureTxt.offsetWidth,
                     height: $mesureTxt.offsetHeight
@@ -1017,12 +1013,13 @@ var flower = {};
         }, {
             key: "startInput",
             value: function startInput() {
-                this.show.attachWithIME();
+                this.show.focus();
+                //this.show.attachWithIME();
             }
         }, {
             key: "stopInput",
             value: function stopInput() {
-                this.show.detachWithIME();
+                //this.show.detachWithIME();
             }
         }, {
             key: "release",
@@ -4838,6 +4835,8 @@ var flower = {};
             if (text != "") {
                 _this19.text = text;
             }
+            _this19.width = 100;
+            _this19.height = 21;
             _this19.focusEnabled = true;
             _this19.$nativeShow.setChangeBack(_this19.$onTextChange, _this19);
             return _this19;
@@ -4928,6 +4927,7 @@ var flower = {};
                 }
                 this.$addFlags(0x0800);
                 this.$invalidateContentBounds();
+                this.$nativeShow.setSize(this.width, this.height);
             }
         }, {
             key: "$setHeight",
@@ -4944,6 +4944,7 @@ var flower = {};
                 }
                 this.$addFlags(0x0800);
                 this.$invalidateContentBounds();
+                this.$nativeShow.setSize(this.width, this.height);
             }
         }, {
             key: "$setEditEnabled",

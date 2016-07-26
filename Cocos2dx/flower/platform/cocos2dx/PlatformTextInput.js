@@ -27,6 +27,10 @@ class PlatformTextInput extends PlatformDisplayObject {
         //}
     }
 
+    setSize(width,height) {
+
+    }
+
     setFontColor(color) {
         if (Platform.native) {
             this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});

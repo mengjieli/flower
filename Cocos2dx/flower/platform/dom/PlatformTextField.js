@@ -56,7 +56,7 @@ class PlatformTextField extends PlatformDisplayObject {
                     txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 }
                 //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
+                if (!autoSize && height && txt.offsetHeight > height) {
                     txt.innerHTML = (txtText);
                     break;
                 } else {

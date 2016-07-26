@@ -19,6 +19,8 @@ class TextInput extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
+        this.width = 100;
+        this.height = 21;
         this.focusEnabled = true;
         this.$nativeShow.setChangeBack(this.$onTextChange, this);
     }
@@ -101,6 +103,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
+        this.$nativeShow.setSize(this.width,this.height);
     }
 
     $setHeight(val) {
@@ -116,6 +119,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
+        this.$nativeShow.setSize(this.width,this.height);
     }
 
     $setEditEnabled(val) {

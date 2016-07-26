@@ -34,6 +34,11 @@ class Platform {
                 engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
             }
         }
+        Platform.width = document.documentElement.clientWidth;
+        Platform.height = document.documentElement.clientHeight;
+        engine.$resize(Platform.width, Platform.height);
+
+
         //var scene = cc.Scene.extend({
         //    ctor: function () {
         //        this._super();

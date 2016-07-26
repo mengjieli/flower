@@ -83,6 +83,7 @@ cc.game.onStart = function () {
             "src/Remote.js"
         ].concat(jsFiles);
         cc.loader.loadJs(jsFiles, function (err) {
+            new Main();
         });
     });
 };

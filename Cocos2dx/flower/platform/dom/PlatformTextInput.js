@@ -14,23 +14,9 @@ class PlatformTextInput extends PlatformDisplayObject {
         input.style.position = "absolute";
         input.style.left = "0px";
         input.style.top = "0px";
+        input.style["font-style"] = "normal";
         input.style["transform-origin"] = "left top";
         this.show = input;
-        //this.show = new cc.TextFieldTTF();
-        //if (Platform.native) {
-        //    this.show.setSystemFontSize((RETINA ? 2.0 : 1) * 12);
-        //} else {
-        //    this.show.setFontSize((RETINA ? 2.0 : 1) * 12);
-        //}
-        //this.show.setAnchorPoint(0, 1);
-        //this.show.retain();
-        //this.setFontColor(0);
-        //this.setScaleX(1);
-        //this.setScaleY(1);
-        //if (Platform.native) {
-        //} else {
-        //    this.show.setDelegate(this);
-        //}
     }
 
     setFontColor(color) {
@@ -39,6 +25,12 @@ class PlatformTextInput extends PlatformDisplayObject {
         } else {
             this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
         }
+    }
+
+    setSize(width, height) {
+        var txt = this.show;
+        txt.style.width = width + "px";
+        txt.style.width = height + "px";
     }
 
     setChangeBack(changeBack, thisObj) {
@@ -66,7 +58,7 @@ class PlatformTextInput extends PlatformDisplayObject {
     }
 
     getNativeText() {
-        return this.show.getString();
+        return this.show.value;
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
@@ -74,11 +66,11 @@ class PlatformTextInput extends PlatformDisplayObject {
         $mesureTxt.style.fontSize = size + "px";
         var txt = this.show;
         txt.style.fontSize = size + "px";
-        txt.text = "";
+        txt.value = "";
         var txtText = "";
         var start = 0;
         if (text == "") {
-            txt.innerHTML = "";
+            txt.value = "";
         }
         for (var i = 0; i < text.length; i++) {
             //取一行文字进行处理
@@ -97,13 +89,13 @@ class PlatformTextInput extends PlatformDisplayObject {
                 }
                 if (wordWrap && changeLine) {
                     i = findEnd;
-                    txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.value = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 } else {
-                    txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                    txt.value = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
                 }
                 //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
-                    txt.innerHTML = (txtText);
+                if (!autoSize && height && txt.offsetHeight > height) {
+                    txt.value = (txtText);
                     break;
                 } else {
                     txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
@@ -117,10 +109,9 @@ class PlatformTextInput extends PlatformDisplayObject {
                 }
             }
         }
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
-        $mesureTxt.innerHTML = txt.innerHTML;
-        txt.style.width = $mesureTxt.offsetWidth + "px";
+        txt.value = flower.StringDo.replaceString(txt.value, "\n", "</br>");
+        txt.value = flower.StringDo.replaceString(txt.value, "\r", "</br>");
+        $mesureTxt.innerHTML = txt.value;
         return {
             width: $mesureTxt.offsetWidth,
             height: $mesureTxt.offsetHeight
@@ -132,11 +123,12 @@ class PlatformTextInput extends PlatformDisplayObject {
     }
 
     startInput() {
-        this.show.attachWithIME();
+        this.show.focus();
+        //this.show.attachWithIME();
     }
 
     stopInput() {
-        this.show.detachWithIME();
+        //this.show.detachWithIME();
     }
 
     release() {
