@@ -1048,7 +1048,10 @@ var $root = eval("this");
 
             var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
 
-            _this5.__old = _this5.__value = init;
+            if (init == "false") {
+                init = false;
+            }
+            _this5.__old = _this5.__value = !!init;
             return _this5;
         }
 
@@ -1064,7 +1067,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWidth(flower.Event.UPDATE, this, val);
             }
         }]);
 
@@ -1086,7 +1089,7 @@ var $root = eval("this");
 
             var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
 
-            _this6.__old = _this6.__value = init;
+            _this6.__old = _this6.__value = +init & ~0 || 0;
             return _this6;
         }
 
@@ -1099,7 +1102,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWidth(flower.Event.UPDATE, this, val);
             }
         }]);
 
@@ -1121,7 +1124,7 @@ var $root = eval("this");
 
             var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
 
-            _this7.__old = _this7.__value = init;
+            _this7.__old = _this7.__value = +init || 0;
             return _this7;
         }
 
@@ -1134,7 +1137,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWidth(flower.Event.UPDATE, this, val);
             }
         }]);
 
@@ -1232,7 +1235,7 @@ var $root = eval("this");
 
             var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
 
-            _this9.__old = _this9.__value = init;
+            _this9.__old = _this9.__value = "" + init;
             return _this9;
         }
 
@@ -1245,7 +1248,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWidth(flower.Event.UPDATE, this, val);
             }
         }]);
 
@@ -1267,6 +1270,10 @@ var $root = eval("this");
 
             var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
 
+            init = +init & ~0 || 0;
+            if (init < 0) {
+                init = 0;
+            }
             _this10.__old = _this10.__value = init;
             return _this10;
         }
@@ -1283,7 +1290,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWidth(flower.Event.UPDATE, this, val);
             }
         }]);
 

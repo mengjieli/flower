@@ -933,11 +933,14 @@ class BooleanValue extends Value {
 
     constructor(init = false) {
         super();
-        this.__old = this.__value = init;
+        if(init == "false") {
+            init = false;
+        }
+        this.__old = this.__value = !!init;
     }
 
     $setValue(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;
@@ -946,7 +949,7 @@ class BooleanValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
 }
 
@@ -960,7 +963,7 @@ class IntValue extends Value {
 
     constructor(init = 0) {
         super();
-        this.__old = this.__value = init;
+        this.__old = this.__value = +init & ~0 || 0;
     }
 
     $setValue(val) {
@@ -970,7 +973,7 @@ class IntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
 }
 
@@ -984,7 +987,7 @@ class NumberValue extends Value {
 
     constructor(init = 0) {
         super();
-        this.__old = this.__value = init;
+        this.__old = this.__value = +init || 0;
     }
 
     $setValue(val) {
@@ -994,7 +997,7 @@ class NumberValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
 }
 
@@ -1073,7 +1076,7 @@ class StringValue extends Value {
 
     constructor(init = "") {
         super();
-        this.__old = this.__value = init;
+        this.__old = this.__value = "" + init;
     }
 
     $setValue(val) {
@@ -1083,7 +1086,7 @@ class StringValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
 }
 
@@ -1097,6 +1100,10 @@ class UIntValue extends Value {
 
     constructor(init = 0) {
         super();
+        init = +init & ~0 || 0;
+        if (init < 0) {
+            init = 0;
+        }
         this.__old = this.__value = init;
     }
 
@@ -1110,7 +1117,7 @@ class UIntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
 }
 

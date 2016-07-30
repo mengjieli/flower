@@ -2,7 +2,7 @@ class NumberValue extends Value {
 
     constructor(init = 0) {
         super();
-        this.__old = this.__value = init;
+        this.__old = this.__value = +init || 0;
     }
 
     $setValue(val) {

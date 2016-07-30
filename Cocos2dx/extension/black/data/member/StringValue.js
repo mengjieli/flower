@@ -2,7 +2,7 @@ class StringValue extends Value {
 
     constructor(init = "") {
         super();
-        this.__old = this.__value = init;
+        this.__old = this.__value = "" + init;
     }
 
     $setValue(val) {

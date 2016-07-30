@@ -6,8 +6,13 @@ var UI = (function (_super) {
         _super.call(this);
         this.data = data;
         this.info = info;
-        this.init();
         this.focusEnabeld = true;
+        this.addListener(flower.Event.ADDED,this.onAdded,this);
+    }
+
+    UI.prototype.onAdded = function(e) {
+        this.removeListener(flower.Event.ADDED,this.onAdded,this);
+        this.init();
     }
 
     UI.prototype.init = function () {
@@ -19,11 +24,10 @@ var UI = (function (_super) {
             this.percentHeight = 100;
         }
         this.editor = new editor.UIEditor(this.data, this.display);
-        //flower.breakPoint();
         var atrs = ["x", "y", "width", "height", "scaleX", "scaleY", "rotation", "left", "right", "top", "bottom"];
         for (var i = 0; i < atrs.length; i++) {
             var atr = data.getAttribute(atrs[i]);
-            if (!atr) continue;
+            if (!atr || atr.exist == false) continue;
             var display;
             if (data.isContainer) {
                 display = this;
@@ -44,8 +48,10 @@ var UI = (function (_super) {
                 display[atrs[i]] = atr;
             }
         }
+        flower.breakPoint();
         for (var i = 0; i < data.numElement; i++) {
             var childData = data.getElementAt(i);
+            console.log("childData",childData);
             if (childData.isDisplay) {
                 var child = new UI(childData, this.info);
                 this.addChild(child);
@@ -82,6 +88,11 @@ var UI = (function (_super) {
 
     UI.prototype.unselected = function () {
         this.editor.hide();
+    }
+
+    UI.prototype.dispose = function() {
+        this.editor.dispose();
+        _super.dispose.call(this);
     }
 
     return UI;

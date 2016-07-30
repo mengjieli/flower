@@ -67,6 +67,7 @@ var UIEditor = (function (_super) {
             this.box.fillAlpha = 0;
             this.box.lineWidth = 1;
             this.box.lineColor = 0x000000;
+            this.box.touchEnabled = false;
             this.addChild(this.box);
         }
         this.box.clear();

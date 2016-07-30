@@ -29,12 +29,13 @@ var UIElement = (function (_super) {
         this.__isUIComponent = display.__UIComponent ? true : false;
         if (this.isDisplay) {
             var names = ["x", "y", "width", "height", "rotation", "scaleX", "scaleY"];
+            var inits = [0, 0, 0, 0, 0, 1, 1];
             for (var i = 0; i < names.length; i++) {
                 var attribute = xml.getAttribute(names[i]);
                 if (attribute) {
                     this.attributes[names[i]] = new flower.NumberValue(attribute.value);
                 } else {
-                    this.attributes[names[i]] = new flower.NumberValue();
+                    this.attributes[names[i]] = new flower.NumberValue(inits[i]);
                     this.attributes[names[i]].exist = false;
                 }
             }
@@ -127,7 +128,7 @@ var UIElement = (function (_super) {
 
     Object.defineProperty(UIElement.prototype, "numElement", {
         get: function () {
-            return this.attributes.length;
+            return this.elements.length;
         },
         set: function (val) {
         },
