@@ -4,9 +4,10 @@ function init() {
 
 function onSelectElement(e) {
     this.data = e.data;
-    flower.breakPoint();
-    this.xInput.bindProperty("text", "{data.attributes.x==null?'':data.attributes.x}", [this]);
-    this.yInput.bindProperty("text", "{data.attributes.y==null?'':data.attributes.y}", [this]);
-    this.widthInput.bindProperty("text", "{data.attributes.width==null?'':data.attributes.width}", [this]);
-    this.heightInput.bindProperty("text", "{data.attributes.height==null?'':data.attributes.height}", [this]);
+    this.xInput.bindProperty("text", "{data.attributes.x==null?'0':data.attributes.x}", [this]);
+    this.yInput.bindProperty("text", "{data.attributes.y==null?'0':data.attributes.y}", [this]);
+    this.widthInput.bindProperty("text", "{data.attributes.width==null?'0':data.attributes.width}", [this]);
+    this.heightInput.bindProperty("text", "{data.attributes.height==null?'0':data.attributes.height}", [this]);
+    this.scaleXInput.bindProperty("text", "{data.attributes.scaleX==null?'1':data.attributes.x}", [this]);
+    this.scaleYInput.bindProperty("text", "{data.attributes.scaleY==null?'1':data.attributes.y}", [this]);
 }

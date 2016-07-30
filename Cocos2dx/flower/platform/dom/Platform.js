@@ -17,6 +17,7 @@ class Platform {
         mask.style.width = document.documentElement.clientWidth + "px";
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
+        div.appendChild(engine.$background.$nativeShow.show);
         div.appendChild(root.show);
         requestAnimationFrame.call(window, Platform._run);
         var touchDown = false;
@@ -37,68 +38,6 @@ class Platform {
         Platform.width = document.documentElement.clientWidth;
         Platform.height = document.documentElement.clientHeight;
         engine.$resize(Platform.width, Platform.height);
-
-
-        //var scene = cc.Scene.extend({
-        //    ctor: function () {
-        //        this._super();
-        //        this.scheduleUpdate();
-        //        //注册鼠标事件
-        //        cc.eventManager.addListener({
-        //            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-        //            swallowTouches: true,
-        //            onTouchBegan: this.onTouchesBegan.bind(this),
-        //            onTouchMoved: this.onTouchesMoved.bind(this),
-        //            onTouchEnded: this.onTouchesEnded.bind(this)
-        //        }, this);
-        //        cc.eventManager.addListener({
-        //            event: cc.EventListener.MOUSE,
-        //            onMouseMove: this.onMouseMove.bind(this)
-        //        }, this);
-        //    },
-        //    update: function (dt) {
-        //        trace("dt", dt);
-        //    },
-        //    onMouseMove: function (e) {
-        //        engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
-        //    },
-        //    onTouchesBegan: function (touch) {
-        //        engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-        //        return true;
-        //    },
-        //    onTouchesMoved: function (touch) {
-        //        engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-        //        return true;
-        //    },
-        //    onTouchesEnded: function (touch) {
-        //        engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-        //        return true;
-        //    },
-        //});
-        //Platform.stage2 = root.show;
-        //Platform.stage = new scene();
-        //Platform.stage.update = Platform._run;
-        //cc.director.runScene(Platform.stage);
-        //Platform.width = cc.director.getWinSize().width;
-        //Platform.height = cc.director.getWinSize().height;
-        //engine.$resize(Platform.width, Platform.height);
-        //background.show.setPositionY(Platform.height);
-        //Platform.stage.addChild(background.show);
-        //root.show.setPositionY(Platform.height);
-        //Platform.stage.addChild(root.show);
-        //if ('keyboard' in cc.sys.capabilities) {
-        //    cc.eventManager.addListener({
-        //        event: cc.EventListener.KEYBOARD,
-        //        onKeyPressed: function (key, event) {
-        //            engine.$onKeyDown(key);
-        //        },
-        //        onKeyReleased: function (key, event) {
-        //            engine.$onKeyUp(key);
-        //        }
-        //    }, Platform.stage);
-        //} else {
-        //    trace("KEYBOARD Not supported");
-        //}
     }
 
 

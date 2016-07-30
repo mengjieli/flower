@@ -94,6 +94,17 @@ var UIElement = (function (_super) {
         return this.attributes[name];
     }
 
+    UIElement.prototype.getAttributeValue = function (name) {
+        var val = this.attributes[name];
+        if (val && val instanceof flower.Value) {
+            val = val.value;
+            if (flower.StringDo.isNumberString(val)) {
+                val = +val || 0;
+            }
+        }
+        return val;
+    }
+
     UIElement.prototype.getAttributeElementAt = function (index) {
         return this.attributesElements[index];
     }

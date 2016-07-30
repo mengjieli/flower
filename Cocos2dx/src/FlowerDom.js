@@ -211,6 +211,7 @@ var flower = {};
                 mask.style.width = document.documentElement.clientWidth + "px";
                 mask.style.height = document.documentElement.clientHeight + "px";
                 document.body.appendChild(mask);
+                div.appendChild(engine.$background.$nativeShow.show);
                 div.appendChild(root.show);
                 requestAnimationFrame.call(window, Platform._run);
                 var touchDown = false;
@@ -231,67 +232,6 @@ var flower = {};
                 Platform.width = document.documentElement.clientWidth;
                 Platform.height = document.documentElement.clientHeight;
                 engine.$resize(Platform.width, Platform.height);
-
-                //var scene = cc.Scene.extend({
-                //    ctor: function () {
-                //        this._super();
-                //        this.scheduleUpdate();
-                //        //注册鼠标事件
-                //        cc.eventManager.addListener({
-                //            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-                //            swallowTouches: true,
-                //            onTouchBegan: this.onTouchesBegan.bind(this),
-                //            onTouchMoved: this.onTouchesMoved.bind(this),
-                //            onTouchEnded: this.onTouchesEnded.bind(this)
-                //        }, this);
-                //        cc.eventManager.addListener({
-                //            event: cc.EventListener.MOUSE,
-                //            onMouseMove: this.onMouseMove.bind(this)
-                //        }, this);
-                //    },
-                //    update: function (dt) {
-                //        trace("dt", dt);
-                //    },
-                //    onMouseMove: function (e) {
-                //        engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
-                //    },
-                //    onTouchesBegan: function (touch) {
-                //        engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                //        return true;
-                //    },
-                //    onTouchesMoved: function (touch) {
-                //        engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                //        return true;
-                //    },
-                //    onTouchesEnded: function (touch) {
-                //        engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                //        return true;
-                //    },
-                //});
-                //Platform.stage2 = root.show;
-                //Platform.stage = new scene();
-                //Platform.stage.update = Platform._run;
-                //cc.director.runScene(Platform.stage);
-                //Platform.width = cc.director.getWinSize().width;
-                //Platform.height = cc.director.getWinSize().height;
-                //engine.$resize(Platform.width, Platform.height);
-                //background.show.setPositionY(Platform.height);
-                //Platform.stage.addChild(background.show);
-                //root.show.setPositionY(Platform.height);
-                //Platform.stage.addChild(root.show);
-                //if ('keyboard' in cc.sys.capabilities) {
-                //    cc.eventManager.addListener({
-                //        event: cc.EventListener.KEYBOARD,
-                //        onKeyPressed: function (key, event) {
-                //            engine.$onKeyDown(key);
-                //        },
-                //        onKeyReleased: function (key, event) {
-                //            engine.$onKeyUp(key);
-                //        }
-                //    }, Platform.stage);
-                //} else {
-                //    trace("KEYBOARD Not supported");
-                //}
             }
         }, {
             key: "_run",
@@ -1353,31 +1293,18 @@ var flower = {};
                         div.style.top = points[0].y + "px";
                         div.style.width = points[1].x - points[0].x + "px";
                         div.style.height = points[2].y - points[0].y + "px";
-                        var color = //"rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + fillColor & 0xFF + "," + fillAlpha + ")";
-                        "#" + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF);
+                        var color = "#" + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF);
                         div.style.backgroundColor = color;
                         div.style.opacity = fillAlpha;
+                        if (lineAlpha && lineWidth) {
+                            color = "#" + this.toColor16(lineColor >> 16) + this.toColor16(lineColor >> 8 & 0xFF) + this.toColor16(lineColor & 0xFF);
+                            div.style.border = lineWidth + "px solid " + color;
+                            //div.style.borderWidth = lineWidth + "px";
+                        }
+
                         this.show.appendChild(div);
                         this.elements.push(div);
                     }
-                //var shape = this.show;
-                //for (var i = 0; i < points.length; i++) {
-                //    points[i].y = points[i].y;
-                //}
-                //shape.drawPoly(points, {
-                //    r: fillColor >> 16,
-                //    g: fillColor >> 8 & 0xFF,
-                //    b: fillColor & 0xFF,
-                //    a: fillAlpha * 255
-                //}, lineWidth, {
-                //    r: lineColor >> 16,
-                //    g: lineColor >> 8 & 0xFF,
-                //    b: lineColor & 0xFF,
-                //    a: lineAlpha * 255
-                //});
-                //for (var i = 0; i < points.length; i++) {
-                //    points[i].y = -points[i].y;
-                //}
             }
         }, {
             key: "clear",
@@ -1385,7 +1312,6 @@ var flower = {};
                 while (this.elements.length) {
                     this.show.removeChild(this.elements.pop());
                 }
-                //this.show.clear();
             }
         }, {
             key: "setAlpha",

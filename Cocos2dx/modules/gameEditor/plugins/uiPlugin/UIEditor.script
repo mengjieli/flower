@@ -5,7 +5,6 @@ var UIEditor = (function (_super) {
     function UIEditor(data, display) {
         _super.call(this);
         this.data = data;
-        this.attributes = {};
         this.display = display;
         this.width = this.height = 0;
         if (data.isContainer) {
@@ -43,20 +42,22 @@ var UIEditor = (function (_super) {
     }
 
     UIEditor.prototype.getAttribute = function (name) {
-        var value = this.data.getAttribute(name);
-        return this.data.getAttribute(name);
+        return this.data.getAttributeValue(name);
     }
 
     UIEditor.prototype.update = function () {
         var bounds = this.display.contentBounds;
         var width = bounds.width;
         var height = bounds.height;
-        if (this.getAttribute("width") != null && typeof this.getAttribute("width") != "string") {
-            width = this.attributes.width;
+        var atrWidth = this.getAttribute("width");
+        if (atrWidth != null && typeof atrWidth != "string") {
+            width = atrWidth;
         }
-        if (this.getAttribute("height") != null && typeof this.getAttribute("height") != "string") {
-            height = this.attributes.height;
+        var atrHeight = this.getAttribute("height");
+        if (atrHeight != null && typeof atrHeight != "string") {
+            height = atrHeight;
         }
+        console.log("width", width, "height", height);
         var x = bounds.x + this.getAttribute("x") || 0;
         var y = bounds.y + this.getAttribute("y") || 0;
         var scaleX = this.getAttribute("scaleX") || 1;
