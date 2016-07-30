@@ -33,7 +33,11 @@ class PlatformDisplayObject {
     }
 
     setVisible(val) {
-        this.show.style.display = "none";
+        if (val) {
+            this.show.style.display = "";
+        } else {
+            this.show.style.display = "none";
+        }
     }
 
     setWidth(val) {

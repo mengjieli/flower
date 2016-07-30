@@ -418,7 +418,11 @@ class PlatformDisplayObject {
     }
 
     setVisible(val) {
-        this.show.style.display = "none";
+        if (val) {
+            this.show.style.display = "";
+        } else {
+            this.show.style.display = "none";
+        }
     }
 
     setWidth(val) {
@@ -852,7 +856,7 @@ class PlatformTextInput extends PlatformDisplayObject {
     setSize(width, height) {
         var txt = this.show;
         txt.style.width = width + "px";
-        txt.style.width = height + "px";
+        //txt.style.height = height + "px";
     }
 
     setChangeBack(changeBack, thisObj) {
@@ -1252,8 +1256,10 @@ class PlatformShape extends PlatformDisplayObject {
             div.style.top = points[0].y + "px";
             div.style.width = points[1].x - points[0].x + "px";
             div.style.height = points[2].y - points[0].y + "px";
-            var color = "#" + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF);
+            var color = //"rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + fillColor & 0xFF + "," + fillAlpha + ")";
+            "#" + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF);
             div.style.backgroundColor = color;
+            div.style.opacity = fillAlpha;
             this.show.appendChild(div);
             this.elements.push(div);
         }

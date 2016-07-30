@@ -68,6 +68,22 @@ var Main = function () {
             //mask.x = 200;
             //mask.y = 200;
 
+            //var shape = new flower.Shape();
+            //shape.fillColor = 0x00ff00;
+            //shape.drawRect(0,0,100,20);
+            //flower.Stage.getInstance().addChild(shape);
+            //shape.x = shape.y = 100;
+            //shape.addListener(flower.TouchEvent.TOUCH_BEGIN,function(e){
+            //    console.log("click");
+            //    shape.clear();
+            //    shape.fillColor = 0xff0000;
+            //    shape.drawRect(-50,-50,100,20);
+            //});
+            //
+            //var input = new flower.TextInput();
+            //input.x = input.y = 20;
+            //flower.Stage.getInstance().addChild(input);
+
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

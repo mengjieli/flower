@@ -30,7 +30,7 @@ class PlatformTextInput extends PlatformDisplayObject {
     setSize(width, height) {
         var txt = this.show;
         txt.style.width = width + "px";
-        txt.style.width = height + "px";
+        //txt.style.height = height + "px";
     }
 
     setChangeBack(changeBack, thisObj) {
