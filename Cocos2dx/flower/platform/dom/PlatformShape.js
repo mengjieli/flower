@@ -68,8 +68,7 @@ class PlatformShape extends PlatformDisplayObject {
             div.style.height = "0px";
             div.style["-webkit-transform"] = "rotate(" + (rotation * 180 / Math.PI) + "deg)";
             if (lineAlpha && lineWidth) {
-                color = "#" + this.toColor16(lineColor >> 16) + this.toColor16(lineColor >> 8 & 0xFF) + this.toColor16(lineColor & 0xFF);
-                div.style.border = lineWidth + "px solid " + color;
+                div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
             }
             this.show.appendChild(div);
             this.elements.push(div);
@@ -80,13 +79,9 @@ class PlatformShape extends PlatformDisplayObject {
             div.style.top = points[0].y + "px";
             div.style.width = points[1].x - points[0].x + "px";
             div.style.height = points[2].y - points[0].y + "px";
-            var color = "#" + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF);
-            div.style.backgroundColor = color;
-            div.style.opacity = fillAlpha;
+            div.style.backgroundColor = "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + fillAlpha + ")";
             if (lineAlpha && lineWidth) {
-                color = "#" + this.toColor16(lineColor >> 16) + this.toColor16(lineColor >> 8 & 0xFF) + this.toColor16(lineColor & 0xFF);
-                div.style.border = lineWidth + "px solid " + color;
-                //div.style.borderWidth = lineWidth + "px";
+                div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
             }
             this.show.appendChild(div);
             this.elements.push(div);

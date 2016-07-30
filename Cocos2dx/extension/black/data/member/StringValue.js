@@ -12,7 +12,7 @@ class StringValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
 }
 

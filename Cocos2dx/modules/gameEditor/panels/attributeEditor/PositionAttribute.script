@@ -5,6 +5,18 @@ function init() {
 function onSelectElement(e) {
     this.data = e.data;
     this.xInput.bindProperty("text", "{data.attributes.x==null?'0':data.attributes.x}", [this]);
+    this.xInput.addListener(flower.Event.FOCUS_IN,function(e){
+        this.xInput.removeBindProperty("text");
+    }.bind(this));
+    this.xInput.addListener(flower.Event.FOCUS_OUT,function(e){
+        flower.breakPoint();
+        if(!this.data.attributes.x) {
+            this.data.attributes.x = new flower.NumberValue();
+        }
+        this.data.attributes.x.value = this.xInput.text;
+        this.xInput.bindProperty("text", "{data.attributes.x==null?'0':data.attributes.x}", [this]);
+    }.bind(this));
+
     this.yInput.bindProperty("text", "{data.attributes.y==null?'0':data.attributes.y}", [this]);
     this.widthInput.bindProperty("text", "{data.attributes.width==null?'0':data.attributes.width}", [this]);
     this.heightInput.bindProperty("text", "{data.attributes.height==null?'0':data.attributes.height}", [this]);

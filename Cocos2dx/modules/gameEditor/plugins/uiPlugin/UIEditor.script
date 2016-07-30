@@ -57,7 +57,6 @@ var UIEditor = (function (_super) {
         if (atrHeight != null && typeof atrHeight != "string") {
             height = atrHeight;
         }
-        console.log("width", width, "height", height);
         var x = bounds.x + this.getAttribute("x") || 0;
         var y = bounds.y + this.getAttribute("y") || 0;
         var scaleX = this.getAttribute("scaleX") || 1;
@@ -126,7 +125,6 @@ var UIEditor = (function (_super) {
         cos = Math.cos(rad);
         this.points.right.x = x + Math.sqrt(width * width + height * height * 0.25) * cos;
         this.points.right.y = y + Math.sqrt(width * width + height * height * 0.25) * sin;
-
 
         rad = rotation * Math.PI / 180 + Math.atan2(height, 0);
         sin = Math.sin(rad);

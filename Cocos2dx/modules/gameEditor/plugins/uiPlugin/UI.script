@@ -19,14 +19,31 @@ var UI = (function (_super) {
             this.percentHeight = 100;
         }
         this.editor = new editor.UIEditor(this.data, this.display);
-        /*for (var i = 0; i < data.numAttribute; i++) {
-            var attribute = data.getAttributeAt(i);
+        //flower.breakPoint();
+        var atrs = ["x", "y", "width", "height", "scaleX", "scaleY", "rotation", "left", "right", "top", "bottom"];
+        for (var i = 0; i < atrs.length; i++) {
+            var atr = data.getAttribute(atrs[i]);
+            if (!atr) continue;
+            var display;
             if (data.isContainer) {
-                this[attribute.name] = attribute.value;
+                display = this;
             } else {
-                this.display[attribute.name] = attribute.value;
+                display = this.display;
             }
-        }*/
+            if (atr instanceof flower.Value) {
+                display[atrs[i]] = atr.value;
+                var _this = new function (display, name) {
+                    this.display = display;
+                    this.name = name;
+                    return this;
+                }(display, atrs[i]);
+                atr.addListener(flower.Event.CHANGE, function (e) {
+                    this.display[this.name] = e.data;
+                }.bind(_this));
+            } else {
+                display[atrs[i]] = atr;
+            }
+        }
         for (var i = 0; i < data.numElement; i++) {
             var childData = data.getElementAt(i);
             if (childData.isDisplay) {

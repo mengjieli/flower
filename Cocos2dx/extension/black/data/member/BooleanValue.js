@@ -6,7 +6,7 @@ class BooleanValue extends Value {
     }
 
     $setValue(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;
@@ -15,7 +15,7 @@ class BooleanValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
 }
 

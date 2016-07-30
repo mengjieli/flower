@@ -16,15 +16,6 @@ var Main = function () {
         value: function ready() {
             trace("ready");
 
-            //var rect = new flower.Rect();
-            //rect.width = 100;
-            //rect.height = 100;
-            //rect.fillColor = 0x88aa88;
-            //rect.lineWidth = 1;
-            //rect.lineColor = 0xff0000;
-            //flower.Stage.getInstance().addChild(rect);
-            //
-            //return;
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

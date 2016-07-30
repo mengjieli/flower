@@ -28,23 +28,27 @@ var UIElement = (function (_super) {
         this.__isContainer = display instanceof flower.Sprite;
         this.__isUIComponent = display.__UIComponent ? true : false;
         if (this.isDisplay) {
+            var names = ["x", "y", "width", "height", "rotation", "scaleX", "scaleY"];
+            for (var i = 0; i < names.length; i++) {
+                var attribute = xml.getAttribute(names[i]);
+                if (attribute) {
+                    this.attributes[names[i]] = new flower.NumberValue(attribute.value);
+                } else {
+                    this.attributes[names[i]] = new flower.NumberValue();
+                    this.attributes[names[i]].exist = false;
+                }
+            }
             for (var i = 0; i < xml.attributes.length; i++) {
                 var attribute = xml.attributes[i];
-                switch (attribute.name) {
-                    case "x":
-                    case "y":
-                    case "scaleX":
-                    case "scaleY":
-                    case "rotation":
-                    case "alpha":
-                        this.attributes[attribute.name] = new flower.NumberValue(attribute.value);
+                var find = false;
+                for (var f = 0; f < names.length; f++) {
+                    if (names[f] == attribute.name) {
+                        find = true;
                         break;
-                    case "width":
-                    case "height":
-                        this.attributes[attribute.name] = new flower.UIntValue(attribute.value);
-                        break;
-                    default :
-                        this.attributes[attribute.name] = new flower.StringValue(attribute.value);
+                    }
+                }
+                if (!find) {
+                    this.attributes[attribute.name] = new flower.StringValue(attribute.value);
                 }
             }
             for (var i = 0; i < xml.elements.length; i++) {
@@ -123,7 +127,7 @@ var UIElement = (function (_super) {
 
     Object.defineProperty(UIElement.prototype, "numElement", {
         get: function () {
-            return this.elements.length;
+            return this.attributes.length;
         },
         set: function (val) {
         },
