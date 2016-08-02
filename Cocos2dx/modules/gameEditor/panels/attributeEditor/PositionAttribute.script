@@ -20,6 +20,6 @@ function onSelectElement(e) {
     this.yInput.bindProperty("text", "{data.attributes.y==null?'0':data.attributes.y}", [this]);
     this.widthInput.bindProperty("text", "{data.attributes.width==null?'0':data.attributes.width}", [this]);
     this.heightInput.bindProperty("text", "{data.attributes.height==null?'0':data.attributes.height}", [this]);
-    this.scaleXInput.bindProperty("text", "{data.attributes.scaleX==null?'1':data.attributes.x}", [this]);
-    this.scaleYInput.bindProperty("text", "{data.attributes.scaleY==null?'1':data.attributes.y}", [this]);
+    this.scaleXInput.bindProperty("text", "{data.attributes.scaleX==null?'1':data.attributes.scaleX}", [this]);
+    this.scaleYInput.bindProperty("text", "{data.attributes.scaleY==null?'1':data.attributes.scaleY}", [this]);
 }

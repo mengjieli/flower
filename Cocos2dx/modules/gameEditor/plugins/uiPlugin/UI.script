@@ -17,55 +17,53 @@ var UI = (function (_super) {
 
     UI.prototype.init = function () {
         var data = this.data;
+        this.container = new flower.Group();
+        this.percentWidth = 100;
+        this.percentHeight = 100;
+        this.addChild(this.container);
         this.display = new data.clazz();
-        this.addChild(this.display);
-        if (!data.isContainer) {
-            this.percentWidth = 100;
-            this.percentHeight = 100;
-        }
-        this.editor = new editor.UIEditor(this.data, this.display);
-        var atrs = ["x", "y", "width", "height", "scaleX", "scaleY", "rotation", "left", "right", "top", "bottom"];
+        this.container.addChild(this.display);
+        //var atrs = ["x", "y", "width", "height", "scaleX", "scaleY", "rotation", "left", "right", "top", "bottom"];
+        var atrs = this.data.getAttributeNames();
         for (var i = 0; i < atrs.length; i++) {
             var atr = data.getAttribute(atrs[i]);
             if (!atr || atr.exist == false) continue;
             var display;
             if (data.isContainer) {
-                display = this;
+                display = this.container;
             } else {
                 display = this.display;
             }
             if (atr instanceof flower.Value) {
                 display[atrs[i]] = atr.value;
-                var _this = new function (display, name) {
-                    this.display = display;
-                    this.name = name;
-                    return this;
-                }(display, atrs[i]);
-                atr.addListener(flower.Event.CHANGE, function (e) {
-                    this.display[this.name] = e.data;
-                }.bind(_this));
+                atr.addListener(flower.Event.UPDATE, function (display, name) {
+                    return function (e) {
+                        display[name] = e.data.value;
+                    }
+                }(display, atrs[i]));
             } else {
                 display[atrs[i]] = atr;
             }
         }
-        flower.breakPoint();
         for (var i = 0; i < data.numElement; i++) {
             var childData = data.getElementAt(i);
-            console.log("childData", childData);
+            //console.log("childData", childData);
             if (childData.isDisplay) {
                 var child = new UI(childData, this.info);
-                this.addChild(child);
+                this.container.addChild(child);
             }
         }
+        this.editor = new editor.UIEditor(this.data, display);
         this.addChild(this.editor);
         this.display.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouchBegin, this);
         this.editor.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouchBegin, this);
     }
 
     UI.prototype.onTouchBegin = function (e) {
-        if (e.currentTarget == this.display) {
-            this.display.startDrag();
-            EnterFrame.add(this.dragUpdate, this);
+        if (e.currentTarget == this.display || e.target == this.editor.nameTxt) {
+            this.startDrag();
+            this.addListener(flower.DragEvent.DRAG_END, this.onDragEnd, this);
+            //flower.EnterFrame.add(this.dragUpdate, this);
         }
         if (this.info.select == this) {
             return;
@@ -80,6 +78,13 @@ var UI = (function (_super) {
 
     UI.prototype.dragUpdate = function (gap, time) {
         //this.data.
+    }
+
+    UI.prototype.onDragEnd = function (e) {
+        this.data.getAttribute("x").value = this.data.getAttribute("x").value + this.x;
+        this.data.getAttribute("y").value = this.data.getAttribute("y").value + this.y;
+        this.x = this.y = 0;
+        this.editor.update();
     }
 
     UI.prototype.selected = function () {

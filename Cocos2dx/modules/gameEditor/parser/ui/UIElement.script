@@ -36,6 +36,9 @@ var UIElement = (function (_super) {
                     this.attributes[names[i]] = new flower.NumberValue(attribute.value);
                 } else {
                     this.attributes[names[i]] = new flower.NumberValue(inits[i]);
+                    this.attributes[names[i]].addListener(flower.Event.UPDATE, function (e) {
+                        delete e.currentTarget.exist;
+                    });
                     this.attributes[names[i]].exist = false;
                 }
             }
@@ -49,7 +52,11 @@ var UIElement = (function (_super) {
                     }
                 }
                 if (!find) {
-                    this.attributes[attribute.name] = new flower.StringValue(attribute.value);
+                    if (flower.StringDo.isNumberString(attribute.value)) {
+                        this.attributes[attribute.name] = new flower.NumberValue(attribute.value);
+                    } else {
+                        this.attributes[attribute.name] = new flower.StringValue(attribute.value);
+                    }
                 }
             }
             for (var i = 0; i < xml.elements.length; i++) {
@@ -97,6 +104,10 @@ var UIElement = (function (_super) {
 
     UIElement.prototype.getAttribute = function (name) {
         return this.attributes[name];
+    }
+
+    UIElement.prototype.getAttributeNames = function () {
+        return Object.keys(this.attributes);
     }
 
     UIElement.prototype.getAttributeValue = function (name) {
