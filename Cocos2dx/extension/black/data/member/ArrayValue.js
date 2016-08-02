@@ -281,6 +281,11 @@ class ArrayValue extends Value {
         return this.list[index];
     }
 
+    setItemAt(index, item) {
+        this.splice(index, 1);
+        this.splice(index, 0, item);
+    }
+
     getItemByValue(value) {
         if (this.key == "") {
             return null;
@@ -374,5 +379,23 @@ class ArrayValue extends Value {
         }
     }
 }
+
+for (var i = 0; i < 100000; i++) {
+    Object.defineProperty(ArrayValue.prototype, "" + i, {
+        get: function (index) {
+            return function () {
+                return this.list[index];
+            }
+        }(i, this),
+        set: function (index) {
+            return function (val) {
+                this.setItemAt(index, val);
+            }
+        }(i, this),
+        enumerable: true,
+        configurable: true
+    });
+}
+
 
 exports.ArrayValue = ArrayValue;

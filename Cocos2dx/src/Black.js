@@ -933,6 +933,12 @@ var $root = eval("this");
                 return this.list[index];
             }
         }, {
+            key: "setItemAt",
+            value: function setItemAt(index, item) {
+                this.splice(index, 1);
+                this.splice(index, 0, item);
+            }
+        }, {
             key: "getItemByValue",
             value: function getItemByValue(value) {
                 if (this.key == "") {
@@ -1032,6 +1038,23 @@ var $root = eval("this");
 
         return ArrayValue;
     }(Value);
+
+    for (var i = 0; i < 1000; i++) {
+        Object.defineProperty(ArrayValue.prototype, "" + i, {
+            get: function (index) {
+                return function () {
+                    return this.list[index];
+                };
+            }(i, this),
+            set: function (index) {
+                return function (val) {
+                    this.setItemAt(index, val);
+                };
+            }(i, this),
+            enumerable: true,
+            configurable: true
+        });
+    }
 
     black.ArrayValue = ArrayValue;
     //////////////////////////End File:extension/black/data/member/ArrayValue.js///////////////////////////

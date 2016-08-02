@@ -7,11 +7,11 @@ var UI = (function (_super) {
         this.data = data;
         this.info = info;
         this.focusEnabeld = true;
-        this.addListener(flower.Event.ADDED,this.onAdded,this);
+        this.addListener(flower.Event.ADDED, this.onAdded, this);
     }
 
-    UI.prototype.onAdded = function(e) {
-        this.removeListener(flower.Event.ADDED,this.onAdded,this);
+    UI.prototype.onAdded = function (e) {
+        this.removeListener(flower.Event.ADDED, this.onAdded, this);
         this.init();
     }
 
@@ -51,7 +51,7 @@ var UI = (function (_super) {
         flower.breakPoint();
         for (var i = 0; i < data.numElement; i++) {
             var childData = data.getElementAt(i);
-            console.log("childData",childData);
+            console.log("childData", childData);
             if (childData.isDisplay) {
                 var child = new UI(childData, this.info);
                 this.addChild(child);
@@ -90,7 +90,7 @@ var UI = (function (_super) {
         this.editor.hide();
     }
 
-    UI.prototype.dispose = function() {
+    UI.prototype.dispose = function () {
         this.editor.dispose();
         _super.dispose.call(this);
     }
