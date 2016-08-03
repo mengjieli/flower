@@ -6,7 +6,7 @@
                       visible.down="true" visible.selectedDown="true"
                       visible.selectedUp="true"/>
             <f:Button dispatchEventToParent="false" percentHeight="100"
-                      click="this.data.open.value = !this.data.open.value;"
+                      touchBegin="this.data.open.value = !this.data.open.value;"
                       visible="{data.isDirection}">
                 <f:Rect x="{data.depth*20}" width="20" percentHeight="100" fillAlpha="0"/>
                 <f:Label x="{7 + data.depth*20}" text="{data.open?'-':'+'}" verticalCenter="0"/>

@@ -20,11 +20,7 @@ class PlatformTextInput extends PlatformDisplayObject {
     }
 
     setFontColor(color) {
-        if (Platform.native) {
-            this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
-        } else {
-            this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
-        }
+        this.show.style.color = '#' + this.toColor16(color >> 16) + this.toColor16(color >> 8 & 0xFF) + this.toColor16(color & 0xFF);
     }
 
     setSize(width, height) {
@@ -139,6 +135,53 @@ class PlatformTextInput extends PlatformDisplayObject {
         show.style.fontSize = "12px";
         this.setFontColor(0);
         super.release();
+    }
+
+    toColor16(color) {
+        var abc;
+        var num = Math.floor(color / 16);
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        var str = abc + "";
+        num = color % 16;
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        str += abc;
+        return str;
     }
 }
 

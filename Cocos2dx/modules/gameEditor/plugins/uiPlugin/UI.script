@@ -22,32 +22,39 @@ var UI = (function (_super) {
         this.percentHeight = 100;
         this.addChild(this.container);
         this.display = new data.clazz();
+        if (data.isContainer) {
+
+        } else {
+            this.container.percentWidth = 100;
+            this.container.percentHeight = 100;
+        }
         this.container.addChild(this.display);
-        //var atrs = ["x", "y", "width", "height", "scaleX", "scaleY", "rotation", "left", "right", "top", "bottom"];
         var atrs = this.data.getAttributeNames();
         for (var i = 0; i < atrs.length; i++) {
             var atr = data.getAttribute(atrs[i]);
-            if (!atr || atr.exist == false) continue;
             var display;
             if (data.isContainer) {
                 display = this.container;
             } else {
                 display = this.display;
             }
+            atr.addListener(flower.Event.UPDATE, function (display, name, ui) {
+                return function (e) {
+                    display[name] = e.data.value;
+                    if(ui.info.select == ui) {
+                        ui.editor.update();
+                    }
+                }
+            }(display, atrs[i], this));
+            if (atr.exist.value == false) continue;
             if (atr instanceof flower.Value) {
                 display[atrs[i]] = atr.value;
-                atr.addListener(flower.Event.UPDATE, function (display, name) {
-                    return function (e) {
-                        display[name] = e.data.value;
-                    }
-                }(display, atrs[i]));
             } else {
                 display[atrs[i]] = atr;
             }
         }
         for (var i = 0; i < data.numElement; i++) {
             var childData = data.getElementAt(i);
-            //console.log("childData", childData);
             if (childData.isDisplay) {
                 var child = new UI(childData, this.info);
                 this.container.addChild(child);
@@ -63,7 +70,7 @@ var UI = (function (_super) {
         if (e.currentTarget == this.display || e.target == this.editor.nameTxt) {
             this.startDrag();
             this.addListener(flower.DragEvent.DRAG_END, this.onDragEnd, this);
-            //flower.EnterFrame.add(this.dragUpdate, this);
+            flower.EnterFrame.add(this.dragUpdate, this);
         }
         if (this.info.select == this) {
             return;
@@ -77,10 +84,12 @@ var UI = (function (_super) {
     }
 
     UI.prototype.dragUpdate = function (gap, time) {
-        //this.data.
+        this.data.getAttributeShow("x").value = this.data.getAttribute("x").value + this.x;
+        this.data.getAttributeShow("y").value = this.data.getAttribute("y").value + this.y;
     }
 
     UI.prototype.onDragEnd = function (e) {
+        flower.EnterFrame.remove(this.dragUpdate, this);
         this.data.getAttribute("x").value = this.data.getAttribute("x").value + this.x;
         this.data.getAttribute("y").value = this.data.getAttribute("y").value + this.y;
         this.x = this.y = 0;

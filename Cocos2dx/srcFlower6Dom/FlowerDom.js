@@ -191,6 +191,12 @@ class Platform {
         mask.style.width = document.documentElement.clientWidth + "px";
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
+        document.body.onkeydown = function(e){
+            engine.$onKeyDown(e.which);
+        }
+        document.body.onkeyup = function(e){
+            engine.$onKeyUp(e.which);
+        }
         div.appendChild(engine.$background.$nativeShow.show);
         div.appendChild(root.show);
         requestAnimationFrame.call(window, Platform._run);
@@ -673,11 +679,7 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     setFontColor(color) {
-        if (Platform.native) {
-            this.show.setFontFillColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF}, true);
-        } else {
-            this.show.color = {r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF};
-        }
+        this.show.style.color = '#' + this.toColor16(color >> 16) + this.toColor16(color >> 8 & 0xFF) + this.toColor16(color & 0xFF);
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
@@ -749,6 +751,53 @@ class PlatformTextField extends PlatformDisplayObject {
         this.setFontColor(0);
         super.release();
     }
+
+    toColor16(color) {
+        var abc;
+        var num = Math.floor(color / 16);
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        var str = abc + "";
+        num = color % 16;
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        str += abc;
+        return str;
+    }
 }
 
 var measureTxt = document.createElement("span");
@@ -785,11 +834,7 @@ class PlatformTextInput extends PlatformDisplayObject {
     }
 
     setFontColor(color) {
-        if (Platform.native) {
-            this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
-        } else {
-            this.show.setTextColor({r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255});
-        }
+        this.show.style.color = '#' + this.toColor16(color >> 16) + this.toColor16(color >> 8 & 0xFF) + this.toColor16(color & 0xFF);
     }
 
     setSize(width, height) {
@@ -904,6 +949,53 @@ class PlatformTextInput extends PlatformDisplayObject {
         show.style.fontSize = "12px";
         this.setFontColor(0);
         super.release();
+    }
+
+    toColor16(color) {
+        var abc;
+        var num = Math.floor(color / 16);
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        var str = abc + "";
+        num = color % 16;
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        str += abc;
+        return str;
     }
 }
 
@@ -2207,6 +2299,8 @@ class KeyboardEvent extends Event {
     static KEY_DOWN = "key_down";
     static KEY_UP = "key_up";
 }
+
+flower.KeyboardEvent = KeyboardEvent;
 //////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
 
 
@@ -4360,7 +4454,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
-        this.$nativeShow.setSize(this.width,this.height);
+        this.$nativeShow.setSize(this.width, this.height);
     }
 
     $setHeight(val) {
@@ -4376,7 +4470,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
-        this.$nativeShow.setSize(this.width,this.height);
+        this.$nativeShow.setSize(this.width, this.height);
     }
 
     $setEditEnabled(val) {
@@ -4456,6 +4550,10 @@ class TextInput extends DisplayObject {
             var width = this.width;
         }
         super.$onFrameEnd();
+    }
+
+    inputOver() {
+        this.$inputEnd();
     }
 
     dispose() {
@@ -4800,9 +4898,9 @@ class Stage extends Sprite {
         if (val && !val.focusEnabled) {
             val = null;
         }
-        if (this.__focus == val) {
-            return;
-        }
+        //if (this.__focus == val) {
+        //    return;
+        //}
         var event;
         if (this.__focus) {
             event = new flower.Event(Event.FOCUS_OUT, true);

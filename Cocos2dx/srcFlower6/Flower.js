@@ -2141,6 +2141,8 @@ class KeyboardEvent extends Event {
     static KEY_DOWN = "key_down";
     static KEY_UP = "key_up";
 }
+
+flower.KeyboardEvent = KeyboardEvent;
 //////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
 
 
@@ -4734,9 +4736,9 @@ class Stage extends Sprite {
         if (val && !val.focusEnabled) {
             val = null;
         }
-        if (this.__focus == val) {
-            return;
-        }
+        //if (this.__focus == val) {
+        //    return;
+        //}
         var event;
         if (this.__focus) {
             event = new flower.Event(Event.FOCUS_OUT, true);

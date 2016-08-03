@@ -2388,16 +2388,18 @@ var flower = {};
 
         return KeyboardEvent;
     }(Event);
-    //////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
-
-    //////////////////////////File:flower/filters/Filter.js///////////////////////////
-
 
     KeyboardEvent.$shift = false;
     KeyboardEvent.$control = false;
     KeyboardEvent.$alt = false;
     KeyboardEvent.KEY_DOWN = "key_down";
     KeyboardEvent.KEY_UP = "key_up";
+
+
+    flower.KeyboardEvent = KeyboardEvent;
+    //////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
+
+    //////////////////////////File:flower/filters/Filter.js///////////////////////////
 
     var Filter = function () {
         function Filter(type) {
@@ -5249,9 +5251,9 @@ var flower = {};
                 if (val && !val.focusEnabled) {
                     val = null;
                 }
-                if (this.__focus == val) {
-                    return;
-                }
+                //if (this.__focus == val) {
+                //    return;
+                //}
                 var event;
                 if (this.__focus) {
                     event = new flower.Event(Event.FOCUS_OUT, true);

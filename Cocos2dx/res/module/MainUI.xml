@@ -1,4 +1,4 @@
-<f:Group class="PaikMain" width="400" height="300" xmlns:f="flower">
+<f:Group class="PaikMain" x="20" y="20" width="400" height="300" xmlns:f="flower">
     <f:Rect x="30" y="30" percentWidth="50" percentHeight="50" fillColor="0xff0000"/>
     <f:Label x="150" y="250" text="派克帝国"/>
     <f:Group x="50" y="30" width="100" height="50"/>

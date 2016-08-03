@@ -47,6 +47,10 @@ var UIEditor = (function (_super) {
         return this.data.getAttributeValue(name);
     }
 
+    UIEditor.prototype.setAttribute = function (name, value) {
+        return this.data.getAttribute(name).value = value;
+    }
+
     UIEditor.prototype.update = function () {
         this.x = this.getAttribute("x");
         this.y = this.getAttribute("y");
@@ -63,9 +67,9 @@ var UIEditor = (function (_super) {
         }
         var x = 0;
         var y = 0;
-        var scaleX = this.getAttribute("scaleX") || 1;
-        var scaleY = this.getAttribute("scaleY") || 1;
-        var rotation = this.getAttribute("rotation") || 0;
+        var scaleX = this.getAttribute("scaleX");
+        var scaleY = this.getAttribute("scaleY");
+        var rotation = this.getAttribute("rotation");
         if (!this.box) {
             this.box = new flower.Shape();
             this.box.fillAlpha = 0;
@@ -84,72 +88,160 @@ var UIEditor = (function (_super) {
         if (!this.points) {
             this.points = {};
             var point;
-            //point = new flower.Shape();
-            //point.lineWidth = 1;
-            //point.lineColor = 0x000000;
-            //point.fillColor = 0xffffff;
-            //point.drawRect(-3, -3, 0, 0);
-            //this.addChild(point);
-            //this.points.center = point;
-
-            this.points.top1 = new flower.Shape();
-            this.points.top2 = new flower.Shape();
-            this.points.top3 = new flower.Shape();
-            this.points.left = new flower.Shape();
-            this.points.right = new flower.Shape();
-            this.points.bottom1 = new flower.Shape();
-            this.points.bottom2 = new flower.Shape();
-            this.points.bottom3 = new flower.Shape();
+            point = new flower.Shape();
+            point.lineWidth = 1;
+            point.lineColor = 0x000000;
+            point.fillColor = 0xffffff;
+            point.drawRect(-3, -3, 6, 6);
+            this.addChild(point);
+            this.points.center = point;
+            this.points.top1 = new flower.Sprite();
+            this.points.top2 = new flower.Sprite();
+            this.points.top3 = new flower.Sprite();
+            this.points.left = new flower.Sprite();
+            this.points.right = new flower.Sprite();
+            this.points.bottom1 = new flower.Sprite();
+            this.points.bottom2 = new flower.Sprite();
+            this.points.bottom3 = new flower.Sprite();
+            var shaders = {
+                top1: [-24, -24, 30, 30],
+                top2: [-10, -10, 20, 20],
+                top3: [-6, -24, 30, 30],
+                left: [-10, -10, 20, 20],
+                right: [-10, -10, 20, 20],
+                bottom1: [-24, -6, 30, 30],
+                bottom2: [-10, -10, 20, 20],
+                bottom3: [-6, -6, 30, 30]
+            }
             for (var key in this.points) {
-                point = this.points[key];
+                if (key == "center") continue;
+                var sprite = this.points[key];
+                var shader = new flower.Shape();
+                shader.fillColor = 0x000000;
+                shader.alpha = 0;
+                shader.drawRect(shaders[key][0], shaders[key][1], shaders[key][2], shaders[key][3]);
+                sprite.addChild(shader);
+                sprite.shader = shader;
+                var point = new flower.Shape();
+                sprite.addChild(point);
                 point.lineWidth = 1;
                 point.lineColor = 0xffffff;
                 point.fillColor = 0x000000;
                 point.drawRect(-3, -3, 6, 6);
-                this.addChild(point);
+                sprite.point = point;
+                sprite.addListener(flower.TouchEvent.TOUCH_BEGIN, this.touchPointBegin, this);
+                sprite.addListener(flower.TouchEvent.TOUCH_MOVE, this.touchPointMove, this);
+                sprite.addListener(flower.TouchEvent.TOUCH_END, this.touchPointEnd, this);
+                sprite.addListener(flower.TouchEvent.TOUCH_RELEASE, this.touchPointEnd, this);
+                this.addChild(sprite);
             }
         }
+        for (var key in this.points) {
+            this.points[key].rotation = rotation;
+        }
         var rad = rotation * Math.PI / 180;
-        var sin = Math.sin(rad);
-        var cos = Math.cos(rad);
-        this.points.top1.x = x;
-        this.points.top1.y = y;
-        this.points.top2.x = x + (width * scaleX * 0.5) * cos;
-        this.points.top2.y = y + (width * scaleX * 0.5) * sin;
-        this.points.top3.x = x + width * scaleX * cos;
-        this.points.top3.y = y + width * scaleX * sin;
-
-        rad = rotation * Math.PI / 180 + Math.atan2(height, 0);
-        sin = Math.sin(rad);
-        cos = Math.cos(rad);
-        this.points.left.x = x + height * 0.5 * cos;
-        this.points.left.y = y + height * 0.5 * sin;
-
-        rad = rotation * Math.PI / 180 + Math.atan2(height * 0.5, width);
-        sin = Math.sin(rad);
-        cos = Math.cos(rad);
-        this.points.right.x = x + Math.sqrt(width * width + height * height * 0.25) * cos;
-        this.points.right.y = y + Math.sqrt(width * width + height * height * 0.25) * sin;
-
-        rad = rotation * Math.PI / 180 + Math.atan2(height, 0);
-        sin = Math.sin(rad);
-        cos = Math.cos(rad);
-        this.points.bottom1.x = x + height * cos;
-        this.points.bottom1.y = y + height * sin;
-
-        rad = rotation * Math.PI / 180 + Math.atan2(height, width * 0.5);
-        sin = Math.sin(rad);
-        cos = Math.cos(rad);
-        this.points.bottom2.x = x + Math.sqrt(width * width * 0.25 + height * height) * cos;
-        this.points.bottom2.y = y + Math.sqrt(width * width * 0.25 + height * height) * sin;
-
-        rad = rotation * Math.PI / 180 + Math.atan2(height, width);
-        sin = Math.sin(rad);
-        cos = Math.cos(rad);
-        this.points.bottom3.x = x + Math.sqrt(width * width + height * height) * cos;
-        this.points.bottom3.y = y + Math.sqrt(width * width + height * height) * sin;
+        var names = {
+            "top1": {x: 0, y: 0},
+            "top2": {x: 0.5, y: 0},
+            "top3": {x: 1, y: 0},
+            "left": {x: 0, y: 0.5},
+            "right": {x: 1, y: 0.5},
+            "bottom1": {x: 0, y: 1},
+            "bottom2": {x: 0.5, y: 1},
+            "bottom3": {x: 1, y: 1},
+            "center": {x: 0.5, y: 0.5}
+        };
+        for (var key in names) {
+            var point = this.points[key];
+            var x = width * names[key].x;
+            var y = height * names[key].y;
+            x *= scaleX;
+            y *= scaleY;
+            var r = Math.atan2(y, x);
+            var sin = Math.sin(r + rad);
+            var cos = Math.cos(r + rad);
+            point.x = Math.sqrt(x * x + y * y) * cos;
+            point.y = Math.sqrt(x * x + y * y) * sin;
+            point.rotation = rotation;
+        }
     }
 
+    UIEditor.prototype.touchPointBegin = function (e) {
+        var point = e.currentTarget;
+        this.startX = this.x;
+        this.startY = this.y;
+        this.startWidth = this.points.top3.x - this.points.top1.x;
+        this.startHeight = this.points.bottom1.y - this.points.top1.y;
+        this.recordX = e.stageX;
+        this.recordY = e.stageY;
+        this.pointX = point.x;
+        this.pointY = point.y;
+        this.centerX = (this.points.top1.x + this.points.top3.x) / 2;
+        this.centerY = (this.points.top1.y + this.points.bottom1.y) / 2;
+        if ((point == this.points.top1 || point == this.points.top3 ||
+            point == this.points.bottom1 || point == this.points.bottom3) && e.target == point.shader) {
+            this.rotate = true;
+        } else {
+            this.rotate = false;
+        }
+    }
+
+    UIEditor.prototype.touchPointMove = function (e) {
+        var point = e.currentTarget;
+        var newX = e.stageX + this.pointX - this.recordX;
+        var newY = e.stageY + this.pointY - this.recordY;
+        switch (point) {
+            case this.points.top1:
+                if (this.rotate) {
+
+                } else {
+                    this.setAttribute("x", newX + this.startX);
+                    this.setAttribute("y", newY + this.startY);
+                    this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
+                    this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
+                }
+                break;
+            case this.points.top2:
+                this.setAttribute("y", newY + this.startY);
+                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
+                break;
+            case this.points.top3:
+                this.setAttribute("x", this.pointX - newX + this.startX);
+                this.setAttribute("y", newY + this.startY);
+                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
+                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
+                break;
+            case this.points.left:
+                this.setAttribute("x", newX + this.startX);
+                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
+                break;
+            case this.points.right:
+                this.setAttribute("x", this.pointX - newX + this.startX);
+                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
+                break;
+            case this.points.bottom1:
+                this.setAttribute("x", newX + this.startX);
+                this.setAttribute("y", this.pointY - newY + this.startY);
+                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
+                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
+                break;
+            case this.points.bottom2:
+                this.setAttribute("y", this.pointY - newY + this.startY);
+                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
+                break;
+            case this.points.bottom3:
+                this.setAttribute("x", this.pointX - newX + this.startX);
+                this.setAttribute("y", this.pointY - newY + this.startY);
+                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
+                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
+                break;
+        }
+        this.update();
+    }
+
+    UIEditor.prototype.touchPointEnd = function (e) {
+        var point = e.currentTarget;
+    }
 
     return UIEditor;
 

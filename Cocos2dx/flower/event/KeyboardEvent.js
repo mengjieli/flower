@@ -37,3 +37,5 @@ class KeyboardEvent extends Event {
     static KEY_DOWN = "key_down";
     static KEY_UP = "key_up";
 }
+
+exports.KeyboardEvent = KeyboardEvent;

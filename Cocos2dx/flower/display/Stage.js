@@ -54,9 +54,9 @@ class Stage extends Sprite {
         if (val && !val.focusEnabled) {
             val = null;
         }
-        if (this.__focus == val) {
-            return;
-        }
+        //if (this.__focus == val) {
+        //    return;
+        //}
         var event;
         if (this.__focus) {
             event = new flower.Event(Event.FOCUS_OUT, true);

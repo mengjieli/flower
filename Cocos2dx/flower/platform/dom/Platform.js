@@ -17,6 +17,12 @@ class Platform {
         mask.style.width = document.documentElement.clientWidth + "px";
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
+        document.body.onkeydown = function(e){
+            engine.$onKeyDown(e.which);
+        }
+        document.body.onkeyup = function(e){
+            engine.$onKeyUp(e.which);
+        }
         div.appendChild(engine.$background.$nativeShow.show);
         div.appendChild(root.show);
         requestAnimationFrame.call(window, Platform._run);

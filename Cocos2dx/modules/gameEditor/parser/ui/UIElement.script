@@ -9,6 +9,7 @@ var UIElement = (function (_super) {
         this.elements = [];
         this.attributesElements = [];
         this.attributes = {};
+        this.attributesShow = {};
         this.namespaces = namespaces || xml.namespaces;
     }
 
@@ -28,18 +29,28 @@ var UIElement = (function (_super) {
         this.__isContainer = display instanceof flower.Sprite;
         this.__isUIComponent = display.__UIComponent ? true : false;
         if (this.isDisplay) {
-            var names = ["x", "y", "width", "height", "rotation", "scaleX", "scaleY"];
-            var inits = [0, 0, 0, 0, 0, 1, 1];
+            var names = ["x", "y", "width", "height",
+                "rotation", "scaleX", "scaleY", "rotation",
+                "left", "right", "top", "bottom",
+                "percentWidth", "percentHeight", "horizontalCenter", "verticalCenter"];
+            var calzz = [flower.IntValue, flower.IntValue, flower.UIntValue, flower.UIntValue,
+                flower.NumberValue, flower.NumberValue, flower.NumberValue, flower.NumberValue,
+                flower.IntValue, flower.IntValue, flower.IntValue, flower.IntValue,
+                flower.NumberValue, flower.NumberValue, flower.IntValue, flower.IntValue];
+            var inits = [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0];
             for (var i = 0; i < names.length; i++) {
                 var attribute = xml.getAttribute(names[i]);
                 if (attribute) {
-                    this.attributes[names[i]] = new flower.NumberValue(attribute.value);
+                    this.attributes[names[i]] = new calzz[i](attribute.value);
+                    this.attributesShow[names[i]] = new calzz[i](attribute.value);
+                    this.attributes[names[i]].exist = new flower.BooleanValue(true);
                 } else {
-                    this.attributes[names[i]] = new flower.NumberValue(inits[i]);
+                    this.attributes[names[i]] = new calzz[i](inits[i]);
+                    this.attributesShow[names[i]] = new calzz[i](inits[i]);
                     this.attributes[names[i]].addListener(flower.Event.UPDATE, function (e) {
-                        delete e.currentTarget.exist;
+                        e.currentTarget.exist.value = true;
                     });
-                    this.attributes[names[i]].exist = false;
+                    this.attributes[names[i]].exist = new flower.BooleanValue(false);
                 }
             }
             for (var i = 0; i < xml.attributes.length; i++) {
@@ -54,10 +65,20 @@ var UIElement = (function (_super) {
                 if (!find) {
                     if (flower.StringDo.isNumberString(attribute.value)) {
                         this.attributes[attribute.name] = new flower.NumberValue(attribute.value);
+                        this.attributesShow[attribute.name] = new flower.NumberValue(attribute.value);
                     } else {
                         this.attributes[attribute.name] = new flower.StringValue(attribute.value);
+                        this.attributesShow[attribute.name] = new flower.StringValue(attribute.value);
                     }
+                    this.attributes[attribute.name].exist = new flower.BooleanValue(true);
                 }
+            }
+            for (var key in this.attributes) {
+                this.attributes[key].addListener(flower.Event.UPDATE, function (attribute) {
+                    return function (e) {
+                        attribute.value = e.currentTarget.value;
+                    };
+                }(this.attributesShow[key]));
             }
             for (var i = 0; i < xml.elements.length; i++) {
                 var childXML = xml.elements[i];
@@ -104,6 +125,10 @@ var UIElement = (function (_super) {
 
     UIElement.prototype.getAttribute = function (name) {
         return this.attributes[name];
+    }
+
+    UIElement.prototype.getAttributeShow = function (name) {
+        return this.attributesShow[name];
     }
 
     UIElement.prototype.getAttributeNames = function () {

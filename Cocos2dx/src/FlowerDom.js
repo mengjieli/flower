@@ -211,6 +211,12 @@ var flower = {};
                 mask.style.width = document.documentElement.clientWidth + "px";
                 mask.style.height = document.documentElement.clientHeight + "px";
                 document.body.appendChild(mask);
+                document.body.onkeydown = function (e) {
+                    engine.$onKeyDown(e.which);
+                };
+                document.body.onkeyup = function (e) {
+                    engine.$onKeyUp(e.which);
+                };
                 div.appendChild(engine.$background.$nativeShow.show);
                 div.appendChild(root.show);
                 requestAnimationFrame.call(window, Platform._run);
@@ -731,11 +737,7 @@ var flower = {};
         _createClass(PlatformTextField, [{
             key: "setFontColor",
             value: function setFontColor(color) {
-                if (Platform.native) {
-                    this.show.setFontFillColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF }, true);
-                } else {
-                    this.show.color = { r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF };
-                }
+                this.show.style.color = '#' + this.toColor16(color >> 16) + this.toColor16(color >> 8 & 0xFF) + this.toColor16(color & 0xFF);
             }
         }, {
             key: "changeText",
@@ -808,6 +810,54 @@ var flower = {};
                 this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextField.prototype), "release", this).call(this);
             }
+        }, {
+            key: "toColor16",
+            value: function toColor16(color) {
+                var abc;
+                var num = Math.floor(color / 16);
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                var str = abc + "";
+                num = color % 16;
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                str += abc;
+                return str;
+            }
         }]);
 
         return PlatformTextField;
@@ -848,11 +898,7 @@ var flower = {};
         _createClass(PlatformTextInput, [{
             key: "setFontColor",
             value: function setFontColor(color) {
-                if (Platform.native) {
-                    this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
-                } else {
-                    this.show.setTextColor({ r: color >> 16, g: color >> 8 & 0xFF, b: color & 0xFF, a: 255 });
-                }
+                this.show.style.color = '#' + this.toColor16(color >> 16) + this.toColor16(color >> 8 & 0xFF) + this.toColor16(color & 0xFF);
             }
         }, {
             key: "setSize",
@@ -975,6 +1021,54 @@ var flower = {};
                 show.style.fontSize = "12px";
                 this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextInput.prototype), "release", this).call(this);
+            }
+        }, {
+            key: "toColor16",
+            value: function toColor16(color) {
+                var abc;
+                var num = Math.floor(color / 16);
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                var str = abc + "";
+                num = color % 16;
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                str += abc;
+                return str;
             }
         }]);
 
@@ -2458,16 +2552,18 @@ var flower = {};
 
         return KeyboardEvent;
     }(Event);
-    //////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
-
-    //////////////////////////File:flower/filters/Filter.js///////////////////////////
-
 
     KeyboardEvent.$shift = false;
     KeyboardEvent.$control = false;
     KeyboardEvent.$alt = false;
     KeyboardEvent.KEY_DOWN = "key_down";
     KeyboardEvent.KEY_UP = "key_up";
+
+
+    flower.KeyboardEvent = KeyboardEvent;
+    //////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
+
+    //////////////////////////File:flower/filters/Filter.js///////////////////////////
 
     var Filter = function () {
         function Filter(type) {
@@ -4940,6 +5036,11 @@ var flower = {};
                 _get(Object.getPrototypeOf(TextInput.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
+            key: "inputOver",
+            value: function inputOver() {
+                this.$inputEnd();
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 if (!this.$nativeShow) {
@@ -5319,9 +5420,9 @@ var flower = {};
                 if (val && !val.focusEnabled) {
                     val = null;
                 }
-                if (this.__focus == val) {
-                    return;
-                }
+                //if (this.__focus == val) {
+                //    return;
+                //}
                 var event;
                 if (this.__focus) {
                     event = new flower.Event(Event.FOCUS_OUT, true);

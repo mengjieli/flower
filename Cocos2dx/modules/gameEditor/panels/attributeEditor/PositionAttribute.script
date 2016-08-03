@@ -1,25 +1,50 @@
 function init() {
+    var container = this.container;
+    var labels = ["x", "y", "width", "height", "scaleX", "scaleY", "left", "right", "top", "bottom", "pWidth", "pHeight", "hCenter", "vCenter", "rotation"];
+    var attributes = ["x", "y", "width", "height", "scaleX", "scaleY", "left", "right", "top"
+        , "bottom", "percentWidth", "percentHeight", "horizontalCenter", "verticalCenter", "rotation"];
+    this.attributes = attributes;
+    for (var i = 0; i < attributes.length; i++, i++) {
+        var atr1 = attributes[i];
+        var atr2 = attributes[i + 1];
+        var label1 = labels[i];
+        var label2 = labels[i + 1];
+        var fxml =
+            '<f:Group horizontalCenter="0" xmlns:f="flower">' +
+            '<f:Label horizontalCenter="-95" width="50" text="' + label1 + '" verticalCenter="0"/>' +
+            '<f:Input id="' + atr1 + 'Input" horizontalCenter="-40" width="50" verticalCenter="0"/>' +
+            '<f:Label text="' + label2 + '" width="50" horizontalCenter="40" verticalCenter="0"/>' +
+            '<f:Input id="' + atr2 + 'Input" horizontalCenter="95" width="50" verticalCenter="0"/>' +
+            '</f:Group>';
+        var ui = (new flower.UIParser()).parseUI(fxml);
+        container.addChild(ui);
+        this[atr1 + "Input"] = ui[atr1 + "Input"];
+        this[atr2 + "Input"] = ui[atr2 + "Input"];
+    }
     editor.EventManager.instance.addListener(editor.ModuleEvent.SELECT_ELEMENT, this.onSelectElement, this);
 }
 
 function onSelectElement(e) {
     this.data = e.data;
-    this.xInput.bindProperty("text", "{data.attributes.x==null?'0':data.attributes.x}", [this]);
-    this.xInput.addListener(flower.Event.FOCUS_IN,function(e){
-        this.xInput.removeBindProperty("text");
-    }.bind(this));
-    this.xInput.addListener(flower.Event.FOCUS_OUT,function(e){
-        flower.breakPoint();
-        if(!this.data.attributes.x) {
-            this.data.attributes.x = new flower.NumberValue();
-        }
-        this.data.attributes.x.value = this.xInput.text;
-        this.xInput.bindProperty("text", "{data.attributes.x==null?'0':data.attributes.x}", [this]);
-    }.bind(this));
-
-    this.yInput.bindProperty("text", "{data.attributes.y==null?'0':data.attributes.y}", [this]);
-    this.widthInput.bindProperty("text", "{data.attributes.width==null?'0':data.attributes.width}", [this]);
-    this.heightInput.bindProperty("text", "{data.attributes.height==null?'0':data.attributes.height}", [this]);
-    this.scaleXInput.bindProperty("text", "{data.attributes.scaleX==null?'1':data.attributes.scaleX}", [this]);
-    this.scaleYInput.bindProperty("text", "{data.attributes.scaleY==null?'1':data.attributes.scaleY}", [this]);
+    var attributes = this.attributes;
+    for (var i = 0; i < attributes.length; i++) {
+        var atr = attributes[i];
+        (function (atr) {
+            this[atr + "Input"].bindProperty("fontColor", "{data.attributes." + atr + ".exist?'0x000000':'0xaaaaaa'}", [this]);
+            this[atr + "Input"].bindProperty("text", "{data.attributesShow." + atr + "}", [this]);
+            this[atr + "Input"].addListener(flower.Event.FOCUS_IN, function (e) {
+                this[atr + "Input"].removeBindProperty("text");
+            }.bind(this));
+            this[atr + "Input"].addListener(flower.Event.FOCUS_OUT, function (e) {
+                this.data.attributes[atr].value = this[atr + "Input"].text;
+                this[atr + "Input"].bindProperty("text", "{data.attributes." + atr + "}", [this]);
+            }.bind(this));
+            this[atr + "Input"].addListener(flower.KeyboardEvent.KEY_DOWN, function (e) {
+                if (e.keyCode != 13) return;
+                this[atr + "Input"].inputOver();
+                this.data.attributes[atr].value = this[atr + "Input"].text;
+                this[atr + "Input"].bindProperty("text", "{data.attributes." + atr + "}", [this]);
+            }.bind(this));
+        }).bind(this)(atr);
+    }
 }

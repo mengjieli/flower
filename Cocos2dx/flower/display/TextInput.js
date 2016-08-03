@@ -103,7 +103,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
-        this.$nativeShow.setSize(this.width,this.height);
+        this.$nativeShow.setSize(this.width, this.height);
     }
 
     $setHeight(val) {
@@ -119,7 +119,7 @@ class TextInput extends DisplayObject {
         }
         this.$addFlags(0x0800);
         this.$invalidateContentBounds();
-        this.$nativeShow.setSize(this.width,this.height);
+        this.$nativeShow.setSize(this.width, this.height);
     }
 
     $setEditEnabled(val) {
@@ -199,6 +199,10 @@ class TextInput extends DisplayObject {
             var width = this.width;
         }
         super.$onFrameEnd();
+    }
+
+    inputOver() {
+        this.$inputEnd();
     }
 
     dispose() {
