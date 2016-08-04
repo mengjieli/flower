@@ -33,7 +33,7 @@ var UIElement = (function (_super) {
                 "rotation", "scaleX", "scaleY", "rotation",
                 "left", "right", "top", "bottom",
                 "percentWidth", "percentHeight", "horizontalCenter", "verticalCenter"];
-            var calzz = [flower.IntValue, flower.IntValue, flower.UIntValue, flower.UIntValue,
+            var calzz = [flower.NumberValue, flower.NumberValue, flower.NumberValue, flower.NumberValue,
                 flower.NumberValue, flower.NumberValue, flower.NumberValue, flower.NumberValue,
                 flower.IntValue, flower.IntValue, flower.IntValue, flower.IntValue,
                 flower.NumberValue, flower.NumberValue, flower.IntValue, flower.IntValue];

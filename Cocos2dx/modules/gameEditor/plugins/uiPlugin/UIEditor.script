@@ -13,10 +13,13 @@ var UIEditor = (function (_super) {
             nameTxt.text = data.className;
             nameTxt.fontColor = 0;
             nameTxt.alpha = 0.2;
+            nameTxt.rotation = this.getAttribute("rotation");
             this.addChild(nameTxt);
         }
         this.x = this.getAttribute("x");
         this.y = this.getAttribute("y");
+        this.centerX = 0.5;
+        this.centerY = 0.5;
         this.points = null;
         this.box = null;
     }
@@ -70,6 +73,15 @@ var UIEditor = (function (_super) {
         var scaleX = this.getAttribute("scaleX");
         var scaleY = this.getAttribute("scaleY");
         var rotation = this.getAttribute("rotation");
+        this.info = {
+            x: this.x,
+            y: this.y,
+            width: width,
+            height: height,
+            scaleX: scaleX,
+            scaleY: scaleY,
+            rotation: rotation
+        };
         if (!this.box) {
             this.box = new flower.Shape();
             this.box.fillAlpha = 0;
@@ -85,16 +97,9 @@ var UIEditor = (function (_super) {
         this.box.scaleX = scaleX;
         this.box.scaleY = scaleY;
         this.box.rotation = rotation;
+        if (this.nameTxt) this.nameTxt.rotation = rotation;
         if (!this.points) {
             this.points = {};
-            var point;
-            point = new flower.Shape();
-            point.lineWidth = 1;
-            point.lineColor = 0x000000;
-            point.fillColor = 0xffffff;
-            point.drawRect(-3, -3, 6, 6);
-            this.addChild(point);
-            this.points.center = point;
             this.points.top1 = new flower.Sprite();
             this.points.top2 = new flower.Sprite();
             this.points.top3 = new flower.Sprite();
@@ -103,6 +108,7 @@ var UIEditor = (function (_super) {
             this.points.bottom1 = new flower.Sprite();
             this.points.bottom2 = new flower.Sprite();
             this.points.bottom3 = new flower.Sprite();
+            this.points.center = new flower.Sprite();
             var shaders = {
                 top1: [-24, -24, 30, 30],
                 top2: [-10, -10, 20, 20],
@@ -111,10 +117,10 @@ var UIEditor = (function (_super) {
                 right: [-10, -10, 20, 20],
                 bottom1: [-24, -6, 30, 30],
                 bottom2: [-10, -10, 20, 20],
-                bottom3: [-6, -6, 30, 30]
+                bottom3: [-6, -6, 30, 30],
+                center: [-10, -10, 20, 20]
             }
             for (var key in this.points) {
-                if (key == "center") continue;
                 var sprite = this.points[key];
                 var shader = new flower.Shape();
                 shader.fillColor = 0x000000;
@@ -125,19 +131,24 @@ var UIEditor = (function (_super) {
                 var point = new flower.Shape();
                 sprite.addChild(point);
                 point.lineWidth = 1;
-                point.lineColor = 0xffffff;
-                point.fillColor = 0x000000;
+                if (key == "center") {
+                    point.lineColor = 0x000000;
+                    point.fillColor = 0xffffff;
+                } else {
+                    point.lineColor = 0xffffff;
+                    point.fillColor = 0x000000;
+                }
                 point.drawRect(-3, -3, 6, 6);
                 sprite.point = point;
-                sprite.addListener(flower.TouchEvent.TOUCH_BEGIN, this.touchPointBegin, this);
-                sprite.addListener(flower.TouchEvent.TOUCH_MOVE, this.touchPointMove, this);
-                sprite.addListener(flower.TouchEvent.TOUCH_END, this.touchPointEnd, this);
-                sprite.addListener(flower.TouchEvent.TOUCH_RELEASE, this.touchPointEnd, this);
                 this.addChild(sprite);
             }
         }
         for (var key in this.points) {
             this.points[key].rotation = rotation;
+            this.points[key].addListener(flower.TouchEvent.TOUCH_BEGIN, this.touchPointBegin, this);
+            this.points[key].addListener(flower.TouchEvent.TOUCH_MOVE, this.touchPointMove, this);
+            this.points[key].addListener(flower.TouchEvent.TOUCH_END, this.touchPointEnd, this);
+            this.points[key].addListener(flower.TouchEvent.TOUCH_RELEASE, this.touchPointEnd, this);
         }
         var rad = rotation * Math.PI / 180;
         var names = {
@@ -149,10 +160,12 @@ var UIEditor = (function (_super) {
             "bottom1": {x: 0, y: 1},
             "bottom2": {x: 0.5, y: 1},
             "bottom3": {x: 1, y: 1},
-            "center": {x: 0.5, y: 0.5}
+            "center": {x: this.centerX, y: this.centerY}
         };
         for (var key in names) {
             var point = this.points[key];
+            point.percentX = names[key].x;
+            point.percentY = names[key].y;
             var x = width * names[key].x;
             var y = height * names[key].y;
             x *= scaleX;
@@ -168,18 +181,24 @@ var UIEditor = (function (_super) {
 
     UIEditor.prototype.touchPointBegin = function (e) {
         var point = e.currentTarget;
-        this.startX = this.x;
-        this.startY = this.y;
-        this.startWidth = this.points.top3.x - this.points.top1.x;
-        this.startHeight = this.points.bottom1.y - this.points.top1.y;
-        this.recordX = e.stageX;
-        this.recordY = e.stageY;
-        this.pointX = point.x;
-        this.pointY = point.y;
-        this.centerX = (this.points.top1.x + this.points.top3.x) / 2;
-        this.centerY = (this.points.top1.y + this.points.bottom1.y) / 2;
+        this.start = {};
+        for (var key in this.info) {
+            this.start[key] = this.info[key];
+        }
+        this.start.pointX = point.x + this.start.x;
+        this.start.pointY = point.y + this.start.y;
+        this.start.touchX = e.stageX;
+        this.start.touchY = e.stageY;
+        this.start.centerX = this.points.center.x + this.start.x;
+        this.start.centerY = this.points.center.y + this.start.y;
+        this.start.originX = this.points.top1.x + this.start.x;
+        this.start.originY = this.points.top1.y + this.start.y;
+        this.start.radX = this.points.top3.x + this.start.x;
+        this.start.radY = this.points.top3.y + this.start.y;
+        this.start.centerX2 = this.centerX;
+        this.start.centerY2 = this.centerY;
         if ((point == this.points.top1 || point == this.points.top3 ||
-            point == this.points.bottom1 || point == this.points.bottom3) && e.target == point.shader) {
+            point == this.points.bottom1 || point == this.points.bottom3) && (Math.abs(e.touchX) > 5 || Math.abs(e.touchY) > 5)) {
             this.rotate = true;
         } else {
             this.rotate = false;
@@ -188,53 +207,121 @@ var UIEditor = (function (_super) {
 
     UIEditor.prototype.touchPointMove = function (e) {
         var point = e.currentTarget;
-        var newX = e.stageX + this.pointX - this.recordX;
-        var newY = e.stageY + this.pointY - this.recordY;
-        switch (point) {
-            case this.points.top1:
-                if (this.rotate) {
+        var pointX = e.stageX + this.start.pointX - this.start.touchX;
+        var pointY = e.stageY + this.start.pointY - this.start.touchY;
+        if (this.rotate) {//旋转
+            //把之前的点(鼠标拖动的那个点)转换为以旋转中心为原点的相对坐标
+            var px1 = this.start.pointX - this.start.centerX;
+            var py1 = this.start.pointY - this.start.centerY;
 
+            //把现在的点转换为以旋转中心为原点的相对坐标
+            var px2 = pointX - this.start.centerX;
+            var py2 = pointY - this.start.centerY;
+
+            //计算点的旋转角度，根据向量的叉乘和点乘获得 sin 和 cos
+            var sin = (px1 * py2 - py1 * px2) / (Math.sqrt(px1 * px1 + py1 * py1) * Math.sqrt(px2 * px2 + py2 * py2));
+            var cos = (px1 * px2 + py1 * py2) / (Math.sqrt(px1 * px1 + py1 * py1) * Math.sqrt(px2 * px2 + py2 * py2));
+
+            //根据点的旋转公式 newX = l * cos(r + a) = l * cos(r) * cos(a) - l * sin(r) * sin(a) = x * cos(a) - y * sin(a)
+            //以及 newY = l * sin(r + a) = l * sin(r) * cos(a) + l * cos(r) * sin(a) = y * cos(a) + x * sin(a)
+            var originX = (this.start.originX - this.start.centerX) * cos - (this.start.originY - this.start.centerY) * sin;
+            var originY = (this.start.originY - this.start.centerY) * cos + (this.start.originX - this.start.centerX) * sin;
+
+            //计算出 top3 旋转过后的坐标
+            var radX = (this.start.radX - this.start.centerX) * cos - (this.start.radY - this.start.centerY) * sin;
+            var radY = (this.start.radY - this.start.centerY) * cos + (this.start.radX - this.start.centerX) * sin;
+
+            //根据 top1 和 top3 的夹角算出新的旋转角度
+            var r = Math.atan2(radY - originY, radX - originX);
+            r = r * 180 / Math.PI;
+            if (r < 3 && r > -3 || r < -177 && r > -177) {
+                if (r < 5 && r > -5) r = 0;
+                if (r < -175 && r > -185) r = -180;
+                var rad = (-this.start.rotation + r) * Math.PI / 180;
+                var x = this.start.originX - this.start.centerX;
+                var y = this.start.originY - this.start.centerY;
+                originX = x * Math.cos(rad) - y * Math.sin(rad);
+                originY = y * Math.cos(rad) + x * Math.sin(rad);
+            }
+            this.setAttribute("rotation", r);
+            //根据相对坐标算出绝对坐标
+            originX = originX + this.start.centerX;
+            originY = originY + this.start.centerY;
+            this.setAttribute("x", originX);
+            this.setAttribute("y", originY);
+        } else {
+            if (point == this.points.center) {//移动中心点
+                //把 center 转换到，以 top1、top3 为 x 轴，以 top1、bottom1 为 y 轴的坐标系中
+                var x = pointX - this.start.originX;
+                var y = pointY - this.start.originY;
+                r = this.start.rotation * Math.PI / 180;
+                pointX = x * Math.cos(r) + y * Math.sin(r);
+                pointY = y * Math.cos(r) - x * Math.sin(r);
+                this.centerX = pointX / this.start.width;
+                this.centerY = pointY / this.start.height;
+            } else {//缩放
+                var rad = (-this.start.rotation) * Math.PI / 180;
+                //把之前的点(鼠标拖动的那个点)转换为以旋转中心为原点的相对坐标
+                var x = this.start.pointX - this.start.centerX;
+                var y = this.start.pointY - this.start.centerY;
+                var px1 = x * Math.cos(rad) - y * Math.sin(rad);
+                var py1 = y * Math.cos(rad) + x * Math.sin(rad);
+
+                //把现在的点转换为以旋转中心为原点的相对坐标
+                x = pointX - this.start.centerX;
+                y = pointY - this.start.centerY;
+                var px2 = x * Math.cos(rad) - y * Math.sin(rad);
+                var py2 = y * Math.cos(rad) + x * Math.sin(rad);
+
+                if (point == this.points.top2 || point == this.points.bottom2) px2 = px1;
+                if (point == this.points.left || point == this.points.right) py2 = py1;
+
+                x = this.start.originX - this.start.centerX;
+                y = this.start.originY - this.start.centerY;
+
+                var originX = x * Math.cos(rad) - y * Math.sin(rad);
+                var originY = y * Math.cos(rad) + x * Math.sin(rad);
+
+                x = originX * (Math.abs(px1) < 0.1 ? 1 : (px2 / px1)) - originX;
+                y = originY * (Math.abs(py1) < 0.1 ? 1 : (py2 / py1)) - originY;
+
+                rad = (this.start.rotation) * Math.PI / 180;
+                originX = x * Math.cos(rad) - y * Math.sin(rad);
+                originY = y * Math.cos(rad) + x * Math.sin(rad);
+
+                var startX = originX + this.start.originX;
+                var startY = originY + this.start.originY;
+                var width = this.start.width * (Math.abs(px1) < 0.1 ? 1 : (px2 / px1));
+                var height = this.start.height * (Math.abs(py1) < 0.1 ? 1 : (py2 / py1));
+                if (width < 0) {
+                    x = -width;
+                    y = 0;
+                    var moveX = x * Math.cos(rad) - y * Math.sin(rad);
+                    var moveY = y * Math.cos(rad) + x * Math.sin(rad);
+                    width = -width;
+                    startX -= moveX;
+                    startY -= moveY;
+                    this.centerX = 1 - this.start.centerX2;
                 } else {
-                    this.setAttribute("x", newX + this.startX);
-                    this.setAttribute("y", newY + this.startY);
-                    this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
-                    this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
+                    this.centerX = this.start.centerX2;
                 }
-                break;
-            case this.points.top2:
-                this.setAttribute("y", newY + this.startY);
-                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
-                break;
-            case this.points.top3:
-                this.setAttribute("x", this.pointX - newX + this.startX);
-                this.setAttribute("y", newY + this.startY);
-                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
-                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
-                break;
-            case this.points.left:
-                this.setAttribute("x", newX + this.startX);
-                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
-                break;
-            case this.points.right:
-                this.setAttribute("x", this.pointX - newX + this.startX);
-                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
-                break;
-            case this.points.bottom1:
-                this.setAttribute("x", newX + this.startX);
-                this.setAttribute("y", this.pointY - newY + this.startY);
-                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
-                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
-                break;
-            case this.points.bottom2:
-                this.setAttribute("y", this.pointY - newY + this.startY);
-                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
-                break;
-            case this.points.bottom3:
-                this.setAttribute("x", this.pointX - newX + this.startX);
-                this.setAttribute("y", this.pointY - newY + this.startY);
-                this.setAttribute("width", Math.abs(newX - this.centerX) * 2);
-                this.setAttribute("height", Math.abs(newY - this.centerY) * 2);
-                break;
+                if (height < 0) {
+                    x = 0;
+                    y = -height;
+                    var moveX = x * Math.cos(rad) - y * Math.sin(rad);
+                    var moveY = y * Math.cos(rad) + x * Math.sin(rad);
+                    height = -height;
+                    startX -= moveX;
+                    startY -= moveY;
+                    this.centerY = 1 - this.start.centerY2;
+                } else {
+                    this.centerY = this.start.centerY2;
+                }
+                this.setAttribute("x", startX);
+                this.setAttribute("y", startY);
+                this.setAttribute("width", width);
+                this.setAttribute("height", height);
+            }
         }
         this.update();
     }
