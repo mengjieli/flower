@@ -267,8 +267,8 @@ var UIEditor = (function (_super) {
                 r = this.start.rotation * Math.PI / 180;
                 pointX = x * Math.cos(r) + y * Math.sin(r);
                 pointY = y * Math.cos(r) - x * Math.sin(r);
-                this.centerX = pointX / this.start.width;
-                this.centerY = pointY / this.start.height;
+                this.centerX = Math.floor((pointX / this.start.width) * 20) / 20;
+                this.centerY = Math.floor((pointY / this.start.height) * 20) / 20;
             } else {//缩放
                 var rad = (-this.start.rotation) * Math.PI / 180;
                 //把之前的点(鼠标拖动的那个点)转换为以旋转中心为原点的相对坐标
