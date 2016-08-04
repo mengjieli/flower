@@ -179,7 +179,12 @@ var UIEditor = (function (_super) {
         }
     }
 
+    /**
+     * 准备编辑
+     * @param e
+     */
     UIEditor.prototype.touchPointBegin = function (e) {
+        //记录初始信息
         var point = e.currentTarget;
         this.start = {};
         for (var key in this.info) {
@@ -205,7 +210,12 @@ var UIEditor = (function (_super) {
         }
     }
 
+    /**
+     * 编辑中
+     * @param e
+     */
     UIEditor.prototype.touchPointMove = function (e) {
+        //编辑中
         var point = e.currentTarget;
         var pointX = e.stageX + this.start.pointX - this.start.touchX;
         var pointY = e.stageY + this.start.pointY - this.start.touchY;
@@ -250,7 +260,7 @@ var UIEditor = (function (_super) {
             this.setAttribute("x", originX);
             this.setAttribute("y", originY);
         } else {
-            if (point == this.points.center) {//移动中心点
+            if (point == this.points.center) {//移动 center(中心点)
                 //把 center 转换到，以 top1、top3 为 x 轴，以 top1、bottom1 为 y 轴的坐标系中
                 var x = pointX - this.start.originX;
                 var y = pointY - this.start.originY;
@@ -279,21 +289,27 @@ var UIEditor = (function (_super) {
                 x = this.start.originX - this.start.centerX;
                 y = this.start.originY - this.start.centerY;
 
+                //把之前的原点 (0,0) 转到相对于 center(带旋转角度的) 的坐标系中
                 var originX = x * Math.cos(rad) - y * Math.sin(rad);
                 var originY = y * Math.cos(rad) + x * Math.sin(rad);
 
+                //获取拉伸之后的原点(拉伸之后就不是 (0,0) 点了)坐标
                 x = originX * (Math.abs(px1) < 0.1 ? 1 : (px2 / px1)) - originX;
                 y = originY * (Math.abs(py1) < 0.1 ? 1 : (py2 / py1)) - originY;
 
+                //把新原点(拉伸之后就不是 (0,0) 点了)转换到原点坐标系(没有旋转角度的)
                 rad = (this.start.rotation) * Math.PI / 180;
                 originX = x * Math.cos(rad) - y * Math.sin(rad);
                 originY = y * Math.cos(rad) + x * Math.sin(rad);
 
+                //获取新原点相对上层的坐标
                 var startX = originX + this.start.originX;
                 var startY = originY + this.start.originY;
+
+                //获取新的宽高
                 var width = this.start.width * (Math.abs(px1) < 0.1 ? 1 : (px2 / px1));
                 var height = this.start.height * (Math.abs(py1) < 0.1 ? 1 : (py2 / py1));
-                if (width < 0) {
+                if (width < 0) { //如果宽为负需要处理
                     x = -width;
                     y = 0;
                     var moveX = x * Math.cos(rad) - y * Math.sin(rad);
@@ -305,7 +321,7 @@ var UIEditor = (function (_super) {
                 } else {
                     this.centerX = this.start.centerX2;
                 }
-                if (height < 0) {
+                if (height < 0) { //如果高为负需要处理
                     x = 0;
                     y = -height;
                     var moveX = x * Math.cos(rad) - y * Math.sin(rad);
@@ -317,6 +333,7 @@ var UIEditor = (function (_super) {
                 } else {
                     this.centerY = this.start.centerY2;
                 }
+                //设置新的位置和宽高
                 this.setAttribute("x", startX);
                 this.setAttribute("y", startY);
                 this.setAttribute("width", width);
