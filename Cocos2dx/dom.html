@@ -1,8 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+<style type="text/css">
+    body {
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        user-select: none;
+        font-style: italic;
+    }
+</style>
 <head>
     <meta charset="UTF-8">
     <title></title>
+    <script>
+        window.onload = function() {
+            var labels = document.getElementsByTagName('label');
+            for (var i = 0; i < labels.length; i++) {
+                disableSelection(labels[i]);
+            }
+        };
+        function disableSelection(element) {
+            if (typeof element.onselectstart != 'undefined') {
+                element.onselectstart = function() { return false; };
+            } else if (typeof element.style.MozUserSelect != 'undefined') {
+                element.style.MozUserSelect = 'none';
+            } else {
+                element.onmousedown = function() { return false; };
+            }
+        }
+    </script>
 </head>
 <body style="overflow:hidden" >
     <div id="FlowerMain">

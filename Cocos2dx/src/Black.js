@@ -199,20 +199,32 @@ var $root = eval("this");
                 };
 
                 p.$setLeft = function (val) {
-                    val = +val || 0;
                     var p = this.$UIComponent;
-                    if (p[0] == val) {
-                        return false;
+                    if (val == null) {
+                        if (p[0] == null) {
+                            return;
+                        }
+                    } else {
+                        val = +val || 0;
+                        if (p[0] == val) {
+                            return false;
+                        }
                     }
                     p[0] = val;
                     this.$invalidateContentBounds();
                 };
 
                 p.$setRight = function (val) {
-                    val = +val || 0;
                     var p = this.$UIComponent;
-                    if (p[1] == val) {
-                        return false;
+                    if (val == null) {
+                        if (p[1] == null) {
+                            return;
+                        }
+                    } else {
+                        val = +val || 0;
+                        if (p[1] == val) {
+                            return false;
+                        }
                     }
                     p[1] = val;
                     this.$invalidateContentBounds();
@@ -1039,7 +1051,7 @@ var $root = eval("this");
         return ArrayValue;
     }(Value);
 
-    for (var i = 0; i < 1000; i++) {
+    for (var i = 0; i < 100000; i++) {
         Object.defineProperty(ArrayValue.prototype, "" + i, {
             get: function (index) {
                 return function () {
@@ -1148,6 +1160,8 @@ var $root = eval("this");
             var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
 
             _this7.__old = _this7.__value = +init || 0;
+            _this7.__precision = 2;
+            _this7.__multiplier = Math.pow(10, _this7.__precision);
             return _this7;
         }
 
@@ -1155,12 +1169,39 @@ var $root = eval("this");
             key: "$setValue",
             value: function $setValue(val) {
                 val = +val || 0;
+                if (val > 0) {
+                    var smallNumber = val - Math.floor(val);
+                    smallNumber = Math.floor(smallNumber * this.__multiplier) / this.__multiplier;
+                    val = Math.floor(val) + smallNumber;
+                } else {
+                    val = -val;
+                    var smallNumber = val - Math.floor(val);
+                    smallNumber = Math.floor(smallNumber * this.__multiplier) / this.__multiplier;
+                    val = Math.floor(val) + smallNumber;
+                    val = -val;
+                }
                 if (val == this.__value) {
                     return;
                 }
                 this.__old = this.__value;
                 this.__value = val;
                 this.dispatchWidth(flower.Event.UPDATE, this, val);
+            }
+
+            /**
+             * 设置精确到小数点后多少位
+             * @param val
+             */
+
+        }, {
+            key: "precision",
+            set: function set(val) {
+                this.__precision = val;
+                this.__multiplier = Math.pow(10, this.__precision);
+                this.$setValue(this.__value);
+            },
+            get: function get() {
+                return this.__precision;
             }
         }]);
 
@@ -1384,7 +1425,7 @@ var $root = eval("this");
                 "members": {
                     "current": { "type": "number" },
                     "max": { "type": "number" },
-                    "percent": { "type": "number", "bind": "{this.current/this.max}" },
+                    "percent": { "type": "number", "bind": "{this.max==0?1:this.current/this.max}" },
                     "tip": { "type": "string" }
                 }
             });
@@ -6435,7 +6476,7 @@ var $root = eval("this");
                 flower.UIParser.addNameSapce(namespace, cfg.packageURL);
                 this.__list = [];
                 var classes = cfg.classes;
-                if (classes) {
+                if (classes && Object.keys(classes).length) {
                     for (var key in classes) {
                         var url = classes[key];
                         if (url.slice(0, 2) == "./") {
@@ -6447,7 +6488,7 @@ var $root = eval("this");
                 this.script = "var module = $root." + cfg.packageURL + " = $root." + cfg.packageURL + "||{};\n";
                 //this.script += "var " + cfg.packageURL + " = module;\n\n";
                 var scripts = cfg.scripts;
-                if (scripts) {
+                if (scripts && Object.keys(scripts).length) {
                     for (var i = 0; i < scripts.length; i++) {
                         var url = scripts[i];
                         if (url.slice(0, 2) == "./") {
@@ -6460,7 +6501,7 @@ var $root = eval("this");
                     }
                 }
                 var data = cfg.data;
-                if (data) {
+                if (data && Object.keys(data).length) {
                     for (var i = 0; i < data.length; i++) {
                         var url = data[i];
                         if (url.slice(0, 2) == "./") {
@@ -6473,7 +6514,7 @@ var $root = eval("this");
                     }
                 }
                 var components = cfg.components;
-                if (components) {
+                if (components && Object.keys(components).length) {
                     for (var i = 0; i < components.length; i++) {
                         var url = components[i];
                         if (url.slice(0, 2) == "./") {
@@ -6515,6 +6556,9 @@ var $root = eval("this");
                             eval(this.script);
                         }
                     }
+                }
+                if (this.__list.length == 0) {
+                    this.__index = this.__list.length = 1;
                 }
                 this.__progress.max.value = this.__list.length;
                 this.__progress.current.value = this.__index;

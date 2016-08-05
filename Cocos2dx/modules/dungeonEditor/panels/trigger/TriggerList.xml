@@ -1,0 +1,8 @@
+<s:ScrollerTree class="TriggerList" percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software" xmlns:d="dungeon">
+    <f:viewport>
+        <s:LabelTree selectTime="touch_begin"/>
+    </f:viewport>
+    <f:dataProvider>
+        <f:Direction path="res"/>
+    </f:dataProvider>
+</s:ScrollerTree>

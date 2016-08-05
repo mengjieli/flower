@@ -35,15 +35,23 @@ function onSelectElement(e) {
             this[atr + "Input"].addListener(flower.Event.FOCUS_IN, function (e) {
                 this[atr + "Input"].removeBindProperty("text");
             }.bind(this));
+            var inputOver = function () {
+                var text = this[atr + "Input"].text;
+                if (text != "") {
+                    this.data.attributes[atr].value = text;
+                } else {
+                    this.data.attributes[atr].value = text;
+                    this.data.attributes[atr].exist.value = false;
+                }
+                this[atr + "Input"].bindProperty("text", "{data.attributesShow." + atr + "}", [this]);
+            };
             this[atr + "Input"].addListener(flower.Event.FOCUS_OUT, function (e) {
-                this.data.attributes[atr].value = this[atr + "Input"].text;
-                this[atr + "Input"].bindProperty("text", "{data.attributes." + atr + "}", [this]);
+                inputOver.apply(this);
             }.bind(this));
             this[atr + "Input"].addListener(flower.KeyboardEvent.KEY_DOWN, function (e) {
                 if (e.keyCode != 13) return;
                 this[atr + "Input"].inputOver();
-                this.data.attributes[atr].value = this[atr + "Input"].text;
-                this[atr + "Input"].bindProperty("text", "{data.attributes." + atr + "}", [this]);
+                inputOver.apply(this);
             }.bind(this));
         }).bind(this)(atr);
     }

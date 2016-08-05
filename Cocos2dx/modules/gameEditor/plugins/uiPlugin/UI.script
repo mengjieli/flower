@@ -41,8 +41,18 @@ var UI = (function (_super) {
             atr.addListener(flower.Event.UPDATE, function (display, name, ui) {
                 return function (e) {
                     display[name] = e.data.value;
-                    if(ui.info.select == ui) {
+                    if (ui.info.select == ui) {
                         ui.editor.update();
+                    }
+                }
+            }(display, atrs[i], this));
+            atr.exist.addListener(flower.Event.UPDATE, function (display, name, ui) {
+                return function (e) {
+                    if (e.data.value == false) {
+                        display[name] = null;
+                        if (ui.info.select == ui) {
+                            ui.editor.update();
+                        }
                     }
                 }
             }(display, atrs[i], this));

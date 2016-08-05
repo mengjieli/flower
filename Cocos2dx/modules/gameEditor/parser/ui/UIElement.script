@@ -47,11 +47,11 @@ var UIElement = (function (_super) {
                 } else {
                     this.attributes[names[i]] = new calzz[i](inits[i]);
                     this.attributesShow[names[i]] = new calzz[i](inits[i]);
-                    this.attributes[names[i]].addListener(flower.Event.UPDATE, function (e) {
-                        e.currentTarget.exist.value = true;
-                    });
                     this.attributes[names[i]].exist = new flower.BooleanValue(false);
                 }
+                this.attributes[names[i]].addListener(flower.Event.UPDATE, function (e) {
+                    e.currentTarget.exist.value = true;
+                });
             }
             for (var i = 0; i < xml.attributes.length; i++) {
                 var attribute = xml.attributes[i];

@@ -29,7 +29,7 @@ class Module extends flower.EventDispatcher {
         flower.UIParser.addNameSapce(namespace, cfg.packageURL);
         this.__list = [];
         var classes = cfg.classes;
-        if (classes) {
+        if (classes && Object.keys(classes).length) {
             for (var key in  classes) {
                 var url = classes[key];
                 if (url.slice(0, 2) == "./") {
@@ -41,7 +41,7 @@ class Module extends flower.EventDispatcher {
         this.script = "var module = $root." + cfg.packageURL + " = $root." + cfg.packageURL + "||{};\n";
         //this.script += "var " + cfg.packageURL + " = module;\n\n";
         var scripts = cfg.scripts;
-        if (scripts) {
+        if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
                 var url = scripts[i];
                 if (url.slice(0, 2) == "./") {
@@ -54,7 +54,7 @@ class Module extends flower.EventDispatcher {
             }
         }
         var data = cfg.data;
-        if (data) {
+        if (data && Object.keys(data).length) {
             for (var i = 0; i < data.length; i++) {
                 var url = data[i];
                 if (url.slice(0, 2) == "./") {
@@ -67,7 +67,7 @@ class Module extends flower.EventDispatcher {
             }
         }
         var components = cfg.components;
-        if (components) {
+        if (components && Object.keys(components).length) {
             for (var i = 0; i < components.length; i++) {
                 var url = components[i];
                 if (url.slice(0, 2) == "./") {
@@ -107,6 +107,9 @@ class Module extends flower.EventDispatcher {
                     eval(this.script);
                 }
             }
+        }
+        if(this.__list.length == 0) {
+            this.__index = this.__list.length = 1;
         }
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;

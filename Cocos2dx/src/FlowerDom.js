@@ -1168,6 +1168,7 @@ var flower = {};
                     return;
                 }
                 if (scale9Grid) {
+                    return;
                     this.addProgrammerFlag(0x0001);
                     var width = this.__texture.width;
                     var height = this.__texture.height;
@@ -1250,7 +1251,7 @@ var flower = {};
             key: "setY",
             value: function setY(val) {
                 this.__y = val;
-                this.show.style.top = -this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY + "px";
+                this.show.style.top = this.__y + (this.__texture ? this.__texture.offY : 0) * this.__scaleY + "px";
             }
         }, {
             key: "setScaleX",
@@ -1278,9 +1279,15 @@ var flower = {};
                 }
                 this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
                 if (this.__texture && this.__texture.offY) {
-                    this.show.style.top = -this.__y - this.__texture.offY * this.__scaleY + "px";
+                    this.show.style.top = this.__y + this.__texture.offY * this.__scaleY + "px";
                 }
                 this.setScale9Grid(this.__scale9Grid);
+            }
+        }, {
+            key: "setRotation",
+            value: function setRotation(val) {
+                this.__rotation = val;
+                this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
             }
         }, {
             key: "release",
@@ -1996,6 +2003,7 @@ var flower = {};
     locale_strings[1007] = "{0} 超出索引: {1}，索引范围为 0 ~ {2}";
     locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docsWebSite + "docs/class/{1}.md?f{2}";
     locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
+    locale_strings[1030] = "目标显示对象不在同一个显示列表中";
     locale_strings[2001] = "[loadText] {0}";
     locale_strings[2002] = "[loadTexture] {0}";
     locale_strings[2003] = "[加载失败] {0}";
@@ -3875,13 +3883,50 @@ var flower = {};
         }, {
             key: "localToGlobal",
             value: function localToGlobal(point) {
-                point = point || new flower.Point();
-                var matrix;
                 var display = this;
-                while (display) {
-                    matrix = display.$getMatrix();
-                    matrix.transformPoint(point.x, point.y, point);
+                while (display.parent) {
                     display = display.parent;
+                }
+                return this.localToDisplay(point, display);
+            }
+        }, {
+            key: "localToDisplay",
+            value: function localToDisplay(point, display) {
+                point = point || new flower.Point();
+                var parentsThis = [];
+                var dis = this;
+                while (dis) {
+                    parentsThis.push(dis);
+                    dis = dis.parent;
+                }
+                var parentsDisplay = [];
+                dis = display;
+                while (dis) {
+                    parentsDisplay.push(dis);
+                    dis = dis.parent;
+                }
+                var find = false;
+                for (var i = 0; i < parentsThis.length; i++) {
+                    for (var j = 0; j < parentsDisplay.length; j++) {
+                        if (parentsThis[i] == parentsDisplay[j]) {
+                            parentsThis.splice(i, parentsThis.length - i);
+                            parentsDisplay.splice(j, parentsDisplay.length - j);
+                            find = true;
+                            break;
+                        }
+                    }
+                }
+                if (!find) {
+                    $error(1030);
+                }
+                var matrix;
+                for (var i = 0; i < parentsThis.length; i++) {
+                    matrix = parentsThis[i].$getMatrix();
+                    matrix.transformPoint(point.x, point.y, point);
+                }
+                for (var i = 0; i < parentsDisplay.length; i++) {
+                    matrix = parentsDisplay[i].$getReverseMatrix();
+                    matrix.transformPoint(point.x, point.y, point);
                 }
                 return point;
             }

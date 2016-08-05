@@ -77,6 +77,7 @@ class PlatformBitmap extends PlatformDisplayObject {
             return;
         }
         if (scale9Grid) {
+            return;
             this.addProgrammerFlag(0x0001);
             var width = this.__texture.width;
             var height = this.__texture.height;
@@ -157,7 +158,7 @@ class PlatformBitmap extends PlatformDisplayObject {
 
     setY(val) {
         this.__y = val;
-        this.show.style.top = (-this.__y - (this.__texture ? this.__texture.offY : 0) * this.__scaleY) + "px";
+        this.show.style.top = (this.__y + (this.__texture ? this.__texture.offY : 0) * this.__scaleY) + "px";
     }
 
     setScaleX(val) {
@@ -183,9 +184,14 @@ class PlatformBitmap extends PlatformDisplayObject {
         }
         this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
         if (this.__texture && this.__texture.offY) {
-            this.show.style.top = (-this.__y - this.__texture.offY * this.__scaleY) + "px";
+            this.show.style.top = (this.__y + this.__texture.offY * this.__scaleY) + "px";
         }
         this.setScale9Grid(this.__scale9Grid);
+    }
+
+    setRotation(val) {
+        this.__rotation = val;
+        this.show.style["-webkit-transform"] = "rotate(" + this.__rotation + "deg) scale(" + this.scaleX + "," + this.scaleY + ")";
     }
 
     release() {

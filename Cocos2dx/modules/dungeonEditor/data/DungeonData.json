@@ -1,0 +1,17 @@
+{
+  "name": "de.DungeonData",
+  "exports": true,
+  "desc": "关卡数据",
+  "members": {
+    "name": {
+      "desc": "关卡名称",
+      "type": "string",
+      "init": "关卡"
+    },
+    "isPlay": {
+      "desc": "是否正在播放",
+      "type": "bool",
+      "init": false
+    }
+  }
+}

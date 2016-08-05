@@ -36,7 +36,7 @@ class DataManager {
             "members": {
                 "current": {"type": "number"},
                 "max": {"type": "number"},
-                "percent": {"type": "number", "bind": "{this.current/this.max}"},
+                "percent": {"type": "number", "bind": "{this.max==0?1:this.current/this.max}"},
                 "tip": {"type": "string"}
             }
         });

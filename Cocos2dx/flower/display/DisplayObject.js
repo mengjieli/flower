@@ -512,13 +512,49 @@ class DisplayObject extends EventDispatcher {
     }
 
     localToGlobal(point) {
-        point = point || new flower.Point();
-        var matrix;
         var display = this;
-        while (display) {
-            matrix = display.$getMatrix();
-            matrix.transformPoint(point.x, point.y, point);
+        while (display.parent) {
             display = display.parent;
+        }
+        return this.localToDisplay(point, display);
+    }
+
+    localToDisplay(point, display) {
+        point = point || new flower.Point();
+        var parentsThis = [];
+        var dis = this;
+        while (dis) {
+            parentsThis.push(dis);
+            dis = dis.parent;
+        }
+        var parentsDisplay = [];
+        dis = display;
+        while (dis) {
+            parentsDisplay.push(dis);
+            dis = dis.parent;
+        }
+        var find = false;
+        for (var i = 0; i < parentsThis.length; i++) {
+            for (var j = 0; j < parentsDisplay.length; j++) {
+                if (parentsThis[i] == parentsDisplay[j]) {
+                    parentsThis.splice(i, parentsThis.length - i);
+                    parentsDisplay.splice(j, parentsDisplay.length - j);
+                    find = true;
+                    break;
+                }
+            }
+        }
+        if (!find) {
+            $error(1030);
+        }
+        var matrix;
+        for (var i = 0; i < parentsThis.length; i++) {
+            matrix = parentsThis[i].$getMatrix();
+            matrix.transformPoint(point.x, point.y, point);
+        }
+        for (var i = 0; i < parentsDisplay.length; i++) {
+            matrix = parentsDisplay[i].$getReverseMatrix();
+            matrix.transformPoint(point.x, point.y, point);
         }
         return point;
     }

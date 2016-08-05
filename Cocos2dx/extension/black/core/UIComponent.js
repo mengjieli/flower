@@ -165,20 +165,32 @@ class UIComponent {
         }
 
         p.$setLeft = function (val) {
-            val = +val || 0;
             var p = this.$UIComponent;
-            if (p[0] == val) {
-                return false;
+            if (val == null) {
+                if (p[0] == null) {
+                    return;
+                }
+            } else {
+                val = +val || 0;
+                if (p[0] == val) {
+                    return false;
+                }
             }
             p[0] = val;
             this.$invalidateContentBounds();
         }
 
         p.$setRight = function (val) {
-            val = +val || 0;
             var p = this.$UIComponent;
-            if (p[1] == val) {
-                return false;
+            if (val == null) {
+                if (p[1] == null) {
+                    return;
+                }
+            } else {
+                val = +val || 0;
+                if (p[1] == val) {
+                    return false;
+                }
             }
             p[1] = val;
             this.$invalidateContentBounds();

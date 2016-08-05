@@ -1,6 +1,7 @@
 {
   "namespace": "s",
   "components": [
+    "./button/Button.xml",
     "./label/Label.xml",
     "./panel/Panel.xml",
     "./panel/Alert.xml",

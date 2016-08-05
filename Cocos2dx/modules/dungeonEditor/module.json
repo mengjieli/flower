@@ -1,0 +1,16 @@
+{
+  "namespace": "d",
+  "packageURL": "de",
+  "scripts": [
+  ],
+  "components": [
+  ],
+  "classes": {
+    "EditorMain": "./DungeonEditorMain.xml",
+    "TriggerPanel": "./panels/trigger/TriggerPanel.xml",
+    "TriggerList": "./panels/trigger/TriggerList.xml"
+  },
+  "data": [
+    "./data/DungeonData.json"
+  ]
+}

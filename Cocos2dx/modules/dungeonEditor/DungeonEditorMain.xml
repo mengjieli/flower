@@ -1,0 +1,7 @@
+<s:Tab percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software" xmlns:d="dungeon">
+    <f:panels>
+        <f:Array>
+            <d:TriggerPanel/>
+        </f:Array>
+    </f:panels>
+</s:Tab>
