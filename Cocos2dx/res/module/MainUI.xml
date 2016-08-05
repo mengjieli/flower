@@ -1,6 +1,3 @@
 <f:Group class="PaikMain" width="400" height="400" xmlns:f="flower">
-    <f:Rect x="30" y="30" percentWidth="25" percentHeight="25" fillColor="0xff0000"/>
-    <f:Label x="150" y="250" text="派克帝国"/>
-    <f:Rect x="130" y="30" width="50" height="50" fillColor="0x0000ff"/>
-    <f:Group x="100" y="100" width="250" height="200" rotation="30"/>
+    <f:Rect x="30" y="30" width="100" height="100" fillColor="0xff0000"/>
 </f:Group>
