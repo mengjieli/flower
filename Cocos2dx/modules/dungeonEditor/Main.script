@@ -1,0 +1,27 @@
+function init() {
+    var direction = this.data.direction;
+    //for(var i = 0; i < 10; i++)
+
+    var info = {
+        isDirection:true,
+        path:"abc"
+    }
+    info.name = flower.Path.getName(info.path);
+    info.fileType = flower.Path.getFileType(info.path);
+    flower.breakPoint();
+    var menu = new Button();
+    menu.x = 100;
+    menu.y = 100;
+    info.menu = menu;
+    direction.push(info);
+
+
+    info = {
+        isDirection:false,
+        path:"abc/item1.trigger"
+    }
+    info.name = flower.Path.getName(info.path);
+    info.fileType = flower.Path.getFileType(info.path);
+    direction.push(info);
+    //}
+}

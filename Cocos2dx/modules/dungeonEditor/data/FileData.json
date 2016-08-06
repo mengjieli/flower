@@ -1,0 +1,12 @@
+{
+  "name": "de.FileData",
+  "exports": false,
+  "desc": "文件(文件夹)信息",
+  "members": {
+    "name": {
+      "desc": "关卡名称",
+      "type": "string",
+      "init": "关卡"
+    }
+  }
+}

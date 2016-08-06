@@ -12,6 +12,11 @@
       "desc": "是否正在播放",
       "type": "bool",
       "init": false
+    },
+    "direction": {
+      "desc": "副本信息列表",
+      "type": "Array",
+      "typeValue": "de.File"
     }
   }
 }

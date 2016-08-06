@@ -32,6 +32,7 @@ class MouseEvent extends Event {
     static MOUSE_MOVE = "mouse_move";
     static MOUSE_OVER = "mouse_over";
     static MOUSE_OUT = "mouse_out";
+    static RIGHT_CLICK = "right_click";
 }
 
 exports.MouseEvent = MouseEvent;

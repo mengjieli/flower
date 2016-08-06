@@ -6,11 +6,11 @@
   "components": [
   ],
   "classes": {
-    "EditorMain": "./DungeonEditorMain.xml",
-    "TriggerPanel": "./panels/trigger/TriggerPanel.xml",
-    "TriggerList": "./panels/trigger/TriggerList.xml"
+    "Main": "./Main.xml",
+    "DirectionPanel": "./panels/DirectionPanel.xml"
   },
   "data": [
-    "./data/DungeonData.json"
+    "./data/DungeonData.json",
+    "./data/FileData.json"
   ]
 }

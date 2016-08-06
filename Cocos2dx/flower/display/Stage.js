@@ -42,12 +42,15 @@ class Stage extends Sprite {
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
     __nativeMouseMoveEvent = [];
+    __nativeRightClickEvent = [];
     __nativeTouchEvent = [];
     __mouseOverList = [this];
     __dragOverList = [this];
     __touchList = [];
     __lastMouseX = -1;
     __lastMouseY = -1;
+    __lastRightX = -1;
+    __lastRightY = -1;
     __focus = null;
 
     $setFocus(val) {
@@ -74,6 +77,12 @@ class Stage extends Sprite {
         this.__lastMouseY = y;
         this.__nativeMouseMoveEvent.push({x: x, y: y});
         //flower.trace("mouseEvent",x,y);
+    }
+
+    $addRightClickEvent(x, y) {
+        this.__lastRightX = x;
+        this.__lastRightY = y;
+        this.__nativeRightClickEvent.push({x: x, y: y});
     }
 
     $addTouchEvent(type, id, x, y) {
@@ -129,6 +138,21 @@ class Stage extends Sprite {
             event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
+    }
+
+    $onRightClick(x, y) {
+        if (this.$menu.$hasMenu()) {
+            return;
+        }
+        var target = this.$getMouseTarget(x, y, false);
+        var event;
+        event = new flower.MouseEvent(flower.MouseEvent.RIGHT_CLICK);
+        event.$stageX = x;
+        event.$stageY = y;
+        event.$target = target;
+        event.$touchX = target.lastTouchX;
+        event.$touchY = target.lastTouchY;
+        target.dispatch(event);
     }
 
     $onMouseMove(x, y) {
@@ -364,9 +388,12 @@ class Stage extends Sprite {
     $onFrameEnd() {
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
+        var rightClickList = this.__nativeRightClickEvent;
+        var hasclick = false;
         while (touchList.length) {
             var touch = touchList.shift();
             if (touch.type == "begin") {
+                hasclick = true;
                 this.$onTouchBegin(touch.id, touch.x, touch.y);
             } else if (touch.type == "move") {
                 this.$onTouchMove(touch.id, touch.x, touch.y);
@@ -382,6 +409,15 @@ class Stage extends Sprite {
             this.$onMouseMove(moveInfo.x, moveInfo.y);
         }
         mouseMoveList.length = 0;
+        if (rightClickList.length) {
+            hasclick = true;
+            var rightInfo = rightClickList[rightClickList.length - 1];
+            this.$onRightClick(rightInfo.x, rightInfo.y);
+        }
+        rightClickList.length = 0;
+        if(hasclick) {
+            this.$menu.$onTouch();
+        }
         super.$onFrameEnd();
         this.$background.$onFrameEnd();
     }

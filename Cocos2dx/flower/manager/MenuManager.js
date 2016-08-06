@@ -4,20 +4,20 @@ class MenuManager extends Sprite {
 
     constructor() {
         super();
-        this.addListener(Event.ADDED_TO_STAGE, this.__addedToStage, this);
     }
 
-    __addedToStage(e) {
-        this.removeListener(Event.ADDED_TO_STAGE, this.addedToStage, this);
-        this.stage.addListener(TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
-    }
-
-    __onTouch(e) {
-        var frame = flower.EnterFrame.frame;
-        if (frame > this.__addFrame && this.numChildren) {
+    $onTouch() {
+        if (flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
             this.removeAll();
+            return true;
         }
+        return false;
     }
+
+    $hasMenu() {
+        return (flower.EnterFrame.frame > this.__addFrame && this.numChildren) ? true : false;
+    }
+
 
     addChildAt(child, index) {
         this.__addFrame = flower.EnterFrame.frame;

@@ -15,11 +15,11 @@ class Main {
     loadThemeComplete(e) {
         e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         var stage = flower.Stage.getInstance();
-        stage.backgroundColor = 0x005555;
+        stage.backgroundColor = 0;
 
         var ui = new flower.UIParser();
         //ui.parseUIAsync("modules/gameEditor/EditorMain.xml");
-        ui.parseUIAsync("modules/dungeonEditor/DungeonEditorMain.xml");
+        ui.parseUIAsync("modules/dungeonEditor/Main.xml");
         stage.addChild(ui);
     }
 }

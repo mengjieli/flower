@@ -222,18 +222,25 @@ var flower = {};
                 requestAnimationFrame.call(window, Platform._run);
                 var touchDown = false;
                 mask.onmousedown = function (e) {
+                    if (e.button == 2) return;
                     touchDown = true;
                     engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
                 };
                 mask.onmouseup = function (e) {
+                    if (e.button == 2) return;
                     touchDown = false;
                     engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
                 };
                 mask.onmousemove = function (e) {
+                    if (e.button == 2) return;
                     engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
                     if (touchDown) {
                         engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
                     }
+                };
+                document.body.oncontextmenu = function (e) {
+                    engine.$addRightClickEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+                    return false;
                 };
                 Platform.width = document.documentElement.clientWidth;
                 Platform.height = document.documentElement.clientHeight;
@@ -668,6 +675,8 @@ var flower = {};
 
             var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformSprite).call(this));
 
+            _this.__children = [];
+
             _this.initShow();
             return _this;
         }
@@ -691,18 +700,30 @@ var flower = {};
             key: "addChild",
             value: function addChild(child) {
                 this.show.appendChild(child.show);
+                this.__children.push(child.show);
             }
         }, {
             key: "removeChild",
             value: function removeChild(child) {
                 this.show.removeChild(child.show);
+                for (var i = 0; i < this.__children.length; i++) {
+                    if (this.__children[i] == child.show) {
+                        this.__children.splice(i, 1);
+                        break;
+                    }
+                }
             }
         }, {
             key: "resetChildIndex",
             value: function resetChildIndex(children) {
-                //for (var i = 0, len = children.length; i < len; i++) {
-                //    children[i].$nativeShow.show.setLocalZOrder(i);
-                //}
+                for (var i = 0, len = children.length; i < len; i++) {
+                    var show = children[i].$nativeShow.show;
+                    if (this.__children[i] != show) {
+                        this.removeChild(children[i].$nativeShow);
+                        this.show.insertBefore(show, this.__children[i]);
+                        this.__children.splice(i, 0, show);
+                    }
+                }
             }
         }, {
             key: "setFilters",
@@ -2433,6 +2454,7 @@ var flower = {};
     MouseEvent.MOUSE_MOVE = "mouse_move";
     MouseEvent.MOUSE_OVER = "mouse_over";
     MouseEvent.MOUSE_OUT = "mouse_out";
+    MouseEvent.RIGHT_CLICK = "right_click";
 
 
     flower.MouseEvent = MouseEvent;
@@ -5423,12 +5445,15 @@ var flower = {};
             var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
             _this21.__nativeMouseMoveEvent = [];
+            _this21.__nativeRightClickEvent = [];
             _this21.__nativeTouchEvent = [];
             _this21.__mouseOverList = [_this21];
             _this21.__dragOverList = [_this21];
             _this21.__touchList = [];
             _this21.__lastMouseX = -1;
             _this21.__lastMouseY = -1;
+            _this21.__lastRightX = -1;
+            _this21.__lastRightY = -1;
             _this21.__focus = null;
 
             _this21.__stage = _this21;
@@ -5488,6 +5513,13 @@ var flower = {};
                 //flower.trace("mouseEvent",x,y);
             }
         }, {
+            key: "$addRightClickEvent",
+            value: function $addRightClickEvent(x, y) {
+                this.__lastRightX = x;
+                this.__lastRightY = y;
+                this.__nativeRightClickEvent.push({ x: x, y: y });
+            }
+        }, {
             key: "$addTouchEvent",
             value: function $addTouchEvent(type, id, x, y) {
                 this.__nativeTouchEvent.push({
@@ -5544,6 +5576,22 @@ var flower = {};
                     event.$touchY = target.lastTouchY;
                     target.dispatch(event);
                 }
+            }
+        }, {
+            key: "$onRightClick",
+            value: function $onRightClick(x, y) {
+                if (this.$menu.$hasMenu()) {
+                    return;
+                }
+                var target = this.$getMouseTarget(x, y, false);
+                var event;
+                event = new flower.MouseEvent(flower.MouseEvent.RIGHT_CLICK);
+                event.$stageX = x;
+                event.$stageY = y;
+                event.$target = target;
+                event.$touchX = target.lastTouchX;
+                event.$touchY = target.lastTouchY;
+                target.dispatch(event);
             }
         }, {
             key: "$onMouseMove",
@@ -5788,9 +5836,12 @@ var flower = {};
             value: function $onFrameEnd() {
                 var touchList = this.__nativeTouchEvent;
                 var mouseMoveList = this.__nativeMouseMoveEvent;
+                var rightClickList = this.__nativeRightClickEvent;
+                var hasclick = false;
                 while (touchList.length) {
                     var touch = touchList.shift();
                     if (touch.type == "begin") {
+                        hasclick = true;
                         this.$onTouchBegin(touch.id, touch.x, touch.y);
                     } else if (touch.type == "move") {
                         this.$onTouchMove(touch.id, touch.x, touch.y);
@@ -5806,6 +5857,15 @@ var flower = {};
                     this.$onMouseMove(moveInfo.x, moveInfo.y);
                 }
                 mouseMoveList.length = 0;
+                if (rightClickList.length) {
+                    hasclick = true;
+                    var rightInfo = rightClickList[rightClickList.length - 1];
+                    this.$onRightClick(rightInfo.x, rightInfo.y);
+                }
+                rightClickList.length = 0;
+                if (hasclick) {
+                    this.$menu.$onTouch();
+                }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
                 this.$background.$onFrameEnd();
             }
@@ -6012,24 +6072,22 @@ var flower = {};
             var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
 
             _this23.__addFrame = 0;
-
-            _this23.addListener(Event.ADDED_TO_STAGE, _this23.__addedToStage, _this23);
             return _this23;
         }
 
         _createClass(MenuManager, [{
-            key: "__addedToStage",
-            value: function __addedToStage(e) {
-                this.removeListener(Event.ADDED_TO_STAGE, this.addedToStage, this);
-                this.stage.addListener(TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+            key: "$onTouch",
+            value: function $onTouch() {
+                if (flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
+                    this.removeAll();
+                    return true;
+                }
+                return false;
             }
         }, {
-            key: "__onTouch",
-            value: function __onTouch(e) {
-                var frame = flower.EnterFrame.frame;
-                if (frame > this.__addFrame && this.numChildren) {
-                    this.removeAll();
-                }
+            key: "$hasMenu",
+            value: function $hasMenu() {
+                return flower.EnterFrame.frame > this.__addFrame && this.numChildren ? true : false;
             }
         }, {
             key: "addChildAt",

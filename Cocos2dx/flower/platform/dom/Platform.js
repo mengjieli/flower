@@ -17,10 +17,10 @@ class Platform {
         mask.style.width = document.documentElement.clientWidth + "px";
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
-        document.body.onkeydown = function(e){
+        document.body.onkeydown = function (e) {
             engine.$onKeyDown(e.which);
         }
-        document.body.onkeyup = function(e){
+        document.body.onkeyup = function (e) {
             engine.$onKeyUp(e.which);
         }
         div.appendChild(engine.$background.$nativeShow.show);
@@ -28,18 +28,25 @@ class Platform {
         requestAnimationFrame.call(window, Platform._run);
         var touchDown = false;
         mask.onmousedown = function (e) {
+            if(e.button == 2) return;
             touchDown = true;
             engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
         }
         mask.onmouseup = function (e) {
+            if(e.button == 2) return;
             touchDown = false;
             engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
         }
         mask.onmousemove = function (e) {
+            if(e.button == 2) return;
             engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
             if (touchDown) {
                 engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
             }
+        }
+        document.body.oncontextmenu = function (e) {
+            engine.$addRightClickEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+            return false;
         }
         Platform.width = document.documentElement.clientWidth;
         Platform.height = document.documentElement.clientHeight;

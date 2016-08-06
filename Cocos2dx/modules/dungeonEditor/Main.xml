@@ -1,0 +1,8 @@
+<s:Tab percentWidth="100" percentHeight="100" data="de.DungeonData" creationComplete="this.init();" xmlns:f="flower" xmlns:s="software" xmlns:d="dungeon">
+    <f:script src="./Main.script"/>
+    <f:panels>
+        <f:Array>
+            <d:DirectionPanel data="{data}"/>
+        </f:Array>
+    </f:panels>
+</s:Tab>

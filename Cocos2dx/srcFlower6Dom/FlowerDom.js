@@ -191,10 +191,10 @@ class Platform {
         mask.style.width = document.documentElement.clientWidth + "px";
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
-        document.body.onkeydown = function(e){
+        document.body.onkeydown = function (e) {
             engine.$onKeyDown(e.which);
         }
-        document.body.onkeyup = function(e){
+        document.body.onkeyup = function (e) {
             engine.$onKeyUp(e.which);
         }
         div.appendChild(engine.$background.$nativeShow.show);
@@ -202,18 +202,25 @@ class Platform {
         requestAnimationFrame.call(window, Platform._run);
         var touchDown = false;
         mask.onmousedown = function (e) {
+            if(e.button == 2) return;
             touchDown = true;
             engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
         }
         mask.onmouseup = function (e) {
+            if(e.button == 2) return;
             touchDown = false;
             engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
         }
         mask.onmousemove = function (e) {
+            if(e.button == 2) return;
             engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
             if (touchDown) {
                 engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
             }
+        }
+        document.body.oncontextmenu = function (e) {
+            engine.$addRightClickEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+            return false;
         }
         Platform.width = document.documentElement.clientWidth;
         Platform.height = document.documentElement.clientHeight;
@@ -619,6 +626,8 @@ class PlatformDisplayObject {
 //////////////////////////File:flower/platform/dom/PlatformSprite.js///////////////////////////
 class PlatformSprite extends PlatformDisplayObject {
 
+    __children = [];
+
     constructor() {
         super();
         this.initShow();
@@ -640,16 +649,28 @@ class PlatformSprite extends PlatformDisplayObject {
 
     addChild(child) {
         this.show.appendChild(child.show);
+        this.__children.push(child.show);
     }
 
     removeChild(child) {
         this.show.removeChild(child.show);
+        for (var i = 0; i < this.__children.length; i++) {
+            if (this.__children[i] == child.show) {
+                this.__children.splice(i, 1);
+                break;
+            }
+        }
     }
 
     resetChildIndex(children) {
-        //for (var i = 0, len = children.length; i < len; i++) {
-        //    children[i].$nativeShow.show.setLocalZOrder(i);
-        //}
+        for (var i = 0, len = children.length; i < len; i++) {
+            var show = children[i].$nativeShow.show;
+            if (this.__children[i] != show) {
+                this.removeChild(children[i].$nativeShow);
+                this.show.insertBefore(show, this.__children[i]);
+                this.__children.splice(i, 0, show);
+            }
+        }
     }
 
     setFilters(filters) {
@@ -2201,6 +2222,7 @@ class MouseEvent extends Event {
     static MOUSE_MOVE = "mouse_move";
     static MOUSE_OVER = "mouse_over";
     static MOUSE_OUT = "mouse_out";
+    static RIGHT_CLICK = "right_click";
 }
 
 flower.MouseEvent = MouseEvent;
@@ -4929,12 +4951,15 @@ class Stage extends Sprite {
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
     __nativeMouseMoveEvent = [];
+    __nativeRightClickEvent = [];
     __nativeTouchEvent = [];
     __mouseOverList = [this];
     __dragOverList = [this];
     __touchList = [];
     __lastMouseX = -1;
     __lastMouseY = -1;
+    __lastRightX = -1;
+    __lastRightY = -1;
     __focus = null;
 
     $setFocus(val) {
@@ -4961,6 +4986,12 @@ class Stage extends Sprite {
         this.__lastMouseY = y;
         this.__nativeMouseMoveEvent.push({x: x, y: y});
         //flower.trace("mouseEvent",x,y);
+    }
+
+    $addRightClickEvent(x, y) {
+        this.__lastRightX = x;
+        this.__lastRightY = y;
+        this.__nativeRightClickEvent.push({x: x, y: y});
     }
 
     $addTouchEvent(type, id, x, y) {
@@ -5016,6 +5047,21 @@ class Stage extends Sprite {
             event.$touchY = target.lastTouchY;
             target.dispatch(event);
         }
+    }
+
+    $onRightClick(x, y) {
+        if (this.$menu.$hasMenu()) {
+            return;
+        }
+        var target = this.$getMouseTarget(x, y, false);
+        var event;
+        event = new flower.MouseEvent(flower.MouseEvent.RIGHT_CLICK);
+        event.$stageX = x;
+        event.$stageY = y;
+        event.$target = target;
+        event.$touchX = target.lastTouchX;
+        event.$touchY = target.lastTouchY;
+        target.dispatch(event);
     }
 
     $onMouseMove(x, y) {
@@ -5251,9 +5297,12 @@ class Stage extends Sprite {
     $onFrameEnd() {
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
+        var rightClickList = this.__nativeRightClickEvent;
+        var hasclick = false;
         while (touchList.length) {
             var touch = touchList.shift();
             if (touch.type == "begin") {
+                hasclick = true;
                 this.$onTouchBegin(touch.id, touch.x, touch.y);
             } else if (touch.type == "move") {
                 this.$onTouchMove(touch.id, touch.x, touch.y);
@@ -5269,6 +5318,15 @@ class Stage extends Sprite {
             this.$onMouseMove(moveInfo.x, moveInfo.y);
         }
         mouseMoveList.length = 0;
+        if (rightClickList.length) {
+            hasclick = true;
+            var rightInfo = rightClickList[rightClickList.length - 1];
+            this.$onRightClick(rightInfo.x, rightInfo.y);
+        }
+        rightClickList.length = 0;
+        if(hasclick) {
+            this.$menu.$onTouch();
+        }
         super.$onFrameEnd();
         this.$background.$onFrameEnd();
     }
@@ -5447,20 +5505,20 @@ class MenuManager extends Sprite {
 
     constructor() {
         super();
-        this.addListener(Event.ADDED_TO_STAGE, this.__addedToStage, this);
     }
 
-    __addedToStage(e) {
-        this.removeListener(Event.ADDED_TO_STAGE, this.addedToStage, this);
-        this.stage.addListener(TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
-    }
-
-    __onTouch(e) {
-        var frame = flower.EnterFrame.frame;
-        if (frame > this.__addFrame && this.numChildren) {
+    $onTouch() {
+        if (flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
             this.removeAll();
+            return true;
         }
+        return false;
     }
+
+    $hasMenu() {
+        return (flower.EnterFrame.frame > this.__addFrame && this.numChildren) ? true : false;
+    }
+
 
     addChildAt(child, index) {
         this.__addFrame = flower.EnterFrame.frame;
