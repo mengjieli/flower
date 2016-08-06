@@ -1,5 +1,6 @@
 {
   "namespace": "s",
+  "name": "software",
   "components": [
     "./button/Button.xml",
     "./label/Label.xml",
@@ -7,6 +8,7 @@
     "./panel/Alert.xml",
     "./panel/TitlePanel.xml",
     "./list/LabelList.xml",
+    "./list/Menu.xml",
     "./list/ScrollerList.xml",
     "./tree/LabelTree.xml",
     "./tree/ScrollerTree.xml",

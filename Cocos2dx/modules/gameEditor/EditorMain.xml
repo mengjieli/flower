@@ -4,7 +4,7 @@
         <f:panels>
             <f:Array>
                 <e:ProjectView/>
-                <s:ScrollerTree title="源文件" percentWidth="100" percentHeight="100" viewport="LabelTree">
+                <s:ScrollerTree title="源文件" percentWidth="100" percentHeight="100" viewport="s:LabelTree">
                     <f:dataProvider>
                         <f:Direction path="res"/>
                     </f:dataProvider>

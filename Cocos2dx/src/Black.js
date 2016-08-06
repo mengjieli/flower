@@ -1058,12 +1058,12 @@ var $root = eval("this");
                 return function () {
                     return this.list[index];
                 };
-            }(i, this),
+            }(i),
             set: function (index) {
                 return function (val) {
                     this.setItemAt(index, val);
                 };
-            }(i, this),
+            }(i),
             enumerable: true,
             configurable: true
         });
@@ -3178,6 +3178,8 @@ var $root = eval("this");
                 item.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchItem, this);
                 item.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchItem, this);
                 item.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
+                item.addListener(flower.MouseEvent.MOUSE_OVER, this.__onMouseItem, this);
+                item.addListener(flower.MouseEvent.MOUSE_OUT, this.__onMouseItem, this);
                 if (item.data == p[8]) {
                     if (item.data == p[9]) {
                         item.currentState = "selectedDown";
@@ -3196,6 +3198,27 @@ var $root = eval("this");
                 return item;
             }
         }, {
+            key: "__onMouseItem",
+            value: function __onMouseItem(e) {
+                var p = this.$DataGroup;
+                var item = e.currentTarget;
+                if (item.currentState == "up" || item.currentState == "over") {
+                    switch (e.type) {
+                        case flower.MouseEvent.MOUSE_OVER:
+                            item.currentState = "over";
+                            break;
+                        case flower.MouseEvent.MOUSE_OUT:
+                            if (item.data == p[9]) {
+                                item.currentState = "selectedUp";
+                                item.selected = true;
+                            } else {
+                                item.currentState = "up";
+                            }
+                            break;
+                    }
+                }
+            }
+        }, {
             key: "__onTouchItem",
             value: function __onTouchItem(e) {
                 var p = this.$DataGroup;
@@ -3205,13 +3228,17 @@ var $root = eval("this");
                         this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
                         if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                             p[15] = -1;
-                            p[8] = item.data;
-                            item.currentState = "down";
+                            if (p[10]) {
+                                p[8] = item.data;
+                                item.currentState = "down";
+                            }
                             this.__setSelectedItemData(p[8]);
                         } else {
                             p[15] = flower.CoreTime.currentTime;
                             p[16] = item.data;
-                            p[8] = p[16];
+                            if (p[10]) {
+                                p[8] = p[16];
+                            }
                             flower.EnterFrame.add(this.__onTouchUpdate, this);
                         }
                         break;
@@ -3282,7 +3309,6 @@ var $root = eval("this");
                 var changeFlag = true;
                 if (itemData == selectedItem || !p[10]) {
                     changeFlag = false;
-                    //return;
                 }
                 var data = p[0];
                 var find = false;
@@ -4489,6 +4515,9 @@ var $root = eval("this");
             _this24.addListener(flower.TouchEvent.TOUCH_BEGIN, _this24.__onTouch, _this24);
             _this24.addListener(flower.TouchEvent.TOUCH_END, _this24.__onTouch, _this24);
             _this24.addListener(flower.TouchEvent.TOUCH_RELEASE, _this24.__onTouch, _this24);
+            _this24.addListener(flower.MouseEvent.MOUSE_OVER, _this24.__onMouse, _this24);
+            _this24.addListener(flower.MouseEvent.MOUSE_OUT, _this24.__onMouse, _this24);
+            _this24.addListener(flower.Event.REMOVED, _this24.__onRemoved, _this24);
             return _this24;
         }
 
@@ -4517,6 +4546,25 @@ var $root = eval("this");
                         this.currentState = "up";
                         break;
                 }
+            }
+        }, {
+            key: "__onMouse",
+            value: function __onMouse(e) {
+                if (this.currentState == "up" || this.currentState == "over") {
+                    switch (e.type) {
+                        case flower.MouseEvent.MOUSE_OVER:
+                            this.currentState = "over";
+                            break;
+                        case flower.MouseEvent.MOUSE_OUT:
+                            this.currentState = "up";
+                            break;
+                    }
+                }
+            }
+        }, {
+            key: "__onRemoved",
+            value: function __onRemoved(e) {
+                this.currentState = "up";
             }
         }, {
             key: "__setEnabled",
@@ -6456,6 +6504,7 @@ var $root = eval("this");
             _this39.__url = url;
             _this39.__direction = flower.Path.getPathDirection(url);
             _this39.__progress = flower.DataManager.getInstance().createData("ProgressData");
+
             return _this39;
         }
 
@@ -6474,7 +6523,7 @@ var $root = eval("this");
             value: function __onLoadModuleComplete(e) {
                 var cfg = e.data;
                 var namespace = cfg.namespace || "local";
-                flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+                flower.UIParser.addNameSapce(namespace, cfg.name);
                 this.__list = [];
                 var classes = cfg.classes;
                 if (classes && Object.keys(classes).length) {
@@ -6486,7 +6535,7 @@ var $root = eval("this");
                         flower.UIParser.setLocalUIURL(key, url, namespace);
                     }
                 }
-                this.script = "var module = $root." + cfg.packageURL + " = $root." + cfg.packageURL + "||{};\n";
+                this.script = "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
                 //this.script += "var " + cfg.packageURL + " = module;\n\n";
                 var scripts = cfg.scripts;
                 if (scripts && Object.keys(scripts).length) {

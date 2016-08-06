@@ -1,27 +1,18 @@
 function init() {
     var direction = this.data.direction;
-    //for(var i = 0; i < 10; i++)
-
-    var info = {
-        isDirection:true,
-        path:"abc"
+    var d = {
+        isDirection: true,
+        path: "trigger",
+        name: "触发器",
+        menu: new software.Menu({
+            menu: [
+                {label: "添加触发器", type: "add"},
+                {label: "删除触发器", type: "del"}
+            ],
+            click: function () {
+                console.log(arguments)
+            }
+        })
     }
-    info.name = flower.Path.getName(info.path);
-    info.fileType = flower.Path.getFileType(info.path);
-    flower.breakPoint();
-    var menu = new Button();
-    menu.x = 100;
-    menu.y = 100;
-    info.menu = menu;
-    direction.push(info);
-
-
-    info = {
-        isDirection:false,
-        path:"abc/item1.trigger"
-    }
-    info.name = flower.Path.getName(info.path);
-    info.fileType = flower.Path.getFileType(info.path);
-    direction.push(info);
-    //}
+    direction.push(d);
 }

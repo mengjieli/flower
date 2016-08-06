@@ -947,12 +947,12 @@ for (var i = 0; i < 100000; i++) {
             return function () {
                 return this.list[index];
             }
-        }(i, this),
+        }(i),
         set: function (index) {
             return function (val) {
                 this.setItemAt(index, val);
             }
-        }(i, this),
+        }(i),
         enumerable: true,
         configurable: true
     });
@@ -2907,6 +2907,8 @@ class DataGroup extends Group {
         item.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
+        item.addListener(flower.MouseEvent.MOUSE_OVER, this.__onMouseItem, this);
+        item.addListener(flower.MouseEvent.MOUSE_OUT, this.__onMouseItem, this);
         if (item.data == p[8]) {
             if (item.data == p[9]) {
                 item.currentState = "selectedDown";
@@ -2925,6 +2927,26 @@ class DataGroup extends Group {
         return item;
     }
 
+    __onMouseItem(e) {
+        var p = this.$DataGroup;
+        var item = e.currentTarget;
+        if (item.currentState == "up" || item.currentState == "over") {
+            switch (e.type) {
+                case flower.MouseEvent.MOUSE_OVER:
+                    item.currentState = "over";
+                    break;
+                case flower.MouseEvent.MOUSE_OUT:
+                    if (item.data == p[9]) {
+                        item.currentState = "selectedUp";
+                        item.selected = true;
+                    } else {
+                        item.currentState = "up";
+                    }
+                    break;
+            }
+        }
+    }
+
     __onTouchItem(e) {
         var p = this.$DataGroup;
         var item = e.currentTarget;
@@ -2933,13 +2955,17 @@ class DataGroup extends Group {
                 this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                     p[15] = -1;
-                    p[8] = item.data;
-                    item.currentState = "down";
+                    if(p[10]) {
+                        p[8] = item.data;
+                        item.currentState = "down";
+                    }
                     this.__setSelectedItemData(p[8]);
                 } else {
                     p[15] = flower.CoreTime.currentTime;
                     p[16] = item.data;
-                    p[8] = p[16];
+                    if(p[10]) {
+                        p[8] = p[16];
+                    }
                     flower.EnterFrame.add(this.__onTouchUpdate, this);
                 }
                 break;
@@ -3006,7 +3032,6 @@ class DataGroup extends Group {
         var changeFlag = true;
         if (itemData == selectedItem || !p[10]) {
             changeFlag = false;
-            //return;
         }
         var data = p[0];
         var find = false;
@@ -4101,6 +4126,9 @@ class Button extends Group {
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouch, this);
+        this.addListener(flower.MouseEvent.MOUSE_OVER, this.__onMouse, this);
+        this.addListener(flower.MouseEvent.MOUSE_OUT, this.__onMouse, this);
+        this.addListener(flower.Event.REMOVED, this.__onRemoved, this);
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -4127,8 +4155,25 @@ class Button extends Group {
         }
     }
 
+    __onMouse(e) {
+        if (this.currentState == "up" || this.currentState == "over") {
+            switch (e.type) {
+                case flower.MouseEvent.MOUSE_OVER :
+                    this.currentState = "over";
+                    break;
+                case flower.MouseEvent.MOUSE_OUT :
+                    this.currentState = "up";
+                    break;
+            }
+        }
+    }
+
+    __onRemoved(e) {
+        this.currentState = "up";
+    }
+
     __setEnabled(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;
@@ -5924,6 +5969,7 @@ class Module extends flower.EventDispatcher {
         this.__url = url;
         this.__direction = flower.Path.getPathDirection(url);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
+
     }
 
     load() {
@@ -5938,7 +5984,7 @@ class Module extends flower.EventDispatcher {
     __onLoadModuleComplete(e) {
         var cfg = e.data;
         var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+        flower.UIParser.addNameSapce(namespace, cfg.name);
         this.__list = [];
         var classes = cfg.classes;
         if (classes && Object.keys(classes).length) {
@@ -5950,7 +5996,7 @@ class Module extends flower.EventDispatcher {
                 flower.UIParser.setLocalUIURL(key, url, namespace);
             }
         }
-        this.script = "var module = $root." + cfg.packageURL + " = $root." + cfg.packageURL + "||{};\n";
+        this.script = "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
         //this.script += "var " + cfg.packageURL + " = module;\n\n";
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
@@ -6020,7 +6066,7 @@ class Module extends flower.EventDispatcher {
                 }
             }
         }
-        if(this.__list.length == 0) {
+        if (this.__list.length == 0) {
             this.__index = this.__list.length = 1;
         }
         this.__progress.max.value = this.__list.length;

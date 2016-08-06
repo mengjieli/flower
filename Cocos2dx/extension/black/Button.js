@@ -10,6 +10,9 @@ class Button extends Group {
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouch, this);
+        this.addListener(flower.MouseEvent.MOUSE_OVER, this.__onMouse, this);
+        this.addListener(flower.MouseEvent.MOUSE_OUT, this.__onMouse, this);
+        this.addListener(flower.Event.REMOVED, this.__onRemoved, this);
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -36,8 +39,25 @@ class Button extends Group {
         }
     }
 
+    __onMouse(e) {
+        if (this.currentState == "up" || this.currentState == "over") {
+            switch (e.type) {
+                case flower.MouseEvent.MOUSE_OVER :
+                    this.currentState = "over";
+                    break;
+                case flower.MouseEvent.MOUSE_OUT :
+                    this.currentState = "up";
+                    break;
+            }
+        }
+    }
+
+    __onRemoved(e) {
+        this.currentState = "up";
+    }
+
     __setEnabled(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;

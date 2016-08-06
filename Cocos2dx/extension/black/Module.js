@@ -12,6 +12,7 @@ class Module extends flower.EventDispatcher {
         this.__url = url;
         this.__direction = flower.Path.getPathDirection(url);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
+
     }
 
     load() {
@@ -26,7 +27,7 @@ class Module extends flower.EventDispatcher {
     __onLoadModuleComplete(e) {
         var cfg = e.data;
         var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace, cfg.packageURL);
+        flower.UIParser.addNameSapce(namespace, cfg.name);
         this.__list = [];
         var classes = cfg.classes;
         if (classes && Object.keys(classes).length) {
@@ -38,7 +39,7 @@ class Module extends flower.EventDispatcher {
                 flower.UIParser.setLocalUIURL(key, url, namespace);
             }
         }
-        this.script = "var module = $root." + cfg.packageURL + " = $root." + cfg.packageURL + "||{};\n";
+        this.script = "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
         //this.script += "var " + cfg.packageURL + " = module;\n\n";
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
@@ -108,7 +109,7 @@ class Module extends flower.EventDispatcher {
                 }
             }
         }
-        if(this.__list.length == 0) {
+        if (this.__list.length == 0) {
             this.__index = this.__list.length = 1;
         }
         this.__progress.max.value = this.__list.length;

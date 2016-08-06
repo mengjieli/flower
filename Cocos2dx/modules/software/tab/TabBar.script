@@ -1,6 +1,6 @@
 function init() {
-    var moreList = new ScrollerList();
-    moreList.viewport = new LabelList();
+    var moreList = new software.ScrollerList();
+    moreList.viewport = new software.LabelList();
     moreList.viewport.requireSelection = false;
     var _this = this;
     moreList.viewport.touchBeginItem = function (e) {

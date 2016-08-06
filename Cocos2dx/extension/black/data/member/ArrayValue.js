@@ -386,12 +386,12 @@ for (var i = 0; i < 100000; i++) {
             return function () {
                 return this.list[index];
             }
-        }(i, this),
+        }(i),
         set: function (index) {
             return function (val) {
                 this.setItemAt(index, val);
             }
-        }(i, this),
+        }(i),
         enumerable: true,
         configurable: true
     });

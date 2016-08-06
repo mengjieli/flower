@@ -1,4 +1,4 @@
-<f:Panel title="触发器" percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software" xmlns:d="dungeon">
+<f:Panel title="副本编辑器" percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software" xmlns:d="dungeon">
     <f:Group width="200" percentHeight="100">
         <s:ScrollerTree percentWidth="100" percentHeight="100" dataProvider="{data.direction}">
             <f:viewport>

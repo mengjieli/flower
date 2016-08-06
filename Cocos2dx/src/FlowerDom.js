@@ -5444,6 +5444,8 @@ var flower = {};
 
             var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
+            _this21.__mouseX = 0;
+            _this21.__mouseY = 0;
             _this21.__nativeMouseMoveEvent = [];
             _this21.__nativeRightClickEvent = [];
             _this21.__nativeTouchEvent = [];
@@ -5596,6 +5598,8 @@ var flower = {};
         }, {
             key: "$onMouseMove",
             value: function $onMouseMove(x, y) {
+                this.__mouseX = x;
+                this.__mouseY = y;
                 var target = this.$getMouseTarget(x, y, false);
                 var parent = target.parent;
                 var event;
@@ -5922,6 +5926,16 @@ var flower = {};
             get: function get() {
                 return this.$debugSprite;
             }
+        }, {
+            key: "mouseX",
+            get: function get() {
+                return this.__mouseX;
+            }
+        }, {
+            key: "mouseY",
+            get: function get() {
+                return this.__mouseY;
+            }
         }], [{
             key: "getInstance",
             value: function getInstance() {
@@ -6132,6 +6146,17 @@ var flower = {};
         }, {
             key: "showMenu",
             value: function showMenu(display) {
+                var x = arguments.length <= 1 || arguments[1] === undefined ? -1 : arguments[1];
+                var y = arguments.length <= 2 || arguments[2] === undefined ? -1 : arguments[2];
+
+                if (x == -1) {
+                    x = Stage.getInstance().mouseX + 1;
+                }
+                if (y == -1) {
+                    y = Stage.getInstance().mouseY;
+                }
+                display.x = x;
+                display.y = y;
                 MenuManager.getInstance().removeAll();
                 MenuManager.getInstance().addChild(display);
             }

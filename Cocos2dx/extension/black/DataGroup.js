@@ -190,6 +190,8 @@ class DataGroup extends Group {
         item.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchItem, this);
         item.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchItem, this);
+        item.addListener(flower.MouseEvent.MOUSE_OVER, this.__onMouseItem, this);
+        item.addListener(flower.MouseEvent.MOUSE_OUT, this.__onMouseItem, this);
         if (item.data == p[8]) {
             if (item.data == p[9]) {
                 item.currentState = "selectedDown";
@@ -208,6 +210,26 @@ class DataGroup extends Group {
         return item;
     }
 
+    __onMouseItem(e) {
+        var p = this.$DataGroup;
+        var item = e.currentTarget;
+        if (item.currentState == "up" || item.currentState == "over") {
+            switch (e.type) {
+                case flower.MouseEvent.MOUSE_OVER:
+                    item.currentState = "over";
+                    break;
+                case flower.MouseEvent.MOUSE_OUT:
+                    if (item.data == p[9]) {
+                        item.currentState = "selectedUp";
+                        item.selected = true;
+                    } else {
+                        item.currentState = "up";
+                    }
+                    break;
+            }
+        }
+    }
+
     __onTouchItem(e) {
         var p = this.$DataGroup;
         var item = e.currentTarget;
@@ -216,13 +238,17 @@ class DataGroup extends Group {
                 this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                     p[15] = -1;
-                    p[8] = item.data;
-                    item.currentState = "down";
+                    if(p[10]) {
+                        p[8] = item.data;
+                        item.currentState = "down";
+                    }
                     this.__setSelectedItemData(p[8]);
                 } else {
                     p[15] = flower.CoreTime.currentTime;
                     p[16] = item.data;
-                    p[8] = p[16];
+                    if(p[10]) {
+                        p[8] = p[16];
+                    }
                     flower.EnterFrame.add(this.__onTouchUpdate, this);
                 }
                 break;
@@ -289,7 +315,6 @@ class DataGroup extends Group {
         var changeFlag = true;
         if (itemData == selectedItem || !p[10]) {
             changeFlag = false;
-            //return;
         }
         var data = p[0];
         var find = false;

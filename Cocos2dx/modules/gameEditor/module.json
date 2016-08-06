@@ -1,6 +1,6 @@
 {
   "namespace": "e",
-  "packageURL": "editor",
+  "name": "editor",
   "scripts": [
     "./file/File.script",
     "./parser/Parser.script",

@@ -3,5 +3,5 @@
     <f:script src="./ProjectView.script"/>
     <s:ScrollerTree id="tree" data="editor.ProjectData" dataProvider="{data.direction}" percentWidth="100"
                     percentHeight="100"
-                    viewport="LabelTree"/>
+                    viewport="s:LabelTree"/>
 </s:TitlePanel>

@@ -1,0 +1,7 @@
+<f:Group class="Menu" width="150" height="300" creationComplete="this.init();" xmlns:f="flower" xmlns:s="software">
+    <f:script src="./Menu.script"/>
+    <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff" lineColor="0xcccccc" lineWidth="1"/>
+    <f:Group id="scroller" left="5" right="5" top="5" bottom="5">
+        <s:LabelList id="list" percentWidth="100" percentHeight="100" selectTime="touch_begin" itemSelectedEnabled="false"/>
+    </f:Group>
+</f:Group>

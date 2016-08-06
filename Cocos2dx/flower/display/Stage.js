@@ -1,5 +1,7 @@
 class Stage extends Sprite {
 
+    __mouseX = 0;
+    __mouseY = 0;
     __forntLayer;
     $background;
     $debugSprite
@@ -156,6 +158,8 @@ class Stage extends Sprite {
     }
 
     $onMouseMove(x, y) {
+        this.__mouseX = x;
+        this.__mouseY = y;
         var target = this.$getMouseTarget(x, y, false);
         var parent = target.parent;
         var event;
@@ -415,7 +419,7 @@ class Stage extends Sprite {
             this.$onRightClick(rightInfo.x, rightInfo.y);
         }
         rightClickList.length = 0;
-        if(hasclick) {
+        if (hasclick) {
             this.$menu.$onTouch();
         }
         super.$onFrameEnd();
@@ -459,6 +463,14 @@ class Stage extends Sprite {
 
     get debugContainer() {
         return this.$debugSprite;
+    }
+
+    get mouseX() {
+        return this.__mouseX;
+    }
+
+    get mouseY() {
+        return this.__mouseY;
     }
 
     static stages = [];

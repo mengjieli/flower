@@ -57,7 +57,15 @@ class MenuManager extends Sprite {
         return MenuManager.instance;
     }
 
-    static showMenu(display) {
+    static showMenu(display, x = -1, y = -1) {
+        if (x == -1) {
+            x = Stage.getInstance().mouseX + 1;
+        }
+        if (y == -1) {
+            y = Stage.getInstance().mouseY;
+        }
+        display.x = x;
+        display.y = y;
         MenuManager.getInstance().removeAll();
         MenuManager.getInstance().addChild(display);
     }

@@ -4909,6 +4909,8 @@ flower.Shape = Shape;
 //////////////////////////File:flower/display/Stage.js///////////////////////////
 class Stage extends Sprite {
 
+    __mouseX = 0;
+    __mouseY = 0;
     __forntLayer;
     $background;
     $debugSprite
@@ -5065,6 +5067,8 @@ class Stage extends Sprite {
     }
 
     $onMouseMove(x, y) {
+        this.__mouseX = x;
+        this.__mouseY = y;
         var target = this.$getMouseTarget(x, y, false);
         var parent = target.parent;
         var event;
@@ -5324,7 +5328,7 @@ class Stage extends Sprite {
             this.$onRightClick(rightInfo.x, rightInfo.y);
         }
         rightClickList.length = 0;
-        if(hasclick) {
+        if (hasclick) {
             this.$menu.$onTouch();
         }
         super.$onFrameEnd();
@@ -5368,6 +5372,14 @@ class Stage extends Sprite {
 
     get debugContainer() {
         return this.$debugSprite;
+    }
+
+    get mouseX() {
+        return this.__mouseX;
+    }
+
+    get mouseY() {
+        return this.__mouseY;
     }
 
     static stages = [];
@@ -5558,7 +5570,15 @@ class MenuManager extends Sprite {
         return MenuManager.instance;
     }
 
-    static showMenu(display) {
+    static showMenu(display, x = -1, y = -1) {
+        if (x == -1) {
+            x = Stage.getInstance().mouseX + 1;
+        }
+        if (y == -1) {
+            y = Stage.getInstance().mouseY;
+        }
+        display.x = x;
+        display.y = y;
         MenuManager.getInstance().removeAll();
         MenuManager.getInstance().addChild(display);
     }
