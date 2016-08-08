@@ -1,0 +1,18 @@
+<f:Combox width="100" class="Combox" xmlns:f="flower" xmlns:s="software">
+    <f:Group percentWidth="100">
+        <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
+        <f:Label id="label" left="0" right="-30" verticalCenter="0"/>
+        <f:Button id="button" width="30" height="20" right="0">
+            <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xFC4A4A" fillColor.down="0x7D2525"/>
+        </f:Button>
+    </f:Group>
+    <f:list>
+        <f:Group width="150" height="300">
+            <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff" lineColor="0xcccccc" lineWidth="1"/>
+            <f:Group id="scroller" left="5" right="5" top="5" bottom="5">
+                <s:LabelList percentWidth="100" percentHeight="100" selectTime="touch_begin"
+                             itemSelectedEnabled="false" clickItem="this.clickItem(arguments[0]);"/>
+            </f:Group>
+        </f:Group>
+    </f:list>
+</f:Combox>

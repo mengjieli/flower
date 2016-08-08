@@ -2955,15 +2955,21 @@ class DataGroup extends Group {
                 this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                     p[15] = -1;
-                    if(p[10]) {
+                    if (p[10]) {
                         p[8] = item.data;
                         item.currentState = "down";
                     }
                     this.__setSelectedItemData(p[8]);
+                    if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
+                        if (p[11]) {
+                            item.$onClick();
+                            this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                        }
+                    }
                 } else {
                     p[15] = flower.CoreTime.currentTime;
                     p[16] = item.data;
-                    if(p[10]) {
+                    if (p[10]) {
                         p[8] = p[16];
                     }
                     flower.EnterFrame.add(this.__onTouchUpdate, this);
@@ -5374,10 +5380,8 @@ class Combox extends Group {
             if (this.stage && list) {
                 var point = flower.Point.create();
                 this.localToGlobal(point);
-                list.x = point.x;
-                list.y = point.y + this.height;
                 flower.Point.release(point);
-                flower.MenuManager.showMenu(list);
+                flower.MenuManager.showMenu(list,point.x,point.y + this.height);
             }
         } else {
 

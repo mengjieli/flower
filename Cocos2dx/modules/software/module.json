@@ -14,6 +14,7 @@
     "./tree/ScrollerTree.xml",
     "./tree/PathObject.xml",
     "./tab/TabBar.xml",
-    "./tab/Tab.xml"
+    "./tab/Tab.xml",
+    "./combox/Combox.xml"
   ]
 }

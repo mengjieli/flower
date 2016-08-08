@@ -1,9 +1,14 @@
 function init() {
-    //console.log(this.data);
     var menu = this.data.menu;
     var d = new flower.ArrayValue();
     for (var i = 0; i < menu.length; i++) {
         d.push(menu[i]);
     }
     this.list.dataProvider = d;
+}
+
+function clickItem(e) {
+    if (this.data.click) {
+        this.data.click(this.data.target, e.item);
+    }
 }

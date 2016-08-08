@@ -3233,6 +3233,12 @@ var $root = eval("this");
                                 item.currentState = "down";
                             }
                             this.__setSelectedItemData(p[8]);
+                            if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
+                                if (p[11]) {
+                                    item.$onClick();
+                                    this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                                }
+                            }
                         } else {
                             p[15] = flower.CoreTime.currentTime;
                             p[16] = item.data;
@@ -5877,10 +5883,8 @@ var $root = eval("this");
                     if (this.stage && list) {
                         var point = flower.Point.create();
                         this.localToGlobal(point);
-                        list.x = point.x;
-                        list.y = point.y + this.height;
                         flower.Point.release(point);
-                        flower.MenuManager.showMenu(list);
+                        flower.MenuManager.showMenu(list, point.x, point.y + this.height);
                     }
                 } else {}
             }

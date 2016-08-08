@@ -5030,9 +5030,17 @@ class Stage extends Sprite {
         var target = this.$getMouseTarget(x, y, mouse.mutiply);
         mouse.target = target;
         var parent = target.parent;
+        var isMenu = false;
         while (parent && parent != this) {
+            if (parent == this.$menu) {
+                isMenu = true;
+            }
             mouse.parents.push(parent);
             parent = parent.parent;
+        }
+        if (this.$menu.$hasMenu() && !isMenu) {
+            this.__touchList.length = 0;
+            return;
         }
         if (target) {
             this.$setFocus(target);

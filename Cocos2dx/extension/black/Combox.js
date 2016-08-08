@@ -115,13 +115,10 @@ class Combox extends Group {
             if (this.stage && list) {
                 var point = flower.Point.create();
                 this.localToGlobal(point);
-                list.x = point.x;
-                list.y = point.y + this.height;
                 flower.Point.release(point);
-                flower.MenuManager.showMenu(list);
+                flower.MenuManager.showMenu(list, point.x, point.y + this.height);
             }
         } else {
-
         }
     }
 

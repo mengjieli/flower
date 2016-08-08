@@ -53,5 +53,9 @@ function closePanel() {
 }
 
 function onCloseComplete() {
-    this.parent.dispose();
+    if (this.parent && this.parent instanceof flower.UIParser) {
+        this.parent.dispose();
+    } else {
+        this.dispose();
+    }
 }

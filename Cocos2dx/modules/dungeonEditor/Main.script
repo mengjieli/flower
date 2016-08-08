@@ -3,16 +3,20 @@ function init() {
     var d = {
         isDirection: true,
         path: "trigger",
-        name: "触发器",
-        menu: new software.Menu({
-            menu: [
-                {label: "添加触发器", type: "add"},
-                {label: "删除触发器", type: "del"}
-            ],
-            click: function () {
-                console.log(arguments)
+        name: "触发器"
+    };
+    d.menu = new software.Menu({
+        menu: [
+            {label: "添加触发器", type: "add"},
+            {label: "删除触发器", type: "del"}
+        ],
+        target: d,
+        click: function (info, item) {
+            if (item.type == "add") {
+                flower.PopManager.pop(new de.NewTriggerPanel(),true,true);
             }
-        })
-    }
+            //console.log(info, item);
+        }
+    });
     direction.push(d);
 }

@@ -1,9 +1,10 @@
 {
   "namespace": "d",
-  "packageURL": "de",
+  "name": "de",
   "scripts": [
   ],
   "components": [
+    "./panels/NewTriggerPanel.xml"
   ],
   "classes": {
     "Main": "./Main.xml",

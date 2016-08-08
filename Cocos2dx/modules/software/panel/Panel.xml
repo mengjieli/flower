@@ -1,18 +1,16 @@
-<f:Panel class="Panel" width="300" height="200" scaleMode="show_all" creationComplete="this.initPanel();"
+<f:Panel class="Panel" width="300" height="200" scaleMode="no_scale" creationComplete="this.initPanel();"
          xmlns:f="flower">
     <f:script src="./Panel.script"/>
     <f:Rect id="background" percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1"
-              fillColor="0xE7E7E7"/>
-    <f:Group left="1" right="1" height="24" top="1">
-        <f:Rect id="titleBar" percentWidth="100" percentHeight="100" fillColor="c2c2c2"
-                  touchBegin="this.startDrag();"/>
+            fillColor="0xE7E7E7"/>
+    <f:Group left="1" right="-1" height="24" top="1">
+        <f:Rect id="titleBar" percentWidth="100" percentHeight="100" fillColor="0xc2c2c2"
+                touchBegin="this.startDrag();"/>
         <f:Image id="iconImage"/>
         <f:Label id="titleLabel" y="3" touchEnabled="false" text="Panel" horizontalCenter="0" fontSize="16"
                  fontColor="0x252325"/>
         <f:Button id="closeButton" width="30" height="24" right="0">
             <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xFC4A4A" fillColor.down="0x7D2525"/>
         </f:Button>
-    </f:Group>
-    <f:Group id="container" left="1" right="1" top="25" bottom="0">
     </f:Group>
 </f:Panel>
