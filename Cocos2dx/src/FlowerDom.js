@@ -5853,11 +5853,11 @@ var flower = {};
                 while (touchList.length) {
                     var touch = touchList.shift();
                     if (touch.type == "begin") {
-                        hasclick = true;
                         this.$onTouchBegin(touch.id, touch.x, touch.y);
                     } else if (touch.type == "move") {
                         this.$onTouchMove(touch.id, touch.x, touch.y);
                     } else if (touch.type == "end") {
+                        hasclick = true;
                         this.$onTouchEnd(touch.id, touch.x, touch.y);
                     }
                 }
@@ -6100,7 +6100,7 @@ var flower = {};
         _createClass(MenuManager, [{
             key: "$onTouch",
             value: function $onTouch() {
-                if (flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
+                if (this.$autoRemove && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
                     this.removeAll();
                     return true;
                 }
@@ -6156,6 +6156,7 @@ var flower = {};
             value: function showMenu(display) {
                 var x = arguments.length <= 1 || arguments[1] === undefined ? -1 : arguments[1];
                 var y = arguments.length <= 2 || arguments[2] === undefined ? -1 : arguments[2];
+                var autoRemove = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
 
                 if (x == -1) {
                     x = Stage.getInstance().mouseX + 1;
@@ -6166,7 +6167,13 @@ var flower = {};
                 display.x = x;
                 display.y = y;
                 MenuManager.getInstance().removeAll();
+                MenuManager.getInstance().$autoRemove = autoRemove;
                 MenuManager.getInstance().addChild(display);
+            }
+        }, {
+            key: "hideMenu",
+            value: function hideMenu() {
+                MenuManager.getInstance().removeAll();
             }
         }]);
 

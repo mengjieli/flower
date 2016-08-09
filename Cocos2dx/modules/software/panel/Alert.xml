@@ -6,7 +6,7 @@
         <f:Rect id="titleBar" percentWidth="100" percentHeight="100" fillColor="0xc2c2c2"
                   touchBegin="this.startDrag();"/>
         <f:Image id="iconImage"/>
-        <f:Label id="titleLabel" y="3" touchEnabled="false" text="Panel" horizontalCenter="0" fontSize="16"
+        <f:Label id="titleLabel" y="3" touchEnabled="false" text="提示" horizontalCenter="0" fontSize="16"
                  fontColor="0x252325"/>
         <f:Button id="closeButton" width="30" height="24" right="0">
             <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xFC4A4A" fillColor.down="0x7D2525"/>
@@ -16,12 +16,12 @@
         <f:Label id="contentLabel" horizontalCenter="0" verticalCenter="0"/>
     </f:Group>
     <f:Group left="1" right="1" height="50" bottom="0">
-        <f:Button id="confirmButton" horizontalCenter="-50" bottom="10" width="60" height="30">
+        <f:Button id="confirmButton" horizontalCenter="-50" bottom="10" width="60" height="30" click="this.onSure();">
             <f:Rect percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor.up="0xE7E7E7"
                       fillColor.down="0xb3b3b3"/>
             <f:Label text="确定" horizontalCenter="0" verticalCenter="0"/>
         </f:Button>
-        <f:Button id="cancelButton" horizontalCenter="50" bottom="10" width="60" height="30">
+        <f:Button id="cancelButton" horizontalCenter="50" bottom="10" width="60" height="30" click="this.onCancel();">
             <f:Rect percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor.up="0xE7E7E7"
                       fillColor.down="0xb3b3b3"/>
             <f:Label text="取消" horizontalCenter="0" verticalCenter="0"/>

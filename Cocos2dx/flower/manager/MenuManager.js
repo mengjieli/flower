@@ -1,13 +1,14 @@
 class MenuManager extends Sprite {
 
     __addFrame = 0;
+    $autoRemove;
 
     constructor() {
         super();
     }
 
     $onTouch() {
-        if (flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
+        if (this.$autoRemove && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
             this.removeAll();
             return true;
         }
@@ -57,7 +58,7 @@ class MenuManager extends Sprite {
         return MenuManager.instance;
     }
 
-    static showMenu(display, x = -1, y = -1) {
+    static showMenu(display, x = -1, y = -1, autoRemove = true) {
         if (x == -1) {
             x = Stage.getInstance().mouseX + 1;
         }
@@ -67,7 +68,12 @@ class MenuManager extends Sprite {
         display.x = x;
         display.y = y;
         MenuManager.getInstance().removeAll();
+        MenuManager.getInstance().$autoRemove = autoRemove;
         MenuManager.getInstance().addChild(display);
+    }
+
+    static hideMenu() {
+        MenuManager.getInstance().removeAll();
     }
 }
 

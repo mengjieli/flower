@@ -1,0 +1,44 @@
+var Direction = (function () {
+
+    function getRoot() {
+        return de.data.direction;
+    }
+
+    function Direction(type, path, name) {
+        this.isDirection = true;
+        this.path = path;
+        this.name = name;
+        if (type == "trigger") {
+            this.__addTriggerMenu();
+        }
+    }
+
+    Direction.prototype.__addTriggerMenu = function () {
+        var direction = getRoot();
+        this.menu = new software.Menu({
+            menu: [
+                {label: "添加触发器", type: "add"}
+            ],
+            target: this,
+            click: function (info, item) {
+                if (item.type == "add") {
+                    flower.PopManager.pop(new de.NewTriggerPanel({
+                        direction: direction,
+                        path: info.path
+                    }), true, true);
+                }
+            }
+        });
+    }
+
+    Direction.addPath = function (type, path, name) {
+        getRoot().push(new Direction(type, path, name));
+    }
+
+    Direction.addFile = function (type, path, name) {
+    }
+
+    return Direction;
+})();
+
+module.Direction = Direction;

@@ -1,0 +1,35 @@
+var File = (function () {
+
+    function File(type, path, name) {
+        this.isDirection = true;
+        this.path = path;
+        this.name = name;
+        this.type = type;
+        if (type == "trigger") {
+            this.__addTriggerMenu();
+        }
+    }
+
+    File.prototype.__addTriggerMenu = function () {
+        var direction = getRoot();
+        this.menu = new software.Menu({
+            menu: [
+                {label: "编辑触发器", type: "add"},
+                {label: "删除触发器", type: "del"}
+            ],
+            target: this,
+            click: function (info, item) {
+                if (item.type == "add") {
+                    flower.PopManager.pop(new de.NewTriggerPanel({
+                        direction: direction,
+                        path: info.path
+                    }), true, true);
+                }
+            }
+        });
+    }
+
+    return File;
+})();
+
+module.File = File;

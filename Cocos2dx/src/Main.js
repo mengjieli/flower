@@ -46,8 +46,8 @@ var Main = function () {
             stage.backgroundColor = 0;
 
             var ui = new flower.UIParser();
-            //ui.parseUIAsync("modules/gameEditor/EditorMain.xml");
-            ui.parseUIAsync("modules/dungeonEditor/Main.xml");
+            ui.parseUIAsync("modules/gameEditor/EditorMain.xml");
+            //ui.parseUIAsync("modules/dungeonEditor/Main.xml");
             stage.addChild(ui);
         }
     }]);

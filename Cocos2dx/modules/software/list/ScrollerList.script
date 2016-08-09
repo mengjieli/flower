@@ -1,11 +1,9 @@
 function set dataProvider(val) {
-    if (this.scroller.viewport) {
-        this.scroller.viewport.dataProvider = val;
-    }
+    this.scroller.viewport.dataProvider = val;
 }
 
 function get dataProvider() {
-    return this.scroller.viewport ? this.scroller.viewport.dataProvider : null;
+    return this.scroller.viewport.dataProvider;
 }
 
 function set viewport(val) {
@@ -24,4 +22,20 @@ function set clickItem(val) {
 
 function get clickItem() {
     return this.scroller.viewport ? this.scroller.viewport.clickItem : null;
+}
+
+function get selectedIndex() {
+    return this.scroller.viewport.selectedIndex;
+}
+
+function set selectedIndex(val) {
+    this.scroller.viewport.selectedIndex = val;
+}
+
+function get selectedItem() {
+    return this.scroller.viewport.selectedItem;
+}
+
+function set selectedItem(val) {
+    this.scroller.viewport.selectedItem = val;
 }

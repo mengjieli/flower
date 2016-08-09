@@ -405,11 +405,11 @@ class Stage extends Sprite {
         while (touchList.length) {
             var touch = touchList.shift();
             if (touch.type == "begin") {
-                hasclick = true;
                 this.$onTouchBegin(touch.id, touch.x, touch.y);
             } else if (touch.type == "move") {
                 this.$onTouchMove(touch.id, touch.x, touch.y);
             } else if (touch.type == "end") {
+                hasclick = true;
                 this.$onTouchEnd(touch.id, touch.x, touch.y);
             }
         }

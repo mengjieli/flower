@@ -357,7 +357,7 @@ class DataGroup extends Group {
         }
         data.selectedItem = itemData;
         if (changeFlag) {
-            this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, false, itemData));
+            this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
         }
         if (!selectedItem) {
             this._canSelecteItem();

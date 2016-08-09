@@ -2,6 +2,7 @@
   "namespace": "d",
   "name": "de",
   "scripts": [
+    "./src/Direction.script"
   ],
   "components": [
     "./panels/NewTriggerPanel.xml"
@@ -11,7 +12,6 @@
     "DirectionPanel": "./panels/DirectionPanel.xml"
   },
   "data": [
-    "./data/DungeonData.json",
-    "./data/FileData.json"
+    "./data/DungeonData.json"
   ]
 }

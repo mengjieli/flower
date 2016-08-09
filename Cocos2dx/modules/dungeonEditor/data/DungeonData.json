@@ -15,8 +15,8 @@
     },
     "direction": {
       "desc": "副本信息列表",
-      "type": "Array",
-      "typeValue": "de.File"
+      "type": "*",
+      "typeValue": "null"
     }
   }
 }

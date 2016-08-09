@@ -44,8 +44,20 @@ function closePanel() {
     }
 }
 
+function onSure() {
+    this.closePanel();
+}
+
+function onCancel() {
+    this.closePanel();
+}
+
 function onCloseComplete() {
     this.dispose();
+}
+
+function set content(val) {
+    this.contentLabel.text = val;
 }
 
 static function show(content) {

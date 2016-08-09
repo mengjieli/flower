@@ -518,7 +518,6 @@ class DataGroupEvent extends flower.Event {
     static SELECTED_ITEM_CHANGE = "selected_item_change";
     static CLICK_ITEM = "click_item";
     static TOUCH_BEGIN_ITEM = "touch_begin_item";
-    static SELECTED_CHANGE = "selected_change";
 }
 
 black.DataGroupEvent = DataGroupEvent;
@@ -3074,7 +3073,7 @@ class DataGroup extends Group {
         }
         data.selectedItem = itemData;
         if (changeFlag) {
-            this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, false, itemData));
+            this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
         }
         if (!selectedItem) {
             this._canSelecteItem();
@@ -5298,6 +5297,10 @@ class Combox extends Group {
         }
     }
 
+    __listClickItem(e) {
+        flower.MenuManager.hideMenu();
+    }
+
     set label(val) {
         if (this.$combox[0] == val) {
             return;
@@ -5344,7 +5347,8 @@ class Combox extends Group {
         }
         if (this.$combox[2]) {
             this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-            this.$combox[2].addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            this.$combox[2].removeListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            this.$combox[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
         }
         this.$combox[2] = val;
         if (val) {
@@ -5354,6 +5358,7 @@ class Combox extends Group {
             val.dataProvider = this.$combox[5];
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
             val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            val.addListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
         }
         this.__listSelectItemChange();
     }
@@ -5381,10 +5386,9 @@ class Combox extends Group {
                 var point = flower.Point.create();
                 this.localToGlobal(point);
                 flower.Point.release(point);
-                flower.MenuManager.showMenu(list,point.x,point.y + this.height);
+                flower.MenuManager.showMenu(list, point.x, point.y + this.height, false);
             }
         } else {
-
         }
     }
 

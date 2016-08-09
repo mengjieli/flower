@@ -13,7 +13,7 @@ class PreLoading extends flower.EventDispatcher {
         this.modules = [
             new flower.Module("modules/software/module.json"),
             new flower.Module("modules/gameEditor/module.json"),
-            new flower.Module("modules/dungeonEditor/module.json")
+            //new flower.Module("modules/dungeonEditor/module.json")
         ];
         this.progressBar = (new flower.UIParser()).parseUI(`
         <f:Group width="150" height="20" class="PreLoading" xmlns:f="flower">
