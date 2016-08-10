@@ -1,0 +1,9 @@
+<f:Group percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software" xmlns:e="editor">
+    <f:Group percentWidth="100">
+        <f:layout>
+            <f:VerticalLayout/>
+        </f:layout>
+        <e:BasicAttribute/>
+        <e:PositionAttribute/>
+    </f:Group>
+</f:Group>

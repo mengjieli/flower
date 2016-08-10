@@ -6,15 +6,10 @@
     "./parser/Parser.script",
     "./events/ModuleEvent.script",
     "./plugins/PluginManager.script",
-    "./parser/ui/UIFileParser.script",
-    "./parser/ui/UIElement.script",
-    "./events/EventManager.script",
-    "./plugins/uiPlugin/UI.script",
-    "./plugins/uiPlugin/UIEditor.script"
+    "./events/EventManager.script"
   ],
   "components": [
-    "./plugins/PluginBase.xml",
-    "./plugins/uiPlugin/UIPlugin.xml"
+    "./plugins/PluginBase.xml"
   ],
   "classes": {
     "EditorMain": "./EditorMain.xml",

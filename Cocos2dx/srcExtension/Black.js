@@ -6005,6 +6005,7 @@ class Module extends flower.EventDispatcher {
             }
         }
         this.script = "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
+        this.script += "module.path = \"" + this.__direction + "\";\n";
         //this.script += "var " + cfg.packageURL + " = module;\n\n";
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {

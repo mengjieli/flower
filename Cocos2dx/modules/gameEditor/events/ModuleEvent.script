@@ -7,8 +7,13 @@ var ModuleEvent = (function (_super) {
         this.data = data;
     }
 
+    /**
+     * 显示详细信息
+     * @type {string}
+     */
+    ModuleEvent.SHOW_DETAIL = "show_detail";
     ModuleEvent.VIEW_FILE = "view_file";
-    ModuleEvent.SELECT_ELEMENT = "select_element";
+    //ModuleEvent.SELECT_ELEMENT = "select_element";
     //ModuleEvent.VIEW_MODULE = "view_module";
 
     return ModuleEvent;

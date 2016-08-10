@@ -1,14 +1,9 @@
-<s:Tab xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:e="modules/gameEditor/module.json">
+<s:Tab creationComplete="this.init();" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:e="modules/gameEditor/module.json">
+    <f:script src="./AttributeEditor.script"/>
     <f:panels>
         <f:Array>
-            <s:TitlePanel percentWidth="100" percentHeight="100" title="属性">
-                <f:Group percentWidth="100">
-                    <f:layout>
-                        <f:VerticalLayout/>
-                    </f:layout>
-                    <e:BasicAttribute/>
-                    <e:PositionAttribute/>
-                </f:Group>
+            <s:TitlePanel  percentWidth="100" percentHeight="100" title="属性">
+                <f:Group id="container" percentWidth="100" percentHeight="100"/>
             </s:TitlePanel>
         </f:Array>
     </f:panels>

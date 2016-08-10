@@ -1,12 +1,50 @@
 function init() {
-    this.clickItem = this.onClickItem.bind(this);
-    this.loadPorject("flower.json");
+    this.tree.clickItem = this.onClickItem.bind(this);
+    this.loadPlugins();
 }
 
-function onClickItem(e) {
-    var item = e.item;
-    if (item.plugin) {
-        item.openFile();
+function loadPlugins() {
+    var loader = new flower.URLLoader(editor.path + "plugins/Plugin.json");
+    loader.addListener(flower.Event.COMPLETE, this.__onLoadPlugins, this);
+    loader.load();
+}
+
+function __onLoadPlugins(e) {
+    var list = e.data;
+    this.progress = flower.DataManager.getInstance().createData("ProgressData");
+    this.progress.max.value = list.length;
+    this.progress.tip.value = "加载插件";
+    software.Loading.show(this.progress);
+    this.__loadNextPlugin(0, list);
+}
+
+function __loadNextPlugin(index, list) {
+    this.progress.current.value = index;
+    if (index == list.length) {
+        software.Loading.hide();
+        this.loadPorject("flower.json");
+    } else {
+        var loader = new flower.URLLoader(editor.path + "plugins/" + list[index]);
+        loader.addListener(flower.Event.COMPLETE, function (e) {
+            var path = editor.path + "plugins/" + list[index];
+            var isLoading = false;
+            var startLoad = function () {
+                isLoading = true;
+            }.bind(this);
+            var setProgress = function (progress) {
+                this.progress.current.value = index + progress;
+            }.bind(this);
+            var loadComplete = function () {
+                index++;
+                this.__loadNextPlugin(index, list);
+            }.bind(this);
+            path = path.slice(0, path.length - (path.split("/")[path.split("/").length - 1]).length);
+            eval(e.data);
+            if (isLoading == false) {
+                loadComplete();
+            }
+        }, this);
+        loader.load();
     }
 }
 
@@ -29,7 +67,8 @@ function __onLoadConfig(e) {
             direction.push(new editor.File(false, item.path, flower.Path.getName(item.path), item.type));
         }
     }
-    this.openItem("res/module/MainUI.xml");
+    //this.openItem("res/dungeon/Level1.json");
+    //this.openItem("res/module/MainUI.xml");
 }
 
 function openItem(url) {
@@ -44,4 +83,14 @@ function openItem(url) {
     if (item) {
         item.openFile();
     }
+}
+
+function onClickItem(e) {
+    this.openItem(e.item.path);
+    //console.log(e);
+    //var item = e.item;
+    //if (item.plugin) {
+    //    this.openItem(item.path);
+    //    //item.openFile();
+    //}
 }

@@ -90,7 +90,17 @@ var UI = (function (_super) {
         }
         this.info.select = this;
         this.info.select.selected();
-        editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.SELECT_ELEMENT, this.data);
+
+        if (!UI.detailPanel) {
+            UI.detailPanel = new flower.UIParser();
+            UI.detailPanel.parseUIAsync("modules/gameEditor/plugins/uiPlugin/UIAttributePanel.xml");
+        }
+        var event = new editor.ModuleEvent(editor.ModuleEvent.SHOW_DETAIL, {
+            "type": "element",
+            data: this.data,
+            panel: UI.detailPanel
+        });
+        editor.EventManager.instance.dispatch(event);
     }
 
     UI.prototype.dragUpdate = function (gap, time) {

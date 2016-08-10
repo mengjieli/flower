@@ -1,0 +1,10 @@
+function init() {
+    editor.EventManager.instance.addListener(editor.ModuleEvent.SHOW_DETAIL, this.onShowDetail, this);
+}
+
+function onShowDetail(e) {
+    if (e.data.panel) {
+        this.container.removeAll();
+        this.container.addChild(e.data.panel);
+    }
+}

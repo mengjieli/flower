@@ -1,0 +1,5 @@
+//console.log(path);
+
+startLoad();
+
+setProgress(0.1);

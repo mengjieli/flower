@@ -5,6 +5,10 @@
       "name": "模块",
       "list": [
         {
+          "path": "res/dungeon/Level1.json",
+          "type": "Dungeon"
+        },
+        {
           "path": "res/module/MainUI.xml",
           "type": "UI"
         },

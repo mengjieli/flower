@@ -32,7 +32,12 @@ var File = (function (_super) {
 
     File.prototype.onLoadConfig = function (e) {
         this.content = e.data;
+        flower.breakPoint();
         var clazz = editor.PluginManager.getParser(this.__type);
+        //if (!clazz) {
+        //    software.Alert.show("没有找到对应的解析器:" + this.__type);
+        //    return;
+        //}
         this.__parser = new clazz(this);
         if (this.__parser) {
             this.__parser.load();
