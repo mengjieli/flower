@@ -1932,6 +1932,7 @@ class UIParser extends Group {
 
     _className;
     _classNameSpace;
+    _beforeScript;
     defaultClassName = "";
     classes;
     parseContent;
@@ -1946,8 +1947,9 @@ class UIParser extends Group {
     loadURL;
     localNameSpace = "local";
 
-    constructor() {
+    constructor(beforeScript = "") {
         super();
+        this._beforeScript = beforeScript;
         this.classes = flower.UIParser.classes;
         this.percentWidth = this.percentHeight = 100;
     }
@@ -2138,7 +2140,7 @@ class UIParser extends Group {
     }
 
     decodeRootComponent(xml, classContent) {
-        var content = "";
+        var content = this._beforeScript;
         var namespacesList = xml.namespaces;
         var namespaces = {};
         for (var i = 0; i < namespacesList.length; i++) {
@@ -5970,14 +5972,15 @@ class Module extends flower.EventDispatcher {
     __index;
     __url;
     __direction;
+    __beforeScript;
 
-    constructor(url) {
+    constructor(url, beforeScript = "") {
         super();
         Module.instance = this;
         this.__url = url;
+        this.__beforeScript = beforeScript;
         this.__direction = flower.Path.getPathDirection(url);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
-
     }
 
     load() {
@@ -6004,7 +6007,10 @@ class Module extends flower.EventDispatcher {
                 flower.UIParser.setLocalUIURL(key, url, namespace);
             }
         }
-        this.script = "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
+        this.script = "";
+        this.script += this.__beforeScript;
+        this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
+        this.__beforeScript += "var module = $root." + cfg.name + ";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
         //this.script += "var " + cfg.packageURL + " = module;\n\n";
         var scripts = cfg.scripts;
@@ -6040,7 +6046,7 @@ class Module extends flower.EventDispatcher {
                 if (url.slice(0, 2) == "./") {
                     url = this.__direction + url.slice(2, url.length);
                 }
-                var parser = new flower.UIParser();
+                var parser = new flower.UIParser(this.__beforeScript);
                 parser.localNameSpace = namespace;
                 this.__list.push({
                     type: "ui",
@@ -6070,7 +6076,7 @@ class Module extends flower.EventDispatcher {
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                    //trace("执行script", this.script);
+                    trace("执行script:\n", this.script);
                     eval(this.script);
                 }
             }

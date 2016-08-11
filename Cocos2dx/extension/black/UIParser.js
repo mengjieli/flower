@@ -69,6 +69,7 @@ class UIParser extends Group {
 
     _className;
     _classNameSpace;
+    _beforeScript;
     defaultClassName = "";
     classes;
     parseContent;
@@ -83,8 +84,9 @@ class UIParser extends Group {
     loadURL;
     localNameSpace = "local";
 
-    constructor() {
+    constructor(beforeScript = "") {
         super();
+        this._beforeScript = beforeScript;
         this.classes = flower.UIParser.classes;
         this.percentWidth = this.percentHeight = 100;
     }
@@ -275,7 +277,7 @@ class UIParser extends Group {
     }
 
     decodeRootComponent(xml, classContent) {
-        var content = "";
+        var content = this._beforeScript;
         var namespacesList = xml.namespaces;
         var namespaces = {};
         for (var i = 0; i < namespacesList.length; i++) {

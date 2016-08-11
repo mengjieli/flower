@@ -2099,6 +2099,8 @@ var $root = eval("this");
         _inherits(UIParser, _Group);
 
         function UIParser() {
+            var beforeScript = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+
             _classCallCheck(this, UIParser);
 
             var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
@@ -2106,6 +2108,7 @@ var $root = eval("this");
             _this15.defaultClassName = "";
             _this15.localNameSpace = "local";
 
+            _this15._beforeScript = beforeScript;
             _this15.classes = flower.UIParser.classes;
             _this15.percentWidth = _this15.percentHeight = 100;
             return _this15;
@@ -2303,7 +2306,7 @@ var $root = eval("this");
         }, {
             key: "decodeRootComponent",
             value: function decodeRootComponent(xml, classContent) {
-                var content = "";
+                var content = this._beforeScript;
                 var namespacesList = xml.namespaces;
                 var namespaces = {};
                 for (var i = 0; i < namespacesList.length; i++) {
@@ -6506,15 +6509,17 @@ var $root = eval("this");
         _inherits(Module, _flower$EventDispatch2);
 
         function Module(url) {
+            var beforeScript = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+
             _classCallCheck(this, Module);
 
             var _this39 = _possibleConstructorReturn(this, Object.getPrototypeOf(Module).call(this));
 
             Module.instance = _this39;
             _this39.__url = url;
+            _this39.__beforeScript = beforeScript;
             _this39.__direction = flower.Path.getPathDirection(url);
             _this39.__progress = flower.DataManager.getInstance().createData("ProgressData");
-
             return _this39;
         }
 
@@ -6545,7 +6550,10 @@ var $root = eval("this");
                         flower.UIParser.setLocalUIURL(key, url, namespace);
                     }
                 }
-                this.script = "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
+                this.script = "";
+                this.script += this.__beforeScript;
+                this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
+                this.__beforeScript += "var module = $root." + cfg.name + ";\n";
                 this.script += "module.path = \"" + this.__direction + "\";\n";
                 //this.script += "var " + cfg.packageURL + " = module;\n\n";
                 var scripts = cfg.scripts;
@@ -6581,7 +6589,7 @@ var $root = eval("this");
                         if (url.slice(0, 2) == "./") {
                             url = this.__direction + url.slice(2, url.length);
                         }
-                        var parser = new flower.UIParser();
+                        var parser = new flower.UIParser(this.__beforeScript);
                         parser.localNameSpace = namespace;
                         this.__list.push({
                             type: "ui",
@@ -6613,7 +6621,7 @@ var $root = eval("this");
                     } else if (item.type == "script") {
                         this.script += e.data + "\n\n\n";
                         if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                            //trace("执行script", this.script);
+                            trace("执行script:\n", this.script);
                             eval(this.script);
                         }
                     }

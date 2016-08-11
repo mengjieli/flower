@@ -6,11 +6,11 @@ var PluginManager = (function () {
     var plugins = {};
     var parsers = {};
 
-    PluginManager.getPlugin = function (name) {
+    PluginManager.getView = function (name) {
         return plugins[name];
     }
 
-    PluginManager.registerPlugin = function (name, clazz) {
+    PluginManager.registerView = function (name, clazz) {
         plugins[name] = clazz;
     }
 

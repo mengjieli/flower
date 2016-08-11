@@ -70,7 +70,7 @@ var UI = (function (_super) {
                 this.container.addChild(child);
             }
         }
-        this.editor = new editor.UIEditor(this.data, display);
+        this.editor = new module.UIEditor(this.data, display);
         this.addChild(this.editor);
         this.display.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouchBegin, this);
         this.editor.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouchBegin, this);

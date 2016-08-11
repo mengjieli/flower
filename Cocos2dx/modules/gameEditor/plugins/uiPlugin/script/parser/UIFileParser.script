@@ -9,7 +9,7 @@ var UIFileParser = (function (_super) {
     UIFileParser.prototype.load = function () {
         var xml = new flower.XMLElement();
         xml.parse(this.file.content);
-        this.element = new editor.UIElement(xml);
+        this.element = new module.UIElement(xml);
         this.element.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
         this.element.addListener(flower.Event.ERROR, this.onLoadError, this);
         this.element.load();
@@ -28,5 +28,4 @@ var UIFileParser = (function (_super) {
 })(editor.Parser);
 
 module.UIFileParser = UIFileParser;
-
-editor.PluginManager.registerParser("UI", UIFileParser);
+registerParser("UI", UIFileParser);

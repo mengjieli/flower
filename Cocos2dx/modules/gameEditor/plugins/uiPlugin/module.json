@@ -1,0 +1,20 @@
+{
+  "namespace": "ui",
+  "name": "ui",
+  "scripts": [
+    "./script/parser/UIFileParser.script",
+    "./script/parser/UIElement.script",
+    "./ui/UI.script",
+    "./ui/UIEditor.script"
+  ],
+  "components": [
+    "./ui/UIView.xml",
+    "./ui/UIAttributePanel.xml"
+  ],
+  "classes": {
+    "BasicAttribute": "./panels/attributeEditor/BasicAttribute.xml",
+    "PositionAttribute": "./panels/attributeEditor/PositionAttribute.xml"
+  },
+  "data": [
+  ]
+}

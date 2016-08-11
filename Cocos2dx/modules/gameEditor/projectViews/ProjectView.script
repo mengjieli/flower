@@ -24,27 +24,18 @@ function __loadNextPlugin(index, list) {
         software.Loading.hide();
         this.loadPorject("flower.json");
     } else {
-        var loader = new flower.URLLoader(editor.path + "plugins/" + list[index]);
-        loader.addListener(flower.Event.COMPLETE, function (e) {
-            var path = editor.path + "plugins/" + list[index];
-            var isLoading = false;
-            var startLoad = function () {
-                isLoading = true;
-            }.bind(this);
-            var setProgress = function (progress) {
-                this.progress.current.value = index + progress;
-            }.bind(this);
-            var loadComplete = function () {
-                index++;
-                this.__loadNextPlugin(index, list);
-            }.bind(this);
-            path = path.slice(0, path.length - (path.split("/")[path.split("/").length - 1]).length);
-            eval(e.data);
-            if (isLoading == false) {
-                loadComplete();
-            }
+        var script = "";
+        script += "var registerParser = editor.PluginManager.registerParser;\n";
+        script += "var registerView = editor.PluginManager.registerView;\n";
+        var module = new flower.Module(editor.path + "plugins/" + list[index],script);
+        module.addListener(flower.Event.COMPLETE, function (e) {
+            index++;
+            this.__loadNextPlugin(index, list);
         }, this);
-        loader.load();
+        module.progress.percent.addListener(flower.Event.UPDATE, function (e) {
+            this.progress.current.value = index + e.data.value;
+        }, this);
+        module.load();
     }
 }
 
@@ -68,7 +59,7 @@ function __onLoadConfig(e) {
         }
     }
     //this.openItem("res/dungeon/Level1.json");
-    //this.openItem("res/module/MainUI.xml");
+    this.openItem("res/module/MainUI.xml");
 }
 
 function openItem(url) {

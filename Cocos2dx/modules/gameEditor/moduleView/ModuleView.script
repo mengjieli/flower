@@ -10,7 +10,7 @@ function onViewFile(e) {
             return;
         }
     }
-    var pluginClass = editor.PluginManager.getPlugin(file.type);
+    var pluginClass = editor.PluginManager.getView(file.type);
     var plugin;
     if (pluginClass) {
         plugin = new pluginClass(file);
