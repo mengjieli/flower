@@ -1,5 +1,6 @@
-function init() {
-    var menu = this.data.menu;
+function setData(data) {
+    _super.prototype.setData.call(this, data);
+    var menu = data.menu || [];
     var d = new flower.ArrayValue();
     for (var i = 0; i < menu.length; i++) {
         d.push(menu[i]);

@@ -5,6 +5,7 @@ var PluginManager = (function () {
 
     var plugins = {};
     var parsers = {};
+    var newFilePanels = {};
 
     PluginManager.getView = function (name) {
         return plugins[name];
@@ -18,9 +19,21 @@ var PluginManager = (function () {
         return parsers[name];
     }
 
-
     PluginManager.registerParser = function (name, clazz) {
         parsers[name] = clazz;
+    }
+
+    /**
+     * 设置新建文件的面板
+     * @param name
+     * @param clazz
+     */
+    PluginManager.setNewFilePanel = function (name, clazz) {
+        newFilePanels[name] = clazz;
+    }
+
+    PluginManager.getNewFilePanel = function (name) {
+        return newFilePanels[name];
     }
 
     return PluginManager;

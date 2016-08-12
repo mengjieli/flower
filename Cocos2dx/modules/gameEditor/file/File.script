@@ -9,12 +9,13 @@ var File = (function (_super) {
      * @param type
      * @constructor
      */
-    function File(isDirection, path, name, type) {
+    function File(isDirection, path, name, type, menu) {
         _super.call(this);
         this.__isDirection = isDirection;
         this.__path = path;
         this.__name = name;
         this.__type = type;
+        this.__menu = menu;
         this.__parser = null;
         this.ready = false;
         this.waitForOpen = false;
@@ -122,6 +123,17 @@ var File = (function (_super) {
             return this.__type;
         },
         set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(File.prototype, "menu", {
+        get: function () {
+            return this.__menu;
+        },
+        set: function (val) {
+            this.__menu = val;
         },
         enumerable: true,
         configurable: true

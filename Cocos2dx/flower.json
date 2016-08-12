@@ -3,49 +3,35 @@
   "direction": {
     "module": {
       "name": "模块",
+      "plugin": "UI",
       "list": [
-        {
-          "path": "res/dungeon/Level1.json",
-          "type": "Dungeon"
-        },
-        {
-          "path": "res/module/MainUI.xml",
-          "type": "UI"
-        },
-        {
-          "path": "res/module/MainUI1.xml",
-          "type": "UI"
-        },
-        {
-          "path": "res/module/MainUI2.xml",
-          "type": "UI"
-        },
-        {
-          "path": "res/module/MainUI3.xml",
-          "type": "UI"
-        },
-        {
-          "path": "res/module/MainUI4.xml",
-          "type": "UI"
-        }
+        "res/module/MainUI.xml"
       ]
     },
     "data": {
       "name": "数据结构",
+      "plugin": "Data",
       "list": [
-        {
-          "path": "res/data/Paik.json",
-          "type": "Data"
-        }
+        "res/data/Paik.json"
       ]
     },
     "language": {
       "name": "语言配置",
+      "plugin": "Language",
       "list": [
-        {
-          "path": "res/language/zh_CN.json",
-          "type": "Language"
-        }
+        "res/language/zh_CN.json"
+      ]
+    },
+    "tools": {
+      "name": "工具",
+      "list": [
+      ]
+    },
+    "tools/dungeon": {
+      "name": "副本",
+      "plugin": "Dungeon",
+      "list": [
+        "res/tools/dungeon/Level1.json"
       ]
     }
   }

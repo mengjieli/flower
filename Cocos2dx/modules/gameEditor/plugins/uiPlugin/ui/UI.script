@@ -92,8 +92,7 @@ var UI = (function (_super) {
         this.info.select.selected();
 
         if (!UI.detailPanel) {
-            UI.detailPanel = new flower.UIParser();
-            UI.detailPanel.parseUIAsync("modules/gameEditor/plugins/uiPlugin/UIAttributePanel.xml");
+            UI.detailPanel = new module.UIAttributePanel(this.data);
         }
         var event = new editor.ModuleEvent(editor.ModuleEvent.SHOW_DETAIL, {
             "type": "element",

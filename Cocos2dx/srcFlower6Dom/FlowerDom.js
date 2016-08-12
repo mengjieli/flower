@@ -9296,6 +9296,18 @@ class Path {
         var arr = url.split("/");
         return arr[arr.length - 1];
     }
+
+    static joinPath(path1, path2) {
+        var path = path1;
+        if (path.charAt(path.length - 1) != "/") {
+            path += "/";
+        }
+        if (path2.charAt(0) == "/") {
+            path2 = path2.slice(1, path2.length);
+        }
+        path += path2;
+        return path;
+    }
 }
 
 flower.Path = Path;

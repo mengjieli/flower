@@ -1,0 +1,13 @@
+{
+  "namespace": "dg",
+  "name": "dg",
+  "scripts": [
+  ],
+  "components": [
+    "./panels/NewTriggerPanel.xml"
+  ],
+  "classes": {
+  },
+  "data": [
+  ]
+}

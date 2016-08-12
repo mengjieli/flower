@@ -27,7 +27,8 @@ function __loadNextPlugin(index, list) {
         var script = "";
         script += "var registerParser = editor.PluginManager.registerParser;\n";
         script += "var registerView = editor.PluginManager.registerView;\n";
-        var module = new flower.Module(editor.path + "plugins/" + list[index],script);
+        script += "var setNewFilePanel = editor.PluginManager.setNewFilePanel;\n";
+        var module = new flower.Module(editor.path + "plugins/" + list[index], script);
         module.addListener(flower.Event.COMPLETE, function (e) {
             index++;
             this.__loadNextPlugin(index, list);
@@ -51,15 +52,43 @@ function __onLoadConfig(e) {
     var direction = this.tree.data.direction;
     direction.removeAll();
     for (var key in cfg.direction) {
-        direction.push(new editor.File(true, "res/" + key, cfg.direction[key].name));
-        var list = cfg.direction[key].list;
+        var item = cfg.direction[key];
+        var menu = null;
+        var path = "res/" + key;
+        var file = new editor.File(true, path, item.name);
+        if (item.plugin) {
+            var list = [];
+            if (editor.PluginManager.getNewFilePanel(item.plugin)) {
+                list.push({"label": "添加" + item.name, "type": "addFile"});
+            }
+            if (list.length) {
+                menu = {
+                    "menu": list,
+                    "target": {
+                        "path": path,
+                        "plugin": item.plugin
+                    },
+                    "click": function (info, item) {
+                        if (item.type == "addFile") {
+                            var clazz = editor.PluginManager.getNewFilePanel(info.plugin);
+                            flower.PopManager.pop(new clazz(info), true, true);
+                            console.log("AddFile:" + info.path);
+                        }
+                    }
+                };
+            }
+        }
+        file.menu = menu;
+        direction.push(file);
+        var list = item.list;
+        var pluginName = item.plugin;
         for (var i = 0; i < list.length; i++) {
-            var item = list[i];
-            direction.push(new editor.File(false, item.path, flower.Path.getName(item.path), item.type));
+            path = list[i];
+            direction.push(new editor.File(false, path, flower.Path.getName(path), pluginName));
         }
     }
-    //this.openItem("res/dungeon/Level1.json");
-    this.openItem("res/module/MainUI.xml");
+    this.openItem("res/dungeon/Level1.json");
+    //this.openItem("res/module/MainUI.xml");
 }
 
 function openItem(url) {
@@ -77,7 +106,13 @@ function openItem(url) {
 }
 
 function onClickItem(e) {
-    this.openItem(e.item.path);
+    var item = e.item;
+    if (item.isDirection == true) {
+
+    } else {
+        this.openItem(item.path);
+    }
+
     //console.log(e);
     //var item = e.item;
     //if (item.plugin) {

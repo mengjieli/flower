@@ -1,3 +1,4 @@
 [
-  "uiPlugin/module.json"
+  "uiPlugin/module.json",
+  "dungeonPlugin/module.json"
 ]
