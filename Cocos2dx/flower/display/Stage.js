@@ -359,6 +359,8 @@ class Stage extends Sprite {
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
 
     ///////////////////////////////////////键盘事件处理///////////////////////////////////////
+    $keyEvents = [];
+
     $onKeyDown(key) {
         if (key == 16) {
             KeyboardEvent.$shift = true;
@@ -369,12 +371,14 @@ class Stage extends Sprite {
         if (key == 18) {
             KeyboardEvent.$alt = true;
         }
-        var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, key);
-        if (this.__focus) {
-            this.__focus.dispatch(event);
-        } else {
-            this.dispatch(event);
-        }
+        this.$keyEvents.push({
+            type: KeyboardEvent.KEY_DOWN,
+            shift: KeyboardEvent.$shift,
+            control: KeyboardEvent.$control,
+            alt: KeyboardEvent.$alt,
+            key: key
+        });
+
     }
 
     $onKeyUp(key) {
@@ -387,12 +391,40 @@ class Stage extends Sprite {
         if (key == 18) {
             KeyboardEvent.$alt = false;
         }
-        var event = new KeyboardEvent(KeyboardEvent.KEY_UP, key);
-        if (this.__focus) {
-            this.__focus.dispatch(event);
-        } else {
-            this.dispatch(event);
+        this.$keyEvents.push({
+            type: KeyboardEvent.KEY_UP,
+            shift: KeyboardEvent.$shift,
+            control: KeyboardEvent.$control,
+            alt: KeyboardEvent.$alt,
+            key: key
+        });
+    }
+
+    $dispatchKeyEvent(info) {
+        var shift = KeyboardEvent.$shift;
+        var control = KeyboardEvent.$control;
+        var alt = KeyboardEvent.$alt;
+        KeyboardEvent.$shift = info.shift;
+        KeyboardEvent.$control = info.control;
+        KeyboardEvent.$alt = info.alt;
+        if (info.type == KeyboardEvent.KEY_DOWN) {
+            var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, info.key);
+            if (this.__focus) {
+                this.__focus.dispatch(event);
+            } else {
+                this.dispatch(event);
+            }
+        } else if (info.type == KeyboardEvent.KEY_UP) {
+            var event = new KeyboardEvent(KeyboardEvent.KEY_UP, info.key);
+            if (this.__focus) {
+                this.__focus.dispatch(event);
+            } else {
+                this.dispatch(event);
+            }
         }
+        KeyboardEvent.$shift = shift;
+        KeyboardEvent.$control = control;
+        KeyboardEvent.$alt = alt;
     }
 
     ///////////////////////////////////////键盘事件处理///////////////////////////////////////
@@ -429,6 +461,9 @@ class Stage extends Sprite {
         rightClickList.length = 0;
         if (hasclick) {
             this.$menu.$onTouch();
+        }
+        while (this.$keyEvents.length) {
+            this.$dispatchKeyEvent(this.$keyEvents.shift());
         }
         super.$onFrameEnd();
         this.$background.$onFrameEnd();

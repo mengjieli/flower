@@ -3,7 +3,7 @@ class File {
     __path;
     __autoUpdate;
 
-    constructor(path, autoUpdate = true) {
+    constructor(path, autoUpdate = false) {
         this.__path = path;
         this.__autoUpdate = autoUpdate;
     }

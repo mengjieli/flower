@@ -162,6 +162,8 @@ class TextInput extends DisplayObject {
     }
 
     $keyDown(e) {
+        var p = this.$TextField;
+        p[0] = this.$nativeShow.getNativeText();
         if (e.key == 13) {
             this.$inputEnd();
         }

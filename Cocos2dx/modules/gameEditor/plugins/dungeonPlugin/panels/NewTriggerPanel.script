@@ -14,5 +14,3 @@ function onSure() {
     this.closePanel();
     var path = this.data.path + "/" + name + "." + this.data.type;
 }
-
-setNewFilePanel("Dungeon", NewTriggerPanel);

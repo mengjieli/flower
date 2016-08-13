@@ -5090,6 +5090,8 @@ var flower = {};
         }, {
             key: "$keyDown",
             value: function $keyDown(e) {
+                var p = this.$TextField;
+                p[0] = this.$nativeShow.getNativeText();
                 if (e.key == 13) {
                     this.$inputEnd();
                 }
@@ -5457,6 +5459,7 @@ var flower = {};
             _this21.__lastRightX = -1;
             _this21.__lastRightY = -1;
             _this21.__focus = null;
+            _this21.$keyEvents = [];
 
             _this21.__stage = _this21;
             Stage.stages.push(_this21);
@@ -5814,12 +5817,13 @@ var flower = {};
                 if (key == 18) {
                     KeyboardEvent.$alt = true;
                 }
-                var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, key);
-                if (this.__focus) {
-                    this.__focus.dispatch(event);
-                } else {
-                    this.dispatch(event);
-                }
+                this.$keyEvents.push({
+                    type: KeyboardEvent.KEY_DOWN,
+                    shift: KeyboardEvent.$shift,
+                    control: KeyboardEvent.$control,
+                    alt: KeyboardEvent.$alt,
+                    key: key
+                });
             }
         }, {
             key: "$onKeyUp",
@@ -5833,12 +5837,41 @@ var flower = {};
                 if (key == 18) {
                     KeyboardEvent.$alt = false;
                 }
-                var event = new KeyboardEvent(KeyboardEvent.KEY_UP, key);
-                if (this.__focus) {
-                    this.__focus.dispatch(event);
-                } else {
-                    this.dispatch(event);
+                this.$keyEvents.push({
+                    type: KeyboardEvent.KEY_UP,
+                    shift: KeyboardEvent.$shift,
+                    control: KeyboardEvent.$control,
+                    alt: KeyboardEvent.$alt,
+                    key: key
+                });
+            }
+        }, {
+            key: "$dispatchKeyEvent",
+            value: function $dispatchKeyEvent(info) {
+                var shift = KeyboardEvent.$shift;
+                var control = KeyboardEvent.$control;
+                var alt = KeyboardEvent.$alt;
+                KeyboardEvent.$shift = info.shift;
+                KeyboardEvent.$control = info.control;
+                KeyboardEvent.$alt = info.alt;
+                if (info.type == KeyboardEvent.KEY_DOWN) {
+                    var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, info.key);
+                    if (this.__focus) {
+                        this.__focus.dispatch(event);
+                    } else {
+                        this.dispatch(event);
+                    }
+                } else if (info.type == KeyboardEvent.KEY_UP) {
+                    var event = new KeyboardEvent(KeyboardEvent.KEY_UP, info.key);
+                    if (this.__focus) {
+                        this.__focus.dispatch(event);
+                    } else {
+                        this.dispatch(event);
+                    }
                 }
+                KeyboardEvent.$shift = shift;
+                KeyboardEvent.$control = control;
+                KeyboardEvent.$alt = alt;
             }
 
             ///////////////////////////////////////键盘事件处理///////////////////////////////////////
@@ -5877,6 +5910,9 @@ var flower = {};
                 rightClickList.length = 0;
                 if (hasclick) {
                     this.$menu.$onTouch();
+                }
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
                 this.$background.$onFrameEnd();

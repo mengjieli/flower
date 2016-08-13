@@ -1,0 +1,9 @@
+<s:Alert class="NewDungeonPanel" creationComplete="this.init();" title="新建副本关卡" width="300" height="200"
+         xmlns:f="flower" xmlns:s="software">
+    <f:script src="./NewDungeonPanel.script"/>
+    <f:Group id="container" left="1" right="1" top="25" bottom="0">
+        <f:Label text="名称" horizontalCenter="-50" y="24"/>
+        <f:Input id="nameInput" horizontalCenter="30" y="20" width="100"/>
+        <f:Label id="pathLabel" horizontalCenter="0" y="54"/>
+    </f:Group>
+</s:Alert>

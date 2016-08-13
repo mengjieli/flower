@@ -1,9 +1,11 @@
 function init() {
     this.tree.clickItem = this.onClickItem.bind(this);
     this.loadPlugins();
+    ProjectView.instance = this;
 }
 
 function loadPlugins() {
+    this.path = "flower.json";
     var loader = new flower.URLLoader(editor.path + "plugins/Plugin.json");
     loader.addListener(flower.Event.COMPLETE, this.__onLoadPlugins, this);
     loader.load();
@@ -22,12 +24,14 @@ function __loadNextPlugin(index, list) {
     this.progress.current.value = index;
     if (index == list.length) {
         software.Loading.hide();
-        this.loadPorject("flower.json");
+        this.loadPorject(this.path);
     } else {
         var script = "";
         script += "var registerParser = editor.PluginManager.registerParser;\n";
         script += "var registerView = editor.PluginManager.registerView;\n";
         script += "var setNewFilePanel = editor.PluginManager.setNewFilePanel;\n";
+        script += "var addFile = editor.ProjectView.addFile;\n";
+        script += "var saveFile = editor.ProjectView.saveFile;\n";
         var module = new flower.Module(editor.path + "plugins/" + list[index], script);
         module.addListener(flower.Event.COMPLETE, function (e) {
             index++;
@@ -48,6 +52,7 @@ function loadPorject(url) {
 
 function __onLoadConfig(e) {
     var cfg = this.config = e.data;
+    this.plugins = {};
     this.title = cfg.name;
     var direction = this.tree.data.direction;
     direction.removeAll();
@@ -57,20 +62,21 @@ function __onLoadConfig(e) {
         var path = "res/" + key;
         var file = new editor.File(true, path, item.name);
         if (item.plugin) {
+            this.plugins[item.plugin] = item;
             var list = [];
             if (editor.PluginManager.getNewFilePanel(item.plugin)) {
-                list.push({"label": "添加" + item.name, "type": "addFile"});
+                list.push({"label": "新建" + item.name, "type": "addFile"});
             }
             if (list.length) {
                 menu = {
                     "menu": list,
                     "target": {
                         "path": path,
-                        "plugin": item.plugin
+                        "pluginName": item.plugin
                     },
                     "click": function (info, item) {
                         if (item.type == "addFile") {
-                            var clazz = editor.PluginManager.getNewFilePanel(info.plugin);
+                            var clazz = editor.PluginManager.getNewFilePanel(info.pluginName);
                             flower.PopManager.pop(new clazz(info), true, true);
                             console.log("AddFile:" + info.path);
                         }
@@ -89,6 +95,10 @@ function __onLoadConfig(e) {
     }
     this.openItem("res/dungeon/Level1.json");
     //this.openItem("res/module/MainUI.xml");
+}
+
+function saveDirection() {
+    (new flower.File(this.path)).saveText(JSON.stringify(this.config));
 }
 
 function openItem(url) {
@@ -119,4 +129,27 @@ function onClickItem(e) {
     //    this.openItem(item.path);
     //    //item.openFile();
     //}
+}
+
+function addFile(path, pluginName) {
+    var direction = this.tree.data.direction;
+    direction.push(new editor.File(false, path, flower.Path.getName(path), pluginName));
+    this.plugins[pluginName].list.push(path);
+    this.saveDirection();
+}
+
+function saveFile(path,content,back,thisObj,type) {
+    if(type == null) {
+        (new flower.File(path)).saveText(content,back,thisObj);
+    } else if(type == "png") {
+        (new flower.File(path)).savePNG(content,back,thisObj);
+    }
+}
+
+static function addFile(path,pluginName) {
+    ProjectView.instance.addFile(path,pluginName);
+}
+
+static function saveFile(path,content,back,thisObj,type) {
+    ProjectView.instance.saveFile(path,content,back,thisObj,type);
 }

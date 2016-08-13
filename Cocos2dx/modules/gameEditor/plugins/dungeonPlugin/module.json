@@ -4,7 +4,8 @@
   "scripts": [
   ],
   "components": [
-    "./panels/NewTriggerPanel.xml"
+    "./panels/NewTriggerPanel.xml",
+    "./panels/NewDungeonPanel.xml"
   ],
   "classes": {
   },
