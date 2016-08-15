@@ -54,6 +54,7 @@ class Event {
     static CANCEL = "cancel";
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
 
     static _eventPool = [];
 

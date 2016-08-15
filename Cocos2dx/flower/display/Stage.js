@@ -54,6 +54,7 @@ class Stage extends Sprite {
     __lastRightX = -1;
     __lastRightY = -1;
     __focus = null;
+    __touchTarget = null;
 
     $setFocus(val) {
         if (val && !val.focusEnabled) {
@@ -119,6 +120,7 @@ class Stage extends Sprite {
         mouse.mutiply = this.__touchList.length == 0 ? false : true;
         this.__touchList.push(mouse);
         var target = this.$getMouseTarget(x, y, mouse.mutiply);
+        this.__touchTarget = target;
         mouse.target = target;
         var parent = target.parent;
         var isMenu = false;
@@ -155,6 +157,7 @@ class Stage extends Sprite {
             return;
         }
         var target = this.$getMouseTarget(x, y, false);
+        this.__touchTarget = target;
         var event;
         event = new flower.MouseEvent(flower.MouseEvent.RIGHT_CLICK);
         event.$stageX = x;
@@ -460,7 +463,7 @@ class Stage extends Sprite {
         }
         rightClickList.length = 0;
         if (hasclick) {
-            this.$menu.$onTouch();
+            this.$menu.$onTouch(this.__touchTarget);
         }
         while (this.$keyEvents.length) {
             this.$dispatchKeyEvent(this.$keyEvents.shift());

@@ -2,10 +2,13 @@
   "namespace": "dg",
   "name": "dg",
   "scripts": [
+    "./src/Dungeon.script",
+    "./src/parser/DungeonParser.script"
   ],
   "components": [
     "./panels/NewTriggerPanel.xml",
-    "./panels/NewDungeonPanel.xml"
+    "./panels/NewDungeonPanel.xml",
+    "./view/DungeonView.xml"
   ],
   "classes": {
   },

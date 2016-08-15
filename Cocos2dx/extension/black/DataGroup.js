@@ -28,6 +28,10 @@ class DataGroup extends Group {
 
     __onDataUpdate() {
         this.$addFlags(0x4000);
+        var p = this.$DataGroup;
+        if (p[10] && p[0].length && this.selectedItem == null) {
+            this.__setSelectedItemData(p[0].getItemAt(0));
+        }
     }
 
     $resetLayout() {
@@ -412,6 +416,10 @@ class DataGroup extends Group {
                 this._canSelecteItem();
             }
             p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+        }
+        this.selectedItem = null;
+        if (p[10] && p[0].length) {
+            this.__setSelectedItemData(p[0].getItemAt(0));
         }
     }
 

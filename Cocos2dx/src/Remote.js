@@ -248,7 +248,7 @@ var remote = {};
 
     var File = function () {
         function File(path) {
-            var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+            var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
             _classCallCheck(this, File);
 
@@ -265,6 +265,11 @@ var remote = {};
             key: "savePNG",
             value: function savePNG(colors, width, height, back, thisObj) {
                 new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
+            }
+        }, {
+            key: "delete",
+            value: function _delete(back, thisObj) {
+                new DeleteFileRemote(back, thisObj, this.__path);
             }
         }]);
 
@@ -526,6 +531,44 @@ var remote = {};
         return SaveFileRemote;
     }(Remote);
     //////////////////////////End File:remote/remotes/SaveFileRemote.js///////////////////////////
+
+    //////////////////////////File:remote/remotes/DeleteFileRemote.js///////////////////////////
+
+
+    var DeleteFileRemote = function (_Remote4) {
+        _inherits(DeleteFileRemote, _Remote4);
+
+        function DeleteFileRemote(back, thisObj, path) {
+            _classCallCheck(this, DeleteFileRemote);
+
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(DeleteFileRemote).call(this));
+
+            _this6.__back = back;
+            _this6.__thisObj = thisObj;
+
+            var msg = new flower.VByteArray();
+            msg.writeUInt(20);
+            msg.writeUInt(_this6.remoteClientId);
+            msg.writeUInt(106);
+            msg.writeUInt(_this6.id);
+            msg.writeUTF(path);
+            _this6.send(msg);
+            return _this6;
+        }
+
+        _createClass(DeleteFileRemote, [{
+            key: "receive",
+            value: function receive(cmd, msg) {
+                if (this.__back) {
+                    this.__back.call(this.__thisObj);
+                }
+                this.__back = this.__thisObj = null;
+            }
+        }]);
+
+        return DeleteFileRemote;
+    }(Remote);
+    //////////////////////////End File:remote/remotes/DeleteFileRemote.js///////////////////////////
 })();
 for (var key in remote) {
     flower[key] = remote[key];

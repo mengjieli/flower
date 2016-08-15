@@ -13,6 +13,7 @@ var UIFileParser = (function (_super) {
         this.element.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
         this.element.addListener(flower.Event.ERROR, this.onLoadError, this);
         this.element.load();
+        return true;
     }
 
     UIFileParser.prototype.onLoadComplete = function (e) {

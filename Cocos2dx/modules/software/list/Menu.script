@@ -3,6 +3,9 @@ function setData(data) {
     var menu = data.menu || [];
     var d = new flower.ArrayValue();
     for (var i = 0; i < menu.length; i++) {
+        if (menu[i].isVisible && !menu[i].isVisible(data.target)) {
+            continue;
+        }
         d.push(menu[i]);
     }
     this.list.dataProvider = d;

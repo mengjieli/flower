@@ -15,6 +15,10 @@ class File {
     savePNG(colors, width, height, back, thisObj) {
         new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
     }
+
+    delete(back, thisObj) {
+        new DeleteFileRemote(back, thisObj, this.__path);
+    }
 }
 
 exports.File = File;

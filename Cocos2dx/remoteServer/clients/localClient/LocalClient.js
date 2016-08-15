@@ -40,6 +40,9 @@ var LocalClient = (function (_super) {
                 case 104:
                     this.saveFile(bytes);
                     break;
+                case 106:
+                    this.deleteFile(bytes);
+                    break;
                 case 501:
                     this.receiveRemote(bytes);
                     break;
@@ -59,6 +62,21 @@ var LocalClient = (function (_super) {
         bytes.writeUIntV(101);
         bytes.writeUIntV(remoteId);
         bytes.writeBoolean(file.isExist());
+        this.sendData(bytes);
+    }
+
+    p.deleteFile = function (msg) {
+        var clientId = msg.readUIntV();
+        var remoteId = msg.readUIntV();
+        var url = msg.readUTFV();
+        var file = new File(this.root + url);
+        file.delete();
+        var bytes = new VByteArray();
+        bytes.writeUIntV(22);
+        bytes.writeUIntV(clientId);
+        bytes.writeUIntV(107);
+        bytes.writeUIntV(remoteId);
+        //bytes.writeBoolean(file.isExist() ? file.delete() : false);
         this.sendData(bytes);
     }
 

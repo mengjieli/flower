@@ -1423,12 +1423,6 @@ class PlatformTexture {
     }
 
     dispose() {
-        if (Platform.native) {
-            cc.TextureCache.getInstance().removeTextureForKey(this.url);
-            this.textrue.releaseData();
-        } else {
-            this.textrue.releaseData();
-        }
         this.textrue = null;
     }
 }
@@ -2105,6 +2099,7 @@ class Event {
     static CANCEL = "cancel";
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
 
     static _eventPool = [];
 
@@ -3922,17 +3917,9 @@ class Sprite extends DisplayObject {
         for (var i = 0, len = children.length; i < len; i++) {
             var bounds = children[i].$getBounds();
             if (i == 0) {
-                //minX = bounds.x;
-                //minY = bounds.y;
                 maxX = bounds.x + bounds.width;
                 maxY = bounds.y + bounds.height;
             } else {
-                //if (bounds.x < minX) {
-                //    minX = bounds.x;
-                //}
-                //if (bounds.y < minY) {
-                //    minY = bounds.y;
-                //}
                 if (bounds.x + bounds.width > maxX) {
                     maxX = bounds.x + bounds.width;
                 }
@@ -3940,6 +3927,19 @@ class Sprite extends DisplayObject {
                     maxY = bounds.y + bounds.height;
                 }
             }
+            //var child = children[i];
+            //var bounds = children[i].$getBounds();
+            //if (i == 0) {
+            //    maxX = bounds.x + child.width;
+            //    maxY = bounds.y + child.height;
+            //} else {
+            //    if (bounds.x + child.width > maxX) {
+            //        maxX = bounds.x + child.width;
+            //    }
+            //    if (bounds.y + child.height > maxY) {
+            //        maxY = bounds.y + child.height;
+            //    }
+            //}
         }
         rect.x = minX;
         rect.y = minY;
@@ -4473,8 +4473,8 @@ class TextInput extends DisplayObject {
             var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
             rect.x = 0;
             rect.y = 0;
-            rect.width = size.width;
-            rect.height = size.height;
+            rect.width = this.width;//size.width;
+            rect.height = this.height;
             this.$removeFlags(0x0800);
         }
     }
@@ -4580,7 +4580,7 @@ class TextInput extends DisplayObject {
     $keyDown(e) {
         var p = this.$TextField;
         p[0] = this.$nativeShow.getNativeText();
-        if (e.key == 13) {
+        if (e.keyCode == 13) {
             this.$inputEnd();
         }
     }
@@ -4965,6 +4965,7 @@ class Stage extends Sprite {
     __lastRightX = -1;
     __lastRightY = -1;
     __focus = null;
+    __touchTarget = null;
 
     $setFocus(val) {
         if (val && !val.focusEnabled) {
@@ -5030,6 +5031,7 @@ class Stage extends Sprite {
         mouse.mutiply = this.__touchList.length == 0 ? false : true;
         this.__touchList.push(mouse);
         var target = this.$getMouseTarget(x, y, mouse.mutiply);
+        this.__touchTarget = target;
         mouse.target = target;
         var parent = target.parent;
         var isMenu = false;
@@ -5066,6 +5068,7 @@ class Stage extends Sprite {
             return;
         }
         var target = this.$getMouseTarget(x, y, false);
+        this.__touchTarget = target;
         var event;
         event = new flower.MouseEvent(flower.MouseEvent.RIGHT_CLICK);
         event.$stageX = x;
@@ -5371,7 +5374,7 @@ class Stage extends Sprite {
         }
         rightClickList.length = 0;
         if (hasclick) {
-            this.$menu.$onTouch();
+            this.$menu.$onTouch(this.__touchTarget);
         }
         while (this.$keyEvents.length) {
             this.$dispatchKeyEvent(this.$keyEvents.shift());
@@ -5565,8 +5568,13 @@ class MenuManager extends Sprite {
         super();
     }
 
-    $onTouch() {
-        if (this.$autoRemove && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
+    $onTouch(target) {
+        var flag = true;
+        while (target && flag) {
+            flag = target == this ? false : true;
+            target = target.parent;
+        }
+        if ((flag || this.$autoRemove) && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
             this.removeAll();
             return true;
         }

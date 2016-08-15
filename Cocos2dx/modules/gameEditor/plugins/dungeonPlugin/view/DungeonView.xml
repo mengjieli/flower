@@ -1,0 +1,36 @@
+<s:TitlePanel percentWidth="100" percentHeight="100" class="DungeonView" title="{data.name}" xmlns:f="flower"
+              xmlns:s="software">
+    <f:script src="./DungeonView.script"/>
+    <f:Group percentWidth="100" percentHeight="100">
+        <f:Group percentWidth="100" height="25">
+            <f:Rect percentWidth="100" percentHeight="100" fillColor="0xbbbbbb" lineColor="0x333333" lineWidth="1"/>
+            <f:Group percentWidth="100" percentHeight="100">
+                <f:layout>
+                    <f:HorizontalLayout gap="15"/>
+                </f:layout>
+                <f:Group percentHeight="100">
+                    <f:Label text="屏幕宽:" verticalCenter="0" x="5"/>
+                    <f:Input stopInput="this.data.parser.screenWidth.value = arguments[0].currentTarget.text;"
+                             text="{data.parser.screenWidth}" width="50" verticalCenter="0" x="55"/>
+                </f:Group>
+                <f:Group percentHeight="100">
+                    <f:Label text="屏幕高:" verticalCenter="0" x="5"/>
+                    <f:Input stopInput="this.data.parser.screenHeight.value = arguments[0].currentTarget.text;"
+                             text="{data.parser.screenHeight}" width="50" verticalCenter="0" x="55"/>
+                </f:Group>
+                <f:Group percentHeight="100">
+                    <f:Label text="背景:" verticalCenter="0" x="5"/>
+                    <s:Combox width="120" dataProvider="{data.parser.backgroundList}" verticalCenter="0" x="40"/>
+                </f:Group>
+            </f:Group>
+        </f:Group>
+        <f:Group percentWidth="100" top="25" bottom="0">
+            <f:Rect fillColor="0x888888" percentWidth="100" percentHeight="100"/>
+            <f:MaskUI id="container" width="{data.parser.screenWidth}" height="{data.parser.screenHeight}"
+                      horizontalCenter="0" verticalCenter="0">
+                <f:Image id="background" source="{data.parser.background}"/>
+                <f:Group id="layer"/>
+            </f:MaskUI>
+        </f:Group>
+    </f:Group>
+</s:TitlePanel>

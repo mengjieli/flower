@@ -75,12 +75,12 @@ class Input extends flower.TextInput {
         }
     }
 
-    $onFrameEnd() {
-        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-        //    this.$validateUIComponent();
-        //}
-        super.$onFrameEnd();
-    }
+    //$onFrameEnd() {
+    //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+    //    //    this.$validateUIComponent();
+    //    //}
+    //    super.$onFrameEnd();
+    //}
 
     dispose() {
         this.removeAllBindProperty();
@@ -92,3 +92,6 @@ class Input extends flower.TextInput {
 UIComponent.register(Input);
 Input.prototype.__UIComponent = true;
 exports.Input = Input;
+
+UIComponent.registerEvent(Input, 1140, "startInput", flower.Event.START_INPUT);
+UIComponent.registerEvent(Input, 1141, "stopInput", flower.Event.STOP_INPUT);

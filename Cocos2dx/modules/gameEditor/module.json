@@ -9,7 +9,8 @@
     "./events/EventManager.script"
   ],
   "components": [
-    "./plugins/PluginBase.xml"
+    "./plugins/PluginBase.xml",
+    "./panels/DeleteFilePanel.xml"
   ],
   "classes": {
     "EditorMain": "./EditorMain.xml",

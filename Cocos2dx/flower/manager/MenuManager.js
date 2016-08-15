@@ -7,8 +7,13 @@ class MenuManager extends Sprite {
         super();
     }
 
-    $onTouch() {
-        if (this.$autoRemove && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
+    $onTouch(target) {
+        var flag = true;
+        while (target && flag) {
+            flag = target == this ? false : true;
+            target = target.parent;
+        }
+        if ((flag || this.$autoRemove) && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
             this.removeAll();
             return true;
         }

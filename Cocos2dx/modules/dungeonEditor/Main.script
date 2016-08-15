@@ -1,6 +1,0 @@
-function init() {
-    de.data = this.data;
-    de.data.direction = new flower.Direction("res");
-    //Direction
-    //de.Direction.addPath("trigger","trigger","触发器");
-}

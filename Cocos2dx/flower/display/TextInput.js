@@ -57,8 +57,8 @@ class TextInput extends DisplayObject {
             var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
             rect.x = 0;
             rect.y = 0;
-            rect.width = size.width;
-            rect.height = size.height;
+            rect.width = this.width;//size.width;
+            rect.height = this.height;
             this.$removeFlags(0x0800);
         }
     }
@@ -164,7 +164,7 @@ class TextInput extends DisplayObject {
     $keyDown(e) {
         var p = this.$TextField;
         p[0] = this.$nativeShow.getNativeText();
-        if (e.key == 13) {
+        if (e.keyCode == 13) {
             this.$inputEnd();
         }
     }

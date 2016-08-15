@@ -169,7 +169,8 @@ var list = [
     "zh_CN",
     "IsDirectionExistRemote",
     "ReadDirectionListRemote",
-    "SaveFileRemote"
+    "SaveFileRemote",
+    "DeleteFileRemote"
 ];
 var fileContent = "";
 fileContent += "var remote = {};\n";

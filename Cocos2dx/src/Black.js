@@ -636,6 +636,7 @@ var $root = eval("this");
             _this4._key = "";
             _this4._rangeMinKey = "";
             _this4._rangeMaxKey = "";
+            _this4._selectedItem = null;
 
             _this4.list = init || [];
             _this4._length = _this4.list.length;
@@ -1046,12 +1047,24 @@ var $root = eval("this");
                     this.dispatchWidth(flower.Event.UPDATE, this);
                 }
             }
+        }, {
+            key: "selectedItem",
+            set: function set(val) {
+                if (this._selectedItem == val) {
+                    return;
+                }
+                this._selectedItem = val;
+                this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
+            },
+            get: function get() {
+                return this._selectedItem;
+            }
         }]);
 
         return ArrayValue;
     }(Value);
 
-    for (var i = 0; i < 100000; i++) {
+    for (var i = 0; i < 100; i++) {
         Object.defineProperty(ArrayValue.prototype, "" + i, {
             get: function (index) {
                 return function () {
@@ -3015,6 +3028,10 @@ var $root = eval("this");
             key: "__onDataUpdate",
             value: function __onDataUpdate() {
                 this.$addFlags(0x4000);
+                var p = this.$DataGroup;
+                if (p[10] && p[0].length && this.selectedItem == null) {
+                    this.__setSelectedItemData(p[0].getItemAt(0));
+                }
             }
         }, {
             key: "$resetLayout",
@@ -3413,6 +3430,10 @@ var $root = eval("this");
                         this._canSelecteItem();
                     }
                     p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+                }
+                this.selectedItem = null;
+                if (p[10] && p[0].length) {
+                    this.__setSelectedItemData(p[0].getItemAt(0));
                 }
             }
 
@@ -3900,14 +3921,14 @@ var $root = eval("this");
                     }
                 }
             }
-        }, {
-            key: "$onFrameEnd",
-            value: function $onFrameEnd() {
-                //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                //    this.$validateUIComponent();
-                //}
-                _get(Object.getPrototypeOf(Input.prototype), "$onFrameEnd", this).call(this);
-            }
+
+            //$onFrameEnd() {
+            //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+            //    //    this.$validateUIComponent();
+            //    //}
+            //    super.$onFrameEnd();
+            //}
+
         }, {
             key: "dispose",
             value: function dispose() {
@@ -3923,6 +3944,9 @@ var $root = eval("this");
     UIComponent.register(Input);
     Input.prototype.__UIComponent = true;
     black.Input = Input;
+
+    UIComponent.registerEvent(Input, 1140, "startInput", flower.Event.START_INPUT);
+    UIComponent.registerEvent(Input, 1141, "stopInput", flower.Event.STOP_INPUT);
     //////////////////////////End File:extension/black/Input.js///////////////////////////
 
     //////////////////////////File:extension/black/Rect.js///////////////////////////

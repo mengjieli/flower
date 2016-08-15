@@ -12,6 +12,7 @@ class ArrayValue extends Value {
     _key = "";
     _rangeMinKey = "";
     _rangeMaxKey = "";
+    _selectedItem = null;
 
     constructor(init = null) {
         super();
@@ -378,9 +379,21 @@ class ArrayValue extends Value {
             this.dispatchWidth(flower.Event.UPDATE, this);
         }
     }
+
+    set selectedItem(val) {
+        if (this._selectedItem == val) {
+            return;
+        }
+        this._selectedItem = val;
+        this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
+    }
+
+    get selectedItem() {
+        return this._selectedItem;
+    }
 }
 
-for (var i = 0; i < 100000; i++) {
+for (var i = 0; i < 100; i++) {
     Object.defineProperty(ArrayValue.prototype, "" + i, {
         get: function (index) {
             return function () {

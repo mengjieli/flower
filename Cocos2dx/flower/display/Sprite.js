@@ -203,17 +203,9 @@ class Sprite extends DisplayObject {
         for (var i = 0, len = children.length; i < len; i++) {
             var bounds = children[i].$getBounds();
             if (i == 0) {
-                //minX = bounds.x;
-                //minY = bounds.y;
                 maxX = bounds.x + bounds.width;
                 maxY = bounds.y + bounds.height;
             } else {
-                //if (bounds.x < minX) {
-                //    minX = bounds.x;
-                //}
-                //if (bounds.y < minY) {
-                //    minY = bounds.y;
-                //}
                 if (bounds.x + bounds.width > maxX) {
                     maxX = bounds.x + bounds.width;
                 }
@@ -221,6 +213,19 @@ class Sprite extends DisplayObject {
                     maxY = bounds.y + bounds.height;
                 }
             }
+            //var child = children[i];
+            //var bounds = children[i].$getBounds();
+            //if (i == 0) {
+            //    maxX = bounds.x + child.width;
+            //    maxY = bounds.y + child.height;
+            //} else {
+            //    if (bounds.x + child.width > maxX) {
+            //        maxX = bounds.x + child.width;
+            //    }
+            //    if (bounds.y + child.height > maxY) {
+            //        maxY = bounds.y + child.height;
+            //    }
+            //}
         }
         rect.x = minX;
         rect.y = minY;

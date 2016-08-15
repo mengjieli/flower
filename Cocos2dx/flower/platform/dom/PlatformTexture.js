@@ -9,12 +9,6 @@ class PlatformTexture {
     }
 
     dispose() {
-        if (Platform.native) {
-            cc.TextureCache.getInstance().removeTextureForKey(this.url);
-            this.textrue.releaseData();
-        } else {
-            this.textrue.releaseData();
-        }
         this.textrue = null;
     }
 }

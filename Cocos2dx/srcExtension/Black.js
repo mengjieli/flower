@@ -572,6 +572,7 @@ class ArrayValue extends Value {
     _key = "";
     _rangeMinKey = "";
     _rangeMaxKey = "";
+    _selectedItem = null;
 
     constructor(init = null) {
         super();
@@ -938,9 +939,21 @@ class ArrayValue extends Value {
             this.dispatchWidth(flower.Event.UPDATE, this);
         }
     }
+
+    set selectedItem(val) {
+        if (this._selectedItem == val) {
+            return;
+        }
+        this._selectedItem = val;
+        this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
+    }
+
+    get selectedItem() {
+        return this._selectedItem;
+    }
 }
 
-for (var i = 0; i < 100000; i++) {
+for (var i = 0; i < 100; i++) {
     Object.defineProperty(ArrayValue.prototype, "" + i, {
         get: function (index) {
             return function () {
@@ -1651,12 +1664,13 @@ class LinearLayout extends Layout {
 
 
 //////////////////////////File:extension/black/layout/HorizontalLayout.js///////////////////////////
-class HorizontalLayout extends LinearLayout{
+class HorizontalLayout extends LinearLayout {
 
     constructor() {
         super();
         this.align = flower.Layout.HorizontalAlign;
     }
+
 }
 
 black.HorizontalLayout = HorizontalLayout;
@@ -2746,6 +2760,10 @@ class DataGroup extends Group {
 
     __onDataUpdate() {
         this.$addFlags(0x4000);
+        var p = this.$DataGroup;
+        if (p[10] && p[0].length && this.selectedItem == null) {
+            this.__setSelectedItemData(p[0].getItemAt(0));
+        }
     }
 
     $resetLayout() {
@@ -3130,6 +3148,10 @@ class DataGroup extends Group {
                 this._canSelecteItem();
             }
             p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+        }
+        this.selectedItem = null;
+        if (p[10] && p[0].length) {
+            this.__setSelectedItemData(p[0].getItemAt(0));
         }
     }
 
@@ -3574,12 +3596,12 @@ class Input extends flower.TextInput {
         }
     }
 
-    $onFrameEnd() {
-        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-        //    this.$validateUIComponent();
-        //}
-        super.$onFrameEnd();
-    }
+    //$onFrameEnd() {
+    //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+    //    //    this.$validateUIComponent();
+    //    //}
+    //    super.$onFrameEnd();
+    //}
 
     dispose() {
         this.removeAllBindProperty();
@@ -3591,6 +3613,9 @@ class Input extends flower.TextInput {
 UIComponent.register(Input);
 Input.prototype.__UIComponent = true;
 black.Input = Input;
+
+UIComponent.registerEvent(Input, 1140, "startInput", flower.Event.START_INPUT);
+UIComponent.registerEvent(Input, 1141, "stopInput", flower.Event.STOP_INPUT);
 //////////////////////////End File:extension/black/Input.js///////////////////////////
 
 
@@ -3957,7 +3982,7 @@ class MaskUI extends flower.Mask {
             return false;
         }
         this._data = val;
-        if(this.$UIComponent) {
+        if (this.$UIComponent) {
             flower.Binding.changeData(this);
         }
         return true;

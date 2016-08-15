@@ -1,0 +1,43 @@
+var DungeonParser = (function (_super) {
+
+    __extends(DungeonParser, _super);
+
+    function DungeonParser(file) {
+        _super.call(this, file);
+        this.screenWidth = new flower.UIntValue(480);
+        this.screenHeight = new flower.UIntValue(320);
+        this.backgroundList = new flower.ArrayValue();
+        this.background = new flower.StringValue();
+        this.backgroundList.addListener(flower.Event.SELECTED_ITEM_CHANGE, function (e) {
+            this.background.value = e.data.path;
+        }, this);
+        (new flower.Direction("res/tools/dungeon/background")).readDirectionList(function (list) {
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].fileType == "jpg" || list[i].fileType == "png") {
+                    this.backgroundList.push({
+                        label: list[i].name,
+                        path: list[i].path
+                    });
+                }
+            }
+        }, this);
+    }
+
+    DungeonParser.prototype.load = function () {
+        return false;
+    }
+
+    DungeonParser.prototype.onLoadComplete = function (e) {
+        this.dispatch(e);
+    }
+
+    DungeonParser.prototype.onLoadError = function (e) {
+        this.dispatch(e);
+    }
+
+    return DungeonParser;
+
+})(editor.Parser);
+
+module.DungeonParser = DungeonParser;
+registerParser("Dungeon", DungeonParser);

@@ -30,8 +30,11 @@ function __loadNextPlugin(index, list) {
         script += "var registerParser = editor.PluginManager.registerParser;\n";
         script += "var registerView = editor.PluginManager.registerView;\n";
         script += "var setNewFilePanel = editor.PluginManager.setNewFilePanel;\n";
+        script += "var setDirectionMenu = editor.PluginManager.setDirectionMenu;\n";
+        script += "var setFileMenu = editor.PluginManager.setFileMenu;\n";
         script += "var addFile = editor.ProjectView.addFile;\n";
         script += "var saveFile = editor.ProjectView.saveFile;\n";
+        script += "var deleteFile = editor.ProjectView.deleteFile;\n";
         var module = new flower.Module(editor.path + "plugins/" + list[index], script);
         module.addListener(flower.Event.COMPLETE, function (e) {
             index++;
@@ -61,11 +64,21 @@ function __onLoadConfig(e) {
         var menu = null;
         var path = "res/" + key;
         var file = new editor.File(true, path, item.name);
+        var list;
         if (item.plugin) {
             this.plugins[item.plugin] = item;
-            var list = [];
+            list = [];
             if (editor.PluginManager.getNewFilePanel(item.plugin)) {
-                list.push({"label": "新建" + item.name, "type": "addFile"});
+                list.push({
+                    "label": "新建" + item.name, click: function (info) {
+                        var clazz = editor.PluginManager.getNewFilePanel(info.pluginName);
+                        flower.PopManager.pop(new clazz(info), true, true);
+                    }
+                });
+            }
+            var directionMenu = editor.PluginManager.getDirectionMenu(item.plugin);
+            if (directionMenu) {
+                list = list.concat(directionMenu);
             }
             if (list.length) {
                 menu = {
@@ -75,10 +88,8 @@ function __onLoadConfig(e) {
                         "pluginName": item.plugin
                     },
                     "click": function (info, item) {
-                        if (item.type == "addFile") {
-                            var clazz = editor.PluginManager.getNewFilePanel(info.pluginName);
-                            flower.PopManager.pop(new clazz(info), true, true);
-                            console.log("AddFile:" + info.path);
+                        if (item.click) {
+                            item.click(info);
                         }
                     }
                 };
@@ -86,15 +97,40 @@ function __onLoadConfig(e) {
         }
         file.menu = menu;
         direction.push(file);
-        var list = item.list;
+        var fileList = item.list;
         var pluginName = item.plugin;
-        for (var i = 0; i < list.length; i++) {
-            path = list[i];
-            direction.push(new editor.File(false, path, flower.Path.getName(path), pluginName));
+        for (var i = 0; i < fileList.length; i++) {
+            direction.push(this.createFile(fileList[i],pluginName));
         }
     }
-    this.openItem("res/dungeon/Level1.json");
+    this.openItem("res/tools/dungeon/Level1.json");
     //this.openItem("res/module/MainUI.xml");
+}
+
+function createFile(path,pluginName) {
+    var file = new editor.File(false, path, flower.Path.getName(path), pluginName);
+    var menu;
+    var list = [
+        {
+            "label": "删除",
+            "click": function (file) {
+                flower.PopManager.pop(new editor.DeleteFilePanel(file),true,true);
+            }
+        }
+    ]
+    if (list.length) {
+        menu = {
+            "menu": list,
+            "target": file,
+            "click": function (info, item) {
+                if (item.click) {
+                    item.click(info);
+                }
+            }
+        };
+    }
+    file.menu = menu;
+    return file;
 }
 
 function saveDirection() {
@@ -133,23 +169,40 @@ function onClickItem(e) {
 
 function addFile(path, pluginName) {
     var direction = this.tree.data.direction;
-    direction.push(new editor.File(false, path, flower.Path.getName(path), pluginName));
+    direction.push(this.createFile(path,pluginName));
     this.plugins[pluginName].list.push(path);
     this.saveDirection();
 }
 
-function saveFile(path,content,back,thisObj,type) {
-    if(type == null) {
-        (new flower.File(path)).saveText(content,back,thisObj);
-    } else if(type == "png") {
-        (new flower.File(path)).savePNG(content,back,thisObj);
+function deleteFile(path,pluginName) {
+    var direction = this.tree.data.direction;
+    direction.removeItemWith("path",path);
+    var list = this.plugins[pluginName].list;
+    for(var i = 0; i < list.length; i++) {
+        if(path == list[i]) {
+            list.splice(i,1);
+            break;
+        }
+    }
+    this.saveDirection();
+}
+
+function saveFile(path, content, back, thisObj, type) {
+    if (type == null) {
+        (new flower.File(path)).saveText(content, back, thisObj);
+    } else if (type == "png") {
+        (new flower.File(path)).savePNG(content, back, thisObj);
     }
 }
 
-static function addFile(path,pluginName) {
-    ProjectView.instance.addFile(path,pluginName);
+static function addFile(path, pluginName) {
+    ProjectView.instance.addFile(path, pluginName);
 }
 
-static function saveFile(path,content,back,thisObj,type) {
-    ProjectView.instance.saveFile(path,content,back,thisObj,type);
+static function saveFile(path, content, back, thisObj, type) {
+    ProjectView.instance.saveFile(path, content, back, thisObj, type);
+}
+
+static function deleteFile(path,pluginName) {
+    ProjectView.instance.deleteFile(path,pluginName);
 }

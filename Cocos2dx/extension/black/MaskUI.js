@@ -16,7 +16,7 @@ class MaskUI extends flower.Mask {
             return false;
         }
         this._data = val;
-        if(this.$UIComponent) {
+        if (this.$UIComponent) {
             flower.Binding.changeData(this);
         }
         return true;

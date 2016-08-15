@@ -1,0 +1,12 @@
+setDirectionMenu("Dungeon", [
+    {
+        "label": "测试菜单",
+        "isVisible": function (item) {
+            trace("是否可见", flower.ObjectDo.toString(item));
+            return true;
+        },
+        "click": function (item) {
+            trace("点击", flower.ObjectDo.toString(item));
+        }
+    }
+]);

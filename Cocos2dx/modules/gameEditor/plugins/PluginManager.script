@@ -6,6 +6,8 @@ var PluginManager = (function () {
     var plugins = {};
     var parsers = {};
     var newFilePanels = {};
+    var directionMenus = {};
+    var fileMenus = {};
 
     PluginManager.getView = function (name) {
         return plugins[name];
@@ -34,6 +36,48 @@ var PluginManager = (function () {
 
     PluginManager.getNewFilePanel = function (name) {
         return newFilePanels[name];
+    }
+
+    /**
+     *
+     * @param name
+     * @param menus
+     * [
+     *  {
+     *      "label":"菜单1",
+     *      "isVisible":function(info){
+     *            //info = {path:'res/test',pluginName:'Plugin1'}
+     *      }
+     *      "click":function(info){
+     *            //info = {path:'res/test',pluginName:'Plugin1'}
+     *      }
+     *  }
+     * ]
+     */
+    PluginManager.setDirectionMenu = function (name, menus) {
+        directionMenus[name] = menus;
+    }
+
+    PluginManager.getDirectionMenu = function (name) {
+        return directionMenus[name];
+    }
+
+
+    /**
+     *
+     * @param name
+     * @param menus
+     * [
+     *  file:editor.File,
+     *  ...
+     * ]
+     */
+    PluginManager.setFileMenu = function (name, menus) {
+        fileMenus[name] = menus;
+    }
+
+    PluginManager.getFileMenu = function (name) {
+        return fileMenus;
     }
 
     return PluginManager;

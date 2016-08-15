@@ -284,7 +284,7 @@ class File {
     __path;
     __autoUpdate;
 
-    constructor(path, autoUpdate = true) {
+    constructor(path, autoUpdate = false) {
         this.__path = path;
         this.__autoUpdate = autoUpdate;
     }
@@ -295,6 +295,10 @@ class File {
 
     savePNG(colors, width, height, back, thisObj) {
         new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
+    }
+
+    delete(back, thisObj) {
+        new DeleteFileRemote(back, thisObj, this.__path);
     }
 }
 
@@ -533,6 +537,37 @@ class SaveFileRemote extends Remote {
     }
 }
 //////////////////////////End File:remote/remotes/SaveFileRemote.js///////////////////////////
+
+
+
+//////////////////////////File:remote/remotes/DeleteFileRemote.js///////////////////////////
+class DeleteFileRemote extends Remote {
+
+    __back;
+    __thisObj;
+
+    constructor(back, thisObj, path) {
+        super();
+        this.__back = back;
+        this.__thisObj = thisObj;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(20);
+        msg.writeUInt(this.remoteClientId);
+        msg.writeUInt(106);
+        msg.writeUInt(this.id);
+        msg.writeUTF(path);
+        this.send(msg);
+    }
+
+    receive(cmd, msg) {
+        if (this.__back) {
+            this.__back.call(this.__thisObj);
+        }
+        this.__back = this.__thisObj = null;
+    }
+}
+//////////////////////////End File:remote/remotes/DeleteFileRemote.js///////////////////////////
 
 
 

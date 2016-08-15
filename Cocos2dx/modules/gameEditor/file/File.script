@@ -40,9 +40,12 @@ var File = (function (_super) {
         //}
         this.__parser = new clazz(this);
         if (this.__parser) {
-            this.__parser.load();
-            this.__parser.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
-            this.__parser.addListener(flower.Event.ERROR, this.onParserLoadError, this);
+            if(this.__parser.load()) {
+                this.__parser.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
+                this.__parser.addListener(flower.Event.ERROR, this.onParserLoadError, this);
+            } else {
+                this.onLoadComplete();
+            }
         } else {
             this.onLoadComplete();
         }
@@ -119,6 +122,16 @@ var File = (function (_super) {
     });
 
     Object.defineProperty(File.prototype, "type", {
+        get: function () {
+            return this.__type;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(File.prototype, "pluginName", {
         get: function () {
             return this.__type;
         },
