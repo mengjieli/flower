@@ -1,4 +1,8 @@
 function init() {
+    //showDetailPanel
+
+    this.tree.clickItem = this.onClickItem.bind(this);
+
     this.direction = new flower.ArrayValue();
     this.addDirection("trigger", "trigger", "触发器", [{
         "label": "添加触发器",
@@ -21,6 +25,17 @@ function init() {
         for (var e = 0; e < effects.length; e++) {
             this.addEffectToDirection(trigger, effects[e]);
         }
+    }
+}
+
+function onClickItem(e) {
+    var item = e.item;
+    if (item.type == "trigger") {
+        if (!this.triggerDetailPanel) {
+            this.triggerDetailPanel = new dg.TriggerDetailPanel();
+        }
+        this.triggerDetailPanel.data = item.data;
+        showDetailPanel("Dungeon.trigger", item.data, this.triggerDetailPanel);
     }
 }
 

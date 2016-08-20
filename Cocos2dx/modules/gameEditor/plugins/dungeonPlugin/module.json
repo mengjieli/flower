@@ -8,6 +8,7 @@
   "components": [
     "./panels/NewTriggerPanel.xml",
     "./panels/NewDungeonPanel.xml",
+    "./panels/TriggerDetailPanel.xml",
     "./view/DungeonView.xml"
   ],
   "classes": {

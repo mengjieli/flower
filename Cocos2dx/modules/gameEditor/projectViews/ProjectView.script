@@ -35,6 +35,7 @@ function __loadNextPlugin(index, list) {
         script += "var addFile = editor.ProjectView.addFile;\n";
         script += "var saveFile = editor.ProjectView.saveFile;\n";
         script += "var deleteFile = editor.ProjectView.deleteFile;\n";
+        script += "var showDetailPanel = editor.ProjectView.showDetailPanel;\n";
         var module = new flower.Module(editor.path + "plugins/" + list[index], script);
         module.addListener(flower.Event.COMPLETE, function (e) {
             index++;
@@ -215,4 +216,14 @@ function saveFile(path, content, back, thisObj, type) {
 static
 function deleteFile(path, pluginName) {
     ProjectView.instance.deleteFile(path, pluginName);
+}
+
+static
+function showDetailPanel(type, data, panel) {
+    var event = new editor.ModuleEvent(editor.ModuleEvent.SHOW_DETAIL, {
+        "type": type,
+        data: data,
+        panel: panel
+    });
+    editor.EventManager.instance.dispatch(event);
 }

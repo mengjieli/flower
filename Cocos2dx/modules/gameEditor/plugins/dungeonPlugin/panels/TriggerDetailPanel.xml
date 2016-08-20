@@ -1,0 +1,18 @@
+<f:Group class="TriggerDetailPanel" percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software"
+         xmlns:e="editor" xmlns:ui="ui">
+    <f:Group percentWidth="100">
+        <f:layout>
+            <f:VerticalLayout/>
+        </f:layout>
+        <f:Group percentWidth="100" height="135">
+            <f:Group percentWidth="100" height="20">
+                <f:Label x="30" text="触发器属性" verticalCenter="0"/>
+            </f:Group>
+            <f:Group id="container" percentWidth="100" top="30" bottom="0">
+                <f:layout>
+                    <f:VerticalLayout gap="20"/>
+                </f:layout>
+            </f:Group>
+        </f:Group>
+    </f:Group>
+</f:Group>
