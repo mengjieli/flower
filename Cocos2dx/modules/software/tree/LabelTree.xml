@@ -1,10 +1,7 @@
 <f:Tree class="LabelTree" selectTime="touch_end" xmlns:f="flower" xmlns:s="software">
-    <f:menu>
-        <s:Menu/>
-    </f:menu>
     <f:itemRenderer>
         <f:ItemRenderer percentWidth="100" height="20"
-                        rightClick="if(this.data.menu) {this.parent.menu.data = this.data.menu; flower.MenuManager.showMenu(this.parent.menu);}">
+                        rightClick="if(this.data.menu) flower.MenuManager.showMenu(new software.Menu(this.data.menu));">
             <f:Rect percentWidth="100" percentHeight="100" fillColor.down="0xd6d4d0"
                     fillColor.selectedDown="0x96b97d" fillColor.selectedUp="0x96b97d"
                     fillColor.over="0x98b7dd"

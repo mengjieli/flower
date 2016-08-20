@@ -40,7 +40,7 @@ var File = (function (_super) {
         //}
         this.__parser = new clazz(this);
         if (this.__parser) {
-            if(this.__parser.load()) {
+            if (this.__parser.load()) {
                 this.__parser.addListener(flower.Event.COMPLETE, this.onLoadComplete, this);
                 this.__parser.addListener(flower.Event.ERROR, this.onParserLoadError, this);
             } else {
@@ -155,6 +155,16 @@ var File = (function (_super) {
     Object.defineProperty(File.prototype, "parser", {
         get: function () {
             return this.__getParser();
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(File.prototype, "data", {
+        get: function () {
+            return this.parser.data;
         },
         set: function (val) {
         },

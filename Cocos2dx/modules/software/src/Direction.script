@@ -1,0 +1,87 @@
+var Direction = (function (_super) {
+
+    __extends(Direction, _super);
+    /**
+     *
+     * @param isDirection
+     * @param path
+     * @param name
+     * @param type
+     * @constructor
+     */
+    function Direction(path, name, menu, data, type) {
+        _super.call(this);
+        this.__isDirection = true;
+        this.__path = path;
+        this.__name = name || flower.Path.getName(path);
+        this.__menu = menu;
+        this.__data = data;
+        this.__type = type;
+    }
+
+    Object.defineProperty(Direction.prototype, "isDirection", {
+        get: function () {
+            return this.__isDirection;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(Direction.prototype, "path", {
+        get: function () {
+            return this.__path;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(Direction.prototype, "name", {
+        get: function () {
+            return this.__name;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(Direction.prototype, "data", {
+        get: function () {
+            return this.__data;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(Direction.prototype, "type", {
+        get: function () {
+            return this.__type;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(Direction.prototype, "menu", {
+        get: function () {
+            return this.__menu;
+        },
+        set: function (val) {
+            this.__menu = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    return Direction;
+})(flower.EventDispatcher);
+
+
+module.Direction = Direction;

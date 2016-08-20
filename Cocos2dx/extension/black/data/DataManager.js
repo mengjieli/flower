@@ -55,9 +55,9 @@ class DataManager {
         this.addRootData("flower", "FlowerData");
     }
 
-    addRootData(name, className) {
-        this[name] = this.createData(className);
-        this._root[name] = this[name];
+    addRootData(name, className, init = null) {
+        this[name] = this.createData(className, className);
+        return this._root[name] = this[name];
     }
 
     addDefine(config) {
@@ -89,8 +89,9 @@ class DataManager {
         }
         var content = "var " + defineClass + " = (function (_super) {\n" +
             "\t__extends(" + defineClass + ", _super);\n" +
-            "\tfunction " + defineClass + "() {\n" +
-            "\t\t_super.call(this);\n";
+            "\tfunction " + defineClass + "(init) {\n" +
+            "\t\t_super.call(this,null);\n";
+        var defineMember = "";
         var members = config.members;
         var bindContent = "";
         if (members) {
@@ -98,29 +99,41 @@ class DataManager {
             for (var key in members) {
                 member = members[key];
                 if (member.type === "number" || member.type === "Number") {
-                    content += "\t\tthis." + key + " = new NumberValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
                 } else if (member.type === "int" || member.type === "Int") {
-                    content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
                 } else if (member.type === "uint" || member.type === "Uint") {
-                    content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
                 } else if (member.type === "string" || member.type === "String") {
-                    content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + ");\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
                 } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                    content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
                 } else if (member.type === "array" || member.type === "Array") {
-                    content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
                 } else if (member.type === "*") {
-                    content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                 } else {
-                    content += "\t\tthis." + key + " = DataManager.getInstance().createData(\"" + member.type + "\");\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
                 }
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
                 }
+                defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
+                defineMember += "\t\tget: function () {\n";
+                defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
+                defineMember += "\t\t},\n";
+                defineMember += "\t\tset: function (val) {\n";
+                defineMember += "\t\t\tthis.setValue(\"" + key + "\", val);\n";
+                defineMember += "\t\t},\n";
+                defineMember += "\t\tenumerable: true,\n";
+                defineMember += "\t\tconfigurable: true\n";
+                defineMember += "\t});\n\n";
             }
         }
+        content += "\t\tif(init) this.value = init;\n";
         content += bindContent;
-        content += "\t}\n" +
+        content += "\t}\n\n" +
+            defineMember +
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
         content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + config.name + "\");\n";
@@ -134,7 +147,7 @@ class DataManager {
             name += className;
             content += "$root." + name + " = " + defineClass + ";\n";
         }
-        if(sys.TIP) {
+        if (sys.TIP) {
             flower.trace("数据结构:\n" + content);
         }
         if (sys.DEBUG) {
@@ -147,6 +160,7 @@ class DataManager {
             eval(className);
         }
         item.id++;
+        return this.getClass(config.name);
     }
 
     $addClassDefine(clazz, className) {
@@ -162,13 +176,29 @@ class DataManager {
         return item.define;
     }
 
-    createData(className) {
-        var item = this._defines[className];
-        if (!item) {
-            sys.$error(3012, className);
-            return;
+    createData(className, init = null) {
+        if (className === "number" || className === "Number") {
+            return new NumberValue(init);
+        } else if (className === "int" || className === "Int") {
+            return new IntValue(init);
+        } else if (className === "uint" || className === "Uint") {
+            return new UIntValue(init);
+        } else if (className === "string" || className === "String") {
+            return new StringValue(init);
+        } else if (className === "boolean" || className === "Boolean" || className === "bool") {
+            return new BooleanValue(init);
+        } else if (className === "array" || className === "Array") {
+            return new ArrayValue(init);
+        } else if (className === "*") {
+            return init;
+        } else {
+            var item = this._defines[className];
+            if (!item) {
+                sys.$error(3012, className);
+                return;
+            }
+            return new item.define(init);
         }
-        return new item.define();
     }
 
     clear() {
@@ -186,6 +216,26 @@ class DataManager {
             new DataManager();
         }
         return DataManager.instance;
+    }
+
+    static addRootData(name, className, init = null) {
+        return DataManager.getInstance().addRootData(name, className, init);
+    }
+
+    static getClass(className) {
+        return DataManager.getInstance().getClass(className);
+    }
+
+    static addDefine(config) {
+        return DataManager.getInstance().addDefine(config);
+    }
+
+    static createData(className, init = null) {
+        return DataManager.getInstance().createData(className, init);
+    }
+
+    static clear() {
+        DataManager.getInstance().clear();
     }
 }
 

@@ -1,4 +1,39 @@
+function init() {
+    this.direction = new flower.ArrayValue();
+    this.addDirection("trigger", "trigger", "触发器", [{
+        "label": "添加触发器",
+        "click": function (target) {
+            var r = Math.floor(Math.random() * 100000000);
+            this.addDirection(flower.Path.joinPath(target.path, r + ".trigger"),
+                target.type, "新触发器" + r, [
+                    {
+                        "label": "添加效果",
+                        "click": function (target) {
+                            console.log(target)
+                        }
+                    }
+                ]);
+        }.bind(this)
+    }]);
+    this.tree.dataProvider = this.direction;
+}
 
-
+function addDirection(path, type, name, menuList) {
+    var dir = new software.Direction(path, name, null, null, type);
+    var menu = null;
+    if (menuList && menuList.length) {
+        menu = {
+            "menu": menuList,
+            "target": dir,
+            "click": function (info, item) {
+                if (item.click) {
+                    item.click(info);
+                }
+            }
+        };
+    }
+    dir.menu = menu;
+    return this.direction.push(dir);
+}
 
 registerView("Dungeon", DungeonView);

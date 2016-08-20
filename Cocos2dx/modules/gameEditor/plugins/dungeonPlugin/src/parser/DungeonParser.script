@@ -4,26 +4,28 @@ var DungeonParser = (function (_super) {
 
     function DungeonParser(file) {
         _super.call(this, file);
-        this.screenWidth = new flower.UIntValue(480);
-        this.screenHeight = new flower.UIntValue(320);
-        this.backgroundList = new flower.ArrayValue();
-        this.background = new flower.StringValue();
-        this.backgroundList.addListener(flower.Event.SELECTED_ITEM_CHANGE, function (e) {
-            this.background.value = e.data.path;
+    }
+
+    DungeonParser.prototype.load = function () {
+        var config = this.file.content;
+        this.data = flower.DataManager.createData("dg.DungeonData", config);
+        this.data.backgroundList.addListener(flower.Event.SELECTED_ITEM_CHANGE, function (e) {
+            if(e.data) {
+                this.data.background.value = e.data.path;
+                this.save();
+            }
         }, this);
         (new flower.Direction("res/tools/dungeon/background")).readDirectionList(function (list) {
+            this.data.backgroundList.removeAll();
             for (var i = 0; i < list.length; i++) {
                 if (list[i].fileType == "jpg" || list[i].fileType == "png") {
-                    this.backgroundList.push({
+                    this.data.backgroundList.push({
                         label: list[i].name,
                         path: list[i].path
                     });
                 }
             }
         }, this);
-    }
-
-    DungeonParser.prototype.load = function () {
         return false;
     }
 
@@ -34,6 +36,22 @@ var DungeonParser = (function (_super) {
     DungeonParser.prototype.onLoadError = function (e) {
         this.dispatch(e);
     }
+
+    DungeonParser.prototype.save = function () {
+        var path = this.file.path;
+        (new flower.File(path)).saveText(flower.ObjectDo.toString(this.data.value));
+    }
+
+    Object.defineProperty(DungeonParser.prototype, "itemId", {
+        get: function () {
+            return this.config.itemId++;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
 
     return DungeonParser;
 

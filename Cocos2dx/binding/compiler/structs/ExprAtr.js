@@ -92,7 +92,11 @@ class ExprAtr {
 
     getValue() {
         if (this.value) {
-            return this.value.value;
+            if (this.value instanceof flower.ArrayValue || this.value instanceof  flower.ObjectValue) {
+                return this.value;
+            } else {
+                return this.value.value;
+            }
         }
         var atr;
         var lastAtr = null;

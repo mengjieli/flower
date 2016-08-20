@@ -1,0 +1,35 @@
+{
+  "name": "dg.DungeonData",
+  "desc": "副本关卡数据",
+  "members": {
+    "itemId": {
+      "desc": "子对象id计数器",
+      "type": "int",
+      "init": 1
+    },
+    "screenWidth": {
+      "desc": "可视区域宽",
+      "type": "int",
+      "init": "480"
+    },
+    "screenHeight": {
+      "desc": "可视区域高",
+      "type": "int",
+      "init": "320"
+    },
+    "background": {
+      "desc": "背景图片",
+      "type": "string"
+    },
+    "backgroundList": {
+      "desc": "背景图片列表",
+      "type": "Array",
+      "typeValue": "*"
+    },
+    "triggers": {
+      "desc": "触发器列表",
+      "type": "Array",
+      "typeValue": "dg.TriggerData"
+    }
+  }
+}

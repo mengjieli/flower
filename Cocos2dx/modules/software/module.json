@@ -17,5 +17,9 @@
     "./tab/TabBar.xml",
     "./tab/Tab.xml",
     "./combox/Combox.xml"
+  ],
+  "scripts": [
+    "./src/Direction.script",
+    "./src/File.script"
   ]
 }

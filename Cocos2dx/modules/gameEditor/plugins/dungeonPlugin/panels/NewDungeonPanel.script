@@ -13,10 +13,11 @@ function onSure() {
         software.Alert.show("名称不能为空");
     } else {
         this.closePanel();
-        var cfg = {};
-        saveFile(this.path,JSON.stringify(cfg), function (flag) {
+        var data = flower.DataManager.createData("dg.DungeonData");
+        var cfg = data.value;
+        saveFile(this.path, JSON.stringify(cfg), function (flag) {
             if (flag) {
-                addFile(this.path,this.data.pluginName);
+                addFile(this.path, this.data.pluginName);
             } else {
                 software.Alert.show("保存文件失败");
             }

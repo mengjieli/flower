@@ -1,1 +1,18 @@
-{}
+{
+	"itemId"	: 1,
+	"screenWidth"	: 480,
+	"screenHeight"	: 320,
+	"background"	: "res/tools/dungeon/background/map_0_2.jpg",
+	"backgroundList"	: [
+		{
+			"label"	: "map_0_2.jpg",
+			"path"	: "res/tools/dungeon/background/map_0_2.jpg"
+		},
+		{
+			"label"	: "map_0_3.jpg",
+			"path"	: "res/tools/dungeon/background/map_0_3.jpg"
+		}
+	],
+	"triggers"	: [
+	]
+}

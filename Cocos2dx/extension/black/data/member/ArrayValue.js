@@ -13,16 +13,14 @@ class ArrayValue extends Value {
     _rangeMinKey = "";
     _rangeMaxKey = "";
     _selectedItem = null;
+    _itemType = null;
 
-    constructor(init = null) {
+    constructor(init = null, itemType = "*") {
         super();
+        this._itemType = itemType;
         this.list = init || [];
         this._length = this.list.length;
         this.__value = this;
-    }
-
-    $setValue(val) {
-        return;
     }
 
     push(item) {
@@ -337,6 +335,39 @@ class ArrayValue extends Value {
             }
         }
         super.dispose();
+    }
+
+    /**
+     * 从 Object 中读取数据
+     * @param value
+     */
+    $setValue(val) {
+        this.removeAll();
+        var itemType = this._itemType;
+        for (var i = 0; i < val.length; i++) {
+            this.push(DataManager.createData(itemType, val[i]));
+        }
+    }
+
+    /**
+     * 将数据转化成 Object
+     */
+    get value() {
+        var res = [];
+        var list = this.list;
+        for (var i = 0, len = list.length; i < len; i++) {
+            var item = list[i];
+            if (item instanceof Value) {
+                res.push(item.value);
+            } else {
+                res.push(item);
+            }
+        }
+        return res;
+    }
+
+    set value(val) {
+        this.$setValue(val);
     }
 
     set key(val) {

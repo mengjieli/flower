@@ -51,18 +51,6 @@ class PlatformURLLoader {
                 }
                 PlatformURLLoader.isLoading = false;
             };
-            //xhr.onreadystatechange = function () {
-            //    if (xhr.readyState == 4 && xhr.status == 200) {
-            //        if (method == "HEAD") {
-            //            back.call(thisObj, xhr.getAllResponseHeaders());
-            //        } else {
-            //            back.call(thisObj, xhr.responseText);
-            //        }
-            //    }
-            //    else if (xhr.readyState == 4 && xhr.status != 200) {
-            //        errorBack.call(thisObj);
-            //    }
-            //};
             xhr.send();
         } else {
             var res;

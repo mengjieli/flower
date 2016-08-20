@@ -3,7 +3,7 @@
   "scale": 1,
   "backgroundColor": "0xf6f6f6",
   "remote": {
-    "server": "192.168.1.125",
+    "server": "192.168.1.121",
     "useHttpServer": true,
     "port": "9900",
     "autoLink": true,

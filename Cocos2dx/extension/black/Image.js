@@ -110,12 +110,12 @@ class Image extends flower.Bitmap {
         this.texture = e.data;
     }
 
-    $onFrameEnd() {
-        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-        //    this.$validateUIComponent();
-        //}
-        super.$onFrameEnd();
-    }
+    //$onFrameEnd() {
+    //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+    //    //    this.$validateUIComponent();
+    //    //}
+    //    super.$onFrameEnd();
+    //}
 
     dispose() {
         if (this.__loader) {

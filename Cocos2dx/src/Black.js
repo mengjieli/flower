@@ -628,6 +628,7 @@ var $root = eval("this");
 
         function ArrayValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+            var itemType = arguments.length <= 1 || arguments[1] === undefined ? "*" : arguments[1];
 
             _classCallCheck(this, ArrayValue);
 
@@ -637,7 +638,9 @@ var $root = eval("this");
             _this4._rangeMinKey = "";
             _this4._rangeMaxKey = "";
             _this4._selectedItem = null;
+            _this4._itemType = null;
 
+            _this4._itemType = itemType;
             _this4.list = init || [];
             _this4._length = _this4.list.length;
             _this4.__value = _this4;
@@ -645,11 +648,6 @@ var $root = eval("this");
         }
 
         _createClass(ArrayValue, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                return;
-            }
-        }, {
             key: "push",
             value: function push(item) {
                 this.list.push(item);
@@ -1007,6 +1005,44 @@ var $root = eval("this");
                 }
                 _get(Object.getPrototypeOf(ArrayValue.prototype), "dispose", this).call(this);
             }
+
+            /**
+             * 从 Object 中读取数据
+             * @param value
+             */
+
+        }, {
+            key: "$setValue",
+            value: function $setValue(val) {
+                this.removeAll();
+                var itemType = this._itemType;
+                for (var i = 0; i < val.length; i++) {
+                    this.push(DataManager.createData(itemType, val[i]));
+                }
+            }
+
+            /**
+             * 将数据转化成 Object
+             */
+
+        }, {
+            key: "value",
+            get: function get() {
+                var res = [];
+                var list = this.list;
+                for (var i = 0, len = list.length; i < len; i++) {
+                    var item = list[i];
+                    if (item instanceof Value) {
+                        res.push(item.value);
+                    } else {
+                        res.push(item);
+                    }
+                }
+                return res;
+            },
+            set: function set(val) {
+                this.$setValue(val);
+            }
         }, {
             key: "key",
             set: function set(val) {
@@ -1230,67 +1266,119 @@ var $root = eval("this");
         _inherits(ObjectValue, _Value5);
 
         function ObjectValue() {
+            var init = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+
             _classCallCheck(this, ObjectValue);
 
             var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
 
             _this8.__old = _this8.__value = {};
-            _this8.__value = _this8;
+            if (init) {
+                _this8.value = init;
+            }
             return _this8;
         }
 
         _createClass(ObjectValue, [{
-            key: "$setValue",
-            value: function $setValue(val) {
-                return;
+            key: "setMember",
+            value: function setMember(name, value) {
+                var old = this.__value[name];
+                this.__value[name] = value;
+                //this.dispatchWidth(flower.Event.UPDATE, {
+                //    "name": name,
+                //    "old": old,
+                //    "value": value
+                //});
+            }
+        }, {
+            key: "hasMember",
+            value: function hasMember(name) {
+                return this.__value.hasOwnProperty(name);
+            }
+        }, {
+            key: "getValue",
+            value: function getValue(name) {
+                return this.__value[name];
+            }
+        }, {
+            key: "setValue",
+            value: function setValue(name, value) {
+                if (!this.__value.hasOwnProperty(name)) {
+                    sys.$error(3014, name);
+                    return;
+                }
+                if (value instanceof Value) {
+                    this.setMember(name, value);
+                } else {
+                    var val = this.__value[name];
+                    if (val instanceof Value) {
+                        val.value = value;
+                    } else {
+                        this.__value[name] = value;
+                    }
+                }
             }
 
-            //update(...args) {
-            //    var change = false;
-            //    for (var i = 0; i < args.length;) {
-            //        var name = args[i];
-            //        if (i + 1 >= args.length) {
-            //            break;
-            //        }
-            //        var value = args[i + 1];
-            //        var obj = this[name];
-            //        if (obj instanceof Value) {
-            //            if (obj.value != value) {
-            //                obj.value = value;
-            //                change = true;
-            //            }
-            //        } else {
-            //            if (obj != value) {
-            //                this[name] = value;
-            //                change = true;
-            //            }
-            //        }
-            //        i += 2;
-            //    }
-            //    if (change) {
-            //        this.dispatchWidth(flower.Event.UPDATE, this);
-            //    }
-            //}
-            //
-            //addMember(name, value) {
-            //    this[name] = value;
-            //    this.dispatchWidth(flower.Event.UPDATE, this);
-            //}
-            //
-            //
-            //deleteMember(name) {
-            //    delete this[name];
-            //}
+            /**
+             * 从 Object 中读取数据
+             * @param value
+             */
+
+        }, {
+            key: "$setValue",
+            value: function $setValue(val) {
+                if (val == null) {
+                    sys.$error(3015);
+                    return;
+                }
+                var list = Object.keys(val);
+                for (var i = 0; i < list.length; i++) {
+                    var key = list[i];
+                    var value = val[key];
+                    if (!this.__value.hasOwnProperty(key)) {
+                        this.setMember(key, value);
+                    } else {
+                        this.setValue(key, value);
+                    }
+                }
+            }
+
+            /**
+             * 将数据转化成 Object
+             */
 
         }, {
             key: "dispose",
             value: function dispose() {
-                for (var key in this) {
-                    if (this[key] instanceof Value) {
-                        this[key].dispose();
+                var val = this.__value;
+                var list = Object.keys(val);
+                for (var i = 0; i < list.length; i++) {
+                    var key = list[i];
+                    if (val[key] instanceof Value) {
+                        val[key].dispose();
                     }
                 }
                 _get(Object.getPrototypeOf(ObjectValue.prototype), "dispose", this).call(this);
+            }
+        }, {
+            key: "value",
+            get: function get() {
+                var val = this.__value;
+                var list = Object.keys(val);
+                var config = {};
+                for (var i = 0; i < list.length; i++) {
+                    var key = list[i];
+                    var member = val[key];
+                    if (member instanceof Value) {
+                        config[key] = member.value;
+                    } else {
+                        config[key] = member;
+                    }
+                }
+                return config;
+            },
+            set: function set(val) {
+                this.$setValue(val);
             }
         }]);
 
@@ -1391,6 +1479,8 @@ var $root = eval("this");
     locale_strings[3011] = "数据结构类定义解析出错 : {0}\n{1}";
     locale_strings[3012] = "没有定义的数据结构 : {0}";
     locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
+    locale_strings[3014] = "无法设置属性值，该对象没有此属性 : {0}";
+    locale_strings[3015] = "对象不能设置为空";
     locale_strings[3100] = "没有定义的数据类型 : {0}";
     locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
     locale_strings[3201] = "没有找到对应的类 : {0}";
@@ -1460,8 +1550,10 @@ var $root = eval("this");
         _createClass(DataManager, [{
             key: "addRootData",
             value: function addRootData(name, className) {
-                this[name] = this.createData(className);
-                this._root[name] = this[name];
+                var init = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+                this[name] = this.createData(className, className);
+                return this._root[name] = this[name];
             }
         }, {
             key: "addDefine",
@@ -1492,7 +1584,8 @@ var $root = eval("this");
                     }
                     extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
                 }
-                var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "() {\n" + "\t\t_super.call(this);\n";
+                var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "(init) {\n" + "\t\t_super.call(this,null);\n";
+                var defineMember = "";
                 var members = config.members;
                 var bindContent = "";
                 if (members) {
@@ -1500,29 +1593,40 @@ var $root = eval("this");
                     for (var key in members) {
                         member = members[key];
                         if (member.type === "number" || member.type === "Number") {
-                            content += "\t\tthis." + key + " = new NumberValue(" + (member.init != null ? member.init : "") + ");\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
                         } else if (member.type === "int" || member.type === "Int") {
-                            content += "\t\tthis." + key + " = new IntValue(" + (member.init != null ? member.init : "") + ");\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
                         } else if (member.type === "uint" || member.type === "Uint") {
-                            content += "\t\tthis." + key + " = new UIntValue(" + (member.init != null ? member.init : "") + ");\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
                         } else if (member.type === "string" || member.type === "String") {
-                            content += "\t\tthis." + key + " = new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + ");\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
                         } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                            content += "\t\tthis." + key + " = new BooleanValue(" + (member.init != null ? member.init : "") + ");\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
                         } else if (member.type === "array" || member.type === "Array") {
-                            content += "\t\tthis." + key + " = new ArrayValue(" + (member.init != null ? member.init : "") + ");\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
                         } else if (member.type === "*") {
-                            content += "\t\tthis." + key + " = " + (member.init != null ? member.init : "null") + ";\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                         } else {
-                            content += "\t\tthis." + key + " = DataManager.getInstance().createData(\"" + member.type + "\");\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
                         }
                         if (member.bind) {
                             bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n";
                         }
+                        defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
+                        defineMember += "\t\tget: function () {\n";
+                        defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
+                        defineMember += "\t\t},\n";
+                        defineMember += "\t\tset: function (val) {\n";
+                        defineMember += "\t\t\tthis.setValue(\"" + key + "\", val);\n";
+                        defineMember += "\t\t},\n";
+                        defineMember += "\t\tenumerable: true,\n";
+                        defineMember += "\t\tconfigurable: true\n";
+                        defineMember += "\t});\n\n";
                     }
                 }
+                content += "\t\tif(init) this.value = init;\n";
                 content += bindContent;
-                content += "\t}\n" + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
+                content += "\t}\n\n" + defineMember + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
                 content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + config.name + "\");\n";
                 if (config.exports) {
                     var name = "";
@@ -1547,6 +1651,7 @@ var $root = eval("this");
                     eval(className);
                 }
                 item.id++;
+                return this.getClass(config.name);
             }
         }, {
             key: "$addClassDefine",
@@ -1566,12 +1671,30 @@ var $root = eval("this");
         }, {
             key: "createData",
             value: function createData(className) {
-                var item = this._defines[className];
-                if (!item) {
-                    sys.$error(3012, className);
-                    return;
+                var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+                if (className === "number" || className === "Number") {
+                    return new NumberValue(init);
+                } else if (className === "int" || className === "Int") {
+                    return new IntValue(init);
+                } else if (className === "uint" || className === "Uint") {
+                    return new UIntValue(init);
+                } else if (className === "string" || className === "String") {
+                    return new StringValue(init);
+                } else if (className === "boolean" || className === "Boolean" || className === "bool") {
+                    return new BooleanValue(init);
+                } else if (className === "array" || className === "Array") {
+                    return new ArrayValue(init);
+                } else if (className === "*") {
+                    return init;
+                } else {
+                    var item = this._defines[className];
+                    if (!item) {
+                        sys.$error(3012, className);
+                        return;
+                    }
+                    return new item.define(init);
                 }
-                return new item.define();
             }
         }, {
             key: "clear",
@@ -1589,6 +1712,35 @@ var $root = eval("this");
                     new DataManager();
                 }
                 return DataManager.instance;
+            }
+        }, {
+            key: "addRootData",
+            value: function addRootData(name, className) {
+                var init = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+                return DataManager.getInstance().addRootData(name, className, init);
+            }
+        }, {
+            key: "getClass",
+            value: function getClass(className) {
+                return DataManager.getInstance().getClass(className);
+            }
+        }, {
+            key: "addDefine",
+            value: function addDefine(config) {
+                return DataManager.getInstance().addDefine(config);
+            }
+        }, {
+            key: "createData",
+            value: function createData(className) {
+                var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+                return DataManager.getInstance().createData(className, init);
+            }
+        }, {
+            key: "clear",
+            value: function clear() {
+                DataManager.getInstance().clear();
             }
         }]);
 
@@ -4271,14 +4423,14 @@ var $root = eval("this");
                 this.__loader = null;
                 this.texture = e.data;
             }
-        }, {
-            key: "$onFrameEnd",
-            value: function $onFrameEnd() {
-                //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                //    this.$validateUIComponent();
-                //}
-                _get(Object.getPrototypeOf(Image.prototype), "$onFrameEnd", this).call(this);
-            }
+
+            //$onFrameEnd() {
+            //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+            //    //    this.$validateUIComponent();
+            //    //}
+            //    super.$onFrameEnd();
+            //}
+
         }, {
             key: "dispose",
             value: function dispose() {

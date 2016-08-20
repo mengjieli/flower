@@ -13,5 +13,6 @@
   "classes": {
   },
   "data": [
+    "./data/DungeonData.json"
   ]
 }

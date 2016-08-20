@@ -27,7 +27,7 @@ class ObjectDo {
             }
             str = "{\n";
             for (var key in obj) {
-                str += before + "\t" + key + "\t: " + flower.ObjectDo.toString(obj[key], maxDepth, before + "\t", depth + 1);
+                str += before + "\t\"" + key + "\"\t: " + flower.ObjectDo.toString(obj[key], maxDepth, before + "\t", depth + 1);
                 str += ",\n";
             }
             if (str.slice(str.length - 2, str.length) == ",\n") {

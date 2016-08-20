@@ -1,0 +1,21 @@
+{
+  "name": "dg.TriggerData",
+  "desc": "触发器",
+  "members": {
+    "itemId": {
+      "desc": "子对象id计数器",
+      "type": "int",
+      "init": 1
+    },
+    "name": {
+      "desc": "触发器名称",
+      "type": "string",
+      "init": "新触发器"
+    },
+    "effects": {
+      "desc":"触发效果列表",
+      "type":"Array",
+      "typeValue":"dg.TriggerEffectData"
+    }
+  }
+}

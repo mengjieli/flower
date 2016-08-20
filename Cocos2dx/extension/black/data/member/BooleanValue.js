@@ -2,7 +2,7 @@ class BooleanValue extends Value {
 
     constructor(init = false) {
         super();
-        if(init == "false") {
+        if (init == "false") {
             init = false;
         }
         this.__old = this.__value = !!init;
