@@ -9573,7 +9573,7 @@ var flower = {};
                     }
                     str = "[\n";
                     for (var i = 0; i < obj.length; i++) {
-                        str += before + "\t" + flower.ObjectDo.toString(obj[i], maxDepth, before + "\t", depth + 1) + (i < obj.length - 1 ? ",\n" : "\n");
+                        str += before + " " + flower.ObjectDo.toString(obj[i], maxDepth, before + " ", depth + 1) + (i < obj.length - 1 ? ",\n" : "\n");
                     }
                     str += before + "]";
                 } else if (obj instanceof Object) {
@@ -9582,7 +9582,7 @@ var flower = {};
                     }
                     str = "{\n";
                     for (var key in obj) {
-                        str += before + "\t\"" + key + "\"\t: " + flower.ObjectDo.toString(obj[key], maxDepth, before + "\t", depth + 1);
+                        str += before + " \"" + key + "\": " + flower.ObjectDo.toString(obj[key], maxDepth, before + " ", depth + 1);
                         str += ",\n";
                     }
                     if (str.slice(str.length - 2, str.length) == ",\n") {

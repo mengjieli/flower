@@ -13,6 +13,8 @@
   "classes": {
   },
   "data": [
-    "./data/DungeonData.json"
+    "./data/DungeonData.json",
+    "./data/TriggerData.json",
+    "./data/TriggerEffectData.json"
   ]
 }

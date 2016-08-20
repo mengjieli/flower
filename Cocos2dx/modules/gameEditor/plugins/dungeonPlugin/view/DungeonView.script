@@ -3,23 +3,89 @@ function init() {
     this.addDirection("trigger", "trigger", "触发器", [{
         "label": "添加触发器",
         "click": function (target) {
-            var r = Math.floor(Math.random() * 100000000);
-            this.addDirection(flower.Path.joinPath(target.path, r + ".trigger"),
-                target.type, "新触发器" + r, [
-                    {
-                        "label": "添加效果",
-                        "click": function (target) {
-                            console.log(target)
-                        }
-                    }
-                ]);
+            var trigger = flower.DataManager.createData("dg.TriggerData");
+            var id = this.data.parser.itemId;
+            trigger.itemId.value = id;
+            trigger.name.value = "触发器" + id;
+            this.data.data.triggers.push(trigger);
+            this.data.parser.save();
+            this.addTriggerToDirection(trigger);
         }.bind(this)
     }]);
     this.tree.dataProvider = this.direction;
+    var triggerList = this.data.data.triggers;
+    for (var i = 0; i < triggerList.length; i++) {
+        var trigger = triggerList[i];
+        this.addTriggerToDirection(trigger);
+        var effects = trigger.effects;
+        for (var e = 0; e < effects.length; e++) {
+            this.addEffectToDirection(trigger, effects[e]);
+        }
+    }
 }
 
-function addDirection(path, type, name, menuList) {
-    var dir = new software.Direction(path, name, null, null, type);
+function addTriggerToDirection(trigger) {
+    var path = "trigger/" + trigger.itemId.value;
+    this.addDirection(path, "trigger", trigger.name.value, [
+        {
+            "label": "添加效果",
+            "click": function (target) {
+                var trigger = target.data;
+                var effect = flower.DataManager.createData("dg.TriggerEffectData");
+                effect.itemId.value = this.data.parser.itemId;
+                effect.name.value = "效果" + effect.itemId.value;
+                trigger.effects.push(effect);
+                this.data.parser.save();
+                this.addEffectToDirection(trigger, effect);
+            }.bind(this)
+        },
+        {
+            "label": "删除",
+            "click": function (target) {
+                var dungeonData = this.data.data;
+                dungeonData.triggers.removeItem(trigger);
+                this.data.parser.save();
+                this.direction.removeItem(target);
+            }.bind(this)
+        }
+    ], trigger);
+}
+
+function addEffectToDirection(trigger, effect) {
+    var path = "trigger/" + trigger.itemId.value + "/" + effect.itemId.value + ".effect";
+    this.addFile(path, "effect", effect.name.value, [
+        {
+            "label": "删除",
+            "click": function (target) {
+                target.data.trigger.effects.removeItem(target.data.effect);
+                this.data.parser.save();
+                this.direction.removeItem(target);
+            }.bind(this)
+        }
+    ], {trigger: trigger, effect: effect});
+}
+
+
+function addDirection(path, type, name, menuList, data) {
+    var dir = new software.Direction(path, name, type, null, data);
+    var menu = null;
+    if (menuList && menuList.length) {
+        menu = {
+            "menu": menuList,
+            "target": dir,
+            "click": function (info, item) {
+                if (item.click) {
+                    item.click(info);
+                }
+            }
+        };
+    }
+    dir.menu = menu;
+    return this.direction.push(dir);
+}
+
+function addFile(path, type, name, menuList, data) {
+    var dir = new software.File(path, name, type, null, data);
     var menu = null;
     if (menuList && menuList.length) {
         menu = {

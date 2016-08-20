@@ -9,14 +9,14 @@ var Direction = (function (_super) {
      * @param type
      * @constructor
      */
-    function Direction(path, name, menu, data, type) {
+    function Direction(path, name, type, menu, data) {
         _super.call(this);
         this.__isDirection = true;
         this.__path = path;
         this.__name = name || flower.Path.getName(path);
+        this.__type = type;
         this.__menu = menu;
         this.__data = data;
-        this.__type = type;
     }
 
     Object.defineProperty(Direction.prototype, "isDirection", {

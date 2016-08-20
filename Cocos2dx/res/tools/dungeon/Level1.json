@@ -1,18 +1,42 @@
 {
-	"itemId"	: 1,
-	"screenWidth"	: 480,
-	"screenHeight"	: 320,
-	"background"	: "res/tools/dungeon/background/map_0_2.jpg",
-	"backgroundList"	: [
-		{
-			"label"	: "map_0_2.jpg",
-			"path"	: "res/tools/dungeon/background/map_0_2.jpg"
-		},
-		{
-			"label"	: "map_0_3.jpg",
-			"path"	: "res/tools/dungeon/background/map_0_3.jpg"
-		}
-	],
-	"triggers"	: [
-	]
+ "itemId": 34,
+ "screenWidth": 480,
+ "screenHeight": 320,
+ "background": "res/tools/dungeon/background/map_0_2.jpg",
+ "backgroundList": [
+  {
+   "label": "map_0_2.jpg",
+   "path": "res/tools/dungeon/background/map_0_2.jpg"
+  },
+  {
+   "label": "map_0_3.jpg",
+   "path": "res/tools/dungeon/background/map_0_3.jpg"
+  }
+ ],
+ "triggers": [
+  {
+   "itemId": 20,
+   "name": "触发器20",
+   "effects": [
+    {
+     "itemId": 26,
+     "name": "效果26"
+    },
+    {
+     "itemId": 31,
+     "name": "效果31"
+    }
+   ]
+  },
+  {
+   "itemId": 32,
+   "name": "触发器32",
+   "effects": [
+    {
+     "itemId": 33,
+     "name": "效果33"
+    }
+   ]
+  }
+ ]
 }

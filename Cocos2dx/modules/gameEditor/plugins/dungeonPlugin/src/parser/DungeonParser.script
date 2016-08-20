@@ -10,7 +10,7 @@ var DungeonParser = (function (_super) {
         var config = this.file.content;
         this.data = flower.DataManager.createData("dg.DungeonData", config);
         this.data.backgroundList.addListener(flower.Event.SELECTED_ITEM_CHANGE, function (e) {
-            if(e.data) {
+            if (e.data) {
                 this.data.background.value = e.data.path;
                 this.save();
             }
@@ -44,7 +44,8 @@ var DungeonParser = (function (_super) {
 
     Object.defineProperty(DungeonParser.prototype, "itemId", {
         get: function () {
-            return this.config.itemId++;
+            this.data.itemId.value = this.data.itemId.value + 1;
+            return this.data.itemId.value;
         },
         set: function (val) {
         },

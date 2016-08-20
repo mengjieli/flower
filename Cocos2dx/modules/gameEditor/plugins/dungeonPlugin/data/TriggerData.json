@@ -13,9 +13,9 @@
       "init": "新触发器"
     },
     "effects": {
-      "desc":"触发效果列表",
-      "type":"Array",
-      "typeValue":"dg.TriggerEffectData"
+      "desc": "触发效果列表",
+      "type": "Array",
+      "typeValue": "dg.TriggerEffectData"
     }
   }
 }
