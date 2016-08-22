@@ -1,10 +1,8 @@
 function init() {
     //showDetailPanel
-
     this.tree.clickItem = this.onClickItem.bind(this);
-
     this.direction = new flower.ArrayValue();
-    this.addDirection("trigger", "trigger", "触发器", [{
+    this.addDirection("trigger", "root", "触发器", [{
         "label": "添加触发器",
         "click": function (target) {
             var trigger = flower.DataManager.createData("dg.TriggerData");
@@ -34,6 +32,7 @@ function onClickItem(e) {
         if (!this.triggerDetailPanel) {
             this.triggerDetailPanel = new dg.TriggerDetailPanel();
         }
+        this.triggerDetailPanel.save = this.data.parser.save.bind(this.data.parser);
         this.triggerDetailPanel.data = item.data;
         showDetailPanel("Dungeon.trigger", item.data, this.triggerDetailPanel);
     }
@@ -41,7 +40,7 @@ function onClickItem(e) {
 
 function addTriggerToDirection(trigger) {
     var path = "trigger/" + trigger.itemId.value;
-    this.addDirection(path, "trigger", trigger.name.value, [
+    this.addDirection(path, "trigger", trigger.name, [
         {
             "label": "添加效果",
             "click": function (target) {
@@ -68,7 +67,7 @@ function addTriggerToDirection(trigger) {
 
 function addEffectToDirection(trigger, effect) {
     var path = "trigger/" + trigger.itemId.value + "/" + effect.itemId.value + ".effect";
-    this.addFile(path, "effect", effect.name.value, [
+    this.addFile(path, "effect", effect.name, [
         {
             "label": "删除",
             "click": function (target) {

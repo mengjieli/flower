@@ -169,6 +169,7 @@ class ViewStack extends Group {
     set selectedItem(val) {
         var index = this.getChildIndex(val);
         this._setSelectedIndex(index);
+        this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
     }
 
     get selectedItem() {

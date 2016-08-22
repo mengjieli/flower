@@ -12,6 +12,12 @@
       "type": "string",
       "init": "新触发器"
     },
+    "startCondition": {
+      "desc": "启动条件",
+      "detail": "启动条件分别为: start:启动触发",
+      "type": "string",
+      "init": "other"
+    },
     "effects": {
       "desc": "触发效果列表",
       "type": "Array",

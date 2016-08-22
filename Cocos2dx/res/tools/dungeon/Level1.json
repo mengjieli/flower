@@ -1,5 +1,5 @@
 {
- "itemId": 34,
+ "itemId": 35,
  "screenWidth": 480,
  "screenHeight": 320,
  "background": "res/tools/dungeon/background/map_0_2.jpg",
@@ -16,7 +16,8 @@
  "triggers": [
   {
    "itemId": 20,
-   "name": "触发器20",
+   "name": "启动触发器",
+   "startCondition": "start",
    "effects": [
     {
      "itemId": 26,
@@ -25,12 +26,17 @@
     {
      "itemId": 31,
      "name": "效果31"
+    },
+    {
+     "itemId": 35,
+     "name": "效果35"
     }
    ]
   },
   {
    "itemId": 32,
    "name": "触发器32",
+   "startCondition": "start",
    "effects": [
     {
      "itemId": 33,

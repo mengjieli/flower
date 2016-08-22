@@ -5673,6 +5673,7 @@ var $root = eval("this");
             set: function set(val) {
                 var index = this.getChildIndex(val);
                 this._setSelectedIndex(index);
+                this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
             },
             get: function get() {
                 return this._selectedItem;
@@ -5953,13 +5954,15 @@ var $root = eval("this");
                 2: null, //list
                 3: false, //openFlags
                 4: "label", //labelField
-                5: null };
+                5: null, //dataProvider
+                6: "type", //typeField
+                7: null //typeValue
+            };
             return _this35;
         }
 
         _createClass(Combox, [{
             key: "__onClickButton",
-            //dataProvider
             value: function __onClickButton(e) {
                 this.isOpen = !this.isOpen;
             }
@@ -5971,19 +5974,45 @@ var $root = eval("this");
         }, {
             key: "__listSelectItemChange",
             value: function __listSelectItemChange(e) {
-                if (this.label && this.list && this.list.selectedItem) {
-                    this.label.text = this.list.selectedItem[this.$combox[4]];
+                var p = this.$combox;
+                var array = p[5];
+                if (this.label && array && array.selectedItem) {
+                    this.label.text = array.selectedItem[p[4]];
                 } else {
                     this.label.text = "";
                 }
                 if (e) {
                     this.dispatch(e);
                 }
+                if (p[6] && p[7]) {
+                    if (p[7] instanceof flower.Value) {
+                        p[7].value = array.selectedItem[p[6]];
+                    }
+                }
             }
         }, {
             key: "__listClickItem",
             value: function __listClickItem(e) {
                 flower.MenuManager.hideMenu();
+            }
+        }, {
+            key: "__typeValueChange",
+            value: function __typeValueChange() {
+                if (this.$combox[6] && this.$combox[7]) {
+                    var array = this.$combox[5];
+                    var value = this.$combox[7] instanceof flower.Value ? this.$combox[7].value : this.$combox[7];
+                    for (var i = 0; i < array.length; i++) {
+                        if (array[i][this.$combox[6]] == value) {
+                            this.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }, {
+            key: "__onTypeValueChange",
+            value: function __onTypeValueChange(e) {
+                this.__typeValueChange();
             }
         }, {
             key: "label",
@@ -6031,17 +6060,12 @@ var $root = eval("this");
                 }
                 if (this.$combox[2]) {
                     this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-                    this.$combox[2].removeListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
                     this.$combox[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
                 }
                 this.$combox[2] = val;
                 if (val) {
-                    val.itemClickedEnabled = true;
-                    val.itemSelectedEnabled = true;
-                    val.requireSelection = true;
                     val.dataProvider = this.$combox[5];
                     val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-                    val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
                     val.addListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
                 }
                 this.__listSelectItemChange();
@@ -6083,6 +6107,36 @@ var $root = eval("this");
                 this.__listSelectItemChange();
             }
         }, {
+            key: "typeField",
+            get: function get() {
+                return this.$combox[6];
+            },
+            set: function set(val) {
+                if (this.$combox[6] == val) {
+                    return;
+                }
+                this.$combox[6] = val;
+                this.__typeValueChange();
+            }
+        }, {
+            key: "typeValue",
+            get: function get() {
+                return this.$combox[7];
+            },
+            set: function set(val) {
+                if (this.$combox[7] == val) {
+                    return;
+                }
+                if (this.$combox[7] && this.$combox[7] instanceof flower.Value) {
+                    this.$combox[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                }
+                this.$combox[7] = val;
+                if (this.$combox[7] && this.$combox[7] instanceof flower.Value) {
+                    this.$combox[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                }
+                this.__typeValueChange();
+            }
+        }, {
             key: "dataProvider",
             get: function get() {
                 return this.$combox[5];
@@ -6091,7 +6145,13 @@ var $root = eval("this");
                 if (this.$combox[5] == val) {
                     return;
                 }
+                if (this.$combox[5]) {
+                    this.$combox[5].removeListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+                }
                 this.$combox[5] = val;
+                if (this.$combox[5]) {
+                    this.$combox[5].addListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+                }
                 if (this.list) {
                     this.list.dataProvider = this.$combox[5];
                 }
@@ -6100,11 +6160,24 @@ var $root = eval("this");
             key: "selectedItem",
             get: function get() {
                 return this.list ? this.list.selectedItem : null;
+            },
+            set: function set(val) {
+                var array = this.$combox[5];
+                for (var i = 0; i < this.array.length; i++) {
+                    if (this.array[i] == val) {
+                        this.selectedIndex = i;
+                        return;
+                    }
+                }
+                this.list.selectedIndex = -1;
             }
         }, {
             key: "selectedIndex",
             get: function get() {
                 return this.list ? this.list.selectedIndex : -1;
+            },
+            set: function set(val) {
+                this.list.selectedIndex = val;
             }
         }]);
 
