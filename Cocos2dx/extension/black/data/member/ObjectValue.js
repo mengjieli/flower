@@ -31,14 +31,21 @@ class ObjectValue extends Value {
             sys.$error(3014, name);
             return;
         }
-        if (value instanceof Value) {
-            this.setMember(name, value);
+        if(value == null) {
+            this.setMember(name, null);
         } else {
-            var val = this.__value[name];
-            if (val instanceof Value) {
-                val.value = value;
+            if (value instanceof Value) {
+                this.setMember(name, value);
             } else {
-                this.__value[name] = value;
+                var val = this.__value[name];
+                if (val instanceof Value) {
+                    val.value = value;
+                } else {
+                    if (value && typeof value == "object" && value.__className) {
+                        value = flower.DataManager.createData(value.__className, value);
+                    }
+                    this.__value[name] = value;
+                }
             }
         }
     }
@@ -81,11 +88,26 @@ class ObjectValue extends Value {
                 config[key] = member;
             }
         }
+        if (this.__className) {
+            config.__className = this.__className.value;
+        }
         return config;
     }
 
     set value(val) {
         this.$setValue(val);
+    }
+
+    get className() {
+        return this.__className ? this.__className.value : "";
+    }
+
+    set className(val) {
+        if (val) {
+            this.__className = new StringValue(val);
+        } else {
+            this.__className = null;
+        }
     }
 
     dispose() {

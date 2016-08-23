@@ -17,8 +17,8 @@
     },
     "type": {
       "desc": "效果类型",
-      "type": "string",
-      "init": "CameraRange"
+      "type": "int",
+      "init": 1
     }
   }
 }

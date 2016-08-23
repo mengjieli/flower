@@ -1,5 +1,5 @@
 {
- "itemId": 35,
+ "itemId": 41,
  "screenWidth": 480,
  "screenHeight": 320,
  "background": "res/tools/dungeon/background/map_0_2.jpg",
@@ -15,41 +15,34 @@
  ],
  "triggers": [
   {
-   "itemId": 20,
-   "name": "主触发器",
-   "startCondition": 1,
+   "itemId": 39,
+   "name": "触发器39",
+   "startCondition": 3,
+   "startValue": {
+    "tag": 1001,
+    "hp": 0.1,
+    "__className": "dg.HPCondition"
+   },
    "effects": [
     {
-     "itemId": 26,
-     "name": "效果27",
+     "itemId": 40,
+     "name": "效果40",
      "delay": 0,
-     "type": "CameraRange"
-    },
-    {
-     "itemId": 31,
-     "name": "效果31",
-     "delay": 0,
-     "type": "CameraRange"
-    },
-    {
-     "itemId": 35,
-     "name": "效果35",
-     "delay": 0,
-     "type": "CameraRange"
+     "type": 1
     }
    ]
   },
   {
-   "itemId": 32,
-   "name": "触发器32",
-   "startCondition": 1,
+   "itemId": 41,
+   "name": "触发器41",
+   "startCondition": 2,
+   "startValue": {
+    "armyType": 1,
+    "points": [
+    ],
+    "__className": "dg.MoveCondition"
+   },
    "effects": [
-    {
-     "itemId": 33,
-     "name": "效果33",
-     "delay": 0,
-     "type": "CameraRange"
-    }
    ]
   }
  ]

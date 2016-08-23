@@ -24,7 +24,7 @@ function init() {
                 "type": 4
             },
             {
-                "label": "效果触发",
+                "label": "触发器触发",
                 "type": 5
             }
         ]
@@ -51,6 +51,18 @@ function init() {
             this[atr1 + "Input"] = ui[atr1 + "Input"];
         }
     }
+    var fxml =
+        '<f:ViewStack percentWidth="100" xmlns:f="flower" xmlns:s="software" xmlns:dg="dungeon">' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<dg:MoveCondition id="moveCondition"/>' +
+        '<dg:HPCondition id="hpCondition"/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '</f:ViewStack>';
+    this.viewStack = (new flower.UIParser()).parseUI(fxml);
+    container.addChild(this.viewStack);
+    this.hpCondition = this.viewStack.hpCondition;
 }
 
 function set save(func) {
@@ -63,6 +75,23 @@ function get save() {
 
 function setData(val) {
     _super.prototype.setData.call(this, val);
+    var changeViewStack = function (e) {
+        this.viewStack.selectedIndex = this.data.startCondition.value;
+        if (e) {
+            if (this.data.startCondition.value == 2) {
+                this.data.startValue = flower.DataManager.createData("dg.MoveCondition");
+            } else if (this.data.startCondition.value == 3) {
+                this.data.startValue = flower.DataManager.createData("dg.HPCondition");
+            } else {
+                this.data.startValue = null;
+            }
+            this.save();
+        }
+        this.viewStack.selectedItem.save = this.save;
+        this.viewStack.selectedItem.data = this.data.startValue;
+    };
+    changeViewStack.call(this);
+    this.data.startCondition.addListener(flower.Event.UPDATE, changeViewStack, this);
     var attributes = this.attributes;
     for (var i = 0; i < attributes.length; i++) {
         var atr = attributes[i];

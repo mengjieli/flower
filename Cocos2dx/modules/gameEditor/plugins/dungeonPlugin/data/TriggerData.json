@@ -13,10 +13,14 @@
       "init": "新触发器"
     },
     "startCondition": {
-      "desc": "启动条件",
-      "detail": "启动条件分别为: 1:启动触发 ",
+      "desc": "启动条件类型",
+      "detail": "启动条件分别为: 1:进入副本触发 ",
       "type": "int",
       "init": 1
+    },
+    "startValue": {
+      "desc": "启动条件",
+      "type": "*"
     },
     "effects": {
       "desc": "触发效果列表",

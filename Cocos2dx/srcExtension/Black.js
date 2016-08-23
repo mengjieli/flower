@@ -1146,14 +1146,21 @@ class ObjectValue extends Value {
             sys.$error(3014, name);
             return;
         }
-        if (value instanceof Value) {
-            this.setMember(name, value);
+        if(value == null) {
+            this.setMember(name, null);
         } else {
-            var val = this.__value[name];
-            if (val instanceof Value) {
-                val.value = value;
+            if (value instanceof Value) {
+                this.setMember(name, value);
             } else {
-                this.__value[name] = value;
+                var val = this.__value[name];
+                if (val instanceof Value) {
+                    val.value = value;
+                } else {
+                    if (value && typeof value == "object" && value.__className) {
+                        value = flower.DataManager.createData(value.__className, value);
+                    }
+                    this.__value[name] = value;
+                }
             }
         }
     }
@@ -1196,11 +1203,26 @@ class ObjectValue extends Value {
                 config[key] = member;
             }
         }
+        if (this.__className) {
+            config.__className = this.__className.value;
+        }
         return config;
     }
 
     set value(val) {
         this.$setValue(val);
+    }
+
+    get className() {
+        return this.__className ? this.__className.value : "";
+    }
+
+    set className(val) {
+        if (val) {
+            this.__className = new StringValue(val);
+        } else {
+            this.__className = null;
+        }
     }
 
     dispose() {
@@ -1394,6 +1416,9 @@ class DataManager {
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "(init) {\n" +
             "\t\t_super.call(this,null);\n";
+        if (config.saveClass) {
+            content += "\t\tthis.className = \"" + config.name + "\";\n";
+        }
         var defineMember = "";
         var members = config.members;
         var bindContent = "";
@@ -1401,22 +1426,26 @@ class DataManager {
             var member;
             for (var key in members) {
                 member = members[key];
-                if (member.type === "number" || member.type === "Number") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "int" || member.type === "Int") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "uint" || member.type === "Uint") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "string" || member.type === "String") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
-                } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "array" || member.type === "Array") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
-                } else if (member.type === "*") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                if (member.init && typeof member.init == "object" && member.init.__className) {
+                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
                 } else {
-                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                    if (member.type === "number" || member.type === "Number") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "int" || member.type === "Int") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "uint" || member.type === "Uint") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "string" || member.type === "String") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
+                    } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "array" || member.type === "Array") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
+                    } else if (member.type === "*") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                    } else {
+                        content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                    }
                 }
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
@@ -2285,7 +2314,7 @@ class UIParser extends Group {
         var namespacesList = xml.namespaces;
         var namespaces = {};
         for (var i = 0; i < namespacesList.length; i++) {
-            namespaces[namespacesList[i]] = namespacesList[i].value;
+            namespaces[namespacesList[i].name] = namespacesList[i].value;
         }
         //= xml.getNameSapce("local") ? true : false;
         var uiname = xml.name;

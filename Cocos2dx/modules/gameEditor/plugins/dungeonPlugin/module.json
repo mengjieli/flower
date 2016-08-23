@@ -9,6 +9,8 @@
     "./panels/NewTriggerPanel.xml",
     "./panels/NewDungeonPanel.xml",
     "./panels/TriggerDetailPanel.xml",
+    "./panels/startCondition/HPCondition.xml",
+    "./panels/startCondition/MoveCondition.xml",
     "./panels/EffectDetailPanel.xml",
     "./view/DungeonView.xml"
   ],
@@ -17,6 +19,8 @@
   "data": [
     "./data/DungeonData.json",
     "./data/TriggerData.json",
-    "./data/TriggerEffectData.json"
+    "./data/TriggerEffectData.json",
+    "./data/startCondition/HPCondition.json",
+    "./data/startCondition/MoveCondition.json"
   ]
 }

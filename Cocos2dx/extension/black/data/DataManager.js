@@ -91,6 +91,9 @@ class DataManager {
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "(init) {\n" +
             "\t\t_super.call(this,null);\n";
+        if (config.saveClass) {
+            content += "\t\tthis.className = \"" + config.name + "\";\n";
+        }
         var defineMember = "";
         var members = config.members;
         var bindContent = "";
@@ -98,22 +101,26 @@ class DataManager {
             var member;
             for (var key in members) {
                 member = members[key];
-                if (member.type === "number" || member.type === "Number") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "int" || member.type === "Int") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "uint" || member.type === "Uint") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "string" || member.type === "String") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
-                } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
-                } else if (member.type === "array" || member.type === "Array") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
-                } else if (member.type === "*") {
-                    content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                if (member.init && typeof member.init == "object" && member.init.__className) {
+                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
                 } else {
-                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                    if (member.type === "number" || member.type === "Number") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "int" || member.type === "Int") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "uint" || member.type === "Uint") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "string" || member.type === "String") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
+                    } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
+                    } else if (member.type === "array" || member.type === "Array") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
+                    } else if (member.type === "*") {
+                        content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                    } else {
+                        content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                    }
                 }
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"

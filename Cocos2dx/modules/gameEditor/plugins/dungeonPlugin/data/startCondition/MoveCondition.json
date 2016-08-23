@@ -1,0 +1,16 @@
+{
+  "name": "dg.MoveCondition",
+  "desc": "移动触发",
+  "saveClass": true,
+  "members": {
+    "armyType": {
+      "desc": "部队或者野怪  0.部队  1.野怪",
+      "type": "int"
+    },
+    "points": {
+      "desc": "坐标点(网格坐标)",
+      "type": "Array",
+      "typeValue": "Point"
+    }
+  }
+}

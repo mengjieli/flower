@@ -3413,7 +3413,7 @@ class DisplayObject extends EventDispatcher {
 
     dispatch(e) {
         super.dispatch(e);
-        if (e.bubbles && this.__parent && this.$DisplayObject[21]) {
+        if (e.bubbles && !e.isPropagationStopped && this.__parent && this.$DisplayObject[21]) {
             this.__parent.dispatch(e);
         }
     }

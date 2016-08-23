@@ -3806,7 +3806,7 @@ var flower = {};
             key: "dispatch",
             value: function dispatch(e) {
                 _get(Object.getPrototypeOf(DisplayObject.prototype), "dispatch", this).call(this, e);
-                if (e.bubbles && this.__parent && this.$DisplayObject[21]) {
+                if (e.bubbles && !e.isPropagationStopped && this.__parent && this.$DisplayObject[21]) {
                     this.__parent.dispatch(e);
                 }
             }

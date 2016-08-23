@@ -1,27 +1,52 @@
 function init() {
     var container = this.container;
-    var labels = ["名称", "类型"];
-    var attributes = ["name", "type"];
+    var labels = ["名称","延迟(ms)", "类型"];
+    var attributes = ["name","delay", "type"];
     var inputFalse = {
         //"itemId": true
     };
+
     var dropDownList = {
         "type": [
             {
-                "label": "开启触发器",
-                "type", 1
-            },
-            {
-                "label": "镜头范围",
-                "type": "CameraRange"
-            },
-            {
-                "label": "镜头位置",
-                "type": "CameraPosition"
-            },
-            {
                 "label": "刷怪",
-                "type": "CreateMonster"
+                "type": 1
+            },
+            {
+                "label": "直接伤害",
+                "type": 2
+            },
+            {
+                "label": "buff",
+                "type": 3
+            },
+            {
+                "label": "开关触发器",
+                "type": 4
+            },
+            {
+                "label": "副本通关",
+                "type": 5
+            },
+            {
+                "label": "通关失败",
+                "type": 6
+            },
+            {
+                "label": "完成任务",
+                "type": 7
+            },
+            {
+                "label": "镜头移动",
+                "type": 9
+            },
+            {
+                "label": "锁定视野",
+                "type": 10
+            },
+            {
+                "label": "剧情对话",
+                "type": 11
             }
         ]
     };
@@ -31,7 +56,7 @@ function init() {
         var label1 = labels[i];
         var fxml =
             '<f:Group horizontalCenter="0" xmlns:f="flower" xmlns:s="software">' +
-            '<f:Label horizontalCenter="-55" width="50" text="' + label1 + '" verticalCenter="0"/>';
+            '<f:Label horizontalCenter="-55" width="60" text="' + label1 + '" verticalCenter="0"/>';
         if (dropDownList[atr1]) {
             fxml += '<s:Combox id="' + atr1 + 'Combox" horizontalCenter="30" width="100" verticalCenter="0"/>';
         } else {

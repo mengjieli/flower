@@ -281,7 +281,7 @@ class UIParser extends Group {
         var namespacesList = xml.namespaces;
         var namespaces = {};
         for (var i = 0; i < namespacesList.length; i++) {
-            namespaces[namespacesList[i]] = namespacesList[i].value;
+            namespaces[namespacesList[i].name] = namespacesList[i].value;
         }
         //= xml.getNameSapce("local") ? true : false;
         var uiname = xml.name;
