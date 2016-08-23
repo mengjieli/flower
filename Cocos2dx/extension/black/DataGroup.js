@@ -67,7 +67,7 @@ class DataGroup extends Group {
                 this.$addFlags(0x4000);
             }
         }
-        if (p[0] && p[0].length && p[1] && (this.$hasFlags(0x4000))) {
+        if (p[0] && p[1] && (this.$hasFlags(0x4000))) {
             this.$removeFlags(0x4000);
             if (!p[2]) {
                 p[2] = [];
@@ -110,13 +110,15 @@ class DataGroup extends Group {
                 layout.$clear();
                 var elementWidth;
                 var elementHeight;
-                if (!items.length) {
-                    item = this.createItem(list.getItemAt(0), 0);
-                    item.data = list.getItemAt(0);
-                    items.push(item);
+                if(p[0].length) {
+                    if (!items.length) {
+                        item = this.createItem(list.getItemAt(0), 0);
+                        item.data = list.getItemAt(0);
+                        items.push(item);
+                    }
+                    elementWidth = items[0].width;
+                    elementHeight = items[0].height;
                 }
-                elementWidth = items[0].width;
-                elementHeight = items[0].height;
                 var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
                 for (var i = firstItemIndex; i < list.length; i++) {

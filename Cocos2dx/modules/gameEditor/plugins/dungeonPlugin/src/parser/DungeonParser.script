@@ -39,7 +39,7 @@ var DungeonParser = (function (_super) {
 
     DungeonParser.prototype.save = function () {
         var path = this.file.path;
-        (new flower.File(path)).saveText(flower.ObjectDo.toString(this.data.value));
+        (new flower.File(path)).saveText(flower.ObjectDo.toString(this.data.value, 100000000));
     }
 
     Object.defineProperty(DungeonParser.prototype, "itemId", {

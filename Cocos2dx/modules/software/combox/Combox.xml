@@ -3,7 +3,7 @@
         <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
         <f:Label id="label" left="0" right="-30" verticalCenter="0"/>
         <f:Button id="button" width="30" height="20" right="0">
-            <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xFC4A4A" fillColor.down="0x7D2525"/>
+            <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xFFB5C5" fillColor.down="0xFFAEB9"/>
         </f:Button>
     </f:Group>
     <f:list>

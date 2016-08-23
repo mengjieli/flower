@@ -3253,7 +3253,7 @@ var $root = eval("this");
                         this.$addFlags(0x4000);
                     }
                 }
-                if (p[0] && p[0].length && p[1] && this.$hasFlags(0x4000)) {
+                if (p[0] && p[1] && this.$hasFlags(0x4000)) {
                     this.$removeFlags(0x4000);
                     if (!p[2]) {
                         p[2] = [];
@@ -3296,13 +3296,15 @@ var $root = eval("this");
                         layout.$clear();
                         var elementWidth;
                         var elementHeight;
-                        if (!items.length) {
-                            item = this.createItem(list.getItemAt(0), 0);
-                            item.data = list.getItemAt(0);
-                            items.push(item);
+                        if (p[0].length) {
+                            if (!items.length) {
+                                item = this.createItem(list.getItemAt(0), 0);
+                                item.data = list.getItemAt(0);
+                                items.push(item);
+                            }
+                            elementWidth = items[0].width;
+                            elementHeight = items[0].height;
                         }
-                        elementWidth = items[0].width;
-                        elementHeight = items[0].height;
                         var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                         firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
                         for (var i = firstItemIndex; i < list.length; i++) {
@@ -4027,11 +4029,14 @@ var $root = eval("this");
             var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Input).call(this, text));
 
             _this19.$initUIComponent();
+            _this19.$input = {
+                0: null };
             return _this19;
         }
 
         _createClass(Input, [{
             key: "$addFlags",
+            //value
             value: function $addFlags(flags) {
                 if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
                     this.__flags |= 0x1000;
@@ -4104,6 +4109,26 @@ var $root = eval("this");
                     }
                 }
             }
+        }, {
+            key: "$setText",
+            value: function $setText(val) {
+                _get(Object.getPrototypeOf(Input.prototype), "$setText", this).call(this, val);
+                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+                    this.$input[0].value = this.text;
+                }
+            }
+        }, {
+            key: "__valueChange",
+            value: function __valueChange() {
+                if (this.$input[0]) {
+                    this.$input[0].value = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
+                }
+            }
+        }, {
+            key: "__onValueChange",
+            value: function __onValueChange(e) {
+                this.__valueChange();
+            }
 
             //$onFrameEnd() {
             //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
@@ -4115,9 +4140,29 @@ var $root = eval("this");
         }, {
             key: "dispose",
             value: function dispose() {
+                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                }
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Input.prototype), "dispose", this).call(this);
+            }
+        }, {
+            key: "value",
+            set: function set(val) {
+                if (this.$input[0] == val) {
+                    return;
+                }
+                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                }
+                this.$input[0] = val;
+                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+                    this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+                }
+            },
+            get: function get() {
+                return this.$input[0];
             }
         }]);
 

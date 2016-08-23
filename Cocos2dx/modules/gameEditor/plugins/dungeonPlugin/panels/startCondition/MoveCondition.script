@@ -1,4 +1,5 @@
 function init() {
+    this.list.dataProvider = new flower.ArrayValue();
     this.scrollerList.rightClick = function () {
         flower.MenuManager.showMenu(new software.Menu(
             {
@@ -14,13 +15,10 @@ function init() {
                 ],
                 "click": function (target, item) {
                     if (item.type == "addPoint") {
-                        if (this.list.dataProvider == null) {
-                            this.list.dataProvider = new flower.ArrayValue();
-                        }
                         var array = this.list.dataProvider;
                         var point = flower.DataManager.createData("Point");
                         var data = {
-                            "point": point
+                            "point": point,
                         }
                         data.menu = {
                             "target": data,
@@ -32,18 +30,25 @@ function init() {
                             ],
                             "click": function (target, item) {
                                 array.removeItem(target);
-                            }
+                                this.save();
+                                this.data.points.removeItem(target.point);
+                            }.bind(this)
                         }
+                        point.x.addListener(flower.Event.UPDATE,function(e){
+                            this.save();
+                        },this);
+                        point.y.addListener(flower.Event.UPDATE,function(e){
+                            this.save();
+                        },this);
                         array.push(data);
+                        this.data.points.push(point);
                     } else if (item.type == "removeAll") {
-                        var array = this.list.dataProvider;
-                        if (array) {
-                            while (array.length) {
-                                array.removeItem(array[0]);
-                            }
-                            //array.removeAll();
+                        if (this.list.dataProvider) {
+                            this.list.dataProvider.removeAll();
+                            this.data.points.removeAll();
                         }
                     }
+                    this.save();
                 }.bind(this)
             }
         ));
@@ -56,6 +61,34 @@ function rightClickItem() {
 
 function setData(val) {
     _super.prototype.setData.call(this, val);
+    this.list.dataProvider.removeAll();
+    for (var i = 0; i < this.data.points.length; i++) {
+        var point = this.data.points[i];
+        var data = {
+            "point": point
+        }
+        data.menu = {
+            "target": data,
+            "menu": [
+                {
+                    "label": "删除",
+                    "type": "del"
+                }
+            ],
+            "click": function (target, item) {
+                array.removeItem(target);
+                this.save();
+                this.data.points.removeItem(target.point);
+            }.bind(this)
+        }
+        point.x.addListener(flower.Event.UPDATE,function(e){
+            this.save();
+        },this);
+        point.y.addListener(flower.Event.UPDATE,function(e){
+            this.save();
+        },this);
+        this.list.dataProvider.push(data);
+    }
     var atrs = ["armyType"];
     var dropDownList = {
         "armyType": [

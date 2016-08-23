@@ -2955,7 +2955,7 @@ class DataGroup extends Group {
                 this.$addFlags(0x4000);
             }
         }
-        if (p[0] && p[0].length && p[1] && (this.$hasFlags(0x4000))) {
+        if (p[0] && p[1] && (this.$hasFlags(0x4000))) {
             this.$removeFlags(0x4000);
             if (!p[2]) {
                 p[2] = [];
@@ -2998,13 +2998,15 @@ class DataGroup extends Group {
                 layout.$clear();
                 var elementWidth;
                 var elementHeight;
-                if (!items.length) {
-                    item = this.createItem(list.getItemAt(0), 0);
-                    item.data = list.getItemAt(0);
-                    items.push(item);
+                if(p[0].length) {
+                    if (!items.length) {
+                        item = this.createItem(list.getItemAt(0), 0);
+                        item.data = list.getItemAt(0);
+                        items.push(item);
+                    }
+                    elementWidth = items[0].width;
+                    elementHeight = items[0].height;
                 }
-                elementWidth = items[0].width;
-                elementHeight = items[0].height;
                 var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
                 for (var i = firstItemIndex; i < list.length; i++) {
@@ -3680,6 +3682,9 @@ class Input extends flower.TextInput {
     constructor(text = "") {
         super(text);
         this.$initUIComponent();
+        this.$input = {
+            0: null, //value
+        }
     }
 
     $addFlags(flags) {
@@ -3752,6 +3757,23 @@ class Input extends flower.TextInput {
         }
     }
 
+    $setText(val) {
+        super.$setText(val);
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].value = this.text;
+        }
+    }
+
+    __valueChange() {
+        if (this.$input[0]) {
+            this.$input[0].value = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
+        }
+    }
+
+    __onValueChange(e) {
+        this.__valueChange();
+    }
+
     //$onFrameEnd() {
     //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
     //    //    this.$validateUIComponent();
@@ -3760,9 +3782,29 @@ class Input extends flower.TextInput {
     //}
 
     dispose() {
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+        }
         this.removeAllBindProperty();
         this.$UIComponent[11].dispose();
         super.dispose();
+    }
+
+    set value(val) {
+        if (this.$input[0] == val) {
+            return;
+        }
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+        }
+        this.$input[0] = val;
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+        }
+    }
+
+    get value() {
+        return this.$input[0];
     }
 }
 

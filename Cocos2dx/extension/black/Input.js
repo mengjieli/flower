@@ -3,6 +3,9 @@ class Input extends flower.TextInput {
     constructor(text = "") {
         super(text);
         this.$initUIComponent();
+        this.$input = {
+            0: null, //value
+        }
     }
 
     $addFlags(flags) {
@@ -75,6 +78,23 @@ class Input extends flower.TextInput {
         }
     }
 
+    $setText(val) {
+        super.$setText(val);
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].value = this.text;
+        }
+    }
+
+    __valueChange() {
+        if (this.$input[0]) {
+            this.$input[0].value = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
+        }
+    }
+
+    __onValueChange(e) {
+        this.__valueChange();
+    }
+
     //$onFrameEnd() {
     //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
     //    //    this.$validateUIComponent();
@@ -83,9 +103,29 @@ class Input extends flower.TextInput {
     //}
 
     dispose() {
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+        }
         this.removeAllBindProperty();
         this.$UIComponent[11].dispose();
         super.dispose();
+    }
+
+    set value(val) {
+        if (this.$input[0] == val) {
+            return;
+        }
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+        }
+        this.$input[0] = val;
+        if (this.$input[0] && this.$input[0] instanceof flower.Value) {
+            this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+        }
+    }
+
+    get value() {
+        return this.$input[0];
     }
 }
 

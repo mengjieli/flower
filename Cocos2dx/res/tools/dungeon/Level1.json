@@ -37,8 +37,12 @@
    "name": "触发器41",
    "startCondition": 2,
    "startValue": {
-    "armyType": 1,
+    "armyType": 0,
     "points": [
+     {
+      "x": 10,
+      "y": 80
+     }
     ],
     "__className": "dg.MoveCondition"
    },
