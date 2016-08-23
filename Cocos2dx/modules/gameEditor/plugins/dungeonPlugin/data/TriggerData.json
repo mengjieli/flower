@@ -14,9 +14,9 @@
     },
     "startCondition": {
       "desc": "启动条件",
-      "detail": "启动条件分别为: start:启动触发",
-      "type": "string",
-      "init": "other"
+      "detail": "启动条件分别为: 1:启动触发 ",
+      "type": "int",
+      "init": 1
     },
     "effects": {
       "desc": "触发效果列表",

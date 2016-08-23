@@ -35,6 +35,13 @@ function onClickItem(e) {
         this.triggerDetailPanel.save = this.data.parser.save.bind(this.data.parser);
         this.triggerDetailPanel.data = item.data;
         showDetailPanel("Dungeon.trigger", item.data, this.triggerDetailPanel);
+    } else if (item.type == "effect") {
+        if (!this.effectDetailPanel) {
+            this.effectDetailPanel = new dg.EffectDetailPanel();
+        }
+        this.effectDetailPanel.save = this.data.parser.save.bind(this.data.parser);
+        this.effectDetailPanel.data = item.data.effect;
+        showDetailPanel("Dungeon.effect", item.data, this.effectDetailPanel);
     }
 }
 

@@ -1,34 +1,30 @@
 function init() {
     var container = this.container;
-    var labels = ["名称", "id", "启动条件"];
-    var attributes = ["name", "itemId", "startCondition"];
+    var labels = ["名称", "类型"];
+    var attributes = ["name", "type"];
     var inputFalse = {
-        "itemId": true
+        //"itemId": true
     };
     var dropDownList = {
-        "startCondition": [
+        "type": [
             {
-                "label": "进入副本",
-                "type": 1
+                "label": "开启触发器",
+                "type", 1
             },
             {
-                "label": "移动触发",
-                "type": 2
+                "label": "镜头范围",
+                "type": "CameraRange"
             },
             {
-                "label": "hp触发",
-                "type": 3
+                "label": "镜头位置",
+                "type": "CameraPosition"
             },
             {
-                "label": "通关触发",
-                "type": 4
-            },
-            {
-                "label": "效果触发",
-                "type": 5
+                "label": "刷怪",
+                "type": "CreateMonster"
             }
         ]
-    }
+    };
     this.attributes = attributes;
     for (var i = 0; i < attributes.length; i++) {
         var atr1 = attributes[i];

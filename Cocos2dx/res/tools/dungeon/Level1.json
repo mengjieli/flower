@@ -16,31 +16,39 @@
  "triggers": [
   {
    "itemId": 20,
-   "name": "启动触发器",
-   "startCondition": "start",
+   "name": "主触发器",
+   "startCondition": 1,
    "effects": [
     {
      "itemId": 26,
-     "name": "效果26"
+     "name": "效果27",
+     "delay": 0,
+     "type": "CameraRange"
     },
     {
      "itemId": 31,
-     "name": "效果31"
+     "name": "效果31",
+     "delay": 0,
+     "type": "CameraRange"
     },
     {
      "itemId": 35,
-     "name": "效果35"
+     "name": "效果35",
+     "delay": 0,
+     "type": "CameraRange"
     }
    ]
   },
   {
    "itemId": 32,
    "name": "触发器32",
-   "startCondition": "start",
+   "startCondition": 1,
    "effects": [
     {
      "itemId": 33,
-     "name": "效果33"
+     "name": "效果33",
+     "delay": 0,
+     "type": "CameraRange"
     }
    ]
   }

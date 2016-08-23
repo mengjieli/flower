@@ -6107,7 +6107,7 @@ var $root = eval("this");
                 this.__listSelectItemChange();
             }
         }, {
-            key: "typeField",
+            key: "valueField",
             get: function get() {
                 return this.$combox[6];
             },
@@ -6119,7 +6119,7 @@ var $root = eval("this");
                 this.__typeValueChange();
             }
         }, {
-            key: "typeValue",
+            key: "value",
             get: function get() {
                 return this.$combox[7];
             },

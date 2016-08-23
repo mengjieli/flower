@@ -9,6 +9,7 @@
     "./panels/NewTriggerPanel.xml",
     "./panels/NewDungeonPanel.xml",
     "./panels/TriggerDetailPanel.xml",
+    "./panels/EffectDetailPanel.xml",
     "./view/DungeonView.xml"
   ],
   "classes": {

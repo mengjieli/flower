@@ -9,8 +9,16 @@
     },
     "name": {
       "desc": "效果名称",
+      "type": "string"
+    },
+    "delay": {
+      "desc": "延迟多久生效",
+      "type": "int"
+    },
+    "type": {
+      "desc": "效果类型",
       "type": "string",
-      "init": "新效果"
+      "init": "CameraRange"
     }
   }
 }

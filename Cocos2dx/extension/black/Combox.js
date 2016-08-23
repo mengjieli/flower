@@ -158,11 +158,11 @@ class Combox extends Group {
         this.__listSelectItemChange();
     }
 
-    get typeField() {
+    get valueField() {
         return this.$combox[6];
     }
 
-    set typeField(val) {
+    set valueField(val) {
         if (this.$combox[6] == val) {
             return;
         }
@@ -170,11 +170,11 @@ class Combox extends Group {
         this.__typeValueChange();
     }
 
-    get typeValue() {
+    get value() {
         return this.$combox[7];
     }
 
-    set typeValue(val) {
+    set value(val) {
         if (this.$combox[7] == val) {
             return;
         }

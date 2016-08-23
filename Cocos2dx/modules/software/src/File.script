@@ -59,7 +59,7 @@ var File = (function (_super) {
         configurable: true
     });
 
-    Object.defineProperty(Direction.prototype, "type", {
+    Object.defineProperty(File.prototype, "type", {
         get: function () {
             return this.__type;
         },
