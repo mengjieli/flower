@@ -22,10 +22,10 @@
                                     alpha.up="0" alpha.over="0.5"
                                     alpha.selectedUp="1"/>
                             <f:Label x="5" text="x" verticalCenter="0"/>
-                            <f:Input id="xInput" text="{data.point.x}" x="15" width="50"
+                            <f:Input id="xInput" x="15" width="50"
                                      verticalCenter="0"/>
                             <f:Label x="80" text="y" verticalCenter="0"/>
-                            <f:Input id="yInput" text="{data.point.y}" x="90" width="50"
+                            <f:Input id="yInput" x="90" width="50"
                                      verticalCenter="0"/>
                         </f:ItemRenderer>
                     </f:itemRenderer>

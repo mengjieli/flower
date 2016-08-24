@@ -81,7 +81,6 @@ class Combox extends Group {
         return this.$combox[0];
     }
 
-
     set button(val) {
         if (this.$combox[1] == val) {
             return;

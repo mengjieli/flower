@@ -3761,12 +3761,15 @@ class Input extends flower.TextInput {
         super.$setText(val);
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
             this.$input[0].value = this.text;
+            if (this.text != this.$input[0].value + "") {
+                this.__valueChange();
+            }
         }
     }
 
     __valueChange() {
         if (this.$input[0]) {
-            this.$input[0].value = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
+            this.text = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
         }
     }
 
@@ -3801,6 +3804,7 @@ class Input extends flower.TextInput {
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
             this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
         }
+        this.__valueChange();
     }
 
     get value() {
@@ -5570,7 +5574,6 @@ class Combox extends Group {
     get label() {
         return this.$combox[0];
     }
-
 
     set button(val) {
         if (this.$combox[1] == val) {

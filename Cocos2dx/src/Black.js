@@ -4115,13 +4115,16 @@ var $root = eval("this");
                 _get(Object.getPrototypeOf(Input.prototype), "$setText", this).call(this, val);
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
                     this.$input[0].value = this.text;
+                    if (this.text != this.$input[0].value + "") {
+                        this.__valueChange();
+                    }
                 }
             }
         }, {
             key: "__valueChange",
             value: function __valueChange() {
                 if (this.$input[0]) {
-                    this.$input[0].value = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
+                    this.text = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
                 }
             }
         }, {
@@ -4160,6 +4163,7 @@ var $root = eval("this");
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
                     this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
                 }
+                this.__valueChange();
             },
             get: function get() {
                 return this.$input[0];
