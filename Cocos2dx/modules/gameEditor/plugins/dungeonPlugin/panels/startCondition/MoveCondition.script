@@ -109,28 +109,10 @@ function setData(val) {
                     this.save();
                 }, this);
             } else {
-                this[atr + "Input"].bindProperty("text", "{data." + atr + "}", [this]);
-                this[atr + "Input"].addListener(flower.Event.FOCUS_IN, function (e) {
-                    this[atr + "Input"].removeBindProperty("text");
-                }.bind(this));
-                var inputOver = function () {
-                    var text = this[atr + "Input"].text;
-                    if (text != "") {
-                        this.data[atr].value = text;
-                    } else {
-                        this.data[atr].value = text;
-                    }
-                    this[atr + "Input"].bindProperty("text", "{data." + atr + "}", [this]);
-                    this.__save();
-                };
-                this[atr + "Input"].addListener(flower.Event.FOCUS_OUT, function (e) {
-                    inputOver.apply(this);
-                }.bind(this));
-                this[atr + "Input"].addListener(flower.KeyboardEvent.KEY_DOWN, function (e) {
-                    if (e.keyCode != 13) return;
-                    this[atr + "Input"].inputOver();
-                    inputOver.apply(this);
-                }.bind(this));
+                this[atr + "Input"].value = this.data[atr];
+                this.data[atr].addListener(flower.Event.UPDATE, function (e) {
+                    this.save();
+                }, this);
             }
         }.bind(this))(atr);
     }

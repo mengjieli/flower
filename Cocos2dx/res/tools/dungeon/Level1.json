@@ -16,19 +16,20 @@
  "triggers": [
   {
    "itemId": 51,
-   "name": "触发器51",
-   "startCondition": 3,
+   "name": "触发器51222",
+   "startCondition": 2,
    "startValue": {
-    "tag": 0,
-    "hp": 0,
-    "__className": "dg.HPCondition"
+    "armyType": 0,
+    "points": [
+    ],
+    "__className": "dg.MoveCondition"
    },
    "effects": [
     {
      "itemId": 52,
      "name": "效果52",
      "delay": 0,
-     "type": 3,
+     "type": 1,
      "effectValue": null
     }
    ]
