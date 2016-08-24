@@ -16,7 +16,7 @@
     "./tree/PathObject.xml",
     "./tab/TabBar.xml",
     "./tab/Tab.xml",
-    "./combox/Combox.xml"
+    "./comboBox/ComboBox.xml"
   ],
   "scripts": [
     "./src/Direction.script",

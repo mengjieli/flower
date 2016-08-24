@@ -970,18 +970,6 @@ class ArrayValue extends Value {
             this.dispatchWidth(flower.Event.UPDATE, this);
         }
     }
-
-    set selectedItem(val) {
-        if (this._selectedItem == val) {
-            return;
-        }
-        this._selectedItem = val;
-        this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
-    }
-
-    get selectedItem() {
-        return this._selectedItem;
-    }
 }
 
 for (var i = 0; i < 100; i++) {
@@ -1410,6 +1398,7 @@ locale_strings[3014] = "无法设置属性值，该对象没有此属性 : {0}";
 locale_strings[3015] = "对象不能设置为空";
 locale_strings[3100] = "没有定义的数据类型 : {0}";
 locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
+locale_strings[3102] = "还没有设定数据源 dataProvider";
 locale_strings[3201] = "没有找到对应的类 : {0}";
 //////////////////////////End File:extension/black/language/zh_CN.js///////////////////////////
 
@@ -2169,7 +2158,7 @@ class UIParser extends Group {
             "List": "flower.List",
             "TabBar": "flower.TabBar",
             "ViewStack": "flower.ViewStack",
-            "Combox": "flower.Combox",
+            "ComboBox": "flower.ComboBox",
             "Panel": "flower.Panel",
             "Alert": "flower.Alert",
             "Tree": "flower.Tree",
@@ -3062,9 +3051,6 @@ class DataGroup extends Group {
             var measureSize = false;
             var findSelected = false;
             var layout = this.layout;
-            if (p[9] && p[9] != list.selectedItem) {
-                this.__setSelectedItemData(list.selectedItem);
-            }
             if (!p[3] || !layout || !layout.fixElementSize) {
                 for (var i = 0, len = list.length; i < len; i++) {
                     item = null;
@@ -3090,9 +3076,9 @@ class DataGroup extends Group {
                 }
             } else {
                 layout.$clear();
-                var elementWidth;
-                var elementHeight;
-                if(p[0].length) {
+                var elementWidth = 0;
+                var elementHeight = 0;
+                if (p[0].length) {
                     if (!items.length) {
                         item = this.createItem(list.getItemAt(0), 0);
                         item.data = list.getItemAt(0);
@@ -3343,7 +3329,6 @@ class DataGroup extends Group {
             }
             itemRenderer.selected = true;
         }
-        data.selectedItem = itemData;
         if (changeFlag) {
             this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
         }
@@ -3386,7 +3371,7 @@ class DataGroup extends Group {
     $setDataProvider(val) {
         var p = this.$DataGroup;
         if (p[0] == val) {
-            return;
+            return false;
         }
         if (p[0]) {
             p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
@@ -3405,6 +3390,7 @@ class DataGroup extends Group {
         if (p[10] && p[0].length) {
             this.__setSelectedItemData(p[0].getItemAt(0));
         }
+        return true;
     }
 
     //////////////////////////////////get&set//////////////////////////////////
@@ -3471,6 +3457,9 @@ class DataGroup extends Group {
         var p = this.$DataGroup;
         val = +val || 0;
         var item;
+        if (p[0] == null) {
+            sys.$error(3102);
+        }
         if (val != -1) {
             if (val < 0 || val >= p[0].length) {
                 sys.$error(3101, val, p[0].length);
@@ -3488,7 +3477,19 @@ class DataGroup extends Group {
     }
 
     set selectedItem(val) {
-        this.__setSelectedItemData(val);
+        var p = this.$DataGroup;
+        if (p[9] == val) {
+            return;
+        }
+        if (p[0] == null) {
+            sys.$error(3102);
+        }
+        var p = this.$DataGroup;
+        if (p[0].getItemIndex(val) == -1) {
+            this.__setSelectedItemData(null);
+        } else {
+            this.__setSelectedItemData(val);
+        }
     }
 
     get itemSelectedEnabled() {
@@ -4900,189 +4901,26 @@ class TabBar extends ListBase {
         this.layout.fixElementSize = false;
     }
 
-    __setSelectedItem(item) {
-        super.__setSelectedItem(item);
-        (this.dataProvider).selectedItem = item.data;
+    $setDataProvider(val) {
+        var d = this.dataProvider;
+        if (super.$setDataProvider(val)) {
+            if(d) {
+                d.removeListener(flower.Event.CHANGE, this.__onDataProviderSelectedChange, this);
+            }
+            if (val && val instanceof flower.ViewStack) {
+                val.addListener(flower.Event.CHANGE, this.__onDataProviderSelectedChange, this);
+            }
+        }
     }
 
-    $onFrameEnd() {
-        var p = this.$DataGroup;
-        if (p[3]) {
-            if (p[4] != p[3].width || p[5] != p[3].height) {
-                p[4] = p[3].width;
-                p[5] = p[3].height;
-                this.$addFlags(0x4000);
-            }
-        }
-        if (p[0] && p[0].length && p[1] && (this.$hasFlags(0x4000))) {
-            this.$removeFlags(0x4000);
-            if (!p[2]) {
-                p[2] = [];
-            }
-            var items = p[2];
-            var list = p[0];
-            var newItems = [];
-            var item;
-            var itemData;
-            var measureSize = false;
-            var findSelected = false;
-            if (p[9] && p[9] != list.selectedItem) {
-                this.__setSelectedItemData(list.selectedItem);
-            }
-            var layout = this.layout;
-            var addMoreButton = false;
-            if (!p[3] || !layout || !layout.fixElementSize) {
-                for (var i = 0, len = list.length; i < len; i++) {
-                    item = null;
-                    itemData = list.getItemAt(i);
-                    if (itemData == p[9]) {
-                        findSelected = true;
-                    }
-                    for (var f = 0; f < items.length; f++) {
-                        if (items[f].data == itemData) {
-                            item = items[f];
-                            items.splice(f, 1);
-                            break;
-                        }
-                    }
-                    if (item == null) {
-                        item = this.createItem(itemData, i);
-                        item.data = itemData;
-                    }
-                    //检查 more 里面的数据
-                    if (this.width > 20 && this.more && item.x + item.width > this.width - 20) {
-                        if (itemData == p[9]) {
-                            findSelected = false;
-                        }
-                        if (!findSelected && list instanceof flower.ViewStack) {
-                            list.setItemIndex(p[9], 0);
-                        }
-                        addMoreButton = true;
-                        if (item.parent) {
-                            item.parent.removeChild(item);
-                        }
-                        if (this.moreButton) {
-                            this.moreButton.width = this.width - item.x;
-                            if (this.moreButton.parent != this) {
-                                this.addChild(this.moreButton);
-                            }
-                        }
-                        var more = this.moreData;
-                        var saveList = more.list.concat();
-                        var moreItem;
-                        more.removeAll();
-                        for (; i < len; i++) {
-                            itemData = list.getItemAt(i);
-                            moreItem = null;
-                            for (var j = 0; j < saveList.length; j++) {
-                                if (saveList[j].panel == itemData) {
-                                    moreItem = saveList[j];
-                                    saveList.splice(j, 1);
-                                    break;
-                                }
-                            }
-                            if (!moreItem) {
-                                moreItem = {
-                                    label: itemData.title,
-                                    panel: itemData
-                                };
-                            } else {
-                                moreItem.label = itemData.title;
-                            }
-                            more.push(moreItem);
-                        }
-                        break;
-                    }
-                    if (item.parent == this) {
-                        this.setChildIndex(item, i);
-                    } else {
-                        this.addChild(item);
-                    }
-                    item.$setItemIndex(i);
-                    newItems[i] = item;
-                }
-                if (!addMoreButton) {
-                    if (this.moreButton && this.moreButton.parent == this) {
-                        this.removeChild(this.moreButton);
-                    }
-                }
-            } else {
-                layout.$clear();
-                var elementWidth;
-                var elementHeight;
-                if (!items.length) {
-                    item = this.createItem(list.getItemAt(0), 0);
-                    item.data = list.getItemAt(0);
-                    items.push(item);
-                }
-                elementWidth = items[0].width;
-                elementHeight = items[0].height;
-                var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
-                firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
-                for (var i = firstItemIndex; i < list.length; i++) {
-                    item = null;
-                    itemData = list.getItemAt(i);
-                    for (var f = 0; f < items.length; f++) {
-                        if (items[f].data == itemData) {
-                            item = items[f];
-                            items.splice(f, 1);
-                            break;
-                        }
-                    }
-                    if (!item) {
-                        item = this.createItem(itemData, i);
-                        item.data = itemData;
-                    }
-                    if (item.parent == this) {
-                        this.setChildIndex(item, i - firstItemIndex);
-                    } else {
-                        this.addChild(item);
-                    }
-                    item.$setItemIndex(i);
-                    newItems[i - firstItemIndex] = item;
-                    layout.updateList(p[4], p[5], firstItemIndex);
-                    if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
-                        break;
-                    }
-                }
-            }
-            if (p[9]) {
-                findSelected = false;
-                for (var i = 0, len = list.length; i < len; i++) {
-                    if (list.getItemAt(i) == p[9]) {
-                        findSelected = true;
-                        break;
-                    }
-                }
-                if (!findSelected) {
-                    p[9] = null;
-                }
-            }
-            measureSize = true;
-            while (items.length) {
-                items.pop().dispose();
-            }
-            p[2] = newItems;
-            if (!p[9]) {
-                this._canSelecteItem();
-            }
-        }
-        super.$onFrameEnd();
-        if (measureSize) {
-            if (layout) {
-                if (!p[3] || !layout.fixElementSize) {
-                    var size = layout.getContentSize();
-                    p[6] = size.width;
-                    p[7] = size.height;
-                    flower.Size.release(size);
-                }
-                else if (p[2].length) {
-                    var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                    p[6] = size.width;
-                    p[7] = size.height;
-                    flower.Size.release(size);
-                }
-            }
+    __onDataProviderSelectedChange(e) {
+        this.selectedItem = this.dataProvider.selectedChild;
+    }
+
+    __setSelectedItemData(item) {
+        super.__setSelectedItemData(item);
+        if (this.dataProvider instanceof flower.ViewStack) {
+            this.dataProvider.selectedChild = this.selectedItem;
         }
     }
 
@@ -5285,7 +5123,8 @@ class ViewStack extends Group {
             this._selectedIndex = val;
             super.addChildAt(this._selectedItem, this.numChildren);
         }
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.CHANGE, this._selectedItem);
+        this.dispatchWidth(flower.Event.UPDATE);
     }
 
     get length() {
@@ -5313,7 +5152,7 @@ class ViewStack extends Group {
         if (this._selectedIndex != -1 && this._selectedIndex >= index) {
             this._selectedIndex++;
         }
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWidth(flower.Event.UPDATE);
     }
 
     set selectedIndex(val) {
@@ -5331,13 +5170,12 @@ class ViewStack extends Group {
         return this._selectedIndex;
     }
 
-    set selectedItem(val) {
+    set selectedChild(val) {
         var index = this.getChildIndex(val);
         this._setSelectedIndex(index);
-        this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
     }
 
-    get selectedItem() {
+    get selectedChild() {
         return this._selectedItem;
     }
 }
@@ -5585,22 +5423,24 @@ black.Scroller = Scroller;
 
 
 
-//////////////////////////File:extension/black/Combox.js///////////////////////////
-class Combox extends Group {
+//////////////////////////File:extension/black/ComboBox.js///////////////////////////
+class ComboBox extends Group {
 
-    $combox;
+    $comboBox;
 
     constructor() {
         super();
-        this.$combox = {
+        this.$comboBox = {
             0: null, //label
             1: null, //button
             2: null, //list
             3: false, //openFlags
             4: "label", //labelField
             5: null, //dataProvider
-            6: "type", //typeField
-            7: null //typeValue
+            6: "type", //valueField
+            7: null, //value
+            8: null, //selectedItem
+            9: false //inSettingValue
         }
     }
 
@@ -5609,23 +5449,28 @@ class Combox extends Group {
     }
 
     __listRemoved(e) {
-        this.$combox[3] = false;
+        this.$comboBox[3] = false;
     }
 
     __listSelectItemChange(e) {
-        var p = this.$combox;
-        var array = p[5];
-        if (this.label && array && array.selectedItem) {
-            this.label.text = array.selectedItem[p[4]];
-        } else {
-            this.label.text = "";
+        var p = this.$comboBox;
+        if (p[9]) {
+            return;
+        }
+        p[8] = e.item;
+        if (p[0]) {
+            if (p[8] && p[8][p[4]]) {
+                p[0].text = p[8][p[4]];
+            } else {
+                p[0].text = "";
+            }
         }
         if (e) {
             this.dispatch(e);
         }
-        if (p[6] && p[7]) {
+        if (p[6] && p[7] && p[8]) {
             if (p[7] instanceof flower.Value) {
-                p[7].value = array.selectedItem[p[6]];
+                p[7].value = p[8][p[6]];
             }
         }
     }
@@ -5635,15 +5480,11 @@ class Combox extends Group {
     }
 
     __typeValueChange() {
-        if (this.$combox[6] && this.$combox[7]) {
-            var array = this.$combox[5];
-            var value = this.$combox[7] instanceof flower.Value ? this.$combox[7].value : this.$combox[7];
-            for (var i = 0; i < array.length; i++) {
-                if (array[i][this.$combox[6]] == value) {
-                    this.selectedIndex = i;
-                    break;
-                }
-            }
+        var p = this.$comboBox;
+        if (p[6] && p[7]) {
+            var array = p[5];
+            var value = p[7] instanceof flower.Value ? p[7].value : p[7];
+            this.selectedItem = array.getItemWith(p[6], value);
         }
     }
 
@@ -5652,31 +5493,39 @@ class Combox extends Group {
     }
 
     set label(val) {
-        if (this.$combox[0] == val) {
+        var p = this.$comboBox;
+        if (p[0] == val) {
             return;
         }
-        this.$combox[0] = val;
+        p[0] = val;
         if (val) {
             val.touchEnabled = false;
             if (val.parent != this) {
                 this.addChild(val);
             }
         }
-        this.__listSelectItemChange();
+        if (p[0]) {
+            if (p[8] && p[8][p[4]]) {
+                p[0].text = p[8][p[4]];
+            } else {
+                p[0].text = "";
+            }
+        }
     }
 
     get label() {
-        return this.$combox[0];
+        return this.$comboBox[0];
     }
 
     set button(val) {
-        if (this.$combox[1] == val) {
+        var p = this.$comboBox;
+        if (p[1] == val) {
             return;
         }
-        if (this.$combox[1]) {
-            this.$combox[1].removeListener(flower.TouchEvent.TOUCH_END, this.__onClickButton, this);
+        if (p[1]) {
+            p[1].removeListener(flower.TouchEvent.TOUCH_END, this.__onClickButton, this);
         }
-        this.$combox[1] = val;
+        p[1] = val;
         if (val) {
             val.addListener(flower.TouchEvent.TOUCH_END, this.__onClickButton, this);
             if (val.parent != this) {
@@ -5686,33 +5535,38 @@ class Combox extends Group {
     }
 
     get button() {
-        return this.$combox[1];
+        return this.$comboBox[1];
     }
 
 
     set list(val) {
-        if (this.$combox[2] == val) {
+        var p = this.$comboBox;
+        if (p[2] == val) {
             return;
         }
-        if (this.$combox[2]) {
-            this.$combox[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-            this.$combox[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+        if (p[2]) {
+            p[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
+            p[2].removeListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            p[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
         }
-        this.$combox[2] = val;
+        p[2] = val;
         if (val) {
-            val.dataProvider = this.$combox[5];
+            val.dataProvider = p[5];
+            if (p[8]) {
+                val.selectedItem = p[8];
+            }
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
+            val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
             val.addListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
         }
-        this.__listSelectItemChange();
     }
 
     get list() {
-        return this.$combox[2];
+        return this.$comboBox[2];
     }
 
     get isOpen() {
-        return this.$combox[3];
+        return this.$comboBox[3];
     }
 
     set isOpen(val) {
@@ -5720,12 +5574,12 @@ class Combox extends Group {
             val = false;
         }
         val = !!val;
-        if (val == this.$combox[3]) {
+        if (val == this.$comboBox[3]) {
             return;
         }
-        this.$combox[3] = val;
+        this.$comboBox[3] = val;
         if (val) {
-            var list = this.$combox[2];
+            var list = this.$comboBox[2];
             if (this.stage && list) {
                 var point = flower.Point.create();
                 this.localToGlobal(point);
@@ -5737,94 +5591,144 @@ class Combox extends Group {
     }
 
     get labelField() {
-        return this.$combox[4];
+        return this.$comboBox[4];
     }
 
     set labelField(val) {
-        this.$combox[4] = val;
-        this.__listSelectItemChange();
+        this.$comboBox[4] = val;
+        if (p[0]) {
+            if (p[8] && p[8][p[4]]) {
+                p[0].text = p[8][p[4]];
+            } else {
+                p[0].text = "";
+            }
+        }
     }
 
     get valueField() {
-        return this.$combox[6];
+        return this.$comboBox[6];
     }
 
     set valueField(val) {
-        if (this.$combox[6] == val) {
+        if (this.$comboBox[6] == val) {
             return;
         }
-        this.$combox[6] = val;
+        this.$comboBox[6] = val;
         this.__typeValueChange();
     }
 
     get value() {
-        return this.$combox[7];
+        return this.$comboBox[7];
     }
 
     set value(val) {
-        if (this.$combox[7] == val) {
+        var p = this.$comboBox;
+        if (p[7] == val) {
             return;
         }
-        if (this.$combox[7] && this.$combox[7] instanceof flower.Value) {
-            this.$combox[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+        if (p[7] && p[7] instanceof flower.Value) {
+            p[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
         }
-        this.$combox[7] = val;
-        if (this.$combox[7] && this.$combox[7] instanceof flower.Value) {
-            this.$combox[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
-            if (this.$combox[7].enumList) {
-                this.dataProvider = new flower.ArrayValue(this.$combox[7].enumList);
+        p[7] = val;
+        if (p[7]) {
+            p[9] = true;
+            if (p[7] instanceof flower.Value) {
+                p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                if (p[7].enumList) {
+                    this.dataProvider = new flower.ArrayValue(p[7].enumList);
+                }
             }
+            p[9] = false;
+            this.__typeValueChange();
         }
-        this.__typeValueChange();
     }
 
     get dataProvider() {
-        return this.$combox[5];
+        return this.$comboBox[5];
     }
 
     set dataProvider(val) {
-        if (this.$combox[5] == val) {
+        var p = this.$comboBox;
+        if (p[5] == val) {
             return;
         }
-        if (this.$combox[5]) {
-            this.$combox[5].removeListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-        }
-        this.$combox[5] = val;
-        if (this.$combox[5]) {
-            this.$combox[5].addListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+        p[5] = val;
+        if (!p[9]) {
+            if (p[5] == null || p[5].length == 0) {
+                p[8] = null;
+            } else {
+                p[8] = p[5][0];
+            }
         }
         if (this.list) {
-            this.list.dataProvider = this.$combox[5];
+            this.list.dataProvider = p[5];
+            if (!p[9] && this.list && p[8]) {
+                this.list.selectedItem = p[8];
+            }
         }
     }
 
     get selectedItem() {
-        return this.list ? this.list.selectedItem : null;
+        return this.$comboBox[8];
     }
 
     set selectedItem(val) {
-        var array = this.$combox[5];
-        for (var i = 0; i < this.array.length; i++) {
-            if (this.array[i] == val) {
-                this.selectedIndex = i;
-                return;
+        var p = this.$comboBox;
+        if (p[8] == val) {
+            return;
+        }
+        if (p[5] == null) {
+            sys.$error(3102);
+        }
+        var array = p[5];
+        var index = array.getItemIndex(val);
+        if (index == -1) {
+            p[8] = null;
+            if (this.list) {
+                this.list.selectedItem = null;
+            }
+            if (p[0]) {
+                p[0].text = "";
+            }
+        } else {
+            p[8] = val;
+            if (this.list) {
+                this.list.selectedItem = val;
+            }
+            if (p[0]) {
+                if (p[8] && p[8][p[4]]) {
+                    p[0].text = p[8][p[4]];
+                } else {
+                    p[0].text = "";
+                }
             }
         }
-        this.list.selectedIndex = -1;
     }
 
     get selectedIndex() {
-        return this.list ? this.list.selectedIndex : -1;
+        var p = this.$comboBox;
+        return p[5] == null ? -1 : p[5].getItemIndex(p[8]);
     }
 
     set selectedIndex(val) {
-        this.list.selectedIndex = val;
+        var p = this.$comboBox;
+        var item;
+        if (p[5] == null) {
+            sys.$error(3102);
+        }
+        if (val != -1) {
+            if (val < 0 || val >= p[5].length) {
+                sys.$error(3101, val, p[0].length);
+            }
+            item = p[5][val];
+        }
+        this.selectedItem = item;
     }
 }
 
 
-black.Combox = Combox;
-//////////////////////////End File:extension/black/Combox.js///////////////////////////
+black.ComboBox = ComboBox;
+//////////////////////////End File:extension/black/ComboBox.js///////////////////////////
 
 
 

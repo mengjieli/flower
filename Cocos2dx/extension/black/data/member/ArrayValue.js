@@ -410,18 +410,6 @@ class ArrayValue extends Value {
             this.dispatchWidth(flower.Event.UPDATE, this);
         }
     }
-
-    set selectedItem(val) {
-        if (this._selectedItem == val) {
-            return;
-        }
-        this._selectedItem = val;
-        this.dispatchWidth(flower.Event.SELECTED_ITEM_CHANGE, this._selectedItem);
-    }
-
-    get selectedItem() {
-        return this._selectedItem;
-    }
 }
 
 for (var i = 0; i < 100; i++) {

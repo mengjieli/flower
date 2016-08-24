@@ -1,5 +1,5 @@
 function init() {
-    this.combox.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, function (e) {
+    this.comboBox.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, function (e) {
         console.log("event:" + e.type);
     });
 }

@@ -1,4 +1,4 @@
-<f:Combox width="100" class="Combox" xmlns:f="flower" xmlns:s="software">
+<f:ComboBox width="100" class="ComboBox" xmlns:f="flower" xmlns:s="software">
     <f:Group percentWidth="100">
         <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
         <f:Label id="label" left="0" right="-30" verticalCenter="0"/>
@@ -13,4 +13,4 @@
             </f:viewport>
         </s:ScrollerList>
     </f:list>
-</f:Combox>
+</f:ComboBox>

@@ -18,5 +18,5 @@ function onViewFile(e) {
         plugin = new editor.PluginBase(file);
     }
     this.viewStack.addChild(plugin);
-    this.viewStack.selectedItem = plugin;
+    this.viewStack.selectedChild = plugin;
 }

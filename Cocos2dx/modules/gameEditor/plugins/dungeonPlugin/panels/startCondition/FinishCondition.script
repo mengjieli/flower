@@ -21,8 +21,8 @@ function setData(val) {
         var atr = atrs[i];
         (function (atr) {
             if (dropDownList[atr]) {
-                this[atr + "Combox"].dataProvider = new flower.ArrayValue(dropDownList[atr]);
-                this[atr + "Combox"].value = this.data[atr];
+                this[atr + "ComboBox"].dataProvider = new flower.ArrayValue(dropDownList[atr]);
+                this[atr + "ComboBox"].value = this.data[atr];
                 this.data[atr].addListener(flower.Event.UPDATE, function (e) {
                     this.save();
                 }, this);

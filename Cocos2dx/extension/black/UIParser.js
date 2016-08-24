@@ -42,7 +42,7 @@ class UIParser extends Group {
             "List": "flower.List",
             "TabBar": "flower.TabBar",
             "ViewStack": "flower.ViewStack",
-            "Combox": "flower.Combox",
+            "ComboBox": "flower.ComboBox",
             "Panel": "flower.Panel",
             "Alert": "flower.Alert",
             "Tree": "flower.Tree",

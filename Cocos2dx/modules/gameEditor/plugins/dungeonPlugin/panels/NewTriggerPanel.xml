@@ -7,7 +7,7 @@
         <f:Label text="id" horizontalCenter="-50" y="54"/>
         <f:Input id="idInput" horizontalCenter="30" y="50" width="100"/>
         <f:Label text="类型" horizontalCenter="-50" y="84"/>
-        <s:Combox id="combox" horizontalCenter="30" y="80" width="100">
+        <s:ComboBox id="comboBox" horizontalCenter="30" y="80" width="100">
             <f:dataProvider>
                 <f:ArrayValue>
                     <f:Object label="延时执行"/>
@@ -25,6 +25,6 @@
                     <f:Object label="剧情对话12"/>
                 </f:ArrayValue>
             </f:dataProvider>
-        </s:Combox>
+        </s:ComboBox>
     </f:Group>
 </s:Alert>

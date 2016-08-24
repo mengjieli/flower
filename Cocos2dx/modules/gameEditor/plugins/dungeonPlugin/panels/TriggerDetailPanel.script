@@ -16,7 +16,7 @@ function init() {
             '<f:Group horizontalCenter="0" xmlns:f="flower" xmlns:s="software">' +
             '<f:Label horizontalCenter="-55" width="50" text="' + label1 + '" verticalCenter="0"/>';
         if (dropDownList[atr1]) {
-            fxml += '<s:Combox id="' + atr1 + 'Combox" horizontalCenter="30" width="100" verticalCenter="0"/>';
+            fxml += '<s:ComboBox id="' + atr1 + 'ComboBox" horizontalCenter="30" width="100" verticalCenter="0"/>';
         } else {
             fxml += '<f:Input id="' + atr1 + 'Input" horizontalCenter="30" width="100" verticalCenter="0" ' + (inputFalse[atr1] ? 'touchEnabled="false"' : '') + '/>';
         }
@@ -24,8 +24,7 @@ function init() {
         var ui = (new flower.UIParser()).parseUI(fxml);
         container.addChild(ui);
         if (dropDownList[atr1]) {
-            //ui[atr1 + "Combox"].dataProvider = new flower.ArrayValue();
-            this[atr1 + "Combox"] = ui[atr1 + "Combox"];
+            this[atr1 + "ComboBox"] = ui[atr1 + "ComboBox"];
         } else {
             this[atr1 + "Input"] = ui[atr1 + "Input"];
         }
@@ -67,8 +66,8 @@ function setData(val) {
             }
             this.save();
         }
-        this.viewStack.selectedItem.save = this.save;
-        this.viewStack.selectedItem.data = this.data.startValue;
+        this.viewStack.selectedChild.save = this.save;
+        this.viewStack.selectedChild.data = this.data.startValue;
     };
     changeViewStack.call(this);
     this.data.startCondition.addListener(flower.Event.UPDATE, changeViewStack, this);
@@ -99,8 +98,8 @@ function setData(val) {
                     this[atr + "Input"].inputOver();
                     inputOver.apply(this);
                 }.bind(this));
-            } else if (this[atr + "Combox"]) {
-                this[atr + "Combox"].value = this.data[atr];
+            } else if (this[atr + "ComboBox"]) {
+                this[atr + "ComboBox"].value = this.data[atr];
                 this.data[atr].addListener(flower.Event.UPDATE, function (e) {
                     this.save();
                 }, this);

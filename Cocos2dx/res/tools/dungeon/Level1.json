@@ -17,14 +17,18 @@
   {
    "itemId": 51,
    "name": "触发器51",
-   "startCondition": 1,
-   "startValue": null,
+   "startCondition": 3,
+   "startValue": {
+    "tag": 0,
+    "hp": 0,
+    "__className": "dg.HPCondition"
+   },
    "effects": [
     {
      "itemId": 52,
      "name": "效果52",
      "delay": 0,
-     "type": 1,
+     "type": 3,
      "effectValue": null
     }
    ]

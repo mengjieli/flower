@@ -9,12 +9,12 @@ var DungeonParser = (function (_super) {
     DungeonParser.prototype.load = function () {
         var config = this.file.content;
         this.data = flower.DataManager.createData("dg.DungeonData", config);
-        this.data.backgroundList.addListener(flower.Event.SELECTED_ITEM_CHANGE, function (e) {
+        /*this.data.backgroundList.addListener(flower.Event.SELECTED_ITEM_CHANGE, function (e) {
             if (e.data) {
                 this.data.background.value = e.data.path;
                 this.save();
             }
-        }, this);
+        }, this);*/
         (new flower.Direction("res/tools/dungeon/background")).readDirectionList(function (list) {
             this.data.backgroundList.removeAll();
             for (var i = 0; i < list.length; i++) {

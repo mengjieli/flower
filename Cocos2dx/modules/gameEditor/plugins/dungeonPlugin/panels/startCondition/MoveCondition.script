@@ -98,23 +98,13 @@ function setData(val) {
     }
     var atrs = ["armyType"];
     var dropDownList = {
-        "armyType": [
-            {
-                "label": "己方部队",
-                "type": 0
-            },
-            {
-                "label": "怪物",
-                "type": 1
-            }
-        ]
+        "armyType":true
     }
     for (var i = 0; i < atrs.length; i++) {
         var atr = atrs[i];
         (function (atr) {
             if (dropDownList[atr]) {
-                this[atr + "Combox"].dataProvider = new flower.ArrayValue(dropDownList[atr]);
-                this[atr + "Combox"].value = this.data[atr];
+                this[atr + "ComboBox"].value = this.data[atr];
                 this.data[atr].addListener(flower.Event.UPDATE, function (e) {
                     this.save();
                 }, this);

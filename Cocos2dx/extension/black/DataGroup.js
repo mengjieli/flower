@@ -80,9 +80,6 @@ class DataGroup extends Group {
             var measureSize = false;
             var findSelected = false;
             var layout = this.layout;
-            if (p[9] && p[9] != list.selectedItem) {
-                this.__setSelectedItemData(list.selectedItem);
-            }
             if (!p[3] || !layout || !layout.fixElementSize) {
                 for (var i = 0, len = list.length; i < len; i++) {
                     item = null;
@@ -108,9 +105,9 @@ class DataGroup extends Group {
                 }
             } else {
                 layout.$clear();
-                var elementWidth;
-                var elementHeight;
-                if(p[0].length) {
+                var elementWidth = 0;
+                var elementHeight = 0;
+                if (p[0].length) {
                     if (!items.length) {
                         item = this.createItem(list.getItemAt(0), 0);
                         item.data = list.getItemAt(0);
@@ -361,7 +358,6 @@ class DataGroup extends Group {
             }
             itemRenderer.selected = true;
         }
-        data.selectedItem = itemData;
         if (changeFlag) {
             this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
         }
@@ -404,7 +400,7 @@ class DataGroup extends Group {
     $setDataProvider(val) {
         var p = this.$DataGroup;
         if (p[0] == val) {
-            return;
+            return false;
         }
         if (p[0]) {
             p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
@@ -423,6 +419,7 @@ class DataGroup extends Group {
         if (p[10] && p[0].length) {
             this.__setSelectedItemData(p[0].getItemAt(0));
         }
+        return true;
     }
 
     //////////////////////////////////get&set//////////////////////////////////
@@ -489,6 +486,9 @@ class DataGroup extends Group {
         var p = this.$DataGroup;
         val = +val || 0;
         var item;
+        if (p[0] == null) {
+            sys.$error(3102);
+        }
         if (val != -1) {
             if (val < 0 || val >= p[0].length) {
                 sys.$error(3101, val, p[0].length);
@@ -506,7 +506,19 @@ class DataGroup extends Group {
     }
 
     set selectedItem(val) {
-        this.__setSelectedItemData(val);
+        var p = this.$DataGroup;
+        if (p[9] == val) {
+            return;
+        }
+        if (p[0] == null) {
+            sys.$error(3102);
+        }
+        var p = this.$DataGroup;
+        if (p[0].getItemIndex(val) == -1) {
+            this.__setSelectedItemData(null);
+        } else {
+            this.__setSelectedItemData(val);
+        }
     }
 
     get itemSelectedEnabled() {

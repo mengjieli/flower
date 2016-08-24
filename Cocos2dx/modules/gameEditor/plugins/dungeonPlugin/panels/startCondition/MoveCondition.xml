@@ -5,7 +5,7 @@
     <f:script src="./MoveCondition.script"/>
     <f:Group horizontalCenter="0">
         <f:Label horizontalCenter="-55" width="60" text="部队类型" verticalCenter="0"/>
-        <s:Combox id="armyTypeCombox" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:ComboBox id="armyTypeComboBox" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="40">
         <f:Label horizontalCenter="0" text="坐标点(网格坐标)"/>

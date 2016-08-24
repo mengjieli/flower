@@ -4,7 +4,17 @@
   "members": {
     "armyType": {
       "desc": "部队或者野怪  0.部队  1.野怪",
-      "type": "int"
+      "type": "int",
+      "enumList": [
+        {
+          "label": "己方部队",
+          "type": 0
+        },
+        {
+          "label": "怪物",
+          "type": 1
+        }
+      ]
     },
     "points": {
       "desc": "坐标点(网格坐标)",

@@ -209,7 +209,7 @@ var list = [
     "TabBar",
     "ViewStack",
     "Scroller",
-    "Combox",
+    "ComboBox",
     "Panel",
     "Alert",
     "Tree",

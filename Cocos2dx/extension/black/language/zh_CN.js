@@ -16,4 +16,5 @@ locale_strings[3014] = "无法设置属性值，该对象没有此属性 : {0}";
 locale_strings[3015] = "对象不能设置为空";
 locale_strings[3100] = "没有定义的数据类型 : {0}";
 locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
+locale_strings[3102] = "还没有设定数据源 dataProvider";
 locale_strings[3201] = "没有找到对应的类 : {0}";
