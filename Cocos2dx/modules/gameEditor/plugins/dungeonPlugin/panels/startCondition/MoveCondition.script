@@ -13,50 +13,53 @@ function init() {
                         "type": "removeAll"
                     }
                 ],
-                "click": function (target, item) {
-                    if (item.type == "addPoint") {
-                        var array = this.list.dataProvider;
-                        var point = flower.DataManager.createData("Point");
-                        var data = {
-                            "point": point,
-                        }
-                        data.menu = {
-                            "target": data,
-                            "menu": [
-                                {
-                                    "label": "删除",
-                                    "type": "del"
-                                }
-                            ],
-                            "click": function (target, item) {
-                                array.removeItem(target);
-                                this.save();
-                                this.data.points.removeItem(target.point);
-                            }.bind(this)
-                        }
-                        point.x.addListener(flower.Event.UPDATE,function(e){
-                            this.save();
-                        },this);
-                        point.y.addListener(flower.Event.UPDATE,function(e){
-                            this.save();
-                        },this);
-                        array.push(data);
-                        this.data.points.push(point);
-                    } else if (item.type == "removeAll") {
-                        if (this.list.dataProvider) {
-                            this.list.dataProvider.removeAll();
-                            this.data.points.removeAll();
-                        }
-                    }
-                    this.save();
-                }.bind(this)
+                "click": this.menuFunction.bind(this)
             }
         ));
     }.bind(this);
 }
 
-function rightClickItem() {
-    console.log("clickItem", arguments);
+function menuFunction(target, item) {
+    if (item.type == "addPoint") {
+        var array = this.list.dataProvider;
+        var point = flower.DataManager.createData("Point");
+        var data = {
+            "point": point,
+        }
+        data.menu = {
+            "target": data,
+            "menu": [
+                {
+                    "label": "删除",
+                    "type": "delPoint"
+                },
+                {
+                    "label": "添加坐标点",
+                    "type": "addPoint"
+                },
+                {
+                    "label": "删除全部点",
+                    "type": "removeAll"
+                }
+            ],
+            "click": this.menuFunction.bind(this)
+        }
+        point.x.addListener(flower.Event.UPDATE, function (e) {
+            this.save();
+        }, this);
+        point.y.addListener(flower.Event.UPDATE, function (e) {
+            this.save();
+        }, this);
+        array.push(data);
+        this.data.points.push(point);
+    } else if (item.type == "removeAll") {
+        this.list.dataProvider.removeAll();
+        this.data.points.removeAll();
+    } else if (item.type == "delPoint") {
+        this.list.dataProvider.removeItem(target);
+        this.data.points.removeItem(target.point);
+    }
+    this.save();
 }
 
 function setData(val) {
@@ -73,20 +76,24 @@ function setData(val) {
                 {
                     "label": "删除",
                     "type": "del"
+                },
+                {
+                    "label": "添加坐标点",
+                    "type": "addPoint"
+                },
+                {
+                    "label": "删除全部点",
+                    "type": "removeAll"
                 }
             ],
-            "click": function (target, item) {
-                array.removeItem(target);
-                this.save();
-                this.data.points.removeItem(target.point);
-            }.bind(this)
+            "click": this.menuFunction.bind(this)
         }
-        point.x.addListener(flower.Event.UPDATE,function(e){
+        point.x.addListener(flower.Event.UPDATE, function (e) {
             this.save();
-        },this);
-        point.y.addListener(flower.Event.UPDATE,function(e){
+        }, this);
+        point.y.addListener(flower.Event.UPDATE, function (e) {
             this.save();
-        },this);
+        }, this);
         this.list.dataProvider.push(data);
     }
     var atrs = ["armyType"];

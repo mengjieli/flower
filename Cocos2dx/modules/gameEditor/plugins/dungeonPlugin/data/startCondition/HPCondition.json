@@ -1,7 +1,6 @@
 {
   "name": "dg.HPCondition",
   "desc": "hp触发",
-  "saveClass": true,
   "members": {
     "tag": {
       "desc": "野怪标记",

@@ -6,6 +6,7 @@ class ObjectValue extends Value {
         if (init) {
             this.value = init;
         }
+        this.__saveClass = {};
     }
 
     setMember(name, value) {
@@ -16,6 +17,10 @@ class ObjectValue extends Value {
         //    "old": old,
         //    "value": value
         //});
+    }
+
+    setMemberSaveClass(name, saveClass = false) {
+        this.__saveClass[name] = saveClass;
     }
 
     hasMember(name) {
@@ -31,7 +36,7 @@ class ObjectValue extends Value {
             sys.$error(3014, name);
             return;
         }
-        if(value == null) {
+        if (value == null) {
             this.setMember(name, null);
         } else {
             if (value instanceof Value) {
@@ -71,11 +76,7 @@ class ObjectValue extends Value {
         }
     }
 
-
-    /**
-     * 将数据转化成 Object
-     */
-    get value() {
+    $getValue(saveClass = false) {
         var val = this.__value;
         var list = Object.keys(val);
         var config = {};
@@ -83,15 +84,27 @@ class ObjectValue extends Value {
             var key = list[i];
             var member = val[key];
             if (member instanceof Value) {
-                config[key] = member.value;
+                if (member instanceof ObjectValue) {
+                    config[key] = member.$getValue(this.__saveClass[key]);
+                } else {
+                    config[key] = member.value;
+                }
             } else {
                 config[key] = member;
             }
         }
-        if (this.__className) {
+        if (this.__className && saveClass) {
             config.__className = this.__className.value;
         }
         return config;
+    }
+
+
+    /**
+     * 将数据转化成 Object
+     */
+    get value() {
+        return this.$getValue();
     }
 
     set value(val) {

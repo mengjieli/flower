@@ -11,6 +11,7 @@
     "./panels/TriggerDetailPanel.xml",
     "./panels/startCondition/HPCondition.xml",
     "./panels/startCondition/MoveCondition.xml",
+    "./panels/startCondition/FinishCondition.xml",
     "./panels/EffectDetailPanel.xml",
     "./view/DungeonView.xml"
   ],
@@ -21,6 +22,7 @@
     "./data/TriggerData.json",
     "./data/TriggerEffectData.json",
     "./data/startCondition/HPCondition.json",
-    "./data/startCondition/MoveCondition.json"
+    "./data/startCondition/MoveCondition.json",
+    "./data/startCondition/FinishCondition.json"
   ]
 }

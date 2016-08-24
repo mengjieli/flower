@@ -1129,6 +1129,7 @@ var $root = eval("this");
 
         function BooleanValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
             _classCallCheck(this, BooleanValue);
 
@@ -1137,6 +1138,7 @@ var $root = eval("this");
             if (init == "false") {
                 init = false;
             }
+            _this5.__enumList = enumList;
             _this5.__old = _this5.__value = !!init;
             return _this5;
         }
@@ -1155,6 +1157,22 @@ var $root = eval("this");
                 this.__value = val;
                 this.dispatchWidth(flower.Event.UPDATE, this, val);
             }
+        }, {
+            key: "$setEnumList",
+            value: function $setEnumList(val) {
+                if (this.__enumList == val) {
+                    return;
+                }
+                this.__enumList = val;
+            }
+        }, {
+            key: "enumList",
+            get: function get() {
+                return this.__enumList;
+            },
+            set: function set(val) {
+                this.$setEnumList(val);
+            }
         }]);
 
         return BooleanValue;
@@ -1170,12 +1188,14 @@ var $root = eval("this");
 
         function IntValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+            var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
             _classCallCheck(this, IntValue);
 
             var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
 
             _this6.__old = _this6.__value = +init & ~0 || 0;
+            _this6.__enumList = enumList;
             return _this6;
         }
 
@@ -1189,6 +1209,22 @@ var $root = eval("this");
                 this.__old = this.__value;
                 this.__value = val;
                 this.dispatchWidth(flower.Event.UPDATE, this, val);
+            }
+        }, {
+            key: "$setEnumList",
+            value: function $setEnumList(val) {
+                if (this.__enumList == val) {
+                    return;
+                }
+                this.__enumList = val;
+            }
+        }, {
+            key: "enumList",
+            get: function get() {
+                return this.__enumList;
+            },
+            set: function set(val) {
+                this.$setEnumList(val);
             }
         }]);
 
@@ -1205,11 +1241,13 @@ var $root = eval("this");
 
         function NumberValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+            var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
             _classCallCheck(this, NumberValue);
 
             var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
 
+            _this7.__enumList = enumList;
             _this7.__old = _this7.__value = +init || 0;
             _this7.__precision = 2;
             _this7.__multiplier = Math.pow(10, _this7.__precision);
@@ -1237,6 +1275,22 @@ var $root = eval("this");
                 this.__old = this.__value;
                 this.__value = val;
                 this.dispatchWidth(flower.Event.UPDATE, this, val);
+            }
+        }, {
+            key: "$setEnumList",
+            value: function $setEnumList(val) {
+                if (this.__enumList == val) {
+                    return;
+                }
+                this.__enumList = val;
+            }
+        }, {
+            key: "enumList",
+            get: function get() {
+                return this.__enumList;
+            },
+            set: function set(val) {
+                this.$setEnumList(val);
             }
 
             /**
@@ -1278,6 +1332,7 @@ var $root = eval("this");
             if (init) {
                 _this8.value = init;
             }
+            _this8.__saveClass = {};
             return _this8;
         }
 
@@ -1291,6 +1346,13 @@ var $root = eval("this");
                 //    "old": old,
                 //    "value": value
                 //});
+            }
+        }, {
+            key: "setMemberSaveClass",
+            value: function setMemberSaveClass(name) {
+                var saveClass = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+                this.__saveClass[name] = saveClass;
             }
         }, {
             key: "hasMember",
@@ -1351,6 +1413,32 @@ var $root = eval("this");
                     }
                 }
             }
+        }, {
+            key: "$getValue",
+            value: function $getValue() {
+                var saveClass = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+                var val = this.__value;
+                var list = Object.keys(val);
+                var config = {};
+                for (var i = 0; i < list.length; i++) {
+                    var key = list[i];
+                    var member = val[key];
+                    if (member instanceof Value) {
+                        if (member instanceof ObjectValue) {
+                            config[key] = member.$getValue(this.__saveClass[key]);
+                        } else {
+                            config[key] = member.value;
+                        }
+                    } else {
+                        config[key] = member;
+                    }
+                }
+                if (this.__className && saveClass) {
+                    config.__className = this.__className.value;
+                }
+                return config;
+            }
 
             /**
              * 将数据转化成 Object
@@ -1372,22 +1460,7 @@ var $root = eval("this");
         }, {
             key: "value",
             get: function get() {
-                var val = this.__value;
-                var list = Object.keys(val);
-                var config = {};
-                for (var i = 0; i < list.length; i++) {
-                    var key = list[i];
-                    var member = val[key];
-                    if (member instanceof Value) {
-                        config[key] = member.value;
-                    } else {
-                        config[key] = member;
-                    }
-                }
-                if (this.__className) {
-                    config.__className = this.__className.value;
-                }
-                return config;
+                return this.$getValue();
             },
             set: function set(val) {
                 this.$setValue(val);
@@ -1419,12 +1492,14 @@ var $root = eval("this");
 
         function StringValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+            var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
             _classCallCheck(this, StringValue);
 
             var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
 
             _this9.__old = _this9.__value = "" + init;
+            _this9.__enumList = enumList;
             return _this9;
         }
 
@@ -1438,6 +1513,22 @@ var $root = eval("this");
                 this.__old = this.__value;
                 this.__value = val;
                 this.dispatchWidth(flower.Event.UPDATE, this, val);
+            }
+        }, {
+            key: "$setEnumList",
+            value: function $setEnumList(val) {
+                if (this.__enumList == val) {
+                    return;
+                }
+                this.__enumList = val;
+            }
+        }, {
+            key: "enumList",
+            get: function get() {
+                return this.__enumList;
+            },
+            set: function set(val) {
+                this.$setEnumList(val);
             }
         }]);
 
@@ -1454,6 +1545,7 @@ var $root = eval("this");
 
         function UIntValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+            var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
             _classCallCheck(this, UIntValue);
 
@@ -1463,6 +1555,7 @@ var $root = eval("this");
             if (init < 0) {
                 init = 0;
             }
+            _this10.__enumList = enumList;
             _this10.__old = _this10.__value = init;
             return _this10;
         }
@@ -1480,6 +1573,22 @@ var $root = eval("this");
                 this.__old = this.__value;
                 this.__value = val;
                 this.dispatchWidth(flower.Event.UPDATE, this, val);
+            }
+        }, {
+            key: "$setEnumList",
+            value: function $setEnumList(val) {
+                if (this.__enumList == val) {
+                    return;
+                }
+                this.__enumList = val;
+            }
+        }, {
+            key: "enumList",
+            get: function get() {
+                return this.__enumList;
+            },
+            set: function set(val) {
+                this.$setEnumList(val);
             }
         }]);
 
@@ -1552,7 +1661,7 @@ var $root = eval("this");
                 "members": {
                     "current": { "type": "number" },
                     "max": { "type": "number" },
-                    "percent": { "type": "number", "bind": "{this.max==0?1:this.current/this.max}" },
+                    "percent": { "type": "number", "bind": "{max==0?1:current/max}" },
                     "tip": { "type": "string" }
                 }
             });
@@ -1609,9 +1718,7 @@ var $root = eval("this");
                     extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
                 }
                 var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "(init) {\n" + "\t\t_super.call(this,null);\n";
-                if (config.saveClass) {
-                    content += "\t\tthis.className = \"" + config.name + "\";\n";
-                }
+                content += "\t\tthis.className = \"" + config.name + "\";\n";
                 var defineMember = "";
                 var members = config.members;
                 var bindContent = "";
@@ -1621,23 +1728,26 @@ var $root = eval("this");
                         member = members[key];
                         if (member.init && _typeof(member.init) == "object" && member.init.__className) {
                             content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                            content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                         } else {
                             if (member.type === "number" || member.type === "Number") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "int" || member.type === "Int") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "uint" || member.type === "Uint") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "string" || member.type === "String") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "array" || member.type === "Array") {
                                 content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
                             } else if (member.type === "*") {
                                 content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                                content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             } else {
                                 content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                                content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             }
                         }
                         if (member.bind) {
@@ -6213,6 +6323,9 @@ var $root = eval("this");
                 this.$combox[7] = val;
                 if (this.$combox[7] && this.$combox[7] instanceof flower.Value) {
                     this.$combox[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                    if (this.$combox[7].enumList) {
+                        this.dataProvider = new flower.ArrayValue(this.$combox[7].enumList);
+                    }
                 }
                 this.__typeValueChange();
             }

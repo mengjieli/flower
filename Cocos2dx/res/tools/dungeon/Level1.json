@@ -1,5 +1,5 @@
 {
- "itemId": 41,
+ "itemId": 52,
  "screenWidth": 480,
  "screenHeight": 320,
  "background": "res/tools/dungeon/background/map_0_2.jpg",
@@ -15,54 +15,18 @@
  ],
  "triggers": [
   {
-   "itemId": 39,
-   "name": "触发器39",
-   "startCondition": 3,
-   "startValue": {
-    "tag": 1001,
-    "hp": 0.1,
-    "__className": "dg.HPCondition"
-   },
+   "itemId": 51,
+   "name": "触发器51",
+   "startCondition": 1,
+   "startValue": null,
    "effects": [
     {
-     "itemId": 40,
-     "name": "效果40",
+     "itemId": 52,
+     "name": "效果52",
      "delay": 0,
-     "type": 1
+     "type": 1,
+     "effectValue": null
     }
-   ]
-  },
-  {
-   "itemId": 41,
-   "name": "触发器41",
-   "startCondition": 2,
-   "startValue": {
-    "armyType": 0,
-    "points": [
-     {
-      "x": 3,
-      "y": 0
-     },
-     {
-      "x": 0,
-      "y": 3
-     },
-     {
-      "x": 8,
-      "y": 0
-     },
-     {
-      "x": 0,
-      "y": 7
-     },
-     {
-      "x": 0,
-      "y": 0
-     }
-    ],
-    "__className": "dg.MoveCondition"
-   },
-   "effects": [
    ]
   }
  ]

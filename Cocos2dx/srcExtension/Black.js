@@ -1010,11 +1010,12 @@ black.ArrayValue = ArrayValue;
 //////////////////////////File:extension/black/data/member/BooleanValue.js///////////////////////////
 class BooleanValue extends Value {
 
-    constructor(init = false) {
+    constructor(init = false, enumList = null) {
         super();
         if (init == "false") {
             init = false;
         }
+        this.__enumList = enumList;
         this.__old = this.__value = !!init;
     }
 
@@ -1030,6 +1031,21 @@ class BooleanValue extends Value {
         this.__value = val;
         this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
+
+    $setEnumList(val) {
+        if (this.__enumList == val) {
+            return;
+        }
+        this.__enumList = val;
+    }
+
+    get enumList() {
+        return this.__enumList;
+    }
+
+    set enumList(val) {
+        this.$setEnumList(val);
+    }
 }
 
 black.BooleanValue = BooleanValue;
@@ -1040,9 +1056,10 @@ black.BooleanValue = BooleanValue;
 //////////////////////////File:extension/black/data/member/IntValue.js///////////////////////////
 class IntValue extends Value {
 
-    constructor(init = 0) {
+    constructor(init = 0, enumList = null)  {
         super();
         this.__old = this.__value = +init & ~0 || 0;
+        this.__enumList = enumList;
     }
 
     $setValue(val) {
@@ -1054,6 +1071,21 @@ class IntValue extends Value {
         this.__value = val;
         this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
+
+    $setEnumList(val) {
+        if (this.__enumList == val) {
+            return;
+        }
+        this.__enumList = val;
+    }
+
+    get enumList() {
+        return this.__enumList;
+    }
+
+    set enumList(val) {
+        this.$setEnumList(val);
+    }
 }
 
 black.IntValue = IntValue;
@@ -1064,8 +1096,9 @@ black.IntValue = IntValue;
 //////////////////////////File:extension/black/data/member/NumberValue.js///////////////////////////
 class NumberValue extends Value {
 
-    constructor(init = 0) {
+    constructor(init = 0, enumList = null) {
         super();
+        this.__enumList = enumList;
         this.__old = this.__value = +init || 0;
         this.__precision = 2;
         this.__multiplier = Math.pow(10, this.__precision);
@@ -1090,6 +1123,21 @@ class NumberValue extends Value {
         this.__old = this.__value;
         this.__value = val;
         this.dispatchWidth(flower.Event.UPDATE, this, val);
+    }
+
+    $setEnumList(val) {
+        if (this.__enumList == val) {
+            return;
+        }
+        this.__enumList = val;
+    }
+
+    get enumList() {
+        return this.__enumList;
+    }
+
+    set enumList(val) {
+        this.$setEnumList(val);
     }
 
     /**
@@ -1121,6 +1169,7 @@ class ObjectValue extends Value {
         if (init) {
             this.value = init;
         }
+        this.__saveClass = {};
     }
 
     setMember(name, value) {
@@ -1131,6 +1180,10 @@ class ObjectValue extends Value {
         //    "old": old,
         //    "value": value
         //});
+    }
+
+    setMemberSaveClass(name, saveClass = false) {
+        this.__saveClass[name] = saveClass;
     }
 
     hasMember(name) {
@@ -1146,7 +1199,7 @@ class ObjectValue extends Value {
             sys.$error(3014, name);
             return;
         }
-        if(value == null) {
+        if (value == null) {
             this.setMember(name, null);
         } else {
             if (value instanceof Value) {
@@ -1186,11 +1239,7 @@ class ObjectValue extends Value {
         }
     }
 
-
-    /**
-     * 将数据转化成 Object
-     */
-    get value() {
+    $getValue(saveClass = false) {
         var val = this.__value;
         var list = Object.keys(val);
         var config = {};
@@ -1198,15 +1247,27 @@ class ObjectValue extends Value {
             var key = list[i];
             var member = val[key];
             if (member instanceof Value) {
-                config[key] = member.value;
+                if (member instanceof ObjectValue) {
+                    config[key] = member.$getValue(this.__saveClass[key]);
+                } else {
+                    config[key] = member.value;
+                }
             } else {
                 config[key] = member;
             }
         }
-        if (this.__className) {
+        if (this.__className && saveClass) {
             config.__className = this.__className.value;
         }
         return config;
+    }
+
+
+    /**
+     * 将数据转化成 Object
+     */
+    get value() {
+        return this.$getValue();
     }
 
     set value(val) {
@@ -1246,9 +1307,10 @@ black.ObjectValue = ObjectValue;
 //////////////////////////File:extension/black/data/member/StringValue.js///////////////////////////
 class StringValue extends Value {
 
-    constructor(init = "") {
+    constructor(init = "", enumList = null) {
         super();
         this.__old = this.__value = "" + init;
+        this.__enumList = enumList;
     }
 
     $setValue(val) {
@@ -1260,6 +1322,21 @@ class StringValue extends Value {
         this.__value = val;
         this.dispatchWidth(flower.Event.UPDATE, this, val);
     }
+
+    $setEnumList(val) {
+        if (this.__enumList == val) {
+            return;
+        }
+        this.__enumList = val;
+    }
+
+    get enumList() {
+        return this.__enumList;
+    }
+
+    set enumList(val) {
+        this.$setEnumList(val);
+    }
 }
 
 black.StringValue = StringValue;
@@ -1270,12 +1347,13 @@ black.StringValue = StringValue;
 //////////////////////////File:extension/black/data/member/UIntValue.js///////////////////////////
 class UIntValue extends Value {
 
-    constructor(init = 0) {
+    constructor(init = 0, enumList = null) {
         super();
         init = +init & ~0 || 0;
         if (init < 0) {
             init = 0;
         }
+        this.__enumList = enumList;
         this.__old = this.__value = init;
     }
 
@@ -1290,6 +1368,21 @@ class UIntValue extends Value {
         this.__old = this.__value;
         this.__value = val;
         this.dispatchWidth(flower.Event.UPDATE, this, val);
+    }
+
+    $setEnumList(val) {
+        if (this.__enumList == val) {
+            return;
+        }
+        this.__enumList = val;
+    }
+
+    get enumList() {
+        return this.__enumList;
+    }
+
+    set enumList(val) {
+        this.$setEnumList(val);
     }
 }
 
@@ -1361,7 +1454,7 @@ class DataManager {
             "members": {
                 "current": {"type": "number"},
                 "max": {"type": "number"},
-                "percent": {"type": "number", "bind": "{this.max==0?1:this.current/this.max}"},
+                "percent": {"type": "number", "bind": "{max==0?1:current/max}"},
                 "tip": {"type": "string"}
             }
         });
@@ -1416,9 +1509,7 @@ class DataManager {
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "(init) {\n" +
             "\t\t_super.call(this,null);\n";
-        if (config.saveClass) {
-            content += "\t\tthis.className = \"" + config.name + "\";\n";
-        }
+        content += "\t\tthis.className = \"" + config.name + "\";\n";
         var defineMember = "";
         var members = config.members;
         var bindContent = "";
@@ -1428,23 +1519,26 @@ class DataManager {
                 member = members[key];
                 if (member.init && typeof member.init == "object" && member.init.__className) {
                     content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                    content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                 } else {
                     if (member.type === "number" || member.type === "Number") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "int" || member.type === "Int") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "uint" || member.type === "Uint") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "string" || member.type === "String") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "array" || member.type === "Array") {
                         content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
                     } else if (member.type === "*") {
                         content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                        content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     } else {
                         content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                        content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     }
                 }
                 if (member.bind) {
@@ -5677,6 +5771,9 @@ class Combox extends Group {
         this.$combox[7] = val;
         if (this.$combox[7] && this.$combox[7] instanceof flower.Value) {
             this.$combox[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+            if (this.$combox[7].enumList) {
+                this.dataProvider = new flower.ArrayValue(this.$combox[7].enumList);
+            }
         }
         this.__typeValueChange();
     }

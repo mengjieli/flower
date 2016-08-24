@@ -11,8 +11,8 @@ class Combox extends Group {
             3: false, //openFlags
             4: "label", //labelField
             5: null, //dataProvider
-            6: "type", //typeField
-            7: null //typeValue
+            6: "type", //valueField
+            7: null //value
         }
     }
 
@@ -183,6 +183,9 @@ class Combox extends Group {
         this.$combox[7] = val;
         if (this.$combox[7] && this.$combox[7] instanceof flower.Value) {
             this.$combox[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+            if (this.$combox[7].enumList) {
+                this.dataProvider = new flower.ArrayValue(this.$combox[7].enumList);
+            }
         }
         this.__typeValueChange();
     }

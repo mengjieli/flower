@@ -6,28 +6,7 @@ function init() {
         "itemId": true
     };
     var dropDownList = {
-        "startCondition": [
-            {
-                "label": "进入副本",
-                "type": 1
-            },
-            {
-                "label": "移动触发",
-                "type": 2
-            },
-            {
-                "label": "hp触发",
-                "type": 3
-            },
-            {
-                "label": "通关触发",
-                "type": 4
-            },
-            {
-                "label": "触发器触发",
-                "type": 5
-            }
-        ]
+        "startCondition": true
     }
     this.attributes = attributes;
     for (var i = 0; i < attributes.length; i++) {
@@ -45,7 +24,7 @@ function init() {
         var ui = (new flower.UIParser()).parseUI(fxml);
         container.addChild(ui);
         if (dropDownList[atr1]) {
-            ui[atr1 + "Combox"].dataProvider = new flower.ArrayValue(dropDownList[atr1]);
+            //ui[atr1 + "Combox"].dataProvider = new flower.ArrayValue();
             this[atr1 + "Combox"] = ui[atr1 + "Combox"];
         } else {
             this[atr1 + "Input"] = ui[atr1 + "Input"];
@@ -55,14 +34,13 @@ function init() {
         '<f:ViewStack percentWidth="100" xmlns:f="flower" xmlns:s="software" xmlns:dg="dungeon">' +
         '<f:Group/>' +
         '<f:Group/>' +
-        '<dg:MoveCondition id="moveCondition"/>' +
-        '<dg:HPCondition id="hpCondition"/>' +
-        '<f:Group/>' +
+        '<dg:MoveCondition/>' +
+        '<dg:HPCondition/>' +
+        '<dg:FinishCondition/>' +
         '<f:Group/>' +
         '</f:ViewStack>';
     this.viewStack = (new flower.UIParser()).parseUI(fxml);
     container.addChild(this.viewStack);
-    this.hpCondition = this.viewStack.hpCondition;
 }
 
 function set save(func) {
@@ -82,6 +60,8 @@ function setData(val) {
                 this.data.startValue = flower.DataManager.createData("dg.MoveCondition");
             } else if (this.data.startCondition.value == 3) {
                 this.data.startValue = flower.DataManager.createData("dg.HPCondition");
+            } else if (this.data.startCondition.value == 4) {
+                this.data.startValue = flower.DataManager.createData("dg.FinishCondition");
             } else {
                 this.data.startValue = null;
             }

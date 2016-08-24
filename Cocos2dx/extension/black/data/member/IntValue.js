@@ -1,8 +1,9 @@
 class IntValue extends Value {
 
-    constructor(init = 0) {
+    constructor(init = 0, enumList = null)  {
         super();
         this.__old = this.__value = +init & ~0 || 0;
+        this.__enumList = enumList;
     }
 
     $setValue(val) {
@@ -13,6 +14,21 @@ class IntValue extends Value {
         this.__old = this.__value;
         this.__value = val;
         this.dispatchWidth(flower.Event.UPDATE, this, val);
+    }
+
+    $setEnumList(val) {
+        if (this.__enumList == val) {
+            return;
+        }
+        this.__enumList = val;
+    }
+
+    get enumList() {
+        return this.__enumList;
+    }
+
+    set enumList(val) {
+        this.$setEnumList(val);
     }
 }
 
