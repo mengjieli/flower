@@ -1,6 +1,7 @@
 function init() {
     this.tree.clickItem = this.onClickItem.bind(this);
     this.loadPlugins();
+    flower.breakPoint();
     ProjectView.instance = this;
 }
 
@@ -227,3 +228,4 @@ function showDetailPanel(type, data, panel) {
     });
     editor.EventManager.instance.dispatch(event);
 }
+

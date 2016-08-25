@@ -1,54 +1,12 @@
 function init() {
     var container = this.container;
-    var labels = ["名称","延迟(ms)", "类型"];
-    var attributes = ["name","delay", "type"];
+    var labels = ["名称", "延迟(ms)", "类型"];
+    var attributes = ["name", "delay", "type"];
     var inputFalse = {
         //"itemId": true
     };
-
     var dropDownList = {
-        "type": [
-            {
-                "label": "刷怪",
-                "type": 1
-            },
-            {
-                "label": "直接伤害",
-                "type": 2
-            },
-            {
-                "label": "buff",
-                "type": 3
-            },
-            {
-                "label": "开关触发器",
-                "type": 4
-            },
-            {
-                "label": "副本通关",
-                "type": 5
-            },
-            {
-                "label": "通关失败",
-                "type": 6
-            },
-            {
-                "label": "完成任务",
-                "type": 7
-            },
-            {
-                "label": "镜头移动",
-                "type": 9
-            },
-            {
-                "label": "锁定视野",
-                "type": 10
-            },
-            {
-                "label": "剧情对话",
-                "type": 11
-            }
-        ]
+        "type": true
     };
     this.attributes = attributes;
     for (var i = 0; i < attributes.length; i++) {
@@ -66,12 +24,29 @@ function init() {
         var ui = (new flower.UIParser()).parseUI(fxml);
         container.addChild(ui);
         if (dropDownList[atr1]) {
-            ui[atr1 + "ComboBox"].dataProvider = new flower.ArrayValue(dropDownList[atr1]);
             this[atr1 + "ComboBox"] = ui[atr1 + "ComboBox"];
         } else {
             this[atr1 + "Input"] = ui[atr1 + "Input"];
         }
     }
+
+    var fxml =
+        '<f:ViewStack percentWidth="100" xmlns:f="flower" xmlns:s="software" xmlns:dg="dungeon">' +
+        '<f:Group/>' +
+        '<dg:FlushMonsterEffect/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '<f:Group/>' +
+        '</f:ViewStack>';
+    this.viewStack = (new flower.UIParser()).parseUI(fxml);
+    container.addChild(this.viewStack);
 }
 
 function set save(func) {
@@ -84,33 +59,30 @@ function get save() {
 
 function setData(val) {
     _super.prototype.setData.call(this, val);
+    var changeViewStack = function (e) {
+        this.viewStack.selectedIndex = this.data.type.value;
+        if (e) {
+            if (this.data.type.value == 1) {
+                this.data.effectValue = flower.DataManager.createData("dg.FlushMonsterEffect");
+            } else {
+                this.data.effectValue = null;
+            }
+            this.save();
+        }
+        this.viewStack.selectedChild.save = this.save;
+        this.viewStack.selectedChild.data = this.data.startValue;
+    };
+    changeViewStack.call(this);
+    this.data.type.addListener(flower.Event.UPDATE, changeViewStack, this);
     var attributes = this.attributes;
     for (var i = 0; i < attributes.length; i++) {
         var atr = attributes[i];
         (function (atr) {
             if (this[atr + "Input"]) {
-                this[atr + "Input"].bindProperty("text", "{data." + atr + "}", [this]);
-                this[atr + "Input"].addListener(flower.Event.FOCUS_IN, function (e) {
-                    this[atr + "Input"].removeBindProperty("text");
-                }.bind(this));
-                var inputOver = function () {
-                    var text = this[atr + "Input"].text;
-                    if (text != "") {
-                        this.data[atr].value = text;
-                    } else {
-                        this.data[atr].value = text;
-                    }
-                    this[atr + "Input"].bindProperty("text", "{data." + atr + "}", [this]);
-                    this.__save();
-                };
-                this[atr + "Input"].addListener(flower.Event.FOCUS_OUT, function (e) {
-                    inputOver.apply(this);
-                }.bind(this));
-                this[atr + "Input"].addListener(flower.KeyboardEvent.KEY_DOWN, function (e) {
-                    if (e.keyCode != 13) return;
-                    this[atr + "Input"].inputOver();
-                    inputOver.apply(this);
-                }.bind(this));
+                this[atr + "Input"].value = this.data[atr];
+                this.data[atr].addListener(flower.Event.UPDATE, function (e) {
+                    this.save();
+                }, this);
             } else if (this[atr + "ComboBox"]) {
                 this[atr + "ComboBox"].value = this.data[atr];
                 this.data[atr].addListener(flower.Event.UPDATE, function (e) {
@@ -120,3 +92,5 @@ function setData(val) {
         }).bind(this)(atr);
     }
 }
+
+trace("moduleKey",moduleKey);

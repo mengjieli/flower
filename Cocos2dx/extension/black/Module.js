@@ -6,6 +6,7 @@ class Module extends flower.EventDispatcher {
     __url;
     __direction;
     __beforeScript;
+    __moduleKey;
 
     constructor(url, beforeScript = "") {
         super();
@@ -13,6 +14,7 @@ class Module extends flower.EventDispatcher {
         this.__url = url;
         this.__beforeScript = beforeScript;
         this.__direction = flower.Path.getPathDirection(url);
+        this.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
     }
 
@@ -44,8 +46,10 @@ class Module extends flower.EventDispatcher {
         this.script += this.__beforeScript;
         this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
         this.__beforeScript += "var module = $root." + cfg.name + ";\n";
+        this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
-        //this.script += "var " + cfg.packageURL + " = module;\n\n";
+        this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
+        flower.UIParser.setNameSpaceBeforeScript(namespace, this.__beforeScript);
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
@@ -105,7 +109,7 @@ class Module extends flower.EventDispatcher {
         if (this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data);
+                flower.DataManager.getInstance().addDefine(e.data,this.__moduleKey);
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {

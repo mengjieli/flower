@@ -1396,6 +1396,7 @@ locale_strings[3012] = "没有定义的数据结构 : {0}";
 locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
 locale_strings[3014] = "无法设置属性值，该对象没有此属性 : {0}";
 locale_strings[3015] = "对象不能设置为空";
+locale_strings[3016] = "无权访问模块数据，moduleKey 错误: {0}";
 locale_strings[3100] = "没有定义的数据类型 : {0}";
 locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
 locale_strings[3102] = "还没有设定数据源 dataProvider";
@@ -1462,12 +1463,12 @@ class DataManager {
         this.addRootData("flower", "FlowerData");
     }
 
-    addRootData(name, className, init = null) {
-        this[name] = this.createData(className, className);
+    addRootData(name, className, init = null, moduleKey = "") {
+        this[name] = this.createData(className, className, moduleKey);
         return this._root[name] = this[name];
     }
 
-    addDefine(config) {
+    addDefine(config, moduleKey = "") {
         var className = config.name;
         if (!className) {
             sys.$error(3010, flower.ObjectDo.toString(config));
@@ -1475,6 +1476,7 @@ class DataManager {
         }
         if (!this._defines[className]) {
             this._defines[className] = {
+                moduleKey: moduleKey,
                 id: 0,
                 className: "",
                 define: null
@@ -1575,7 +1577,7 @@ class DataManager {
             eval(className);
         }
         item.id++;
-        return this.getClass(config.name);
+        return this.getClass(config.name, moduleKey);
     }
 
     $addClassDefine(clazz, className) {
@@ -1583,15 +1585,18 @@ class DataManager {
         item.define = clazz;
     }
 
-    getClass(className) {
+    getClass(className, moduleKey = "") {
         var item = this._defines[className];
         if (!item) {
             return null;
         }
+        if (item.moduleKey != moduleKey) {
+            sys.$error(3016, moduleKey);
+        }
         return item.define;
     }
 
-    createData(className, init = null) {
+    createData(className, init = null, moduleKey = "") {
         if (className === "number" || className === "Number") {
             return new NumberValue(init);
         } else if (className === "int" || className === "Int") {
@@ -1611,6 +1616,9 @@ class DataManager {
             if (!item) {
                 sys.$error(3012, className);
                 return;
+            }
+            if (item.moduleKey != moduleKey) {
+                sys.$error(3016, moduleKey);
             }
             return new item.define(init);
         }
@@ -1633,20 +1641,20 @@ class DataManager {
         return DataManager.instance;
     }
 
-    static addRootData(name, className, init = null) {
-        return DataManager.getInstance().addRootData(name, className, init);
+    static addRootData(name, className, init = null, moduleKey = "") {
+        return DataManager.getInstance().addRootData(name, className, init, moduleKey);
     }
 
-    static getClass(className) {
-        return DataManager.getInstance().getClass(className);
+    static getClass(className, moduleKey = "") {
+        return DataManager.getInstance().getClass(className, moduleKey);
     }
 
-    static addDefine(config) {
-        return DataManager.getInstance().addDefine(config);
+    static addDefine(config, moduleKey = "") {
+        return DataManager.getInstance().addDefine(config, moduleKey);
     }
 
-    static createData(className, init = null) {
-        return DataManager.getInstance().createData(className, init);
+    static createData(className, init = null, moduleKey = "") {
+        return DataManager.getInstance().createData(className, init, moduleKey);
     }
 
     static clear() {
@@ -2180,7 +2188,8 @@ class UIParser extends Group {
         defaultClassNames: {},
         packages: {
             "local": ""
-        }
+        },
+        beforeScripts: {}
     };
 
     _className;
@@ -2210,6 +2219,9 @@ class UIParser extends Group {
     parseUIAsync(url, data = null) {
         if (this.classes.namespaces[url]) {
             this.localNameSpace = this.classes.namespaces[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+            }
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2226,6 +2238,9 @@ class UIParser extends Group {
     parseAsync(url) {
         if (this.classes.namespaces[url]) {
             this.localNameSpace = this.classes.namespaces[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+            }
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2960,6 +2975,10 @@ class UIParser extends Group {
             flower.UIParser.classes[name + "Content"] = {};
             flower.UIParser.classes[name + "URL"] = {};
         }
+    }
+
+    static setNameSpaceBeforeScript(nameSpace, beforeScript) {
+        flower.UIParser.classes.beforeScripts[nameSpace] = beforeScript;
     }
 }
 
@@ -6273,6 +6292,7 @@ class Module extends flower.EventDispatcher {
     __url;
     __direction;
     __beforeScript;
+    __moduleKey;
 
     constructor(url, beforeScript = "") {
         super();
@@ -6280,6 +6300,7 @@ class Module extends flower.EventDispatcher {
         this.__url = url;
         this.__beforeScript = beforeScript;
         this.__direction = flower.Path.getPathDirection(url);
+        this.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
     }
 
@@ -6311,8 +6332,10 @@ class Module extends flower.EventDispatcher {
         this.script += this.__beforeScript;
         this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
         this.__beforeScript += "var module = $root." + cfg.name + ";\n";
+        this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
-        //this.script += "var " + cfg.packageURL + " = module;\n\n";
+        this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
+        flower.UIParser.setNameSpaceBeforeScript(namespace, this.__beforeScript);
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
@@ -6372,7 +6395,7 @@ class Module extends flower.EventDispatcher {
         if (this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data);
+                flower.DataManager.getInstance().addDefine(e.data,this.__moduleKey);
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {

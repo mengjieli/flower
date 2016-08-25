@@ -10,3 +10,5 @@ setDirectionMenu("Dungeon", [
         }
     }
 ]);
+
+trace("moduleKey",moduleKey);

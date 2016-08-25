@@ -64,7 +64,8 @@ class UIParser extends Group {
         defaultClassNames: {},
         packages: {
             "local": ""
-        }
+        },
+        beforeScripts: {}
     };
 
     _className;
@@ -94,6 +95,9 @@ class UIParser extends Group {
     parseUIAsync(url, data = null) {
         if (this.classes.namespaces[url]) {
             this.localNameSpace = this.classes.namespaces[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+            }
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -110,6 +114,9 @@ class UIParser extends Group {
     parseAsync(url) {
         if (this.classes.namespaces[url]) {
             this.localNameSpace = this.classes.namespaces[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+            }
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -705,6 +712,11 @@ class UIParser extends Group {
                 setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
             } else if (atrArray.length == 1) {
                 if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
+                    if (atrValue.indexOf("$moduleKey$") >= 0) {
+
+                    } else {
+
+                    }
                     setObject += before + "\tif(" + thisObj + ".__UIComponent) ";
                     setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
                     setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
@@ -844,6 +856,10 @@ class UIParser extends Group {
             flower.UIParser.classes[name + "Content"] = {};
             flower.UIParser.classes[name + "URL"] = {};
         }
+    }
+
+    static setNameSpaceBeforeScript(nameSpace, beforeScript) {
+        flower.UIParser.classes.beforeScripts[nameSpace] = beforeScript;
     }
 }
 

@@ -1602,6 +1602,7 @@ var $root = eval("this");
     locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
     locale_strings[3014] = "无法设置属性值，该对象没有此属性 : {0}";
     locale_strings[3015] = "对象不能设置为空";
+    locale_strings[3016] = "无权访问模块数据，moduleKey 错误: {0}";
     locale_strings[3100] = "没有定义的数据类型 : {0}";
     locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
     locale_strings[3102] = "还没有设定数据源 dataProvider";
@@ -1673,13 +1674,16 @@ var $root = eval("this");
             key: "addRootData",
             value: function addRootData(name, className) {
                 var init = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+                var moduleKey = arguments.length <= 3 || arguments[3] === undefined ? "" : arguments[3];
 
-                this[name] = this.createData(className, className);
+                this[name] = this.createData(className, className, moduleKey);
                 return this._root[name] = this[name];
             }
         }, {
             key: "addDefine",
             value: function addDefine(config) {
+                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+
                 var className = config.name;
                 if (!className) {
                     sys.$error(3010, flower.ObjectDo.toString(config));
@@ -1687,6 +1691,7 @@ var $root = eval("this");
                 }
                 if (!this._defines[className]) {
                     this._defines[className] = {
+                        moduleKey: moduleKey,
                         id: 0,
                         className: "",
                         define: null
@@ -1781,7 +1786,7 @@ var $root = eval("this");
                     eval(className);
                 }
                 item.id++;
-                return this.getClass(config.name);
+                return this.getClass(config.name, moduleKey);
             }
         }, {
             key: "$addClassDefine",
@@ -1792,9 +1797,14 @@ var $root = eval("this");
         }, {
             key: "getClass",
             value: function getClass(className) {
+                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+
                 var item = this._defines[className];
                 if (!item) {
                     return null;
+                }
+                if (item.moduleKey != moduleKey) {
+                    sys.$error(3016, moduleKey);
                 }
                 return item.define;
             }
@@ -1802,6 +1812,7 @@ var $root = eval("this");
             key: "createData",
             value: function createData(className) {
                 var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var moduleKey = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
 
                 if (className === "number" || className === "Number") {
                     return new NumberValue(init);
@@ -1822,6 +1833,9 @@ var $root = eval("this");
                     if (!item) {
                         sys.$error(3012, className);
                         return;
+                    }
+                    if (item.moduleKey != moduleKey) {
+                        sys.$error(3016, moduleKey);
                     }
                     return new item.define(init);
                 }
@@ -1847,25 +1861,31 @@ var $root = eval("this");
             key: "addRootData",
             value: function addRootData(name, className) {
                 var init = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+                var moduleKey = arguments.length <= 3 || arguments[3] === undefined ? "" : arguments[3];
 
-                return DataManager.getInstance().addRootData(name, className, init);
+                return DataManager.getInstance().addRootData(name, className, init, moduleKey);
             }
         }, {
             key: "getClass",
             value: function getClass(className) {
-                return DataManager.getInstance().getClass(className);
+                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+
+                return DataManager.getInstance().getClass(className, moduleKey);
             }
         }, {
             key: "addDefine",
             value: function addDefine(config) {
-                return DataManager.getInstance().addDefine(config);
+                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+
+                return DataManager.getInstance().addDefine(config, moduleKey);
             }
         }, {
             key: "createData",
             value: function createData(className) {
                 var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var moduleKey = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
 
-                return DataManager.getInstance().createData(className, init);
+                return DataManager.getInstance().createData(className, init, moduleKey);
             }
         }, {
             key: "clear",
@@ -2416,6 +2436,9 @@ var $root = eval("this");
 
                 if (this.classes.namespaces[url]) {
                     this.localNameSpace = this.classes.namespaces[url];
+                    if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
+                        this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+                    }
                 }
                 if (this.classes.defaultClassNames[url]) {
                     this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2433,6 +2456,9 @@ var $root = eval("this");
             value: function parseAsync(url) {
                 if (this.classes.namespaces[url]) {
                     this.localNameSpace = this.classes.namespaces[url];
+                    if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
+                        this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+                    }
                 }
                 if (this.classes.defaultClassNames[url]) {
                     this.defaultClassName = this.classes.defaultClassNames[url];
@@ -3196,6 +3222,11 @@ var $root = eval("this");
                     flower.UIParser.classes[name + "URL"] = {};
                 }
             }
+        }, {
+            key: "setNameSpaceBeforeScript",
+            value: function setNameSpaceBeforeScript(nameSpace, beforeScript) {
+                flower.UIParser.classes.beforeScripts[nameSpace] = beforeScript;
+            }
         }]);
 
         return UIParser;
@@ -3266,7 +3297,8 @@ var $root = eval("this");
         defaultClassNames: {},
         packages: {
             "local": ""
-        }
+        },
+        beforeScripts: {}
     };
 
 
@@ -6867,6 +6899,7 @@ var $root = eval("this");
             _this39.__url = url;
             _this39.__beforeScript = beforeScript;
             _this39.__direction = flower.Path.getPathDirection(url);
+            _this39.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
             _this39.__progress = flower.DataManager.getInstance().createData("ProgressData");
             return _this39;
         }
@@ -6902,8 +6935,10 @@ var $root = eval("this");
                 this.script += this.__beforeScript;
                 this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
                 this.__beforeScript += "var module = $root." + cfg.name + ";\n";
+                this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
                 this.script += "module.path = \"" + this.__direction + "\";\n";
-                //this.script += "var " + cfg.packageURL + " = module;\n\n";
+                this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
+                flower.UIParser.setNameSpaceBeforeScript(namespace, this.__beforeScript);
                 var scripts = cfg.scripts;
                 if (scripts && Object.keys(scripts).length) {
                     for (var i = 0; i < scripts.length; i++) {
@@ -6965,7 +7000,7 @@ var $root = eval("this");
                 if (this.__index != 0) {
                     item = this.__list[this.__index - 1];
                     if (item.type == "data") {
-                        flower.DataManager.getInstance().addDefine(e.data);
+                        flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
                     } else if (item.type == "script") {
                         this.script += e.data + "\n\n\n";
                         if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {

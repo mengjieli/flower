@@ -218,3 +218,5 @@ var UIElement = (function (_super) {
 
 
 module.Map = Map;
+
+trace("moduleKey",moduleKey);

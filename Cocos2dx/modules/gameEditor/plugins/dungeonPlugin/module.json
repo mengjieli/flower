@@ -13,6 +13,7 @@
     "./panels/startCondition/MoveCondition.xml",
     "./panels/startCondition/FinishCondition.xml",
     "./panels/EffectDetailPanel.xml",
+    "./panels/effect/FlushMonsterEffect.xml",
     "./view/DungeonView.xml"
   ],
   "classes": {
@@ -23,6 +24,7 @@
     "./data/TriggerEffectData.json",
     "./data/startCondition/HPCondition.json",
     "./data/startCondition/MoveCondition.json",
-    "./data/startCondition/FinishCondition.json"
+    "./data/startCondition/FinishCondition.json",
+    "./data/effect/FlushMonsterEffect.json"
   ]
 }

@@ -18,7 +18,49 @@
     "type": {
       "desc": "效果类型",
       "type": "int",
-      "init": 1
+      "init": 1,
+      "enumList": [
+        {
+          "label": "刷怪",
+          "type": 1
+        },
+        {
+          "label": "直接伤害",
+          "type": 2
+        },
+        {
+          "label": "buff",
+          "type": 3
+        },
+        {
+          "label": "开关触发器",
+          "type": 4
+        },
+        {
+          "label": "副本通关",
+          "type": 5
+        },
+        {
+          "label": "通关失败",
+          "type": 6
+        },
+        {
+          "label": "完成任务",
+          "type": 7
+        },
+        {
+          "label": "镜头移动",
+          "type": 9
+        },
+        {
+          "label": "锁定视野",
+          "type": 10
+        },
+        {
+          "label": "剧情对话",
+          "type": 11
+        }
+      ]
     },
     "effectValue": {
       "desc": "效果值",
