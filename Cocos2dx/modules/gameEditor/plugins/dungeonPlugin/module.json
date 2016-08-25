@@ -14,6 +14,11 @@
     "./panels/startCondition/FinishCondition.xml",
     "./panels/EffectDetailPanel.xml",
     "./panels/effect/FlushMonsterEffect.xml",
+    "./panels/effect/HurtEffect.xml",
+    "./panels/effect/MissionCompleteEffect.xml",
+    "./panels/effect/CameraMoveEffect.xml",
+    "./panels/effect/CameraRangeEffect.xml",
+    "./panels/effect/DialogEffect.xml",
     "./view/DungeonView.xml"
   ],
   "classes": {
@@ -25,6 +30,12 @@
     "./data/startCondition/HPCondition.json",
     "./data/startCondition/MoveCondition.json",
     "./data/startCondition/FinishCondition.json",
-    "./data/effect/FlushMonsterEffect.json"
+    "./data/effect/FlushMonsterEffect.json",
+    "./data/effect/FlushMonsterEffectItem.json",
+    "./data/effect/HurtEffect.json",
+    "./data/effect/MissionCompleteEffect.json",
+    "./data/effect/CameraMoveEffect.json",
+    "./data/effect/CameraRangeEffect.json",
+    "./data/effect/DialogEffect.json"
   ]
 }

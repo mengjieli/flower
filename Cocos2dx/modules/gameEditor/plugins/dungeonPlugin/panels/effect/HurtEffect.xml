@@ -1,0 +1,48 @@
+<f:Group class="HurtEffect" percentWidth="100" percentHeight="100"
+         creationComplete="this.init();"
+         xmlns:f="flower" xmlns:s="software"
+         xmlns:e="editor" xmlns:ui="ui">
+    <f:script src="./HurtEffect.script"/>
+    <f:Group horizontalCenter="0">
+        <f:Label horizontalCenter="-55" width="60" text="部队类型" verticalCenter="0"/>
+        <s:ComboBox id="typeComboBox" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+    <f:Group horizontalCenter="0" y="30">
+        <f:Label horizontalCenter="-55" width="60" text="伤害次数" verticalCenter="0"/>
+        <f:Input id="countInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+    <f:Group horizontalCenter="0" y="60">
+        <f:Label horizontalCenter="-55" width="60" text="伤害值" verticalCenter="0"/>
+        <f:Input id="damageInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+    <f:Group horizontalCenter="0" y="90">
+        <f:Label horizontalCenter="-55" width="60" text="伤害间隔(ms)" verticalCenter="0"/>
+        <f:Input id="timeGapInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+    <f:Group horizontalCenter="0" top="130" bottom="0">
+        <f:Label horizontalCenter="0" text="坐标点"/>
+        <s:ScrollerList id="scrollerList" width="180" top="20" bottom="10">
+            <f:viewport>
+                <f:List id="list" itemSelectedEnabled="false">
+                    <f:itemRenderer>
+                        <f:ItemRenderer percentWidth="100"
+                                        rightClick="arguments[0].stopPropagation();flower.MenuManager.showMenu(new software.Menu(this.data.menu));"
+                                        creationComplete="this.xInput.value=this.data.point.x;this.yInput.value=this.data.point.y;">
+                            <f:Rect percentWidth="100" percentHeight="100" fillColor.down="0xd6d4d0"
+                                    fillColor.selectedDown="0x96b97d" fillColor.selectedUp="0x96b97d"
+                                    fillColor.over="0x98b7dd"
+                                    alpha.up="0" alpha.over="0.5"
+                                    alpha.selectedUp="1"/>
+                            <f:Label x="5" text="x" verticalCenter="0"/>
+                            <f:Input id="xInput" x="15" width="50"
+                                     verticalCenter="0"/>
+                            <f:Label x="80" text="y" verticalCenter="0"/>
+                            <f:Input id="yInput" x="90" width="50"
+                                     verticalCenter="0"/>
+                        </f:ItemRenderer>
+                    </f:itemRenderer>
+                </f:List>
+            </f:viewport>
+        </s:ScrollerList>
+    </f:Group>
+</f:Group>

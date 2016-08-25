@@ -1,0 +1,10 @@
+{
+  "name": "dg.CameraRangeEffect",
+  "desc": "镜头范围",
+  "members": {
+    "rect": {
+      "desc": "范围",
+      "type": "Rectangle"
+    }
+  }
+}

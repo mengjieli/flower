@@ -6,11 +6,11 @@
       "desc": "怪物id",
       "type": "int"
     },
-    "bornCoordinate": {
+    "bornCoord": {
       "desc": "出生点",
       "type": "Point"
     },
-    "moveCoordinate": {
+    "moveCoord": {
       "desc": "出生后移动到哪一个点",
       "type": "Point"
     }

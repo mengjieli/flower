@@ -1,0 +1,57 @@
+{
+  "name": "dg.CameraMoveEffect",
+  "desc": "镜头移动",
+  "members": {
+    "coord": {
+      "desc": "坐标",
+      "type": "Point"
+    },
+    "time": {
+      "desc": "移动时间(ms)",
+      "type": "int"
+    },
+    "pos": {
+      "desc": "坐标位置",
+      "type": "int",
+      "init":1,
+      "enumList":[
+        {
+          "label":"左下角",
+          "type":1
+        },
+        {
+          "label":"左边中点",
+          "type":2
+        },
+        {
+          "label":"左上角",
+          "type":3
+        },
+        {
+          "label":"上边中点",
+          "type":4
+        },
+        {
+          "label":"右上角",
+          "type":5
+        },
+        {
+          "label":"右边中点",
+          "type":6
+        },
+        {
+          "label":"右下角",
+          "type":7
+        },
+        {
+          "label":"下边中点",
+          "type":8
+        },
+        {
+          "label":"中点",
+          "type":9
+        }
+      ]
+    }
+  }
+}

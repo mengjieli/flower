@@ -1,5 +1,5 @@
 {
- "itemId": 52,
+ "itemId": 66,
  "screenWidth": 480,
  "screenHeight": 320,
  "background": "res/tools/dungeon/background/map_0_2.jpg",
@@ -15,25 +15,115 @@
  ],
  "triggers": [
   {
-   "itemId": 51,
-   "name": "触发器51",
-   "startCondition": 2,
-   "startValue": {
-    "armyType": 0,
-    "points": [
-    ],
-    "__className": "dg.MoveCondition"
-   },
+   "itemId": 59,
+   "name": "测试触发器",
+   "startCondition": 1,
+   "startValue": null,
    "effects": [
     {
-     "itemId": 52,
-     "name": "效果52",
-     "delay": 123231,
+     "itemId": 60,
+     "name": "刷怪",
+     "delay": 0,
      "type": 1,
      "effectValue": {
       "monsters": [
+       {
+        "id": 0,
+        "bornCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        }
+       }
       ],
       "__className": "dg.FlushMonsterEffect"
+     }
+    },
+    {
+     "itemId": 61,
+     "name": "直接伤害",
+     "delay": 0,
+     "type": 2,
+     "effectValue": {
+      "type": 1,
+      "count": 2,
+      "damage": 1001,
+      "timeGap": 30002,
+      "points": [
+       {
+        "x": 1,
+        "y": 0
+       },
+       {
+        "x": 0,
+        "y": 2
+       }
+      ],
+      "__className": "dg.HurtEffect"
+     }
+    },
+    {
+     "itemId": 63,
+     "name": "完成任务",
+     "delay": 0,
+     "type": 7,
+     "effectValue": {
+      "missionId": 123,
+      "__className": "dg.MissionCompleteEffect"
+     }
+    },
+    {
+     "itemId": 64,
+     "name": "镜头移动",
+     "delay": 0,
+     "type": 9,
+     "effectValue": {
+      "coord": {
+       "x": 1,
+       "y": 2
+      },
+      "time": 3,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
+    },
+    {
+     "itemId": 65,
+     "name": "锁定视野",
+     "delay": 0,
+     "type": 10,
+     "effectValue": {
+      "rect": {
+       "x": 1,
+       "y": 2,
+       "width": 3,
+       "height": 4
+      },
+      "dialogId": 0,
+      "param1": 0,
+      "param2": 0,
+      "param3": 0,
+      "param4": 0,
+      "triggerId": 0,
+      "__className": "dg.CameraRangeEffect"
+     }
+    },
+    {
+     "itemId": 66,
+     "name": "剧情对话",
+     "delay": 0,
+     "type": 11,
+     "effectValue": {
+      "dialogId": 1111,
+      "param1": 1,
+      "param2": 2,
+      "param3": 3,
+      "param4": 4,
+      "triggerId": 666,
+      "__className": "dg.DialogEffect"
      }
     }
    ]

@@ -1,0 +1,10 @@
+{
+  "name": "dg.MissionCompleteEffect",
+  "desc": "完成任务",
+  "members": {
+    "missionId": {
+      "desc": "任务 id",
+      "type": "int"
+    }
+  }
+}

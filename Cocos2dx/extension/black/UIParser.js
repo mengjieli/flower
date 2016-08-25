@@ -712,11 +712,11 @@ class UIParser extends Group {
                 setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
             } else if (atrArray.length == 1) {
                 if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
-                    if (atrValue.indexOf("$moduleKey$") >= 0) {
-
-                    } else {
-
-                    }
+                    //if (atrValue.indexOf("$moduleKey$") >= 0) {
+                    //
+                    //} else {
+                    //
+                    //}
                     setObject += before + "\tif(" + thisObj + ".__UIComponent) ";
                     setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
                     setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";

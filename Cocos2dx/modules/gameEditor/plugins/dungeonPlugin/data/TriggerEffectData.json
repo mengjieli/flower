@@ -65,7 +65,10 @@
     "effectValue": {
       "desc": "效果值",
       "type": "*",
-      "saveClass": true
+      "saveClass": true,
+      "init":{
+        "__className":"dg.FlushMonsterEffect"
+      }
     }
   }
 }

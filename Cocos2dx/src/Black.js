@@ -1362,6 +1362,9 @@ var $root = eval("this");
                 if (value == null) {
                     this.setMember(name, null);
                 } else {
+                    if (value && !(value instanceof Value) && (typeof value === "undefined" ? "undefined" : _typeof(value)) == "object" && value.__className) {
+                        value = flower.DataManager.createData(value.__className, value);
+                    }
                     if (value instanceof Value) {
                         this.setMember(name, value);
                     } else {
@@ -1369,9 +1372,6 @@ var $root = eval("this");
                         if (val instanceof Value) {
                             val.value = value;
                         } else {
-                            if (value && (typeof value === "undefined" ? "undefined" : _typeof(value)) == "object" && value.__className) {
-                                value = flower.DataManager.createData(value.__className, value);
-                            }
                             this.__value[name] = value;
                         }
                     }
@@ -1674,16 +1674,13 @@ var $root = eval("this");
             key: "addRootData",
             value: function addRootData(name, className) {
                 var init = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
-                var moduleKey = arguments.length <= 3 || arguments[3] === undefined ? "" : arguments[3];
 
-                this[name] = this.createData(className, className, moduleKey);
+                this[name] = this.createData(className, className);
                 return this._root[name] = this[name];
             }
         }, {
             key: "addDefine",
             value: function addDefine(config) {
-                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
-
                 var className = config.name;
                 if (!className) {
                     sys.$error(3010, flower.ObjectDo.toString(config));
@@ -1691,7 +1688,7 @@ var $root = eval("this");
                 }
                 if (!this._defines[className]) {
                     this._defines[className] = {
-                        moduleKey: moduleKey,
+                        //moduleKey: moduleKey,
                         id: 0,
                         className: "",
                         define: null
@@ -1721,7 +1718,7 @@ var $root = eval("this");
                     for (var key in members) {
                         member = members[key];
                         if (member.init && _typeof(member.init) == "object" && member.init.__className) {
-                            content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
                             content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                         } else {
                             if (member.type === "number" || member.type === "Number") {
@@ -1786,7 +1783,7 @@ var $root = eval("this");
                     eval(className);
                 }
                 item.id++;
-                return this.getClass(config.name, moduleKey);
+                return this.getClass(config.name);
             }
         }, {
             key: "$addClassDefine",
@@ -1797,22 +1794,19 @@ var $root = eval("this");
         }, {
             key: "getClass",
             value: function getClass(className) {
-                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
-
                 var item = this._defines[className];
                 if (!item) {
                     return null;
                 }
-                if (item.moduleKey != moduleKey) {
-                    sys.$error(3016, moduleKey);
-                }
+                //if (item.moduleKey != moduleKey) {
+                //    sys.$error(3016, moduleKey);
+                //}
                 return item.define;
             }
         }, {
             key: "createData",
             value: function createData(className) {
                 var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-                var moduleKey = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
 
                 if (className === "number" || className === "Number") {
                     return new NumberValue(init);
@@ -1834,9 +1828,9 @@ var $root = eval("this");
                         sys.$error(3012, className);
                         return;
                     }
-                    if (item.moduleKey != moduleKey) {
-                        sys.$error(3016, moduleKey);
-                    }
+                    //if (item.moduleKey != moduleKey) {
+                    //    sys.$error(3016, moduleKey);
+                    //}
                     return new item.define(init);
                 }
             }
@@ -1861,31 +1855,25 @@ var $root = eval("this");
             key: "addRootData",
             value: function addRootData(name, className) {
                 var init = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
-                var moduleKey = arguments.length <= 3 || arguments[3] === undefined ? "" : arguments[3];
 
-                return DataManager.getInstance().addRootData(name, className, init, moduleKey);
+                return DataManager.getInstance().addRootData(name, className, init);
             }
         }, {
             key: "getClass",
             value: function getClass(className) {
-                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
-
-                return DataManager.getInstance().getClass(className, moduleKey);
+                return DataManager.getInstance().getClass(className);
             }
         }, {
             key: "addDefine",
             value: function addDefine(config) {
-                var moduleKey = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
-
-                return DataManager.getInstance().addDefine(config, moduleKey);
+                return DataManager.getInstance().addDefine(config);
             }
         }, {
             key: "createData",
             value: function createData(className) {
                 var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-                var moduleKey = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
 
-                return DataManager.getInstance().createData(className, init, moduleKey);
+                return DataManager.getInstance().createData(className, init);
             }
         }, {
             key: "clear",
@@ -3057,6 +3045,11 @@ var $root = eval("this");
                         setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
                     } else if (atrArray.length == 1) {
                         if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
+                            //if (atrValue.indexOf("$moduleKey$") >= 0) {
+                            //
+                            //} else {
+                            //
+                            //}
                             setObject += before + "\tif(" + thisObj + ".__UIComponent) ";
                             setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
                             setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";

@@ -3,11 +3,11 @@
   "desc": "移动触发",
   "members": {
     "armyType": {
-      "desc": "部队或者野怪  0.部队  1.野怪",
+      "desc": "部队类型",
       "type": "int",
       "enumList": [
         {
-          "label": "己方部队",
+          "label": "玩家部队",
           "type": 0
         },
         {

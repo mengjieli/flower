@@ -31,19 +31,19 @@ function init() {
     }
 
     var fxml =
-        '<f:ViewStack percentWidth="100" xmlns:f="flower" xmlns:s="software" xmlns:dg="dungeon">' +
+        '<f:ViewStack percentWidth="100" top="80" bottom="0" xmlns:f="flower" xmlns:s="software" xmlns:dg="dungeon">' +
         '<f:Group/>' +
         '<dg:FlushMonsterEffect/>' +
+        '<dg:HurtEffect/>' +
         '<f:Group/>' +
         '<f:Group/>' +
         '<f:Group/>' +
         '<f:Group/>' +
+        '<dg:MissionCompleteEffect/>' +
         '<f:Group/>' +
-        '<f:Group/>' +
-        '<f:Group/>' +
-        '<f:Group/>' +
-        '<f:Group/>' +
-        '<f:Group/>' +
+        '<dg:CameraMoveEffect/>' +
+        '<dg:CameraRangeEffect/>' +
+        '<dg:DialogEffect/>' +
         '</f:ViewStack>';
     this.viewStack = (new flower.UIParser()).parseUI(fxml);
     container.addChild(this.viewStack);
@@ -64,13 +64,23 @@ function setData(val) {
         if (e) {
             if (this.data.type.value == 1) {
                 this.data.effectValue = flower.DataManager.createData("dg.FlushMonsterEffect");
+            } else if (this.data.type.value == 2) {
+                this.data.effectValue = flower.DataManager.createData("dg.HurtEffect");
+            } else if (this.data.type.value == 7) {
+                this.data.effectValue = flower.DataManager.createData("dg.MissionCompleteEffect");
+            } else if (this.data.type.value == 9) {
+                this.data.effectValue = flower.DataManager.createData("dg.CameraMoveEffect");
+            } else if (this.data.type.value == 10) {
+                this.data.effectValue = flower.DataManager.createData("dg.CameraRangeEffect");
+            } else if (this.data.type.value == 11) {
+                this.data.effectValue = flower.DataManager.createData("dg.DialogEffect");
             } else {
                 this.data.effectValue = null;
             }
             this.save();
         }
         this.viewStack.selectedChild.save = this.save;
-        this.viewStack.selectedChild.data = this.data.startValue;
+        this.viewStack.selectedChild.data = this.data.effectValue;
     };
     changeViewStack.call(this);
     this.data.type.addListener(flower.Event.UPDATE, changeViewStack, this);
@@ -92,5 +102,3 @@ function setData(val) {
         }).bind(this)(atr);
     }
 }
-
-trace("moduleKey",moduleKey);

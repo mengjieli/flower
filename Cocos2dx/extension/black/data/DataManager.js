@@ -55,12 +55,12 @@ class DataManager {
         this.addRootData("flower", "FlowerData");
     }
 
-    addRootData(name, className, init = null, moduleKey = "") {
-        this[name] = this.createData(className, className, moduleKey);
+    addRootData(name, className, init = null) {
+        this[name] = this.createData(className, className);
         return this._root[name] = this[name];
     }
 
-    addDefine(config, moduleKey = "") {
+    addDefine(config) {
         var className = config.name;
         if (!className) {
             sys.$error(3010, flower.ObjectDo.toString(config));
@@ -68,7 +68,7 @@ class DataManager {
         }
         if (!this._defines[className]) {
             this._defines[className] = {
-                moduleKey: moduleKey,
+                //moduleKey: moduleKey,
                 id: 0,
                 className: "",
                 define: null
@@ -101,7 +101,7 @@ class DataManager {
             for (var key in members) {
                 member = members[key];
                 if (member.init && typeof member.init == "object" && member.init.__className) {
-                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
                     content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                 } else {
                     if (member.type === "number" || member.type === "Number") {
@@ -169,7 +169,7 @@ class DataManager {
             eval(className);
         }
         item.id++;
-        return this.getClass(config.name, moduleKey);
+        return this.getClass(config.name);
     }
 
     $addClassDefine(clazz, className) {
@@ -177,18 +177,18 @@ class DataManager {
         item.define = clazz;
     }
 
-    getClass(className, moduleKey = "") {
+    getClass(className) {
         var item = this._defines[className];
         if (!item) {
             return null;
         }
-        if (item.moduleKey != moduleKey) {
-            sys.$error(3016, moduleKey);
-        }
+        //if (item.moduleKey != moduleKey) {
+        //    sys.$error(3016, moduleKey);
+        //}
         return item.define;
     }
 
-    createData(className, init = null, moduleKey = "") {
+    createData(className, init = null) {
         if (className === "number" || className === "Number") {
             return new NumberValue(init);
         } else if (className === "int" || className === "Int") {
@@ -209,9 +209,9 @@ class DataManager {
                 sys.$error(3012, className);
                 return;
             }
-            if (item.moduleKey != moduleKey) {
-                sys.$error(3016, moduleKey);
-            }
+            //if (item.moduleKey != moduleKey) {
+            //    sys.$error(3016, moduleKey);
+            //}
             return new item.define(init);
         }
     }
@@ -233,20 +233,20 @@ class DataManager {
         return DataManager.instance;
     }
 
-    static addRootData(name, className, init = null, moduleKey = "") {
-        return DataManager.getInstance().addRootData(name, className, init, moduleKey);
+    static addRootData(name, className, init = null) {
+        return DataManager.getInstance().addRootData(name, className, init);
     }
 
-    static getClass(className, moduleKey = "") {
-        return DataManager.getInstance().getClass(className, moduleKey);
+    static getClass(className) {
+        return DataManager.getInstance().getClass(className);
     }
 
-    static addDefine(config, moduleKey = "") {
-        return DataManager.getInstance().addDefine(config, moduleKey);
+    static addDefine(config) {
+        return DataManager.getInstance().addDefine(config);
     }
 
-    static createData(className, init = null, moduleKey = "") {
-        return DataManager.getInstance().createData(className, init, moduleKey);
+    static createData(className, init = null) {
+        return DataManager.getInstance().createData(className, init);
     }
 
     static clear() {

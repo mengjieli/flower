@@ -39,6 +39,9 @@ class ObjectValue extends Value {
         if (value == null) {
             this.setMember(name, null);
         } else {
+            if (value && (!(value instanceof Value)) && typeof value == "object" && value.__className) {
+                value = flower.DataManager.createData(value.__className, value);
+            }
             if (value instanceof Value) {
                 this.setMember(name, value);
             } else {
@@ -46,9 +49,6 @@ class ObjectValue extends Value {
                 if (val instanceof Value) {
                     val.value = value;
                 } else {
-                    if (value && typeof value == "object" && value.__className) {
-                        value = flower.DataManager.createData(value.__className, value);
-                    }
                     this.__value[name] = value;
                 }
             }

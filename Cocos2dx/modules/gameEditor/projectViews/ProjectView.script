@@ -1,7 +1,6 @@
 function init() {
     this.tree.clickItem = this.onClickItem.bind(this);
     this.loadPlugins();
-    flower.breakPoint();
     ProjectView.instance = this;
 }
 

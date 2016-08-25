@@ -5,7 +5,7 @@
     "monsters": {
       "desc": "怪物信息",
       "type": "Array",
-      "typeValue": "FlushMinsterEffectItem"
+      "typeValue": "dg.FlushMonsterEffectItem"
     }
   }
 }
