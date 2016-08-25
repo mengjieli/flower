@@ -14,7 +14,7 @@
                     <f:itemRenderer>
                         <f:ItemRenderer percentWidth="100"
                                         rightClick="arguments[0].stopPropagation();flower.MenuManager.showMenu(new software.Menu(this.data.menu));"
-                                        creationComplete="this.idInput.value=this.data.monster.id;this.bornXInput.value=this.data.monster.bornCoord.x;this.bornYInput.value=this.data.monster.bornCoord.y;this.moveXInput.value=this.data.monster.moveCoord.x;this.moveYInput.value=this.data.monster.moveCoord.y;">
+                                        creationComplete="this.idInput.value=this.data.monster.id;this.tagInput.value=this.data.monster.tag;this.bornXInput.value=this.data.monster.bornCoord.x;this.bornYInput.value=this.data.monster.bornCoord.y;this.moveXInput.value=this.data.monster.moveCoord.x;this.moveYInput.value=this.data.monster.moveCoord.y;">
                             <f:Rect percentWidth="100" percentHeight="100" fillColor.down="0xd6d4d0"
                                     fillColor.selectedDown="0x96b97d" fillColor.selectedUp="0x96b97d"
                                     fillColor.over="0x98b7dd"
@@ -22,10 +22,12 @@
                                     alpha.selectedUp="1"/>
                             <f:Group>
                                 <f:Label x="5" text="id" verticalCenter="0"/>
-                                <f:Input id="idInput" x="20" width="100"
+                                <f:Input id="idInput" x="40" width="50"
+                                         verticalCenter="0"/>
+                                <f:Label x="105" text="tag" verticalCenter="0"/>
+                                <f:Input id="tagInput" x="140" width="50"
                                          verticalCenter="0"/>
                             </f:Group>
-
                             <f:Group y="25">
                                 <f:Label x="5" text="出生x" verticalCenter="0"/>
                                 <f:Input id="bornXInput" x="40" width="50"
@@ -34,7 +36,6 @@
                                 <f:Input id="bornYInput" x="140" width="50"
                                          verticalCenter="0"/>
                             </f:Group>
-
                             <f:Group y="50">
                                 <f:Label x="5" text="移动x" verticalCenter="0"/>
                                 <f:Input id="moveXInput" x="40" width="50"

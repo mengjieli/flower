@@ -1,7 +1,7 @@
 {
- "itemId": 66,
- "screenWidth": 480,
- "screenHeight": 320,
+ "itemId": 68,
+ "screenWidth": 800,
+ "screenHeight": 600,
  "background": "res/tools/dungeon/background/map_0_2.jpg",
  "backgroundList": [
   {
@@ -16,7 +16,7 @@
  "triggers": [
   {
    "itemId": 59,
-   "name": "测试触发器",
+   "name": "进入副本触发器",
    "startCondition": 1,
    "startValue": null,
    "effects": [
@@ -28,14 +28,15 @@
      "effectValue": {
       "monsters": [
        {
-        "id": 0,
+        "id": 1,
+        "tag": 2,
         "bornCoord": {
-         "x": 0,
-         "y": 0
+         "x": 3,
+         "y": 4
         },
         "moveCoord": {
-         "x": 0,
-         "y": 0
+         "x": 5,
+         "y": 6
         }
        }
       ],
@@ -126,6 +127,39 @@
       "__className": "dg.DialogEffect"
      }
     }
+   ]
+  },
+  {
+   "itemId": 67,
+   "name": "移动触发器",
+   "startCondition": 2,
+   "startValue": {
+    "armyType": 1,
+    "points": [
+     {
+      "x": 1,
+      "y": 0
+     },
+     {
+      "x": 0,
+      "y": 2
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+   ]
+  },
+  {
+   "itemId": 68,
+   "name": "hp触发器",
+   "startCondition": 3,
+   "startValue": {
+    "tag": 1,
+    "hp": 100,
+    "__className": "dg.HPCondition"
+   },
+   "effects": [
    ]
   }
  ]

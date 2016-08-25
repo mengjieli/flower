@@ -6,6 +6,10 @@
       "desc": "怪物id",
       "type": "int"
     },
+    "tag": {
+      "desc": "怪物tag",
+      "type": "int"
+    },
     "bornCoord": {
       "desc": "出生点",
       "type": "Point"
