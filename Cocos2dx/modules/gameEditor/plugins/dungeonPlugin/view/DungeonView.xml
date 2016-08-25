@@ -1,10 +1,10 @@
 <s:TitlePanel creationComplete="this.init();" percentWidth="100" percentHeight="100" class="DungeonView" title="{data.name}" xmlns:f="flower"
               xmlns:s="software">
     <f:script src="./DungeonView.script"/>
-    <f:Group width="200" percentHeight="100">
+    <f:Group width="150" percentHeight="100">
         <s:ScrollerTree id="tree" percentWidth="100" percentHeight="100" viewport="s:LabelTree"/>
     </f:Group>
-    <f:Group left="200" right="0" percentHeight="100">
+    <f:Group left="150" right="0" percentHeight="100">
         <f:Group percentWidth="100" height="25">
             <f:Rect percentWidth="100" percentHeight="100" fillColor="0xbbbbbb" lineColor="0x333333" lineWidth="1"/>
             <f:Group percentWidth="100" percentHeight="100">
