@@ -3,7 +3,8 @@
   "name": "dg",
   "scripts": [
     "./src/Dungeon.script",
-    "./src/parser/DungeonParser.script"
+    "./src/parser/DungeonParser.script",
+    "./src/Map.script"
   ],
   "components": [
     "./panels/NewTriggerPanel.xml",

@@ -1,5 +1,6 @@
-<s:TitlePanel creationComplete="this.init();" percentWidth="100" percentHeight="100" class="DungeonView" title="{data.name}" xmlns:f="flower"
-              xmlns:s="software">
+<s:TitlePanel creationComplete="this.init();" percentWidth="100" percentHeight="100" class="DungeonView"
+              title="{data.name}" xmlns:f="flower"
+              xmlns:s="software" xmlns:dg="dungeon">
     <f:script src="./DungeonView.script"/>
     <f:Group width="150" percentHeight="100">
         <s:ScrollerTree id="tree" percentWidth="100" percentHeight="100" viewport="s:LabelTree"/>
@@ -31,8 +32,7 @@
             <f:Rect fillColor="0x888888" percentWidth="100" percentHeight="100"/>
             <f:MaskUI id="container" width="{data.data.screenWidth}" height="{data.data.screenHeight}"
                       horizontalCenter="0" verticalCenter="0">
-                <f:Image id="background" source="{data.data.background}"/>
-                <f:Group id="layer"/>
+                <dg:Map data="{data.data}"/>
             </f:MaskUI>
         </f:Group>
     </f:Group>

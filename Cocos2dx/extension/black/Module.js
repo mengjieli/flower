@@ -113,7 +113,7 @@ class Module extends flower.EventDispatcher {
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                    trace("执行script:\n", this.script);
+                    //trace("执行script:\n", this.script);
                     eval(this.script);
                 }
             }

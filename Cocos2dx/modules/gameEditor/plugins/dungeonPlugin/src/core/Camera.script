@@ -1,0 +1,18 @@
+var Camera = (function (_super) {
+
+    __extends(Camera, _super);
+
+    function Camera() {
+        _super.call(this);
+    }
+
+    Camera.prototype.setData = function (val) {
+        _super.prototype.setData.call(this, val);
+    }
+
+    return Camera;
+
+})(flower.Group);
+
+
+module.Camera = Camera;
