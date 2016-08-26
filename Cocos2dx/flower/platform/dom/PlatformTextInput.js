@@ -139,7 +139,7 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     toColor16(color) {
         var abc;
-        var num = Math.floor(color / 16);
+        var num = math.floor(color / 16);
         abc = num + "";
         if (num == 15) {
             abc = "f";

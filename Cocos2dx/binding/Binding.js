@@ -172,4 +172,6 @@ class Binding {
 
 }
 
+Binding.addBindingCheck(flower.Math);
+
 exports.Binding = Binding;

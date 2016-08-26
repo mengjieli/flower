@@ -90,7 +90,7 @@ class ResItem {
             if (!info) {
                 info = loadList[i];
             } else if (scale != null) {
-                if (loadList[i].scale != null && Math.abs(loadList[i].scale - scale) < Math.abs(info.scale - scale)) {
+                if (loadList[i].scale != null && math.abs(loadList[i].scale - scale) < math.abs(info.scale - scale)) {
                     info = loadList[i];
                 }
             }

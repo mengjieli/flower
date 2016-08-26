@@ -1,0 +1,24 @@
+var MapNet = (function () {
+
+
+    function MapNet() {
+    }
+
+    MapNet.prototype.setData = function (data) {
+        this.data = data; //MapData
+    }
+
+    /**
+     * 设置镜头范围
+     * @param data
+     */
+    MapNet.prototype.setCameraRange = function (x, y, width, height) {
+        trace("设置镜头范围", x, y, width, height);
+        //this.data = data;
+    }
+
+    return MapNet;
+})();
+
+
+module.MapNet = MapNet;

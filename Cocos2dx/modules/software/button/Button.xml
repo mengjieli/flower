@@ -1,5 +1,5 @@
 <f:Button class="Button" width="50" height="30" xmlns:f="flower">
     <f:script src="./Button.script"/>
     <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0xFC4A4A" fillColor.down="0x7D2525" fillColor.over="0xff7070"/>
-    <f:Label id="labelTxt" text="Button" horizontalCenter="0" verticalCenter="0" fontSize="12" fontColor="0x252325"/>
+    <f:Label percentWidth="100" percentHeight="100" id="labelTxt" text="Button" horizontalCenter="0" verticalCenter="0" fontSize="12" fontColor="0x252325"/>
 </f:Button>

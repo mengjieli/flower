@@ -138,7 +138,7 @@ exports.sys = {
     $tip: $tip,
     $warn: $warn,
     $error: $error,
-    getLanguage:getLanguage
+    getLanguage: getLanguage
 }
 
 $root.trace = trace;

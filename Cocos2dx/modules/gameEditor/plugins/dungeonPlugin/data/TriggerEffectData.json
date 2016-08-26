@@ -69,6 +69,15 @@
       "init":{
         "__className":"dg.FlushMonsterEffect"
       }
+    },
+    "hasPlay": {
+      "desc": "是否触发过",
+      "type": "bool"
+    },
+    "color": {
+      "desc": "文字颜色",
+      "type": "number",
+      "bind": "{hasPlay?0x999999:0}"
     }
   }
 }

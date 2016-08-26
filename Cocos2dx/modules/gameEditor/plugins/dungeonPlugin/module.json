@@ -7,8 +7,10 @@
     "./src/Map.script",
     "./src/core/Camera.script",
     "./src/core/GridLayer.script",
+    "./src/net/MapNet.script",
     "./src/display/Grid.script",
-    "./src/trigger/Triggerrunning.script",
+    "./src/trigger/TriggerRunning.script",
+    "./src/trigger/Trigger.script",
     "./src/utils/MapUtils.script"
   ],
   "components": [

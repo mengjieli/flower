@@ -84,7 +84,7 @@ class VByteArray {
             this.length++;
         }
         if (flag) {
-            this.writeUInt(Math.floor(val2));
+            this.writeUInt(math.floor(val2));
         }
     }
 
@@ -159,11 +159,11 @@ class VByteArray {
     readInt() {
         var val = this.readUInt();
         if (val % 2 == 1) {
-            val = Math.floor(val / 2);
+            val = math.floor(val / 2);
             val = ~val;
         }
         else {
-            val = Math.floor(val / 2);
+            val = math.floor(val / 2);
         }
         return val;
     }

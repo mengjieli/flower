@@ -23,8 +23,8 @@ class Mask extends Sprite {
         if (multiply == true && this.multiplyTouchEnabled == false)
             return null;
         var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-        touchX = Math.floor(point.x);
-        touchY = Math.floor(point.y);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;

@@ -14,7 +14,7 @@
                 <f:Rect x="{data.depth*20}" width="20" percentHeight="100" alpha="0"/>
                 <f:Label x="{7 + data.depth*20}" text="{data.open?'-':'+'}" verticalCenter="0"/>
             </f:Button>
-            <f:Label x="{20 + data.depth*20}" text="{data.name}" verticalCenter="0" fontColor="0x000000"/>
+            <f:Label x="{20 + data.depth*20}" text="{data.name}" verticalCenter="0" fontColor="{data.color||0}"/>
         </f:ItemRenderer>
     </f:itemRenderer>
 </f:Tree>

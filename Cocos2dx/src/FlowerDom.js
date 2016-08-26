@@ -31,7 +31,7 @@ function __extends(d, b) {
     d.prototype = new __();
 }
 var flower = {};
-(function () {
+(function (math) {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
     var TIP = false;
@@ -224,22 +224,22 @@ var flower = {};
                 mask.onmousedown = function (e) {
                     if (e.button == 2) return;
                     touchDown = true;
-                    engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+                    engine.$addTouchEvent("begin", 0, math.floor(e.clientX), math.floor(e.clientY));
                 };
                 mask.onmouseup = function (e) {
                     if (e.button == 2) return;
                     touchDown = false;
-                    engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+                    engine.$addTouchEvent("end", 0, math.floor(e.clientX), math.floor(e.clientY));
                 };
                 mask.onmousemove = function (e) {
                     if (e.button == 2) return;
-                    engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+                    engine.$addMouseMoveEvent(math.floor(e.clientX), math.floor(e.clientY));
                     if (touchDown) {
-                        engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+                        engine.$addTouchEvent("move", 0, math.floor(e.clientX), math.floor(e.clientY));
                     }
                 };
                 document.body.oncontextmenu = function (e) {
-                    engine.$addRightClickEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+                    engine.$addRightClickEvent(math.floor(e.clientX), math.floor(e.clientY));
                     return false;
                 };
                 Platform.width = document.documentElement.clientWidth;
@@ -835,7 +835,7 @@ var flower = {};
             key: "toColor16",
             value: function toColor16(color) {
                 var abc;
-                var num = Math.floor(color / 16);
+                var num = math.floor(color / 16);
                 abc = num + "";
                 if (num == 15) {
                     abc = "f";
@@ -1047,7 +1047,7 @@ var flower = {};
             key: "toColor16",
             value: function toColor16(color) {
                 var abc;
-                var num = Math.floor(color / 16);
+                var num = math.floor(color / 16);
                 abc = num + "";
                 if (num == 15) {
                     abc = "f";
@@ -1354,7 +1354,7 @@ var flower = {};
             key: "toColor16",
             value: function toColor16(color) {
                 var abc;
-                var num = Math.floor(color / 16);
+                var num = math.floor(color / 16);
                 abc = num + "";
                 if (num == 15) {
                     abc = "f";
@@ -1406,11 +1406,11 @@ var flower = {};
                     div.style.position = "absolute";
                     div.style.left = points[0].x + "px";
                     div.style.top = points[0].y + "px";
-                    var rotation = Math.atan2(points[1].y - points[0].y, points[1].x - points[0].x);
-                    var len = Math.sqrt((points[1].y - points[0].y) * (points[1].y - points[0].y) + (points[1].x - points[0].x) * (points[1].x - points[0].x));
+                    var rotation = math.atan2(points[1].y - points[0].y, points[1].x - points[0].x);
+                    var len = math.sqrt((points[1].y - points[0].y) * (points[1].y - points[0].y) + (points[1].x - points[0].x) * (points[1].x - points[0].x));
                     div.style.width = len + "px";
                     div.style.height = "0px";
-                    div.style["-webkit-transform"] = "rotate(" + rotation * 180 / Math.PI + "deg)";
+                    div.style["-webkit-transform"] = "rotate(" + rotation * 180 / math.PI + "deg)";
                     if (lineAlpha && lineWidth) {
                         div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
                     } else {
@@ -2880,8 +2880,8 @@ var flower = {};
         }, {
             key: "rotate",
             value: function rotate(angle) {
-                var sin = Math.sin(angle);
-                var cos = Math.cos(angle);
+                var sin = math.sin(angle);
+                var cos = math.cos(angle);
                 this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos, this.b * cos - this.d * sin, this.b * sin + this.d * cos, this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
             }
         }, {
@@ -2909,8 +2909,8 @@ var flower = {};
                 var sin = 0;
                 var cos = 1;
                 if (rotation) {
-                    sin = Math.sin(rotation);
-                    cos = Math.cos(rotation);
+                    sin = math.sin(rotation);
+                    cos = math.cos(rotation);
                 }
                 this.a = cos * scaleX;
                 this.b = sin * scaleY;
@@ -2923,8 +2923,8 @@ var flower = {};
                 var sin = 0;
                 var cos = 1;
                 if (rotation) {
-                    sin = Math.sin(rotation);
-                    cos = Math.cos(rotation);
+                    sin = math.sin(rotation);
+                    cos = math.cos(rotation);
                 }
                 this.a = cos * scaleX;
                 this.b = sin * scaleX;
@@ -2965,8 +2965,8 @@ var flower = {};
                     x2 = x3;
                     x3 = tmp;
                 }
-                rect.x = Math.floor(x0 < x2 ? x0 : x2);
-                rect.width = Math.ceil((x1 > x3 ? x1 : x3) - rect.x);
+                rect.x = math.floor(x0 < x2 ? x0 : x2);
+                rect.width = math.ceil((x1 > x3 ? x1 : x3) - rect.x);
                 if (y0 > y1) {
                     tmp = y0;
                     y0 = y1;
@@ -2977,8 +2977,8 @@ var flower = {};
                     y2 = y3;
                     y3 = tmp;
                 }
-                rect.y = Math.floor(y0 < y2 ? y0 : y2);
-                rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+                rect.y = math.floor(y0 < y2 ? y0 : y2);
+                rect.height = math.ceil((y1 > y3 ? y1 : y3) - rect.y);
             }
         }, {
             key: "save",
@@ -3061,12 +3061,12 @@ var flower = {};
         }, {
             key: "length",
             get: function get() {
-                return Math.sqrt(this.x * this.x + this.y * this.y);
+                return math.sqrt(this.x * this.x + this.y * this.y);
             }
         }], [{
             key: "distance",
             value: function distance(p1, p2) {
-                return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+                return math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
             }
         }, {
             key: "release",
@@ -3147,11 +3147,11 @@ var flower = {};
                 var y0 = this.y;
                 var x1 = clipRect.x;
                 var y1 = clipRect.y;
-                var l = Math.max(x0, x1);
-                var r = Math.min(x0 + this.width, x1 + clipRect.width);
+                var l = math.max(x0, x1);
+                var r = math.min(x0 + this.width, x1 + clipRect.width);
                 if (l <= r) {
-                    var t = Math.max(y0, y1);
-                    var b = Math.min(y0 + this.height, y1 + clipRect.height);
+                    var t = math.max(y0, y1);
+                    var b = math.min(y0 + this.height, y1 + clipRect.height);
                     if (t <= b) {
                         this.setTo(l, t, r - l, b - t);
                         return this;
@@ -3163,7 +3163,7 @@ var flower = {};
         }, {
             key: "intersects",
             value: function intersects(toIntersect) {
-                return Math.max(this.x, toIntersect.x) <= Math.min(this.right, toIntersect.right) && Math.max(this.y, toIntersect.y) <= Math.min(this.bottom, toIntersect.bottom);
+                return math.max(this.x, toIntersect.x) <= math.min(this.right, toIntersect.right) && math.max(this.y, toIntersect.y) <= math.min(this.bottom, toIntersect.bottom);
             }
         }, {
             key: "isEmpty",
@@ -3186,15 +3186,15 @@ var flower = {};
         }, {
             key: "_getBaseWidth",
             value: function _getBaseWidth(angle) {
-                var u = Math.abs(Math.cos(angle));
-                var v = Math.abs(Math.sin(angle));
+                var u = math.abs(math.cos(angle));
+                var v = math.abs(math.sin(angle));
                 return u * this.width + v * this.height;
             }
         }, {
             key: "_getBaseHeight",
             value: function _getBaseHeight(angle) {
-                var u = Math.abs(Math.cos(angle));
-                var v = Math.abs(Math.sin(angle));
+                var u = math.abs(math.cos(angle));
+                var v = math.abs(math.sin(angle));
                 return v * this.width + u * this.height;
             }
         }, {
@@ -3573,7 +3573,7 @@ var flower = {};
                     return;
                 }
                 p[2] = val;
-                p[14] = val * Math.PI / 180;
+                p[14] = val * math.PI / 180;
                 if (!this.$nativeShow) {
                     $warn(1002, this.name);
                     return;
@@ -3893,8 +3893,8 @@ var flower = {};
             key: "$getMouseTarget",
             value: function $getMouseTarget(touchX, touchY, multiply) {
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -4420,8 +4420,8 @@ var flower = {};
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -4522,8 +4522,8 @@ var flower = {};
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -6738,7 +6738,7 @@ var flower = {};
                         loader.load();
                     } else {
                         var params = {};
-                        params.r = Math.random();
+                        params.r = math.random();
                         for (var key in this._params) {
                             params[key] = this._params;
                         }
@@ -6806,7 +6806,7 @@ var flower = {};
             key: "loadText",
             value: function loadText() {
                 var params = {};
-                params.r = Math.random();
+                params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
@@ -7623,8 +7623,8 @@ var flower = {};
                         } else if (attributes.list[i].value == "size") {
                             var size = attributes.list[i + 1].value;
                             size = size.slice(1, size.length - 1);
-                            //this.width = Math.floor(size.split(",")[0]);
-                            //this.height = Math.floor(size.split(",")[1]);
+                            //this.width = math.floor(size.split(",")[0]);
+                            //this.height = math.floor(size.split(",")[1]);
                         }
                         i++;
                     }
@@ -7948,7 +7948,7 @@ var flower = {};
                     if (!info) {
                         info = loadList[i];
                     } else if (scale != null) {
-                        if (loadList[i].scale != null && Math.abs(loadList[i].scale - scale) < Math.abs(info.scale - scale)) {
+                        if (loadList[i].scale != null && math.abs(loadList[i].scale - scale) < math.abs(info.scale - scale)) {
                             info = loadList[i];
                         }
                     }
@@ -8173,11 +8173,11 @@ var flower = {};
                 var target = tween.target;
                 this.centerX = target.width / 2;
                 this.centerY = target.height / 2;
-                this.centerLength = Math.sqrt(target.width * target.width + target.height * target.height) * .5;
-                this.rotationStart = Math.atan2(target.height, target.width) * 180 / Math.PI;
+                this.centerLength = math.sqrt(target.width * target.width + target.height * target.height) * .5;
+                this.rotationStart = math.atan2(target.height, target.width) * 180 / math.PI;
                 if (target.rotation) {
-                    this.lastMoveX = this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-                    this.lastMoveY = this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                    this.lastMoveX = this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+                    this.lastMoveY = this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
                 } else {
                     this.lastMoveX = 0;
                     this.lastMoveY = 0;
@@ -8229,8 +8229,8 @@ var flower = {};
                 }
                 if (this.rotationTo) {
                     target.rotation = this.rotationFrom + (this.rotationTo - this.rotationFrom) * value;
-                    moveX += this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-                    moveY += this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                    moveX += this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+                    moveY += this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
                     target.x += moveX - this.lastMoveX;
                     target.y += moveY - this.lastMoveY;
                 }
@@ -8302,7 +8302,7 @@ var flower = {};
                 this.pathSum = [];
                 this.pathSum.push(0);
                 for (var i = 1, len = path.length; i < len; i++) {
-                    this.pathSum[i] = this.pathSum[i - 1] + Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                    this.pathSum[i] = this.pathSum[i - 1] + math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
                 }
                 var sum = this.pathSum[len - 1];
                 for (i = 1; i < len; i++) {
@@ -8346,7 +8346,7 @@ var flower = {};
 
                 var sum = 0;
                 for (var i = 1, len = path.length; i < len; i++) {
-                    sum += Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                    sum += math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
                 }
                 var time = sum / v;
                 return flower.Tween.to(target, time, { "path": path }, ease);
@@ -8439,7 +8439,7 @@ var flower = {};
         }, {
             key: "freeFallToWithG",
             value: function freeFallToWithG(target, g, groundY) {
-                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g), { "y": groundY, "physicMove": true });
+                return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g), { "y": groundY, "physicMove": true });
             }
         }, {
             key: "fallTo",
@@ -8457,7 +8457,7 @@ var flower = {};
 
                 vX = +vX;
                 vY = +vY;
-                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g + vY * vY / (g * g)) - vY / g, {
+                return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g + vY * vY / (g * g)) - vY / g, {
                     "y": groundY,
                     "physicMove": true,
                     "vx": vX,
@@ -8606,25 +8606,25 @@ var flower = {};
         }, {
             key: "SineEaseIn",
             value: function SineEaseIn(t) {
-                return Math.sin((t - 1) * Math.PI * .5) + 1;
+                return math.sin((t - 1) * math.PI * .5) + 1;
             }
         }, {
             key: "SineEaseOut",
             value: function SineEaseOut(t) {
-                return Math.sin(t * Math.PI * .5);
+                return math.sin(t * math.PI * .5);
             }
         }, {
             key: "SineEaseInOut",
             value: function SineEaseInOut(t) {
-                return Math.sin((t - .5) * Math.PI) * .5 + .5;
+                return math.sin((t - .5) * math.PI) * .5 + .5;
             }
         }, {
             key: "SineEaseOutIn",
             value: function SineEaseOutIn(t) {
                 if (t < 0.5) {
-                    return Math.sin(t * Math.PI) * .5;
+                    return math.sin(t * math.PI) * .5;
                 }
-                return Math.sin((t - 1) * Math.PI) * .5 + 1;
+                return math.sin((t - 1) * math.PI) * .5 + 1;
             }
         }, {
             key: "QuadEaseIn",
@@ -8734,51 +8734,51 @@ var flower = {};
         }, {
             key: "ExpoEaseIn",
             value: function ExpoEaseIn(t) {
-                return Math.pow(2, 10 * (t - 1));
+                return math.pow(2, 10 * (t - 1));
             }
         }, {
             key: "ExpoEaseOut",
             value: function ExpoEaseOut(t) {
-                return -Math.pow(2, -10 * t) + 1;
+                return -math.pow(2, -10 * t) + 1;
             }
         }, {
             key: "ExpoEaseInOut",
             value: function ExpoEaseInOut(t) {
                 if (t < .5) {
-                    return Math.pow(2, 10 * (t * 2 - 1)) * .5;
+                    return math.pow(2, 10 * (t * 2 - 1)) * .5;
                 }
-                return -Math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
+                return -math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
             }
         }, {
             key: "ExpoEaseOutIn",
             value: function ExpoEaseOutIn(t) {
                 if (t < .5) {
-                    return -Math.pow(2, -20 * t) * .5 + .5;
+                    return -math.pow(2, -20 * t) * .5 + .5;
                 }
-                return Math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
+                return math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
             }
         }, {
             key: "CircEaseIn",
             value: function CircEaseIn(t) {
-                return 1 - Math.sqrt(1 - t * t);
+                return 1 - math.sqrt(1 - t * t);
             }
         }, {
             key: "CircEaseOut",
             value: function CircEaseOut(t) {
-                return Math.sqrt(1 - (1 - t) * (1 - t));
+                return math.sqrt(1 - (1 - t) * (1 - t));
             }
         }, {
             key: "CircEaseInOut",
             value: function CircEaseInOut(t) {
                 if (t < .5) {
-                    return .5 - Math.sqrt(.25 - t * t);
+                    return .5 - math.sqrt(.25 - t * t);
                 }
-                return Math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
+                return math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
             }
         }, {
             key: "CircEaseOutIn",
             value: function CircEaseOutIn(t) {
-                var s = Math.sqrt(.25 - (.5 - t) * (.5 - t));
+                var s = math.sqrt(.25 - (.5 - t) * (.5 - t));
                 if (t < .5) {
                     return s;
                 }
@@ -8817,31 +8817,31 @@ var flower = {};
             key: "ElasticEaseIn",
             value: function ElasticEaseIn(t) {
                 if (t == 0 || t == 1) return t;
-                return -(Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.075) * 2 * Math.PI / .3));
+                return -(math.pow(2, 10 * (t - 1)) * math.sin((t - 1.075) * 2 * math.PI / .3));
             }
         }, {
             key: "ElasticEaseOut",
             value: function ElasticEaseOut(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
-                return Math.pow(2, 10 * -t) * Math.sin((-t - .075) * 2 * Math.PI / .3) + 1;
+                return math.pow(2, 10 * -t) * math.sin((-t - .075) * 2 * math.PI / .3) + 1;
             }
         }, {
             key: "ElasticEaseInOut",
             value: function ElasticEaseInOut(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
                 if (t < .5) {
-                    return -(Math.pow(2, 10 * t - 10) * Math.sin((t * 2 - 2.15) * Math.PI / .3));
+                    return -(math.pow(2, 10 * t - 10) * math.sin((t * 2 - 2.15) * math.PI / .3));
                 }
-                return Math.pow(2, 10 - 20 * t) * Math.sin((-4 * t + 1.85) * Math.PI / .3) * .5 + 1;
+                return math.pow(2, 10 - 20 * t) * math.sin((-4 * t + 1.85) * math.PI / .3) * .5 + 1;
             }
         }, {
             key: "ElasticEaseOutIn",
             value: function ElasticEaseOutIn(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
                 if (t < .5) {
-                    return Math.pow(2, -20 * t) * Math.sin((-t * 4 - .15) * Math.PI / .3) * .5 + .5;
+                    return math.pow(2, -20 * t) * math.sin((-t * 4 - .15) * math.PI / .3) * .5 + .5;
                 }
-                return -(Math.pow(2, 20 * (t - 1)) * Math.sin((t * 4 - 4.15) * Math.PI / .3)) * .5 + .5;
+                return -(math.pow(2, 20 * (t - 1)) * math.sin((t * 4 - 4.15) * math.PI / .3)) * .5 + .5;
             }
         }, {
             key: "bounceEaseIn",
@@ -8939,7 +8939,7 @@ var flower = {};
                 var loopTime = 0;
                 if (this._currentTime >= totalTime) {
                     currentTime = this._currentTime % totalTime;
-                    loopTime = Math.floor(this._currentTime / totalTime);
+                    loopTime = math.floor(this._currentTime / totalTime);
                     if (!this._loop) {
                         this.$setPlaying(false);
                     }
@@ -9947,16 +9947,16 @@ var flower = {};
                     if (num < 128) {
                         res.push(num);
                     } else if (num < 2048) {
-                        res.push(Math.floor(num / 64) + 128 + 64);
+                        res.push(math.floor(num / 64) + 128 + 64);
                         res.push(num % 64 + 128);
                     } else if (num < 65536) {
-                        res.push(Math.floor(num / 4096) + 128 + 64 + 32);
-                        res.push(Math.floor(num % 4096 / 64) + 128);
+                        res.push(math.floor(num / 4096) + 128 + 64 + 32);
+                        res.push(math.floor(num % 4096 / 64) + 128);
                         res.push(num % 64 + 128);
                     } else {
-                        res.push(Math.floor(num / 262144) + 128 + 64 + 32 + 16);
-                        res.push(Math.floor(num % 262144 / 4096) + 128);
-                        res.push(Math.floor(num % 4096 / 64) + 128);
+                        res.push(math.floor(num / 262144) + 128 + 64 + 32 + 16);
+                        res.push(math.floor(num % 262144 / 4096) + 128);
+                        res.push(math.floor(num % 4096 / 64) + 128);
                         res.push(num % 64 + 128);
                     }
                 }
@@ -10056,7 +10056,7 @@ var flower = {};
                     this.length++;
                 }
                 if (flag) {
-                    this.writeUInt(Math.floor(val2));
+                    this.writeUInt(math.floor(val2));
                 }
             }
         }, {
@@ -10131,10 +10131,10 @@ var flower = {};
             value: function readInt() {
                 var val = this.readUInt();
                 if (val % 2 == 1) {
-                    val = Math.floor(val / 2);
+                    val = math.floor(val / 2);
                     val = ~val;
                 } else {
-                    val = Math.floor(val / 2);
+                    val = math.floor(val / 2);
                 }
                 return val;
             }
@@ -10620,5 +10620,48 @@ var flower = {};
 
     flower.XMLNameSpace = XMLNameSpace;
     //////////////////////////End File:flower/utils/XMLNameSpace.js///////////////////////////
-})();
+
+    //////////////////////////File:flower/utils/Math.js///////////////////////////
+
+    var Math = function () {
+        function Math() {
+            _classCallCheck(this, Math);
+        }
+
+        _createClass(Math, null, [{
+            key: "timeToHMS",
+
+
+            /**
+             * 将时间(ms) 转换为 00:00:00 的格式
+             * @param time
+             */
+            value: function timeToHMS(time) {
+                var hour = math.floor(time / (1000 * 3600));
+                var minute = math.floor(time % (1000 * 3600) / (1000 * 60));
+                var second = math.floor(time % (1000 * 60) / 1000);
+                return (hour < 10 ? "0" + hour : hour) + ":" + (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second);
+            }
+
+            /**
+             * 将时间(ms) 转换为 00:00:00 的格式
+             * @param time
+             */
+
+        }, {
+            key: "timeToMSM",
+            value: function timeToMSM(time) {
+                var minute = math.floor(time % (1000 * 3600) / (1000 * 60));
+                var second = math.floor(time % (1000 * 60) / 1000);
+                var ms = math.floor(time % 1000 / 10);
+                return (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second) + ":" + (ms < 10 ? "0" + ms : ms);
+            }
+        }]);
+
+        return Math;
+    }();
+
+    flower.Math = Math;
+    //////////////////////////End File:flower/utils/Math.js///////////////////////////
+})(Math);
 var trace = flower.trace;

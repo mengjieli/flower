@@ -11,7 +11,7 @@ class PlatformShape extends PlatformDisplayObject {
 
     toColor16(color) {
         var abc;
-        var num = Math.floor(color / 16);
+        var num = math.floor(color / 16);
         abc = num + "";
         if (num == 15) {
             abc = "f";
@@ -62,11 +62,11 @@ class PlatformShape extends PlatformDisplayObject {
             div.style.position = "absolute";
             div.style.left = points[0].x + "px";
             div.style.top = points[0].y + "px";
-            var rotation = Math.atan2(points[1].y - points[0].y, points[1].x - points[0].x);
-            var len = Math.sqrt((points[1].y - points[0].y) * (points[1].y - points[0].y) + (points[1].x - points[0].x) * (points[1].x - points[0].x));
+            var rotation = math.atan2(points[1].y - points[0].y, points[1].x - points[0].x);
+            var len = math.sqrt((points[1].y - points[0].y) * (points[1].y - points[0].y) + (points[1].x - points[0].x) * (points[1].x - points[0].x));
             div.style.width = len + "px";
             div.style.height = "0px";
-            div.style["-webkit-transform"] = "rotate(" + (rotation * 180 / Math.PI) + "deg)";
+            div.style["-webkit-transform"] = "rotate(" + (rotation * 180 / math.PI) + "deg)";
             if (lineAlpha && lineWidth) {
                 div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
             } else {

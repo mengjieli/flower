@@ -1,0 +1,43 @@
+var Trigger = (function () {
+
+    function Trigger(data, dungeonData, callObject) {
+        this.data = data;
+        this.dungeonData = dungeonData;
+        this.callObject = callObject;
+
+        this.data.hasPlay.value = true;
+        this.time = 0;
+        this.update(0);
+    }
+
+    Trigger.prototype.update = function (dt) {
+        this.time += dt;
+        for (var i = 0; i < this.data.effects.length; i++) {
+            var effect = this.data.effects[i];
+            if (!effect.hasPlay.value && effect.delay.value <= this.time) {
+                this.runEffect(effect);
+            }
+        }
+    }
+
+    Trigger.prototype.runEffect = function (effect) {
+        effect.hasPlay.value = true;
+        switch (effect.type.value) {
+            case 10:
+                //callObject.
+                break;
+        }
+    }
+
+    Trigger.prototype.dispose = function () {
+        this.data.hasPlay.value = false;
+        for (var i = 0; i < this.data.effects.length; i++) {
+            this.data.effects[i].hasPlay.value = false;
+        }
+    }
+
+    return Trigger;
+})();
+
+
+module.Trigger = Trigger;

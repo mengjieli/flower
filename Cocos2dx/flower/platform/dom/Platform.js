@@ -30,22 +30,22 @@ class Platform {
         mask.onmousedown = function (e) {
             if(e.button == 2) return;
             touchDown = true;
-            engine.$addTouchEvent("begin", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+            engine.$addTouchEvent("begin", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmouseup = function (e) {
             if(e.button == 2) return;
             touchDown = false;
-            engine.$addTouchEvent("end", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+            engine.$addTouchEvent("end", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmousemove = function (e) {
             if(e.button == 2) return;
-            engine.$addMouseMoveEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+            engine.$addMouseMoveEvent(math.floor(e.clientX), math.floor(e.clientY));
             if (touchDown) {
-                engine.$addTouchEvent("move", 0, Math.floor(e.clientX), Math.floor(e.clientY));
+                engine.$addTouchEvent("move", 0, math.floor(e.clientX), math.floor(e.clientY));
             }
         }
         document.body.oncontextmenu = function (e) {
-            engine.$addRightClickEvent(Math.floor(e.clientX), Math.floor(e.clientY));
+            engine.$addRightClickEvent(math.floor(e.clientX), math.floor(e.clientY));
             return false;
         }
         Platform.width = document.documentElement.clientWidth;

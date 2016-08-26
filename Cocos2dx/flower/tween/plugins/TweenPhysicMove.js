@@ -79,7 +79,7 @@ class TweenPhysicMove {
     }
 
     static freeFallToWithG(target, g, groundY) {
-        return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g), {"y": groundY, "physicMove": true});
+        return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g), {"y": groundY, "physicMove": true});
     }
 
     static fallTo(target, time, groundY, vX = null, vY = null) {
@@ -89,7 +89,7 @@ class TweenPhysicMove {
     static fallToWithG(target, g, groundY, vX = null, vY = null) {
         vX = +vX;
         vY = +vY;
-        return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g + (vY * vY / (g * g))) - vY / g, {
+        return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g + (vY * vY / (g * g))) - vY / g, {
             "y": groundY,
             "physicMove": true,
             "vx": vX,

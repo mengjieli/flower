@@ -10,6 +10,18 @@
       "desc": "是否显示格子",
       "type": "bool",
       "init": true
+    },
+    "isPlaying": {
+      "desc": "是否正在运行",
+      "type": "bool"
+    },
+    "reset": {
+      "desc": "是否重置",
+      "type": "int"
+    },
+    "time": {
+      "desc": "运行时间(ms)",
+      "type": "int"
     }
   }
 }

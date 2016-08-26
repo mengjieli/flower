@@ -12,18 +12,20 @@
     {
      "itemId": 60,
      "name": "刷怪",
-     "delay": 0,
+     "delay": 20000,
      "type": 1,
      "effectValue": {
       "monsters": [
       ],
       "__className": "dg.FlushMonsterEffect"
-     }
+     },
+     "hasPlay": false,
+     "color": 0
     },
     {
      "itemId": 61,
      "name": "直接伤害",
-     "delay": 0,
+     "delay": 10000,
      "type": 2,
      "effectValue": {
       "type": 1,
@@ -41,17 +43,21 @@
        }
       ],
       "__className": "dg.HurtEffect"
-     }
+     },
+     "hasPlay": false,
+     "color": 0
     },
     {
      "itemId": 63,
      "name": "完成任务",
-     "delay": 0,
+     "delay": 5000,
      "type": 7,
      "effectValue": {
       "missionId": 123,
       "__className": "dg.MissionCompleteEffect"
-     }
+     },
+     "hasPlay": false,
+     "color": 0
     },
     {
      "itemId": 64,
@@ -66,7 +72,9 @@
       "time": 3,
       "pos": 9,
       "__className": "dg.CameraMoveEffect"
-     }
+     },
+     "hasPlay": false,
+     "color": 0
     },
     {
      "itemId": 65,
@@ -87,7 +95,9 @@
       "param4": 0,
       "triggerId": 0,
       "__className": "dg.CameraRangeEffect"
-     }
+     },
+     "hasPlay": false,
+     "color": 0
     },
     {
      "itemId": 66,
@@ -102,9 +112,13 @@
       "param4": 4,
       "triggerId": 666,
       "__className": "dg.DialogEffect"
-     }
+     },
+     "hasPlay": false,
+     "color": 0
     }
-   ]
+   ],
+   "hasPlay": false,
+   "color": 0
   },
   {
    "itemId": 67,
@@ -125,7 +139,9 @@
     "__className": "dg.MoveCondition"
    },
    "effects": [
-   ]
+   ],
+   "hasPlay": false,
+   "color": 0
   },
   {
    "itemId": 68,
@@ -137,7 +153,16 @@
     "__className": "dg.HPCondition"
    },
    "effects": [
-   ]
+   ],
+   "hasPlay": false,
+   "color": 0
   }
- ]
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "showGrid": true,
+  "isPlaying": false,
+  "reset": 0,
+  "time": 0
+ }
 }

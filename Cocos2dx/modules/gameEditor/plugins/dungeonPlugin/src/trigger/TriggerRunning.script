@@ -1,0 +1,87 @@
+var TriggerRunning = (function () {
+
+    function TriggerRunning(callObject) {
+        this.triggers = [];
+        this.callObject = callObject;
+        //运行时间
+        this.time = 0;
+        //是否初始化过
+        this.hasInit = false;
+    }
+
+    TriggerRunning.prototype.setData = function (data) {
+        this.data = data; // DungeonData
+        if (this.data.settings.isPlaying.value) {
+            this.start();
+        }
+        this.data.settings.reset.addListener(flower.Event.UPDATE, function (e) {
+            this.stop();
+        }, this);
+        this.data.settings.isPlaying.addListener(flower.Event.UPDATE, function (e) {
+            if (this.data.settings.isPlaying.value) {
+                if (!this.hasInit) {
+                    this.start();
+                } else {
+                    this.play();
+                }
+            } else {
+                this.pause();
+            }
+        }, this);
+    }
+
+    /**
+     * 重新开始
+     */
+    TriggerRunning.prototype.start = function () {
+        this.stop();
+        this.time = 0;
+        this.hasInit = true;
+        //运行
+        flower.EnterFrame.add(this.update, this);
+    }
+
+    TriggerRunning.prototype.stop = function () {
+        while (this.triggers.length) {
+            this.triggers.pop().dispose();
+        }
+        flower.EnterFrame.remove(this.update, this);
+        this.data.settings.time.value = 0;
+        this.time = 0;
+        this.data.settings.isPlaying = false;
+    }
+
+    /**
+     * 暂停
+     */
+    TriggerRunning.prototype.pause = function () {
+        flower.EnterFrame.remove(this.update, this);
+    }
+
+    /**
+     * 继续播放
+     */
+    TriggerRunning.prototype.play = function () {
+        flower.EnterFrame.add(this.update, this);
+    }
+
+    TriggerRunning.prototype.update = function (now, dt) {
+        this.time += dt;
+        this.data.settings.time.value = this.time;
+        var triggers = this.data.triggers;
+        for (var i = 0; i < this.triggers.length; i++) {
+            this.triggers[i].update(dt);
+        }
+        for (var i = 0; i < triggers.length; i++) {
+            var trigger = triggers[i];
+            if (!trigger.hasPlay.value && trigger.startCondition.value == 1) {
+                this.triggers.push(new Trigger(trigger, this.data, this.callObject));
+            }
+        }
+    }
+
+    return TriggerRunning;
+})();
+
+
+module.TriggerRunning = TriggerRunning;

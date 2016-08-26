@@ -37,6 +37,20 @@
                 <f:Group percentHeight="100">
                     <s:CheckBox id="showGridCheckBox" x="10" label="查看格子" width="50" verticalCenter="0"/>
                 </f:Group>
+                <f:Group percentHeight="100">
+                    <s:Button1 verticalCenter="0" width="35" height="16"
+                               label="重置"
+                               click="this.data.data.settings.reset.value = this.data.data.settings.reset.value + 1;"/>
+                </f:Group>
+                <f:Group percentHeight="100">
+                    <s:Button1 verticalCenter="0" width="35" height="16" visible="{data.data.settings.isPlaying}"
+                               label="暂停" click="this.data.data.settings.isPlaying.value = false;"/>
+                    <s:Button1 verticalCenter="0" width="35" height="16" visible="{!data.data.settings.isPlaying}"
+                               label="播放" click="this.data.data.settings.isPlaying.value = true;"/>
+                </f:Group>
+                <f:Group percentHeight="100">
+                    <f:Label text="{timeToMSM(data.data.settings.time)}" verticalCenter="0" width="50"/>
+                </f:Group>
             </f:Group>
         </f:Group>
         <f:Group percentWidth="100" top="50" bottom="0">

@@ -82,8 +82,8 @@ class PlistLoader extends EventDispatcher {
                 else if (attributes.list[i].value == "size") {
                     var size = attributes.list[i + 1].value;
                     size = size.slice(1, size.length - 1);
-                    //this.width = Math.floor(size.split(",")[0]);
-                    //this.height = Math.floor(size.split(",")[1]);
+                    //this.width = math.floor(size.split(",")[0]);
+                    //this.height = math.floor(size.split(",")[1]);
                 }
                 i++;
             }

@@ -7,11 +7,11 @@ class TweenCenter {
         var target = tween.target;
         this.centerX = target.width / 2;
         this.centerY = target.height / 2;
-        this.centerLength = Math.sqrt(target.width * target.width + target.height * target.height) * .5;
-        this.rotationStart = Math.atan2(target.height, target.width) * 180 / Math.PI;
+        this.centerLength = math.sqrt(target.width * target.width + target.height * target.height) * .5;
+        this.rotationStart = math.atan2(target.height, target.width) * 180 / math.PI;
         if (target.rotation) {
-            this.lastMoveX = this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-            this.lastMoveY = this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+            this.lastMoveX = this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+            this.lastMoveY = this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
         } else {
             this.lastMoveX = 0;
             this.lastMoveY = 0;
@@ -79,8 +79,8 @@ class TweenCenter {
         }
         if (this.rotationTo) {
             target.rotation = this.rotationFrom + (this.rotationTo - this.rotationFrom) * value;
-            moveX += this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-            moveY += this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+            moveX += this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+            moveY += this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
             target.x += moveX - this.lastMoveX;
             target.y += moveY - this.lastMoveY;
         }

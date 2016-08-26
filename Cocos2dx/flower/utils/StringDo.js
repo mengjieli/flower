@@ -277,18 +277,18 @@ class StringDo {
                 res.push(num);
             }
             else if (num < 2048) {
-                res.push(Math.floor(num / 64) + 128 + 64);
+                res.push(math.floor(num / 64) + 128 + 64);
                 res.push((num % 64) + 128);
             }
             else if (num < 65536) {
-                res.push(Math.floor(num / 4096) + 128 + 64 + 32);
-                res.push(Math.floor((num % 4096) / 64) + 128);
+                res.push(math.floor(num / 4096) + 128 + 64 + 32);
+                res.push(math.floor((num % 4096) / 64) + 128);
                 res.push((num % 64) + 128);
             }
             else {
-                res.push(Math.floor(num / 262144) + 128 + 64 + 32 + 16);
-                res.push(Math.floor((num % 262144) / 4096) + 128);
-                res.push(Math.floor((num % 4096) / 64) + 128);
+                res.push(math.floor(num / 262144) + 128 + 64 + 32 + 16);
+                res.push(math.floor((num % 262144) / 4096) + 128);
+                res.push(math.floor((num % 4096) / 64) + 128);
                 res.push((num % 64) + 128);
             }
         }

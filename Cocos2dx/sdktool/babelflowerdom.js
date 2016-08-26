@@ -256,6 +256,7 @@ var list = [
     "XMLAttribute",
     "XMLElement",
     "XMLNameSpace",
+    "Math"
 ];
 var fileContent = "";
 fileContent += `
@@ -282,7 +283,7 @@ function __extends(d, b) {
 }
 var flower = {};
 `;
-fileContent += "(function(){\n";
+fileContent += "(function(math){\n";
 while (list.length) {
     var name = list.shift();
     file = files[i];
@@ -296,7 +297,7 @@ while (list.length) {
         }
     }
 }
-fileContent += "})();\n";
+fileContent += "})(Math);\n";
 fileContent += "var trace = flower.trace;\n";
 fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
 //fileContent += "var flower = exports;\n";

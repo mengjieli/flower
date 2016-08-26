@@ -210,7 +210,7 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         p[2] = val;
-        p[14] = val * Math.PI / 180;
+        p[14] = val * math.PI / 180;
         if (!this.$nativeShow) {
             $warn(1002, this.name);
             return;
@@ -492,8 +492,8 @@ class DisplayObject extends EventDispatcher {
 
     $getMouseTarget(touchX, touchY, multiply) {
         var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-        touchX = Math.floor(point.x);
-        touchY = Math.floor(point.y);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;

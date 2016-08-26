@@ -69,7 +69,7 @@ function addTriggerToDirection(trigger) {
                 this.direction.removeItem(target);
             }.bind(this)
         }
-    ], trigger);
+    ], trigger, trigger.color);
 }
 
 function addEffectToDirection(trigger, effect) {
@@ -83,12 +83,13 @@ function addEffectToDirection(trigger, effect) {
                 this.direction.removeItem(target);
             }.bind(this)
         }
-    ], {trigger: trigger, effect: effect});
+    ], {trigger: trigger, effect: effect}, effect.color);
 }
 
 
-function addDirection(path, type, name, menuList, data) {
+function addDirection(path, type, name, menuList, data, color) {
     var dir = new software.Direction(path, name, type, null, data);
+    dir.color = color;
     var menu = null;
     if (menuList && menuList.length) {
         menu = {
@@ -105,8 +106,9 @@ function addDirection(path, type, name, menuList, data) {
     return this.direction.push(dir);
 }
 
-function addFile(path, type, name, menuList, data) {
+function addFile(path, type, name, menuList, data, color) {
     var dir = new software.File(path, name, type, null, data);
+    dir.color = color;
     var menu = null;
     if (menuList && menuList.length) {
         menu = {
@@ -125,9 +127,9 @@ function addFile(path, type, name, menuList, data) {
 
 function setData(val) {
     _super.prototype.setData.call(this, val);
-    this.data.data.settings.background.addListener(flower.Event.CHANGE,function(){
+    this.data.data.settings.background.addListener(flower.Event.CHANGE, function () {
         this.data.parser.save();
-    },this);
+    }, this);
     this.backgroundComboBox.value = this.data.data.settings.background;
     this.showGridCheckBox.value = this.data.data.settings.showGrid;
 }

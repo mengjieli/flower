@@ -1382,6 +1382,8 @@ class Binding {
 
 }
 
+Binding.addBindingCheck(flower.Math);
+
 binding.Binding = Binding;
 //////////////////////////End File:binding/Binding.js///////////////////////////
 
