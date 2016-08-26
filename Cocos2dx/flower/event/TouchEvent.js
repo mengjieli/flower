@@ -15,10 +15,16 @@ class TouchEvent extends Event {
     }
 
     get touchX() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchX;
+        }
         return this.$touchX;
     }
 
     get touchY() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchY;
+        }
         return this.$touchY;
     }
 

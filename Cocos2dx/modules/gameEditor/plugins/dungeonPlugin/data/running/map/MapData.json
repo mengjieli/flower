@@ -1,0 +1,27 @@
+{
+  "name": "dg.MapData",
+  "desc": "地图数据",
+  "members": {
+    "background": {
+      "desc": "背景地址",
+      "type": "string"
+    },
+    "size":{
+      "desc":"背景尺寸",
+      "type":"Size",
+      "init":{
+        "width":2700,
+        "height":1872
+      }
+    },
+    "camera": {
+      "desc": "摄像机信息",
+      "type": "dg.Camera"
+    },
+    "settings": {
+      "desc": "设置参数",
+      "type": "dg.DungeonSettingsData",
+      "init": null
+    }
+  }
+}

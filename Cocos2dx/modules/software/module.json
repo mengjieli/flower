@@ -3,6 +3,7 @@
   "name": "software",
   "components": [
     "./button/Button.xml",
+    "./checkBox/CheckBox.xml",
     "./label/Label.xml",
     "./panel/Panel.xml",
     "./panel/Alert.xml",

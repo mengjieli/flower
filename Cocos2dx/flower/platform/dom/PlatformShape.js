@@ -69,6 +69,8 @@ class PlatformShape extends PlatformDisplayObject {
             div.style["-webkit-transform"] = "rotate(" + (rotation * 180 / Math.PI) + "deg)";
             if (lineAlpha && lineWidth) {
                 div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
+            } else {
+                div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
             }
             this.show.appendChild(div);
             this.elements.push(div);
@@ -82,6 +84,8 @@ class PlatformShape extends PlatformDisplayObject {
             div.style.backgroundColor = "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + fillAlpha + ")";
             if (lineAlpha && lineWidth) {
                 div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
+            } else {
+                div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
             }
             this.show.appendChild(div);
             this.elements.push(div);

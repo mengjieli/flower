@@ -1718,7 +1718,7 @@ var $root = eval("this");
                     for (var key in members) {
                         member = members[key];
                         if (member.init && _typeof(member.init) == "object" && member.init.__className) {
-                            content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
                             content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                         } else {
                             if (member.type === "number" || member.type === "Number") {
@@ -1737,7 +1737,7 @@ var $root = eval("this");
                                 content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                                 content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             } else {
-                                content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
                                 content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             }
                         }
@@ -5012,23 +5012,28 @@ var $root = eval("this");
 
             var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-            _this25.__selected = false;
+            _this25.$ToggleButton = {
+                0: false, //
+                1: null, //value
+                2: null };
             return _this25;
         }
 
         _createClass(ToggleButton, [{
             key: "__onTouch",
+            //onChangeEXE
             value: function __onTouch(e) {
                 if (!this.enabled) {
                     e.stopPropagation();
                     return;
                 }
+                var p = this.$ToggleButton;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
-                        if (this.__selected) {
+                        if (p[0]) {
                             this.currentState = "selectedDown";
                         } else {
-                            this.currentState = "down";
+                            this.currentState = "selectedUp";
                         }
                         break;
                     case flower.TouchEvent.TOUCH_END:
@@ -5036,8 +5041,8 @@ var $root = eval("this");
                         if (e.type == flower.TouchEvent.TOUCH_END) {
                             this.selected = !this.selected;
                         }
-                        if (this.__selected) {
-                            this.currentState = "selectedUp";
+                        if (p[0]) {
+                            this.currentState = "down";
                         } else {
                             this.currentState = "up";
                         }
@@ -5048,34 +5053,54 @@ var $root = eval("this");
             key: "__setEnabled",
             value: function __setEnabled(val) {
                 _get(Object.getPrototypeOf(ToggleButton.prototype), "_setEnabled", this).call(this, val);
-                if (val == false && this.__selected) {
+                if (val == false && this.$ToggleButton[0]) {
                     this.selected = false;
                 }
             }
         }, {
             key: "__setSelected",
             value: function __setSelected(val) {
+                var p = this.$ToggleButton;
                 if (val == "false") {
                     val = false;
                 }
                 val = !!val;
-                if (!this.enabled || val == this.__selected) {
+                if (!this.enabled || val == p[0]) {
                     return;
                 }
-                this.__selected = val;
+                p[0] = val;
+                if (p[1] && p[1] instanceof flower.Value) {
+                    p[1].value = val;
+                    if (p[0] != p[1].value) {
+                        this.__valueChange();
+                    }
+                }
                 if (val) {
-                    this.currentState = "selectedUp";
+                    this.currentState = "down";
                 } else {
                     this.currentState = "up";
                 }
-                if (this.onChangeEXE) {
-                    this.onChangeEXE.call(this);
+                if (p[2]) {
+                    p[2].call(this);
                 }
+            }
+        }, {
+            key: "__valueChange",
+            value: function __valueChange() {
+                var p = this.$ToggleButton;
+                if (p[1]) {
+                    this.selected = p[1] instanceof flower.Value ? p[1].value : p[1];
+                }
+            }
+        }, {
+            key: "__onValueChange",
+            value: function __onValueChange(e) {
+                this.__valueChange();
             }
         }, {
             key: "selected",
             get: function get() {
-                return this.__selected;
+                return this.$ToggleButton[0];
             },
             set: function set(val) {
                 this.__setSelected(val);
@@ -5083,16 +5108,38 @@ var $root = eval("this");
         }, {
             key: "onChange",
             set: function set(val) {
+                if (this.$ToggleButton[2] == val) {
+                    return;
+                }
+                this.$ToggleButton[2] = val;
                 if (typeof val == "string") {
                     var content = val;
                     val = function () {
                         eval(content);
                     }.bind(this.eventThis);
                 }
-                this.onChangeEXE = val;
             },
             get: function get() {
-                return this.onChangeEXE;
+                return this.$ToggleButton[2];
+            }
+        }, {
+            key: "value",
+            set: function set(val) {
+                var p = this.$ToggleButton;
+                if (p[1] == val) {
+                    return;
+                }
+                if (p[1] && p[1] instanceof flower.Value) {
+                    p[1].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                }
+                p[1] = val;
+                if (p[1] && p[1] instanceof flower.Value) {
+                    p[1].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+                }
+                this.__valueChange();
+            },
+            get: function get() {
+                return this.$ToggleButton[1];
             }
         }]);
 

@@ -9,24 +9,27 @@ var DungeonParser = (function (_super) {
     DungeonParser.prototype.load = function () {
         var config = this.file.content;
         this.data = flower.DataManager.createData("dg.DungeonData", config);
-        /*this.data.backgroundList.addListener(flower.Event.SELECTED_ITEM_CHANGE, function (e) {
-            if (e.data) {
-                this.data.background.value = e.data.path;
-                this.save();
-            }
-        }, this);*/
         (new flower.Direction("res/tools/dungeon/background")).readDirectionList(function (list) {
-            this.data.backgroundList.removeAll();
+            var enumList = [];
+            var find = false;
             for (var i = 0; i < list.length; i++) {
                 if (list[i].fileType == "jpg" || list[i].fileType == "png") {
-                    this.data.backgroundList.push({
+                    if (this.data.settings.background.value == list[i].path) {
+                        find = true;
+                    }
+                    enumList.push({
                         label: list[i].name,
-                        path: list[i].path
+                        type: list[i].path
                     });
                 }
             }
+            if (!find) {
+                this.data.settings.background.value = enumList[0].type;
+            }
+            this.data.settings.background.enumList = enumList;
+            this.dispatchWidth(flower.Event.COMPLETE);
         }, this);
-        return false;
+        return true;
     }
 
     DungeonParser.prototype.onLoadComplete = function (e) {

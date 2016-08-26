@@ -17,19 +17,14 @@
       "type": "int",
       "init": "320"
     },
-    "background": {
-      "desc": "背景图片",
-      "type": "string"
-    },
-    "backgroundList": {
-      "desc": "背景图片列表",
-      "type": "Array",
-      "typeValue": "*"
-    },
     "triggers": {
       "desc": "触发器列表",
       "type": "Array",
       "typeValue": "dg.TriggerData"
+    },
+    "settings": {
+      "desc": "设置参数",
+      "type": "dg.DungeonSettingsData"
     }
   }
 }

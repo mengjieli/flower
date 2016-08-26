@@ -4,7 +4,12 @@
   "scripts": [
     "./src/Dungeon.script",
     "./src/parser/DungeonParser.script",
-    "./src/Map.script"
+    "./src/Map.script",
+    "./src/core/Camera.script",
+    "./src/core/GridLayer.script",
+    "./src/display/Grid.script",
+    "./src/trigger/Triggerrunning.script",
+    "./src/utils/MapUtils.script"
   ],
   "components": [
     "./panels/NewTriggerPanel.xml",
@@ -26,6 +31,7 @@
   },
   "data": [
     "./data/DungeonData.json",
+    "./data/DungeonSettingsData.json",
     "./data/TriggerData.json",
     "./data/TriggerEffectData.json",
     "./data/startCondition/HPCondition.json",
@@ -37,6 +43,8 @@
     "./data/effect/MissionCompleteEffect.json",
     "./data/effect/CameraMoveEffect.json",
     "./data/effect/CameraRangeEffect.json",
-    "./data/effect/DialogEffect.json"
+    "./data/effect/DialogEffect.json",
+    "./data/running/map/MapData.json",
+    "./data/running/map/Camera.json"
   ]
 }

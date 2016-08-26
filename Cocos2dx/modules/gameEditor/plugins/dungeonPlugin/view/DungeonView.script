@@ -123,4 +123,13 @@ function addFile(path, type, name, menuList, data) {
     return this.direction.push(dir);
 }
 
+function setData(val) {
+    _super.prototype.setData.call(this, val);
+    this.data.data.settings.background.addListener(flower.Event.CHANGE,function(){
+        this.data.parser.save();
+    },this);
+    this.backgroundComboBox.value = this.data.data.settings.background;
+    this.showGridCheckBox.value = this.data.data.settings.showGrid;
+}
+
 registerView("Dungeon", DungeonView);

@@ -1413,6 +1413,8 @@ var flower = {};
                     div.style["-webkit-transform"] = "rotate(" + rotation * 180 / Math.PI + "deg)";
                     if (lineAlpha && lineWidth) {
                         div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
+                    } else {
+                        div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
                     }
                     this.show.appendChild(div);
                     this.elements.push(div);
@@ -1426,6 +1428,8 @@ var flower = {};
                     div.style.backgroundColor = "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + fillAlpha + ")";
                     if (lineAlpha && lineWidth) {
                         div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
+                    } else {
+                        div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
                     }
                     this.show.appendChild(div);
                     this.elements.push(div);
@@ -2330,7 +2334,6 @@ var flower = {};
     Event.CANCEL = "cancel";
     Event.START_INPUT = "start_input";
     Event.STOP_INPUT = "stop_input";
-    Event.SELECTED_ITEM_CHANGE = "selected_item_change";
     Event._eventPool = [];
 
 
@@ -2365,11 +2368,17 @@ var flower = {};
         }, {
             key: "touchX",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchX;
+                }
                 return this.$touchX;
             }
         }, {
             key: "touchY",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchY;
+                }
                 return this.$touchY;
             }
         }, {
@@ -2416,13 +2425,19 @@ var flower = {};
         }
 
         _createClass(MouseEvent, [{
-            key: "touchX",
+            key: "mouseX",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchX;
+                }
                 return this.$touchX;
             }
         }, {
-            key: "touchY",
+            key: "mouseY",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchY;
+                }
                 return this.$touchY;
             }
         }, {

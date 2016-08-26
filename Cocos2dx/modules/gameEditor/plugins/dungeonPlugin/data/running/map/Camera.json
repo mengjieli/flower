@@ -1,0 +1,26 @@
+{
+  "name": "dg.Camera",
+  "desc": "摄像头数据",
+  "members": {
+    "viewport": {
+      "desc": "视窗范围",
+      "type": "Rectangle"
+    },
+    "x": {
+      "desc": "所在位置(像素坐标)(左下角)的x坐标",
+      "type": "int"
+    },
+    "y": {
+      "desc": "所在位置(像素坐标)(左下角)的y坐标",
+      "type": "int"
+    },
+    "width": {
+      "desc": "镜头宽",
+      "type": "int"
+    },
+    "height": {
+      "desc": "镜头高",
+      "type": "int"
+    }
+  }
+}

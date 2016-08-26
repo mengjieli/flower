@@ -1312,6 +1312,8 @@ class PlatformShape extends PlatformDisplayObject {
             div.style["-webkit-transform"] = "rotate(" + (rotation * 180 / Math.PI) + "deg)";
             if (lineAlpha && lineWidth) {
                 div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
+            } else {
+                div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
             }
             this.show.appendChild(div);
             this.elements.push(div);
@@ -1325,6 +1327,8 @@ class PlatformShape extends PlatformDisplayObject {
             div.style.backgroundColor = "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + fillAlpha + ")";
             if (lineAlpha && lineWidth) {
                 div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
+            } else {
+                div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
             }
             this.show.appendChild(div);
             this.elements.push(div);
@@ -2099,7 +2103,6 @@ class Event {
     static CANCEL = "cancel";
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
-    static SELECTED_ITEM_CHANGE = "selected_item_change";
 
     static _eventPool = [];
 
@@ -2151,10 +2154,16 @@ class TouchEvent extends Event {
     }
 
     get touchX() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchX;
+        }
         return this.$touchX;
     }
 
     get touchY() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchY;
+        }
         return this.$touchY;
     }
 
@@ -2194,11 +2203,17 @@ class MouseEvent extends Event {
         super(type, bubbles);
     }
 
-    get touchX() {
+    get mouseX() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchX;
+        }
         return this.$touchX;
     }
 
-    get touchY() {
+    get mouseY() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchY;
+        }
         return this.$touchY;
     }
 

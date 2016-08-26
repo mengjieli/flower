@@ -1,0 +1,15 @@
+{
+  "name": "dg.DungeonSettingsData",
+  "desc": "副本关卡数据",
+  "members": {
+    "background": {
+      "desc": "背景图片",
+      "type": "string"
+    },
+    "showGrid": {
+      "desc": "是否显示格子",
+      "type": "bool",
+      "init": true
+    }
+  }
+}

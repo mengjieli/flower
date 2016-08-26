@@ -1,18 +1,42 @@
-var Camera = (function (_super) {
+var Camera = (function () {
 
-    __extends(Camera, _super);
 
     function Camera() {
-        _super.call(this);
     }
 
     Camera.prototype.setData = function (val) {
-        _super.prototype.setData.call(this, val);
+        this.data = val;
+    }
+
+    Camera.prototype.moveTo = function (x, y) {
+        var width = this.data.width.value;
+        var height = this.data.height.value;
+        var rangeX = this.data.viewport.x.value;
+        var rangeY = this.data.viewport.y.value;
+        var rangeWidth = this.data.viewport.width.value;
+        var rangeHeight = this.data.viewport.height.value;
+        if (x < rangeX) {
+            x = rangeX;
+        }
+        if (x + width > rangeWidth) {
+            x = rangeWidth - width;
+        }
+        if (y < rangeY) {
+            y = rangeY;
+        }
+        if (y + height > rangeHeight) {
+            y = rangeHeight - height;
+        }
+        this.data.x.value = x;
+        this.data.y.value = y;
+    }
+
+    Camera.prototype.screenSizeChange = function () {
+
     }
 
     return Camera;
-
-})(flower.Group);
+})();
 
 
 module.Camera = Camera;

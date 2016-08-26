@@ -1,18 +1,7 @@
 {
  "itemId": 68,
- "screenWidth": 800,
+ "screenWidth": 600,
  "screenHeight": 600,
- "background": "res/tools/dungeon/background/map_0_2.jpg",
- "backgroundList": [
-  {
-   "label": "map_0_2.jpg",
-   "path": "res/tools/dungeon/background/map_0_2.jpg"
-  },
-  {
-   "label": "map_0_3.jpg",
-   "path": "res/tools/dungeon/background/map_0_3.jpg"
-  }
- ],
  "triggers": [
   {
    "itemId": 59,
@@ -27,18 +16,6 @@
      "type": 1,
      "effectValue": {
       "monsters": [
-       {
-        "id": 1,
-        "tag": 2,
-        "bornCoord": {
-         "x": 3,
-         "y": 4
-        },
-        "moveCoord": {
-         "x": 5,
-         "y": 6
-        }
-       }
       ],
       "__className": "dg.FlushMonsterEffect"
      }

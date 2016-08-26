@@ -4,32 +4,103 @@ var Map = (function (_super) {
 
     function Map() {
         _super.call(this);
+
         this.percentWidth = 100;
         this.percentHeight = 100;
+
+        this.init();
+    }
+
+    Map.prototype.init = function () {
+        this.initLayer();
+        //初始化摄像头
+        this.camera = new Camera();
+        //添加 update
+        flower.EnterFrame.add(this.update, this);
+        //添加事件
+        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_MOVE, this.onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_END, this.onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.onTouch, this);
+    }
+
+    /**
+     * 初始化层次
+     */
+    Map.prototype.initLayer = function () {
+        this.container = new flower.Sprite();
+        this.addChild(this.container);
+        //添加背景层
+        this.background = new flower.Image();
+        this.container.addChild(this.background);
+        //添加格子层
+        this.gridLayer = new GridLayer();
+        this.container.addChild(this.gridLayer);
     }
 
     Map.prototype.setData = function (val) {
-        _super.prototype.setData.call(this, val);
+        var dungeonData = val;
+        this.dungeonData = dungeonData;
+        var data = flower.DataManager.createData("dg.MapData");
+        data.settings = dungeonData.settings;
+        data.background = dungeonData.settings.background;
+        _super.prototype.setData.call(this, data);
+        this.mapHeight = this.data.size.height.value;
+        var cameraData = data.camera;
+        cameraData.viewport.value = {
+            x: 0,
+            y: 0,
+            width: 1500,
+            height: 1200
+        };
+        cameraData.width.value = dungeonData.screenWidth.value;
+        cameraData.height.value = dungeonData.screenHeight.value;
+        dungeonData.screenWidth.addListener(flower.Event.CHANGE, this.onCameraScreenChange, this);
+        dungeonData.screenHeight.addListener(flower.Event.CHANGE, this.onCameraScreenChange, this);
 
-        var image = new flower.Image();
-        image.bindProperty("source", "{data.background}", [this]);
-        this.addChild(image);
-
-        //this.camera = new dg.Camera(this.data);
+        //设置背景
+        this.background.bindProperty("source", "{data.settings.background}", [this]);
+        //设置镜头数据
+        this.camera.setData(this.data.camera);
+        //设置其他数据
+        this.gridLayer.setData(this.data);
     }
 
-    /*UIElement.prototype.updateX = function (x) {
-     }
+    Map.prototype.update = function () {
+        var x = -this.data.camera.x.value;
+        var y = -this.data.camera.y.value;
+        this.container.x = x;
+        this.container.y = -y - this.mapHeight + this.data.camera.height.value;
+    }
 
-     Object.defineProperty(UIElement.prototype, "isUIComponent", {
-     get: function () {
-     return this.__isUIComponent;
-     },
-     set: function (val) {
-     },
-     enumerable: true,
-     configurable: true
-     });*/
+    Map.prototype.onCameraScreenChange = function (e) {
+        this.data.camera.width.value = this.dungeonData.screenWidth.value;
+        this.data.camera.height.value = this.dungeonData.screenHeight.value;
+        this.camera.screenSizeChange();
+    }
+
+    Map.prototype.onTouch = function (e) {
+        switch (e.type) {
+            case flower.TouchEvent.TOUCH_BEGIN:
+                this.touchBeginX = e.touchX;
+                this.touchBeginY = this.mapHeight - e.touchY;
+                this.cameraX = -this.data.camera.x.value;
+                this.cameraY = -this.data.camera.y.value;
+                break;
+            case flower.TouchEvent.TOUCH_MOVE:
+                this.camera.moveTo(-(this.cameraX - this.touchBeginX + e.touchX), -(this.cameraY - this.touchBeginY + this.mapHeight - e.touchY));
+                break;
+            case flower.TouchEvent.TOUCH_END:
+            case flower.TouchEvent.TOUCH_RELEASE:
+                break;
+        }
+    }
+
+    Map.prototype.dispose = function () {
+        _super.prototype.dispose.call(this);
+        //移除 update
+        flower.EnterFrame.del(this.update, this);
+    }
 
     return Map;
 

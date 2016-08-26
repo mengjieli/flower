@@ -1,0 +1,28 @@
+var Grid = (function (_super) {
+
+    __extends(Grid, _super);
+
+    function Grid(data) {
+        _super.call(this, data);
+
+
+        this.x = data.x;
+        this.y = -data.y;
+        var image = new flower.Image("res/tools/dungeon/res/block.png");
+        image.x = -90 / 2;
+        image.y = -78 / 2;
+        this.addChild(image);
+        image.alpha = 0.2;
+
+        var label = new flower.Label(data.coordX + "," + data.coordY);
+        label.fontColor = 0xffffff;
+        label.x = -8;
+        label.y = -6;
+        this.addChild(label);
+        label.alpha = 0.3;
+    }
+
+    return Grid;
+})(flower.ItemRenderer);
+
+module.Grid = Grid;
