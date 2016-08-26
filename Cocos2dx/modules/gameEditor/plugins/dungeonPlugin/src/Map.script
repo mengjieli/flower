@@ -55,8 +55,8 @@ var Map = (function (_super) {
         cameraData.viewport.value = {
             x: 0,
             y: 0,
-            width: 1500,
-            height: 1200
+            width: this.data.size.width.value,
+            height: this.data.size.height.value
         };
         cameraData.width.value = dungeonData.screenWidth.value;
         cameraData.height.value = dungeonData.screenHeight.value;

@@ -21,6 +21,11 @@
     "height": {
       "desc": "镜头高",
       "type": "int"
+    },
+    "tweenTo": {
+      "desc": "镜头移动信息",
+      "type": "dg.CameraMove",
+      "init": null
     }
   }
 }

@@ -1,5 +1,5 @@
 {
- "itemId": 68,
+ "itemId": 69,
  "screenWidth": 600,
  "screenHeight": 600,
  "triggers": [
@@ -62,15 +62,15 @@
     {
      "itemId": 64,
      "name": "镜头移动",
-     "delay": 0,
+     "delay": 3000,
      "type": 9,
      "effectValue": {
       "coord": {
-       "x": 1,
-       "y": 2
+       "x": 0,
+       "y": 500
       },
-      "time": 3,
-      "pos": 9,
+      "time": 5000,
+      "pos": 2,
       "__className": "dg.CameraMoveEffect"
      },
      "hasPlay": false,
@@ -83,10 +83,10 @@
      "type": 10,
      "effectValue": {
       "rect": {
-       "x": 1,
-       "y": 2,
-       "width": 3,
-       "height": 4
+       "x": 0,
+       "y": 0,
+       "width": 1500,
+       "height": 1200
       },
       "dialogId": 0,
       "param1": 0,
@@ -113,6 +113,15 @@
       "triggerId": 666,
       "__className": "dg.DialogEffect"
      },
+     "hasPlay": false,
+     "color": 0
+    },
+    {
+     "itemId": 69,
+     "name": "开启触发器",
+     "delay": 0,
+     "type": 4,
+     "effectValue": null,
      "hasPlay": false,
      "color": 0
     }
@@ -162,7 +171,7 @@
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
   "showGrid": true,
   "isPlaying": false,
-  "reset": 0,
+  "reset": 7,
   "time": 0
  }
 }

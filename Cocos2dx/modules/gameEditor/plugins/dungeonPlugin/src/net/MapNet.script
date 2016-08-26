@@ -14,7 +14,30 @@ var MapNet = (function () {
      */
     MapNet.prototype.setCameraRange = function (x, y, width, height) {
         trace("设置镜头范围", x, y, width, height);
-        //this.data = data;
+        this.data.camera.viewport.value = {
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        }
+    }
+
+    MapNet.prototype.cameraTweenTo = function (time, x, y, type) {
+        this.data.camera.tweenTo = flower.DataManager.createData("dg.CameraMove", {
+            time: time,
+            x: x,
+            y: y,
+            type: type
+        });
+    }
+
+    MapNet.prototype.stop = function () {
+        this.data.camera.viewport.value = {
+            x: 0,
+            y: 0,
+            width: this.data.size.width.value,
+            height: this.data.size.height.value
+        };
     }
 
     return MapNet;

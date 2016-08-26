@@ -49,6 +49,7 @@ var TriggerRunning = (function () {
         this.data.settings.time.value = 0;
         this.time = 0;
         this.data.settings.isPlaying = false;
+        this.callObject.stop();
     }
 
     /**

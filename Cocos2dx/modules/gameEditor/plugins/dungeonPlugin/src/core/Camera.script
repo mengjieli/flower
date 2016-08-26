@@ -6,6 +6,10 @@ var Camera = (function () {
 
     Camera.prototype.setData = function (val) {
         this.data = val;
+        this.data.addListener("tweenTo", function (e) {
+            var info = this.data.tweenTo.value;
+            this.tweenTo(info.time, info.x, info.y, info.type);
+        }, this);
     }
 
     Camera.prototype.moveTo = function (x, y) {
@@ -31,9 +35,70 @@ var Camera = (function () {
         this.data.y.value = y;
     }
 
+    Camera.prototype.tweenTo = function (time, x, y, pos) {
+        switch (pos) {
+            case 2:
+                y = y - this.data.height.value * .5;
+                break;
+            case 3:
+                y = y - this.data.height.value;
+                break;
+            case 4:
+                x = x - this.data.width * .5;
+                y = y - this.data.height.value;
+                break;
+            case 5:
+                x = x - this.data.width;
+                y = y - this.data.height.value;
+                break;
+            case 6:
+                x = x - this.data.width;
+                y = y - this.data.height.value * .5;
+                break;
+            case 7:
+                x = x - this.data.width;
+                break;
+            case 8:
+                x = x - this.data.width * .5;
+                break;
+            case 5:
+                x = x - this.data.width * .5;
+                y = y - this.data.height.value * .5;
+                break;
+        }
+        flower.Tween.to(this, time / 1000, {
+            x: x,
+            y: y
+        }).call(function () {
+        }.bind(this));
+    }
+
+
     Camera.prototype.screenSizeChange = function () {
 
     }
+
+    Object.defineProperty(Camera.prototype, "x", {
+        get: function () {
+            return this.data.x.value;
+        },
+        set: function (val) {
+            this.moveTo(val, this.data.y.value);
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    Object.defineProperty(Camera.prototype, "y", {
+        get: function () {
+            return this.data.y.value;
+        },
+        set: function (val) {
+            this.moveTo(this.data.x.value, val);
+        },
+        enumerable: true,
+        configurable: true
+    });
 
     return Camera;
 })();

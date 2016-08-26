@@ -22,9 +22,13 @@ var Trigger = (function () {
 
     Trigger.prototype.runEffect = function (effect) {
         effect.hasPlay.value = true;
+        var value = effect.effectValue;
         switch (effect.type.value) {
+            case 9:
+                this.callObject.cameraTweenTo(value.time.value, value.coord.x.value, value.coord.y.value, value.pos.value);
+                break;
             case 10:
-                //callObject.
+                this.callObject.setCameraRange(value.rect.x.value, value.rect.y.value, value.rect.width.value, value.rect.height.value);
                 break;
         }
     }

@@ -1329,11 +1329,11 @@ var $root = eval("this");
             value: function setMember(name, value) {
                 var old = this.__value[name];
                 this.__value[name] = value;
-                //this.dispatchWidth(flower.Event.UPDATE, {
-                //    "name": name,
-                //    "old": old,
-                //    "value": value
-                //});
+                this.dispatchWidth(name, {
+                    "name": name,
+                    "old": old,
+                    "value": value
+                });
             }
         }, {
             key: "setMemberSaveClass",
@@ -1369,10 +1369,16 @@ var $root = eval("this");
                         this.setMember(name, value);
                     } else {
                         var val = this.__value[name];
+                        var old = val;
                         if (val instanceof Value) {
                             val.value = value;
                         } else {
                             this.__value[name] = value;
+                            this.dispatchWidth(name, {
+                                "name": name,
+                                "old": old,
+                                "value": value
+                            });
                         }
                     }
                 }

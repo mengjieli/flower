@@ -1163,11 +1163,11 @@ class ObjectValue extends Value {
     setMember(name, value) {
         var old = this.__value[name];
         this.__value[name] = value;
-        //this.dispatchWidth(flower.Event.UPDATE, {
-        //    "name": name,
-        //    "old": old,
-        //    "value": value
-        //});
+        this.dispatchWidth(name, {
+            "name": name,
+            "old": old,
+            "value": value
+        });
     }
 
     setMemberSaveClass(name, saveClass = false) {
@@ -1197,10 +1197,16 @@ class ObjectValue extends Value {
                 this.setMember(name, value);
             } else {
                 var val = this.__value[name];
+                var old = val;
                 if (val instanceof Value) {
                     val.value = value;
                 } else {
                     this.__value[name] = value;
+                    this.dispatchWidth(name, {
+                        "name": name,
+                        "old": old,
+                        "value": value
+                    });
                 }
             }
         }

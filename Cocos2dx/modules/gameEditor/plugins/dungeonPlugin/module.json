@@ -47,6 +47,7 @@
     "./data/effect/CameraRangeEffect.json",
     "./data/effect/DialogEffect.json",
     "./data/running/map/MapData.json",
-    "./data/running/map/Camera.json"
+    "./data/running/map/Camera.json",
+    "./data/running/map/CameraMove.json"
   ]
 }
