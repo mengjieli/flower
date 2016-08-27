@@ -4,7 +4,10 @@ var Monster = (function (_super) {
 
     function Monster(data) {
         _super.call(this, data);
+    }
 
+    Monster.prototype.init = function () {
+        this.playAction(Role.Action.STAND, Role.Dir.Left);
     }
 
     return Monster;

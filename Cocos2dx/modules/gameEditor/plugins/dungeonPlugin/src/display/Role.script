@@ -4,6 +4,7 @@ var Role = (function (_super) {
 
     function Role(data) {
         _super.call(this, data);
+        this.data = data;
 
         this.width = 0;
 
@@ -22,9 +23,13 @@ var Role = (function (_super) {
         this.dir = null;
         this.show = null;
 
-        this.playAction(Role.Action.STAND, Role.Dir.Right);
-
         flower.Tween.to(this, 0.5, {alpha: 1}, null, {alpha: 0});
+
+        this.init();
+    }
+
+    Role.prototype.init = function () {
+        this.playAction(Role.Action.STAND, Role.Dir.Right);
     }
 
     Role.prototype.playAction = function (action, dir) {
@@ -36,18 +41,13 @@ var Role = (function (_super) {
         }
         this.action = action;
         this.dir = dir;
-        this.show = new Animation({
-            url: "res/tools/dungeon/res/role/",
-            name: "1201002_000",
-            format: "png",
-            start: 0,
-            end: 5,
-            frameRate: 12,
-            x: -100,
-            y: -100,
-            scaleX: 1,
-            scaleY: 1
-        });
+        var name = this.action + Role.Show[this.dir];
+        var config = ConfigModel.getConfig("rolerAction").getItemWith("id", this.data.showType.value)[name];
+        config = flower.ObjectDo.clone(config);
+        config.url = "res/tools/dungeon/res/role/";
+        config.x = -100;
+        config.y = -100;
+        this.show = new Animation(config);
         this.show.scaleX = Role.ShowScaleX[dir];
         this.container.addChild(this.show);
     }

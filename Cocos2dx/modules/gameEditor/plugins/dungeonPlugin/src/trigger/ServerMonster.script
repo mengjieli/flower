@@ -18,7 +18,7 @@ var ServerMonster = (function () {
     }
 
     ServerMonster.prototype.dispose = function () {
-        this.callObject.removeMonster(this.id);
+        this.callObject.removeRole(this.id);
     }
 
     return ServerMonster;

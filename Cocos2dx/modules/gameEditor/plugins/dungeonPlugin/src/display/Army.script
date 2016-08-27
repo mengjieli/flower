@@ -4,8 +4,10 @@ var Army = (function (_super) {
 
     function Army(data) {
         _super.call(this, data);
+    }
 
-
+    Army.prototype.init = function () {
+        this.playAction(Role.Action.STAND, Role.Dir.Right);
     }
 
     return Army;

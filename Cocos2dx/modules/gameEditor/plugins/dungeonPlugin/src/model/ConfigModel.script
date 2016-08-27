@@ -1,0 +1,73 @@
+var ConfigModel = (function (_super) {
+
+    __extends(ConfigModel, _super);
+
+    function ConfigModel() {
+        _super.call(this);
+    }
+
+    ConfigModel.prototype.load = function () {
+        this.configs = {};
+        var loader = new flower.URLLoader("res/tools/dungeon/res/config/rolerAction.csv");
+        loader.once(flower.Event.COMPLETE, this.loadConfigComplete, this);
+        loader.load();
+    }
+
+    ConfigModel.prototype.loadConfigComplete = function (e) {
+        var content = e.data;
+        var name = flower.Path.getName(e.currentTarget.url);
+        name = name.split(".")[0];
+        var cfg = {};
+        var list = content.split("\n");
+        var array = new flower.ArrayValue();
+        this.configs[name] = array;
+        for (var i = 1; i < list.length; i++) {
+            var items = list[i].split(",");
+            var end = items[items.length - 1];
+            while (end.charAt(end.length - 1) == "\r" || end.charAt(end.length - 1) == "\n") {
+                end = end.slice(0, end.length - 1);
+            }
+            items[items.length - 1] = end;
+            var id = flower.StringDo.parseNumber(items[0]);
+            if (!id) {
+                continue;
+            }
+            var roler = cfg[id] = cfg[id] || {};
+            roler[items[1]] = {
+                "plist": items[2],
+                "name": items[3],
+                "start": flower.StringDo.parseNumber(items[4]),
+                "end": flower.StringDo.parseNumber(items[5]),
+                "frameRate": flower.StringDo.parseNumber(items[6]),
+                "x": flower.StringDo.parseNumber(items[7]),
+                "y": flower.StringDo.parseNumber(items[8]),
+            };
+            roler.id = id;
+            array.push(roler);
+        }
+        this.dispatchWidth(flower.Event.COMPLETE);
+    }
+
+    ConfigModel.prototype.getConfig = function (configName) {
+        var cfg = this.configs[configName];
+        return cfg;
+    }
+
+    var instance = null;
+
+    ConfigModel.getInstance = function () {
+        if (!instance) {
+            instance = new ConfigModel();
+        }
+        return instance;
+    }
+
+    ConfigModel.getConfig = function (configName) {
+        var cfg = ConfigModel.getInstance().getConfig(configName);
+        return cfg;
+    }
+
+    return ConfigModel;
+})(flower.EventDispatcher);
+
+module.ConfigModel = ConfigModel;

@@ -25,6 +25,36 @@
       "desc": "运行时间(ms)",
       "type": "int",
       "save": false
+    },
+    "bornX": {
+      "desc": "出生点x",
+      "type": "int",
+      "init": 0
+    },
+    "bornY": {
+      "desc": "出生点y",
+      "type": "int",
+      "init": 9
+    },
+    "myHp": {
+      "desc": "己方 hp",
+      "type": "int",
+      "init": 1000
+    },
+    "myAttack": {
+      "desc": "己方攻击力",
+      "type": "int",
+      "init": 300
+    },
+    "monsterHp": {
+      "desc": "怪物 hp",
+      "type": "int",
+      "init": 500
+    },
+    "monsterAttack": {
+      "desc": "怪物攻击力",
+      "type": "int",
+      "init": 50
     }
   }
 }

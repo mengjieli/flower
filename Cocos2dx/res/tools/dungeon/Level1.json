@@ -1,5 +1,5 @@
 {
- "itemId": 73,
+ "itemId": 77,
  "screenWidth": 600,
  "screenHeight": 600,
  "triggers": [
@@ -10,48 +10,13 @@
    "startValue": null,
    "effects": [
     {
-     "itemId": 60,
-     "name": "刷怪1",
-     "delay": 500,
-     "type": 1,
-     "effectValue": {
-      "monsters": [
-       {
-        "id": 1002410,
-        "tag": 300,
-        "bornCoord": {
-         "x": 4,
-         "y": 8
-        },
-        "moveCoord": {
-         "x": 4,
-         "y": 8
-        }
-       },
-       {
-        "id": 0,
-        "tag": 300,
-        "bornCoord": {
-         "x": 4,
-         "y": 10
-        },
-        "moveCoord": {
-         "x": 4,
-         "y": 10
-        }
-       }
-      ],
-      "__className": "dg.FlushMonsterEffect"
-     }
-    },
-    {
      "itemId": 64,
      "name": "镜头移动",
      "delay": 0,
      "type": 9,
      "effectValue": {
       "coord": {
-       "x": 0,
+       "x": 100,
        "y": 570
       },
       "time": 0,
@@ -83,82 +48,14 @@
     {
      "itemId": 69,
      "name": "开启触发器",
-     "delay": 2000,
+     "delay": 1,
      "type": 4,
      "effectValue": {
       "operate": 0,
-      "triggerId": 0,
+      "triggerId": 70,
       "__className": "dg.StartTriggerEffect"
      }
-    },
-    {
-     "itemId": 72,
-     "name": "刷怪2",
-     "delay": 1000,
-     "type": 1,
-     "effectValue": {
-      "monsters": [
-       {
-        "id": 0,
-        "tag": 400,
-        "bornCoord": {
-         "x": 6,
-         "y": 10
-        },
-        "moveCoord": {
-         "x": 0,
-         "y": 0
-        }
-       },
-       {
-        "id": 0,
-        "tag": 400,
-        "bornCoord": {
-         "x": 6,
-         "y": 8
-        },
-        "moveCoord": {
-         "x": 0,
-         "y": 0
-        }
-       }
-      ],
-      "__className": "dg.FlushMonsterEffect"
-     }
     }
-   ]
-  },
-  {
-   "itemId": 67,
-   "name": "移动触发器",
-   "startCondition": 2,
-   "startValue": {
-    "armyType": 1,
-    "points": [
-     {
-      "x": 1,
-      "y": 0
-     },
-     {
-      "x": 0,
-      "y": 2
-     }
-    ],
-    "__className": "dg.MoveCondition"
-   },
-   "effects": [
-   ]
-  },
-  {
-   "itemId": 68,
-   "name": "hp触发器",
-   "startCondition": 3,
-   "startValue": {
-    "tag": 300,
-    "hp": 0,
-    "__className": "dg.HPCondition"
-   },
-   "effects": [
    ]
   },
   {
@@ -169,7 +66,7 @@
    "effects": [
     {
      "itemId": 71,
-     "name": "效果71",
+     "name": "镜头右移",
      "delay": 0,
      "type": 9,
      "effectValue": {
@@ -181,12 +78,111 @@
       "pos": 2,
       "__className": "dg.CameraMoveEffect"
      }
+    },
+    {
+     "itemId": 77,
+     "name": "镜头回移",
+     "delay": 3000,
+     "type": 9,
+     "effectValue": {
+      "coord": {
+       "x": 0,
+       "y": 570
+      },
+      "time": 1000,
+      "pos": 2,
+      "__className": "dg.CameraMoveEffect"
+     }
+    }
+   ]
+  },
+  {
+   "itemId": 74,
+   "name": "刷怪",
+   "startCondition": 1,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 75,
+     "name": "刷第一波",
+     "delay": 500,
+     "type": 1,
+     "effectValue": {
+      "monsters": [
+       {
+        "id": 0,
+        "tag": 1,
+        "bornCoord": {
+         "x": 5,
+         "y": 8
+        },
+        "moveCoord": {
+         "x": 5,
+         "y": 8
+        }
+       },
+       {
+        "id": 0,
+        "tag": 1,
+        "bornCoord": {
+         "x": 6,
+         "y": 10
+        },
+        "moveCoord": {
+         "x": 6,
+         "y": 10
+        }
+       }
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    },
+    {
+     "itemId": 76,
+     "name": "刷第二波",
+     "delay": 1500,
+     "type": 1,
+     "effectValue": {
+      "monsters": [
+       {
+        "id": 0,
+        "tag": 2,
+        "bornCoord": {
+         "x": 7,
+         "y": 8
+        },
+        "moveCoord": {
+         "x": 7,
+         "y": 8
+        }
+       },
+       {
+        "id": 0,
+        "tag": 2,
+        "bornCoord": {
+         "x": 8,
+         "y": 10
+        },
+        "moveCoord": {
+         "x": 8,
+         "y": 10
+        }
+       }
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
     }
    ]
   }
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": false
+  "showGrid": false,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 1000,
+  "myAttack": 300,
+  "monsterHp": 500,
+  "monsterAttack": 50
  }
 }

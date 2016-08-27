@@ -9,6 +9,8 @@ var Server = (function () {
         this.hasInit = false;
         //怪物列表
         this.monsters = [];
+        //角色部队列表
+        this.armys = [];
     }
 
     Server.prototype.setData = function (data) {
@@ -50,6 +52,9 @@ var Server = (function () {
         while (this.monsters.length) {
             this.monsters.pop().dispose();
         }
+        while (this.armys.length) {
+            this.armys.pop().dispose();
+        }
         flower.EnterFrame.remove(this.update, this);
         this.data.settings.time.value = 0;
         this.time = 0;
@@ -72,6 +77,12 @@ var Server = (function () {
     }
 
     Server.prototype.update = function (now, dt) {
+        if(this.time == 0) {
+            var data = flower.DataManager.createData("dg.FlushMonsterEffectItem");
+            data.bornCoord.x.value = this.data.settings.bornX.value;
+            data.bornCoord.y.value = this.data.settings.bornY.value;
+            this.addArmy(data);
+        }
         this.time += dt;
         this.data.settings.time.value = this.time;
         var triggers = this.data.triggers;
@@ -80,6 +91,9 @@ var Server = (function () {
         }
         for (var i = 0; i < this.monsters.length; i++) {
             this.monsters[i].update(dt);
+        }
+        for (var i = 0; i < this.armys.length; i++) {
+            this.armys[i].update(dt);
         }
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
@@ -107,6 +121,14 @@ var Server = (function () {
      */
     Server.prototype.addMonster = function (data) {
         this.monsters.push(new ServerMonster(this.monsters.length + 1000, data, this.data, this.callObject, this));
+    }
+
+    /**
+     * 添加角色部队
+     * @param data FlushMonsterEffectItem
+     */
+    Server.prototype.addArmy = function (data) {
+        this.armys.push(new ServerArmy(this.armys.length + 1000000, data, this.data, this.callObject, this));
     }
 
     return Server;

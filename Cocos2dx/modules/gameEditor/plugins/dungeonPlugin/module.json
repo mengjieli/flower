@@ -4,6 +4,7 @@
   "scripts": [
     "./src/Dungeon.script",
     "./src/parser/DungeonParser.script",
+    "./src/model/ConfigModel.script",
     "./src/Map.script",
     "./src/core/Camera.script",
     "./src/core/GridLayer.script",
@@ -18,6 +19,7 @@
     "./src/trigger/Server.script",
     "./src/trigger/Trigger.script",
     "./src/trigger/ServerMonster.script",
+    "./src/trigger/ServerArmy.script",
     "./src/utils/MapUtils.script"
   ],
   "components": [

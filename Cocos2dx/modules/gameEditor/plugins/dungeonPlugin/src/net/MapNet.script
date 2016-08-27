@@ -63,7 +63,23 @@ var MapNet = (function () {
         }));
     }
 
-    MapNet.prototype.removeMonster = function (id) {
+    MapNet.prototype.addArmy = function (id, type, tag, x, y) {
+        this.data.objects.push(flower.DataManager.createData("dg.MapArmy", {
+            id: id,
+            type: type,
+            tag: tag,
+            coord: {
+                x: x,
+                y: y
+            },
+            position: {
+                x: MapUtils.transPointToPosition(x, y).x,
+                y: MapUtils.transPointToPosition(x, y).y,
+            }
+        }));
+    }
+
+    MapNet.prototype.removeRole = function (id) {
         this.data.objects.removeItemWith("id", id);
     }
 

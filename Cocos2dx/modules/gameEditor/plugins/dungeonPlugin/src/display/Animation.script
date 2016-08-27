@@ -26,14 +26,14 @@ var Animation = (function (_super) {
         this.__container.x = data.x;
         this.__container.y = data.y;
         this.addChild(this.__container);
-        this.__container.scaleX = data.scaleX;
-        this.__container.scaleY = data.scaleY;
+        this.__container.scaleX = data.scaleX || 1;
+        this.__container.scaleY = data.scaleY || 1;
         this.__length = data.end - data.start + 1;
         this.__frameTime = 1000 / data.frameRate;
         this.__frames = [];
         for (var i = data.start; i <= data.end; i++) {
             var name = data.name.slice(0, data.name.length - (i + "").length) + (i + "");
-            name = data.url + name + "." + data.format;
+            name = data.url + name + "." + (data.format || "png");
             var image = new flower.Image(name);
             this.__frames.push(image);
         }

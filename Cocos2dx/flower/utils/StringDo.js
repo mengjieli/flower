@@ -294,6 +294,52 @@ class StringDo {
         }
         return res;
     }
+
+    /**
+     * 如果不是数字则返回 null
+     * @param value 字符串
+     */
+    static parseNumber(value) {
+        if (typeof value == "number") {
+            return value;
+        }
+        if (typeof value != "string") {
+            return null;
+        }
+        var code0 = "0".charCodeAt(0);
+        var code9 = "9".charCodeAt(0);
+        var codeP = ".".charCodeAt(0);
+        var isNumber;
+        var hasPoint = false;
+        var before = "";
+        var end = "";
+        var code;
+        var flag = true;
+        for (var p = 0; p < value.length; p++) {
+            code = value.charCodeAt(p);
+            if (hasPoint) {
+                if (code >= code0 && code <= code9) {
+                    end += value.charAt(p);
+                } else {
+                    flag = false;
+                    break;
+                }
+            } else {
+                if (code == codeP) {
+                    hasPoint = true;
+                } else if (code >= code0 && code <= code9) {
+                    before += value.charAt(p);
+                } else {
+                    flag = false;
+                    break;
+                }
+            }
+        }
+        if (flag) {
+            return parseInt(before) + (end != "" ? parseInt(end) / (Math.pow(10, end.length)) : 0);
+        }
+        return null;
+    }
 }
 
 exports.StringDo = StringDo;

@@ -27,9 +27,17 @@ var DungeonParser = (function (_super) {
                 this.data.settings.background.value = enumList[0].type;
             }
             this.data.settings.background.enumList = enumList;
-            this.dispatchWidth(flower.Event.COMPLETE);
+            this.loadConfig();
         }, this);
         return true;
+    }
+
+    DungeonParser.prototype.loadConfig = function () {
+        var model = ConfigModel.getInstance();
+        model.once(flower.Event.COMPLETE, function (e) {
+            this.dispatchWidth(flower.Event.COMPLETE);
+        }, this);
+        model.load();
     }
 
     DungeonParser.prototype.onLoadComplete = function (e) {

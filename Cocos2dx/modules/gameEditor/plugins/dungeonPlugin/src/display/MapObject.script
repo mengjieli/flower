@@ -4,6 +4,7 @@ var MapObject = (function (_super) {
 
     function MapObject(data) {
         _super.call(this, data);
+        this.data = data;
 
         this.x = data.position.x.value;
         this.y = -data.position.y.value;
@@ -11,8 +12,6 @@ var MapObject = (function (_super) {
         var coordX = data.coord.x.value;
         var coordY = data.coord.y.value;
 
-        trace("刷地图对象", data.coord.x.value, data.coord.y.value, data.position.x.value, data.position.y.value);
-        trace("计算位置", MapUtils.transPointToPosition(coordX, coordY).x, MapUtils.transPointToPosition(coordX, coordY).y);
 
         switch (data.mapType.value) {
             case 1:
