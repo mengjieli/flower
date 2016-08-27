@@ -22,6 +22,16 @@ var Camera = (function () {
                 }
             }
         }, this);
+        settings.reset.addListener(flower.Event.UPDATE, function (e) {
+            this.reset();
+        }, this);
+    }
+
+    Camera.prototype.reset = function() {
+        if(this.tween) {
+            this.tween.dispose();
+            this.tween = null;
+        }
     }
 
     Camera.prototype.moveTo = function (x, y) {
