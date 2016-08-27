@@ -1,0 +1,11 @@
+{
+  "name": "dg.MapArmy",
+  "desc": "角色数据",
+  "extends": "dg.MapRole",
+  "init": {
+    "camp": 1,
+    "showType":1201002
+  },
+  "members": {
+  }
+}

@@ -1,0 +1,92 @@
+var Role = (function (_super) {
+
+    __extends(Role, _super);
+
+    function Role(data) {
+        _super.call(this, data);
+
+        this.width = 0;
+
+        var label = new flower.Label(data.type.value + "-" + data.tag.value);
+        label.fontColor = 0xffffff;
+        label.horizontalCenter = 0;
+        label.y = 10;
+        label.alpha = 0.75;
+        this.addChild(label);
+
+        this.container = new flower.Sprite();
+        this.addChild(this.container);
+
+
+        this.action = null;
+        this.dir = null;
+        this.show = null;
+
+        this.playAction(Role.Action.STAND, Role.Dir.Right);
+
+        flower.Tween.to(this, 0.5, {alpha: 1}, null, {alpha: 0});
+    }
+
+    Role.prototype.playAction = function (action, dir) {
+        if (action == this.action && dir == this.dir) {
+            return;
+        }
+        if (this.show) {
+            this.show.dispose();
+        }
+        this.action = action;
+        this.dir = dir;
+        this.show = new Animation({
+            url: "res/tools/dungeon/res/role/",
+            name: "1201002_000",
+            format: "png",
+            start: 0,
+            end: 5,
+            frameRate: 12,
+            x: -100,
+            y: -100,
+            scaleX: 1,
+            scaleY: 1
+        });
+        this.show.scaleX = Role.ShowScaleX[dir];
+        this.container.addChild(this.show);
+    }
+
+    Role.Action = {
+        "STAND": "stand",
+        "RUN": "run",
+        "ATTACK": "attack",
+        "DIE": "die"
+    }
+
+    Role.Dir = {
+        "RightUp": "RightUp",
+        "Right": "Right",
+        "RightDown": "RightDown",
+        "LeftUp": "LeftUp",
+        "Left": "Left",
+        "LeftDown": "LeftDown"
+    }
+
+    Role.Show = {
+        "RightUp": "ru",
+        "Right": "r",
+        "RightDown": "rd",
+        "LeftUp": "ru",
+        "Left": "r",
+        "LeftDown": "rd"
+    }
+
+    Role.ShowScaleX = {
+        "RightUp": 1,
+        "Right": 1,
+        "RightDown": 1,
+        "LeftUp": -1,
+        "Left": -1,
+        "LeftDown": -1
+    }
+
+    return Role;
+})(flower.ItemRenderer);
+
+module.Role = Role;

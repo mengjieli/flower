@@ -7,10 +7,17 @@
     "./src/Map.script",
     "./src/core/Camera.script",
     "./src/core/GridLayer.script",
+    "./src/core/ChangeLayer.script",
     "./src/net/MapNet.script",
     "./src/display/Grid.script",
-    "./src/trigger/TriggerRunning.script",
+    "./src/display/Animation.script",
+    "./src/display/MapObject.script",
+    "./src/display/Role.script",
+    "./src/display/Army.script",
+    "./src/display/Monster.script",
+    "./src/trigger/Server.script",
     "./src/trigger/Trigger.script",
+    "./src/trigger/ServerMonster.script",
     "./src/utils/MapUtils.script"
   ],
   "components": [
@@ -27,6 +34,7 @@
     "./panels/effect/CameraMoveEffect.xml",
     "./panels/effect/CameraRangeEffect.xml",
     "./panels/effect/DialogEffect.xml",
+    "./panels/effect/StartTriggerEffect.xml",
     "./view/DungeonView.xml"
   ],
   "classes": {
@@ -46,8 +54,13 @@
     "./data/effect/CameraMoveEffect.json",
     "./data/effect/CameraRangeEffect.json",
     "./data/effect/DialogEffect.json",
+    "./data/effect/StartTriggerEffect.json",
     "./data/running/map/MapData.json",
     "./data/running/map/Camera.json",
-    "./data/running/map/CameraMove.json"
+    "./data/running/map/CameraMove.json",
+    "./data/running/map/MapObject.json",
+    "./data/running/map/MapRole.json",
+    "./data/running/map/MapArmy.json",
+    "./data/running/map/MapMonster.json"
   ]
 }

@@ -1,5 +1,5 @@
 {
- "itemId": 69,
+ "itemId": 73,
  "screenWidth": 600,
  "screenHeight": 600,
  "triggers": [
@@ -11,70 +11,53 @@
    "effects": [
     {
      "itemId": 60,
-     "name": "刷怪",
-     "delay": 20000,
+     "name": "刷怪1",
+     "delay": 500,
      "type": 1,
      "effectValue": {
       "monsters": [
-      ],
-      "__className": "dg.FlushMonsterEffect"
-     },
-     "hasPlay": false,
-     "color": 0
-    },
-    {
-     "itemId": 61,
-     "name": "直接伤害",
-     "delay": 10000,
-     "type": 2,
-     "effectValue": {
-      "type": 1,
-      "count": 2,
-      "damage": 1001,
-      "timeGap": 30002,
-      "points": [
        {
-        "x": 1,
-        "y": 0
+        "id": 1002410,
+        "tag": 300,
+        "bornCoord": {
+         "x": 4,
+         "y": 8
+        },
+        "moveCoord": {
+         "x": 4,
+         "y": 8
+        }
        },
        {
-        "x": 0,
-        "y": 2
+        "id": 0,
+        "tag": 300,
+        "bornCoord": {
+         "x": 4,
+         "y": 10
+        },
+        "moveCoord": {
+         "x": 4,
+         "y": 10
+        }
        }
       ],
-      "__className": "dg.HurtEffect"
-     },
-     "hasPlay": false,
-     "color": 0
-    },
-    {
-     "itemId": 63,
-     "name": "完成任务",
-     "delay": 5000,
-     "type": 7,
-     "effectValue": {
-      "missionId": 123,
-      "__className": "dg.MissionCompleteEffect"
-     },
-     "hasPlay": false,
-     "color": 0
+      "__className": "dg.FlushMonsterEffect"
+     }
     },
     {
      "itemId": 64,
      "name": "镜头移动",
-     "delay": 3000,
+     "delay": 0,
      "type": 9,
      "effectValue": {
       "coord": {
        "x": 0,
-       "y": 500
+       "y": 570
       },
-      "time": 5000,
+      "time": 0,
       "pos": 2,
       "__className": "dg.CameraMoveEffect"
-     },
-     "hasPlay": false,
-     "color": 0
+     }
     },
     {
      "itemId": 65,
@@ -95,39 +78,55 @@
       "param4": 0,
       "triggerId": 0,
       "__className": "dg.CameraRangeEffect"
-     },
-     "hasPlay": false,
-     "color": 0
-    },
-    {
-     "itemId": 66,
-     "name": "剧情对话",
-     "delay": 0,
-     "type": 11,
-     "effectValue": {
-      "dialogId": 1111,
-      "param1": 1,
-      "param2": 2,
-      "param3": 3,
-      "param4": 4,
-      "triggerId": 666,
-      "__className": "dg.DialogEffect"
-     },
-     "hasPlay": false,
-     "color": 0
+     }
     },
     {
      "itemId": 69,
      "name": "开启触发器",
-     "delay": 0,
+     "delay": 2000,
      "type": 4,
-     "effectValue": null,
-     "hasPlay": false,
-     "color": 0
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 0,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 72,
+     "name": "刷怪2",
+     "delay": 1000,
+     "type": 1,
+     "effectValue": {
+      "monsters": [
+       {
+        "id": 0,
+        "tag": 400,
+        "bornCoord": {
+         "x": 6,
+         "y": 10
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        }
+       },
+       {
+        "id": 0,
+        "tag": 400,
+        "bornCoord": {
+         "x": 6,
+         "y": 8
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        }
+       }
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
     }
-   ],
-   "hasPlay": false,
-   "color": 0
+   ]
   },
   {
    "itemId": 67,
@@ -148,30 +147,46 @@
     "__className": "dg.MoveCondition"
    },
    "effects": [
-   ],
-   "hasPlay": false,
-   "color": 0
+   ]
   },
   {
    "itemId": 68,
    "name": "hp触发器",
    "startCondition": 3,
    "startValue": {
-    "tag": 1,
-    "hp": 100,
+    "tag": 300,
+    "hp": 0,
     "__className": "dg.HPCondition"
    },
    "effects": [
-   ],
-   "hasPlay": false,
-   "color": 0
+   ]
+  },
+  {
+   "itemId": 70,
+   "name": "移动镜头",
+   "startCondition": 5,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 71,
+     "name": "效果71",
+     "delay": 0,
+     "type": 9,
+     "effectValue": {
+      "coord": {
+       "x": 300,
+       "y": 570
+      },
+      "time": 2000,
+      "pos": 2,
+      "__className": "dg.CameraMoveEffect"
+     }
+    }
+   ]
   }
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": true,
-  "isPlaying": false,
-  "reset": 7,
-  "time": 0
+  "showGrid": false
  }
 }

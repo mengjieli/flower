@@ -8,6 +8,7 @@ var Grid = (function (_super) {
 
         this.x = data.x;
         this.y = -data.y;
+
         var image = new flower.Image("res/tools/dungeon/res/block.png");
         image.x = -90 / 2;
         image.y = -78 / 2;

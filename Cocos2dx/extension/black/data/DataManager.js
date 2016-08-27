@@ -124,6 +124,9 @@ class DataManager {
                         content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     }
                 }
+                if (member.save === true || member.save === false) {
+                    content += "\t\tthis.setMemberSaveFlag(\"" + key + "\" ," + member.save + ");\n";
+                }
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
                 }
@@ -138,6 +141,9 @@ class DataManager {
                 defineMember += "\t\tconfigurable: true\n";
                 defineMember += "\t});\n\n";
             }
+        }
+        if (config.init) {
+            content += "\t\tthis.value = " + JSON.stringify(config.init) + ";\n";
         }
         content += "\t\tif(init) this.value = init;\n";
         content += bindContent;

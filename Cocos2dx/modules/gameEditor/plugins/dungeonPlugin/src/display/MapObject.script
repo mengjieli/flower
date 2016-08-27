@@ -1,0 +1,34 @@
+var MapObject = (function (_super) {
+
+    __extends(MapObject, _super);
+
+    function MapObject(data) {
+        _super.call(this, data);
+
+        this.x = data.position.x.value;
+        this.y = -data.position.y.value;
+
+        var coordX = data.coord.x.value;
+        var coordY = data.coord.y.value;
+
+        trace("刷地图对象", data.coord.x.value, data.coord.y.value, data.position.x.value, data.position.y.value);
+        trace("计算位置", MapUtils.transPointToPosition(coordX, coordY).x, MapUtils.transPointToPosition(coordX, coordY).y);
+
+        switch (data.mapType.value) {
+            case 1:
+                if (data.camp.value == 1) {
+                    this.show = new Army(data);
+                } else if (data.camp.value == 2) {
+                    this.show = new Monster(data);
+                }
+                break;
+        }
+        if (this.show) {
+            this.addChild(this.show);
+        }
+    }
+
+    return MapObject;
+})(flower.ItemRenderer);
+
+module.MapObject = MapObject;

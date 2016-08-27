@@ -25,8 +25,9 @@ var Map = (function (_super) {
 
         //设置网络模拟类，接受触器效果
         this.net = new MapNet();
-        //初始化触发器运行环境
-        this.triggerRunning = new TriggerRunning(this.net);
+
+        //初始后台运行环境
+        this.server = new Server(this.net);
     }
 
     /**
@@ -41,6 +42,9 @@ var Map = (function (_super) {
         //添加格子层
         this.gridLayer = new GridLayer();
         this.container.addChild(this.gridLayer);
+        //添加交换层
+        this.changeLayer = new ChangeLayer();
+        this.container.addChild(this.changeLayer);
     }
 
     Map.prototype.setData = function (val) {
@@ -66,11 +70,16 @@ var Map = (function (_super) {
         //设置背景
         this.background.bindProperty("source", "{data.settings.background}", [this]);
         //设置镜头数据
-        this.camera.setData(this.data.camera);
+        this.camera.setData(this.data.camera, dungeonData.settings);
         //设置其他数据
         this.gridLayer.setData(this.data);
+        this.changeLayer.setData(this.data);
+
+        //设置网络监听对象，与后台(Server)交互
         this.net.setData(this.data);
-        this.triggerRunning.setData(dungeonData);
+
+        //设置后台运行程序
+        this.server.setData(dungeonData);
     }
 
     Map.prototype.update = function () {

@@ -714,6 +714,9 @@ var flower = {};
                 }
             }
         }, {
+            key: "setAlpha",
+            value: function setAlpha(val) {}
+        }, {
             key: "resetChildIndex",
             value: function resetChildIndex(children) {
                 for (var i = 0, len = children.length; i < len; i++) {
@@ -2228,6 +2231,11 @@ var flower = {};
                 e.$target = this;
                 this.dispatch(e);
                 flower.Event.release(e);
+            }
+        }, {
+            key: "isDispose",
+            get: function get() {
+                return this.__hasDispose;
             }
         }]);
 
@@ -9162,6 +9170,16 @@ var flower = {};
                 if (target && this._startEvent && this._startEvent != "") {
                     target.addListener(this._startEvent, this.startByEvent, this);
                 }
+            }
+        }, {
+            key: "play",
+            value: function play() {
+                this.timeLine.play();
+            }
+        }, {
+            key: "stop",
+            value: function stop() {
+                this.timeLine.stop();
             }
         }, {
             key: "startByEvent",

@@ -72,12 +72,14 @@
     },
     "hasPlay": {
       "desc": "是否触发过",
-      "type": "bool"
+      "type": "bool",
+      "save": false
     },
     "color": {
       "desc": "文字颜色",
       "type": "number",
-      "bind": "{hasPlay?0x999999:0}"
+      "bind": "{hasPlay?0x999999:0}",
+      "save": false
     }
   }
 }

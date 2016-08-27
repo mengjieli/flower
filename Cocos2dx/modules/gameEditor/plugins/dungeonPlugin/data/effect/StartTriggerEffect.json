@@ -1,0 +1,25 @@
+{
+  "name": "dg.StartTriggerEffect",
+  "desc": "开启/关闭触发器",
+  "members": {
+    "operate": {
+      "desc": "操作",
+      "type": "int",
+      "init": 0,
+      "enumList": [
+        {
+          "label": "开启",
+          "type": 0
+        },
+        {
+          "label": "关闭",
+          "type": 1
+        }
+      ]
+    },
+    "triggerId": {
+      "desc": "触发器 id",
+      "type": "int"
+    }
+  }
+}

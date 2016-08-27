@@ -1,15 +1,17 @@
-var TriggerRunning = (function () {
+var Server = (function () {
 
-    function TriggerRunning(callObject) {
+    function Server(callObject) {
         this.triggers = [];
         this.callObject = callObject;
         //运行时间
         this.time = 0;
         //是否初始化过
         this.hasInit = false;
+        //怪物列表
+        this.monsters = [];
     }
 
-    TriggerRunning.prototype.setData = function (data) {
+    Server.prototype.setData = function (data) {
         this.data = data; // DungeonData
         if (this.data.settings.isPlaying.value) {
             this.start();
@@ -33,7 +35,7 @@ var TriggerRunning = (function () {
     /**
      * 重新开始
      */
-    TriggerRunning.prototype.start = function () {
+    Server.prototype.start = function () {
         this.stop();
         this.time = 0;
         this.hasInit = true;
@@ -41,9 +43,12 @@ var TriggerRunning = (function () {
         flower.EnterFrame.add(this.update, this);
     }
 
-    TriggerRunning.prototype.stop = function () {
+    Server.prototype.stop = function () {
         while (this.triggers.length) {
             this.triggers.pop().dispose();
+        }
+        while (this.monsters.length) {
+            this.monsters.pop().dispose();
         }
         flower.EnterFrame.remove(this.update, this);
         this.data.settings.time.value = 0;
@@ -55,34 +60,57 @@ var TriggerRunning = (function () {
     /**
      * 暂停
      */
-    TriggerRunning.prototype.pause = function () {
+    Server.prototype.pause = function () {
         flower.EnterFrame.remove(this.update, this);
     }
 
     /**
      * 继续播放
      */
-    TriggerRunning.prototype.play = function () {
+    Server.prototype.play = function () {
         flower.EnterFrame.add(this.update, this);
     }
 
-    TriggerRunning.prototype.update = function (now, dt) {
+    Server.prototype.update = function (now, dt) {
         this.time += dt;
         this.data.settings.time.value = this.time;
         var triggers = this.data.triggers;
         for (var i = 0; i < this.triggers.length; i++) {
             this.triggers[i].update(dt);
         }
+        for (var i = 0; i < this.monsters.length; i++) {
+            this.monsters[i].update(dt);
+        }
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
             if (!trigger.hasPlay.value && trigger.startCondition.value == 1) {
-                this.triggers.push(new Trigger(trigger, this.data, this.callObject));
+                this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
             }
         }
     }
 
-    return TriggerRunning;
+    Server.prototype.runTrigger = function (operate, triggerId) {
+        var triggers = this.data.triggers;
+        if (operate == 0) {
+            for (var i = 0; i < triggers.length; i++) {
+                var trigger = triggers[i];
+                if (!trigger.hasPlay.value && trigger.itemId.value == triggerId) {
+                    this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
+                }
+            }
+        }
+    }
+
+    /**
+     * 添加怪物
+     * @param data FlushMonsterEffectItem
+     */
+    Server.prototype.addMonster = function (data) {
+        this.monsters.push(new ServerMonster(this.monsters.length + 1000, data, this.data, this.callObject, this));
+    }
+
+    return Server;
 })();
 
 
-module.TriggerRunning = TriggerRunning;
+module.Server = Server;

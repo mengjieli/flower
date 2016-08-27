@@ -1,0 +1,13 @@
+var Monster = (function (_super) {
+
+    __extends(Monster, _super);
+
+    function Monster(data) {
+        _super.call(this, data);
+
+    }
+
+    return Monster;
+})(Role);
+
+module.Monster = Monster;

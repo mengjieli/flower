@@ -780,16 +780,28 @@ var $root = eval("this");
 
                 var item;
                 var i;
-                if (key2 != "") {
+                if (key2 == "") {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
+                        var val = this.list[i][key];
+                        if (val instanceof Value) {
+                            val = val.value;
+                        }
+                        if (val == value) {
                             item = this.list.splice(i, 1)[0];
                             break;
                         }
                     }
                 } else {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                        var val1 = this.list[i][key];
+                        if (val1 instanceof Value) {
+                            val1 = val1.value;
+                        }
+                        var val2 = this.list[i][key2];
+                        if (val2 instanceof Value) {
+                            val2 = val2.value;
+                        }
+                        if (val == value && val2 == value2) {
                             item = this.list.splice(i, 1)[0];
                             break;
                         }
@@ -1321,6 +1333,7 @@ var $root = eval("this");
                 _this8.value = init;
             }
             _this8.__saveClass = {};
+            _this8.__nosave = {};
             return _this8;
         }
 
@@ -1341,6 +1354,17 @@ var $root = eval("this");
                 var saveClass = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
                 this.__saveClass[name] = saveClass;
+            }
+        }, {
+            key: "setMemberSaveFlag",
+            value: function setMemberSaveFlag(name) {
+                var save = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+                if (save == false) {
+                    this.__nosave[name] = true;
+                } else {
+                    delete this.__nosave[name];
+                }
             }
         }, {
             key: "hasMember",
@@ -1417,6 +1441,9 @@ var $root = eval("this");
                 var config = {};
                 for (var i = 0; i < list.length; i++) {
                     var key = list[i];
+                    if (this.__nosave[key]) {
+                        continue;
+                    }
                     var member = val[key];
                     if (member instanceof Value) {
                         if (member instanceof ObjectValue) {
@@ -1747,6 +1774,9 @@ var $root = eval("this");
                                 content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             }
                         }
+                        if (member.save === true || member.save === false) {
+                            content += "\t\tthis.setMemberSaveFlag(\"" + key + "\" ," + member.save + ");\n";
+                        }
                         if (member.bind) {
                             bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n";
                         }
@@ -1761,6 +1791,9 @@ var $root = eval("this");
                         defineMember += "\t\tconfigurable: true\n";
                         defineMember += "\t});\n\n";
                     }
+                }
+                if (config.init) {
+                    content += "\t\tthis.value = " + JSON.stringify(config.init) + ";\n";
                 }
                 content += "\t\tif(init) this.value = init;\n";
                 content += bindContent;

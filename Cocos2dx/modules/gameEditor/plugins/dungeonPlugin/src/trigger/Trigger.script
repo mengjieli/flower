@@ -1,9 +1,10 @@
 var Trigger = (function () {
 
-    function Trigger(data, dungeonData, callObject) {
+    function Trigger(data, dungeonData, callObject, triggerRunning) {
         this.data = data;
         this.dungeonData = dungeonData;
         this.callObject = callObject;
+        this.triggerRunning = triggerRunning;
 
         this.data.hasPlay.value = true;
         this.time = 0;
@@ -24,6 +25,15 @@ var Trigger = (function () {
         effect.hasPlay.value = true;
         var value = effect.effectValue;
         switch (effect.type.value) {
+            case 1:
+                for (var i = 0; i < value.monsters.length; i++) {
+                    var monster = value.monsters[i];
+                    this.triggerRunning.addMonster(monster);
+                }
+                break;
+            case 4:
+                this.triggerRunning.runTrigger(value.operate.value, value.triggerId.value);
+                break;
             case 9:
                 this.callObject.cameraTweenTo(value.time.value, value.coord.x.value, value.coord.y.value, value.pos.value);
                 break;

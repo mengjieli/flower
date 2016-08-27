@@ -7,6 +7,7 @@ class ObjectValue extends Value {
             this.value = init;
         }
         this.__saveClass = {};
+        this.__nosave = {};
     }
 
     setMember(name, value) {
@@ -21,6 +22,14 @@ class ObjectValue extends Value {
 
     setMemberSaveClass(name, saveClass = false) {
         this.__saveClass[name] = saveClass;
+    }
+
+    setMemberSaveFlag(name, save = false) {
+        if (save == false) {
+            this.__nosave[name] = true;
+        } else {
+            delete this.__nosave[name];
+        }
     }
 
     hasMember(name) {
@@ -88,6 +97,9 @@ class ObjectValue extends Value {
         var config = {};
         for (var i = 0; i < list.length; i++) {
             var key = list[i];
+            if (this.__nosave[key]) {
+                continue;
+            }
             var member = val[key];
             if (member instanceof Value) {
                 if (member instanceof ObjectValue) {

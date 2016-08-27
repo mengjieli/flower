@@ -36,7 +36,7 @@ function init() {
         '<dg:FlushMonsterEffect/>' +
         '<dg:HurtEffect/>' +
         '<f:Group/>' +
-        '<f:Group/>' +
+        '<dg:StartTriggerEffect/>' +
         '<f:Group/>' +
         '<f:Group/>' +
         '<dg:MissionCompleteEffect/>' +
@@ -66,6 +66,8 @@ function setData(val) {
                 this.data.effectValue = flower.DataManager.createData("dg.FlushMonsterEffect");
             } else if (this.data.type.value == 2) {
                 this.data.effectValue = flower.DataManager.createData("dg.HurtEffect");
+            } else if (this.data.type.value == 4) {
+                this.data.effectValue = flower.DataManager.createData("dg.StartTriggerEffect");
             } else if (this.data.type.value == 7) {
                 this.data.effectValue = flower.DataManager.createData("dg.MissionCompleteEffect");
             } else if (this.data.type.value == 9) {

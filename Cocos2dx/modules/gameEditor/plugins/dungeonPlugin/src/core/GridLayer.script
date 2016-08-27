@@ -14,8 +14,8 @@ var GridLayer = (function (_super) {
         this.dataProvider = new flower.ArrayValue();
         var width = this.data.size.width.value;
         var height = this.data.size.height.value;
-        for (var y = 0; y < MapUtils.blockWidth; y++) {
-            for (var x = 0; x < MapUtils.blockHeight; x++) {
+        for (var y = 0; y < MapUtils.blockWidth / 2; y++) {
+            for (var x = 0; x < MapUtils.blockHeight/2; x++) {
                 var pos = MapUtils.transPointToPosition(x, y);
                 var item = {
                     x: pos.x,

@@ -1,0 +1,20 @@
+var ChangeLayer = (function (_super) {
+
+    __extends(ChangeLayer, _super);
+
+    function ChangeLayer() {
+        _super.call(this);
+        this.itemRenderer = MapObject;
+    }
+
+    ChangeLayer.prototype.setData = function (val) {
+        _super.prototype.setData.call(this, val);
+        this.y = this.data.size.height.value;
+        this.dataProvider = this.data.objects;
+    }
+
+    return ChangeLayer;
+
+})(flower.DataGroup);
+
+module.ChangeLayer = ChangeLayer;

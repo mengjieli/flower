@@ -159,6 +159,14 @@ class Tween {
         }
     }
 
+    play() {
+        this.timeLine.play();
+    }
+
+    stop() {
+        this.timeLine.stop();
+    }
+
     startByEvent() {
         this._timeLine.gotoAndPlay(0);
     }

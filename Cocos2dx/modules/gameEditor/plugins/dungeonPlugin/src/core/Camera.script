@@ -4,11 +4,23 @@ var Camera = (function () {
     function Camera() {
     }
 
-    Camera.prototype.setData = function (val) {
+    Camera.prototype.setData = function (val, settings) {
         this.data = val;
+        this.settings = settings;
         this.data.addListener("tweenTo", function (e) {
             var info = this.data.tweenTo.value;
             this.tweenTo(info.time, info.x, info.y, info.type);
+        }, this);
+        settings.isPlaying.addListener(flower.Event.UPDATE, function (e) {
+            if (this.settings.isPlaying.value) {
+                if (this.tween) {
+                    this.tween.play();
+                }
+            } else {
+                if (this.tween) {
+                    this.tween.stop();
+                }
+            }
         }, this);
     }
 
@@ -66,11 +78,19 @@ var Camera = (function () {
                 y = y - this.data.height.value * .5;
                 break;
         }
-        flower.Tween.to(this, time / 1000, {
-            x: x,
-            y: y
-        }).call(function () {
-        }.bind(this));
+        if (time == 0) {
+            this.moveTo(x, y);
+        } else {
+            if (this.tween) {
+                this.tween.dispose();
+            }
+            this.tween = flower.Tween.to(this, time / 1000, {
+                x: x,
+                y: y
+            }).call(function () {
+                this.tween = null;
+            }.bind(this));
+        }
     }
 
 

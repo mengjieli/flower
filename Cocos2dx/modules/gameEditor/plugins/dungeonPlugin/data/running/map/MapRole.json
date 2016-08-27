@@ -1,0 +1,56 @@
+{
+  "name": "dg.MapRole",
+  "desc": "角色数据",
+  "extends": "dg.MapObject",
+  "init": {
+    "mapType": 1
+  },
+  "members": {
+    "id": {
+      "desc": "唯一标识符",
+      "type": "int"
+    },
+    "type": {
+      "desc": "类型 id",
+      "type": "int"
+    },
+    "tag": {
+      "desc": "tag 标记",
+      "type": "int"
+    },
+    "showType": {
+      "desc": "显示类型 id",
+      "type": "int"
+    },
+    "camp": {
+      "desc": "阵营",
+      "type": "int",
+      "enumList": [
+        {
+          "label": "己方",
+          "type": 1
+        },
+        {
+          "label": "怪物",
+          "type": 2
+        },
+        {
+          "label": "敌方",
+          "type": 3
+        },
+        {
+          "label": "中立",
+          "type": 4
+        }
+      ]
+    },
+    "coord": {
+      "desc": "格子坐标",
+      "type": "Point"
+    },
+    "position": {
+      "desc": "像素坐标",
+      "type": "Point"
+    }
+  }
+}

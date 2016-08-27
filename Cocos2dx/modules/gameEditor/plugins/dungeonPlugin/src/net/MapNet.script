@@ -40,6 +40,33 @@ var MapNet = (function () {
         };
     }
 
+    /**
+     * 刷新怪物
+     * @param id 怪物类型
+     * @param tag tag
+     * @param x
+     * @param y
+     */
+    MapNet.prototype.addMonster = function (id, type, tag, x, y) {
+        this.data.objects.push(flower.DataManager.createData("dg.MapMonster", {
+            id: id,
+            type: type,
+            tag: tag,
+            coord: {
+                x: x,
+                y: y
+            },
+            position: {
+                x: MapUtils.transPointToPosition(x, y).x,
+                y: MapUtils.transPointToPosition(x, y).y,
+            }
+        }));
+    }
+
+    MapNet.prototype.removeMonster = function (id) {
+        this.data.objects.removeItemWith("id", id);
+    }
+
     return MapNet;
 })();
 

@@ -662,6 +662,11 @@ class PlatformSprite extends PlatformDisplayObject {
         }
     }
 
+
+    setAlpha(val) {
+
+    }
+
     resetChildIndex(children) {
         for (var i = 0, len = children.length; i < len; i++) {
             var show = children[i].$nativeShow.show;
@@ -1876,6 +1881,10 @@ class EventDispatcher {
             0: target || this,
             1: {}
         }
+    }
+
+    get isDispose() {
+        return this.__hasDispose;
     }
 
     dispose() {
@@ -8429,6 +8438,14 @@ class Tween {
         if (target && this._startEvent && this._startEvent != "") {
             target.addListener(this._startEvent, this.startByEvent, this);
         }
+    }
+
+    play() {
+        this.timeLine.play();
+    }
+
+    stop() {
+        this.timeLine.stop();
     }
 
     startByEvent() {

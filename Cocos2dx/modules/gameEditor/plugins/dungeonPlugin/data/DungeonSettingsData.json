@@ -13,15 +13,18 @@
     },
     "isPlaying": {
       "desc": "是否正在运行",
-      "type": "bool"
+      "type": "bool",
+      "save": false
     },
     "reset": {
       "desc": "是否重置",
-      "type": "int"
+      "type": "int",
+      "save": false
     },
     "time": {
       "desc": "运行时间(ms)",
-      "type": "int"
+      "type": "int",
+      "save": false
     }
   }
 }

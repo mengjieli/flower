@@ -10,6 +10,10 @@ class EventDispatcher {
         }
     }
 
+    get isDispose() {
+        return this.__hasDispose;
+    }
+
     dispose() {
         this.__EventDispatcher = null;
         this.__hasDispose = true;

@@ -135,9 +135,13 @@ class ArrayValue extends Value {
     removeItemWith(key, value, key2 = "", value2 = null) {
         var item;
         var i;
-        if (key2 != "") {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var val = this.list[i][key];
+                if(val instanceof Value) {
+                    val = val.value;
+                }
+                if (val == value) {
                     item = this.list.splice(i, 1)[0];
                     break;
                 }
@@ -145,7 +149,15 @@ class ArrayValue extends Value {
         }
         else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var val1 = this.list[i][key];
+                if(val1 instanceof Value) {
+                    val1 = val1.value;
+                }
+                var val2 = this.list[i][key2];
+                if(val2 instanceof Value) {
+                    val2 = val2.value;
+                }
+                if (val == value && val2 == value2) {
                     item = this.list.splice(i, 1)[0];
                     break;
                 }

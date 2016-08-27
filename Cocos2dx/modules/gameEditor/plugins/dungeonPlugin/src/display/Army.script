@@ -1,0 +1,14 @@
+var Army = (function (_super) {
+
+    __extends(Army, _super);
+
+    function Army(data) {
+        _super.call(this, data);
+
+
+    }
+
+    return Army;
+})(Role);
+
+module.Army = Army;

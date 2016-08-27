@@ -6,12 +6,12 @@
       "desc": "背景地址",
       "type": "string"
     },
-    "size":{
-      "desc":"背景尺寸",
-      "type":"Size",
-      "init":{
-        "width":2700,
-        "height":1872
+    "size": {
+      "desc": "背景尺寸",
+      "type": "Size",
+      "init": {
+        "width": 2700,
+        "height": 1872
       }
     },
     "camera": {
@@ -22,6 +22,12 @@
       "desc": "设置参数",
       "type": "dg.DungeonSettingsData",
       "init": null
+    },
+    "objects": {
+      "desc": "地图对象",
+      "detail": "可以为 MapRole、...",
+      "type": "Array",
+      "typeValue": "*"
     }
   }
 }
