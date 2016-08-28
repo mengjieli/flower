@@ -47,6 +47,9 @@ function menuFunction(target, item) {
         monster.id.addListener(flower.Event.UPDATE, function (e) {
             this.save();
         }, this);
+        monster.tag.addListener(flower.Event.UPDATE, function (e) {
+            this.save();
+        }, this);
         monster.bornCoord.x.addListener(flower.Event.UPDATE, function (e) {
             this.save();
         }, this);
@@ -57,6 +60,9 @@ function menuFunction(target, item) {
             this.save();
         }, this);
         monster.moveCoord.y.addListener(flower.Event.UPDATE, function (e) {
+            this.save();
+        }, this);
+        monster.ai.addListener(flower.Event.UPDATE, function (e) {
             this.save();
         }, this);
         array.push(data);

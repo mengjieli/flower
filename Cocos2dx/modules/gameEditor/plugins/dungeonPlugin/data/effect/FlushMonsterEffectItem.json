@@ -17,6 +17,29 @@
     "moveCoord": {
       "desc": "出生后移动到哪一个点",
       "type": "Point"
+    },
+    "ai":{
+      "desc":"AI 类型",
+      "type":"int",
+      "init": 1,
+      "enumList": [
+        {
+          "label": "反击",
+          "type": 0
+        },
+        {
+          "label": "3格巡视",
+          "type": 1
+        },
+        {
+          "label": "5格巡视",
+          "type": 2
+        },
+        {
+          "label": "无ai",
+          "type": 3
+        }
+      ]
     }
   }
 }

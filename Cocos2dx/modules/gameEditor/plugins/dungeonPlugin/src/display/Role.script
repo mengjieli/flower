@@ -8,7 +8,7 @@ var Role = (function (_super) {
 
         this.width = 0;
 
-        var label = new flower.Label(data.type.value + "-" + data.tag.value + "-" + data.id.value);
+        var label = new flower.Label(data.type.value + "-" + data.tag.value);
         label.fontColor = 0xffffff;
         label.horizontalCenter = 0;
         label.y = 10;

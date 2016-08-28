@@ -11,6 +11,7 @@ var Server = (function () {
         this.monsters = [];
         //角色部队列表
         this.armys = [];
+        this.gameStartFlag = false;
     }
 
     Server.prototype.setData = function (data) {
@@ -44,6 +45,11 @@ var Server = (function () {
         this.hasInit = true;
         //运行
         flower.EnterFrame.add(this.update, this);
+        this.gameStartFlag = false;
+    }
+
+    Server.prototype.gameStart = function () {
+        this.gameStartFlag = true;
     }
 
     Server.prototype.stop = function () {
@@ -62,6 +68,7 @@ var Server = (function () {
         this.data.settings.isPlaying = false;
         this.callObject.stop();
         this.path.reset();
+        this.gameStartFlag = false;
     }
 
     /**
@@ -91,11 +98,18 @@ var Server = (function () {
         for (var i = 0; i < this.triggers.length; i++) {
             this.triggers[i].update(dt);
         }
-        for (var i = 0; i < this.monsters.length; i++) {
-            this.monsters[i].update(dt);
-        }
-        for (var i = 0; i < this.armys.length; i++) {
-            this.armys[i].update(dt);
+        if(this.gameStartFlag) {
+            for (var i = 0; i < this.monsters.length; i++) {
+                if (this.monsters[i].hasDie) {
+                    this.monsters.splice(i, 1);
+                    i--;
+                } else {
+                    this.monsters[i].update(dt);
+                }
+            }
+            for (var i = 0; i < this.armys.length; i++) {
+                this.armys[i].update(dt);
+            }
         }
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
@@ -131,6 +145,14 @@ var Server = (function () {
      */
     Server.prototype.addArmy = function (data) {
         this.armys.push(new ServerArmy(this.data.settings, this.armys.length + 1000000, data, this.data, this.callObject, this, this.path));
+    }
+
+    Server.prototype.getEnemyList = function (type) {
+        if (type == 1) {
+            return this.monsters;
+        } else if (type == 2) {
+            return this.armys;
+        }
     }
 
     /**

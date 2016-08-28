@@ -39,12 +39,12 @@
     "myHp": {
       "desc": "己方 hp",
       "type": "int",
-      "init": 1000
+      "init": 5000
     },
     "myAttack": {
       "desc": "己方攻击力",
       "type": "int",
-      "init": 300
+      "init": 200
     },
     "monsterHp": {
       "desc": "怪物 hp",

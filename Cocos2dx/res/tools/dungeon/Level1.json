@@ -1,6 +1,6 @@
 {
  "itemId": 80,
- "screenWidth": 600,
+ "screenWidth": 800,
  "screenHeight": 600,
  "triggers": [
   {
@@ -52,18 +52,16 @@
      "type": 4,
      "effectValue": {
       "operate": 0,
-      "triggerId": 7000,
+      "triggerId": 70,
       "__className": "dg.StartTriggerEffect"
      }
     },
     {
      "itemId": 80,
-     "name": "效果80",
+     "name": "游戏开始",
      "delay": 0,
-     "type": 12,
-     "effectValue": {
-      "__className": "dg.StartEffect"
-     }
+     "type": 3,
+     "effectValue": null
     }
    ]
   },
@@ -128,8 +126,8 @@
      "effectValue": {
       "monsters": [
        {
-        "id": 0,
-        "tag": 1,
+        "id": 1,
+        "tag": 1000,
         "bornCoord": {
          "x": 5,
          "y": 8
@@ -137,7 +135,8 @@
         "moveCoord": {
          "x": 5,
          "y": 8
-        }
+        },
+        "ai": 1
        },
        {
         "id": 0,
@@ -149,7 +148,8 @@
         "moveCoord": {
          "x": 6,
          "y": 10
-        }
+        },
+        "ai": 1
        }
       ],
       "__className": "dg.FlushMonsterEffect"
@@ -172,7 +172,8 @@
         "moveCoord": {
          "x": 7,
          "y": 8
-        }
+        },
+        "ai": 1
        },
        {
         "id": 0,
@@ -184,7 +185,8 @@
         "moveCoord": {
          "x": 8,
          "y": 10
-        }
+        },
+        "ai": 1
        }
       ],
       "__className": "dg.FlushMonsterEffect"
@@ -195,11 +197,11 @@
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": false,
+  "showGrid": true,
   "bornX": 0,
   "bornY": 9,
-  "myHp": 1000,
-  "myAttack": 300,
+  "myHp": 5000,
+  "myAttack": 200,
   "monsterHp": 500,
   "monsterAttack": 50
  }

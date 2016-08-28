@@ -8,6 +8,10 @@ var ServerArmy = (function (_super) {
         this.maxHp = settings.myHp.value;
         this.attackValue = settings.myAttack.value;
 
+        this.type = 1;
+
+        this.ai = 4;
+
         this.callObject.addArmy(this.id, data.id.value, data.tag.value, this.x, this.y, this.hp, this.maxHp);
     }
 
