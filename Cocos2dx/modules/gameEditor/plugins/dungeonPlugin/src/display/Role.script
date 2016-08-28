@@ -49,7 +49,7 @@ var Role = (function (_super) {
     }
 
     Role.prototype.getObject = function (e) {
-        if (this.data.mapData.getObject.id.value == this.data.id.value) {
+        if (this.data.die.value == false && this.data.mapData.getObject.id.value == this.data.id.value) {
             this.data.mapData.getObject.mapObject = this;
         }
     }
@@ -73,13 +73,14 @@ var Role = (function (_super) {
         }
         this.data.hpLock = false;
         if (this.data.die.value) {
+            this.playAction(Role.Action.DIE)
             this.die();
         }
     }
 
     Role.prototype.die = function () {
         this.data.lock.value = true;
-        flower.Tween.to(this, 0.5, {alpha: 0}).call(function () {
+        flower.Tween.to(this, 1, {alpha: 0}).call(function () {
             this.data.lock.value = false;
             this.data.mapData.objects.removeItem(this.data);
         }.bind(this));
