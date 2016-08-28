@@ -131,7 +131,7 @@ class UIParser extends Group {
 
     loadContentError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
+            this.dispatchWith(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
         } else {
             sys.$error(3001, e.currentTarget.url);
         }
@@ -211,10 +211,10 @@ class UIParser extends Group {
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
                 var ui = this.parseUI(this.loadContent, this.loadData);
-                this.dispatchWidth(flower.Event.COMPLETE, ui);
+                this.dispatchWith(flower.Event.COMPLETE, ui);
             } else {
                 var data = this.parse(this.loadContent);
-                this.dispatchWidth(flower.Event.COMPLETE, data);
+                this.dispatchWith(flower.Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
@@ -228,7 +228,7 @@ class UIParser extends Group {
 
     relationLoadError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, e.data);
+            this.dispatchWith(flower.Event.ERROR, e.data);
         } else {
             $error(e.data);
         }
@@ -360,7 +360,7 @@ class UIParser extends Group {
         }
         content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
+        content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.UIEvent.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {

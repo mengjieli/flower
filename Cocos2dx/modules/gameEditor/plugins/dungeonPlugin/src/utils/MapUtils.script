@@ -120,6 +120,62 @@ var MapUtils = (function () {
         return false;
     }
 
+    MapUtils.getDistancePoint = function (x, y, distance, dir) {
+        if (distance == 0) {
+            return {x: x, y: y};
+        }
+        if (dir == 0) {
+            return {x: x - distance, y: y}
+        } else if (dir == 1) {
+            return {x: x + Math.ceil(((y % 2 == 0 ? -1 : 0) - distance) / 2), y: y - distance}
+        } else if (dir == 2) {
+            return {x: x + Math.floor(((y % 2 == 0 ? 0 : 1) + distance) / 2), y: y - distance}
+        } else if (dir == 3) {
+            return {x: x + distance, y: y};
+        } else if (dir == 4) {
+            return {x: x + Math.floor(((y % 2 == 0 ? 0 : 1) + distance) / 2), y: y + distance}
+        } else if (dir == 5) {
+            return {x: x + Math.ceil(((y % 2 == 0 ? -1 : 0) - distance) / 2), y: y + distance}
+        }
+    }
+
+    MapUtils.getDirection = function (orginX, orginY, x, y) {
+        var r = Math.atan2(-y + orginY, x - orginX);
+        r = r * 180 / Math.PI;
+        r = r + 360;
+        r = r % 360;
+        if (r <= 22.5 || r >= 360 - 22.5) {
+            return Role.Dir.Right;
+        } else if (r >= 22.5 && r <= 90) {
+            return Role.Dir.RightDown;
+        } else if (r >= 90 && r <= 180 - 22.5) {
+            return Role.Dir.LeftDown;
+        } else if (r >= 180 - 22.5 && r <= 180 + 22.5) {
+            return Role.Dir.Left;
+        } else if (r >= 180 + 22.5 && r <= 270) {
+            return Role.Dir.LeftUp;
+        } else {
+            return Role.Dir.RightUp;
+        }
+    }
+
+    /**
+     * 获取距离一个点为 distance 的点集合
+     * @param x
+     * @param y
+     * @param distance
+     */
+    MapUtils.getRoundPoints = function (x, y, distance) {
+        var points = [];
+        for (var dir = 0; dir < 6; dir++) {
+            var start = MapUtils.getDistancePoint(x, y, distance, dir);
+            var transDir = (dir + 2) % 6;
+            for (var i = 0; i < distance; i++) {
+                points.push(MapUtils.getDistancePoint(start.x, start.y, i, transDir));
+            }
+        }
+        return points;
+    }
 
     return MapUtils;
 })();

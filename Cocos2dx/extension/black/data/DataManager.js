@@ -120,7 +120,11 @@ class DataManager {
                         content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                         content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     } else {
-                        content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                        if (member.hasOwnProperty("init") && member.init == null) {
+                            content += "\t\tthis.setMember(\"" + key + "\" , null);\n";
+                        } else {
+                            content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                        }
                         content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     }
                 }

@@ -85,7 +85,7 @@ class URLLoader extends EventDispatcher {
             this.$setResource(res);
         }
         if (this._isLoading) {
-            dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+            dispatchWith(Event.ERROR, "URLLoader is loading, url:" + this.url);
             return;
         }
         this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
@@ -253,7 +253,7 @@ class URLLoader extends EventDispatcher {
                 break;
             }
         }
-        this.dispatchWidth(Event.COMPLETE, this._data);
+        this.dispatchWith(Event.COMPLETE, this._data);
         this._selfDispose = true;
         this.dispose();
         this._selfDispose = false;
@@ -261,7 +261,7 @@ class URLLoader extends EventDispatcher {
 
     loadError(e) {
         if (this.hasListener(Event.ERROR)) {
-            this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
+            this.dispatchWith(Event.ERROR, getLanguage(2003, this._loadInfo.url));
             if (this._links) {
                 for (var i = 0; i < this._links.length; i++) {
                     this._links[i].loadError();

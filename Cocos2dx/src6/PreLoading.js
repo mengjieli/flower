@@ -46,7 +46,7 @@ class PreLoading extends flower.EventDispatcher {
     }
 
     dispose() {
-        this.dispatchWidth(flower.Event.COMPLETE);
+        this.dispatchWith(flower.Event.COMPLETE);
         this.progress.dispose();
         this.progressBar.dispose();
         super.dispose();

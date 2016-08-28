@@ -44,6 +44,7 @@ function init() {
         '<dg:CameraMoveEffect/>' +
         '<dg:CameraRangeEffect/>' +
         '<dg:DialogEffect/>' +
+        '<f:Group/>' +
         '</f:ViewStack>';
     this.viewStack = (new flower.UIParser()).parseUI(fxml);
     container.addChild(this.viewStack);
@@ -76,6 +77,8 @@ function setData(val) {
                 this.data.effectValue = flower.DataManager.createData("dg.CameraRangeEffect");
             } else if (this.data.type.value == 11) {
                 this.data.effectValue = flower.DataManager.createData("dg.DialogEffect");
+            } else if (this.data.type.value == 12) {
+                this.data.effectValue = flower.DataManager.createData("dg.StartEffect");
             } else {
                 this.data.effectValue = null;
             }

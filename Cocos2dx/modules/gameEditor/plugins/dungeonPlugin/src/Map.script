@@ -25,9 +25,10 @@ var Map = (function (_super) {
 
         //设置网络模拟类，接受触器效果
         this.net = new MapNet();
-
         //初始后台运行环境
         this.server = new Server(this.net);
+        //发送网络的对象
+        this.serverNet = new ServerNet(this.server);
     }
 
     /**
@@ -75,6 +76,9 @@ var Map = (function (_super) {
         this.gridLayer.setData(this.data);
         this.changeLayer.setData(this.data);
 
+        //设置攻击模块
+        this.attackModel = new AttackModel(this.data);
+
         //设置网络监听对象，与后台(Server)交互
         this.net.setData(this.data);
 
@@ -82,11 +86,12 @@ var Map = (function (_super) {
         this.server.setData(dungeonData);
     }
 
-    Map.prototype.update = function () {
+    Map.prototype.update = function (time, dt) {
         var x = -this.data.camera.x.value;
         var y = -this.data.camera.y.value;
         this.container.x = x;
         this.container.y = -y - this.mapHeight + this.data.camera.height.value;
+        this.changeLayer.update(dt);
     }
 
     Map.prototype.onCameraScreenChange = function (e) {
@@ -102,12 +107,27 @@ var Map = (function (_super) {
                 this.touchBeginY = this.mapHeight - e.touchY;
                 this.cameraX = -this.data.camera.x.value;
                 this.cameraY = -this.data.camera.y.value;
+                this.clickFlag = true;
                 break;
             case flower.TouchEvent.TOUCH_MOVE:
+                if (Math.abs(e.touchX - this.touchBeginX) > 30 || Math.abs(this.mapHeight - e.touchY - this.touchBeginY) > 30) {
+                    this.clickFlag = false;
+                }
                 this.camera.moveTo(-(this.cameraX - this.touchBeginX + e.touchX), -(this.cameraY - this.touchBeginY + this.mapHeight - e.touchY));
                 break;
             case flower.TouchEvent.TOUCH_END:
             case flower.TouchEvent.TOUCH_RELEASE:
+                if (this.data.start.value == false) {
+                    return;
+                }
+                if (this.clickFlag) {
+                    new ClickModel({
+                        x: e.touchX + this.data.camera.x.value,
+                        y: this.dungeonData.screenHeight.value - e.touchY + this.data.camera.y.value,
+                        mapData: this.data,
+                        serverNet: this.serverNet
+                    });
+                }
                 break;
         }
     }

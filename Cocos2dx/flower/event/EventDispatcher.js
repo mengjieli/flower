@@ -164,7 +164,7 @@ class EventDispatcher {
         }
     }
 
-    dispatchWidth(type, data = null) {
+    dispatchWith(type, data = null) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);

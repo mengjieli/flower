@@ -140,7 +140,7 @@ class TextInput extends DisplayObject {
             var p = this.$TextField;
             this.$nativeShow.startInput();
             p[4] = true;
-            this.dispatchWidth(Event.START_INPUT);
+            this.dispatchWith(Event.START_INPUT);
         }
     }
 
@@ -158,7 +158,7 @@ class TextInput extends DisplayObject {
             this.$nativeShow.stopInput();
         }
         this.text = this.$nativeShow.getNativeText();
-        this.dispatchWidth(Event.STOP_INPUT);
+        this.dispatchWith(Event.STOP_INPUT);
     }
 
     $keyDown(e) {

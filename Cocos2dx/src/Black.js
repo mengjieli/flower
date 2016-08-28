@@ -654,8 +654,8 @@ var $root = eval("this");
             value: function push(item) {
                 this.list.push(item);
                 this._length = this._length + 1;
-                this.dispatchWidth(flower.Event.ADDED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.ADDED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
             }
         }, {
             key: "addItemAt",
@@ -667,8 +667,8 @@ var $root = eval("this");
                 }
                 this.list.splice(index, 0, item);
                 this._length = this._length + 1;
-                this.dispatchWidth(flower.Event.ADDED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.ADDED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
             }
         }, {
             key: "shift",
@@ -678,8 +678,8 @@ var $root = eval("this");
                 }
                 var item = this.list.shift();
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
             }
         }, {
@@ -690,27 +690,32 @@ var $root = eval("this");
                 var i;
                 startIndex = +startIndex & ~0;
                 delCount = +delCount & ~0;
+                var list;
                 if (delCount <= 0) {
+                    list = [];
+
                     for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
                         args[_key2 - 2] = arguments[_key2];
                     }
 
                     for (i = 0; i < args.length; i++) {
+                        list[i] = args[i];
                         this.list.splice(startIndex, 0, args[i]);
                     }
                     this._length = this._length + 1;
                     for (i = 0; i < args.length; i++) {
-                        this.dispatchWidth(flower.Event.ADDED, args[i]);
+                        this.dispatchWith(flower.Event.ADDED, args[i]);
                     }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.UPDATE, this);
                 } else {
-                    var list = this.list.splice(startIndex, delCount);
+                    list = this.list.splice(startIndex, delCount);
                     this._length = this._length - delCount;
                     for (i = 0; i < list.length; i++) {
-                        this.dispatchWidth(flower.Event.REMOVED, list[i]);
+                        this.dispatchWith(flower.Event.REMOVED, list[i]);
                     }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.UPDATE, this);
                 }
+                return list;
             }
         }, {
             key: "slice",
@@ -727,8 +732,8 @@ var $root = eval("this");
                 }
                 var item = this.list.pop();
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
             }
         }, {
@@ -740,9 +745,9 @@ var $root = eval("this");
                 while (this.list.length) {
                     var item = this.list.pop();
                     this._length = this._length - 1;
-                    this.dispatchWidth(flower.Event.REMOVED, item);
+                    this.dispatchWith(flower.Event.REMOVED, item);
                 }
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.UPDATE, this);
             }
         }, {
             key: "removeItem",
@@ -751,8 +756,8 @@ var $root = eval("this");
                     if (this.list[i] == item) {
                         this.list.splice(i, 1);
                         this._length = this._length - 1;
-                        this.dispatchWidth(flower.Event.REMOVED, item);
-                        this.dispatchWidth(flower.Event.UPDATE, this);
+                        this.dispatchWith(flower.Event.REMOVED, item);
+                        this.dispatchWith(flower.Event.UPDATE, this);
                         return item;
                     }
                 }
@@ -768,8 +773,8 @@ var $root = eval("this");
                 }
                 var item = this.list.splice(index, 1)[0];
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
             }
         }, {
@@ -783,7 +788,7 @@ var $root = eval("this");
                 if (key2 == "") {
                     for (i = 0; i < this.list.length; i++) {
                         var val = this.list[i][key];
-                        if (val instanceof Value) {
+                        if (val instanceof Value && !(val instanceof flower.ObjectValue) && !(val instanceof flower.ArrayValue)) {
                             val = val.value;
                         }
                         if (val == value) {
@@ -794,11 +799,11 @@ var $root = eval("this");
                 } else {
                     for (i = 0; i < this.list.length; i++) {
                         var val1 = this.list[i][key];
-                        if (val1 instanceof Value) {
+                        if (val1 instanceof Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
                             val1 = val1.value;
                         }
                         var val2 = this.list[i][key2];
-                        if (val2 instanceof Value) {
+                        if (val2 instanceof Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
                             val2 = val2.value;
                         }
                         if (val == value && val2 == value2) {
@@ -811,8 +816,8 @@ var $root = eval("this");
                     return;
                 }
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
             }
         }, {
@@ -828,19 +833,43 @@ var $root = eval("this");
         }, {
             key: "getItemWith",
             value: function getItemWith(key, value) {
-                var key2 = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
                 var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
                 var i;
-                if (!key2) {
+                if (key2 == "") {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        if (val1 == value) {
                             return this.list[i];
                         }
                     }
                 } else {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        keys = key2.split(".");
+                        var val2 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val2 = val2[keys[k]];
+                        }
+                        if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                            val2 = val2.value;
+                        }
+                        if (val1 == value && val2 == value2) {
                             return this.list[i];
                         }
                     }
@@ -872,15 +901,39 @@ var $root = eval("this");
 
                 var result = [];
                 var i;
-                if (key2 != "") {
+                if (key2 == "") {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        if (val1 == value) {
                             result.push(this.list[i]);
                         }
                     }
                 } else {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        keys = key2.split(".");
+                        var val2 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val2 = val2[keys[k]];
+                        }
+                        if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                            val2 = val2.value;
+                        }
+                        if (val1 == value && val2 == value2) {
                             result.push(this.list[i]);
                         }
                     }
@@ -894,7 +947,9 @@ var $root = eval("this");
                 var setValue = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
                 for (var i = 0; i < this.list.length; i++) {
-                    if (this.list[i][findKey] == findValue) {
+                    if (this.list[i][findKey] instanceof flower.Value && this.list[i][findKey].value == findValue) {
+                        this.list[i][findKey].value = setValue;
+                    } else if (this.list[i][findKey] == findValue) {
                         this.list[i][setKey] = setValue;
                     }
                 }
@@ -934,7 +989,7 @@ var $root = eval("this");
                     _arguments__ = arguments[argumentsLength];
                 }
                 this.list.sort.apply(this.list.sort, _arguments__);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.UPDATE, this);
             }
         }, {
             key: "setItemIndex",
@@ -945,7 +1000,7 @@ var $root = eval("this");
                 }
                 this.list.splice(itemIndex, 1);
                 this.list.splice(index, 0, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.UPDATE, this);
             }
         }, {
             key: "getItemAt",
@@ -1092,9 +1147,9 @@ var $root = eval("this");
                     while (this.list.length > val) {
                         var item = this.list.pop();
                         this._length = this._length - 1;
-                        this.dispatchWidth(flower.Event.REMOVED, item);
+                        this.dispatchWith(flower.Event.REMOVED, item);
                     }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.UPDATE, this);
                 }
             }
         }]);
@@ -1155,7 +1210,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.UPDATE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1208,7 +1263,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.UPDATE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1274,7 +1329,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.UPDATE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1342,7 +1397,7 @@ var $root = eval("this");
             value: function setMember(name, value) {
                 var old = this.__value[name];
                 this.__value[name] = value;
-                this.dispatchWidth(name, {
+                this.dispatchWith(name, {
                     "name": name,
                     "old": old,
                     "value": value
@@ -1398,7 +1453,7 @@ var $root = eval("this");
                             val.value = value;
                         } else {
                             this.__value[name] = value;
-                            this.dispatchWidth(name, {
+                            this.dispatchWith(name, {
                                 "name": name,
                                 "old": old,
                                 "value": value
@@ -1533,7 +1588,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.UPDATE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1593,7 +1648,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.UPDATE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1770,7 +1825,11 @@ var $root = eval("this");
                                 content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                                 content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             } else {
-                                content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                                if (member.hasOwnProperty("init") && member.init == null) {
+                                    content += "\t\tthis.setMember(\"" + key + "\" , null);\n";
+                                } else {
+                                    content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                                }
                                 content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             }
                         }
@@ -2501,7 +2560,7 @@ var $root = eval("this");
             key: "loadContentError",
             value: function loadContentError(e) {
                 if (this.hasListener(flower.Event.ERROR)) {
-                    this.dispatchWidth(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
+                    this.dispatchWith(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
                 } else {
                     sys.$error(3001, e.currentTarget.url);
                 }
@@ -2584,10 +2643,10 @@ var $root = eval("this");
                 if (this.relationIndex >= this.relationUI.length) {
                     if (this.parseUIAsyncFlag) {
                         var ui = this.parseUI(this.loadContent, this.loadData);
-                        this.dispatchWidth(flower.Event.COMPLETE, ui);
+                        this.dispatchWith(flower.Event.COMPLETE, ui);
                     } else {
                         var data = this.parse(this.loadContent);
-                        this.dispatchWidth(flower.Event.COMPLETE, data);
+                        this.dispatchWith(flower.Event.COMPLETE, data);
                     }
                 } else {
                     var parser = new UIParser();
@@ -2602,7 +2661,7 @@ var $root = eval("this");
             key: "relationLoadError",
             value: function relationLoadError(e) {
                 if (this.hasListener(flower.Event.ERROR)) {
-                    this.dispatchWidth(flower.Event.ERROR, e.data);
+                    this.dispatchWith(flower.Event.ERROR, e.data);
                 } else {
                     $error(e.data);
                 }
@@ -2730,7 +2789,7 @@ var $root = eval("this");
                 }
                 content += before + "\t\tif(data) this.data = data;\n";
                 content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-                content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
+                content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.UIEvent.CREATION_COMPLETE);\n";
                 content += before + "\t}\n\n";
                 content += propertyList[propertyList.length - 1];
                 for (var i = 0; i < propertyList.length - 1; i++) {
@@ -5648,12 +5707,12 @@ var $root = eval("this");
                     }
                 }
                 this._items.push(display);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.UPDATE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
                 if (!find) {
-                    this.dispatchWidth(flower.Event.ADDED, display);
+                    this.dispatchWith(flower.Event.ADDED, display);
                 }
             }
         }, {
@@ -5668,12 +5727,12 @@ var $root = eval("this");
                     }
                 }
                 this._items.splice(i, 0, display);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.UPDATE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
                 if (!find) {
-                    this.dispatchWidth(flower.Event.ADDED, display);
+                    this.dispatchWith(flower.Event.ADDED, display);
                 }
             }
         }, {
@@ -5684,8 +5743,8 @@ var $root = eval("this");
                         this._items.splice(i, 1);
                         if (display == this._selectedItem) {
                             this._setSelectedIndex(0);
-                            this.dispatchWidth(flower.Event.UPDATE);
-                            this.dispatchWidth(flower.Event.REMOVED, display);
+                            this.dispatchWith(flower.Event.UPDATE);
+                            this.dispatchWith(flower.Event.REMOVED, display);
                         }
                         return display;
                     }
@@ -5706,8 +5765,8 @@ var $root = eval("this");
                     this._selectedItem = this._items[0];
                     this._selectedIndex = 0;
                     _get(Object.getPrototypeOf(ViewStack.prototype), "removeChild", this).call(this, display);
-                    this.dispatchWidth(flower.Event.UPDATE);
-                    this.dispatchWidth(flower.Event.REMOVED, display);
+                    this.dispatchWith(flower.Event.UPDATE);
+                    this.dispatchWith(flower.Event.REMOVED, display);
                 } else {
                     flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
                 }
@@ -5732,7 +5791,7 @@ var $root = eval("this");
                     if (this._items[i] == display) {
                         this._items.splice(i, 1);
                         this._items.splice(index, 0, display);
-                        this.dispatchWidth(flower.Event.UPDATE);
+                        this.dispatchWith(flower.Event.UPDATE);
                         return display;
                     }
                 }
@@ -5744,7 +5803,7 @@ var $root = eval("this");
                 var opt = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
                 _get(Object.getPrototypeOf(ViewStack.prototype), "sortChild", this).call(this, key, opt);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.UPDATE);
             }
         }, {
             key: "_setSelectedIndex",
@@ -5760,8 +5819,8 @@ var $root = eval("this");
                     this._selectedIndex = val;
                     _get(Object.getPrototypeOf(ViewStack.prototype), "addChildAt", this).call(this, this._selectedItem, this.numChildren);
                 }
-                this.dispatchWidth(flower.Event.CHANGE, this._selectedItem);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE, this._selectedItem);
+                this.dispatchWith(flower.Event.UPDATE);
             }
         }, {
             key: "getItemAt",
@@ -5788,7 +5847,7 @@ var $root = eval("this");
                 if (this._selectedIndex != -1 && this._selectedIndex >= index) {
                     this._selectedIndex++;
                 }
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.UPDATE);
             }
         }, {
             key: "length",
@@ -6519,7 +6578,7 @@ var $root = eval("this");
         }, {
             key: "$onClose",
             value: function $onClose() {
-                this.dispatchWidth(flower.Event.CLOSE);
+                this.dispatchWith(flower.Event.CLOSE);
                 this.closePanel();
             }
         }, {
@@ -6659,13 +6718,13 @@ var $root = eval("this");
             key: "$onConfirm",
             //content
             value: function $onConfirm(e) {
-                this.dispatchWidth(flower.Event.CONFIRM);
+                this.dispatchWith(flower.Event.CONFIRM);
                 this.closePanel();
             }
         }, {
             key: "$onCancel",
             value: function $onCancel(e) {
-                this.dispatchWidth(flower.Event.CANCEL);
+                this.dispatchWith(flower.Event.CANCEL);
                 this.closePanel();
             }
         }, {
@@ -7094,7 +7153,7 @@ var $root = eval("this");
                 this.__progress.max.value = this.__list.length;
                 this.__progress.current.value = this.__index;
                 if (this.__index == this.__list.length) {
-                    this.dispatchWidth(flower.Event.COMPLETE);
+                    this.dispatchWith(flower.Event.COMPLETE);
                     return;
                 }
                 item = this.__list[this.__index];

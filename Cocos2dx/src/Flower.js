@@ -31,7 +31,7 @@ function __extends(d, b) {
     d.prototype = new __();
 }
 var flower = {};
-(function () {
+(function (math) {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
     var TIP = false;
@@ -224,18 +224,18 @@ var flower = {};
                         trace("dt", dt);
                     },
                     onMouseMove: function onMouseMove(e) {
-                        engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
+                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
                     },
                     onTouchesBegan: function onTouchesBegan(touch) {
-                        engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                        engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
                         return true;
                     },
                     onTouchesMoved: function onTouchesMoved(touch) {
-                        engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                        engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
                         return true;
                     },
                     onTouchesEnded: function onTouchesEnded(touch) {
-                        engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
+                        engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
                         return true;
                     }
                 });
@@ -1399,18 +1399,6 @@ var flower = {};
                         }
                         PlatformURLLoader.isLoading = false;
                     };
-                    //xhr.onreadystatechange = function () {
-                    //    if (xhr.readyState == 4 && xhr.status == 200) {
-                    //        if (method == "HEAD") {
-                    //            back.call(thisObj, xhr.getAllResponseHeaders());
-                    //        } else {
-                    //            back.call(thisObj, xhr.responseText);
-                    //        }
-                    //    }
-                    //    else if (xhr.readyState == 4 && xhr.status != 200) {
-                    //        errorBack.call(thisObj);
-                    //    }
-                    //};
                     xhr.send();
                 } else {
                     var res;
@@ -1832,6 +1820,7 @@ var flower = {};
     locale_strings[1007] = "{0} 超出索引: {1}，索引范围为 0 ~ {2}";
     locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docsWebSite + "docs/class/{1}.md?f{2}";
     locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
+    locale_strings[1030] = "目标显示对象不在同一个显示列表中";
     locale_strings[2001] = "[loadText] {0}";
     locale_strings[2002] = "[loadTexture] {0}";
     locale_strings[2003] = "[加载失败] {0}";
@@ -2024,8 +2013,8 @@ var flower = {};
                 }
             }
         }, {
-            key: "dispatchWidth",
-            value: function dispatchWidth(type) {
+            key: "dispatchWith",
+            value: function dispatchWith(type) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
                 if (DEBUG) {
@@ -2037,6 +2026,11 @@ var flower = {};
                 e.$target = this;
                 this.dispatch(e);
                 flower.Event.release(e);
+            }
+        }, {
+            key: "isDispose",
+            get: function get() {
+                return this.__hasDispose;
             }
         }]);
 
@@ -2177,11 +2171,17 @@ var flower = {};
         }, {
             key: "touchX",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchX;
+                }
                 return this.$touchX;
             }
         }, {
             key: "touchY",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchY;
+                }
                 return this.$touchY;
             }
         }, {
@@ -2228,13 +2228,19 @@ var flower = {};
         }
 
         _createClass(MouseEvent, [{
-            key: "touchX",
+            key: "mouseX",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchX;
+                }
                 return this.$touchX;
             }
         }, {
-            key: "touchY",
+            key: "mouseY",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.lastTouchY;
+                }
                 return this.$touchY;
             }
         }, {
@@ -2261,6 +2267,7 @@ var flower = {};
     MouseEvent.MOUSE_MOVE = "mouse_move";
     MouseEvent.MOUSE_OVER = "mouse_over";
     MouseEvent.MOUSE_OUT = "mouse_out";
+    MouseEvent.RIGHT_CLICK = "right_click";
 
 
     flower.MouseEvent = MouseEvent;
@@ -2676,8 +2683,8 @@ var flower = {};
         }, {
             key: "rotate",
             value: function rotate(angle) {
-                var sin = Math.sin(angle);
-                var cos = Math.cos(angle);
+                var sin = math.sin(angle);
+                var cos = math.cos(angle);
                 this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos, this.b * cos - this.d * sin, this.b * sin + this.d * cos, this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
             }
         }, {
@@ -2705,8 +2712,8 @@ var flower = {};
                 var sin = 0;
                 var cos = 1;
                 if (rotation) {
-                    sin = Math.sin(rotation);
-                    cos = Math.cos(rotation);
+                    sin = math.sin(rotation);
+                    cos = math.cos(rotation);
                 }
                 this.a = cos * scaleX;
                 this.b = sin * scaleY;
@@ -2719,8 +2726,8 @@ var flower = {};
                 var sin = 0;
                 var cos = 1;
                 if (rotation) {
-                    sin = Math.sin(rotation);
-                    cos = Math.cos(rotation);
+                    sin = math.sin(rotation);
+                    cos = math.cos(rotation);
                 }
                 this.a = cos * scaleX;
                 this.b = sin * scaleX;
@@ -2761,8 +2768,8 @@ var flower = {};
                     x2 = x3;
                     x3 = tmp;
                 }
-                rect.x = Math.floor(x0 < x2 ? x0 : x2);
-                rect.width = Math.ceil((x1 > x3 ? x1 : x3) - rect.x);
+                rect.x = math.floor(x0 < x2 ? x0 : x2);
+                rect.width = math.ceil((x1 > x3 ? x1 : x3) - rect.x);
                 if (y0 > y1) {
                     tmp = y0;
                     y0 = y1;
@@ -2773,8 +2780,8 @@ var flower = {};
                     y2 = y3;
                     y3 = tmp;
                 }
-                rect.y = Math.floor(y0 < y2 ? y0 : y2);
-                rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+                rect.y = math.floor(y0 < y2 ? y0 : y2);
+                rect.height = math.ceil((y1 > y3 ? y1 : y3) - rect.y);
             }
         }, {
             key: "save",
@@ -2857,12 +2864,12 @@ var flower = {};
         }, {
             key: "length",
             get: function get() {
-                return Math.sqrt(this.x * this.x + this.y * this.y);
+                return math.sqrt(this.x * this.x + this.y * this.y);
             }
         }], [{
             key: "distance",
             value: function distance(p1, p2) {
-                return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+                return math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
             }
         }, {
             key: "release",
@@ -2943,11 +2950,11 @@ var flower = {};
                 var y0 = this.y;
                 var x1 = clipRect.x;
                 var y1 = clipRect.y;
-                var l = Math.max(x0, x1);
-                var r = Math.min(x0 + this.width, x1 + clipRect.width);
+                var l = math.max(x0, x1);
+                var r = math.min(x0 + this.width, x1 + clipRect.width);
                 if (l <= r) {
-                    var t = Math.max(y0, y1);
-                    var b = Math.min(y0 + this.height, y1 + clipRect.height);
+                    var t = math.max(y0, y1);
+                    var b = math.min(y0 + this.height, y1 + clipRect.height);
                     if (t <= b) {
                         this.setTo(l, t, r - l, b - t);
                         return this;
@@ -2959,7 +2966,7 @@ var flower = {};
         }, {
             key: "intersects",
             value: function intersects(toIntersect) {
-                return Math.max(this.x, toIntersect.x) <= Math.min(this.right, toIntersect.right) && Math.max(this.y, toIntersect.y) <= Math.min(this.bottom, toIntersect.bottom);
+                return math.max(this.x, toIntersect.x) <= math.min(this.right, toIntersect.right) && math.max(this.y, toIntersect.y) <= math.min(this.bottom, toIntersect.bottom);
             }
         }, {
             key: "isEmpty",
@@ -2982,15 +2989,15 @@ var flower = {};
         }, {
             key: "_getBaseWidth",
             value: function _getBaseWidth(angle) {
-                var u = Math.abs(Math.cos(angle));
-                var v = Math.abs(Math.sin(angle));
+                var u = math.abs(math.cos(angle));
+                var v = math.abs(math.sin(angle));
                 return u * this.width + v * this.height;
             }
         }, {
             key: "_getBaseHeight",
             value: function _getBaseHeight(angle) {
-                var u = Math.abs(Math.cos(angle));
-                var v = Math.abs(Math.sin(angle));
+                var u = math.abs(math.cos(angle));
+                var v = math.abs(math.sin(angle));
                 return v * this.width + u * this.height;
             }
         }, {
@@ -3369,7 +3376,7 @@ var flower = {};
                     return;
                 }
                 p[2] = val;
-                p[14] = val * Math.PI / 180;
+                p[14] = val * math.PI / 180;
                 if (!this.$nativeShow) {
                     $warn(1002, this.name);
                     return;
@@ -3544,10 +3551,10 @@ var flower = {};
                 }
                 if (this.__parent) {
                     this.$setParentFilters(this.__parent.$getAllFilters());
-                    this.dispatchWidth(Event.ADDED);
+                    this.dispatchWith(Event.ADDED);
                 } else {
                     this.$setParentFilters(null);
-                    this.dispatchWidth(Event.REMOVED);
+                    this.dispatchWith(Event.REMOVED);
                 }
             }
         }, {
@@ -3559,14 +3566,14 @@ var flower = {};
             key: "$dispatchAddedToStageEvent",
             value: function $dispatchAddedToStageEvent() {
                 if (this.__stage) {
-                    this.dispatchWidth(Event.ADDED_TO_STAGE);
+                    this.dispatchWith(Event.ADDED_TO_STAGE);
                 }
             }
         }, {
             key: "$dispatchRemovedFromStageEvent",
             value: function $dispatchRemovedFromStageEvent() {
                 if (!this.__stage) {
-                    this.dispatchWidth(Event.REMOVED_FROM_STAGE);
+                    this.dispatchWith(Event.REMOVED_FROM_STAGE);
                 }
             }
         }, {
@@ -3617,7 +3624,7 @@ var flower = {};
             key: "dispatch",
             value: function dispatch(e) {
                 _get(Object.getPrototypeOf(DisplayObject.prototype), "dispatch", this).call(this, e);
-                if (e.bubbles && this.__parent && this.$DisplayObject[21]) {
+                if (e.bubbles && !e.isPropagationStopped && this.__parent && this.$DisplayObject[21]) {
                     this.__parent.dispatch(e);
                 }
             }
@@ -3689,8 +3696,8 @@ var flower = {};
             key: "$getMouseTarget",
             value: function $getMouseTarget(touchX, touchY, multiply) {
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -3711,13 +3718,50 @@ var flower = {};
         }, {
             key: "localToGlobal",
             value: function localToGlobal(point) {
-                point = point || new flower.Point();
-                var matrix;
                 var display = this;
-                while (display) {
-                    matrix = display.$getMatrix();
-                    matrix.transformPoint(point.x, point.y, point);
+                while (display.parent) {
                     display = display.parent;
+                }
+                return this.localToDisplay(point, display);
+            }
+        }, {
+            key: "localToDisplay",
+            value: function localToDisplay(point, display) {
+                point = point || new flower.Point();
+                var parentsThis = [];
+                var dis = this;
+                while (dis) {
+                    parentsThis.push(dis);
+                    dis = dis.parent;
+                }
+                var parentsDisplay = [];
+                dis = display;
+                while (dis) {
+                    parentsDisplay.push(dis);
+                    dis = dis.parent;
+                }
+                var find = false;
+                for (var i = 0; i < parentsThis.length; i++) {
+                    for (var j = 0; j < parentsDisplay.length; j++) {
+                        if (parentsThis[i] == parentsDisplay[j]) {
+                            parentsThis.splice(i, parentsThis.length - i);
+                            parentsDisplay.splice(j, parentsDisplay.length - j);
+                            find = true;
+                            break;
+                        }
+                    }
+                }
+                if (!find) {
+                    $error(1030);
+                }
+                var matrix;
+                for (var i = 0; i < parentsThis.length; i++) {
+                    matrix = parentsThis[i].$getMatrix();
+                    matrix.transformPoint(point.x, point.y, point);
+                }
+                for (var i = 0; i < parentsDisplay.length; i++) {
+                    matrix = parentsDisplay[i].$getReverseMatrix();
+                    matrix.transformPoint(point.x, point.y, point);
                 }
                 return point;
             }
@@ -4144,17 +4188,9 @@ var flower = {};
                 for (var i = 0, len = children.length; i < len; i++) {
                     var bounds = children[i].$getBounds();
                     if (i == 0) {
-                        //minX = bounds.x;
-                        //minY = bounds.y;
                         maxX = bounds.x + bounds.width;
                         maxY = bounds.y + bounds.height;
                     } else {
-                        //if (bounds.x < minX) {
-                        //    minX = bounds.x;
-                        //}
-                        //if (bounds.y < minY) {
-                        //    minY = bounds.y;
-                        //}
                         if (bounds.x + bounds.width > maxX) {
                             maxX = bounds.x + bounds.width;
                         }
@@ -4162,6 +4198,19 @@ var flower = {};
                             maxY = bounds.y + bounds.height;
                         }
                     }
+                    //var child = children[i];
+                    //var bounds = children[i].$getBounds();
+                    //if (i == 0) {
+                    //    maxX = bounds.x + child.width;
+                    //    maxY = bounds.y + child.height;
+                    //} else {
+                    //    if (bounds.x + child.width > maxX) {
+                    //        maxX = bounds.x + child.width;
+                    //    }
+                    //    if (bounds.y + child.height > maxY) {
+                    //        maxY = bounds.y + child.height;
+                    //    }
+                    //}
                 }
                 rect.x = minX;
                 rect.y = minY;
@@ -4174,8 +4223,8 @@ var flower = {};
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -4276,8 +4325,8 @@ var flower = {};
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -4744,8 +4793,8 @@ var flower = {};
                     var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
                     rect.x = 0;
                     rect.y = 0;
-                    rect.width = size.width;
-                    rect.height = size.height;
+                    rect.width = this.width; //size.width;
+                    rect.height = this.height;
                     this.$removeFlags(0x0800);
                 }
             }
@@ -4834,7 +4883,7 @@ var flower = {};
                     var p = this.$TextField;
                     this.$nativeShow.startInput();
                     p[4] = true;
-                    this.dispatchWidth(Event.START_INPUT);
+                    this.dispatchWith(Event.START_INPUT);
                 }
             }
         }, {
@@ -4854,12 +4903,14 @@ var flower = {};
                     this.$nativeShow.stopInput();
                 }
                 this.text = this.$nativeShow.getNativeText();
-                this.dispatchWidth(Event.STOP_INPUT);
+                this.dispatchWith(Event.STOP_INPUT);
             }
         }, {
             key: "$keyDown",
             value: function $keyDown(e) {
-                if (e.key == 13) {
+                var p = this.$TextField;
+                p[0] = this.$nativeShow.getNativeText();
+                if (e.keyCode == 13) {
                     this.$inputEnd();
                 }
             }
@@ -4870,6 +4921,11 @@ var flower = {};
                     var width = this.width;
                 }
                 _get(Object.getPrototypeOf(TextInput.prototype), "$onFrameEnd", this).call(this);
+            }
+        }, {
+            key: "inputOver",
+            value: function inputOver() {
+                this.$inputEnd();
             }
         }, {
             key: "dispose",
@@ -5208,14 +5264,21 @@ var flower = {};
 
             var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
+            _this21.__mouseX = 0;
+            _this21.__mouseY = 0;
             _this21.__nativeMouseMoveEvent = [];
+            _this21.__nativeRightClickEvent = [];
             _this21.__nativeTouchEvent = [];
             _this21.__mouseOverList = [_this21];
             _this21.__dragOverList = [_this21];
             _this21.__touchList = [];
             _this21.__lastMouseX = -1;
             _this21.__lastMouseY = -1;
+            _this21.__lastRightX = -1;
+            _this21.__lastRightY = -1;
             _this21.__focus = null;
+            _this21.__touchTarget = null;
+            _this21.$keyEvents = [];
 
             _this21.__stage = _this21;
             Stage.stages.push(_this21);
@@ -5274,6 +5337,13 @@ var flower = {};
                 //flower.trace("mouseEvent",x,y);
             }
         }, {
+            key: "$addRightClickEvent",
+            value: function $addRightClickEvent(x, y) {
+                this.__lastRightX = x;
+                this.__lastRightY = y;
+                this.__nativeRightClickEvent.push({ x: x, y: y });
+            }
+        }, {
             key: "$addTouchEvent",
             value: function $addTouchEvent(type, id, x, y) {
                 this.__nativeTouchEvent.push({
@@ -5309,11 +5379,20 @@ var flower = {};
                 mouse.mutiply = this.__touchList.length == 0 ? false : true;
                 this.__touchList.push(mouse);
                 var target = this.$getMouseTarget(x, y, mouse.mutiply);
+                this.__touchTarget = target;
                 mouse.target = target;
                 var parent = target.parent;
+                var isMenu = false;
                 while (parent && parent != this) {
+                    if (parent == this.$menu) {
+                        isMenu = true;
+                    }
                     mouse.parents.push(parent);
                     parent = parent.parent;
+                }
+                if (this.$menu.$hasMenu() && !isMenu) {
+                    this.__touchList.length = 0;
+                    return;
                 }
                 if (target) {
                     this.$setFocus(target);
@@ -5332,8 +5411,27 @@ var flower = {};
                 }
             }
         }, {
+            key: "$onRightClick",
+            value: function $onRightClick(x, y) {
+                if (this.$menu.$hasMenu()) {
+                    return;
+                }
+                var target = this.$getMouseTarget(x, y, false);
+                this.__touchTarget = target;
+                var event;
+                event = new flower.MouseEvent(flower.MouseEvent.RIGHT_CLICK);
+                event.$stageX = x;
+                event.$stageY = y;
+                event.$target = target;
+                event.$touchX = target.lastTouchX;
+                event.$touchY = target.lastTouchY;
+                target.dispatch(event);
+            }
+        }, {
             key: "$onMouseMove",
             value: function $onMouseMove(x, y) {
+                this.__mouseX = x;
+                this.__mouseY = y;
                 var target = this.$getMouseTarget(x, y, false);
                 var parent = target.parent;
                 var event;
@@ -5540,12 +5638,13 @@ var flower = {};
                 if (key == 18) {
                     KeyboardEvent.$alt = true;
                 }
-                var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, key);
-                if (this.__focus) {
-                    this.__focus.dispatch(event);
-                } else {
-                    this.dispatch(event);
-                }
+                this.$keyEvents.push({
+                    type: KeyboardEvent.KEY_DOWN,
+                    shift: KeyboardEvent.$shift,
+                    control: KeyboardEvent.$control,
+                    alt: KeyboardEvent.$alt,
+                    key: key
+                });
             }
         }, {
             key: "$onKeyUp",
@@ -5559,12 +5658,41 @@ var flower = {};
                 if (key == 18) {
                     KeyboardEvent.$alt = false;
                 }
-                var event = new KeyboardEvent(KeyboardEvent.KEY_UP, key);
-                if (this.__focus) {
-                    this.__focus.dispatch(event);
-                } else {
-                    this.dispatch(event);
+                this.$keyEvents.push({
+                    type: KeyboardEvent.KEY_UP,
+                    shift: KeyboardEvent.$shift,
+                    control: KeyboardEvent.$control,
+                    alt: KeyboardEvent.$alt,
+                    key: key
+                });
+            }
+        }, {
+            key: "$dispatchKeyEvent",
+            value: function $dispatchKeyEvent(info) {
+                var shift = KeyboardEvent.$shift;
+                var control = KeyboardEvent.$control;
+                var alt = KeyboardEvent.$alt;
+                KeyboardEvent.$shift = info.shift;
+                KeyboardEvent.$control = info.control;
+                KeyboardEvent.$alt = info.alt;
+                if (info.type == KeyboardEvent.KEY_DOWN) {
+                    var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, info.key);
+                    if (this.__focus) {
+                        this.__focus.dispatch(event);
+                    } else {
+                        this.dispatch(event);
+                    }
+                } else if (info.type == KeyboardEvent.KEY_UP) {
+                    var event = new KeyboardEvent(KeyboardEvent.KEY_UP, info.key);
+                    if (this.__focus) {
+                        this.__focus.dispatch(event);
+                    } else {
+                        this.dispatch(event);
+                    }
                 }
+                KeyboardEvent.$shift = shift;
+                KeyboardEvent.$control = control;
+                KeyboardEvent.$alt = alt;
             }
 
             ///////////////////////////////////////键盘事件处理///////////////////////////////////////
@@ -5574,6 +5702,8 @@ var flower = {};
             value: function $onFrameEnd() {
                 var touchList = this.__nativeTouchEvent;
                 var mouseMoveList = this.__nativeMouseMoveEvent;
+                var rightClickList = this.__nativeRightClickEvent;
+                var hasclick = false;
                 while (touchList.length) {
                     var touch = touchList.shift();
                     if (touch.type == "begin") {
@@ -5581,6 +5711,7 @@ var flower = {};
                     } else if (touch.type == "move") {
                         this.$onTouchMove(touch.id, touch.x, touch.y);
                     } else if (touch.type == "end") {
+                        hasclick = true;
                         this.$onTouchEnd(touch.id, touch.x, touch.y);
                     }
                 }
@@ -5592,6 +5723,18 @@ var flower = {};
                     this.$onMouseMove(moveInfo.x, moveInfo.y);
                 }
                 mouseMoveList.length = 0;
+                if (rightClickList.length) {
+                    hasclick = true;
+                    var rightInfo = rightClickList[rightClickList.length - 1];
+                    this.$onRightClick(rightInfo.x, rightInfo.y);
+                }
+                rightClickList.length = 0;
+                if (hasclick) {
+                    this.$menu.$onTouch(this.__touchTarget);
+                }
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
+                }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
                 this.$background.$onFrameEnd();
             }
@@ -5647,6 +5790,16 @@ var flower = {};
             key: "debugContainer",
             get: function get() {
                 return this.$debugSprite;
+            }
+        }, {
+            key: "mouseX",
+            get: function get() {
+                return this.__mouseX;
+            }
+        }, {
+            key: "mouseY",
+            get: function get() {
+                return this.__mouseY;
             }
         }], [{
             key: "getInstance",
@@ -5798,24 +5951,27 @@ var flower = {};
             var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
 
             _this23.__addFrame = 0;
-
-            _this23.addListener(Event.ADDED_TO_STAGE, _this23.__addedToStage, _this23);
             return _this23;
         }
 
         _createClass(MenuManager, [{
-            key: "__addedToStage",
-            value: function __addedToStage(e) {
-                this.removeListener(Event.ADDED_TO_STAGE, this.addedToStage, this);
-                this.stage.addListener(TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+            key: "$onTouch",
+            value: function $onTouch(target) {
+                var flag = true;
+                while (target && flag) {
+                    flag = target == this ? false : true;
+                    target = target.parent;
+                }
+                if ((flag || this.$autoRemove) && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
+                    this.removeAll();
+                    return true;
+                }
+                return false;
             }
         }, {
-            key: "__onTouch",
-            value: function __onTouch(e) {
-                var frame = flower.EnterFrame.frame;
-                if (frame > this.__addFrame && this.numChildren) {
-                    this.removeAll();
-                }
+            key: "$hasMenu",
+            value: function $hasMenu() {
+                return flower.EnterFrame.frame > this.__addFrame && this.numChildren ? true : false;
             }
         }, {
             key: "addChildAt",
@@ -5860,8 +6016,26 @@ var flower = {};
         }, {
             key: "showMenu",
             value: function showMenu(display) {
+                var x = arguments.length <= 1 || arguments[1] === undefined ? -1 : arguments[1];
+                var y = arguments.length <= 2 || arguments[2] === undefined ? -1 : arguments[2];
+                var autoRemove = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
+                if (x == -1) {
+                    x = Stage.getInstance().mouseX + 1;
+                }
+                if (y == -1) {
+                    y = Stage.getInstance().mouseY;
+                }
+                display.x = x;
+                display.y = y;
                 MenuManager.getInstance().removeAll();
+                MenuManager.getInstance().$autoRemove = autoRemove;
                 MenuManager.getInstance().addChild(display);
+            }
+        }, {
+            key: "hideMenu",
+            value: function hideMenu() {
+                MenuManager.getInstance().removeAll();
             }
         }]);
 
@@ -6019,7 +6193,7 @@ var flower = {};
                 this.__settingWidth = settingWidth;
                 this.__settingHeight = settingHeight;
                 if (this.dispatcher) {
-                    this.dispatcher.dispatchWidth(Event.UPDATE);
+                    this.dispatcher.dispatchWith(Event.UPDATE);
                 }
             }
         }, {
@@ -6322,7 +6496,7 @@ var flower = {};
                     this.$setResource(res);
                 }
                 if (this._isLoading) {
-                    dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+                    dispatchWith(Event.ERROR, "URLLoader is loading, url:" + this.url);
                     return;
                 }
                 this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
@@ -6367,7 +6541,7 @@ var flower = {};
                         loader.load();
                     } else {
                         var params = {};
-                        params.r = Math.random();
+                        params.r = math.random();
                         for (var key in this._params) {
                             params[key] = this._params;
                         }
@@ -6435,7 +6609,7 @@ var flower = {};
             key: "loadText",
             value: function loadText() {
                 var params = {};
-                params.r = Math.random();
+                params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
@@ -6497,7 +6671,7 @@ var flower = {};
                         break;
                     }
                 }
-                this.dispatchWidth(Event.COMPLETE, this._data);
+                this.dispatchWith(Event.COMPLETE, this._data);
                 this._selfDispose = true;
                 this.dispose();
                 this._selfDispose = false;
@@ -6506,7 +6680,7 @@ var flower = {};
             key: "loadError",
             value: function loadError(e) {
                 if (this.hasListener(Event.ERROR)) {
-                    this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
+                    this.dispatchWith(Event.ERROR, getLanguage(2003, this._loadInfo.url));
                     if (this._links) {
                         for (var i = 0; i < this._links.length; i++) {
                             this._links[i].loadError();
@@ -6627,7 +6801,7 @@ var flower = {};
             key: "__loadNext",
             value: function __loadNext() {
                 if (this.__index >= this.__list.length) {
-                    this.dispatchWidth(flower.Event.COMPLETE, this.__dataList);
+                    this.dispatchWith(flower.Event.COMPLETE, this.__dataList);
                     this.__list = null;
                     this.__dataList = null;
                     this.dispose();
@@ -6719,7 +6893,7 @@ var flower = {};
             key: "onConnect",
             value: function onConnect() {
                 this._isConnect = true;
-                this.dispatchWidth(flower.Event.CONNECT);
+                this.dispatchWith(flower.Event.CONNECT);
             }
         }, {
             key: "onReceiveMessage",
@@ -6736,12 +6910,12 @@ var flower = {};
         }, {
             key: "onError",
             value: function onError() {
-                this.dispatchWidth(flower.Event.ERROR);
+                this.dispatchWith(flower.Event.ERROR);
             }
         }, {
             key: "onClose",
             value: function onClose() {
-                this.dispatchWidth(flower.Event.CLOSE);
+                this.dispatchWith(flower.Event.CLOSE);
             }
         }, {
             key: "close",
@@ -7252,8 +7426,8 @@ var flower = {};
                         } else if (attributes.list[i].value == "size") {
                             var size = attributes.list[i + 1].value;
                             size = size.slice(1, size.length - 1);
-                            //this.width = Math.floor(size.split(",")[0]);
-                            //this.height = Math.floor(size.split(",")[1]);
+                            //this.width = math.floor(size.split(",")[0]);
+                            //this.height = math.floor(size.split(",")[1]);
                         }
                         i++;
                     }
@@ -7307,7 +7481,7 @@ var flower = {};
             value: function loadComplete(plist) {
                 plist.texture.$delCount();
                 //var texture = plist.getFrameTexture(this.childName);
-                this.dispatchWidth(Event.COMPLETE, plist);
+                this.dispatchWith(Event.COMPLETE, plist);
             }
         }, {
             key: "dispose",
@@ -7577,7 +7751,7 @@ var flower = {};
                     if (!info) {
                         info = loadList[i];
                     } else if (scale != null) {
-                        if (loadList[i].scale != null && Math.abs(loadList[i].scale - scale) < Math.abs(info.scale - scale)) {
+                        if (loadList[i].scale != null && math.abs(loadList[i].scale - scale) < math.abs(info.scale - scale)) {
                             info = loadList[i];
                         }
                     }
@@ -7802,11 +7976,11 @@ var flower = {};
                 var target = tween.target;
                 this.centerX = target.width / 2;
                 this.centerY = target.height / 2;
-                this.centerLength = Math.sqrt(target.width * target.width + target.height * target.height) * .5;
-                this.rotationStart = Math.atan2(target.height, target.width) * 180 / Math.PI;
+                this.centerLength = math.sqrt(target.width * target.width + target.height * target.height) * .5;
+                this.rotationStart = math.atan2(target.height, target.width) * 180 / math.PI;
                 if (target.rotation) {
-                    this.lastMoveX = this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-                    this.lastMoveY = this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                    this.lastMoveX = this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+                    this.lastMoveY = this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
                 } else {
                     this.lastMoveX = 0;
                     this.lastMoveY = 0;
@@ -7858,8 +8032,8 @@ var flower = {};
                 }
                 if (this.rotationTo) {
                     target.rotation = this.rotationFrom + (this.rotationTo - this.rotationFrom) * value;
-                    moveX += this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-                    moveY += this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                    moveX += this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+                    moveY += this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
                     target.x += moveX - this.lastMoveX;
                     target.y += moveY - this.lastMoveY;
                 }
@@ -7931,7 +8105,7 @@ var flower = {};
                 this.pathSum = [];
                 this.pathSum.push(0);
                 for (var i = 1, len = path.length; i < len; i++) {
-                    this.pathSum[i] = this.pathSum[i - 1] + Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                    this.pathSum[i] = this.pathSum[i - 1] + math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
                 }
                 var sum = this.pathSum[len - 1];
                 for (i = 1; i < len; i++) {
@@ -7975,7 +8149,7 @@ var flower = {};
 
                 var sum = 0;
                 for (var i = 1, len = path.length; i < len; i++) {
-                    sum += Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                    sum += math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
                 }
                 var time = sum / v;
                 return flower.Tween.to(target, time, { "path": path }, ease);
@@ -8068,7 +8242,7 @@ var flower = {};
         }, {
             key: "freeFallToWithG",
             value: function freeFallToWithG(target, g, groundY) {
-                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g), { "y": groundY, "physicMove": true });
+                return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g), { "y": groundY, "physicMove": true });
             }
         }, {
             key: "fallTo",
@@ -8086,7 +8260,7 @@ var flower = {};
 
                 vX = +vX;
                 vY = +vY;
-                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g + vY * vY / (g * g)) - vY / g, {
+                return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g + vY * vY / (g * g)) - vY / g, {
                     "y": groundY,
                     "physicMove": true,
                     "vx": vX,
@@ -8235,25 +8409,25 @@ var flower = {};
         }, {
             key: "SineEaseIn",
             value: function SineEaseIn(t) {
-                return Math.sin((t - 1) * Math.PI * .5) + 1;
+                return math.sin((t - 1) * math.PI * .5) + 1;
             }
         }, {
             key: "SineEaseOut",
             value: function SineEaseOut(t) {
-                return Math.sin(t * Math.PI * .5);
+                return math.sin(t * math.PI * .5);
             }
         }, {
             key: "SineEaseInOut",
             value: function SineEaseInOut(t) {
-                return Math.sin((t - .5) * Math.PI) * .5 + .5;
+                return math.sin((t - .5) * math.PI) * .5 + .5;
             }
         }, {
             key: "SineEaseOutIn",
             value: function SineEaseOutIn(t) {
                 if (t < 0.5) {
-                    return Math.sin(t * Math.PI) * .5;
+                    return math.sin(t * math.PI) * .5;
                 }
-                return Math.sin((t - 1) * Math.PI) * .5 + 1;
+                return math.sin((t - 1) * math.PI) * .5 + 1;
             }
         }, {
             key: "QuadEaseIn",
@@ -8363,51 +8537,51 @@ var flower = {};
         }, {
             key: "ExpoEaseIn",
             value: function ExpoEaseIn(t) {
-                return Math.pow(2, 10 * (t - 1));
+                return math.pow(2, 10 * (t - 1));
             }
         }, {
             key: "ExpoEaseOut",
             value: function ExpoEaseOut(t) {
-                return -Math.pow(2, -10 * t) + 1;
+                return -math.pow(2, -10 * t) + 1;
             }
         }, {
             key: "ExpoEaseInOut",
             value: function ExpoEaseInOut(t) {
                 if (t < .5) {
-                    return Math.pow(2, 10 * (t * 2 - 1)) * .5;
+                    return math.pow(2, 10 * (t * 2 - 1)) * .5;
                 }
-                return -Math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
+                return -math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
             }
         }, {
             key: "ExpoEaseOutIn",
             value: function ExpoEaseOutIn(t) {
                 if (t < .5) {
-                    return -Math.pow(2, -20 * t) * .5 + .5;
+                    return -math.pow(2, -20 * t) * .5 + .5;
                 }
-                return Math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
+                return math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
             }
         }, {
             key: "CircEaseIn",
             value: function CircEaseIn(t) {
-                return 1 - Math.sqrt(1 - t * t);
+                return 1 - math.sqrt(1 - t * t);
             }
         }, {
             key: "CircEaseOut",
             value: function CircEaseOut(t) {
-                return Math.sqrt(1 - (1 - t) * (1 - t));
+                return math.sqrt(1 - (1 - t) * (1 - t));
             }
         }, {
             key: "CircEaseInOut",
             value: function CircEaseInOut(t) {
                 if (t < .5) {
-                    return .5 - Math.sqrt(.25 - t * t);
+                    return .5 - math.sqrt(.25 - t * t);
                 }
-                return Math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
+                return math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
             }
         }, {
             key: "CircEaseOutIn",
             value: function CircEaseOutIn(t) {
-                var s = Math.sqrt(.25 - (.5 - t) * (.5 - t));
+                var s = math.sqrt(.25 - (.5 - t) * (.5 - t));
                 if (t < .5) {
                     return s;
                 }
@@ -8446,31 +8620,31 @@ var flower = {};
             key: "ElasticEaseIn",
             value: function ElasticEaseIn(t) {
                 if (t == 0 || t == 1) return t;
-                return -(Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.075) * 2 * Math.PI / .3));
+                return -(math.pow(2, 10 * (t - 1)) * math.sin((t - 1.075) * 2 * math.PI / .3));
             }
         }, {
             key: "ElasticEaseOut",
             value: function ElasticEaseOut(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
-                return Math.pow(2, 10 * -t) * Math.sin((-t - .075) * 2 * Math.PI / .3) + 1;
+                return math.pow(2, 10 * -t) * math.sin((-t - .075) * 2 * math.PI / .3) + 1;
             }
         }, {
             key: "ElasticEaseInOut",
             value: function ElasticEaseInOut(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
                 if (t < .5) {
-                    return -(Math.pow(2, 10 * t - 10) * Math.sin((t * 2 - 2.15) * Math.PI / .3));
+                    return -(math.pow(2, 10 * t - 10) * math.sin((t * 2 - 2.15) * math.PI / .3));
                 }
-                return Math.pow(2, 10 - 20 * t) * Math.sin((-4 * t + 1.85) * Math.PI / .3) * .5 + 1;
+                return math.pow(2, 10 - 20 * t) * math.sin((-4 * t + 1.85) * math.PI / .3) * .5 + 1;
             }
         }, {
             key: "ElasticEaseOutIn",
             value: function ElasticEaseOutIn(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
                 if (t < .5) {
-                    return Math.pow(2, -20 * t) * Math.sin((-t * 4 - .15) * Math.PI / .3) * .5 + .5;
+                    return math.pow(2, -20 * t) * math.sin((-t * 4 - .15) * math.PI / .3) * .5 + .5;
                 }
-                return -(Math.pow(2, 20 * (t - 1)) * Math.sin((t * 4 - 4.15) * Math.PI / .3)) * .5 + .5;
+                return -(math.pow(2, 20 * (t - 1)) * math.sin((t * 4 - 4.15) * math.PI / .3)) * .5 + .5;
             }
         }, {
             key: "bounceEaseIn",
@@ -8568,7 +8742,7 @@ var flower = {};
                 var loopTime = 0;
                 if (this._currentTime >= totalTime) {
                     currentTime = this._currentTime % totalTime;
-                    loopTime = Math.floor(this._currentTime / totalTime);
+                    loopTime = math.floor(this._currentTime / totalTime);
                     if (!this._loop) {
                         this.$setPlaying(false);
                     }
@@ -8791,6 +8965,16 @@ var flower = {};
                 if (target && this._startEvent && this._startEvent != "") {
                     target.addListener(this._startEvent, this.startByEvent, this);
                 }
+            }
+        }, {
+            key: "play",
+            value: function play() {
+                this.timeLine.play();
+            }
+        }, {
+            key: "stop",
+            value: function stop() {
+                this.timeLine.stop();
             }
         }, {
             key: "startByEvent",
@@ -9217,7 +9401,7 @@ var flower = {};
                     }
                     str = "[\n";
                     for (var i = 0; i < obj.length; i++) {
-                        str += before + "\t" + flower.ObjectDo.toString(obj[i], maxDepth, before + "\t", depth + 1) + (i < obj.length - 1 ? ",\n" : "\n");
+                        str += before + " " + flower.ObjectDo.toString(obj[i], maxDepth, before + " ", depth + 1) + (i < obj.length - 1 ? ",\n" : "\n");
                     }
                     str += before + "]";
                 } else if (obj instanceof Object) {
@@ -9226,7 +9410,7 @@ var flower = {};
                     }
                     str = "{\n";
                     for (var key in obj) {
-                        str += before + "\t" + key + "\t: " + flower.ObjectDo.toString(obj[key], maxDepth, before + "\t", depth + 1);
+                        str += before + " \"" + key + "\": " + flower.ObjectDo.toString(obj[key], maxDepth, before + " ", depth + 1);
                         str += ",\n";
                     }
                     if (str.slice(str.length - 2, str.length) == ",\n") {
@@ -9576,20 +9760,69 @@ var flower = {};
                     if (num < 128) {
                         res.push(num);
                     } else if (num < 2048) {
-                        res.push(Math.floor(num / 64) + 128 + 64);
+                        res.push(math.floor(num / 64) + 128 + 64);
                         res.push(num % 64 + 128);
                     } else if (num < 65536) {
-                        res.push(Math.floor(num / 4096) + 128 + 64 + 32);
-                        res.push(Math.floor(num % 4096 / 64) + 128);
+                        res.push(math.floor(num / 4096) + 128 + 64 + 32);
+                        res.push(math.floor(num % 4096 / 64) + 128);
                         res.push(num % 64 + 128);
                     } else {
-                        res.push(Math.floor(num / 262144) + 128 + 64 + 32 + 16);
-                        res.push(Math.floor(num % 262144 / 4096) + 128);
-                        res.push(Math.floor(num % 4096 / 64) + 128);
+                        res.push(math.floor(num / 262144) + 128 + 64 + 32 + 16);
+                        res.push(math.floor(num % 262144 / 4096) + 128);
+                        res.push(math.floor(num % 4096 / 64) + 128);
                         res.push(num % 64 + 128);
                     }
                 }
                 return res;
+            }
+
+            /**
+             * 如果不是数字则返回 null
+             * @param value 字符串
+             */
+
+        }, {
+            key: "parseNumber",
+            value: function parseNumber(value) {
+                if (typeof value == "number") {
+                    return value;
+                }
+                if (typeof value != "string") {
+                    return null;
+                }
+                var code0 = "0".charCodeAt(0);
+                var code9 = "9".charCodeAt(0);
+                var codeP = ".".charCodeAt(0);
+                var isNumber;
+                var hasPoint = false;
+                var before = "";
+                var end = "";
+                var code;
+                var flag = true;
+                for (var p = 0; p < value.length; p++) {
+                    code = value.charCodeAt(p);
+                    if (hasPoint) {
+                        if (code >= code0 && code <= code9) {
+                            end += value.charAt(p);
+                        } else {
+                            flag = false;
+                            break;
+                        }
+                    } else {
+                        if (code == codeP) {
+                            hasPoint = true;
+                        } else if (code >= code0 && code <= code9) {
+                            before += value.charAt(p);
+                        } else {
+                            flag = false;
+                            break;
+                        }
+                    }
+                }
+                if (flag) {
+                    return parseInt(before) + (end != "" ? parseInt(end) / Math.pow(10, end.length) : 0);
+                }
+                return null;
             }
         }]);
 
@@ -9685,7 +9918,7 @@ var flower = {};
                     this.length++;
                 }
                 if (flag) {
-                    this.writeUInt(Math.floor(val2));
+                    this.writeUInt(math.floor(val2));
                 }
             }
         }, {
@@ -9760,10 +9993,10 @@ var flower = {};
             value: function readInt() {
                 var val = this.readUInt();
                 if (val % 2 == 1) {
-                    val = Math.floor(val / 2);
+                    val = math.floor(val / 2);
                     val = ~val;
                 } else {
-                    val = Math.floor(val / 2);
+                    val = math.floor(val / 2);
                 }
                 return val;
             }
@@ -9902,6 +10135,19 @@ var flower = {};
             value: function getName(url) {
                 var arr = url.split("/");
                 return arr[arr.length - 1];
+            }
+        }, {
+            key: "joinPath",
+            value: function joinPath(path1, path2) {
+                var path = path1;
+                if (path.charAt(path.length - 1) != "/") {
+                    path += "/";
+                }
+                if (path2.charAt(0) == "/") {
+                    path2 = path2.slice(1, path2.length);
+                }
+                path += path2;
+                return path;
             }
         }]);
 
@@ -10236,5 +10482,48 @@ var flower = {};
 
     flower.XMLNameSpace = XMLNameSpace;
     //////////////////////////End File:flower/utils/XMLNameSpace.js///////////////////////////
-})();
+
+    //////////////////////////File:flower/utils/Math.js///////////////////////////
+
+    var Math = function () {
+        function Math() {
+            _classCallCheck(this, Math);
+        }
+
+        _createClass(Math, null, [{
+            key: "timeToHMS",
+
+
+            /**
+             * 将时间(ms) 转换为 00:00:00 的格式
+             * @param time
+             */
+            value: function timeToHMS(time) {
+                var hour = math.floor(time / (1000 * 3600));
+                var minute = math.floor(time % (1000 * 3600) / (1000 * 60));
+                var second = math.floor(time % (1000 * 60) / 1000);
+                return (hour < 10 ? "0" + hour : hour) + ":" + (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second);
+            }
+
+            /**
+             * 将时间(ms) 转换为 00:00:00 的格式
+             * @param time
+             */
+
+        }, {
+            key: "timeToMSM",
+            value: function timeToMSM(time) {
+                var minute = math.floor(time % (1000 * 3600) / (1000 * 60));
+                var second = math.floor(time % (1000 * 60) / 1000);
+                var ms = math.floor(time % 1000 / 10);
+                return (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second) + ":" + (ms < 10 ? "0" + ms : ms);
+            }
+        }]);
+
+        return Math;
+    }();
+
+    flower.Math = Math;
+    //////////////////////////End File:flower/utils/Math.js///////////////////////////
+})(Math);
 var trace = flower.trace;

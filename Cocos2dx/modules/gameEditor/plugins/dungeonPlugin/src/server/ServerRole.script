@@ -1,0 +1,213 @@
+var ServerRole = (function () {
+
+    function ServerRole(settings, id, data, dungeonData, callObject, triggerRunning, serverPath) {
+        this.id = id;
+        this.data = data;
+        this.dungeonData = dungeonData;
+        this.callObject = callObject;
+        this.triggerRunning = triggerRunning;
+        this.serverPath = serverPath;
+
+        this.x = data.bornCoord.x.value;
+        this.y = data.bornCoord.y.value;
+        serverPath.addRoler(this, this.x, this.y);
+
+        this.moveGap = 750;
+
+        //移动相关信息
+        this.moveFlag = false;
+        this.moveX = 0;
+        this.moveY = 0;
+        this.movePath = null;
+        this.moveTime = 0;
+
+        //攻击相关信息
+        this.attackFlag = false;
+        this.attackAim = null;
+        this.attackAimX = 0;
+        this.attackAimY = 0;
+        this.attackPointX = 0;
+        this.attackPointY = 0;
+        this.attackPath = null;
+        this.attackRange = 1;
+        this.attackConstGap = 1000;
+        this.attackTime = 0;
+
+        this.hasDie = false;
+
+    }
+
+    ServerRole.prototype.update = function (dt) {
+        this.moveTime += dt;
+        this.attackTime += dt;
+        if (this.attackFlag) {
+            if (this.attackAim.hasDie) {
+                this.attackFlag = false;
+                return;
+            }
+            if (MapUtils.getDistance(this.x, this.y, this.attackAim.x, this.attackAim.y) <= this.attackRange) {
+                if (this.attackTime >= this.attackConstGap && this.moveTime >= this.moveGap) {
+                    this.attackTime = 0;
+                    this.hurtAttackAim();
+                }
+            } else {
+                var attackPointInfo;
+                var attackPoint;
+                if (!this.attackPath || this.attackAimX != this.attackAim.x || this.attackAimY != this.attackAim.y) {
+                    attackPointInfo = this.getAttackPoint(this.x, this.y, this.attackAim.x, this.attackAim.y, this.attackRange);
+                    this.attackAimX = this.attackAim.x;
+                    this.attackAimY = this.attackAim.y;
+                    this.attackPointX = attackPointInfo.attackPoint.x;
+                    this.attackPointY = attackPointInfo.attackPoint.y;
+                    this.attackPath = attackPointInfo.path;
+                }
+                if (this.moveTime > this.moveGap) {
+                    if (this.attackPath && this.attackPath.length) {
+                        point = this.attackPath[0];
+                        if (this.serverPath.canMove(point.x, point.y)) {
+                            this.attackPath.shift();
+                            this.moveTime = 0;
+                            this.serverPath.removeRoler(this, this.x, this.y);
+                            this.x = point.x;
+                            this.y = point.y;
+                            this.serverPath.addRoler(this, this.x, this.y);
+                            this.callObject.moveTo(this.id, this.x, this.y, this.moveGap);
+                        }
+                    }
+                }
+            }
+        } else if (this.moveFlag) {
+            if (!this.movePath || !this.movePath.length) {
+                this.movePath = this.serverPath.findPath(this.x, this.y, this.moveX, this.moveY);
+            }
+            if (this.movePath && this.movePath.length) {
+                if (this.moveTime > this.moveGap) {
+                    var point = this.movePath[0];
+                    if (!this.serverPath.canMove(point.x, point.y)) {
+                        this.movePath = this.serverPath.findPath(this.x, this.y, this.moveX, this.moveY);
+                    }
+                    if (this.movePath && this.movePath.length) {
+                        point = this.movePath[0];
+                        if (this.serverPath.canMove(point.x, point.y)) {
+                            this.movePath.shift();
+                            this.moveTime = 0;
+                            ;
+                            this.serverPath.removeRoler(this, this.x, this.y);
+                            this.x = point.x;
+                            this.y = point.y;
+                            this.serverPath.addRoler(this, this.x, this.y);
+                            if (this.x == this.moveX && this.y == this.moveY) {
+                                this.moveFlag = false;
+                            }
+                            this.callObject.moveTo(this.id, this.x, this.y, this.moveGap);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ServerRole.prototype.changeHp = function (hp) {
+        this.hp += hp;
+        if (this.hp <= 0) {
+            this.hp = 0;
+        }
+        this.callObject.roleChangeHp(this.id, this.hp);
+        if (this.hp == 0) {
+            this.hasDie = true;
+            this.callObject.roleDie(this.id);
+        }
+    }
+
+    ServerRole.prototype.hurtAttackAim = function () {
+        if (this.attackAim) {
+            console.log("发动攻击", this.id, this.attackValue, this.attackAim.id);
+            this.callObject.attackInfo(this.id, this.attackValue, this.attackAim.id);
+            this.attackAim.changeHp(-this.attackValue);
+            if (this.attackAim.hasDie) {
+                this.attackFlag = false;
+            }
+        }
+    }
+
+    /**
+     * 获取可以攻击的点
+     */
+    ServerRole.prototype.getAttackPoint = function (x, y, aimX, aimY, attackRange) {
+        var points = [];
+        attackRange = attackRange || 1;
+        for (var i = 1; i < attackRange + 1; i++) {
+            points = points.concat(MapUtils.getRoundPoints(aimX, aimY, i));
+        }
+        for (var i = 0; i < points.length; i++) {
+            points[i] = {
+                point: points[i],
+                distance: MapUtils.getDistance(x, y, points[i].x, points[i].y) + Math.abs(points[i].x - x) + Math.abs(points[i].y - y)
+            }
+        }
+        points.sort(function (a, b) {
+            return a.distance > b.distance ? true : false;
+        });
+        var nearPoint = points[0].point;
+        var attackPoint;
+        var path;
+        for (var i = 0; i < points.length; i++) {
+            if (this.serverPath.canMove(points[i].point.x, points[i].point.y)) {
+                attackPoint = points[i].point;
+                if (attackPoint.x == x && attackPoint.y == y) {
+                    path = [];
+                } else {
+                    path = this.serverPath.findPath(x, y, attackPoint.x, attackPoint.y);
+                    if (!path || !path.length) {
+                        path = null;
+                    }
+                }
+                if (!path) {
+                    attackPoint = null;
+                } else {
+                    break;
+                }
+            }
+        }
+        return {
+            nearPoint: nearPoint,
+            attackPoint: attackPoint,
+            path: path
+        }
+    }
+
+    /**
+     * 移动到哪里
+     * @param x
+     * @param y
+     */
+    ServerRole.prototype.moveTo = function (x, y) {
+        this.moveFlag = true;
+        this.attackFlag = false;
+        this.moveX = x;
+        this.moveY = y;
+        this.movePath = this.serverPath.findPath(this.x, this.y, x, y);
+    }
+
+    /**
+     * 攻击对象
+     * @param aim
+     */
+    ServerRole.prototype.attack = function (aim) {
+        this.moveFlag = false;
+        this.attackFlag = true;
+        this.attackAim = aim;
+        this.attackAimX = aim.x;
+        this.attackAimY = aim.y;
+        this.attackPath = null;
+    }
+
+    ServerRole.prototype.dispose = function () {
+        this.callObject.removeRole(this.id);
+    }
+
+    return ServerRole;
+})
+();
+
+module.ServerRole = ServerRole;

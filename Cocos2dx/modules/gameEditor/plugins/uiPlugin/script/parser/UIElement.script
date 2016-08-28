@@ -93,7 +93,7 @@ var UIElement = (function (_super) {
             }
             this.loadIndex = this.attributesElements.length + this.elements.length;
             if (!this.loadIndex) {
-                new flower.CallLater(this.dispatchWidth, this, [flower.Event.COMPLETE]);
+                new flower.CallLater(this.dispatchWith, this, [flower.Event.COMPLETE]);
             } else {
                 for (var i = 0; i < this.attributesElements.length; i++) {
                     this.attributesElements[i].load();
@@ -107,7 +107,7 @@ var UIElement = (function (_super) {
                 }
             }
         } else {
-            new flower.CallLater(this.dispatchWidth, this, [flower.Event.COMPLETE]);
+            new flower.CallLater(this.dispatchWith, this, [flower.Event.COMPLETE]);
         }
     }
 

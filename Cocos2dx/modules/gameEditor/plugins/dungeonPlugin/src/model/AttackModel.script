@@ -1,0 +1,39 @@
+var AttackModel = (function () {
+
+
+    /**
+     * 点击信息
+     * @param data mapData
+     * @constructor
+     */
+    function AttackModel(data) {
+        this.data = data;
+        this.data.attacks.addListener(flower.Event.ADDED, this.receiveNewAttack, this);
+    }
+
+    AttackModel.prototype.receiveNewAttack = function (e) {
+        var attack = e.data;
+        var attackRole;
+        var aimRole;
+        if (attack.role) {
+            this.data.getObject.id.value = attack.role.id.value;
+            this.data.getObject.count.value = this.data.getObject.count.value + 1;
+            attackRole = this.data.getObject.mapObject;
+        }
+        if (attack.aim) {
+            this.data.getObject.id.value = attack.aim.id.value;
+            this.data.getObject.count.value = this.data.getObject.count.value + 1;
+            aimRole = this.data.getObject.mapObject;
+        }
+        if (attackRole && aimRole) {
+            attack.lock = true;
+            attack.aim.hpLock = true;
+            attack.aim.lock = true;
+            attackRole.startAttack(attack, aimRole);
+        }
+    }
+
+    return AttackModel;
+})();
+
+module.AttackModel = AttackModel;

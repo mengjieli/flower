@@ -4,8 +4,13 @@
   "extends": "dg.MapRole",
   "init": {
     "camp": 1,
-    "showType":1201002
+    "showType": 1201002,
+    "selected": true
   },
   "members": {
+    "selected": {
+      "desc": "是否选择",
+      "type": "bool"
+    }
   }
 }

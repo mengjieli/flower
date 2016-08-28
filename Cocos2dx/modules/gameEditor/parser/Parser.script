@@ -8,7 +8,7 @@ var Parser = (function (_super) {
     }
 
     Parser.prototype.load = function () {
-        new flower.CallLater(this.dispatchWidth,this,[flower.Event.COMPLETE]);
+        new flower.CallLater(this.dispatchWith,this,[flower.Event.COMPLETE]);
     }
 
     return Parser;

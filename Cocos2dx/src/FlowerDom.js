@@ -2218,8 +2218,8 @@ var flower = {};
                 }
             }
         }, {
-            key: "dispatchWidth",
-            value: function dispatchWidth(type) {
+            key: "dispatchWith",
+            value: function dispatchWith(type) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
                 if (DEBUG) {
@@ -3756,10 +3756,10 @@ var flower = {};
                 }
                 if (this.__parent) {
                     this.$setParentFilters(this.__parent.$getAllFilters());
-                    this.dispatchWidth(Event.ADDED);
+                    this.dispatchWith(Event.ADDED);
                 } else {
                     this.$setParentFilters(null);
-                    this.dispatchWidth(Event.REMOVED);
+                    this.dispatchWith(Event.REMOVED);
                 }
             }
         }, {
@@ -3771,14 +3771,14 @@ var flower = {};
             key: "$dispatchAddedToStageEvent",
             value: function $dispatchAddedToStageEvent() {
                 if (this.__stage) {
-                    this.dispatchWidth(Event.ADDED_TO_STAGE);
+                    this.dispatchWith(Event.ADDED_TO_STAGE);
                 }
             }
         }, {
             key: "$dispatchRemovedFromStageEvent",
             value: function $dispatchRemovedFromStageEvent() {
                 if (!this.__stage) {
-                    this.dispatchWidth(Event.REMOVED_FROM_STAGE);
+                    this.dispatchWith(Event.REMOVED_FROM_STAGE);
                 }
             }
         }, {
@@ -5088,7 +5088,7 @@ var flower = {};
                     var p = this.$TextField;
                     this.$nativeShow.startInput();
                     p[4] = true;
-                    this.dispatchWidth(Event.START_INPUT);
+                    this.dispatchWith(Event.START_INPUT);
                 }
             }
         }, {
@@ -5108,7 +5108,7 @@ var flower = {};
                     this.$nativeShow.stopInput();
                 }
                 this.text = this.$nativeShow.getNativeText();
-                this.dispatchWidth(Event.STOP_INPUT);
+                this.dispatchWith(Event.STOP_INPUT);
             }
         }, {
             key: "$keyDown",
@@ -6398,7 +6398,7 @@ var flower = {};
                 this.__settingWidth = settingWidth;
                 this.__settingHeight = settingHeight;
                 if (this.dispatcher) {
-                    this.dispatcher.dispatchWidth(Event.UPDATE);
+                    this.dispatcher.dispatchWith(Event.UPDATE);
                 }
             }
         }, {
@@ -6701,7 +6701,7 @@ var flower = {};
                     this.$setResource(res);
                 }
                 if (this._isLoading) {
-                    dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+                    dispatchWith(Event.ERROR, "URLLoader is loading, url:" + this.url);
                     return;
                 }
                 this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
@@ -6876,7 +6876,7 @@ var flower = {};
                         break;
                     }
                 }
-                this.dispatchWidth(Event.COMPLETE, this._data);
+                this.dispatchWith(Event.COMPLETE, this._data);
                 this._selfDispose = true;
                 this.dispose();
                 this._selfDispose = false;
@@ -6885,7 +6885,7 @@ var flower = {};
             key: "loadError",
             value: function loadError(e) {
                 if (this.hasListener(Event.ERROR)) {
-                    this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
+                    this.dispatchWith(Event.ERROR, getLanguage(2003, this._loadInfo.url));
                     if (this._links) {
                         for (var i = 0; i < this._links.length; i++) {
                             this._links[i].loadError();
@@ -7006,7 +7006,7 @@ var flower = {};
             key: "__loadNext",
             value: function __loadNext() {
                 if (this.__index >= this.__list.length) {
-                    this.dispatchWidth(flower.Event.COMPLETE, this.__dataList);
+                    this.dispatchWith(flower.Event.COMPLETE, this.__dataList);
                     this.__list = null;
                     this.__dataList = null;
                     this.dispose();
@@ -7098,7 +7098,7 @@ var flower = {};
             key: "onConnect",
             value: function onConnect() {
                 this._isConnect = true;
-                this.dispatchWidth(flower.Event.CONNECT);
+                this.dispatchWith(flower.Event.CONNECT);
             }
         }, {
             key: "onReceiveMessage",
@@ -7115,12 +7115,12 @@ var flower = {};
         }, {
             key: "onError",
             value: function onError() {
-                this.dispatchWidth(flower.Event.ERROR);
+                this.dispatchWith(flower.Event.ERROR);
             }
         }, {
             key: "onClose",
             value: function onClose() {
-                this.dispatchWidth(flower.Event.CLOSE);
+                this.dispatchWith(flower.Event.CLOSE);
             }
         }, {
             key: "close",
@@ -7686,7 +7686,7 @@ var flower = {};
             value: function loadComplete(plist) {
                 plist.texture.$delCount();
                 //var texture = plist.getFrameTexture(this.childName);
-                this.dispatchWidth(Event.COMPLETE, plist);
+                this.dispatchWith(Event.COMPLETE, plist);
             }
         }, {
             key: "dispose",

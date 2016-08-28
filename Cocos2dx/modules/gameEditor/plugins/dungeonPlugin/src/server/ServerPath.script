@@ -1,0 +1,69 @@
+var ServerPath = (function () {
+
+    function ServerPath(dungeonData, monsters, armys) {
+        this.dungeonData = dungeonData;
+        this.monsters = monsters;
+        this.armys = armys;
+
+        this.astar = new AStarSix();
+        this.blocks = [];
+        this.width = MapUtils.blockWidth;
+        this.height = MapUtils.blockHeight;
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                this.blocks.push({
+                    path: 1,
+                    list: []
+                });
+            }
+        }
+        this.astar.setBlocks(this.blocks, MapUtils.blockWidth, MapUtils.blockHeight, 0, 0);
+    }
+
+    ServerPath.prototype.removeRoler = function (roler, x, y) {
+        var block = this.blocks[y * this.width + x];
+        var list = block.list;
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] == roler) {
+                block.path++;
+                list.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    ServerPath.prototype.addRoler = function (roler, x, y) {
+        var block = this.blocks[y * this.width + x];
+        var list = block.list;
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] == roler) {
+                return;
+            }
+        }
+        block.path--;
+        list.push(roler);
+    }
+
+    ServerPath.prototype.reset = function () {
+        for (var i = 0; i < this.blocks.length; i++) {
+            this.blocks[i] = {
+                path: 1,
+                list: []
+            }
+        }
+    }
+
+    ServerPath.prototype.canMove = function (x, y) {
+        return this.blocks[y * this.width + x].path == 1 ? true : false
+    }
+
+    ServerPath.prototype.findPath = function (startX, startY, endX, endY) {
+        return this.astar.findPath(startX, startY, endX, endY);
+    }
+
+
+    return ServerPath;
+})();
+
+
+module.ServerPath = ServerPath;

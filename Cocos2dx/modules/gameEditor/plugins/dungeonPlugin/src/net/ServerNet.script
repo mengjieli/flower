@@ -1,0 +1,19 @@
+var ServerNet = (function () {
+
+    function ServerNet(server) {
+        this.server = server;
+    }
+
+    ServerNet.prototype.moveTo = function (id, x, y) {
+        this.server.rolerMoveTo(id, x, y);
+    }
+
+    ServerNet.prototype.attack = function (id, otherId) {
+        this.server.attack(id, otherId);
+    }
+
+    return ServerNet;
+})();
+
+
+module.ServerNet = ServerNet;

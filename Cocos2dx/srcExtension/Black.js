@@ -586,8 +586,8 @@ class ArrayValue extends Value {
     push(item) {
         this.list.push(item);
         this._length = this._length + 1;
-        this.dispatchWidth(flower.Event.ADDED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     addItemAt(item, index) {
@@ -598,8 +598,8 @@ class ArrayValue extends Value {
         }
         this.list.splice(index, 0, item);
         this._length = this._length + 1;
-        this.dispatchWidth(flower.Event.ADDED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     shift() {
@@ -608,8 +608,8 @@ class ArrayValue extends Value {
         }
         var item = this.list.shift();
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -617,24 +617,28 @@ class ArrayValue extends Value {
         var i;
         startIndex = +startIndex & ~0;
         delCount = +delCount & ~0;
+        var list;
         if (delCount <= 0) {
+            list = [];
             for (i = 0; i < args.length; i++) {
+                list[i] = args[i];
                 this.list.splice(startIndex, 0, args[i]);
             }
             this._length = this._length + 1;
             for (i = 0; i < args.length; i++) {
-                this.dispatchWidth(flower.Event.ADDED, args[i]);
+                this.dispatchWith(flower.Event.ADDED, args[i]);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.UPDATE, this);
         }
         else {
-            var list = this.list.splice(startIndex, delCount);
+            list = this.list.splice(startIndex, delCount);
             this._length = this._length - delCount;
             for (i = 0; i < list.length; i++) {
-                this.dispatchWidth(flower.Event.REMOVED, list[i]);
+                this.dispatchWith(flower.Event.REMOVED, list[i]);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.UPDATE, this);
         }
+        return list;
     }
 
     slice(startIndex, end) {
@@ -649,8 +653,8 @@ class ArrayValue extends Value {
         }
         var item = this.list.pop();
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -661,9 +665,9 @@ class ArrayValue extends Value {
         while (this.list.length) {
             var item = this.list.pop();
             this._length = this._length - 1;
-            this.dispatchWidth(flower.Event.REMOVED, item);
+            this.dispatchWith(flower.Event.REMOVED, item);
         }
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     removeItem(item) {
@@ -671,8 +675,8 @@ class ArrayValue extends Value {
             if (this.list[i] == item) {
                 this.list.splice(i, 1);
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
             }
         }
@@ -687,8 +691,8 @@ class ArrayValue extends Value {
         }
         var item = this.list.splice(index, 1)[0];
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -698,7 +702,7 @@ class ArrayValue extends Value {
         if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
                 var val = this.list[i][key];
-                if(val instanceof Value) {
+                if (val instanceof Value && !(val instanceof flower.ObjectValue) && !(val instanceof flower.ArrayValue)) {
                     val = val.value;
                 }
                 if (val == value) {
@@ -710,11 +714,11 @@ class ArrayValue extends Value {
         else {
             for (i = 0; i < this.list.length; i++) {
                 var val1 = this.list[i][key];
-                if(val1 instanceof Value) {
+                if (val1 instanceof Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
                     val1 = val1.value;
                 }
                 var val2 = this.list[i][key2];
-                if(val2 instanceof Value) {
+                if (val2 instanceof Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
                     val2 = val2.value;
                 }
                 if (val == value && val2 == value2) {
@@ -727,8 +731,8 @@ class ArrayValue extends Value {
             return;
         }
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -741,18 +745,41 @@ class ArrayValue extends Value {
         return -1;
     }
 
-    getItemWith(key, value, key2 = null, value2 = null) {
+    getItemWith(key, value, key2 = "", value2 = null) {
         var i;
-        if (!key2) {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                if (val1 == value) {
                     return this.list[i];
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                keys = key2.split(".");
+                var val2 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val2 = val2[keys[k]];
+                }
+                if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                    val2 = val2.value;
+                }
+                if (val1 == value && val2 == value2) {
                     return this.list[i];
                 }
             }
@@ -775,16 +802,39 @@ class ArrayValue extends Value {
     getItemsWith(key, value, key2 = "", value2 = null) {
         var result = [];
         var i;
-        if (key2 != "") {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                if (val1 == value) {
                     result.push(this.list[i]);
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                keys = key2.split(".");
+                var val2 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val2 = val2[keys[k]];
+                }
+                if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                    val2 = val2.value;
+                }
+                if (val1 == value && val2 == value2) {
                     result.push(this.list[i]);
                 }
             }
@@ -794,9 +844,12 @@ class ArrayValue extends Value {
 
     setItemsAttributeWith(findKey, findValue, setKey = "", setValue = null) {
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i][findKey] == findValue) {
+            if (this.list[i][findKey] instanceof flower.Value && this.list[i][findKey].value == findValue) {
+                this.list[i][findKey].value = setValue
+            } else if (this.list[i][findKey] == findValue) {
                 this.list[i][setKey] = setValue;
             }
+
         }
     }
 
@@ -830,7 +883,7 @@ class ArrayValue extends Value {
             _arguments__ = arguments[argumentsLength];
         }
         this.list.sort.apply(this.list.sort, _arguments__);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     setItemIndex(item, index) {
@@ -840,7 +893,7 @@ class ArrayValue extends Value {
         }
         this.list.splice(itemIndex, 1);
         this.list.splice(index, 0, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     getItemAt(index) {
@@ -977,9 +1030,9 @@ class ArrayValue extends Value {
             while (this.list.length > val) {
                 var item = this.list.pop();
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVED, item);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.UPDATE, this);
         }
     }
 }
@@ -1029,7 +1082,7 @@ class BooleanValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.UPDATE, this, val);
     }
 
     $setEnumList(val) {
@@ -1069,7 +1122,7 @@ class IntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.UPDATE, this, val);
     }
 
     $setEnumList(val) {
@@ -1122,7 +1175,7 @@ class NumberValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.UPDATE, this, val);
     }
 
     $setEnumList(val) {
@@ -1176,7 +1229,7 @@ class ObjectValue extends Value {
     setMember(name, value) {
         var old = this.__value[name];
         this.__value[name] = value;
-        this.dispatchWidth(name, {
+        this.dispatchWith(name, {
             "name": name,
             "old": old,
             "value": value
@@ -1223,7 +1276,7 @@ class ObjectValue extends Value {
                     val.value = value;
                 } else {
                     this.__value[name] = value;
-                    this.dispatchWidth(name, {
+                    this.dispatchWith(name, {
                         "name": name,
                         "old": old,
                         "value": value
@@ -1338,7 +1391,7 @@ class StringValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.UPDATE, this, val);
     }
 
     $setEnumList(val) {
@@ -1385,7 +1438,7 @@ class UIntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.UPDATE, this, val);
     }
 
     $setEnumList(val) {
@@ -1558,7 +1611,11 @@ class DataManager {
                         content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                         content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     } else {
-                        content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                        if (member.hasOwnProperty("init") && member.init == null) {
+                            content += "\t\tthis.setMember(\"" + key + "\" , null);\n";
+                        } else {
+                            content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                        }
                         content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     }
                 }
@@ -2291,7 +2348,7 @@ class UIParser extends Group {
 
     loadContentError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
+            this.dispatchWith(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
         } else {
             sys.$error(3001, e.currentTarget.url);
         }
@@ -2371,10 +2428,10 @@ class UIParser extends Group {
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
                 var ui = this.parseUI(this.loadContent, this.loadData);
-                this.dispatchWidth(flower.Event.COMPLETE, ui);
+                this.dispatchWith(flower.Event.COMPLETE, ui);
             } else {
                 var data = this.parse(this.loadContent);
-                this.dispatchWidth(flower.Event.COMPLETE, data);
+                this.dispatchWith(flower.Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
@@ -2388,7 +2445,7 @@ class UIParser extends Group {
 
     relationLoadError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, e.data);
+            this.dispatchWith(flower.Event.ERROR, e.data);
         } else {
             $error(e.data);
         }
@@ -2520,7 +2577,7 @@ class UIParser extends Group {
         }
         content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
+        content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.UIEvent.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
@@ -5127,12 +5184,12 @@ class ViewStack extends Group {
             }
         }
         this._items.push(display);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.UPDATE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
         if (!find) {
-            this.dispatchWidth(flower.Event.ADDED, display);
+            this.dispatchWith(flower.Event.ADDED, display);
         }
     }
 
@@ -5146,12 +5203,12 @@ class ViewStack extends Group {
             }
         }
         this._items.splice(i, 0, display);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.UPDATE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
         if (!find) {
-            this.dispatchWidth(flower.Event.ADDED, display);
+            this.dispatchWith(flower.Event.ADDED, display);
         }
     }
 
@@ -5161,8 +5218,8 @@ class ViewStack extends Group {
                 this._items.splice(i, 1);
                 if (display == this._selectedItem) {
                     this._setSelectedIndex(0);
-                    this.dispatchWidth(flower.Event.UPDATE);
-                    this.dispatchWidth(flower.Event.REMOVED, display);
+                    this.dispatchWith(flower.Event.UPDATE);
+                    this.dispatchWith(flower.Event.REMOVED, display);
                 }
                 return display;
             }
@@ -5181,8 +5238,8 @@ class ViewStack extends Group {
             this._selectedItem = this._items[0];
             this._selectedIndex = 0;
             super.removeChild(display);
-            this.dispatchWidth(flower.Event.UPDATE);
-            this.dispatchWidth(flower.Event.REMOVED, display);
+            this.dispatchWith(flower.Event.UPDATE);
+            this.dispatchWith(flower.Event.REMOVED, display);
         } else {
             flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
         }
@@ -5205,7 +5262,7 @@ class ViewStack extends Group {
             if (this._items[i] == display) {
                 this._items.splice(i, 1);
                 this._items.splice(index, 0, display);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.UPDATE);
                 return display;
             }
         }
@@ -5214,7 +5271,7 @@ class ViewStack extends Group {
 
     sortChild(key, opt = 0) {
         super.sortChild(key, opt);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.UPDATE);
     }
 
     _setSelectedIndex(val) {
@@ -5229,8 +5286,8 @@ class ViewStack extends Group {
             this._selectedIndex = val;
             super.addChildAt(this._selectedItem, this.numChildren);
         }
-        this.dispatchWidth(flower.Event.CHANGE, this._selectedItem);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE, this._selectedItem);
+        this.dispatchWith(flower.Event.UPDATE);
     }
 
     get length() {
@@ -5258,7 +5315,7 @@ class ViewStack extends Group {
         if (this._selectedIndex != -1 && this._selectedIndex >= index) {
             this._selectedIndex++;
         }
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.UPDATE);
     }
 
     set selectedIndex(val) {
@@ -5949,7 +6006,7 @@ class Panel extends Group {
     }
 
     $onClose() {
-        this.dispatchWidth(flower.Event.CLOSE);
+        this.dispatchWith(flower.Event.CLOSE);
         this.closePanel();
     }
 
@@ -6082,12 +6139,12 @@ class Alert extends Panel {
     }
 
     $onConfirm(e) {
-        this.dispatchWidth(flower.Event.CONFIRM);
+        this.dispatchWith(flower.Event.CONFIRM);
         this.closePanel();
     }
 
     $onCancel(e) {
-        this.dispatchWidth(flower.Event.CANCEL);
+        this.dispatchWith(flower.Event.CANCEL);
         this.closePanel();
     }
 
@@ -6497,7 +6554,7 @@ class Module extends flower.EventDispatcher {
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;
         if (this.__index == this.__list.length) {
-            this.dispatchWidth(flower.Event.COMPLETE);
+            this.dispatchWith(flower.Event.COMPLETE);
             return;
         }
         item = this.__list[this.__index];

@@ -39,7 +39,7 @@ class Texture {
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
         if (this.dispatcher) {
-            this.dispatcher.dispatchWidth(Event.UPDATE);
+            this.dispatcher.dispatchWith(Event.UPDATE);
         }
     }
 

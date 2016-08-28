@@ -33,7 +33,7 @@ class WebSocket extends flower.EventDispatcher {
 
     onConnect() {
         this._isConnect = true;
-        this.dispatchWidth(flower.Event.CONNECT);
+        this.dispatchWith(flower.Event.CONNECT);
     }
 
     onReceiveMessage(type, data) {
@@ -48,11 +48,11 @@ class WebSocket extends flower.EventDispatcher {
     }
 
     onError() {
-        this.dispatchWidth(flower.Event.ERROR);
+        this.dispatchWith(flower.Event.ERROR);
     }
 
     onClose() {
-        this.dispatchWidth(flower.Event.CLOSE);
+        this.dispatchWith(flower.Event.CLOSE);
     }
 
     close() {

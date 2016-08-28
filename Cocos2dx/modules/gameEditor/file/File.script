@@ -55,9 +55,9 @@ var File = (function (_super) {
         this.isLoading = false;
         if (this.waitForOpen) {
             this.waitForOpen = false;
-            editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.VIEW_FILE, this);
+            editor.EventManager.instance.dispatchWith(editor.ModuleEvent.VIEW_FILE, this);
         }
-        this.dispatchWidth(flower.Event.COMPLETE);
+        this.dispatchWith(flower.Event.COMPLETE);
     }
 
     File.prototype.onLoadConfigError = function (e) {
@@ -83,7 +83,7 @@ var File = (function (_super) {
                 this.load();
             }
         } else {
-            editor.EventManager.instance.dispatchWidth(editor.ModuleEvent.VIEW_FILE, this);
+            editor.EventManager.instance.dispatchWith(editor.ModuleEvent.VIEW_FILE, this);
         }
     }
 

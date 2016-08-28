@@ -59,6 +59,10 @@
         {
           "label": "剧情对话",
           "type": 11
+        },
+        {
+          "label": "正式开始",
+          "type": 12
         }
       ]
     },
@@ -66,8 +70,8 @@
       "desc": "效果值",
       "type": "*",
       "saveClass": true,
-      "init":{
-        "__className":"dg.FlushMonsterEffect"
+      "init": {
+        "__className": "dg.FlushMonsterEffect"
       }
     },
     "hasPlay": {

@@ -1,5 +1,5 @@
 {
- "itemId": 77,
+ "itemId": 80,
  "screenWidth": 600,
  "screenHeight": 600,
  "triggers": [
@@ -16,7 +16,7 @@
      "type": 9,
      "effectValue": {
       "coord": {
-       "x": 100,
+       "x": 0,
        "y": 570
       },
       "time": 0,
@@ -52,8 +52,17 @@
      "type": 4,
      "effectValue": {
       "operate": 0,
-      "triggerId": 70,
+      "triggerId": 7000,
       "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 80,
+     "name": "效果80",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "__className": "dg.StartEffect"
      }
     }
    ]
@@ -92,6 +101,15 @@
       "time": 1000,
       "pos": 2,
       "__className": "dg.CameraMoveEffect"
+     }
+    },
+    {
+     "itemId": 79,
+     "name": "正式开始",
+     "delay": 4300,
+     "type": 12,
+     "effectValue": {
+      "__className": "dg.StartEffect"
      }
     }
    ]

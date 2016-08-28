@@ -371,10 +371,10 @@ class DisplayObject extends EventDispatcher {
         }
         if (this.__parent) {
             this.$setParentFilters(this.__parent.$getAllFilters());
-            this.dispatchWidth(Event.ADDED);
+            this.dispatchWith(Event.ADDED);
         } else {
             this.$setParentFilters(null);
-            this.dispatchWidth(Event.REMOVED);
+            this.dispatchWith(Event.REMOVED);
         }
     }
 
@@ -384,13 +384,13 @@ class DisplayObject extends EventDispatcher {
 
     $dispatchAddedToStageEvent() {
         if (this.__stage) {
-            this.dispatchWidth(Event.ADDED_TO_STAGE);
+            this.dispatchWith(Event.ADDED_TO_STAGE);
         }
     }
 
     $dispatchRemovedFromStageEvent() {
         if (!this.__stage) {
-            this.dispatchWidth(Event.REMOVED_FROM_STAGE);
+            this.dispatchWith(Event.REMOVED_FROM_STAGE);
         }
     }
 

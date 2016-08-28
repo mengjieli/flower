@@ -28,6 +28,20 @@
       "detail": "可以为 MapRole、...",
       "type": "Array",
       "typeValue": "*"
+    },
+    "start": {
+      "desc": "是否已经开始",
+      "type": "bool",
+      "save": false
+    },
+    "attacks": {
+      "desc": "攻击信息",
+      "type": "Array",
+      "typeValue": "dg.Attack"
+    },
+    "getObject": {
+      "desc": "对象获取器",
+      "type": "dg.GetMapObject"
     }
   }
 }

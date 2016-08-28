@@ -53,7 +53,7 @@ var PreLoading = function (_flower$EventDispatch) {
     }, {
         key: "dispose",
         value: function dispose() {
-            this.dispatchWidth(flower.Event.COMPLETE);
+            this.dispatchWith(flower.Event.COMPLETE);
             this.progress.dispose();
             this.progressBar.dispose();
             _get(Object.getPrototypeOf(PreLoading.prototype), "dispose", this).call(this);

@@ -45,7 +45,7 @@ var ConfigModel = (function (_super) {
             roler.id = id;
             array.push(roler);
         }
-        this.dispatchWidth(flower.Event.COMPLETE);
+        this.dispatchWith(flower.Event.COMPLETE);
     }
 
     ConfigModel.prototype.getConfig = function (configName) {

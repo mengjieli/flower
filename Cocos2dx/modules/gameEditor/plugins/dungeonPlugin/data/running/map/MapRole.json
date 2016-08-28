@@ -44,6 +44,27 @@
         }
       ]
     },
+    "hp": {
+      "desc": "hp",
+      "type": "int"
+    },
+    "maxHp": {
+      "desc": "maxHp",
+      "type": "int"
+    },
+    "hpPercent": {
+      "desc": "血量比例",
+      "type": "number",
+      "bind": "{hp/maxHp}"
+    },
+    "hpLock": {
+      "desc": "hp 是否被锁定，如果被锁定，真实的 hp 应该为 lockHp",
+      "type": "int"
+    },
+    "lockHp": {
+      "desc": "锁定时存储真实 hp 的值",
+      "type": "int"
+    },
     "coord": {
       "desc": "格子坐标",
       "type": "Point"
@@ -51,6 +72,25 @@
     "position": {
       "desc": "像素坐标",
       "type": "Point"
+    },
+    "path": {
+      "desc": "移动路径",
+      "type": "Array",
+      "typeValue": "*"
+    },
+    "realCoord": {
+      "desc": "实际服务端坐标，coord 根据 path 移动完后即是此坐标",
+      "type": "Point"
+    },
+    "die": {
+      "desc": "是否死亡",
+      "type": "bool",
+      "init": false
+    },
+    "lock": {
+      "desc": "是否锁定，锁定后不可以删除",
+      "type": "bool",
+      "init": false
     }
   }
 }

@@ -13,7 +13,7 @@ class ObjectValue extends Value {
     setMember(name, value) {
         var old = this.__value[name];
         this.__value[name] = value;
-        this.dispatchWidth(name, {
+        this.dispatchWith(name, {
             "name": name,
             "old": old,
             "value": value
@@ -60,7 +60,7 @@ class ObjectValue extends Value {
                     val.value = value;
                 } else {
                     this.__value[name] = value;
-                    this.dispatchWidth(name, {
+                    this.dispatchWith(name, {
                         "name": name,
                         "old": old,
                         "value": value

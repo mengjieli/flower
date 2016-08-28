@@ -2037,7 +2037,7 @@ class EventDispatcher {
         }
     }
 
-    dispatchWidth(type, data = null) {
+    dispatchWith(type, data = null) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
@@ -3373,10 +3373,10 @@ class DisplayObject extends EventDispatcher {
         }
         if (this.__parent) {
             this.$setParentFilters(this.__parent.$getAllFilters());
-            this.dispatchWidth(Event.ADDED);
+            this.dispatchWith(Event.ADDED);
         } else {
             this.$setParentFilters(null);
-            this.dispatchWidth(Event.REMOVED);
+            this.dispatchWith(Event.REMOVED);
         }
     }
 
@@ -3386,13 +3386,13 @@ class DisplayObject extends EventDispatcher {
 
     $dispatchAddedToStageEvent() {
         if (this.__stage) {
-            this.dispatchWidth(Event.ADDED_TO_STAGE);
+            this.dispatchWith(Event.ADDED_TO_STAGE);
         }
     }
 
     $dispatchRemovedFromStageEvent() {
         if (!this.__stage) {
-            this.dispatchWidth(Event.REMOVED_FROM_STAGE);
+            this.dispatchWith(Event.REMOVED_FROM_STAGE);
         }
     }
 
@@ -4580,7 +4580,7 @@ class TextInput extends DisplayObject {
             var p = this.$TextField;
             this.$nativeShow.startInput();
             p[4] = true;
-            this.dispatchWidth(Event.START_INPUT);
+            this.dispatchWith(Event.START_INPUT);
         }
     }
 
@@ -4598,7 +4598,7 @@ class TextInput extends DisplayObject {
             this.$nativeShow.stopInput();
         }
         this.text = this.$nativeShow.getNativeText();
-        this.dispatchWidth(Event.STOP_INPUT);
+        this.dispatchWith(Event.STOP_INPUT);
     }
 
     $keyDown(e) {
@@ -5809,7 +5809,7 @@ class Texture {
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
         if (this.dispatcher) {
-            this.dispatcher.dispatchWidth(Event.UPDATE);
+            this.dispatcher.dispatchWith(Event.UPDATE);
         }
     }
 
@@ -6114,7 +6114,7 @@ class URLLoader extends EventDispatcher {
             this.$setResource(res);
         }
         if (this._isLoading) {
-            dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+            dispatchWith(Event.ERROR, "URLLoader is loading, url:" + this.url);
             return;
         }
         this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
@@ -6282,7 +6282,7 @@ class URLLoader extends EventDispatcher {
                 break;
             }
         }
-        this.dispatchWidth(Event.COMPLETE, this._data);
+        this.dispatchWith(Event.COMPLETE, this._data);
         this._selfDispose = true;
         this.dispose();
         this._selfDispose = false;
@@ -6290,7 +6290,7 @@ class URLLoader extends EventDispatcher {
 
     loadError(e) {
         if (this.hasListener(Event.ERROR)) {
-            this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
+            this.dispatchWith(Event.ERROR, getLanguage(2003, this._loadInfo.url));
             if (this._links) {
                 for (var i = 0; i < this._links.length; i++) {
                     this._links[i].loadError();
@@ -6371,7 +6371,7 @@ class URLLoaderList extends EventDispatcher {
 
     __loadNext() {
         if (this.__index >= this.__list.length) {
-            this.dispatchWidth(flower.Event.COMPLETE, this.__dataList);
+            this.dispatchWith(flower.Event.COMPLETE, this.__dataList);
             this.__list = null;
             this.__dataList = null;
             this.dispose();
@@ -6455,7 +6455,7 @@ class WebSocket extends flower.EventDispatcher {
 
     onConnect() {
         this._isConnect = true;
-        this.dispatchWidth(flower.Event.CONNECT);
+        this.dispatchWith(flower.Event.CONNECT);
     }
 
     onReceiveMessage(type, data) {
@@ -6470,11 +6470,11 @@ class WebSocket extends flower.EventDispatcher {
     }
 
     onError() {
-        this.dispatchWidth(flower.Event.ERROR);
+        this.dispatchWith(flower.Event.ERROR);
     }
 
     onClose() {
-        this.dispatchWidth(flower.Event.CLOSE);
+        this.dispatchWith(flower.Event.CLOSE);
     }
 
     close() {
@@ -6989,7 +6989,7 @@ class PlistLoader extends EventDispatcher {
     loadComplete(plist) {
         plist.texture.$delCount();
         //var texture = plist.getFrameTexture(this.childName);
-        this.dispatchWidth(Event.COMPLETE, plist);
+        this.dispatchWith(Event.COMPLETE, plist);
     }
 
     dispose() {

@@ -26,8 +26,8 @@ class ArrayValue extends Value {
     push(item) {
         this.list.push(item);
         this._length = this._length + 1;
-        this.dispatchWidth(flower.Event.ADDED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     addItemAt(item, index) {
@@ -38,8 +38,8 @@ class ArrayValue extends Value {
         }
         this.list.splice(index, 0, item);
         this._length = this._length + 1;
-        this.dispatchWidth(flower.Event.ADDED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     shift() {
@@ -48,8 +48,8 @@ class ArrayValue extends Value {
         }
         var item = this.list.shift();
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -57,24 +57,28 @@ class ArrayValue extends Value {
         var i;
         startIndex = +startIndex & ~0;
         delCount = +delCount & ~0;
+        var list;
         if (delCount <= 0) {
+            list = [];
             for (i = 0; i < args.length; i++) {
+                list[i] = args[i];
                 this.list.splice(startIndex, 0, args[i]);
             }
             this._length = this._length + 1;
             for (i = 0; i < args.length; i++) {
-                this.dispatchWidth(flower.Event.ADDED, args[i]);
+                this.dispatchWith(flower.Event.ADDED, args[i]);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.UPDATE, this);
         }
         else {
-            var list = this.list.splice(startIndex, delCount);
+            list = this.list.splice(startIndex, delCount);
             this._length = this._length - delCount;
             for (i = 0; i < list.length; i++) {
-                this.dispatchWidth(flower.Event.REMOVED, list[i]);
+                this.dispatchWith(flower.Event.REMOVED, list[i]);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.UPDATE, this);
         }
+        return list;
     }
 
     slice(startIndex, end) {
@@ -89,8 +93,8 @@ class ArrayValue extends Value {
         }
         var item = this.list.pop();
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -101,9 +105,9 @@ class ArrayValue extends Value {
         while (this.list.length) {
             var item = this.list.pop();
             this._length = this._length - 1;
-            this.dispatchWidth(flower.Event.REMOVED, item);
+            this.dispatchWith(flower.Event.REMOVED, item);
         }
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     removeItem(item) {
@@ -111,8 +115,8 @@ class ArrayValue extends Value {
             if (this.list[i] == item) {
                 this.list.splice(i, 1);
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
             }
         }
@@ -127,8 +131,8 @@ class ArrayValue extends Value {
         }
         var item = this.list.splice(index, 1)[0];
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -138,7 +142,7 @@ class ArrayValue extends Value {
         if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
                 var val = this.list[i][key];
-                if(val instanceof Value) {
+                if (val instanceof Value && !(val instanceof flower.ObjectValue) && !(val instanceof flower.ArrayValue)) {
                     val = val.value;
                 }
                 if (val == value) {
@@ -150,11 +154,11 @@ class ArrayValue extends Value {
         else {
             for (i = 0; i < this.list.length; i++) {
                 var val1 = this.list[i][key];
-                if(val1 instanceof Value) {
+                if (val1 instanceof Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
                     val1 = val1.value;
                 }
                 var val2 = this.list[i][key2];
-                if(val2 instanceof Value) {
+                if (val2 instanceof Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
                     val2 = val2.value;
                 }
                 if (val == value && val2 == value2) {
@@ -167,8 +171,8 @@ class ArrayValue extends Value {
             return;
         }
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.UPDATE, this);
         return item;
     }
 
@@ -181,18 +185,41 @@ class ArrayValue extends Value {
         return -1;
     }
 
-    getItemWith(key, value, key2 = null, value2 = null) {
+    getItemWith(key, value, key2 = "", value2 = null) {
         var i;
-        if (!key2) {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                if (val1 == value) {
                     return this.list[i];
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                keys = key2.split(".");
+                var val2 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val2 = val2[keys[k]];
+                }
+                if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                    val2 = val2.value;
+                }
+                if (val1 == value && val2 == value2) {
                     return this.list[i];
                 }
             }
@@ -215,16 +242,39 @@ class ArrayValue extends Value {
     getItemsWith(key, value, key2 = "", value2 = null) {
         var result = [];
         var i;
-        if (key2 != "") {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                if (val1 == value) {
                     result.push(this.list[i]);
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                keys = key2.split(".");
+                var val2 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val2 = val2[keys[k]];
+                }
+                if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                    val2 = val2.value;
+                }
+                if (val1 == value && val2 == value2) {
                     result.push(this.list[i]);
                 }
             }
@@ -234,9 +284,12 @@ class ArrayValue extends Value {
 
     setItemsAttributeWith(findKey, findValue, setKey = "", setValue = null) {
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i][findKey] == findValue) {
+            if (this.list[i][findKey] instanceof flower.Value && this.list[i][findKey].value == findValue) {
+                this.list[i][findKey].value = setValue
+            } else if (this.list[i][findKey] == findValue) {
                 this.list[i][setKey] = setValue;
             }
+
         }
     }
 
@@ -270,7 +323,7 @@ class ArrayValue extends Value {
             _arguments__ = arguments[argumentsLength];
         }
         this.list.sort.apply(this.list.sort, _arguments__);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     setItemIndex(item, index) {
@@ -280,7 +333,7 @@ class ArrayValue extends Value {
         }
         this.list.splice(itemIndex, 1);
         this.list.splice(index, 0, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.UPDATE, this);
     }
 
     getItemAt(index) {
@@ -417,9 +470,9 @@ class ArrayValue extends Value {
             while (this.list.length > val) {
                 var item = this.list.pop();
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVED, item);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.UPDATE, this);
         }
     }
 }

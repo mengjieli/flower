@@ -4,17 +4,54 @@ var ChangeLayer = (function (_super) {
 
     function ChangeLayer() {
         _super.call(this);
-        this.itemRenderer = MapObject;
     }
 
     ChangeLayer.prototype.setData = function (val) {
-        _super.prototype.setData.call(this, val);
+        this.data = val;
         this.y = this.data.size.height.value;
-        this.dataProvider = this.data.objects;
+        this.list = new flower.ArrayValue();
+        var dataList = this.data.objects;
+        dataList.addListener(flower.Event.UPDATE, this.dataUpdate, this);
+        for (var i = 0; i < dataList.length; i++) {
+            this.list.push(new MapObject(dataList[i]));
+            this.addChild(this.list[this.list.length - 1]);
+        }
+    }
+
+    ChangeLayer.prototype.dataUpdate = function () {
+        var dataList = this.data.objects;
+        for (var i = 0; i < dataList.length; i++) {
+            if (this.list.getItemWith("data", dataList[i]) == null) {
+                this.list.push(new MapObject(dataList[i]));
+                this.addChild(this.list[this.list.length - 1]);
+            }
+        }
+        for (var i = 0; i < this.list.length; i++) {
+            if (dataList.getItemIndex(this.list[i].data) == -1) {
+                this.list.splice(i, 1)[0].dispose();
+            }
+        }
+    }
+
+    ChangeLayer.prototype.update = function (dt) {
+        var list = [];
+        for (var i = 0; i < this.numChildren; i++) {
+            var child = this.getChildAt(i);
+            list.push({child: child, y: child.y});
+        }
+        list.sort(function (a, b) {
+            return a.y > b.y ? true : false;
+        });
+        for (var i = 0; i < list.length; i++) {
+            var child = list[i].child;
+            if (this.getChildIndex(child) != i) {
+                this.setChildIndex(child, i);
+            }
+        }
     }
 
     return ChangeLayer;
 
-})(flower.DataGroup);
+})(flower.Sprite);
 
 module.ChangeLayer = ChangeLayer;

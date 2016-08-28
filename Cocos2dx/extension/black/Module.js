@@ -124,7 +124,7 @@ class Module extends flower.EventDispatcher {
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;
         if (this.__index == this.__list.length) {
-            this.dispatchWidth(flower.Event.COMPLETE);
+            this.dispatchWith(flower.Event.COMPLETE);
             return;
         }
         item = this.__list[this.__index];

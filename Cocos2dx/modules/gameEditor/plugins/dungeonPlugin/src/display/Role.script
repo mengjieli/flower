@@ -8,15 +8,20 @@ var Role = (function (_super) {
 
         this.width = 0;
 
-        var label = new flower.Label(data.type.value + "-" + data.tag.value);
+        var label = new flower.Label(data.type.value + "-" + data.tag.value + "-" + data.id.value);
         label.fontColor = 0xffffff;
         label.horizontalCenter = 0;
         label.y = 10;
         label.alpha = 0.75;
         this.addChild(label);
+        this.name = label;
 
         this.container = new flower.Sprite();
         this.addChild(this.container);
+
+        this.blood = new RoleBlood(data);
+        this.blood.y = -56;
+        this.addChild(this.blood);
 
 
         this.action = null;
@@ -25,6 +30,17 @@ var Role = (function (_super) {
 
         flower.Tween.to(this, 0.5, {alpha: 1}, null, {alpha: 0});
 
+        if (data.mapData.start.value == false) {
+            this.name.alpha = 0;
+            data.mapData.start.once(flower.Event.UPDATE, function (e) {
+                flower.Tween.to(this.name, 0.5, {alpha: 1});
+            }, this);
+        }
+
+        this.moveFlag = false;
+        this.data.path.addListener(flower.Event.UPDATE, this.onPathChange, this);
+        this.data.mapData.getObject.count.addListener(flower.Event.UPDATE, this.getObject, this);
+
         this.init();
     }
 
@@ -32,8 +48,122 @@ var Role = (function (_super) {
         this.playAction(Role.Action.STAND, Role.Dir.Right);
     }
 
-    Role.prototype.playAction = function (action, dir) {
-        if (action == this.action && dir == this.dir) {
+    Role.prototype.getObject = function (e) {
+        if (this.data.mapData.getObject.id.value == this.data.id.value) {
+            this.data.mapData.getObject.mapObject = this;
+        }
+    }
+
+    Role.prototype.startAttack = function (attack, aimObject) {
+        this.playAction(Role.Action.ATTACK, attack.aim ? MapUtils.getDirection(attack.role.position.x.value, attack.role.position.y.value, attack.aim.position.x.value, attack.aim.position.y.value) : this.dir, 1);
+        if (aimObject) {
+            setTimeout(function () {
+                aimObject.beAttack(attack, this);
+            }.bind(this), 500);
+        } else {
+            attack.lock.value = false;
+        }
+    }
+
+    Role.prototype.beAttack = function (attack, attackObject) {
+        if (this.data.hp.value < attack.hp.value) {
+            this.data.hp.value = 0;
+        } else {
+            this.data.hp.value -= attack.hp.value;
+        }
+        this.data.hpLock = false;
+        if (this.data.die.value) {
+            this.die();
+        }
+    }
+
+    Role.prototype.die = function () {
+        this.data.lock.value = true;
+        flower.Tween.to(this, 0.5, {alpha: 0}).call(function () {
+            this.data.lock.value = false;
+            this.data.mapData.objects.removeItem(this.data);
+        }.bind(this));
+    }
+
+    /**
+     * 路径改变
+     */
+    Role.prototype.onPathChange = function () {
+        if (this.data.path.length && !this.moveFlag) {
+            this.moveFlag = true;
+            var point = this.data.path.shift();
+            var position = MapUtils.transPointToPosition(point.x, point.y);
+            this.playAction(Role.Action.RUN, this.getNetDir(this.data.coord.x.value, this.data.coord.y.value, point.x, point.y));
+            this.moveTween = flower.Tween.to(this.data.position, point.time / 1000, {
+                x: position.x,
+                y: position.y
+            }, null, {
+                x: this.data.position.x.value,
+                y: this.data.position.y.value
+            }).call(this.onMoveComplete, this, point.x, point.y);
+        }
+    }
+
+    Role.prototype.getNetDir = function (x, y, nextX, nextY) {
+        var dir = "";
+        if (nextY == y) {
+            if (nextX == x + 1) {
+                dir = Role.Dir.Right;
+            } else if (nextX == x - 1) {
+                dir = Role.Dir.Left;
+            }
+        } else {
+            if (y % 2 == 0) {
+                if (nextX == x) {
+                    if (nextY == y + 1) {
+                        dir = Role.Dir.RightUp;
+                    } else if (nextY == y - 1) {
+                        dir = Role.Dir.RightDown
+                    }
+                } else {
+                    if (nextY == y + 1) {
+                        dir = Role.Dir.LeftUp;
+                    } else if (nextY == y - 1) {
+                        dir = Role.Dir.LeftDown
+                    }
+                }
+            } else {
+                if (nextX == x) {
+                    if (nextY == y + 1) {
+                        dir = Role.Dir.LeftUp;
+                    } else if (nextY == y - 1) {
+                        dir = Role.Dir.LeftDown
+                    }
+                } else {
+                    if (nextY == y + 1) {
+                        dir = Role.Dir.RightUp;
+                    } else if (nextY == y - 1) {
+                        dir = Role.Dir.RightDown
+                    }
+                }
+            }
+        }
+        return dir;
+    }
+
+    Role.prototype.onMoveComplete = function (x, y) {
+        this.moveFlag = false;
+        this.data.coord.x.value = x;
+        this.data.coord.y.value = y;
+        if (this.data.path.length && !this.moveFlag) {
+            this.onPathChange();
+        } else {
+            if (this.action == Role.Action.RUN) {
+                this.playAction(Role.Action.STAND);
+            }
+        }
+    }
+
+    Role.prototype.playAction = function (action, dir, count) {
+        action = action || this.action;
+        count = count || 1000000000;
+        dir = dir || this.dir;
+        if (action == this.action && dir == this.dir && action != Role.Action.ATTACK) {
             return;
         }
         if (this.show) {
@@ -47,9 +177,17 @@ var Role = (function (_super) {
         config.url = "res/tools/dungeon/res/role/";
         config.x = -100;
         config.y = -100;
+        config.save = true;
+        config.saveId = this.data.showType.value;
         this.show = new Animation(config);
+        this.show.play(count);
+        this.show.once(flower.Event.COMPLETE, this.playActionComplete, this);
         this.show.scaleX = Role.ShowScaleX[dir];
         this.container.addChild(this.show);
+    }
+
+    Role.prototype.playActionComplete = function (e) {
+        this.playAction(Role.Action.STAND);
     }
 
     Role.Action = {
@@ -87,6 +225,6 @@ var Role = (function (_super) {
     }
 
     return Role;
-})(flower.ItemRenderer);
+})(flower.Group);
 
 module.Role = Role;

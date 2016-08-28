@@ -134,7 +134,7 @@ class PlistLoader extends EventDispatcher {
     loadComplete(plist) {
         plist.texture.$delCount();
         //var texture = plist.getFrameTexture(this.childName);
-        this.dispatchWidth(Event.COMPLETE, plist);
+        this.dispatchWith(Event.COMPLETE, plist);
     }
 
     dispose() {

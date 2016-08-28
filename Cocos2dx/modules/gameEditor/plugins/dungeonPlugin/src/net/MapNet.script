@@ -31,6 +31,10 @@ var MapNet = (function () {
         });
     }
 
+    MapNet.prototype.startGame = function () {
+        this.data.start.value = true;
+    }
+
     MapNet.prototype.stop = function () {
         this.data.camera.viewport.value = {
             x: 0,
@@ -38,6 +42,8 @@ var MapNet = (function () {
             width: this.data.size.width.value,
             height: this.data.size.height.value
         };
+        this.data.objects.removeAll();
+        this.data.start.value = false;
     }
 
     /**
@@ -47,8 +53,8 @@ var MapNet = (function () {
      * @param x
      * @param y
      */
-    MapNet.prototype.addMonster = function (id, type, tag, x, y) {
-        this.data.objects.push(flower.DataManager.createData("dg.MapMonster", {
+    MapNet.prototype.addMonster = function (id, type, tag, x, y, hp, maxHp) {
+        var data = flower.DataManager.createData("dg.MapMonster", {
             id: id,
             type: type,
             tag: tag,
@@ -56,15 +62,19 @@ var MapNet = (function () {
                 x: x,
                 y: y
             },
+            hp: hp,
+            maxHp: maxHp,
             position: {
                 x: MapUtils.transPointToPosition(x, y).x,
                 y: MapUtils.transPointToPosition(x, y).y,
             }
-        }));
+        });
+        data.mapData = this.data;
+        this.data.objects.push(data);
     }
 
-    MapNet.prototype.addArmy = function (id, type, tag, x, y) {
-        this.data.objects.push(flower.DataManager.createData("dg.MapArmy", {
+    MapNet.prototype.addArmy = function (id, type, tag, x, y, hp, maxHp) {
+        var data = flower.DataManager.createData("dg.MapArmy", {
             id: id,
             type: type,
             tag: tag,
@@ -72,15 +82,75 @@ var MapNet = (function () {
                 x: x,
                 y: y
             },
+            hp: hp,
+            maxHp: maxHp,
             position: {
                 x: MapUtils.transPointToPosition(x, y).x,
                 y: MapUtils.transPointToPosition(x, y).y,
             }
-        }));
+        });
+        data.mapData = this.data;
+        this.data.objects.push(data);
     }
 
     MapNet.prototype.removeRole = function (id) {
         this.data.objects.removeItemWith("id", id);
+    }
+
+    /**
+     * 对象移动到
+     * @param id
+     * @param x
+     * @param y
+     */
+    MapNet.prototype.moveTo = function (id, x, y, time) {
+        var army = this.data.objects.getItemWith("id", id);
+        army.realCoord.x.value = x;
+        army.realCoord.y.value = y;
+        army.path.push({x: x, y: y, time: time});
+    }
+
+    /**
+     * 收到攻击信息
+     */
+    MapNet.prototype.attackInfo = function (id, hp, aimId) {
+        var role = this.data.objects.getItemWith("id", id);
+        var aim = this.data.objects.getItemWith("id", aimId);
+        var attack = flower.DataManager.createData("dg.Attack", {
+            role: role,
+            aim: aim,
+            hp: hp
+        });
+        this.data.attacks.push(attack);
+        if (!attack.lock.value) {
+            this.data.attacks.removeItem(attack);
+        }
+    }
+
+    /**
+     * 更新角色血量
+     * @param id
+     * @param hp
+     */
+    MapNet.prototype.roleChangeHp = function (id, hp) {
+        var army = this.data.objects.getItemWith("id", id);
+        if (army.hpLock.value) {
+            army.lockHp.value = hp;
+        } else {
+            army.hp.value = hp;
+        }
+    }
+
+    /**
+     * 角色死亡
+     * @param id
+     */
+    MapNet.prototype.roleDie = function (id) {
+        var army = this.data.objects.getItemWith("id", id);
+        army.die.value = true;
+        if (!army.lock.value) {
+            this.data.objects.removeItem(army);
+        }
     }
 
     return MapNet;

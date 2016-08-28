@@ -35,7 +35,7 @@ var DungeonParser = (function (_super) {
     DungeonParser.prototype.loadConfig = function () {
         var model = ConfigModel.getInstance();
         model.once(flower.Event.COMPLETE, function (e) {
-            this.dispatchWidth(flower.Event.COMPLETE);
+            this.dispatchWith(flower.Event.COMPLETE);
         }, this);
         model.load();
     }

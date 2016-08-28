@@ -8,6 +8,8 @@ var Army = (function (_super) {
 
     Army.prototype.init = function () {
         this.playAction(Role.Action.STAND, Role.Dir.Right);
+        this.name.bindProperty("text", "{data.selected?'已选择':''}", [this]);
+        this.name.bindProperty("fontColor", "{data.selected?0x88ff88:0xffffff}", [this]);
     }
 
     return Army;

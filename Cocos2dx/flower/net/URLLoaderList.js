@@ -27,7 +27,7 @@ class URLLoaderList extends EventDispatcher {
 
     __loadNext() {
         if (this.__index >= this.__list.length) {
-            this.dispatchWidth(flower.Event.COMPLETE, this.__dataList);
+            this.dispatchWith(flower.Event.COMPLETE, this.__dataList);
             this.__list = null;
             this.__dataList = null;
             this.dispose();

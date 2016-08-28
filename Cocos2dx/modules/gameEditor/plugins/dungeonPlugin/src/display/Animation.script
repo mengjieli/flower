@@ -2,6 +2,8 @@ var Animation = (function (_super) {
 
     __extends(Animation, _super);
 
+    var imageSave = {};
+
     /**
      * 动画配置文件
      * @param data
@@ -31,10 +33,24 @@ var Animation = (function (_super) {
         this.__length = data.end - data.start + 1;
         this.__frameTime = 1000 / data.frameRate;
         this.__frames = [];
+        this.__framesURL = [];
+        this.__save = data.save || false;
+        this.__saveId = data.saveId || 0;
+        if (this.__save) {
+            if (!imageSave[this.__saveId]) {
+                imageSave[this.__saveId] = {};
+            }
+        }
         for (var i = data.start; i <= data.end; i++) {
             var name = data.name.slice(0, data.name.length - (i + "").length) + (i + "");
             name = data.url + name + "." + (data.format || "png");
-            var image = new flower.Image(name);
+            var image;
+            if (this.__save && imageSave[this.__saveId][name] && imageSave[this.__saveId][name].length) {
+                image = imageSave[this.__saveId][name].pop();
+            } else {
+                image = new flower.Image(name);
+            }
+            this.__framesURL.push(name);
             this.__frames.push(image);
         }
         this.__frame = 0;
@@ -68,6 +84,12 @@ var Animation = (function (_super) {
         if (this.__frame >= this.__length) {
             if (this.__loop) {
                 this.__loop--;
+                if (!this.__loop) {
+                    this.dispatchWith(flower.Event.COMPLETE);
+                    if (this.isDispose) {
+                        return;
+                    }
+                }
                 if (!this.__loop && this.__loopDispose) {
                     this.dispose();
                     return;
@@ -87,12 +109,30 @@ var Animation = (function (_super) {
     }
 
     Animation.prototype.dispose = function () {
-        while (this.__frames.length) {
-            this.__frames.pop().dispose();
-        }
         this.stop();
+        if (this.__save) {
+            for (var i = 0; i < this.__frames.length; i++) {
+                if (!imageSave[this.__saveId][this.__framesURL[i]]) {
+                    imageSave[this.__saveId][this.__framesURL[i]] = [];
+                }
+                var list = imageSave[this.__saveId][this.__framesURL[i]];
+                if (list.length < Animation.maxSave) {
+                    list.push(this.__frames[i]);
+                    if (this.__frames[i].parent) this.__frames[i].parent.removeChild(this.__frames[i]);
+                } else {
+                    this.__frames[i].dispose();
+                }
+            }
+            this.__frames.length = 0;
+        } else {
+            while (this.__frames.length) {
+                this.__frames.pop().dispose();
+            }
+        }
         _super.prototype.dispose.call(this);
     }
+
+    Animation.maxSave = 80;
 
     return Animation;
 })(flower.Sprite);

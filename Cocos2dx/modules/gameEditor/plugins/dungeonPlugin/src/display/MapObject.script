@@ -9,9 +9,12 @@ var MapObject = (function (_super) {
         this.x = data.position.x.value;
         this.y = -data.position.y.value;
 
-        var coordX = data.coord.x.value;
-        var coordY = data.coord.y.value;
-
+        data.position.x.addListener(flower.Event.UPDATE, function () {
+            this.x = data.position.x.value;
+        }, this);
+        data.position.y.addListener(flower.Event.UPDATE, function () {
+            this.y = -data.position.y.value;
+        }, this);
 
         switch (data.mapType.value) {
             case 1:
