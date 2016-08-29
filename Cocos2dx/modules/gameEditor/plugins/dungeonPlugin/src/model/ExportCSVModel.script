@@ -28,21 +28,21 @@ var ExportCSVModel = (function () {
             var trigger = triggers[i];
             var start = trigger.startValue;
             content += trigger.itemId + ",name," + trigger.startCondition + "," + trigger.delay + ",\"";
-            if (trigger.type == 1) { //进入副本开启
+            if (trigger.startCondition == 1) { //进入副本开启
                 content += "";
-            } else if (trigger.type == 2) { //移动触发
+            } else if (trigger.startCondition == 2) { //移动触发
                 content += "[" + start.armyType;
                 for (var p = 0; p < start.points.length; p++) {
                     content += ",[" + start.points[p].x + "," + start.points[p].y + "]";
                 }
                 content += "]";
-            } else if (trigger.type == 3) { //hp触发
+            } else if (trigger.startCondition == 3) { //hp触发
                 content += "[" + start.tag + "," + start.hp + "]";
-            } else if (trigger.type == 4) { //通关触发
+            } else if (trigger.startCondition == 4) { //通关触发
                 content += "[" + start.type + "," + start.param + "]";
-            } else if (trigger.type == 5) { //触发器触发
-                content += ",";
-            } else if (trigger.type == 6) { //全队灭亡
+            } else if (trigger.startCondition == 5) { //触发器触发
+                content += "";
+            } else if (trigger.startCondition == 6) { //全队灭亡
                 content += "[" + start.type + "]";
             }
             content += "\",";
@@ -90,7 +90,7 @@ var ExportCSVModel = (function () {
             content += type + "," + "\"" + param + "\"\n";
         }
         if (window) {
-            var url = "res/tools/dungeon/res/save/" + Math.floor(Math.random() * 10000000) + ".txt";
+            var url = "res/tools/dungeon/res/save/" + (new Date()).getTime() + ".txt";
             (new flower.File(url)).saveText(content, function () {
                 window.open(flower.RemoteServer.getInstance().httpURL + url);                 //在另外新建窗口中打开窗口
             });
