@@ -7,6 +7,8 @@ var UILayer = (function (_super) {
         this.serverNet = serverNet;
         this.taskList = new TaskList();
         this.addChild(this.taskList);
+        this.dialog = new DialogUI(serverNet);
+        this.addChild(this.dialog);
         this.percentWith = 100;
         this.percenHeight = 100;
     }
@@ -14,44 +16,7 @@ var UILayer = (function (_super) {
     UILayer.prototype.setData = function (val) {
         _super.prototype.setData.call(this, val);
         this.taskList.data = this.data;
-        this.data.dialog.addListener(flower.Event.UPDATE, this.updateDialog, this);
-    }
-
-    UILayer.prototype.updateDialog = function (e) {
-        if(this.data.dialog.value == 0) {
-            return;
-        }
-        this.dialog = new flower.Group();
-        this.dialog.percentWidth = this.dialog.percentHeight = 100;
-        this.addChild(this.dialog);
-
-        var dialog = this.data.dialog.id;
-        var rect = new flower.Rect();
-        rect.percentWidth = rect.percentHeight = 100;
-        rect.fillAlpha = 0.01;
-        rect.fillColor = 0;
-        this.dialog.addChild(rect);
-
-        rect = new flower.Rect();
-        rect.percentWidth = 100;
-        rect.height = 100;
-        rect.fillAlpha = 0.5;
-        rect.fillColor = 0;
-        this.dialog.addChild(rect);
-        rect.bottom = 0;
-
-        var label = new flower.Label("剧情:" + this.data.dialog.value + " (点击关闭)");
-        label.x = 10;
-        label.fontColor = 0xaaaaaa;
-        label.bottom = 80;
-        this.dialog.addChild(label);
-
-        flower.Tween.to(this.dialog, 0.5, {y: 0}, flower.Ease.CUBIC_EASE_OUT, {y: 100}).call(function () {
-            this.dialog.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
-                this.dialog.dispose();
-                this.serverNet.completeDialog(this.data.dialog.value);
-            }, this);
-        }.bind(this));
+        this.dialog.data = this.data;
     }
 
     return UILayer;

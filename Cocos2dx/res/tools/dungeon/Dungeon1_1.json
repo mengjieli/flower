@@ -1,1 +1,17 @@
-{"itemId":1,"screenWidth":480,"screenHeight":320,"triggers":[],"settings":{"background":"null","showGrid":true,"bornX":0,"bornY":9,"myHp":5000,"myAttack":200,"monsterHp":500,"monsterAttack":50}}
+{
+ "itemId": 1,
+ "screenWidth": 480,
+ "screenHeight": 320,
+ "triggers": [
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "showGrid": true,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

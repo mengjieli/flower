@@ -126,6 +126,9 @@ var Server = (function () {
     }
 
     Server.prototype.gameOver = function (flag) {
+        if (this.gameOverFlag) {
+            return;
+        }
         this.gameOverFlag = true;
         if (flag) {
             var triggers = this.data.triggers;

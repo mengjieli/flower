@@ -23,6 +23,7 @@
     "./src/display/Monster.script",
     "./src/display/RoleBlood.script",
     "./src/ui/TaskList.script",
+    "./src/ui/DialogUI.script",
     "./src/server/Server.script",
     "./src/server/Trigger.script",
     "./src/server/ServerRole.script",

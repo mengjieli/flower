@@ -176,6 +176,21 @@ var remote = {};
                 this.__showConnectPanel();
             }
         }, {
+            key: "severIp",
+            get: function get() {
+                return this.__config.server;
+            }
+        }, {
+            key: "severPort",
+            get: function get() {
+                return this.__config.port;
+            }
+        }, {
+            key: "httpURL",
+            get: function get() {
+                return "http://" + this.__client.ip + ":" + this.__client.httpServerPort + "/";
+            }
+        }, {
             key: "remoteClientId",
             get: function get() {
                 return this.__client.id;

@@ -216,6 +216,18 @@ class RemoteServer extends flower.VBWebSocket {
         this.__showConnectPanel();
     }
 
+    get severIp() {
+        return this.__config.server;
+    }
+
+    get severPort() {
+        return this.__config.port;
+    }
+
+    get httpURL() {
+        return "http://" + this.__client.ip + ":" + this.__client.httpServerPort + "/";
+    }
+
     get remoteClientId() {
         return this.__client.id;
     }

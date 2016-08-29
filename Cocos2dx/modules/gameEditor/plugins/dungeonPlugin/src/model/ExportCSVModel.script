@@ -27,29 +27,75 @@ var ExportCSVModel = (function () {
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
             var start = trigger.startValue;
-            content += trigger.itemId + ",name," + trigger.startCondition + "," + trigger.delay + ",";
-            if (trigger.type == 1) {
-                content += ",";
-            } else if (trigger.type == 2) {
+            content += trigger.itemId + ",name," + trigger.startCondition + "," + trigger.delay + ",\"";
+            if (trigger.type == 1) { //进入副本开启
+                content += "";
+            } else if (trigger.type == 2) { //移动触发
                 content += "[" + start.armyType;
                 for (var p = 0; p < start.points.length; p++) {
                     content += ",[" + start.points[p].x + "," + start.points[p].y + "]";
                 }
-                content += "],";
-            } else if (trigger.type == 3) {
-                content += "[" + start.tag + "," + start.hp + "],";
-            } else if (trigger.type == 4) {
-                content += "[" + start.type + "," + start.param + "],";
-            } else if (trigger.type == 5) {
+                content += "]";
+            } else if (trigger.type == 3) { //hp触发
+                content += "[" + start.tag + "," + start.hp + "]";
+            } else if (trigger.type == 4) { //通关触发
+                content += "[" + start.type + "," + start.param + "]";
+            } else if (trigger.type == 5) { //触发器触发
                 content += ",";
+            } else if (trigger.type == 6) { //全队灭亡
+                content += "[" + start.type + "]";
             }
-            var type = "";
-            var param = "";
+            content += "\",";
+            var type = "\"[";
+            var param = "[";
             for (var p = 0; p < trigger.effects.length; p++) {
                 var effect = trigger.effects[p];
-
+                var val = effect.effectValue;
+                type += effect.type + (p < trigger.effects.length - 1 ? "," : "");
+                if (effect.type == 1) { //刷怪 [[[2603101,[7,9],[8,10],50],[2603102,[10,10],[9,8],51]]]
+                    param += "[";
+                    //[[2603101,[7,9],[8,10],50]
+                    for (var m = 0; m < val.monsters.length; m++) {
+                        var monster = val.monsters[m];
+                        param += "[" + monster.id + ",";
+                        param += "[" + monster.bornCoord.x + "," + monster.bornCoord.y + "],";
+                        param += "[" + monster.moveCoord.x + "," + monster.moveCoord.y + "],";
+                        param += monster.tag;
+                        param += "]" + (m < val.monsters.length - 1 ? "," : "");
+                    }
+                    param += "]";
+                } else if (effect.type == 2) { //直接伤害
+                    param += "[]";
+                } else if (effect.type == 3) { //buff
+                    param += "[]"
+                } else if (effect.type == 4) { //开关触发器
+                    param += "[" + val.triggerId + "]";
+                } else if (effect.type == 5) { //副本通关
+                    param += "[" + 0 + "]";
+                } else if (effect.type == 6) { //通关失败
+                    param += "[" + 0 + "]";
+                } else if (effect.type == 7) { //完成任务
+                    param += "[" + val.missionId + "]";
+                } else if (effect.type == 9) { //镜头移动 [[0,530],5000,2]
+                    param += "[[" + val.coord.x + "," + val.coord.y + "]," + val.time + "," + val.pos + "]";
+                } else if (effect.type == 10) { //锁定视野 [[0,0],1500,1200]
+                    param += "[[" + val.rect.x + "," + val.rect.y + "]," + val.rect.width + "," + val.rect.height + "]";
+                } else if (effect.type == 11) { //剧情对话 [3000,0,0,0,0,500001]
+                    param += "[" + val.dialogId + "," + val.param1 + "," + val.param2 + "," + val.param3 + "," + val.param4 + "," + val.triggerId + "]";
+                }
+                param += (p < trigger.effects.length - 1 ? "," : "");
             }
+            type += "]\"";
+            param += "]";
             content += type + "," + "\"" + param + "\"\n";
+        }
+        if (window) {
+            var url = "res/tools/dungeon/res/save/" + Math.floor(Math.random() * 10000000) + ".txt";
+            (new flower.File(url)).saveText(content, function () {
+                window.open(flower.RemoteServer.getInstance().httpURL + url);                 //在另外新建窗口中打开窗口
+            });
+        } else {
+            software.Alert.tip("请用浏览器打开应用，否则不能用此功能");
         }
     }
 
