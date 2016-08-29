@@ -3,7 +3,7 @@
   "direction": {
     "module": {
       "name": "模块",
-      "plugin": "UI",
+      "plugin": "Black",
       "list": [
         "res/module/MainUI.xml"
       ]

@@ -1,0 +1,29 @@
+{
+  "name": "black.TextField",
+  "desc": "TextField 数据",
+  "extends": "black.DisplayObject",
+  "members": {
+    "text": {
+      "type": "string"
+    },
+    "fontColor": {
+      "type": "number"
+    },
+    "fontSize": {
+      "type": "number",
+      "init": 12
+    },
+    "autoSize": {
+      "type": "bool",
+      "init": true
+    },
+    "multiLine": {
+      "type": "bool",
+      "init": true
+    },
+    "wordWrap": {
+      "type": "bool",
+      "init": true
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "name": "black.DisplayObject",
+  "desc": "DisplayObject 数据",
+  "members": {
+    "className": {
+      "desc": "导出类名",
+      "type": "string"
+    },
+    "x": {
+      "type": "number"
+    },
+    "y": {
+      "type": "number"
+    },
+    "width": {
+      "type": "number"
+    },
+    "height": {
+      "type": "number"
+    },
+    "scaleX": {
+      "type": "number",
+      "init": 1
+    },
+    "scaleY": {
+      "type": "number",
+      "init": 1
+    },
+    "rotation": {
+      "type": "number"
+    },
+    "alpha": {
+      "type": "number",
+      "init": 1
+    },
+    "visible": {
+      "type": "bool",
+      "init": true
+    },
+    "touchEnabled": {
+      "type": "bool",
+      "init": true
+    },
+    "multiplyTouchEnabled": {
+      "type": "bool",
+      "init": true
+    },
+    "focusEnabled": {
+      "type": "bool"
+    },
+    "name": {
+      "desc": "在编辑器中会生成一个 16 位的随机字母数字组合(唯一名)",
+      "type": "string"
+    }
+  }
+}
