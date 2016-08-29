@@ -36,8 +36,16 @@
         {
           "label": "触发器触发",
           "type": 5
+        },
+        {
+          "label": "全队灭亡",
+          "type": 6
         }
       ]
+    },
+    "delay": {
+      "desc": "延时(ms)",
+      "type": "int"
     },
     "startValue": {
       "desc": "启动条件",

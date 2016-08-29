@@ -38,6 +38,7 @@ var UPDATE_RESOURCE = true;
 var RETINA = false;
 var programmers = {};
 var config = {};
+var params = {};
 
 /**
  * 启动引擎
@@ -165,6 +166,7 @@ flower.sys = {
     $error: $error,
     getLanguage: getLanguage
 }
+flower.params = params;
 
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
@@ -181,6 +183,24 @@ class Platform {
     static height;
 
     static start(engine, root, background) {
+        var paramString = window.location.search;
+        while (paramString.charAt(0) == "?") {
+            paramString = paramString.slice(1, paramString.length);
+        }
+        var params = {};
+        var array = paramString.split("&");
+        for (var i = 0; i < array.length; i++) {
+            var paramArray = array[i].split("=");
+            var key = paramArray[0];
+            if (paramArray.length > 1) {
+                params[key] = array[i].slice(key.length + 1, array[i].length);
+            } else {
+                params[key] = null;
+            }
+        }
+        for (var key in params) {
+            flower.params[key] = params[key];
+        }
         RETINA = false;
         Platform.native = false;//cc.sys.isNative;
         var div = document.getElementById("FlowerMain");
@@ -202,17 +222,17 @@ class Platform {
         requestAnimationFrame.call(window, Platform._run);
         var touchDown = false;
         mask.onmousedown = function (e) {
-            if(e.button == 2) return;
+            if (e.button == 2) return;
             touchDown = true;
             engine.$addTouchEvent("begin", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmouseup = function (e) {
-            if(e.button == 2) return;
+            if (e.button == 2) return;
             touchDown = false;
             engine.$addTouchEvent("end", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmousemove = function (e) {
-            if(e.button == 2) return;
+            if (e.button == 2) return;
             engine.$addMouseMoveEvent(math.floor(e.clientX), math.floor(e.clientY));
             if (touchDown) {
                 engine.$addTouchEvent("move", 0, math.floor(e.clientX), math.floor(e.clientY));
@@ -6281,6 +6301,9 @@ class URLLoader extends EventDispatcher {
                 URLLoader.list.splice(i, 1);
                 break;
             }
+        }
+        if(this.isDispose) {
+            return;
         }
         this.dispatchWith(Event.COMPLETE, this._data);
         this._selfDispose = true;

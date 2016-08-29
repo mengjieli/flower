@@ -74,8 +74,12 @@ function __onLoadConfig(e) {
             direction.push(this.createFile(fileList[i], pluginName));
         }
     }
-    this.openItem("res/tools/dungeon/Level1.json");
-    //this.openItem("res/module/MainUI.xml");
+    if (flower.params.openDirection) {
+        this.expand(flower.params.openDirection);
+    }
+    if (flower.params.openItem) {
+        this.openItem(flower.params.openItem);
+    }
 }
 
 function createFile(path, pluginName) {
@@ -89,6 +93,10 @@ function createFile(path, pluginName) {
             }
         }
     ]
+    var fileMenu = editor.PluginManager.getFileMenu(pluginName);
+    if (fileMenu) {
+        list = list.concat(fileMenu);
+    }
     if (list.length) {
         menu = {
             "menu": list,
@@ -120,6 +128,10 @@ function openItem(url) {
     if (item) {
         item.openFile();
     }
+}
+
+function expand(url) {
+    this.tree.viewport.expand(url);
 }
 
 function onClickItem(e) {

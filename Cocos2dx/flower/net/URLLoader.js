@@ -253,6 +253,9 @@ class URLLoader extends EventDispatcher {
                 break;
             }
         }
+        if(this.isDispose) {
+            return;
+        }
         this.dispatchWith(Event.COMPLETE, this._data);
         this._selfDispose = true;
         this.dispose();

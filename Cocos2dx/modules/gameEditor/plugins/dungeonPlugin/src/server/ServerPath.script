@@ -1,9 +1,10 @@
 var ServerPath = (function () {
 
-    function ServerPath(dungeonData, monsters, armys) {
+    function ServerPath(dungeonData, monsters, armys, server) {
         this.dungeonData = dungeonData;
         this.monsters = monsters;
         this.armys = armys;
+        this.server = server;
 
         this.astar = new AStarSix();
         this.blocks = [];
@@ -42,6 +43,17 @@ var ServerPath = (function () {
         }
         block.path--;
         list.push(roler);
+
+        var triggers = this.dungeonData.triggers;
+        for (var i = 0; i < triggers.length; i++) {
+            var trigger = triggers[i];
+            if (!trigger.hasPlay.value && trigger.startCondition.value == 2) {
+                var startValue = trigger.startValue;
+                if (roler.type == startValue.armyType.value && startValue.points.getItemWith("x", x, "y", y)) {
+                    this.server.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.server));
+                }
+            }
+        }
     }
 
     ServerPath.prototype.reset = function () {
@@ -55,6 +67,17 @@ var ServerPath = (function () {
 
     ServerPath.prototype.canMove = function (x, y) {
         return this.blocks[y * this.width + x].path == 1 ? true : false
+    }
+
+    ServerPath.prototype.canPathMove = function (path) {
+        var flag = true;
+        for(var i = 0; i < path.length; i++) {
+            if(!this.canMove(path[i].x,path[i].y)) {
+                flag = false;
+                break;
+            }
+        }
+        return flag;
     }
 
     ServerPath.prototype.findPath = function (startX, startY, endX, endY) {

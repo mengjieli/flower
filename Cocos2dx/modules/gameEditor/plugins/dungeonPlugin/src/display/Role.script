@@ -8,6 +8,7 @@ var Role = (function (_super) {
 
         this.width = 0;
 
+        //var label = new flower.Label(data.type.value + "-" + data.tag.value + "-" + data.id.value);
         var label = new flower.Label(data.type.value + "-" + data.tag.value);
         label.fontColor = 0xffffff;
         label.horizontalCenter = 0;
@@ -66,6 +67,20 @@ var Role = (function (_super) {
     }
 
     Role.prototype.beAttack = function (attack, attackObject) {
+        var eft = new Animation({
+            url: "res/tools/dungeon/res/effect/",
+            name: "attackedEft1_000",
+            format: "png",
+            start: 0,
+            end: 11,
+            frameRate: 18,
+            x: -100,
+            y: -125,
+            scaleX: 1,
+            scaleY: 1
+        });
+        eft.play(1, true);
+        this.addChild(eft);
         if (this.data.hp.value < attack.hp.value) {
             this.data.hp.value = 0;
         } else {
@@ -80,7 +95,7 @@ var Role = (function (_super) {
 
     Role.prototype.die = function () {
         this.data.lock.value = true;
-        flower.Tween.to(this, 1, {alpha: 0}).call(function () {
+        flower.Tween.to(this, 1.3, {alpha: 0}).call(function () {
             this.data.lock.value = false;
             this.data.mapData.objects.removeItem(this.data);
         }.bind(this));
@@ -90,7 +105,7 @@ var Role = (function (_super) {
      * 路径改变
      */
     Role.prototype.onPathChange = function () {
-        if (this.data.path.length && !this.moveFlag) {
+        if (this.data.die.value == false && this.data.path.length && !this.moveFlag) {
             this.moveFlag = true;
             var point = this.data.path.shift();
             var position = MapUtils.transPointToPosition(point.x, point.y);
@@ -102,7 +117,9 @@ var Role = (function (_super) {
                 x: this.data.position.x.value,
                 y: this.data.position.y.value
             }).call(this.onMoveComplete, this, point.x, point.y);
+            return true;
         }
+        return false;
     }
 
     Role.prototype.getNetDir = function (x, y, nextX, nextY) {

@@ -1,0 +1,9 @@
+<f:Group class="AllDieCondition" percentWidth="100"
+         xmlns:f="flower" xmlns:s="software"
+         xmlns:e="editor" xmlns:ui="ui">
+    <f:script src="./AllDieCondition.script"/>
+    <f:Group horizontalCenter="0">
+        <f:Label horizontalCenter="-55" width="60" text="部队类型" verticalCenter="0"/>
+        <s:ComboBox id="typeComboBox" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+</f:Group>

@@ -12,6 +12,8 @@ var Server = (function () {
         //角色部队列表
         this.armys = [];
         this.gameStartFlag = false;
+
+        this.roleId = 0;
     }
 
     Server.prototype.setData = function (data) {
@@ -33,7 +35,7 @@ var Server = (function () {
                 this.pause();
             }
         }, this);
-        this.path = new ServerPath(this.data, this.monsters, this.armys);
+        this.path = new ServerPath(this.data, this.monsters, this.armys, this);
     }
 
     /**
@@ -46,6 +48,8 @@ var Server = (function () {
         //运行
         flower.EnterFrame.add(this.update, this);
         this.gameStartFlag = false;
+        this.sendAllTask();
+        this.dieCount = 0;
     }
 
     Server.prototype.gameStart = function () {
@@ -69,6 +73,8 @@ var Server = (function () {
         this.callObject.stop();
         this.path.reset();
         this.gameStartFlag = false;
+        this.hasInit = false;
+        this.gameOverFlag = false;
     }
 
     /**
@@ -98,7 +104,7 @@ var Server = (function () {
         for (var i = 0; i < this.triggers.length; i++) {
             this.triggers[i].update(dt);
         }
-        if(this.gameStartFlag) {
+        if (this.gameStartFlag && this.gameOverFlag == false) {
             for (var i = 0; i < this.monsters.length; i++) {
                 if (this.monsters[i].hasDie) {
                     this.monsters.splice(i, 1);
@@ -119,6 +125,25 @@ var Server = (function () {
         }
     }
 
+    Server.prototype.gameOver = function (flag) {
+        this.gameOverFlag = true;
+        if (flag) {
+            var triggers = this.data.triggers;
+            for (var i = 0; i < triggers.length; i++) {
+                var trigger = triggers[i];
+                if (!trigger.hasPlay.value && trigger.startCondition.value == 4) {
+                    var triggerValue = trigger.startValue;
+                    if (triggerValue.type.value == 0 && this.dieCount < triggerValue.param.value ||
+                        triggerValue.type.value == 1 && this.time < triggerValue.param.value ||
+                        triggerValue.type.value == 2) {
+                        this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
+                    }
+                }
+            }
+        }
+        this.callObject.gameOver(flag);
+    }
+
     Server.prototype.runTrigger = function (operate, triggerId) {
         var triggers = this.data.triggers;
         if (operate == 0) {
@@ -136,7 +161,7 @@ var Server = (function () {
      * @param data FlushMonsterEffectItem
      */
     Server.prototype.addMonster = function (data) {
-        this.monsters.push(new ServerMonster(this.data.settings, this.monsters.length + 1000, data, this.data, this.callObject, this, this.path));
+        this.monsters.push(new ServerMonster(this.data.settings, this.roleId++ + 1000, data, this.data, this.callObject, this, this.path));
     }
 
     /**
@@ -144,13 +169,13 @@ var Server = (function () {
      * @param data FlushMonsterEffectItem
      */
     Server.prototype.addArmy = function (data) {
-        this.armys.push(new ServerArmy(this.data.settings, this.armys.length + 1000000, data, this.data, this.callObject, this, this.path));
+        this.armys.push(new ServerArmy(this.data.settings, this.roleId++ + 1000000, data, this.data, this.callObject, this, this.path));
     }
 
     Server.prototype.getEnemyList = function (type) {
-        if (type == 1) {
+        if (type == 0) {
             return this.monsters;
-        } else if (type == 2) {
+        } else if (type == 1) {
             return this.armys;
         }
     }
@@ -171,8 +196,7 @@ var Server = (function () {
     Server.prototype.getArmy = function (id) {
         for (var i = 0; i < this.armys.length; i++) {
             if (this.armys[i].id == id) {
-                return this.armys[i]
-                break;
+                return this.armys[i];
             }
         }
     }
@@ -180,8 +204,104 @@ var Server = (function () {
     Server.prototype.getMonster = function (id) {
         for (var i = 0; i < this.monsters.length; i++) {
             if (this.monsters[i].id == id) {
-                return this.monsters[i]
-                break;
+                return this.monsters[i];
+            }
+        }
+    }
+
+    Server.prototype.getMonsterByTag = function (tag) {
+        var list = [];
+        for (var i = 0; i < this.monsters.length; i++) {
+            if (this.monsters[i].data.tag.value == tag) {
+                list.push(this.monsters[i]);
+            }
+        }
+        return list;
+    }
+
+    Server.prototype.hasTriggerMonsterNoShowWithTag = function (tag) {
+        var triggers = this.data.triggers;
+        for (var t = 0; t < triggers.length; t++) {
+            var trigger = triggers[t];
+            if (trigger.hasPlay.value == true) {
+                continue;
+            }
+            var effects = trigger.effects;
+            for (var i = 0; i < effects.length; i++) {
+                var effect = effects[i];
+                if (effect.type.value == 1) {
+                    var monsters = effect.effectValue.monsters;
+                    if (monsters.getItemWith("tag", tag)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        for (var i = 0; i < this.triggers.length; i++) {
+            if (this.triggers[i].hasMinsterNoShowWithTag(tag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Server.prototype.hasTriggerMonsterNoShow = function () {
+        var triggers = this.data.triggers;
+        for (var t = 0; t < triggers.length; t++) {
+            var trigger = triggers[t];
+            if (trigger.hasPlay.value == true) {
+                continue;
+            }
+            var effects = trigger.effects;
+            for (var i = 0; i < effects.length; i++) {
+                var effect = effects[i];
+                if (effect.type.value == 1) {
+                    var monsters = effect.effectValue.monsters;
+                    if (monsters.length) {
+                        return true;
+                    }
+                }
+            }
+        }
+        for (var i = 0; i < this.triggers.length; i++) {
+            if (this.triggers[i].hasTriggerMonsterNoShow()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Server.prototype.isAllDie = function (type) {
+        if (type == 0) {
+            for (var i = 0; i < this.armys.length; i++) {
+                if (this.armys[i].hasDie == false) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (type == 1) {
+            for (var i = 0; i < this.monsters.length; i++) {
+                if (this.monsters[i].hasDie == false) {
+                    return false;
+                }
+            }
+            if (this.hasTriggerMonsterNoShow()) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    Server.prototype.sendAllTask = function () {
+        var triggers = this.data.triggers;
+        for (var t = 0; t < triggers.length; t++) {
+            var trigger = triggers[t];
+            var effects = trigger.effects;
+            for (var i = 0; i < effects.length; i++) {
+                var effect = effects[i];
+                if (effect.type.value == 7) {
+                    this.callObject.receiveTask(effect.effectValue.missionId.value, effect.effectValue.missionName.value);
+                }
             }
         }
     }
@@ -191,6 +311,14 @@ var Server = (function () {
         var monster = this.getMonster(aimId);
         if (army && monster) {
             army.attack(monster);
+        }
+    }
+
+    Server.prototype.completeDialog = function (id) {
+        for (var i = 0; i < this.triggers.length; i++) {
+            if (this.triggers[i].checkDialog(id)) {
+                return;
+            }
         }
     }
 

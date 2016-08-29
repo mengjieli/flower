@@ -164,7 +164,7 @@ var File = (function (_super) {
 
     Object.defineProperty(File.prototype, "data", {
         get: function () {
-            return this.parser.data;
+            return this.parser == null ? null : this.parser.data;
         },
         set: function (val) {
         },

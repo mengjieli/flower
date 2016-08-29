@@ -1,0 +1,18 @@
+{
+  "name": "dg.Task",
+  "desc": "副本任务",
+  "members": {
+    "id": {
+      "desc": "任务id",
+      "type": "int"
+    },
+    "name": {
+      "desc": "任务名称",
+      "type": "string"
+    },
+    "complete": {
+      "desc": "任务是否完成",
+      "type": "bool"
+    }
+  }
+}

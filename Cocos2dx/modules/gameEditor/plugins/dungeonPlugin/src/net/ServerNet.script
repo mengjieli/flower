@@ -12,6 +12,10 @@ var ServerNet = (function () {
         this.server.attack(id, otherId);
     }
 
+    ServerNet.prototype.completeDialog = function (id) {
+        this.server.completeDialog(id);
+    }
+
     return ServerNet;
 })();
 

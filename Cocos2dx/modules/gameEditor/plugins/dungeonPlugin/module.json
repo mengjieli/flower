@@ -7,10 +7,12 @@
     "./src/model/ConfigModel.script",
     "./src/model/ClickModel.script",
     "./src/model/AttackModel.script",
+    "./src/model/ExportCSVModel.script",
     "./src/Map.script",
     "./src/core/Camera.script",
     "./src/core/GridLayer.script",
     "./src/core/ChangeLayer.script",
+    "./src/core/UILayer.script",
     "./src/net/MapNet.script",
     "./src/net/ServerNet.script",
     "./src/display/Grid.script",
@@ -20,6 +22,7 @@
     "./src/display/Army.script",
     "./src/display/Monster.script",
     "./src/display/RoleBlood.script",
+    "./src/ui/TaskList.script",
     "./src/server/Server.script",
     "./src/server/Trigger.script",
     "./src/server/ServerRole.script",
@@ -36,6 +39,7 @@
     "./panels/startCondition/HPCondition.xml",
     "./panels/startCondition/MoveCondition.xml",
     "./panels/startCondition/FinishCondition.xml",
+    "./panels/startCondition/AllDieCondition.xml",
     "./panels/EffectDetailPanel.xml",
     "./panels/effect/FlushMonsterEffect.xml",
     "./panels/effect/HurtEffect.xml",
@@ -56,6 +60,7 @@
     "./data/startCondition/HPCondition.json",
     "./data/startCondition/MoveCondition.json",
     "./data/startCondition/FinishCondition.json",
+    "./data/startCondition/AllDieCondition.json",
     "./data/effect/FlushMonsterEffect.json",
     "./data/effect/FlushMonsterEffectItem.json",
     "./data/effect/HurtEffect.json",
@@ -73,6 +78,7 @@
     "./data/running/map/MapArmy.json",
     "./data/running/map/MapMonster.json",
     "./data/running/map/Attack.json",
-    "./data/running/map/GetMapObject.json"
+    "./data/running/map/GetMapObject.json",
+    "./data/running/map/Task.json"
   ]
 }

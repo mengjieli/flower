@@ -170,6 +170,17 @@ class Tree extends DataGroup {
         }
     }
 
+    expand(url) {
+        var p = this.$Tree;
+        var parentData = p[1];
+        for (var i = 0; i < parentData.length; i++) {
+            var item = parentData[i];
+            if (item.path == url.slice(0, item.path.length)) {
+                item.open.value = true;
+            }
+        }
+    }
+
     get pathField() {
         return this.$Tree[3];
     }

@@ -1,7 +1,9 @@
 function setData(val) {
     _super.prototype.setData.call(this, val);
-    var atrs = ["missionId","missionName"];
-    var dropDownList = {};
+    var atrs = ["type"];
+    var dropDownList = {
+        "type": true
+    }
     for (var i = 0; i < atrs.length; i++) {
         var atr = atrs[i];
         (function (atr) {

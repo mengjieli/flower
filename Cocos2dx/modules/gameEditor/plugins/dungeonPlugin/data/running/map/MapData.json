@@ -42,6 +42,15 @@
     "getObject": {
       "desc": "对象获取器",
       "type": "dg.GetMapObject"
+    },
+    "tasks": {
+      "desc": "任务列表",
+      "type": "Array",
+      "typeValue": "dg.Task"
+    },
+    "dialog": {
+      "desc": "剧情对话",
+      "type": "int"
     }
   }
 }

@@ -5,6 +5,10 @@
     "missionId": {
       "desc": "任务 id",
       "type": "int"
+    },
+    "missionName": {
+      "desc": "任务名称",
+      "type": "string"
     }
   }
 }

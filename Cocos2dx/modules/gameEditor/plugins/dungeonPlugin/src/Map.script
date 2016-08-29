@@ -12,6 +12,13 @@ var Map = (function (_super) {
     }
 
     Map.prototype.init = function () {
+        //设置网络模拟类，接受触器效果
+        this.net = new MapNet();
+        //初始后台运行环境
+        this.server = new Server(this.net);
+        //发送网络的对象
+        this.serverNet = new ServerNet(this.server);
+
         this.initLayer();
         //初始化摄像头
         this.camera = new Camera();
@@ -22,13 +29,6 @@ var Map = (function (_super) {
         this.addListener(flower.TouchEvent.TOUCH_MOVE, this.onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_END, this.onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.onTouch, this);
-
-        //设置网络模拟类，接受触器效果
-        this.net = new MapNet();
-        //初始后台运行环境
-        this.server = new Server(this.net);
-        //发送网络的对象
-        this.serverNet = new ServerNet(this.server);
     }
 
     /**
@@ -46,6 +46,9 @@ var Map = (function (_super) {
         //添加交换层
         this.changeLayer = new ChangeLayer();
         this.container.addChild(this.changeLayer);
+        //ui层
+        this.ui = new UILayer(this.serverNet);
+        this.addChild(this.ui);
     }
 
     Map.prototype.setData = function (val) {
@@ -75,6 +78,9 @@ var Map = (function (_super) {
         //设置其他数据
         this.gridLayer.setData(this.data);
         this.changeLayer.setData(this.data);
+        this.ui.setData(this.data);
+        this.ui.width = dungeonData.screenWidth.value;
+        this.ui.height = dungeonData.screenHeight.value;
 
         //设置攻击模块
         this.attackModel = new AttackModel(this.data);

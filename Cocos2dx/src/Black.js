@@ -7002,6 +7002,18 @@ var $root = eval("this");
                 }
             }
         }, {
+            key: "expand",
+            value: function expand(url) {
+                var p = this.$Tree;
+                var parentData = p[1];
+                for (var i = 0; i < parentData.length; i++) {
+                    var item = parentData[i];
+                    if (item.path == url.slice(0, item.path.length)) {
+                        item.open.value = true;
+                    }
+                }
+            }
+        }, {
             key: "pathField",
             get: function get() {
                 return this.$Tree[3];

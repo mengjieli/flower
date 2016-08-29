@@ -77,7 +77,7 @@ var PluginManager = (function () {
     }
 
     PluginManager.getFileMenu = function (name) {
-        return fileMenus;
+        return fileMenus[name];
     }
 
     return PluginManager;

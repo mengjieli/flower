@@ -10,3 +10,13 @@ setDirectionMenu("Dungeon", [
         }
     }
 ]);
+
+
+setFileMenu("Dungeon", [
+    {
+        "label": "导出csv",
+        "click": function (item) {
+            new ExportCSVModel(item);
+        }
+    }
+]);

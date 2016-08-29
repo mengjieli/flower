@@ -1,0 +1,59 @@
+var ExportCSVModel = (function () {
+
+    /**
+     * 点击信息
+     * @param File
+     * @constructor
+     */
+    function ExportCSVModel(file) {
+        var path = file.path;
+        var data = file.data;
+        if (data == null) {
+            var loader = new flower.URLLoader(path);
+            loader.addListener(flower.Event.COMPLETE, this.loadComplete, this);
+            loader.load();
+        } else {
+            this.export(data.value);
+        }
+    }
+
+    ExportCSVModel.prototype.loadComplete = function (e) {
+        this.export(e.data);
+    }
+
+    ExportCSVModel.prototype.export = function (data) {
+        var content = "id,name,trigger_type,delay,condition,effect_type,effect_params\n";
+        var triggers = data.triggers;
+        for (var i = 0; i < triggers.length; i++) {
+            var trigger = triggers[i];
+            var start = trigger.startValue;
+            content += trigger.itemId + ",name," + trigger.startCondition + "," + trigger.delay + ",";
+            if (trigger.type == 1) {
+                content += ",";
+            } else if (trigger.type == 2) {
+                content += "[" + start.armyType;
+                for (var p = 0; p < start.points.length; p++) {
+                    content += ",[" + start.points[p].x + "," + start.points[p].y + "]";
+                }
+                content += "],";
+            } else if (trigger.type == 3) {
+                content += "[" + start.tag + "," + start.hp + "],";
+            } else if (trigger.type == 4) {
+                content += "[" + start.type + "," + start.param + "],";
+            } else if (trigger.type == 5) {
+                content += ",";
+            }
+            var type = "";
+            var param = "";
+            for (var p = 0; p < trigger.effects.length; p++) {
+                var effect = trigger.effects[p];
+
+            }
+            content += type + "," + "\"" + param + "\"\n";
+        }
+    }
+
+    return ExportCSVModel;
+})();
+
+module.ExportCSVModel = ExportCSVModel;

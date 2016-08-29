@@ -24,6 +24,11 @@ function init() {
             this.addEffectToDirection(trigger, effects[e]);
         }
     }
+    this.expand("trigger");
+}
+
+function expand(url) {
+    this.tree.viewport.expand(url);
 }
 
 function onClickItem(e) {
@@ -127,7 +132,13 @@ function addFile(path, type, name, menuList, data, color) {
 
 function setData(val) {
     _super.prototype.setData.call(this, val);
-    this.data.data.settings.background.addListener(flower.Event.CHANGE, function () {
+    this.data.data.settings.background.addListener(flower.Event.UPDATE, function () {
+        this.data.parser.save();
+    }, this);
+    this.data.data.screenWidth.addListener(flower.Event.UPDATE, function () {
+        this.data.parser.save();
+    }, this);
+    this.data.data.screenHeight.addListener(flower.Event.UPDATE, function () {
         this.data.parser.save();
     }, this);
     this.backgroundComboBox.value = this.data.data.settings.background;

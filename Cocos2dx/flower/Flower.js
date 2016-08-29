@@ -13,6 +13,7 @@ var UPDATE_RESOURCE = true;
 var RETINA = false;
 var programmers = {};
 var config = {};
+var params = {};
 
 /**
  * 启动引擎
@@ -140,5 +141,6 @@ exports.sys = {
     $error: $error,
     getLanguage: getLanguage
 }
+exports.params = params;
 
 $root.trace = trace;

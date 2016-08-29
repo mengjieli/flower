@@ -6,16 +6,18 @@ var Trigger = (function () {
         this.callObject = callObject;
         this.triggerRunning = triggerRunning;
 
-        this.data.hasPlay.value = true;
         this.time = 0;
         this.update(0);
     }
 
     Trigger.prototype.update = function (dt) {
         this.time += dt;
+        if (this.time >= this.data.delay.value && !this.data.hasPlay.value) {
+            this.data.hasPlay.value = true;
+        }
         for (var i = 0; i < this.data.effects.length; i++) {
             var effect = this.data.effects[i];
-            if (!effect.hasPlay.value && effect.delay.value <= this.time) {
+            if (!effect.hasPlay.value && this.data.delay.value <= this.time) {
                 this.runEffect(effect);
             }
         }
@@ -34,17 +36,65 @@ var Trigger = (function () {
             case 4:
                 this.triggerRunning.runTrigger(value.operate.value, value.triggerId.value);
                 break;
+            case 5:
+                this.triggerRunning.gameOver(true);
+                break;
+            case 6:
+                this.triggerRunning.gameOver(false);
+                break;
+            case 7:
+                this.callObject.completeTask(value.missionId.value);
+                break;
             case 9:
                 this.callObject.cameraTweenTo(value.time.value, value.coord.x.value, value.coord.y.value, value.pos.value);
                 break;
             case 10:
                 this.callObject.setCameraRange(value.rect.x.value, value.rect.y.value, value.rect.width.value, value.rect.height.value);
                 break;
+            case 11:
+                this.callObject.startDialog(value.dialogId.value);
+                break;
             case 12:
                 this.triggerRunning.gameStart();
                 this.callObject.startGame();
                 break;
         }
+    }
+
+    Trigger.prototype.checkDialog = function (id) {
+        for (var i = 0; i < this.data.effects.length; i++) {
+            var effect = this.data.effects[i];
+            if (effect.hasPlay.value && effect.type.value == 11) {
+                this.triggerRunning.runTrigger(0, effect.effectValue.triggerId.value);
+                return;
+            }
+        }
+    }
+
+    Trigger.prototype.hasMinsterNoShowWithTag = function (tag) {
+        for (var i = 0; i < this.data.effects.length; i++) {
+            var effect = this.data.effects[i];
+            if (!effect.hasPlay.value && effect.type.value == 1) {
+                var monsters = effect.effectValue.monsters;
+                if (monsters.getItemWith("tag", tag)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    Trigger.prototype.hasTriggerMonsterNoShow = function () {
+        for (var i = 0; i < this.data.effects.length; i++) {
+            var effect = this.data.effects[i];
+            if (!effect.hasPlay.value && effect.type.value == 1) {
+                var monsters = effect.effectValue.monsters;
+                if (monsters.length) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     Trigger.prototype.dispose = function () {

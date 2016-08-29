@@ -48,6 +48,7 @@ var flower = {};
     var RETINA = false;
     var programmers = {};
     var config = {};
+    var params = {};
 
     /**
      * 启动引擎
@@ -187,6 +188,7 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
+    flower.params = params;
 
     $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
@@ -201,6 +203,24 @@ var flower = {};
         _createClass(Platform, null, [{
             key: "start",
             value: function start(engine, root, background) {
+                var paramString = window.location.search;
+                while (paramString.charAt(0) == "?") {
+                    paramString = paramString.slice(1, paramString.length);
+                }
+                var params = {};
+                var array = paramString.split("&");
+                for (var i = 0; i < array.length; i++) {
+                    var paramArray = array[i].split("=");
+                    var key = paramArray[0];
+                    if (paramArray.length > 1) {
+                        params[key] = array[i].slice(key.length + 1, array[i].length);
+                    } else {
+                        params[key] = null;
+                    }
+                }
+                for (var key in params) {
+                    flower.params[key] = params[key];
+                }
                 RETINA = false;
                 Platform.native = false; //cc.sys.isNative;
                 var div = document.getElementById("FlowerMain");
@@ -6875,6 +6895,9 @@ var flower = {};
                         URLLoader.list.splice(i, 1);
                         break;
                     }
+                }
+                if (this.isDispose) {
+                    return;
                 }
                 this.dispatchWith(Event.COMPLETE, this._data);
                 this._selfDispose = true;

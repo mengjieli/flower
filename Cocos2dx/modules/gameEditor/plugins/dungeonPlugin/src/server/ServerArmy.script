@@ -8,7 +8,7 @@ var ServerArmy = (function (_super) {
         this.maxHp = settings.myHp.value;
         this.attackValue = settings.myAttack.value;
 
-        this.type = 1;
+        this.type = 0;
 
         this.ai = 4;
 

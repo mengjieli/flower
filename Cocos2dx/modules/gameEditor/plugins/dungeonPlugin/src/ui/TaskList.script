@@ -1,0 +1,34 @@
+var TaskList = (function (_super) {
+
+    __extends(TaskList, _super);
+
+    function TaskList() {
+        _super.call(this);
+        this.width = 120;
+        this.right = 0;
+        this.touchEnabled = false;
+    }
+
+    TaskList.prototype.setData = function (val) {
+        _super.prototype.setData.call(this, val);
+        var fxml =
+            '<f:Group percentWidth="100" xmlns:f="flower" xmlns:s="software">' +
+                '<f:List percentWidth="100" id="list">' +
+                    '<f:itemRenderer>' +
+                        '<f:ItemRenderer percentWidth="100" height="20">' +
+                            '<f:Rect fillAlpha="0.8" fillColor="0x3d3d3d" percentWidth="100" percentHeight="100"/>' +
+                            '<f:Label verticalCenter="0" horizontalCenter="0" text="{data.name}:{data.id}" fontColor="{data.complete?0x82ff57:0xa8a8a8}"/>'
+                        '</f:ItemRenderer>' +
+                    '</f:itemRenderer>' +
+                '</f:List>' +
+            '</f:Group>';
+        var ui = (new flower.UIParser()).parseUI(fxml);
+        this.addChild(ui);
+        ui.list.dataProvider = this.data.tasks;
+    }
+
+    return TaskList;
+
+})(flower.Group);
+
+module.TaskList = TaskList;

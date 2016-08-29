@@ -39,7 +39,6 @@ var ServerRole = (function () {
         this.playerOperate = false;
 
         this.ai = 0;
-
     }
 
     ServerRole.prototype.update = function (dt) {
@@ -61,15 +60,18 @@ var ServerRole = (function () {
             } else {
                 var attackPointInfo;
                 var attackPoint;
-                if (!this.attackPath || this.attackAimX != this.attackAim.x || this.attackAimY != this.attackAim.y) {
-                    attackPointInfo = this.getAttackPoint(this.x, this.y, this.attackAim.x, this.attackAim.y, this.attackRange);
-                    this.attackAimX = this.attackAim.x;
-                    this.attackAimY = this.attackAim.y;
-                    this.attackPointX = attackPointInfo.attackPoint.x;
-                    this.attackPointY = attackPointInfo.attackPoint.y;
-                    this.attackPath = attackPointInfo.path;
-                }
                 if (this.moveTime > this.moveGap) {
+                    if (!this.attackPath || this.attackAimX != this.attackAim.x || this.attackAimY != this.attackAim.y || !this.serverPath.canPathMove(this.attackPath)) {
+                        attackPointInfo = this.getAttackPoint(this.x, this.y, this.attackAim.x, this.attackAim.y, this.attackRange);
+                        if (attackPointInfo.attackPoint == null) {
+                            return;
+                        }
+                        this.attackAimX = this.attackAim.x;
+                        this.attackAimY = this.attackAim.y;
+                        this.attackPointX = attackPointInfo.attackPoint.x;
+                        this.attackPointY = attackPointInfo.attackPoint.y;
+                        this.attackPath = attackPointInfo.path;
+                    }
                     if (this.attackPath && this.attackPath.length) {
                         point = this.attackPath[0];
                         if (this.serverPath.canMove(point.x, point.y)) {
@@ -147,7 +149,45 @@ var ServerRole = (function () {
         if (this.hp == 0) {
             this.hasDie = true;
             this.callObject.roleDie(this.id);
+            if(this.type == 0) {
+                this.triggerRunning.dieCount++;
+            }
             this.serverPath.removeRoler(this, this.x, this.y);
+            var triggers = this.dungeonData.triggers;
+            for (var t = 0; t < triggers.length; t++) {
+                var trigger = triggers[t];
+                if (!trigger.hasPlay.value && trigger.startCondition.value == 6) {
+                    var startValue = trigger.startValue;
+                    var type = startValue.type.value;
+                    if (this.triggerRunning.isAllDie(type)) {
+                        this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
+                    }
+                }
+            }
+        }
+        var triggers = this.dungeonData.triggers;
+        for (var t = 0; t < triggers.length; t++) {
+            var trigger = triggers[t];
+            if (!trigger.hasPlay.value && trigger.startCondition.value == 3) {
+                var startValue = trigger.startValue;
+                var tag = startValue.tag.value;
+                var hp = startValue.hp.value;
+                if (this.triggerRunning.hasTriggerMonsterNoShowWithTag(tag)) {
+                    continue;
+                }
+                var monsters = this.triggerRunning.getMonsterByTag(tag);
+                var flag = true;
+                for (var i = 0; i < monsters.length; i++) {
+                    if (monsters[i].hp / monsters[i].maxHp > hp) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag) {
+                    this.triggerRunning.hasTriggerMonsterNoShowWithTag(tag);
+                    this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
+                }
+            }
         }
     }
 
@@ -165,7 +205,7 @@ var ServerRole = (function () {
         }
     }
 
-    ServerRole.prototype.searchEnemy = function(range) {
+    ServerRole.prototype.searchEnemy = function (range) {
         var enemys = this.triggerRunning.getEnemyList(this.type);
         if (enemys) {
             for (var i = 0; i < enemys.length; i++) {
@@ -228,13 +268,16 @@ var ServerRole = (function () {
      * @param x
      * @param y
      */
-    ServerRole.prototype.moveTo = function (x, y) {
+    ServerRole.prototype.moveTo = function (x, y, playerOperate) {
+        if (playerOperate == null) {
+            playerOperate = true;
+        }
         this.moveFlag = true;
         this.attackFlag = false;
         this.moveX = x;
         this.moveY = y;
         this.movePath = this.serverPath.findPath(this.x, this.y, x, y);
-        this.playerOperate = true;
+        this.playerOperate = playerOperate;
     }
 
     /**

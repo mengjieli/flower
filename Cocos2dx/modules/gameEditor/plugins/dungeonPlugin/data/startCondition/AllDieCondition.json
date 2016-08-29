@@ -1,0 +1,20 @@
+{
+  "name": "dg.AllDieCondition",
+  "desc": "全队灭亡条件",
+  "members": {
+    "type": {
+      "desc": "部队类型",
+      "type": "int",
+      "enumList": [
+        {
+          "label": "我方部队",
+          "type": 0
+        },
+        {
+          "label": "敌方部队",
+          "type": 1
+        }
+      ]
+    }
+  }
+}
