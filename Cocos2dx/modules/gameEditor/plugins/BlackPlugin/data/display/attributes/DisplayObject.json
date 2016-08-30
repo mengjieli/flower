@@ -2,10 +2,6 @@
   "name": "black.DisplayObject",
   "desc": "DisplayObject 数据",
   "members": {
-    "className": {
-      "desc": "导出类名",
-      "type": "string"
-    },
     "x": {
       "type": "number"
     },

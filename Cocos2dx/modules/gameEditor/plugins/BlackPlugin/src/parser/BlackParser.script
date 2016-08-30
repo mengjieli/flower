@@ -1,0 +1,34 @@
+var BlackParser = (function (_super) {
+
+    __extends(BlackParser, _super);
+
+    function BlackParser(file) {
+        _super.call(this, file);
+    }
+
+    BlackParser.prototype.load = function () {
+        var config = this.file.content;
+        return false;
+    }
+
+    BlackParser.prototype.save = function () {
+    }
+
+    //Object.defineProperty(BlackParser.prototype, "itemId", {
+    //    get: function () {
+    //        this.data.itemId.value = this.data.itemId.value + 1;
+    //        return this.data.itemId.value;
+    //    },
+    //    set: function (val) {
+    //    },
+    //    enumerable: true,
+    //    configurable: true
+    //});
+
+
+    return BlackParser;
+
+})(editor.Parser);
+
+module.BlackParser = BlackParser;
+registerParser("Black", BlackParser);

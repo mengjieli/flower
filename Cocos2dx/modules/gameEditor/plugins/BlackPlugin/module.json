@@ -2,11 +2,15 @@
   "namespace": "black",
   "name": "black",
   "scripts": [
+    "./src/parser/BlackParser.script"
   ],
   "components": [
   ],
   "classes": {
   },
   "data": [
+    "./data/display/UI.json",
+    "./data/display/attributes/DisplayObject.json",
+    "./data/display/attributes/TextField.json"
   ]
 }

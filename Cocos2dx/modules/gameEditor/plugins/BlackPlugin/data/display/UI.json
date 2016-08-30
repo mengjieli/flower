@@ -1,0 +1,19 @@
+{
+  "name": "black.UI",
+  "desc": "UI 数据",
+  "members": {
+    "className": {
+      "desc": "导出类名",
+      "type": "string"
+    },
+    "module": {
+      "desc": "所属模块信息",
+      "type": "*"
+    },
+    "attributes": {
+      "desc": "全部属性信息",
+      "type": "black.DisplayObject",
+      "init": null
+    }
+  }
+}
