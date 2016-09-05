@@ -21,7 +21,7 @@
     "ai":{
       "desc":"AI 类型",
       "type":"int",
-      "init": 1,
+      "init": 0,
       "enumList": [
         {
           "label": "反击",

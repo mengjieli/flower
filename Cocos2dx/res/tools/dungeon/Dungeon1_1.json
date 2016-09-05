@@ -1,15 +1,59 @@
 {
- "itemId": 1,
- "screenWidth": 480,
- "screenHeight": 320,
+ "itemId": 8,
+ "screenWidth": 580,
+ "screenHeight": 420,
  "triggers": [
+  {
+   "itemId": 2,
+   "name": "触发器2",
+   "startCondition": 1,
+   "delay": 5000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 5,
+     "name": "效果5",
+     "delay": 0,
+     "type": 4,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 4,
+      "__className": "dg.StartTriggerEffect"
+     }
+    }
+   ]
+  },
+  {
+   "itemId": 4,
+   "name": "触发器4",
+   "startCondition": 1,
+   "delay": 2000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 6,
+     "name": "效果6",
+     "delay": 0,
+     "type": 11,
+     "effectValue": {
+      "dialogId": 1000,
+      "param1": 0,
+      "param2": 0,
+      "param3": 0,
+      "param4": 0,
+      "triggerId": 0,
+      "__className": "dg.DialogEffect"
+     }
+    }
+   ]
+  }
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
   "showGrid": true,
-  "bornX": 0,
-  "bornY": 9,
-  "myHp": 5000,
+  "bornX": 1,
+  "bornY": 10,
+  "myHp": 500,
   "myAttack": 200,
   "monsterHp": 500,
   "monsterAttack": 50

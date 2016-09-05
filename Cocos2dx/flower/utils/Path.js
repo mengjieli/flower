@@ -21,6 +21,20 @@ class Path {
         return arr[arr.length - 1];
     }
 
+    static isPeerDirection(url1, url2) {
+        var arr1 = url1.split("/");
+        var arr2 = url2.split("/");
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (var i = 0; i < arr1.length - 1; i++) {
+            if(arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     static joinPath(path1, path2) {
         var path = path1;
         if (path.charAt(path.length - 1) != "/") {

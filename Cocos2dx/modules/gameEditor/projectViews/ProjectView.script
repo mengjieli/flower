@@ -77,8 +77,8 @@ function __onLoadConfig(e) {
     if (flower.params.openDirection) {
         this.expand(flower.params.openDirection);
     }
-    if (flower.params.openItem) {
-        this.openItem(flower.params.openItem);
+    if (flower.params.openFile) {
+        this.openItem(flower.params.openFile);
     }
 }
 

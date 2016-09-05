@@ -4338,6 +4338,10 @@ class TextField extends DisplayObject {
     }
 
     $setMultiLine(val) {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
         var p = this.$TextField;
         if (p[4] == val) {
             return false;
@@ -4360,6 +4364,38 @@ class TextField extends DisplayObject {
         }
         p[2] = val;
         this.$nativeShow.setFontColor(val);
+        return true;
+    }
+
+    $setWordWrap(val) {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        val = !!val;
+        var p = this.$TextField;
+        if (p[3] == val) {
+            return false;
+        }
+        p[3] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setAutoSize(val) {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        val = !!val;
+        var p = this.$TextField;
+        if (p[5] == val) {
+            return false;
+        }
+        p[5] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         return true;
     }
 
@@ -4423,6 +4459,19 @@ class TextField extends DisplayObject {
     get autoSize() {
         var p = this.$TextField;
         return p[5];
+    }
+
+    set autoSize(val) {
+        this.$setAutoSize(val);
+    }
+
+    set wordWrap(val) {
+        this.$setWordWrap(val);
+    }
+
+    get wordWrap() {
+        var p = this.$TextField;
+        return p[3];
     }
 
     get multiLine() {
@@ -9441,6 +9490,20 @@ class Path {
     static getName(url) {
         var arr = url.split("/");
         return arr[arr.length - 1];
+    }
+
+    static isPeerDirection(url1, url2) {
+        var arr1 = url1.split("/");
+        var arr2 = url2.split("/");
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (var i = 0; i < arr1.length - 1; i++) {
+            if(arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static joinPath(path1, path2) {

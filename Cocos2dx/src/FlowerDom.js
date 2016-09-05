@@ -4823,6 +4823,10 @@ var flower = {};
         }, {
             key: "$setMultiLine",
             value: function $setMultiLine(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 var p = this.$TextField;
                 if (p[4] == val) {
                     return false;
@@ -4846,6 +4850,40 @@ var flower = {};
                 }
                 p[2] = val;
                 this.$nativeShow.setFontColor(val);
+                return true;
+            }
+        }, {
+            key: "$setWordWrap",
+            value: function $setWordWrap(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                val = !!val;
+                var p = this.$TextField;
+                if (p[3] == val) {
+                    return false;
+                }
+                p[3] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setAutoSize",
+            value: function $setAutoSize(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                val = !!val;
+                var p = this.$TextField;
+                if (p[5] == val) {
+                    return false;
+                }
+                p[5] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
                 return true;
             }
         }, {
@@ -4931,6 +4969,18 @@ var flower = {};
             get: function get() {
                 var p = this.$TextField;
                 return p[5];
+            },
+            set: function set(val) {
+                this.$setAutoSize(val);
+            }
+        }, {
+            key: "wordWrap",
+            set: function set(val) {
+                this.$setWordWrap(val);
+            },
+            get: function get() {
+                var p = this.$TextField;
+                return p[3];
             }
         }, {
             key: "multiLine",
@@ -10363,6 +10413,21 @@ var flower = {};
             value: function getName(url) {
                 var arr = url.split("/");
                 return arr[arr.length - 1];
+            }
+        }, {
+            key: "isPeerDirection",
+            value: function isPeerDirection(url1, url2) {
+                var arr1 = url1.split("/");
+                var arr2 = url2.split("/");
+                if (arr1.length != arr2.length) {
+                    return false;
+                }
+                for (var i = 0; i < arr1.length - 1; i++) {
+                    if (arr1[i] != arr2[i]) {
+                        return false;
+                    }
+                }
+                return true;
             }
         }, {
             key: "joinPath",

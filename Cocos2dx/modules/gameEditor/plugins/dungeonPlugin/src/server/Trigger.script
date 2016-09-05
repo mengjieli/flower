@@ -5,12 +5,14 @@ var Trigger = (function () {
         this.dungeonData = dungeonData;
         this.callObject = callObject;
         this.triggerRunning = triggerRunning;
-
         this.time = 0;
         this.update(0);
     }
 
     Trigger.prototype.update = function (dt) {
+        if (this.data.hasStop.value) {
+            return;
+        }
         this.time += dt;
         if (this.time >= this.data.delay.value && !this.data.hasPlay.value) {
             this.data.hasPlay.value = true;
@@ -21,6 +23,23 @@ var Trigger = (function () {
                 this.runEffect(effect);
             }
         }
+    }
+
+    Trigger.prototype.restart = function () {
+        for (var i = 0; i < this.data.effects.length; i++) {
+            var effect = this.data.effects[i];
+            if (effect.hasPlay.value) {
+                effect.hasPlay.value = false;
+            }
+        }
+        this.time = 0;
+        this.data.hasPlay.value = false;
+        this.data.hasStop.value = false;
+        this.update(0);
+    }
+
+    Trigger.prototype.stop = function () {
+        this.data.hasStop.value = true;
     }
 
     Trigger.prototype.runEffect = function (effect) {
@@ -99,6 +118,7 @@ var Trigger = (function () {
 
     Trigger.prototype.dispose = function () {
         this.data.hasPlay.value = false;
+        this.data.hasStop.value = false;
         for (var i = 0; i < this.data.effects.length; i++) {
             this.data.effects[i].hasPlay.value = false;
         }

@@ -2,6 +2,13 @@ function init() {
     //showDetailPanel
     this.tree.clickItem = this.onClickItem.bind(this);
     this.direction = new flower.ArrayValue();
+    this.tree.dataProvider = this.direction;
+    this.flushDirection();
+    this.expand("trigger");
+}
+
+function flushDirection() {
+    this.direction.removeAll();
     this.addDirection("trigger", "root", "触发器", [{
         "label": "添加触发器",
         "click": function (target) {
@@ -14,7 +21,6 @@ function init() {
             this.addTriggerToDirection(trigger);
         }.bind(this)
     }]);
-    this.tree.dataProvider = this.direction;
     var triggerList = this.data.data.triggers;
     for (var i = 0; i < triggerList.length; i++) {
         var trigger = triggerList[i];
@@ -24,7 +30,6 @@ function init() {
             this.addEffectToDirection(trigger, effects[e]);
         }
     }
-    this.expand("trigger");
 }
 
 function expand(url) {
@@ -73,8 +78,50 @@ function addTriggerToDirection(trigger) {
                 this.data.parser.save();
                 this.direction.removeItem(target);
             }.bind(this)
+        },
+        {
+            "label": "上移",
+            "click": function (target) {
+                var dungeonData = this.data.data;
+                var index = dungeonData.triggers.getItemIndex(trigger);
+                dungeonData.triggers.setItemIndex(trigger, index - 1);
+                this.moveDirectionUp(target);
+                this.data.parser.save();
+            }.bind(this)
+        },
+        {
+            "label": "下移",
+            "click": function (target) {
+                var dungeonData = this.data.data;
+                var index = dungeonData.triggers.getItemIndex(trigger);
+                dungeonData.triggers.setItemIndex(trigger, index + 1);
+                this.moveDirectionDown(target);
+                this.data.parser.save();
+            }.bind(this)
         }
     ], trigger, trigger.color);
+}
+
+function moveDirectionUp(target) {
+    var index = this.direction.getItemIndex(target);
+    for (var i = index - 1; i >= 0; i--) {
+        var dir = this.direction[i];
+        if (flower.Path.isPeerDirection(target.path, dir.path)) {
+            this.direction.setItemIndex(target, i);
+            break;
+        }
+    }
+}
+
+function moveDirectionDown(target) {
+    var index = this.direction.getItemIndex(target);
+    for (var i = index + 1; i < this.direction.length; i++) {
+        var dir = this.direction[i];
+        if (flower.Path.isPeerDirection(target.path, dir.path)) {
+            this.direction.setItemIndex(target, i);
+            break;
+        }
+    }
 }
 
 function addEffectToDirection(trigger, effect) {

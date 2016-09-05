@@ -62,10 +62,15 @@
       "type": "bool",
       "save": false
     },
+    "hasStop": {
+      "desc": "是否已经停止",
+      "type": "bool",
+      "save": false
+    },
     "color": {
       "desc": "文字颜色",
       "type": "number",
-      "bind": "{hasPlay?0x999999:0}",
+      "bind": "{hasStop?0x990000:(hasPlay?0x999999:0)}",
       "save": false
     }
   }

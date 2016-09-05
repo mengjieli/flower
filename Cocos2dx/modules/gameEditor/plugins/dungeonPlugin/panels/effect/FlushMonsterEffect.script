@@ -118,6 +118,9 @@ function setData(val) {
         monster.moveCoord.y.addListener(flower.Event.UPDATE, function (e) {
             this.save();
         }, this);
+        monster.ai.addListener(flower.Event.UPDATE, function (e) {
+            this.save();
+        }, this);
         this.list.dataProvider.push(data);
     }
 }
