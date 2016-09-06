@@ -29,6 +29,7 @@ var Map = (function (_super) {
         this.addListener(flower.TouchEvent.TOUCH_MOVE, this.onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_END, this.onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_RELEASE, this.onTouch, this);
+        this.addListener(flower.MouseEvent.MOUSE_MOVE, this.onTouch, this);
     }
 
     /**
@@ -134,6 +135,10 @@ var Map = (function (_super) {
                         serverNet: this.serverNet
                     });
                 }
+                break;
+            case flower.MouseEvent.MOUSE_MOVE:
+                this.dungeonData.settings.mouseX = e.mouseX + this.data.camera.x.value;
+                this.dungeonData.settings.mouseY = this.dungeonData.screenHeight.value - e.mouseY + this.data.camera.y.value;
                 break;
         }
     }

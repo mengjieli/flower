@@ -8,6 +8,7 @@
  * 1020 touchBegin
  * 1021 touchEnd
  * 1022 touchRelease
+ * 1023 rightClick
  * 1100 click
  */
 class UIComponent {

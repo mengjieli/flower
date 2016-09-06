@@ -26,6 +26,16 @@
       "type": "int",
       "save": false
     },
+    "mouseX": {
+      "desc": "鼠标位置 x",
+      "type": "int",
+      "save": false
+    },
+    "mouseY": {
+      "desc": "鼠标位置 y",
+      "type": "int",
+      "save": false
+    },
     "bornX": {
       "desc": "出生点x",
       "type": "int",

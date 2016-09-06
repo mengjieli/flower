@@ -94,6 +94,9 @@
                                label="保存"
                                click="this.data.parser.save();"/>
                 </f:Group>
+                <f:Group percentHeight="100">
+                    <f:Label text="鼠标({data.data.settings.mouseX},{data.data.settings.mouseY})" verticalCenter="0" width="100"/>
+                </f:Group>
             </f:Group>
         </f:Group>
         <f:Group percentWidth="100" top="75" bottom="0">

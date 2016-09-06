@@ -83,7 +83,7 @@ var Trigger = (function () {
     Trigger.prototype.checkDialog = function (id) {
         for (var i = 0; i < this.data.effects.length; i++) {
             var effect = this.data.effects[i];
-            if (effect.hasPlay.value && effect.type.value == 11) {
+            if (effect.hasPlay.value && effect.type.value == 11 && effect.effectValue.dialogId.value == id) {
                 this.triggerRunning.runTrigger(0, effect.effectValue.triggerId.value);
                 return;
             }

@@ -13,7 +13,6 @@ var MapNet = (function () {
      * @param data
      */
     MapNet.prototype.setCameraRange = function (x, y, width, height) {
-        trace("设置镜头范围", x, y, width, height);
         this.data.camera.viewport.value = {
             x: x,
             y: y,

@@ -22,6 +22,7 @@ var DialogUI = (function (_super) {
         if(this.data.dialog.value == 0) {
             return;
         }
+        var dialogId = this.data.dialog.value;
         this.dialog = new flower.Group();
         this.dialog.percentWidth = this.dialog.percentHeight = 100;
         this.addChild(this.dialog);
@@ -50,7 +51,7 @@ var DialogUI = (function (_super) {
         flower.Tween.to(this.dialog, 0.5, {y: 0}, flower.Ease.CUBIC_EASE_OUT, {y: 100}).call(function () {
             this.dialog.addListener(flower.TouchEvent.TOUCH_END, function () {
                 this.dialog.dispose();
-                this.serverNet.completeDialog(this.data.dialog.value);
+                this.serverNet.completeDialog(dialogId);
             }, this);
         }.bind(this));
     }
