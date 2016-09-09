@@ -2132,6 +2132,7 @@ class Event {
     static CANCEL = "cancel";
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
+    static DISTORT = "distort";
 
     static _eventPool = [];
 

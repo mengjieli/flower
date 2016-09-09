@@ -13,7 +13,13 @@
     "attributes": {
       "desc": "全部属性信息",
       "type": "black.DisplayObject",
-      "init": null
+      "init": null,
+      "saveClass": true
+    },
+    "attributesValue": {
+      "desc": "属性值",
+      "type": "Array",
+      "typeValue": "black.AttributeValue"
     }
   }
 }

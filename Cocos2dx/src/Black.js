@@ -33,7 +33,11 @@ var $root = eval("this");
      * 1020 touchBegin
      * 1021 touchEnd
      * 1022 touchRelease
+     * 1023 rightClick
      * 1100 click
+     * 1110 clickItem
+     * 1111 selectedItemChange
+     * 1112 touchBeginItem
      */
 
     var UIComponent = function () {
@@ -573,17 +577,18 @@ var $root = eval("this");
         _inherits(Value, _flower$EventDispatch);
 
         function Value() {
-            var _Object$getPrototypeO;
-
-            var _temp, _this3, _ret;
+            var checkDistort = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
             _classCallCheck(this, Value);
 
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                args[_key] = arguments[_key];
-            }
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Value).call(this));
 
-            return _ret = (_temp = (_this3 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this3), _this3.__old = null, _this3.__value = null, _temp), _possibleConstructorReturn(_this3, _ret);
+            _this3.__old = null;
+            _this3.__value = null;
+            _this3.__checkDistort = null;
+
+            _this3.__checkDistort = checkDistort == null ? Value.Default_Check_Distort : checkDistort;
+            return _this3;
         }
 
         _createClass(Value, [{
@@ -596,8 +601,16 @@ var $root = eval("this");
                 this.__value = val;
             }
         }, {
+            key: "$getValue",
+            value: function $getValue() {
+                return this.__value;
+            }
+        }, {
             key: "value",
             get: function get() {
+                if (this.__checkDistort) {
+                    return this.$getValue();
+                }
                 return this.__value;
             },
             set: function set(val) {
@@ -608,10 +621,16 @@ var $root = eval("this");
             get: function get() {
                 return this.__old;
             }
+
+            //Value 是否自动检测非法修改
+
         }]);
 
         return Value;
     }(flower.EventDispatcher);
+
+    Value.Default_Check_Distort = false;
+
 
     black.Value = Value;
     //////////////////////////End File:extension/black/data/member/Value.js///////////////////////////
@@ -694,8 +713,8 @@ var $root = eval("this");
                 if (delCount <= 0) {
                     list = [];
 
-                    for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-                        args[_key2 - 2] = arguments[_key2];
+                    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+                        args[_key - 2] = arguments[_key];
                     }
 
                     for (i = 0; i < args.length; i++) {
@@ -879,8 +898,8 @@ var $root = eval("this");
         }, {
             key: "getItemFunction",
             value: function getItemFunction(func, thisObj) {
-                for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
-                    args[_key3 - 2] = arguments[_key3];
+                for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+                    args[_key2 - 2] = arguments[_key2];
                 }
 
                 for (var i = 0; i < this.list.length; i++) {
@@ -1244,13 +1263,15 @@ var $root = eval("this");
         function IntValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
             var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+            var checkDistort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, IntValue);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this, checkDistort));
 
             _this6.__old = _this6.__value = +init & ~0 || 0;
             _this6.__enumList = enumList;
+            _this6.__valueCheck = [48];
             return _this6;
         }
 
@@ -1263,7 +1284,30 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
+                if (this.__checkDistort) {
+                    var str = val + "";
+                    this.__valueCheck.length = 0;
+                    for (var i = 0; i < str.length; i++) {
+                        this.__valueCheck.push(str.charCodeAt(i));
+                    }
+                }
                 this.dispatchWith(flower.Event.UPDATE, this, val);
+            }
+        }, {
+            key: "$getValue",
+            value: function $getValue() {
+                if (this.__checkDistort) {
+                    var str = this.__value + "";
+                    var compare = "";
+                    for (var i = 0; i < this.__valueCheck.length; i++) {
+                        compare += String.fromCharCode(this.__valueCheck[i]);
+                    }
+                    if (str != compare) {
+                        this.dispatchWith(flower.Event.DISTORT, this);
+                    }
+                    this.__value = parseFloat(compare);
+                }
+                return this.__value;
             }
         }, {
             key: "$setEnumList",
@@ -1297,15 +1341,17 @@ var $root = eval("this");
         function NumberValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
             var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+            var checkDistort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, NumberValue);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this, checkDistort));
 
             _this7.__enumList = enumList;
             _this7.__old = _this7.__value = +init || 0;
             _this7.__precision = 2;
             _this7.__multiplier = Math.pow(10, _this7.__precision);
+            _this7.__valueCheck = [48];
             return _this7;
         }
 
@@ -1329,7 +1375,30 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
+                if (this.__checkDistort) {
+                    var str = val + "";
+                    this.__valueCheck.length = 0;
+                    for (var i = 0; i < str.length; i++) {
+                        this.__valueCheck.push(str.charCodeAt(i));
+                    }
+                }
                 this.dispatchWith(flower.Event.UPDATE, this, val);
+            }
+        }, {
+            key: "$getValue",
+            value: function $getValue() {
+                if (this.__checkDistort) {
+                    var str = this.__value + "";
+                    var compare = "";
+                    for (var i = 0; i < this.__valueCheck.length; i++) {
+                        compare += String.fromCharCode(this.__valueCheck[i]);
+                    }
+                    if (str != compare) {
+                        this.dispatchWith(flower.Event.DISTORT, this);
+                    }
+                    this.__value = parseFloat(compare);
+                }
+                return this.__value;
             }
         }, {
             key: "$setEnumList",
@@ -1622,10 +1691,11 @@ var $root = eval("this");
         function UIntValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
             var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+            var checkDistort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, UIntValue);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this, checkDistort));
 
             init = +init & ~0 || 0;
             if (init < 0) {
@@ -1633,6 +1703,7 @@ var $root = eval("this");
             }
             _this10.__enumList = enumList;
             _this10.__old = _this10.__value = init;
+            _this10.__valueCheck = [48];
             return _this10;
         }
 
@@ -1648,7 +1719,30 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
+                if (this.__checkDistort) {
+                    var str = val + "";
+                    this.__valueCheck.length = 0;
+                    for (var i = 0; i < str.length; i++) {
+                        this.__valueCheck.push(str.charCodeAt(i));
+                    }
+                }
                 this.dispatchWith(flower.Event.UPDATE, this, val);
+            }
+        }, {
+            key: "$getValue",
+            value: function $getValue() {
+                if (this.__checkDistort) {
+                    var str = this.__value + "";
+                    var compare = "";
+                    for (var i = 0; i < this.__valueCheck.length; i++) {
+                        compare += String.fromCharCode(this.__valueCheck[i]);
+                    }
+                    if (str != compare) {
+                        this.dispatchWith(flower.Event.DISTORT, this);
+                    }
+                    this.__value = parseFloat(compare);
+                }
+                return this.__value;
             }
         }, {
             key: "$setEnumList",
@@ -1806,15 +1900,15 @@ var $root = eval("this");
                     for (var key in members) {
                         member = members[key];
                         if (member.init && _typeof(member.init) == "object" && member.init.__className) {
-                            content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                            content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
                             content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                         } else {
                             if (member.type === "number" || member.type === "Number") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                             } else if (member.type === "int" || member.type === "Int") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                             } else if (member.type === "uint" || member.type === "Uint") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                             } else if (member.type === "string" || member.type === "String") {
                                 content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
@@ -1905,13 +1999,14 @@ var $root = eval("this");
             key: "createData",
             value: function createData(className) {
                 var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var distort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
                 if (className === "number" || className === "Number") {
-                    return new NumberValue(init);
+                    return new NumberValue(init, null, distort);
                 } else if (className === "int" || className === "Int") {
-                    return new IntValue(init);
+                    return new IntValue(init, null, distort);
                 } else if (className === "uint" || className === "Uint") {
-                    return new UIntValue(init);
+                    return new UIntValue(init, null, distort);
                 } else if (className === "string" || className === "String") {
                     return new StringValue(init);
                 } else if (className === "boolean" || className === "Boolean" || className === "bool") {

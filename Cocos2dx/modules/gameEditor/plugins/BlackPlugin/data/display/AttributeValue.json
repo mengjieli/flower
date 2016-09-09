@@ -1,0 +1,14 @@
+{
+  "name": "black.AttributeValue",
+  "desc": "UI 属性值",
+  "members": {
+    "name": {
+      "desc": "名称",
+      "type": "string"
+    },
+    "attributeValue": {
+      "desc": "值",
+      "type": "*"
+    }
+  }
+}

@@ -101,15 +101,15 @@ class DataManager {
             for (var key in members) {
                 member = members[key];
                 if (member.init && typeof member.init == "object" && member.init.__className) {
-                    content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
                     content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                 } else {
                     if (member.type === "number" || member.type === "Number") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "int" || member.type === "Int") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "uint" || member.type === "Uint") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "string" || member.type === "String") {
                         content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
@@ -198,13 +198,13 @@ class DataManager {
         return item.define;
     }
 
-    createData(className, init = null) {
+    createData(className, init = null, distort = null) {
         if (className === "number" || className === "Number") {
-            return new NumberValue(init);
+            return new NumberValue(init, null, distort);
         } else if (className === "int" || className === "Int") {
-            return new IntValue(init);
+            return new IntValue(init, null, distort);
         } else if (className === "uint" || className === "Uint") {
-            return new UIntValue(init);
+            return new UIntValue(init, null, distort);
         } else if (className === "string" || className === "String") {
             return new StringValue(init);
         } else if (className === "boolean" || className === "Boolean" || className === "bool") {

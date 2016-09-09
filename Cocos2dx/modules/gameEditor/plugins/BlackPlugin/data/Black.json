@@ -1,0 +1,11 @@
+{
+  "name": "black.Black",
+  "desc": "用户操作",
+  "members": {
+    "operationHistory": {
+      "desc": "操作记录",
+      "type": "Array",
+      "typeValue": "black.Operation"
+    }
+  }
+}

@@ -2362,6 +2362,7 @@ var flower = {};
     Event.CANCEL = "cancel";
     Event.START_INPUT = "start_input";
     Event.STOP_INPUT = "stop_input";
+    Event.DISTORT = "distort";
     Event._eventPool = [];
 
 

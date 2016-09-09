@@ -21,7 +21,11 @@ for (var key in flower.sys) {
  * 1020 touchBegin
  * 1021 touchEnd
  * 1022 touchRelease
+ * 1023 rightClick
  * 1100 click
+ * 1110 clickItem
+ * 1111 selectedItemChange
+ * 1112 touchBeginItem
  */
 class UIComponent {
 
@@ -530,6 +534,12 @@ class Value extends flower.EventDispatcher {
 
     __old = null;
     __value = null;
+    __checkDistort = null;
+
+    constructor(checkDistort = null) {
+        super();
+        this.__checkDistort = checkDistort == null ? Value.Default_Check_Distort : checkDistort;
+    }
 
     $setValue(val) {
         if (val == this.__value) {
@@ -539,7 +549,14 @@ class Value extends flower.EventDispatcher {
         this.__value = val;
     }
 
+    $getValue() {
+        return this.__value;
+    }
+
     get value() {
+        if(this.__checkDistort) {
+            return this.$getValue();
+        }
         return this.__value;
     }
 
@@ -550,6 +567,9 @@ class Value extends flower.EventDispatcher {
     get old() {
         return this.__old;
     }
+
+    //Value 是否自动检测非法修改
+    static Default_Check_Distort = false;
 }
 
 black.Value = Value;
@@ -1109,10 +1129,11 @@ black.BooleanValue = BooleanValue;
 //////////////////////////File:extension/black/data/member/IntValue.js///////////////////////////
 class IntValue extends Value {
 
-    constructor(init = 0, enumList = null)  {
-        super();
+    constructor(init = 0, enumList = null, checkDistort = null) {
+        super(checkDistort);
         this.__old = this.__value = +init & ~0 || 0;
         this.__enumList = enumList;
+        this.__valueCheck = [48];
     }
 
     $setValue(val) {
@@ -1122,7 +1143,29 @@ class IntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
+        if (this.__checkDistort) {
+            var str = val + "";
+            this.__valueCheck.length = 0;
+            for (var i = 0; i < str.length; i++) {
+                this.__valueCheck.push(str.charCodeAt(i));
+            }
+        }
         this.dispatchWith(flower.Event.UPDATE, this, val);
+    }
+
+    $getValue() {
+        if (this.__checkDistort) {
+            var str = this.__value + "";
+            var compare = "";
+            for (var i = 0; i < this.__valueCheck.length; i++) {
+                compare += String.fromCharCode(this.__valueCheck[i]);
+            }
+            if (str != compare) {
+                this.dispatchWith(flower.Event.DISTORT, this);
+            }
+            this.__value = parseFloat(compare);
+        }
+        return this.__value;
     }
 
     $setEnumList(val) {
@@ -1149,12 +1192,13 @@ black.IntValue = IntValue;
 //////////////////////////File:extension/black/data/member/NumberValue.js///////////////////////////
 class NumberValue extends Value {
 
-    constructor(init = 0, enumList = null) {
-        super();
+    constructor(init = 0, enumList = null, checkDistort = null) {
+        super(checkDistort);
         this.__enumList = enumList;
         this.__old = this.__value = +init || 0;
         this.__precision = 2;
         this.__multiplier = Math.pow(10, this.__precision);
+        this.__valueCheck = [48];
     }
 
     $setValue(val) {
@@ -1175,7 +1219,29 @@ class NumberValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
+        if (this.__checkDistort) {
+            var str = val + "";
+            this.__valueCheck.length = 0;
+            for (var i = 0; i < str.length; i++) {
+                this.__valueCheck.push(str.charCodeAt(i));
+            }
+        }
         this.dispatchWith(flower.Event.UPDATE, this, val);
+    }
+
+    $getValue() {
+        if (this.__checkDistort) {
+            var str = this.__value + "";
+            var compare = "";
+            for (var i = 0; i < this.__valueCheck.length; i++) {
+                compare += String.fromCharCode(this.__valueCheck[i]);
+            }
+            if (str != compare) {
+                this.dispatchWith(flower.Event.DISTORT, this);
+            }
+            this.__value = parseFloat(compare);
+        }
+        return this.__value;
     }
 
     $setEnumList(val) {
@@ -1418,14 +1484,15 @@ black.StringValue = StringValue;
 //////////////////////////File:extension/black/data/member/UIntValue.js///////////////////////////
 class UIntValue extends Value {
 
-    constructor(init = 0, enumList = null) {
-        super();
+    constructor(init = 0, enumList = null, checkDistort = null) {
+        super(checkDistort);
         init = +init & ~0 || 0;
         if (init < 0) {
             init = 0;
         }
         this.__enumList = enumList;
         this.__old = this.__value = init;
+        this.__valueCheck = [48];
     }
 
     $setValue(val) {
@@ -1438,7 +1505,29 @@ class UIntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
+        if (this.__checkDistort) {
+            var str = val + "";
+            this.__valueCheck.length = 0;
+            for (var i = 0; i < str.length; i++) {
+                this.__valueCheck.push(str.charCodeAt(i));
+            }
+        }
         this.dispatchWith(flower.Event.UPDATE, this, val);
+    }
+
+    $getValue() {
+        if (this.__checkDistort) {
+            var str = this.__value + "";
+            var compare = "";
+            for (var i = 0; i < this.__valueCheck.length; i++) {
+                compare += String.fromCharCode(this.__valueCheck[i]);
+            }
+            if (str != compare) {
+                this.dispatchWith(flower.Event.DISTORT, this);
+            }
+            this.__value = parseFloat(compare);
+        }
+        return this.__value;
     }
 
     $setEnumList(val) {
@@ -1592,15 +1681,15 @@ class DataManager {
             for (var key in members) {
                 member = members[key];
                 if (member.init && typeof member.init == "object" && member.init.__className) {
-                    content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                    content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
                     content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                 } else {
                     if (member.type === "number" || member.type === "Number") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "int" || member.type === "Int") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "uint" || member.type === "Uint") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "string" || member.type === "String") {
                         content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
@@ -1689,13 +1778,13 @@ class DataManager {
         return item.define;
     }
 
-    createData(className, init = null) {
+    createData(className, init = null, distort = null) {
         if (className === "number" || className === "Number") {
-            return new NumberValue(init);
+            return new NumberValue(init, null, distort);
         } else if (className === "int" || className === "Int") {
-            return new IntValue(init);
+            return new IntValue(init, null, distort);
         } else if (className === "uint" || className === "Uint") {
-            return new UIntValue(init);
+            return new UIntValue(init, null, distort);
         } else if (className === "string" || className === "String") {
             return new StringValue(init);
         } else if (className === "boolean" || className === "Boolean" || className === "bool") {
