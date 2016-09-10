@@ -15,7 +15,7 @@ class UIParser extends Group {
             "Shape": "flower.Shape",
             "Mask": "flower.Mask",
 
-            "ArrayValue": "ArrayValue",
+            "ArrayValue": "flower.ArrayValue",
             "BooleanValue": "flower.BooleanValue",
             "IntValue": "flower.IntValue",
             "NumberValue": "flower.NumberValue",
@@ -143,7 +143,7 @@ class UIParser extends Group {
         this.relationUI = [];
         var xml = flower.XMLElement.parse(e.data);
         for (var i = 0; i < xml.namespaces.length; i++) {
-            if(xml.namespaces[i].name == "f") {
+            if (xml.namespaces[i].name == "f") {
                 continue;
             }
             this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[xml.namespaces[i].value];
@@ -274,7 +274,7 @@ class UIParser extends Group {
             return null;
         }
         for (var i = 0; i < xml.namespaces.length; i++) {
-            if(xml.namespaces[i].name == "f") {
+            if (xml.namespaces[i].name == "f") {
                 continue;
             }
             this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[xml.namespaces[i].value];
@@ -697,9 +697,6 @@ class UIParser extends Group {
             } else {
                 //if (createClassNameSpace != "f") {
                 //    createClassName = this.classes[createClassNameSpace][createClassName];
-                //}
-                //if (!createClassName.split) {
-                //    console.log("???");
                 //}
                 thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                 thisObj = thisObj.toLocaleLowerCase();
