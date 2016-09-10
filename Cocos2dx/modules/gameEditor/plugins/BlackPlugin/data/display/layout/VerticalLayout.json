@@ -1,0 +1,9 @@
+{
+  "name": "black.VerticalLayout",
+  "extends": "black.LinearLayout",
+  "init": {
+    "align": "vertical"
+  },
+  "members": {
+  }
+}

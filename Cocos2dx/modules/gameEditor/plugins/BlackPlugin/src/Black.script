@@ -1,0 +1,4 @@
+var blackData = null;
+function initBlack() {
+    blackData = flower.DataManager.createData("black.Black");
+}

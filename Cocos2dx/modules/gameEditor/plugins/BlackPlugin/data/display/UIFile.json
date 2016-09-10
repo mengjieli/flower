@@ -1,0 +1,23 @@
+{
+  "name": "black.UIFile",
+  "desc": "UI文件 数据",
+  "members": {
+    "exportClass": {
+      "desc": "导出类名",
+      "type": "string"
+    },
+    "namespaces": {
+      "desc": "命名空间",
+      "type": "Array",
+      "typeValue": "black.NameSapce"
+    },
+    "module": {
+      "desc": "所属模块信息",
+      "type": "*"
+    },
+    "ui": {
+      "desc": "显示对象",
+      "type": "black.UI"
+    }
+  }
+}

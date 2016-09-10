@@ -10,7 +10,7 @@ class ObjectValue extends Value {
         this.__nosave = {};
     }
 
-    setMember(name, value) {
+    $setMember(name, value) {
         var old = this.__value[name];
         this.__value[name] = value;
         this.dispatchWith(name, {
@@ -20,11 +20,11 @@ class ObjectValue extends Value {
         });
     }
 
-    setMemberSaveClass(name, saveClass = false) {
+    $setMemberSaveClass(name, saveClass = false) {
         this.__saveClass[name] = saveClass;
     }
 
-    setMemberSaveFlag(name, save = false) {
+    $setMemberSaveFlag(name, save = false) {
         if (save == false) {
             this.__nosave[name] = true;
         } else {
@@ -46,13 +46,13 @@ class ObjectValue extends Value {
             return;
         }
         if (value == null) {
-            this.setMember(name, null);
+            this.$setMember(name, null);
         } else {
             if (value && (!(value instanceof Value)) && typeof value == "object" && value.__className) {
                 value = flower.DataManager.createData(value.__className, value);
             }
             if (value instanceof Value) {
-                this.setMember(name, value);
+                this.$setMember(name, value);
             } else {
                 var val = this.__value[name];
                 var old = val;
@@ -84,7 +84,7 @@ class ObjectValue extends Value {
             var key = list[i];
             var value = val[key];
             if (!this.__value.hasOwnProperty(key)) {
-                this.setMember(key, value);
+                this.$setMember(key, value);
             } else {
                 this.setValue(key, value);
             }

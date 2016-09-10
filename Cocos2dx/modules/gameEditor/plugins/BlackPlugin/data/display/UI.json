@@ -1,25 +1,26 @@
 {
   "name": "black.UI",
-  "desc": "UI 数据",
   "members": {
-    "className": {
-      "desc": "导出类名",
-      "type": "string"
-    },
-    "module": {
-      "desc": "所属模块信息",
-      "type": "*"
-    },
-    "attributes": {
-      "desc": "全部属性信息",
+    "display": {
+      "desc": "显示对象属性信息",
       "type": "black.DisplayObject",
       "init": null,
       "saveClass": true
     },
-    "attributesValue": {
+    "attributes": {
       "desc": "属性值",
       "type": "Array",
       "typeValue": "black.AttributeValue"
+    },
+    "children": {
+      "desc": "子对象",
+      "type": "Array",
+      "typeValue": "black.UI"
+    },
+    "file": {
+      "desc": "所属 UI 文件",
+      "type": "black.UIFile",
+      "init": null
     }
   }
 }

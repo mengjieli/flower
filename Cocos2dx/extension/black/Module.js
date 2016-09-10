@@ -7,6 +7,8 @@ class Module extends flower.EventDispatcher {
     __direction;
     __beforeScript;
     __moduleKey;
+    __hasExecute;
+    __name;
 
     constructor(url, beforeScript = "") {
         super();
@@ -29,8 +31,8 @@ class Module extends flower.EventDispatcher {
 
     __onLoadModuleComplete(e) {
         var cfg = e.data;
-        var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace, cfg.name);
+        this.__name = cfg.name;
+        flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
         this.__list = [];
         var classes = cfg.classes;
         if (classes && Object.keys(classes).length) {
@@ -39,7 +41,7 @@ class Module extends flower.EventDispatcher {
                 if (url.slice(0, 2) == "./") {
                     url = this.__direction + url.slice(2, url.length);
                 }
-                flower.UIParser.setLocalUIURL(key, url, namespace);
+                flower.UIParser.setLocalUIURL(key, url, cfg.name);
             }
         }
         this.script = "";
@@ -49,7 +51,11 @@ class Module extends flower.EventDispatcher {
         this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
         this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
-        flower.UIParser.setNameSpaceBeforeScript(namespace, this.__beforeScript);
+        if (cfg.execute) {
+            this.__hasExecute = true;
+            this.script += "$root." + cfg.name + "__executeModule = function() {" + cfg.execute + "}\n";
+        }
+        flower.UIParser.setModuleBeforeScript(cfg.name, this.__beforeScript);
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
@@ -84,7 +90,7 @@ class Module extends flower.EventDispatcher {
                     url = this.__direction + url.slice(2, url.length);
                 }
                 var parser = new flower.UIParser(this.__beforeScript);
-                parser.localNameSpace = namespace;
+                parser.moduleName = cfg.name;
                 this.__list.push({
                     type: "ui",
                     ui: parser,
@@ -109,7 +115,7 @@ class Module extends flower.EventDispatcher {
         if (this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data,this.__moduleKey);
+                flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
@@ -124,6 +130,9 @@ class Module extends flower.EventDispatcher {
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;
         if (this.__index == this.__list.length) {
+            if (this.__hasExecute) {
+                $root[this.__name + "__executeModule"]();
+            }
             this.dispatchWith(flower.Event.COMPLETE);
             return;
         }

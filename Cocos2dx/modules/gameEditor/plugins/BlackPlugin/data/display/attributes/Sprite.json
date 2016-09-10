@@ -1,0 +1,6 @@
+{
+  "name": "black.Sprite",
+  "extends": "black.DisplayObject",
+  "members": {
+  }
+}

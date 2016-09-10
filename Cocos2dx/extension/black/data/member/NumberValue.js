@@ -46,8 +46,8 @@ class NumberValue extends Value {
             }
             if (str != compare) {
                 this.dispatchWith(flower.Event.DISTORT, this);
+                this.__value = parseFloat(compare);
             }
-            this.__value = parseFloat(compare);
         }
         return this.__value;
     }

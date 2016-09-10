@@ -554,7 +554,7 @@ class Value extends flower.EventDispatcher {
     }
 
     get value() {
-        if(this.__checkDistort) {
+        if (this.__checkDistort) {
             return this.$getValue();
         }
         return this.__value;
@@ -1057,7 +1057,7 @@ class ArrayValue extends Value {
     }
 }
 
-for (var i = 0; i < 100; i++) {
+for (var i = 0; i < 1000; i++) {
     Object.defineProperty(ArrayValue.prototype, "" + i, {
         get: function (index) {
             return function () {
@@ -1162,8 +1162,8 @@ class IntValue extends Value {
             }
             if (str != compare) {
                 this.dispatchWith(flower.Event.DISTORT, this);
+                this.__value = parseFloat(compare);
             }
-            this.__value = parseFloat(compare);
         }
         return this.__value;
     }
@@ -1238,8 +1238,8 @@ class NumberValue extends Value {
             }
             if (str != compare) {
                 this.dispatchWith(flower.Event.DISTORT, this);
+                this.__value = parseFloat(compare);
             }
-            this.__value = parseFloat(compare);
         }
         return this.__value;
     }
@@ -1292,7 +1292,7 @@ class ObjectValue extends Value {
         this.__nosave = {};
     }
 
-    setMember(name, value) {
+    $setMember(name, value) {
         var old = this.__value[name];
         this.__value[name] = value;
         this.dispatchWith(name, {
@@ -1302,11 +1302,11 @@ class ObjectValue extends Value {
         });
     }
 
-    setMemberSaveClass(name, saveClass = false) {
+    $setMemberSaveClass(name, saveClass = false) {
         this.__saveClass[name] = saveClass;
     }
 
-    setMemberSaveFlag(name, save = false) {
+    $setMemberSaveFlag(name, save = false) {
         if (save == false) {
             this.__nosave[name] = true;
         } else {
@@ -1328,13 +1328,13 @@ class ObjectValue extends Value {
             return;
         }
         if (value == null) {
-            this.setMember(name, null);
+            this.$setMember(name, null);
         } else {
             if (value && (!(value instanceof Value)) && typeof value == "object" && value.__className) {
                 value = flower.DataManager.createData(value.__className, value);
             }
             if (value instanceof Value) {
-                this.setMember(name, value);
+                this.$setMember(name, value);
             } else {
                 var val = this.__value[name];
                 var old = val;
@@ -1366,7 +1366,7 @@ class ObjectValue extends Value {
             var key = list[i];
             var value = val[key];
             if (!this.__value.hasOwnProperty(key)) {
-                this.setMember(key, value);
+                this.$setMember(key, value);
             } else {
                 this.setValue(key, value);
             }
@@ -1446,12 +1446,12 @@ class StringValue extends Value {
 
     constructor(init = "", enumList = null) {
         super();
-        this.__old = this.__value = "" + init;
+        this.__old = this.__value = "" + (init == null ? "" : init);
         this.__enumList = enumList;
     }
 
     $setValue(val) {
-        val = "" + val;
+        val = "" + (val == null ? "" : val);
         if (val == this.__value) {
             return;
         }
@@ -1524,8 +1524,8 @@ class UIntValue extends Value {
             }
             if (str != compare) {
                 this.dispatchWith(flower.Event.DISTORT, this);
+                this.__value = parseFloat(compare);
             }
-            this.__value = parseFloat(compare);
         }
         return this.__value;
     }
@@ -1681,35 +1681,35 @@ class DataManager {
             for (var key in members) {
                 member = members[key];
                 if (member.init && typeof member.init == "object" && member.init.__className) {
-                    content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
-                    content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                    content += "\t\tthis.$setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
+                    content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                 } else {
                     if (member.type === "number" || member.type === "Number") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "int" || member.type === "Int") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "uint" || member.type === "Uint") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "string" || member.type === "String") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "array" || member.type === "Array") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
                     } else if (member.type === "*") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
-                        content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                        content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     } else {
                         if (member.hasOwnProperty("init") && member.init == null) {
-                            content += "\t\tthis.setMember(\"" + key + "\" , null);\n";
+                            content += "\t\tthis.$setMember(\"" + key + "\" , null);\n";
                         } else {
-                            content += "\t\tthis.setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                            content += "\t\tthis.$setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
                         }
-                        content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                        content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     }
                 }
                 if (member.save === true || member.save === false) {
-                    content += "\t\tthis.setMemberSaveFlag(\"" + key + "\" ," + member.save + ");\n";
+                    content += "\t\tthis.$setMemberSaveFlag(\"" + key + "\" ," + member.save + ");\n";
                 }
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
@@ -2366,6 +2366,7 @@ class UIParser extends Group {
             "Array": "push",
             "ArrayValue": "push"
         },
+        uiModule: {},
         namespaces: {},
         defaultClassNames: {},
         packages: {
@@ -2389,7 +2390,8 @@ class UIParser extends Group {
     scriptContent;
     staticScript;
     loadURL;
-    localNameSpace = "local";
+    moduleName = "local";
+    namespaces = {};
 
     constructor(beforeScript = "") {
         super();
@@ -2399,10 +2401,10 @@ class UIParser extends Group {
     }
 
     parseUIAsync(url, data = null) {
-        if (this.classes.namespaces[url]) {
-            this.localNameSpace = this.classes.namespaces[url];
-            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
-                this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+        if (this.classes.uiModule[url]) {
+            this.moduleName = this.classes.uiModule[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.moduleName]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.moduleName];
             }
         }
         if (this.classes.defaultClassNames[url]) {
@@ -2418,10 +2420,10 @@ class UIParser extends Group {
     }
 
     parseAsync(url) {
-        if (this.classes.namespaces[url]) {
-            this.localNameSpace = this.classes.namespaces[url];
-            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.localNameSpace]) {
-                this._beforeScript = flower.UIParser.classes.beforeScripts[this.localNameSpace];
+        if (this.classes.uiModule[url]) {
+            this.moduleName = this.classes.uiModule[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.moduleName]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.moduleName];
             }
         }
         if (this.classes.defaultClassNames[url]) {
@@ -2446,6 +2448,12 @@ class UIParser extends Group {
     loadContentComplete(e) {
         this.relationUI = [];
         var xml = flower.XMLElement.parse(e.data);
+        for (var i = 0; i < xml.namespaces.length; i++) {
+            if(xml.namespaces[i].name == "f") {
+                continue;
+            }
+            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[xml.namespaces[i].value];
+        }
         this.loadContent = xml;
         var list = xml.getAllElements();
         var scriptURL = "";
@@ -2454,6 +2462,7 @@ class UIParser extends Group {
             var nameSpace = name.split(":")[0];
             name = name.split(":")[1];
             if (nameSpace != "f") {
+                nameSpace = this.namespaces[nameSpace];
                 if (!this.classes[nameSpace][name] && !this.classes[nameSpace + "Content"][name]) {
                     if (!this.classes[nameSpace + "URL"][name]) {
                         sys.$error(3002, name);
@@ -2525,7 +2534,7 @@ class UIParser extends Group {
         } else {
             var parser = new UIParser();
             parser.defaultClassName = this.relationUI[this.relationIndex].name;
-            parser.localNameSpace = this.relationUI[this.relationIndex].namesapce;
+            parser.moduleName = this.relationUI[this.relationIndex].namesapce;
             parser.parseAsync(this.relationUI[this.relationIndex].url);
             parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
             parser.addListener(flower.ERROR, this.relationLoadError, this);
@@ -2543,7 +2552,7 @@ class UIParser extends Group {
     parseUI(content, data = null) {
         this.parse(content);
         var className = this._className;
-        var namesapce = this.localNameSpace;
+        var namesapce = this.moduleName;
         var UIClass = this.classes[namesapce][className];
         var ui;
         if (data) {
@@ -2569,6 +2578,12 @@ class UIParser extends Group {
         if (xml.getNameSapce("f") == null || xml.getNameSapce("f").value != "flower") {
             sys.$error(3006, content);
             return null;
+        }
+        for (var i = 0; i < xml.namespaces.length; i++) {
+            if(xml.namespaces[i].name == "f") {
+                continue;
+            }
+            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[xml.namespaces[i].value];
         }
         this.rootXML = xml;
         var classInfo = this.decodeRootComponent(xml, content);
@@ -2605,6 +2620,7 @@ class UIParser extends Group {
         var allClassName = "";
         var packages = [];
         if (uinameNS != "f") {
+            uinameNS = this.namespaces[uinameNS];
             extendClass = uiname;
         } else {
             extendClass = this.classes[uinameNS][uiname];
@@ -2697,9 +2713,9 @@ class UIParser extends Group {
             }
         }
         content += classEnd;
-        content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
+        content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.moduleName + "\");\n";
         var pkg = "";
-        var pkgs = flower.UIParser.classes.packages[this.localNameSpace] || [];
+        var pkgs = flower.UIParser.classes.packages[this.moduleName] || [];
         pkgs = pkgs.concat(packages);
         for (var i = 0; i < pkgs.length; i++) {
             pkg = pkgs[i];
@@ -2719,7 +2735,7 @@ class UIParser extends Group {
         } else {
             eval(content);
         }
-        flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
+        flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.moduleName);
         return {
             "namesapce": uinameNS,
             "className": allClassName,
@@ -2994,7 +3010,7 @@ class UIParser extends Group {
                 thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                 thisObj = thisObj.toLocaleLowerCase();
                 if (createClassNameSpace != "f") {
-                    setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + createClassNameSpace + "\"))();\n";
+                    setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + this.namespaces[createClassNameSpace] + "\"))();\n";
                 } else {
                     setObject += before + "\tvar " + thisObj + " = new " + this.classes.f[createClassName] + "();\n";
                 }
@@ -3049,6 +3065,7 @@ class UIParser extends Group {
                     if (!namespaces[childNameNS]) {
                         sys.$warn(3004, childNameNS, this.parseContent);
                     }
+                    childNameNS = this.namespaces[childNameNS];
                     if (this.classes[childNameNS][childName]) {
                         childClass = childName;
                     } else {
@@ -3081,8 +3098,9 @@ class UIParser extends Group {
                         for (var n = 0; n < this.rootXML.namespaces.length; n++) {
                             item.addNameSpace(this.rootXML.namespaces[n]);
                         }
-                        var itemRenderer = (new UIParser());
-                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.localNameSpace + "\");\n";
+                        var itemRenderer = new UIParser();
+                        itemRenderer.namespaces = this.namespaces;
+                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.moduleName + "\");\n";
                     } else {
                         funcName = className + "_get" + itemClassName;
                         setObject += before + "\t" + thisObj + "." + childName + " = this." + funcName + "(" + thisObj + ");\n";
@@ -3129,43 +3147,44 @@ class UIParser extends Group {
         return true;
     }
 
-    static registerLocalUIClass(name, cls, namespace = "local") {
-        flower.UIParser.classes[namespace][name] = cls;
+    static registerLocalUIClass(name, cls, moduleName = "local") {
+        flower.UIParser.classes[moduleName][name] = cls;
     }
 
-    static setLocalUIClassContent(name, content, namespace = "local") {
-        flower.UIParser.classes[namespace + "Content"][name] = content;
+    static setLocalUIClassContent(name, content, moduleName = "local") {
+        flower.UIParser.classes[moduleName + "Content"][name] = content;
     }
 
-    static getLocalUIClassContent(name, namespace = "local") {
-        return flower.UIParser.classes[namespace + "Content"] ? flower.UIParser.classes[namespace + "Content"][name] : null;
+    static getLocalUIClassContent(name, moduleName = "local") {
+        return flower.UIParser.classes[moduleName + "Content"] ? flower.UIParser.classes[moduleName + "Content"][name] : null;
     }
 
-    static getLocalUIClass(name, namespace = "local") {
-        return this.classes[namespace] ? this.classes[namespace][name] : null;
+    static getLocalUIClass(name, moduleName = "local") {
+        return this.classes[moduleName] ? this.classes[moduleName][name] : null;
     }
 
-    static setLocalUIURL(name, url, namespace = "local") {
-        this.classes[namespace + "URL"][name] = url;
-        this.classes.namespaces[url] = namespace;
+    static setLocalUIURL(name, url, moduleName = "local") {
+        this.classes[moduleName + "URL"][name] = url;
+        this.classes.uiModule[url] = moduleName;
         this.classes.defaultClassNames[url] = name;
     }
 
-    static addNameSapce(name, packageURL = "") {
-        if (!flower.UIParser.classes[name]) {
+    static addModule(moduleName, url, packageURL = "") {
+        if (!flower.UIParser.classes[moduleName]) {
             var pkgs = packageURL.split(".");
             if (pkgs[0] == "") {
                 pkgs = [];
             }
-            flower.UIParser.classes.packages[name] = pkgs;
-            flower.UIParser.classes[name] = {};
-            flower.UIParser.classes[name + "Content"] = {};
-            flower.UIParser.classes[name + "URL"] = {};
+            flower.UIParser.classes.namespaces[url] = moduleName;
+            flower.UIParser.classes.packages[moduleName] = pkgs;
+            flower.UIParser.classes[moduleName] = {};
+            flower.UIParser.classes[moduleName + "Content"] = {};
+            flower.UIParser.classes[moduleName + "URL"] = {};
         }
     }
 
-    static setNameSpaceBeforeScript(nameSpace, beforeScript) {
-        flower.UIParser.classes.beforeScripts[nameSpace] = beforeScript;
+    static setModuleBeforeScript(moduleName, beforeScript) {
+        flower.UIParser.classes.beforeScripts[moduleName] = beforeScript;
     }
 }
 
@@ -6537,6 +6556,8 @@ class Module extends flower.EventDispatcher {
     __direction;
     __beforeScript;
     __moduleKey;
+    __hasExecute;
+    __name;
 
     constructor(url, beforeScript = "") {
         super();
@@ -6559,8 +6580,8 @@ class Module extends flower.EventDispatcher {
 
     __onLoadModuleComplete(e) {
         var cfg = e.data;
-        var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace, cfg.name);
+        this.__name = cfg.name;
+        flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
         this.__list = [];
         var classes = cfg.classes;
         if (classes && Object.keys(classes).length) {
@@ -6569,7 +6590,7 @@ class Module extends flower.EventDispatcher {
                 if (url.slice(0, 2) == "./") {
                     url = this.__direction + url.slice(2, url.length);
                 }
-                flower.UIParser.setLocalUIURL(key, url, namespace);
+                flower.UIParser.setLocalUIURL(key, url, cfg.name);
             }
         }
         this.script = "";
@@ -6579,7 +6600,11 @@ class Module extends flower.EventDispatcher {
         this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
         this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
-        flower.UIParser.setNameSpaceBeforeScript(namespace, this.__beforeScript);
+        if (cfg.execute) {
+            this.__hasExecute = true;
+            this.script += "$root." + cfg.name + "__executeModule = function() {" + cfg.execute + "}\n";
+        }
+        flower.UIParser.setModuleBeforeScript(cfg.name, this.__beforeScript);
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
@@ -6614,7 +6639,7 @@ class Module extends flower.EventDispatcher {
                     url = this.__direction + url.slice(2, url.length);
                 }
                 var parser = new flower.UIParser(this.__beforeScript);
-                parser.localNameSpace = namespace;
+                parser.moduleName = cfg.name;
                 this.__list.push({
                     type: "ui",
                     ui: parser,
@@ -6639,7 +6664,7 @@ class Module extends flower.EventDispatcher {
         if (this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data,this.__moduleKey);
+                flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
@@ -6654,6 +6679,9 @@ class Module extends flower.EventDispatcher {
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;
         if (this.__index == this.__list.length) {
+            if (this.__hasExecute) {
+                $root[this.__name + "__executeModule"]();
+            }
             this.dispatchWith(flower.Event.COMPLETE);
             return;
         }

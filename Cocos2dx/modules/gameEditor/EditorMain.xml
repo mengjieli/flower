@@ -1,10 +1,10 @@
-<f:Group percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="software"
-         xmlns:e="editer">
+<f:Group percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="modules/software/module.json"
+         xmlns:e="modules/gameEditor/module.json">
     <s:Tab left="0" right="200" percentHeight="100">
         <f:panels>
             <f:Array>
                 <e:ProjectView/>
-                <s:ScrollerTree title="源文件" percentWidth="100" percentHeight="100" viewport="s:LabelTree">
+                <s:ScrollerTree title="源文件" percentWidth="100" percentHeight="100" viewport="software:LabelTree">
                     <f:dataProvider>
                         <f:Direction path="res"/>
                     </f:dataProvider>

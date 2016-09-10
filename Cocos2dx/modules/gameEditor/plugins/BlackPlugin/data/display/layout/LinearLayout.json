@@ -1,0 +1,15 @@
+{
+  "name": "black.LinearLayout",
+  "extends": "black.Layout",
+  "init": {
+    "fixElementSize": true
+  },
+  "members": {
+    "gap": {
+      "type": "uint"
+    },
+    "align": {
+      "type": "string"
+    }
+  }
+}

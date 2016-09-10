@@ -6,6 +6,16 @@
       "desc": "操作记录",
       "type": "Array",
       "typeValue": "black.Operation"
+    },
+    "uis": {
+      "desc": "所有 UI文件 数据",
+      "type": "Array",
+      "typeValue": "black.UIFile"
+    },
+    "modules": {
+      "desc": "所有 Module 数据",
+      "type": "Array",
+      "typeValue": "black.Module"
     }
   }
 }

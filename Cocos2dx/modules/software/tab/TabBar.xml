@@ -1,6 +1,6 @@
 <f:TabBar class="TabBar" more="true" selectTime="touch_begin" percentWidth="100" height="25"
           creationComplete="this.init();" xmlns:f="flower"
-          xmlns:s="software">
+          xmlns:s="modules/software/module.json">
     <f:script src="./TabBar.script"/>
     <f:itemRenderer>
         <f:ItemRenderer percentHeight="100">

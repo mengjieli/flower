@@ -1,0 +1,11 @@
+{
+  "name": "black.Module",
+  "members": {
+    "scripts": {
+      "desc": "代码",
+      "type": "Array",
+      "typeValue": "string"
+    },
+    ""
+  }
+}

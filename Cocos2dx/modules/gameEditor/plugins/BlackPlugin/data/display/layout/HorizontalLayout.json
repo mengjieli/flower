@@ -1,0 +1,9 @@
+{
+  "name": "black.HorizontalLayout",
+  "extends": "black.LinearLayout",
+  "init": {
+    "align": "horizontal"
+  },
+  "members": {
+  }
+}

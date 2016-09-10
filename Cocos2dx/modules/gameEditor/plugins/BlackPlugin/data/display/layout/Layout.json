@@ -1,0 +1,8 @@
+{
+  "name": "black.Layout",
+  "members": {
+    "fixElementSize": {
+      "type": "bool"
+    }
+  }
+}

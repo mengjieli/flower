@@ -1,5 +1,4 @@
 {
-  "namespace": "dg",
   "name": "dg",
   "scripts": [
     "./src/Dungeon.script",

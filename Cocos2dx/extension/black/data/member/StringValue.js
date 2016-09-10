@@ -2,12 +2,12 @@ class StringValue extends Value {
 
     constructor(init = "", enumList = null) {
         super();
-        this.__old = this.__value = "" + init;
+        this.__old = this.__value = "" + (init == null ? "" : init);
         this.__enumList = enumList;
     }
 
     $setValue(val) {
-        val = "" + val;
+        val = "" + (val == null ? "" : val);
         if (val == this.__value) {
             return;
         }

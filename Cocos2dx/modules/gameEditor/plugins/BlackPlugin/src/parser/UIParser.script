@@ -1,0 +1,53 @@
+var UIParser = (function (_super) {
+
+    __extends(UIParser, _super);
+
+    function UIParser(xml, data) {
+        _super.call(this);
+        this.xml = xml;
+        this.data = data;
+    }
+
+    UIParser.prototype.load = function () {
+        //分析类名
+        var name = this.xml.name;
+        var namespace = name.split(":")[0];
+        var className = name.split(":")[1];
+        if (namespace == "f") {
+            this.data.display = flower.DataManager.createData("black." + className);
+        }
+        var display = this.data.display;
+        for (var i = 0; i < this.xml.attributes.length; i++) {
+            var attribute = this.xml.attributes[i];
+            if (display.hasMember(attribute.name)) {
+                display[attribute.name].value = attribute.value;
+            } else {
+                var attributeValue = flower.DataManager.createData("black.AttributeValue");
+                attributeValue.name = attribute.name;
+                attributeValue.content = new flower.StringValue(attribute.value);
+                this.data.attributes.push(attributeValue);
+            }
+        }
+        for (var i = 0; i < this.xml.elements.length; i++) {
+            var element = this.xml.elements[i];
+        }
+        console.log(this.xml, this.data);
+    }
+
+    //Object.defineProperty(UIParser.prototype, "itemId", {
+    //    get: function () {
+    //        this.data.itemId.value = this.data.itemId.value + 1;
+    //        return this.data.itemId.value;
+    //    },
+    //    set: function (val) {
+    //    },
+    //    enumerable: true,
+    //    configurable: true
+    //});
+
+
+    return UIParser;
+
+})(flower.EventDispatcher);
+
+module.UIParser = UIParser;

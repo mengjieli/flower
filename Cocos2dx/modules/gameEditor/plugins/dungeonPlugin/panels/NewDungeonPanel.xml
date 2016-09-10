@@ -1,5 +1,5 @@
 <s:Alert class="NewDungeonPanel" creationComplete="this.init();" title="新建副本关卡" width="300" height="200"
-         xmlns:f="flower" xmlns:s="software">
+         xmlns:f="flower" xmlns:s="modules/software/module.json">
     <f:script src="./NewDungeonPanel.script"/>
     <f:Group id="container" left="1" right="1" top="25" bottom="0">
         <f:Label text="名称" horizontalCenter="-50" y="24"/>

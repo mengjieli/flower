@@ -22,7 +22,7 @@ class Value extends flower.EventDispatcher {
     }
 
     get value() {
-        if(this.__checkDistort) {
+        if (this.__checkDistort) {
             return this.$getValue();
         }
         return this.__value;

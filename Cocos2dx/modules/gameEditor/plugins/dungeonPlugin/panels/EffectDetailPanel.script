@@ -13,7 +13,7 @@ function init() {
         var atr1 = attributes[i];
         var label1 = labels[i];
         var fxml =
-            '<f:Group horizontalCenter="0" xmlns:f="flower" xmlns:s="software">' +
+            '<f:Group horizontalCenter="0" xmlns:f="flower" xmlns:s="modules/software/module.json">' +
             '<f:Label horizontalCenter="-55" width="60" text="' + label1 + '" verticalCenter="0"/>';
         if (dropDownList[atr1]) {
             fxml += '<s:ComboBox id="' + atr1 + 'ComboBox" horizontalCenter="30" width="100" verticalCenter="0"/>';
@@ -31,7 +31,7 @@ function init() {
     }
 
     var fxml =
-        '<f:ViewStack percentWidth="100" top="80" bottom="0" xmlns:f="flower" xmlns:s="software" xmlns:dg="dungeon">' +
+        '<f:ViewStack percentWidth="100" top="80" bottom="0" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:s="modules/gameEditor/plugins/dungeonPlugin/module.json">' +
         '<f:Group/>' +
         '<dg:FlushMonsterEffect/>' +
         '<dg:HurtEffect/>' +

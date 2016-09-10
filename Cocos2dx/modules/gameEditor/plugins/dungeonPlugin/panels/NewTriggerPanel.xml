@@ -1,4 +1,4 @@
-<s:Alert class="NewTriggerPanel" title="新建触发器" creationComplete="this.init();" width="300" height="200" xmlns:f="flower" xmlns:s="software"
+<s:Alert class="NewTriggerPanel" title="新建触发器" creationComplete="this.init();" width="300" height="200" xmlns:f="flower" xmlns:s="modules/software/module.json"
          xmlns:d="dungeon">
     <f:script src="./NewTriggerPanel.script"/>
     <f:Group id="container" left="1" right="1" top="25" bottom="0">

@@ -1,5 +1,5 @@
 <s:TitlePanel percentWidth="100" percentHeight="100" class="UIView" title="{data.name}" xmlns:f="flower"
-              xmlns:s="software">
+              xmlns:s="modules/software/module.json">
     <f:script src="./UIView.script"/>
     <f:Group id="container" left="1" right="1" top="1" bottom="1">
         <f:Rect id="background" percentWidth="100" percentHeight="100" fillColor="0xffffff"/>

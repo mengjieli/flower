@@ -7,8 +7,29 @@ var BlackParser = (function (_super) {
     }
 
     BlackParser.prototype.load = function () {
-        var config = this.file.content;
-        return false;
+        this.data = flower.DataManager.createData("black.UIFile");
+        var xml = new flower.XMLElement();
+        xml.parse(this.file.content);
+        //分析 namesapce
+        for (var i = 0; i < xml.namespaces.length; i++) {
+            var namespace = flower.DataManager.createData("black.NameSpace");
+            namespace.name.value = xml.namespaces[i].name;
+            namespace.content.value = xml.namespaces[i].value;
+            this.data.namespaces.push(namespace);
+        }
+        //分析导出类
+        if (xml.getAttribute("class")) {
+            this.data.exportClass.value = xml.getAttribute("class").value;
+        }
+        this.data.ui.file = this.data;
+        var parser = new UIParser(xml, this.data.ui);
+        parser.addListener(flower.Event.COMPLETE, this.loadComplete, this);
+        parser.load();
+        return true;
+    }
+
+    BlackParser.prototype.loadComplete = function () {
+        this.dispatchWith(flower.Event.COMPLETE);
     }
 
     BlackParser.prototype.save = function () {
@@ -24,7 +45,6 @@ var BlackParser = (function (_super) {
     //    enumerable: true,
     //    configurable: true
     //});
-
 
     return BlackParser;
 

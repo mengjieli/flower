@@ -1,6 +1,5 @@
 {
   "name": "black.DisplayObject",
-  "desc": "DisplayObject 数据",
   "members": {
     "x": {
       "type": "number"

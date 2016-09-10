@@ -1,4 +1,4 @@
-<f:Tree class="LabelTree" selectTime="touch_end" xmlns:f="flower" xmlns:s="software">
+<f:Tree class="LabelTree" selectTime="touch_end" xmlns:f="flower" xmlns:s="modules/software/module.json">
     <f:itemRenderer>
         <f:ItemRenderer percentWidth="100" height="20"
                         rightClick="if(this.data.menu) flower.MenuManager.showMenu(new software.Menu(this.data.menu));">

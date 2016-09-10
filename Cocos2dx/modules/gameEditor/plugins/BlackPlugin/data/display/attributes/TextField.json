@@ -1,6 +1,5 @@
 {
   "name": "black.TextField",
-  "desc": "TextField 数据",
   "extends": "black.DisplayObject",
   "members": {
     "text": {

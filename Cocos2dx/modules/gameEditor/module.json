@@ -1,5 +1,4 @@
 {
-  "namespace": "e",
   "name": "editor",
   "scripts": [
     "./file/File.script",
