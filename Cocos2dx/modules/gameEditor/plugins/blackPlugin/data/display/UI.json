@@ -21,6 +21,10 @@
       "desc": "所属 UI 文件",
       "type": "black.UIFile",
       "init": null
+    },
+    "isReady":{
+      "desc":"是否加载完毕",
+      "type":"bool"
     }
   }
 }

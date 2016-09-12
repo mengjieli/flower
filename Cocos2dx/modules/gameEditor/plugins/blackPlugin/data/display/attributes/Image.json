@@ -1,0 +1,37 @@
+{
+  "name": "black.Image",
+  "extends": "black.Bitmap",
+  "members": {
+    "source": {
+      "type": "string"
+    },
+    "left": {
+      "type": "number"
+    },
+    "right": {
+      "type": "number"
+    },
+    "horizontalCenter": {
+      "type": "number"
+    },
+    "top": {
+      "type": "number"
+    },
+    "bottom": {
+      "type": "number"
+    },
+    "verticalCenter": {
+      "type": "number"
+    },
+    "percentWidth": {
+      "type": "number"
+    },
+    "percentHeight": {
+      "type": "number"
+    },
+    "layout": {
+      "type": "black.Layout",
+      "init": null
+    }
+  }
+}

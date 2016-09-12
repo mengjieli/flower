@@ -6,7 +6,6 @@ var UIParser = (function (_super) {
         _super.call(this);
         this.xml = xml;
         this.data = data;
-        this.isReady = false;
     }
 
     UIParser.prototype.load = function () {
@@ -43,7 +42,7 @@ var UIParser = (function (_super) {
                     if ((new clazz()) instanceof flower.DisplayObject) { //如果是 ui 属性
                         var data = flower.DataManager.createData("black.UI");
                         attributeValue.content = data;
-                        var ui = new UIParser(element, data);
+                        var ui = new UIParser(element.elements[0], data);
                         ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
                         ui.load();
                     } else { //其它非显示对象属性
@@ -52,10 +51,13 @@ var UIParser = (function (_super) {
                 }
                 this.data.attributes.push(attributeValue);
             } else {
-
+                var data = flower.DataManager.createData("black.UI");
+                this.data.children.push(data);
+                var ui = new UIParser(element, data);
+                ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
+                ui.load();
             }
         }
-
         this.loadUIComplete();
     }
 
@@ -70,7 +72,8 @@ var UIParser = (function (_super) {
                 return;
             }
         }
-        this.isReady = true;
+        this.data.isReady = true;
+        new flower.CallLater(this.dispatchWith, this, [flower.Event.COMPLETE]);
     }
 
     UIParser.prototype.decodeNoDisplay = function (xml) {

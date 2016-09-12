@@ -1,0 +1,24 @@
+{
+  "name": "black.Shape",
+  "extends": "black.DisplayObject",
+  "members": {
+    "fillColor": {
+      "type": "uint",
+      "init": "0xffffff"
+    },
+    "fillAlpha": {
+      "type": "number",
+      "init": 1
+    },
+    "lineWidth": {
+      "type": "int"
+    },
+    "lineColor": {
+      "type": "uint"
+    },
+    "lineAlpha": {
+      "type": "number",
+      "init": 1
+    }
+  }
+}

@@ -3225,9 +3225,6 @@ var $root = eval("this");
                         //if (createClassNameSpace != "f") {
                         //    createClassName = this.classes[createClassNameSpace][createClassName];
                         //}
-                        //if (!createClassName.split) {
-                        //    console.log("???");
-                        //}
                         thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                         thisObj = thisObj.toLocaleLowerCase();
                         if (createClassNameSpace != "f") {
@@ -3452,7 +3449,7 @@ var $root = eval("this");
             "Shape": "flower.Shape",
             "Mask": "flower.Mask",
 
-            "ArrayValue": "ArrayValue",
+            "ArrayValue": "flower.ArrayValue",
             "BooleanValue": "flower.BooleanValue",
             "IntValue": "flower.IntValue",
             "NumberValue": "flower.NumberValue",

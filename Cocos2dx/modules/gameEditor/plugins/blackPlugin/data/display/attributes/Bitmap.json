@@ -1,0 +1,13 @@
+{
+  "name": "black.Bitmap",
+  "extends": "black.DisplayObject",
+  "members": {
+    "texture": {
+      "type": "*"
+    },
+    "scale9Grid": {
+      "type": "Rectangle",
+      "init": null
+    }
+  }
+}
