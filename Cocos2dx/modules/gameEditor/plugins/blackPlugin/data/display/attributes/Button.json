@@ -1,0 +1,16 @@
+{
+  "name": "black.Button",
+  "extends": "black.Group",
+  "init": {
+    "absoluteState": true
+  },
+  "members": {
+    "enabled": {
+      "type": "bool",
+      "init": true
+    },
+    "click": {
+      "type": "string"
+    }
+  }
+}

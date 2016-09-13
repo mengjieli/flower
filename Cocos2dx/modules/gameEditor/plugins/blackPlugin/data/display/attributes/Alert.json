@@ -1,0 +1,31 @@
+{
+  "name": "black.Alert",
+  "extends": "black.Panel",
+  "members": {
+    "confirmButton": {
+      "type": "black.UI",
+      "init": null
+    },
+    "cancelButton": {
+      "type": "black.UI",
+      "init": null
+    },
+    "cancelButton": {
+      "type": "black.UI",
+      "init": null
+    },
+    "contentLabel": {
+      "type": "black.UI",
+      "init": null
+    },
+    "content": {
+      "type": "string"
+    },
+    "confirm": {
+      "type": "string"
+    },
+    "cancel": {
+      "type": "string"
+    }
+  }
+}

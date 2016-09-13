@@ -149,7 +149,6 @@ class ViewStack extends Group {
         if (this._selectedIndex != -1 && this._selectedIndex >= index) {
             this._selectedIndex++;
         }
-        this.dispatchWith(flower.Event.UPDATE);
     }
 
     set selectedIndex(val) {
@@ -178,3 +177,5 @@ class ViewStack extends Group {
 }
 
 exports.ViewStack = ViewStack;
+
+UIComponent.registerEvent(ViewStack, 1500, "selectedItemChange", flower.Event.CHANGE);

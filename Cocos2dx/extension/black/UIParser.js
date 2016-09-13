@@ -376,7 +376,7 @@ class UIParser extends Group {
         }
         content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.UIEvent.CREATION_COMPLETE);\n";
+        content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
@@ -860,7 +860,8 @@ class UIParser extends Group {
         this.classes.defaultClassNames[url] = name;
     }
 
-    static addModule(moduleName, url, packageURL = "") {
+    static addModule(moduleName, url) {
+        var packageURL = moduleName;
         if (!flower.UIParser.classes[moduleName]) {
             var pkgs = packageURL.split(".");
             if (pkgs[0] == "") {

@@ -1,0 +1,6 @@
+{
+  "name": "black.Mask",
+  "extends": "black.DisplayObject",
+  "members": {
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "black.RadioButton",
+  "extends": "black.ToggleButton",
+  "members": {
+    "groupName": {
+      "type": "string"
+    },
+    "change": {
+      "type": "string"
+    }
+  }
+}

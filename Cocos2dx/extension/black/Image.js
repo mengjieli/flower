@@ -138,3 +138,5 @@ class Image extends flower.Bitmap {
 UIComponent.register(Image);
 Image.prototype.__UIComponent = true;
 exports.Image = Image;
+
+UIComponent.registerEvent(Image, 1300, "loadComplete", flower.Event.COMPLETE);

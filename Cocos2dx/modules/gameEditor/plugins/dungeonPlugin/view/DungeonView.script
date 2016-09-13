@@ -37,7 +37,7 @@ function expand(url) {
 }
 
 function onClickItem(e) {
-    var item = e.item;
+    var item = e.data;
     if (item.type == "trigger") {
         if (!this.triggerDetailPanel) {
             this.triggerDetailPanel = new dg.TriggerDetailPanel();

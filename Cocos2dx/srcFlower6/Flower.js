@@ -38,6 +38,7 @@ var UPDATE_RESOURCE = true;
 var RETINA = false;
 var programmers = {};
 var config = {};
+var params = {};
 
 /**
  * 启动引擎
@@ -165,6 +166,7 @@ flower.sys = {
     $error: $error,
     getLanguage: getLanguage
 }
+flower.params = params;
 
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
@@ -1837,13 +1839,13 @@ class EventDispatcher {
         }
     }
 
-    dispatchWith(type, data = null) {
+    dispatchWith(type, data = null, bubbles = false) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var e = flower.Event.create(type, data);
+        var e = flower.Event.create(type, data, bubbles);
         e.$target = this;
         this.dispatch(e);
         flower.Event.release(e);
@@ -1912,6 +1914,11 @@ class Event {
     static CANCEL = "cancel";
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
+    static DISTORT = "distort";
+    static CREATION_COMPLETE = "creation_complete";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
+    static CLICK_ITEM = "click_item";
+    static TOUCH_BEGIN_ITEM = "touch_begin_item";
 
     static _eventPool = [];
 
@@ -4118,6 +4125,10 @@ class TextField extends DisplayObject {
     }
 
     $setMultiLine(val) {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
         var p = this.$TextField;
         if (p[4] == val) {
             return false;
@@ -4140,6 +4151,38 @@ class TextField extends DisplayObject {
         }
         p[2] = val;
         this.$nativeShow.setFontColor(val);
+        return true;
+    }
+
+    $setWordWrap(val) {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        val = !!val;
+        var p = this.$TextField;
+        if (p[3] == val) {
+            return false;
+        }
+        p[3] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setAutoSize(val) {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        val = !!val;
+        var p = this.$TextField;
+        if (p[5] == val) {
+            return false;
+        }
+        p[5] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         return true;
     }
 
@@ -4203,6 +4246,19 @@ class TextField extends DisplayObject {
     get autoSize() {
         var p = this.$TextField;
         return p[5];
+    }
+
+    set autoSize(val) {
+        this.$setAutoSize(val);
+    }
+
+    set wordWrap(val) {
+        this.$setWordWrap(val);
+    }
+
+    get wordWrap() {
+        var p = this.$TextField;
+        return p[3];
     }
 
     get multiLine() {
@@ -4361,6 +4417,17 @@ class TextInput extends DisplayObject {
         this.$invalidateContentBounds();
         this.$nativeShow.setSize(this.width, this.height);
     }
+    
+    $setFontSize(val) {
+        var p = this.$TextField;
+        if (p[1] == val) {
+            return false;
+        }
+        p[1] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
 
     $setEditEnabled(val) {
         var p = this.$TextField;
@@ -4425,6 +4492,15 @@ class TextInput extends DisplayObject {
 
     set fontColor(val) {
         this.$setFontColor(val);
+    }
+
+    get fontSize() {
+        var p = this.$TextField;
+        return p[1];
+    }
+
+    set fontSize(val) {
+        this.$setFontSize(val);
     }
 
     get editEnabled() {
@@ -6081,6 +6157,9 @@ class URLLoader extends EventDispatcher {
                 URLLoader.list.splice(i, 1);
                 break;
             }
+        }
+        if(this.isDispose) {
+            return;
         }
         this.dispatchWith(Event.COMPLETE, this._data);
         this._selfDispose = true;
@@ -9218,6 +9297,20 @@ class Path {
     static getName(url) {
         var arr = url.split("/");
         return arr[arr.length - 1];
+    }
+
+    static isPeerDirection(url1, url2) {
+        var arr1 = url1.split("/");
+        var arr2 = url2.split("/");
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (var i = 0; i < arr1.length - 1; i++) {
+            if(arr1[i] != arr2[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static joinPath(path1, path2) {

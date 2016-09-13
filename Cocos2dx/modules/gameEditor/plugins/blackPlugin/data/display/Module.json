@@ -1,11 +1,27 @@
 {
-  "name": "black.Module",
+  "name": "black.Mudule",
   "members": {
+    "name": {
+      "type": "string"
+    },
     "scripts": {
-      "desc": "代码",
       "type": "Array",
       "typeValue": "string"
     },
-    ""
+    "components": {
+      "type": "Array",
+      "typeValue": "string"
+    },
+    "classes": {
+      "type": "Array",
+      "typeValue": "Attribute"
+    },
+    "data": {
+      "type": "Array",
+      "typeValue": "string"
+    },
+    "execute": {
+      "type": "string"
+    }
   }
 }

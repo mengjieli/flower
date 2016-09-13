@@ -5,7 +5,7 @@ class TileImage extends Group {
     }
 
     $setSource() {
-        
+
     }
 }
 

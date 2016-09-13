@@ -6,7 +6,6 @@ class Rect extends flower.Shape {
             0: 0, //width
             1: 0, //height
         };
-        this.drawRect = null;
         this.$initUIComponent();
     }
 

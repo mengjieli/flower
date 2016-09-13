@@ -69,9 +69,7 @@ class RadioButtonGroup extends Group {
                 this._buttons[i].selected = false;
             }
         }
-        if (this.onChangeEXE) {
-            this.onChangeEXE.call(this);
-        }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     get selection() {
@@ -94,7 +92,7 @@ class RadioButtonGroup extends Group {
     }
 
     set enabled(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;
@@ -105,23 +103,6 @@ class RadioButtonGroup extends Group {
         for (var i = 0; i < this._buttons.length; i++) {
             this._buttons[i].enabled = this._enabled;
         }
-    }
-
-    /////////////////////////////////////Event///////////////////////////////////
-    onChangeEXE;
-
-    set onChange(val) {
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
-        }
-        this.onChangeEXE = val;
-    }
-
-    get onChange() {
-        return this.onChangeEXE;
     }
 
     /////////////////////////////////////static///////////////////////////////////
@@ -149,3 +130,5 @@ class RadioButtonGroup extends Group {
 }
 
 exports.RadioButtonGroup = RadioButtonGroup;
+
+UIComponent.registerEvent(RadioButtonGroup, 1400, "change", flower.Event.CHANGE);

@@ -1,0 +1,11 @@
+{
+  "name": "black.ListBase",
+  "extends": "black.DataGroup",
+  "init": {
+    "requireSelection": true,
+    "itemSelectedEnabled": true,
+    "itemClickedEnabled": true
+  },
+  "members": {
+  }
+}

@@ -11,8 +11,15 @@
  * 1023 rightClick
  * 1100 click
  * 1110 clickItem
- * 1111 selectedItemChange
+ * 1111 selectedItemChange DataGroup
  * 1112 touchBeginItem
+ * 1130 confirm
+ * 1131 cancel
+ * 1300 loadComplete
+ * 1400 change  RadioButtonGroup
+ * 1401 change  RadioButton
+ * 1402 change ToggleButton
+ * 1500 selectedItemChange ViewStack
  */
 class UIComponent {
 
@@ -36,7 +43,7 @@ class UIComponent {
                 13: this, //eventThis
                 14: null, //layout
             };
-            UIComponent.registerEvent(clazz, 1000, "creationComplete", UIEvent.CREATION_COMPLETE);
+            UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
             UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
             UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
             UIComponent.registerEvent(clazz, 1003, "remove", flower.Event.REMOVED);

@@ -6,7 +6,7 @@
       "type": "string"
     },
     "fontColor": {
-      "type": "number"
+      "type": "uint"
     },
     "fontSize": {
       "type": "number",

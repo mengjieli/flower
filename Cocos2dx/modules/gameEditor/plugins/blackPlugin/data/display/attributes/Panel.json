@@ -1,0 +1,50 @@
+{
+  "name": "black.Panel",
+  "extends": "black.Group",
+  "members": {
+    "title": {
+      "type": "string"
+    },
+    "titleLabel": {
+      "type": "black.UI",
+      "init": null
+    },
+    "closeButton": {
+      "type": "black.UI",
+      "init": null
+    },
+    "iconImage": {
+      "type": "black.UI",
+      "init": null
+    },
+    "icon": {
+      "type": "string"
+    },
+    "scaleMode": {
+      "type": "string",
+      "init": "no_scale",
+      "enumList": [
+        {
+          "label": "NoScale",
+          "type": "no_scale"
+        },
+        {
+          "label": "ShowAll",
+          "type": "show_all"
+        },
+        {
+          "label": "NoBorder",
+          "type": "no_border"
+        },
+        {
+          "label": "ScaleWidth",
+          "type": "scale_width"
+        },
+        {
+          "label": "ScaleHeight",
+          "type": "scale_height"
+        }
+      ]
+    }
+  }
+}

@@ -7,7 +7,13 @@ class DataManager {
             return;
         }
         DataManager.instance = this;
-
+        this.addDefine({
+            "name": "Attribute",
+            "members": {
+                "name": {"type": "string"},
+                "content": {"type": "string"}
+            }
+        });
         this.addDefine({
             "name": "Size",
             "members": {
@@ -56,7 +62,7 @@ class DataManager {
     }
 
     addRootData(name, className, init = null) {
-        this[name] = this.createData(className, className);
+        this[name] = this.createData(className, init);
         return this._root[name] = this[name];
     }
 

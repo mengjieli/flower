@@ -1,0 +1,6 @@
+{
+  "name": "black.CheckBox",
+  "extends": "black.ToggleButton",
+  "members": {
+  }
+}

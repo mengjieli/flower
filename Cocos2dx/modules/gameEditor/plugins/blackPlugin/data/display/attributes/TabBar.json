@@ -1,0 +1,23 @@
+{
+  "name": "black.List",
+  "extends": "black.ListBase",
+  "init": {
+    "layout": {
+      "fixElementSize": false,
+      "__className": "black.HorizontalLayout"
+    }
+  },
+  "members": {
+    "more": {
+      "type": "bool"
+    },
+    "moreButton": {
+      "type": "black.UI",
+      "init": null
+    },
+    "moreList": {
+      "type": "black.UI",
+      "init": null
+    }
+  }
+}

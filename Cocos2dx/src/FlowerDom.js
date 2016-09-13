@@ -2241,13 +2241,14 @@ var flower = {};
             key: "dispatchWith",
             value: function dispatchWith(type) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var bubbles = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
                 if (DEBUG) {
                     if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
-                var e = flower.Event.create(type, data);
+                var e = flower.Event.create(type, data, bubbles);
                 e.$target = this;
                 this.dispatch(e);
                 flower.Event.release(e);
@@ -2363,6 +2364,10 @@ var flower = {};
     Event.START_INPUT = "start_input";
     Event.STOP_INPUT = "stop_input";
     Event.DISTORT = "distort";
+    Event.CREATION_COMPLETE = "creation_complete";
+    Event.SELECTED_ITEM_CHANGE = "selected_item_change";
+    Event.CLICK_ITEM = "click_item";
+    Event.TOUCH_BEGIN_ITEM = "touch_begin_item";
     Event._eventPool = [];
 
 
@@ -5139,6 +5144,18 @@ var flower = {};
                 this.$nativeShow.setSize(this.width, this.height);
             }
         }, {
+            key: "$setFontSize",
+            value: function $setFontSize(val) {
+                var p = this.$TextField;
+                if (p[1] == val) {
+                    return false;
+                }
+                p[1] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
             key: "$setEditEnabled",
             value: function $setEditEnabled(val) {
                 var p = this.$TextField;
@@ -5231,6 +5248,15 @@ var flower = {};
             },
             set: function set(val) {
                 this.$setFontColor(val);
+            }
+        }, {
+            key: "fontSize",
+            get: function get() {
+                var p = this.$TextField;
+                return p[1];
+            },
+            set: function set(val) {
+                this.$setFontSize(val);
             }
         }, {
             key: "editEnabled",

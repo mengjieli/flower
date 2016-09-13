@@ -1,6 +1,6 @@
 {
-  "name": "black.Group",
-  "extends": "black.Sprite",
+  "name": "black.MaskUI",
+  "extends": "black.Mask",
   "members": {
     "data": {
       "type": "*"

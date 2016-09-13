@@ -2057,13 +2057,13 @@ class EventDispatcher {
         }
     }
 
-    dispatchWith(type, data = null) {
+    dispatchWith(type, data = null, bubbles = false) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var e = flower.Event.create(type, data);
+        var e = flower.Event.create(type, data, bubbles);
         e.$target = this;
         this.dispatch(e);
         flower.Event.release(e);
@@ -2133,6 +2133,10 @@ class Event {
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
     static DISTORT = "distort";
+    static CREATION_COMPLETE = "creation_complete";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
+    static CLICK_ITEM = "click_item";
+    static TOUCH_BEGIN_ITEM = "touch_begin_item";
 
     static _eventPool = [];
 
@@ -4631,6 +4635,17 @@ class TextInput extends DisplayObject {
         this.$invalidateContentBounds();
         this.$nativeShow.setSize(this.width, this.height);
     }
+    
+    $setFontSize(val) {
+        var p = this.$TextField;
+        if (p[1] == val) {
+            return false;
+        }
+        p[1] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
 
     $setEditEnabled(val) {
         var p = this.$TextField;
@@ -4695,6 +4710,15 @@ class TextInput extends DisplayObject {
 
     set fontColor(val) {
         this.$setFontColor(val);
+    }
+
+    get fontSize() {
+        var p = this.$TextField;
+        return p[1];
+    }
+
+    set fontSize(val) {
+        this.$setFontSize(val);
     }
 
     get editEnabled() {

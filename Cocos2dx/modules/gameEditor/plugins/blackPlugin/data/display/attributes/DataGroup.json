@@ -1,0 +1,51 @@
+{
+  "name": "black.DataGroup",
+  "extends": "black.Group",
+  "members": {
+    "dataProvider": {
+      "type": "flower.ArrayValue",
+      "init": "*"
+    },
+    "itemRenderer": {
+      "type": "black.UI",
+      "init": null
+    },
+    "itemSelectedEnabled": {
+      "type": "bool"
+    },
+    "itemClickedEnabled": {
+      "type": "bool",
+      "init": true
+    },
+    "requireSelection": {
+      "type": "bool"
+    },
+    "selectTime": {
+      "type": "string",
+      "init": "touch_begin",
+      "enumList": [
+        {
+          "label": "触摸开始",
+          "type": "touch_begin"
+        },
+        {
+          "label": "触摸结束",
+          "type": "touch_end"
+        }
+      ]
+    },
+    "validDownStateTime": {
+      "type": "uint",
+      "init": 100
+    },
+    "clickItem": {
+      "type": "string"
+    },
+    "selectedItemChange": {
+      "type": "string"
+    },
+    "touchBeginItem": {
+      "type": "string"
+    }
+  }
+}

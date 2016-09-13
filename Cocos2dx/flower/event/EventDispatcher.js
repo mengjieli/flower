@@ -164,13 +164,13 @@ class EventDispatcher {
         }
     }
 
-    dispatchWith(type, data = null) {
+    dispatchWith(type, data = null, bubbles = false) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
             }
         }
-        var e = flower.Event.create(type, data);
+        var e = flower.Event.create(type, data, bubbles);
         e.$target = this;
         this.dispatch(e);
         flower.Event.release(e);

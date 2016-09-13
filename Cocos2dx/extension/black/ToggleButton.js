@@ -1,14 +1,11 @@
 class ToggleButton extends Button {
 
-    onChangeEXE;
-
     constructor() {
         super();
 
         this.$ToggleButton = {
             0: false, //
             1: null, //value
-            2: null, //onChangeEXE
         };
     }
 
@@ -68,9 +65,7 @@ class ToggleButton extends Button {
         } else {
             this.currentState = "up";
         }
-        if (p[2]) {
-            p[2].call(this);
-        }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     __valueChange() {
@@ -90,23 +85,6 @@ class ToggleButton extends Button {
 
     set selected(val) {
         this.__setSelected(val);
-    }
-
-    set onChange(val) {
-        if (this.$ToggleButton[2] == val) {
-            return;
-        }
-        this.$ToggleButton[2] = val;
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
-        }
-    }
-
-    get onChange() {
-        return this.$ToggleButton[2];
     }
 
     set value(val) {
@@ -130,3 +108,6 @@ class ToggleButton extends Button {
 }
 
 exports.ToggleButton = ToggleButton;
+
+
+UIComponent.registerEvent(ToggleButton, 1402, "change", flower.Event.CHANGE);

@@ -1,0 +1,16 @@
+{
+  "name": "black.RadioButtonGroup",
+  "extends": "black.Group",
+  "members": {
+    "groupName": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "bool",
+      "init": true
+    },
+    "change": {
+      "type": "string"
+    }
+  }
+}

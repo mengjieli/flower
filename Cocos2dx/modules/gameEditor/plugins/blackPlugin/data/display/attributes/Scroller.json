@@ -1,0 +1,17 @@
+{
+  "name": "black.Scroller",
+  "extends": "black.MaskUI",
+  "init": {
+    "width": 100,
+    "height": 100
+  },
+  "members": {
+    "viewport": {
+      "type": "*"
+    },
+    "releaseItemDistance": {
+      "type": "uint",
+      "init": 18
+    }
+  }
+}

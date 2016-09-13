@@ -31,7 +31,7 @@ function init() {
     }
 
     var fxml =
-        '<f:ViewStack percentWidth="100" top="80" bottom="0" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:s="modules/gameEditor/plugins/dungeonPlugin/module.json">' +
+        '<f:ViewStack percentWidth="100" top="80" bottom="0" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:dg="modules/gameEditor/plugins/dungeonPlugin/module.json">' +
         '<f:Group/>' +
         '<dg:FlushMonsterEffect/>' +
         '<dg:HurtEffect/>' +

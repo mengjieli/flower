@@ -121,6 +121,17 @@ class TextInput extends DisplayObject {
         this.$invalidateContentBounds();
         this.$nativeShow.setSize(this.width, this.height);
     }
+    
+    $setFontSize(val) {
+        var p = this.$TextField;
+        if (p[1] == val) {
+            return false;
+        }
+        p[1] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
 
     $setEditEnabled(val) {
         var p = this.$TextField;
@@ -185,6 +196,15 @@ class TextInput extends DisplayObject {
 
     set fontColor(val) {
         this.$setFontColor(val);
+    }
+
+    get fontSize() {
+        var p = this.$TextField;
+        return p[1];
+    }
+
+    set fontSize(val) {
+        this.$setFontSize(val);
     }
 
     get editEnabled() {

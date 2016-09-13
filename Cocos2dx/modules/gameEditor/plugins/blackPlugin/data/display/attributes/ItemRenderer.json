@@ -1,0 +1,9 @@
+{
+  "name": "black.ItemRenderer",
+  "extends": "black.Group",
+  "init": {
+    "absoluteState": true
+  },
+  "members": {
+  }
+}

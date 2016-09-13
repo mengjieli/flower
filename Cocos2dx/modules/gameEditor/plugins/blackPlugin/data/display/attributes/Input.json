@@ -1,10 +1,7 @@
 {
-  "name": "black.Group",
-  "extends": "black.Sprite",
+  "name": "black.Input",
+  "extends": "black.TextInput",
   "members": {
-    "data": {
-      "type": "*"
-    },
     "left": {
       "type": "number"
     },
@@ -28,10 +25,6 @@
     },
     "percentHeight": {
       "type": "number"
-    },
-    "layout": {
-      "type": "black.Layout",
-      "init": null
     },
     "absoluteState": {
       "type": "bool"
@@ -61,6 +54,12 @@
       "type": "string"
     },
     "rightClick": {
+      "type": "string"
+    },
+    "startInput": {
+      "type": "string"
+    },
+    "stopInput": {
       "type": "string"
     }
   }

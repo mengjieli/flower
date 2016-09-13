@@ -1,0 +1,12 @@
+{
+  "name": "black.ToggleButton",
+  "extends": "black.Button",
+  "members": {
+    "selected": {
+      "type": "bool"
+    },
+    "change": {
+      "type": "string"
+    }
+  }
+}

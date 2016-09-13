@@ -1,0 +1,25 @@
+{
+  "name": "black.TextInput",
+  "extends": "black.DisplayObject",
+  "init": {
+    "width": 100,
+    "height": 21,
+    "focusEnabled": true
+  },
+  "members": {
+    "text": {
+      "type": "string"
+    },
+    "editEnabled": {
+      "type": "bool",
+      "init": true
+    },
+    "fontColor": {
+      "type": "uint"
+    },
+    "fontSize": {
+      "type": "number",
+      "init": 12
+    }
+  }
+}

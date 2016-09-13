@@ -15,6 +15,7 @@ class RadioButton extends ToggleButton {
         if (this._group) {
             this._group.$itemSelectedChange(this);
         }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     __setGroupName(val) {
@@ -43,3 +44,5 @@ class RadioButton extends ToggleButton {
 }
 
 exports.RadioButton = RadioButton;
+
+UIComponent.registerEvent(RadioButton, 1401, "change", flower.Event.CHANGE);

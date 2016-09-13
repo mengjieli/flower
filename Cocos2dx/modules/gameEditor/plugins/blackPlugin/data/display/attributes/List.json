@@ -1,0 +1,11 @@
+{
+  "name": "black.List",
+  "extends": "black.ListBase",
+  "init": {
+    "layout": {
+      "__className": "black.VerticalLayout"
+    }
+  },
+  "members": {
+  }
+}

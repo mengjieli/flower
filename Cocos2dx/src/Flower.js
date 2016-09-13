@@ -48,6 +48,7 @@ var flower = {};
     var RETINA = false;
     var programmers = {};
     var config = {};
+    var params = {};
 
     /**
      * 启动引擎
@@ -187,6 +188,7 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
+    flower.params = params;
 
     $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
@@ -2016,13 +2018,14 @@ var flower = {};
             key: "dispatchWith",
             value: function dispatchWith(type) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var bubbles = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
                 if (DEBUG) {
                     if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
-                var e = flower.Event.create(type, data);
+                var e = flower.Event.create(type, data, bubbles);
                 e.$target = this;
                 this.dispatch(e);
                 flower.Event.release(e);
@@ -2137,6 +2140,11 @@ var flower = {};
     Event.CANCEL = "cancel";
     Event.START_INPUT = "start_input";
     Event.STOP_INPUT = "stop_input";
+    Event.DISTORT = "distort";
+    Event.CREATION_COMPLETE = "creation_complete";
+    Event.SELECTED_ITEM_CHANGE = "selected_item_change";
+    Event.CLICK_ITEM = "click_item";
+    Event.TOUCH_BEGIN_ITEM = "touch_begin_item";
     Event._eventPool = [];
 
 
@@ -4598,6 +4606,10 @@ var flower = {};
         }, {
             key: "$setMultiLine",
             value: function $setMultiLine(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 var p = this.$TextField;
                 if (p[4] == val) {
                     return false;
@@ -4621,6 +4633,40 @@ var flower = {};
                 }
                 p[2] = val;
                 this.$nativeShow.setFontColor(val);
+                return true;
+            }
+        }, {
+            key: "$setWordWrap",
+            value: function $setWordWrap(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                val = !!val;
+                var p = this.$TextField;
+                if (p[3] == val) {
+                    return false;
+                }
+                p[3] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setAutoSize",
+            value: function $setAutoSize(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                val = !!val;
+                var p = this.$TextField;
+                if (p[5] == val) {
+                    return false;
+                }
+                p[5] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
                 return true;
             }
         }, {
@@ -4706,6 +4752,18 @@ var flower = {};
             get: function get() {
                 var p = this.$TextField;
                 return p[5];
+            },
+            set: function set(val) {
+                this.$setAutoSize(val);
+            }
+        }, {
+            key: "wordWrap",
+            set: function set(val) {
+                this.$setWordWrap(val);
+            },
+            get: function get() {
+                var p = this.$TextField;
+                return p[3];
             }
         }, {
             key: "multiLine",
@@ -4863,6 +4921,18 @@ var flower = {};
                 this.$nativeShow.setSize(this.width, this.height);
             }
         }, {
+            key: "$setFontSize",
+            value: function $setFontSize(val) {
+                var p = this.$TextField;
+                if (p[1] == val) {
+                    return false;
+                }
+                p[1] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
             key: "$setEditEnabled",
             value: function $setEditEnabled(val) {
                 var p = this.$TextField;
@@ -4955,6 +5025,15 @@ var flower = {};
             },
             set: function set(val) {
                 this.$setFontColor(val);
+            }
+        }, {
+            key: "fontSize",
+            get: function get() {
+                var p = this.$TextField;
+                return p[1];
+            },
+            set: function set(val) {
+                this.$setFontSize(val);
             }
         }, {
             key: "editEnabled",
@@ -6670,6 +6749,9 @@ var flower = {};
                         URLLoader.list.splice(i, 1);
                         break;
                     }
+                }
+                if (this.isDispose) {
+                    return;
                 }
                 this.dispatchWith(Event.COMPLETE, this._data);
                 this._selfDispose = true;
@@ -10135,6 +10217,21 @@ var flower = {};
             value: function getName(url) {
                 var arr = url.split("/");
                 return arr[arr.length - 1];
+            }
+        }, {
+            key: "isPeerDirection",
+            value: function isPeerDirection(url1, url2) {
+                var arr1 = url1.split("/");
+                var arr2 = url2.split("/");
+                if (arr1.length != arr2.length) {
+                    return false;
+                }
+                for (var i = 0; i < arr1.length - 1; i++) {
+                    if (arr1[i] != arr2[i]) {
+                        return false;
+                    }
+                }
+                return true;
             }
         }, {
             key: "joinPath",

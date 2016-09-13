@@ -1,0 +1,6 @@
+{
+  "name": "black.TileImage",
+  "extends": "black.Group",
+  "members": {
+  }
+}

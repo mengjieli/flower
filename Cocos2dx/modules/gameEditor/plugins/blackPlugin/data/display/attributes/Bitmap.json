@@ -6,8 +6,7 @@
       "type": "*"
     },
     "scale9Grid": {
-      "type": "Rectangle",
-      "init": null
+      "type": "string"
     }
   }
 }

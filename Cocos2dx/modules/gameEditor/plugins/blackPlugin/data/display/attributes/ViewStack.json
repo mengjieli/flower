@@ -1,0 +1,9 @@
+{
+  "name": "black.ViewStack",
+  "extends": "black.Group",
+  "members": {
+    "selectedItemChange":{
+      "type":"string"
+    }
+  }
+}

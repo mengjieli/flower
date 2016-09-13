@@ -29,9 +29,38 @@
     "percentHeight": {
       "type": "number"
     },
-    "layout": {
-      "type": "black.Layout",
-      "init": null
+    "absoluteState": {
+      "type": "bool"
+    },
+    "creationComplete": {
+      "type": "string"
+    },
+    "add": {
+      "type": "string"
+    },
+    "addToStage": {
+      "type": "string"
+    },
+    "remove": {
+      "type": "string"
+    },
+    "removeFromStage": {
+      "type": "string"
+    },
+    "touchBegin": {
+      "type": "string"
+    },
+    "touchEnd": {
+      "type": "string"
+    },
+    "touchRelease": {
+      "type": "string"
+    },
+    "rightClick": {
+      "type": "string"
+    },
+    "loadComplete": {
+      "type": "string"
     }
   }
 }

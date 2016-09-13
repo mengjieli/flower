@@ -55,6 +55,10 @@ class Event {
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
     static DISTORT = "distort";
+    static CREATION_COMPLETE = "creation_complete";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
+    static CLICK_ITEM = "click_item";
+    static TOUCH_BEGIN_ITEM = "touch_begin_item";
 
     static _eventPool = [];
 

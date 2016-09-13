@@ -13,6 +13,6 @@ function setData(data) {
 
 function clickItem(e) {
     if (this.data.click) {
-        this.data.click(this.data.target, e.item);
+        this.data.click(this.data.target, e.data);
     }
 }

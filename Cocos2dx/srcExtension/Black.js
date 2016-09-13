@@ -24,8 +24,15 @@ for (var key in flower.sys) {
  * 1023 rightClick
  * 1100 click
  * 1110 clickItem
- * 1111 selectedItemChange
+ * 1111 selectedItemChange DataGroup
  * 1112 touchBeginItem
+ * 1130 confirm
+ * 1131 cancel
+ * 1300 loadComplete
+ * 1400 change  RadioButtonGroup
+ * 1401 change  RadioButton
+ * 1402 change ToggleButton
+ * 1500 selectedItemChange ViewStack
  */
 class UIComponent {
 
@@ -49,7 +56,7 @@ class UIComponent {
                 13: this, //eventThis
                 14: null, //layout
             };
-            UIComponent.registerEvent(clazz, 1000, "creationComplete", UIEvent.CREATION_COMPLETE);
+            UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
             UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
             UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
             UIComponent.registerEvent(clazz, 1003, "remove", flower.Event.REMOVED);
@@ -488,44 +495,6 @@ class UIComponent {
 
 black.UIComponent = UIComponent;
 //////////////////////////End File:extension/black/core/UIComponent.js///////////////////////////
-
-
-
-//////////////////////////File:extension/black/events/UIEvent.js///////////////////////////
-class UIEvent extends flower.Event {
-    constructor(type, bubbles = false) {
-        super(type, bubbles);
-    }
-
-    static CREATION_COMPLETE = "creation_complete";
-}
-
-black.UIEvent = UIEvent;
-//////////////////////////End File:extension/black/events/UIEvent.js///////////////////////////
-
-
-
-//////////////////////////File:extension/black/events/DataGroupEvent.js///////////////////////////
-class DataGroupEvent extends flower.Event {
-
-    __item;
-
-    constructor(type, bubbles = false, item = null) {
-        super(type, bubbles);
-        this.__item = item;
-    }
-
-    get item() {
-        return this.__item;
-    }
-
-    static SELECTED_ITEM_CHANGE = "selected_item_change";
-    static CLICK_ITEM = "click_item";
-    static TOUCH_BEGIN_ITEM = "touch_begin_item";
-}
-
-black.DataGroupEvent = DataGroupEvent;
-//////////////////////////End File:extension/black/events/DataGroupEvent.js///////////////////////////
 
 
 
@@ -1587,7 +1556,13 @@ class DataManager {
             return;
         }
         DataManager.instance = this;
-
+        this.addDefine({
+            "name": "Attribute",
+            "members": {
+                "name": {"type": "string"},
+                "content": {"type": "string"}
+            }
+        });
         this.addDefine({
             "name": "Size",
             "members": {
@@ -1636,7 +1611,7 @@ class DataManager {
     }
 
     addRootData(name, className, init = null) {
-        this[name] = this.createData(className, className);
+        this[name] = this.createData(className, init);
         return this._root[name] = this[name];
     }
 
@@ -2682,7 +2657,7 @@ class UIParser extends Group {
         }
         content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.UIEvent.CREATION_COMPLETE);\n";
+        content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
@@ -3166,7 +3141,8 @@ class UIParser extends Group {
         this.classes.defaultClassNames[url] = name;
     }
 
-    static addModule(moduleName, url, packageURL = "") {
+    static addModule(moduleName, url) {
+        var packageURL = moduleName;
         if (!flower.UIParser.classes[moduleName]) {
             var pkgs = packageURL.split(".");
             if (pkgs[0] == "") {
@@ -3431,7 +3407,7 @@ class DataGroup extends Group {
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
+                this.dispatchWith(flower.Event.TOUCH_BEGIN_ITEM, item.data, true);
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                     p[15] = -1;
                     if (p[10]) {
@@ -3442,7 +3418,7 @@ class DataGroup extends Group {
                     if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
                         if (p[11]) {
                             item.$onClick();
-                            this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                            this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                         }
                     }
                 } else {
@@ -3468,7 +3444,7 @@ class DataGroup extends Group {
                     }
                     if (p[11]) {
                         item.$onClick();
-                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                        this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                     }
                 } else {
                     this.$releaseItem();
@@ -3552,7 +3528,7 @@ class DataGroup extends Group {
             itemRenderer.selected = true;
         }
         if (changeFlag) {
-            this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
+            this.dispatchWith(flower.Event.SELECTED_ITEM_CHANGE, itemData, true);
         }
         if (!selectedItem) {
             this._canSelecteItem();
@@ -3656,6 +3632,10 @@ class DataGroup extends Group {
 
     set viewer(display) {
         this.$DataGroup[3] = display;
+    }
+
+    get viewer() {
+        return this.$DataGroup[3];
     }
 
     get contentWidth() {
@@ -3787,9 +3767,9 @@ class DataGroup extends Group {
     }
 }
 
-UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
-UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
-UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", DataGroupEvent.TOUCH_BEGIN_ITEM);
+UIComponent.registerEvent(DataGroup, 1110, "clickItem", flower.Event.CLICK_ITEM);
+UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", flower.Event.SELECTED_ITEM_CHANGE);
+UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", flower.Event.TOUCH_BEGIN_ITEM);
 
 black.DataGroup = DataGroup;
 //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
@@ -4148,7 +4128,6 @@ class Rect extends flower.Shape {
             0: 0, //width
             1: 0, //height
         };
-        this.drawRect = null;
         this.$initUIComponent();
     }
 
@@ -4461,6 +4440,8 @@ class Image extends flower.Bitmap {
 UIComponent.register(Image);
 Image.prototype.__UIComponent = true;
 black.Image = Image;
+
+UIComponent.registerEvent(Image, 1300, "loadComplete", flower.Event.COMPLETE);
 //////////////////////////End File:extension/black/Image.js///////////////////////////
 
 
@@ -4473,7 +4454,7 @@ class TileImage extends Group {
     }
 
     $setSource() {
-        
+
     }
 }
 
@@ -4759,15 +4740,12 @@ black.Button = Button;
 //////////////////////////File:extension/black/ToggleButton.js///////////////////////////
 class ToggleButton extends Button {
 
-    onChangeEXE;
-
     constructor() {
         super();
 
         this.$ToggleButton = {
             0: false, //
             1: null, //value
-            2: null, //onChangeEXE
         };
     }
 
@@ -4827,9 +4805,7 @@ class ToggleButton extends Button {
         } else {
             this.currentState = "up";
         }
-        if (p[2]) {
-            p[2].call(this);
-        }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     __valueChange() {
@@ -4849,23 +4825,6 @@ class ToggleButton extends Button {
 
     set selected(val) {
         this.__setSelected(val);
-    }
-
-    set onChange(val) {
-        if (this.$ToggleButton[2] == val) {
-            return;
-        }
-        this.$ToggleButton[2] = val;
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
-        }
-    }
-
-    get onChange() {
-        return this.$ToggleButton[2];
     }
 
     set value(val) {
@@ -4889,6 +4848,9 @@ class ToggleButton extends Button {
 }
 
 black.ToggleButton = ToggleButton;
+
+
+UIComponent.registerEvent(ToggleButton, 1402, "change", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/ToggleButton.js///////////////////////////
 
 
@@ -4923,6 +4885,7 @@ class RadioButton extends ToggleButton {
         if (this._group) {
             this._group.$itemSelectedChange(this);
         }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     __setGroupName(val) {
@@ -4951,6 +4914,8 @@ class RadioButton extends ToggleButton {
 }
 
 black.RadioButton = RadioButton;
+
+UIComponent.registerEvent(RadioButton, 1401, "change", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/RadioButton.js///////////////////////////
 
 
@@ -5027,9 +4992,7 @@ class RadioButtonGroup extends Group {
                 this._buttons[i].selected = false;
             }
         }
-        if (this.onChangeEXE) {
-            this.onChangeEXE.call(this);
-        }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     get selection() {
@@ -5052,7 +5015,7 @@ class RadioButtonGroup extends Group {
     }
 
     set enabled(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;
@@ -5063,23 +5026,6 @@ class RadioButtonGroup extends Group {
         for (var i = 0; i < this._buttons.length; i++) {
             this._buttons[i].enabled = this._enabled;
         }
-    }
-
-    /////////////////////////////////////Event///////////////////////////////////
-    onChangeEXE;
-
-    set onChange(val) {
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
-        }
-        this.onChangeEXE = val;
-    }
-
-    get onChange() {
-        return this.onChangeEXE;
     }
 
     /////////////////////////////////////static///////////////////////////////////
@@ -5107,6 +5053,8 @@ class RadioButtonGroup extends Group {
 }
 
 black.RadioButtonGroup = RadioButtonGroup;
+
+UIComponent.registerEvent(RadioButtonGroup, 1400, "change", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/RadioButtonGroup.js///////////////////////////
 
 
@@ -5420,7 +5368,6 @@ class ViewStack extends Group {
         if (this._selectedIndex != -1 && this._selectedIndex >= index) {
             this._selectedIndex++;
         }
-        this.dispatchWith(flower.Event.UPDATE);
     }
 
     set selectedIndex(val) {
@@ -5449,6 +5396,8 @@ class ViewStack extends Group {
 }
 
 black.ViewStack = ViewStack;
+
+UIComponent.registerEvent(ViewStack, 1500, "selectedItemChange", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/ViewStack.js///////////////////////////
 
 
@@ -5725,7 +5674,7 @@ class ComboBox extends Group {
         if (p[9]) {
             return;
         }
-        p[8] = e.item;
+        p[8] = e.data;
         if (p[0]) {
             if (p[8] && p[8][p[4]]) {
                 p[0].text = p[8][p[4]];
@@ -5814,8 +5763,8 @@ class ComboBox extends Group {
         }
         if (p[2]) {
             p[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-            p[2].removeListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-            p[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+            p[2].removeListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            p[2].removeListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
         }
         p[2] = val;
         if (val) {
@@ -5824,8 +5773,8 @@ class ComboBox extends Group {
                 val.selectedItem = p[8];
             }
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-            val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-            val.addListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+            val.addListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            val.addListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
         }
     }
 

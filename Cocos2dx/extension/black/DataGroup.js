@@ -238,7 +238,7 @@ class DataGroup extends Group {
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
+                this.dispatchWith(flower.Event.TOUCH_BEGIN_ITEM, item.data, true);
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                     p[15] = -1;
                     if (p[10]) {
@@ -249,7 +249,7 @@ class DataGroup extends Group {
                     if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
                         if (p[11]) {
                             item.$onClick();
-                            this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                            this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                         }
                     }
                 } else {
@@ -275,7 +275,7 @@ class DataGroup extends Group {
                     }
                     if (p[11]) {
                         item.$onClick();
-                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                        this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                     }
                 } else {
                     this.$releaseItem();
@@ -359,7 +359,7 @@ class DataGroup extends Group {
             itemRenderer.selected = true;
         }
         if (changeFlag) {
-            this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
+            this.dispatchWith(flower.Event.SELECTED_ITEM_CHANGE, itemData, true);
         }
         if (!selectedItem) {
             this._canSelecteItem();
@@ -463,6 +463,10 @@ class DataGroup extends Group {
 
     set viewer(display) {
         this.$DataGroup[3] = display;
+    }
+
+    get viewer() {
+        return this.$DataGroup[3];
     }
 
     get contentWidth() {
@@ -594,8 +598,8 @@ class DataGroup extends Group {
     }
 }
 
-UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
-UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
-UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", DataGroupEvent.TOUCH_BEGIN_ITEM);
+UIComponent.registerEvent(DataGroup, 1110, "clickItem", flower.Event.CLICK_ITEM);
+UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", flower.Event.SELECTED_ITEM_CHANGE);
+UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", flower.Event.TOUCH_BEGIN_ITEM);
 
 exports.DataGroup = DataGroup;
