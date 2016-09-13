@@ -3,7 +3,8 @@
   "scripts": [
     "./src/Black.script",
     "./src/parser/BlackParser.script",
-    "./src/parser/UIParser.script"
+    "./src/parser/UIParser.script",
+    "./src/parser/UIData.script"
   ],
   "components": [
   ],

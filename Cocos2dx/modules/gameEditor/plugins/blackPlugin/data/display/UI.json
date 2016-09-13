@@ -1,5 +1,6 @@
 {
   "name": "black.UI",
+  "extends": "black.UIData",
   "members": {
     "display": {
       "desc": "显示对象属性信息",
@@ -22,9 +23,9 @@
       "type": "black.UIFile",
       "init": null
     },
-    "isReady":{
-      "desc":"是否加载完毕",
-      "type":"bool"
+    "isReady": {
+      "desc": "是否加载完毕",
+      "type": "bool"
     }
   }
 }

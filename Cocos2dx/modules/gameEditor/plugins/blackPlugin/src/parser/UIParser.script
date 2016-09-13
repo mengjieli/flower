@@ -6,6 +6,7 @@ var UIParser = (function (_super) {
         _super.call(this);
         this.xml = xml;
         this.data = data;
+        this.data.xml = xml;
     }
 
     UIParser.prototype.load = function () {
@@ -19,13 +20,12 @@ var UIParser = (function (_super) {
         var display = this.data.display;
         for (var i = 0; i < this.xml.attributes.length; i++) {
             var attribute = this.xml.attributes[i];
+            var attributeValue = flower.DataManager.createData("black.AttributeValue");
+            attributeValue.name = attribute.name;
+            attributeValue.content = new flower.StringValue(attribute.value);
+            this.data.attributes.push(attributeValue);
             if (display.hasMember(attribute.name)) {
                 display[attribute.name].value = attribute.value;
-            } else {
-                var attributeValue = flower.DataManager.createData("black.AttributeValue");
-                attributeValue.name = attribute.name;
-                attributeValue.content = new flower.StringValue(attribute.value);
-                this.data.attributes.push(attributeValue);
             }
         }
         for (var i = 0; i < this.xml.elements.length; i++) {

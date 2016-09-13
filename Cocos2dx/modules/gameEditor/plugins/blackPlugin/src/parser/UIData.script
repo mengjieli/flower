@@ -1,0 +1,24 @@
+var UIData = (function (_super) {
+
+    __extends(UIData, _super);
+
+    function UIData(init = null) {
+        _super.call(this, init);
+    }
+
+    Object.defineProperty(UIData.prototype, "xml", {
+        get: function () {
+            return this._xml;
+        },
+        set: function (val) {
+            this._xml = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    return UIData;
+
+})(flower.ObjectValue);
+
+module.UIData = UIData;

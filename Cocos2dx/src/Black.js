@@ -1840,11 +1840,22 @@ var $root = eval("this");
                 var extendClassName = "ObjectValue";
                 if (config.extends) {
                     var extendsItem = this.getClass(config.extends);
+                    if (extendsItem) {
+                        extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
+                    } else {
+                        var extendPakcages = config.extends.split(".");
+                        extendsItem = $root;
+                        for (var i = 0; i < extendPakcages.length; i++) {
+                            extendsItem = extendsItem[extendPakcages[i]];
+                        }
+                        if (extendsItem) {
+                            extendClassName = config.extends;
+                        }
+                    }
                     if (!extendsItem) {
                         sys.$error(3013, config.extends, flower.ObjectDo.toString(config));
                         return;
                     }
-                    extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
                 }
                 var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "(init) {\n" + "\t\t_super.call(this,null);\n";
                 content += "\t\tthis.className = \"" + config.name + "\";\n";
