@@ -56,6 +56,12 @@ class Binding {
                         break;
                     }
                     if (content.charAt(j) == "}") {
+                        var needValue = false;
+                        var bindContent = content.slice(i + 1, j);
+                        if (bindContent  && bindContent.charAt(0) == "$") {
+                            needValue = true;
+                            bindContent = bindContent.slice(1, bindContent.length);
+                        }
                         if (i == 0 && j == content.length - 1) {
                             this.singleValue = true;
                         }
@@ -63,10 +69,10 @@ class Binding {
                             this.stmts.push(content.slice(lastEnd, i));
                         }
                         lastEnd = j + 1;
-                        var stmt = Compiler.parserExpr(content.slice(i + 1, j), checks, {"this": thisObj}, {
+                        var stmt = Compiler.parserExpr(bindContent, checks, {"this": thisObj}, {
                             "Tween": flower.Tween,
                             "Ease": flower.Ease
-                        }, this.list);
+                        }, this.list, needValue);
                         if (stmt == null) {
                             parseError = true;
                             break;

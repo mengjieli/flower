@@ -84,6 +84,7 @@ class ExprAtr {
                 this.list[i].val.checkPropertyBinding(commonInfo);
             }
         }
+        this.needValue = commonInfo.needValue;
         if (atr && atr instanceof flower.Value) {
             this.value = atr;
             commonInfo.result.push(atr);
@@ -92,6 +93,9 @@ class ExprAtr {
 
     getValue() {
         if (this.value) {
+            if (this.needValue) {
+                return this.value;
+            }
             if (this.value instanceof flower.ArrayValue || this.value instanceof  flower.ObjectValue) {
                 return this.value;
             } else {

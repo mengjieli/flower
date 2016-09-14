@@ -1572,6 +1572,11 @@ var $root = eval("this");
                     this.__className = null;
                 }
             }
+        }, {
+            key: "membersKey",
+            get: function get() {
+                return Object.keys(this.value);
+            }
         }]);
 
         return ObjectValue;
@@ -2783,6 +2788,9 @@ var $root = eval("this");
                     }
                     var moduleURL = xml.namespaces[i].value;
                     if (moduleURL.slice(0, 2) == "./") {
+                        if (!this.loadURL || !moduleURL) {
+                            flower.breakPoint();
+                        }
                         moduleURL = flower.Path.joinPath(this.loadURL, moduleURL);
                     }
                     this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
@@ -3297,6 +3305,7 @@ var $root = eval("this");
                                     item.addNameSpace(this.rootXML.namespaces[n]);
                                 }
                                 var itemRenderer = new UIParser();
+                                itemRenderer.loadURL = this.loadURL;
                                 itemRenderer.namespaces = this.namespaces;
                                 setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.moduleName + "\");\n";
                             } else {
@@ -4451,7 +4460,7 @@ var $root = eval("this");
         }, {
             key: "__valueChange",
             value: function __valueChange() {
-                if (this.$input[0]) {
+                if (this.$input[0] != null) {
                     this.text = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
                 }
             }

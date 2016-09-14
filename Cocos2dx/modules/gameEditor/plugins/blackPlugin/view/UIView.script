@@ -1,11 +1,17 @@
 function init() {
-
-
-
     var uiData = this.data.data.ui;
     var clazz = module[uiData.name.value];
     this.ui = new clazz(uiData);
     this.container.addChild(this.ui);
+    this.detailPanel = new uieditor.UIDetailView();
+    this.setSelectedUI(this.ui);
+}
+
+function setSelectedUI(ui) {
+    this.selectedUI = ui;
+    var data = ui.data;
+    this.detailPanel.data = data;
+    showDetailPanel("UIDetail", data, this.detailPanel);
 }
 
 registerView("Black", UIView);

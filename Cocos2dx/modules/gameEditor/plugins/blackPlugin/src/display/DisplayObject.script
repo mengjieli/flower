@@ -12,13 +12,12 @@ var DisplayObject = (function (_super) {
             if (display.hasMember(attributeName)) {
                 this.bindProperty(attributeName, "{data.display." + attributeName + "}");
             }
-
         }
         this.init();
     }
 
     DisplayObject.prototype.init = function () {
-        
+
     }
 
     return DisplayObject;

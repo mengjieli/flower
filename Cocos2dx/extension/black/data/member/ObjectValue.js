@@ -141,6 +141,10 @@ class ObjectValue extends Value {
         }
     }
 
+    get membersKey() {
+        return Object.keys(this.value);
+    }
+
     dispose() {
         var val = this.__value;
         var list = Object.keys(val);

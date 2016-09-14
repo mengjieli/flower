@@ -89,7 +89,7 @@ class Input extends flower.TextInput {
     }
 
     __valueChange() {
-        if (this.$input[0]) {
+        if (this.$input[0] != null) {
             this.text = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
         }
     }

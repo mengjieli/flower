@@ -15,7 +15,9 @@
     "./src/display/Image.script"
   ],
   "components": [
-    "./view/UIView.xml"
+    "./view/UIView.xml",
+    "./view/PropertyPanel.xml",
+    "./view/UIDetailView.xml"
   ],
   "classes": {
   },

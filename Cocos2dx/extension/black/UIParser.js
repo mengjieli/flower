@@ -147,11 +147,11 @@ class UIParser extends Group {
                 continue;
             }
             var moduleURL = xml.namespaces[i].value;
-            if(moduleURL.slice(0,2) == "./") {
-                moduleURL = flower.Path.joinPath(this.loadURL,moduleURL);
+            if (moduleURL.slice(0, 2) == "./") {
+                moduleURL = flower.Path.joinPath(this.loadURL, moduleURL);
             }
             this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
-            if(!this.namespaces[xml.namespaces[i].name]) {
+            if (!this.namespaces[xml.namespaces[i].name]) {
                 sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
             }
         }
@@ -285,11 +285,14 @@ class UIParser extends Group {
                 continue;
             }
             var moduleURL = xml.namespaces[i].value;
-            if(moduleURL.slice(0,2) == "./") {
-                moduleURL = flower.Path.joinPath(this.loadURL,moduleURL);
+            if (moduleURL.slice(0, 2) == "./") {
+                if (!this.loadURL || !moduleURL) {
+                    flower.breakPoint();
+                }
+                moduleURL = flower.Path.joinPath(this.loadURL, moduleURL);
             }
             this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
-            if(!this.namespaces[xml.namespaces[i].name]) {
+            if (!this.namespaces[xml.namespaces[i].name]) {
                 sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
             }
         }
@@ -804,6 +807,7 @@ class UIParser extends Group {
                             item.addNameSpace(this.rootXML.namespaces[n]);
                         }
                         var itemRenderer = new UIParser();
+                        itemRenderer.loadURL = this.loadURL;
                         itemRenderer.namespaces = this.namespaces;
                         setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.moduleName + "\");\n";
                     } else {

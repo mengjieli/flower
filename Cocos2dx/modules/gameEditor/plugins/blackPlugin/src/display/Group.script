@@ -5,7 +5,8 @@ var Group = (function (_super) {
     function Group(data) {
         _super.call(this, data);
         this.show = new flower.Rect();
-        this.show.fillAlpha = 0;
+        this.show.fillAlpha = 0.1;
+        this.show.fillColor = 0;
         this.show.lineColor = 0;
         this.show.lineWidth = 1;
         this.show.percentWidth = 100;

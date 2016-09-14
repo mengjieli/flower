@@ -279,6 +279,7 @@ class ExprAtr {
                 this.list[i].val.checkPropertyBinding(commonInfo);
             }
         }
+        this.needValue = commonInfo.needValue;
         if (atr && atr instanceof flower.Value) {
             this.value = atr;
             commonInfo.result.push(atr);
@@ -287,6 +288,9 @@ class ExprAtr {
 
     getValue() {
         if (this.value) {
+            if (this.needValue) {
+                return this.value;
+            }
             if (this.value instanceof flower.ArrayValue || this.value instanceof  flower.ObjectValue) {
                 return this.value;
             } else {
@@ -477,7 +481,7 @@ class Compiler {
         this._parser = new Parser();
     }
 
-    parserExpr(content, checks, objects, classes, result) {
+    parserExpr(content, checks, objects, classes, result, needValue) {
         var scanner = new Scanner();
         var common = {
             "content": content,
@@ -488,7 +492,8 @@ class Compiler {
             "tokenValue": null,
             "scanner": this._scanner,
             "nodeStack": null,
-            bindList: []
+            "bindList": [],
+            "needValue": needValue
         };
         this._scanner.setCommonInfo(common);
         this._parser.setCommonInfo(common);
@@ -504,11 +509,11 @@ class Compiler {
 
     static ist;
 
-    static parserExpr(content, checks, objects, classes, result) {
+    static parserExpr(content, checks, objects, classes, result, needValue) {
         if (!Compiler.ist) {
             Compiler.ist = new Compiler();
         }
-        return Compiler.ist.parserExpr(content, checks, objects, classes, result);
+        return Compiler.ist.parserExpr(content, checks, objects, classes, result, needValue);
     }
 }
 //////////////////////////End File:binding/compiler/Compiler.js///////////////////////////
@@ -1266,6 +1271,12 @@ class Binding {
                         break;
                     }
                     if (content.charAt(j) == "}") {
+                        var needValue = false;
+                        var bindContent = content.slice(i + 1, j);
+                        if (bindContent  && bindContent.charAt(0) == "$") {
+                            needValue = true;
+                            bindContent = bindContent.slice(1, bindContent.length);
+                        }
                         if (i == 0 && j == content.length - 1) {
                             this.singleValue = true;
                         }
@@ -1273,10 +1284,10 @@ class Binding {
                             this.stmts.push(content.slice(lastEnd, i));
                         }
                         lastEnd = j + 1;
-                        var stmt = Compiler.parserExpr(content.slice(i + 1, j), checks, {"this": thisObj}, {
+                        var stmt = Compiler.parserExpr(bindContent, checks, {"this": thisObj}, {
                             "Tween": flower.Tween,
                             "Ease": flower.Ease
-                        }, this.list);
+                        }, this.list, needValue);
                         if (stmt == null) {
                             parseError = true;
                             break;

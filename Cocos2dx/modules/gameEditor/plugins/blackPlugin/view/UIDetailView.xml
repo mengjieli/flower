@@ -1,0 +1,11 @@
+<s:Tab percentWidth="100" percentHeight="100" class="UIDetailView"
+       xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:b="./../module.json">
+    <f:script src="./UIDetailView.script"/>
+    <s:Tab percentWidth="100" percentHeight="100">
+        <f:panels>
+            <f:Array>
+                <b:PropertyPanel id="propertyPanel"/>
+            </f:Array>
+        </f:panels>
+    </s:Tab>
+</s:Tab>

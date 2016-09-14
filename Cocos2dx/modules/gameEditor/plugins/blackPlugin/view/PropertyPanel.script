@@ -1,0 +1,16 @@
+function setData(val) {
+    _super.prototype.setData.call(this, val);
+    var attributes = this.data.attributes;
+    var display = this.data.display;
+    if (!this.listData) {
+        this.listData = new flower.ArrayValue();
+        this.list.dataProvider = this.listData;
+    }
+    this.listData.length = 0;
+    var keys = display.membersKey;
+    for (var i = 0; i < keys.length; i++) {
+        if(display[keys[i]]) {
+            this.listData.push({name: keys[i], content: display[keys[i]]});
+        }
+    }
+}
