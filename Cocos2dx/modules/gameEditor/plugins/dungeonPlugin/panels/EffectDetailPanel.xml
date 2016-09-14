@@ -1,6 +1,6 @@
 <f:Group class="EffectDetailPanel" percentWidth="100" percentHeight="100" creationComplete="this.init();"
          xmlns:f="flower" xmlns:s="modules/software/module.json"
-         xmlns:e="modules/gameEditor/module.json" xmlns:ui="ui">
+         xmlns:e="modules/gameEditor/module.json">
     <f:script src="./EffectDetailPanel.script"/>
     <f:Group percentWidth="100" percentHeight="100">
         <f:layout>

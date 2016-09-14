@@ -1,4 +1,4 @@
-<f:Group class="UIAttributePanel" percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:e="modules/gameEditor/module.json" xmlns:ui="ui">
+<f:Group class="UIAttributePanel" percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:e="modules/gameEditor/module.json" >
     <f:Group percentWidth="100">
         <f:layout>
             <f:VerticalLayout/>

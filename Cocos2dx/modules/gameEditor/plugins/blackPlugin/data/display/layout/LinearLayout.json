@@ -1,6 +1,6 @@
 {
-  "name": "black.LinearLayout",
-  "extends": "black.Layout",
+  "name": "uieditor.LinearLayout",
+  "extends": "uieditor.Layout",
   "init": {
     "fixElementSize": true
   },

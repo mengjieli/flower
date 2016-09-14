@@ -1,6 +1,6 @@
 {
-  "name": "black.ToggleButton",
-  "extends": "black.Button",
+  "name": "uieditor.ToggleButton",
+  "extends": "uieditor.Button",
   "members": {
     "selected": {
       "type": "bool"

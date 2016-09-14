@@ -1,6 +1,6 @@
 {
-  "name": "black.Scroller",
-  "extends": "black.MaskUI",
+  "name": "uieditor.Scroller",
+  "extends": "uieditor.MaskUI",
   "init": {
     "width": 100,
     "height": 100

@@ -146,7 +146,14 @@ class UIParser extends Group {
             if (xml.namespaces[i].name == "f") {
                 continue;
             }
-            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[xml.namespaces[i].value];
+            var moduleURL = xml.namespaces[i].value;
+            if(moduleURL.slice(0,2) == "./") {
+                moduleURL = flower.Path.joinPath(this.loadURL,moduleURL);
+            }
+            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
+            if(!this.namespaces[xml.namespaces[i].name]) {
+                sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
+            }
         }
         this.loadContent = xml;
         var list = xml.getAllElements();
@@ -277,7 +284,14 @@ class UIParser extends Group {
             if (xml.namespaces[i].name == "f") {
                 continue;
             }
-            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[xml.namespaces[i].value];
+            var moduleURL = xml.namespaces[i].value;
+            if(moduleURL.slice(0,2) == "./") {
+                moduleURL = flower.Path.joinPath(this.loadURL,moduleURL);
+            }
+            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
+            if(!this.namespaces[xml.namespaces[i].name]) {
+                sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
+            }
         }
         this.rootXML = xml;
         var classInfo = this.decodeRootComponent(xml, content);

@@ -1,6 +1,6 @@
 {
-  "name": "black.VerticalLayout",
-  "extends": "black.LinearLayout",
+  "name": "uieditor.VerticalLayout",
+  "extends": "uieditor.LinearLayout",
   "init": {
     "align": "vertical"
   },

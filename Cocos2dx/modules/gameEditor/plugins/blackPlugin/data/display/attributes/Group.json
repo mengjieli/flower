@@ -1,6 +1,6 @@
 {
-  "name": "black.Group",
-  "extends": "black.Sprite",
+  "name": "uieditor.Group",
+  "extends": "uieditor.Sprite",
   "members": {
     "data": {
       "type": "*"

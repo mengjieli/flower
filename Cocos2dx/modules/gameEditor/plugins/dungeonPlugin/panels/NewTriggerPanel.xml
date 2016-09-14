@@ -1,5 +1,5 @@
 <s:Alert class="NewTriggerPanel" title="新建触发器" creationComplete="this.init();" width="300" height="200" xmlns:f="flower" xmlns:s="modules/software/module.json"
-         xmlns:d="dungeon">
+         xmlns:d="./../module.json">
     <f:script src="./NewTriggerPanel.script"/>
     <f:Group id="container" left="1" right="1" top="25" bottom="0">
         <f:Label text="名称" horizontalCenter="-50" y="24"/>

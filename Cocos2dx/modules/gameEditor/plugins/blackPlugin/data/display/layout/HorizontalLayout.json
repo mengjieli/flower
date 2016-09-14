@@ -1,6 +1,6 @@
 {
-  "name": "black.HorizontalLayout",
-  "extends": "black.LinearLayout",
+  "name": "uieditor.HorizontalLayout",
+  "extends": "uieditor.LinearLayout",
   "init": {
     "align": "horizontal"
   },

@@ -1,0 +1,17 @@
+var Rect = (function (_super) {
+
+    __extends(Rect, _super);
+
+    function Rect(data) {
+        _super.call(this, data);
+    }
+
+    Rect.prototype.init = function () {
+        this.show = new flower.Rect();
+    }
+
+    return Rect;
+
+})(module.DisplayObject);
+
+module.Rect = Rect;

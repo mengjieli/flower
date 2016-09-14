@@ -1,6 +1,6 @@
 {
-  "name": "black.DataGroup",
-  "extends": "black.Group",
+  "name": "uieditor.DataGroup",
+  "extends": "uieditor.Group",
   "members": {
     "dataProvider": {
       "type": "flower.ArrayValue",

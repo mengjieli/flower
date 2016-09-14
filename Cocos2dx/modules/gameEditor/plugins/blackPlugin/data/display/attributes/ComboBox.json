@@ -1,6 +1,6 @@
 {
-  "name": "black.ComboBox",
-  "extends": "black.Group",
+  "name": "uieditor.ComboBox",
+  "extends": "uieditor.Group",
   "members": {
     "label": {
       "type": "black.UI",

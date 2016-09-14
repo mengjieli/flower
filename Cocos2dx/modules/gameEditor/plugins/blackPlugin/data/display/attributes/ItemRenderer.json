@@ -1,6 +1,6 @@
 {
-  "name": "black.ItemRenderer",
-  "extends": "black.Group",
+  "name": "uieditor.ItemRenderer",
+  "extends": "uieditor.Group",
   "init": {
     "absoluteState": true
   },

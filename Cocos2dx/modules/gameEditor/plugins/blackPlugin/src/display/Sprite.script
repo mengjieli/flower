@@ -1,0 +1,23 @@
+var Sprite = (function (_super) {
+
+    __extends(Sprite, _super);
+
+    function Sprite(data) {
+        _super.call(this, data);
+    }
+
+    Sprite.prototype.init = function () {
+        var children = this.data.children;
+        for (var i = 0; i < children.length; i++) {
+            var childData = children[i];
+            var clazz = module[childData.name.value];
+            var ui = new clazz(childData);
+            this.addChild(ui);
+        }
+    }
+
+    return Sprite;
+
+})(module.DisplayObject);
+
+module.Sprite = Sprite;

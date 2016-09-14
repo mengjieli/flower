@@ -1,6 +1,6 @@
 {
-  "name": "black.Button",
-  "extends": "black.Group",
+  "name": "uieditor.Button",
+  "extends": "uieditor.Group",
   "init": {
     "absoluteState": true
   },

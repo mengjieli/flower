@@ -1,5 +1,5 @@
 {
-  "name": "black.AttributeValue",
+  "name": "uieditor.AttributeValue",
   "desc": "UI 属性值",
   "members": {
     "name": {

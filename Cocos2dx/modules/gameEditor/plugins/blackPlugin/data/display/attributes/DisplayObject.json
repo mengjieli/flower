@@ -1,5 +1,5 @@
 {
-  "name": "black.DisplayObject",
+  "name": "uieditor.DisplayObject",
   "members": {
     "x": {
       "type": "number"

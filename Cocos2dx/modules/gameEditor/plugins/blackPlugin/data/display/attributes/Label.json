@@ -1,6 +1,6 @@
 {
-  "name": "black.Label",
-  "extends": "black.TextField",
+  "name": "uieditor.Label",
+  "extends": "uieditor.TextField",
   "members": {
     "left": {
       "type": "number"

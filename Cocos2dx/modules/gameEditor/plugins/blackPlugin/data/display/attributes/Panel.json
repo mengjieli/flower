@@ -1,6 +1,6 @@
 {
-  "name": "black.Panel",
-  "extends": "black.Group",
+  "name": "uieditor.Panel",
+  "extends": "uieditor.Group",
   "members": {
     "title": {
       "type": "string"

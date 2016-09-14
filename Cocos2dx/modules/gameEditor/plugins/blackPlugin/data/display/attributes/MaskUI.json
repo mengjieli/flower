@@ -1,6 +1,6 @@
 {
-  "name": "black.MaskUI",
-  "extends": "black.Mask",
+  "name": "uieditor.MaskUI",
+  "extends": "uieditor.Mask",
   "members": {
     "data": {
       "type": "*"

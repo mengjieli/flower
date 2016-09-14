@@ -1,0 +1,9 @@
+<s:TitlePanel creationComplete="this.init();" percentWidth="100" percentHeight="100" class="UIView"
+              title="{data.name}" xmlns:f="flower"
+              xmlns:s="modules/software/module.json" xmlns:b="./../module.json">
+    <f:script src="./UIView.script"/>
+    <f:Rect fillColor="0x333333" percentWidth="100" percentHeight="100"/>
+    <f:Group horizontalCenter="0" verticalCenter="0" id="container">
+        <f:Rect fillColor="0xffffff" percentWidth="100" percentHeight="100"/>
+    </f:Group>
+</s:TitlePanel>

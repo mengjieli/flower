@@ -1,6 +1,6 @@
 {
-  "name": "black.Input",
-  "extends": "black.TextInput",
+  "name": "uieditor.Input",
+  "extends": "uieditor.TextInput",
   "members": {
     "left": {
       "type": "number"

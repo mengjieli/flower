@@ -1,6 +1,6 @@
 {
-  "name": "black.Shape",
-  "extends": "black.DisplayObject",
+  "name": "uieditor.Shape",
+  "extends": "uieditor.DisplayObject",
   "members": {
     "fillColor": {
       "type": "uint",

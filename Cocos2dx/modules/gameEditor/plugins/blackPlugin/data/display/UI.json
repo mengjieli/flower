@@ -1,7 +1,11 @@
 {
-  "name": "black.UI",
-  "extends": "black.UIData",
+  "name": "uieditor.UI",
+  "extends": "uieditor.UIData",
   "members": {
+    "name": {
+      "desc": "显示名称",
+      "type": "string"
+    },
     "display": {
       "desc": "显示对象属性信息",
       "type": "black.DisplayObject",

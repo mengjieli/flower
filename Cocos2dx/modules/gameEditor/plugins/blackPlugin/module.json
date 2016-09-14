@@ -1,12 +1,21 @@
 {
-  "name": "black",
+  "name": "uieditor",
   "scripts": [
     "./src/Black.script",
     "./src/parser/BlackParser.script",
     "./src/parser/UIParser.script",
-    "./src/parser/UIData.script"
+    "./src/parser/UIData.script",
+    "./src/display/DisplayObject.script",
+    "./src/display/Bitmap.script",
+    "./src/display/TextField.script",
+    "./src/display/TextInput.script",
+    "./src/display/Rect.script",
+    "./src/display/Sprite.script",
+    "./src/display/Group.script",
+    "./src/display/Image.script"
   ],
   "components": [
+    "./view/UIView.xml"
   ],
   "classes": {
   },

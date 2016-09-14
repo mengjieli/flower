@@ -1,7 +1,7 @@
 <f:Group class="MoveCondition" percentWidth="100"
          creationComplete="this.init();"
          xmlns:f="flower" xmlns:s="modules/software/module.json"
-         xmlns:e="modules/gameEditor/module.json" xmlns:ui="ui">
+         xmlns:e="modules/gameEditor/module.json" >
     <f:script src="./MoveCondition.script"/>
     <f:Group horizontalCenter="0">
         <f:Label horizontalCenter="-55" width="60" text="部队类型" verticalCenter="0"/>

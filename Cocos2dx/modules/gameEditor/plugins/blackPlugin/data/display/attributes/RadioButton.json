@@ -1,6 +1,6 @@
 {
-  "name": "black.RadioButton",
-  "extends": "black.ToggleButton",
+  "name": "uieditor.RadioButton",
+  "extends": "uieditor.ToggleButton",
   "members": {
     "groupName": {
       "type": "string"

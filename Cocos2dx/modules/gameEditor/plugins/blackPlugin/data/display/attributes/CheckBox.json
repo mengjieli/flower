@@ -1,6 +1,6 @@
 {
-  "name": "black.CheckBox",
-  "extends": "black.ToggleButton",
+  "name": "uieditor.CheckBox",
+  "extends": "uieditor.ToggleButton",
   "members": {
   }
 }

@@ -10466,6 +10466,21 @@ var flower = {};
                 if (path2.charAt(0) == "/") {
                     path2 = path2.slice(1, path2.length);
                 }
+                while ((path2.slice(0, 2) == "./" || path2.slice(0, 3) == "../") && path != "") {
+                    if (path2.slice(0, 2) == "./") {
+                        path2 = path2.slice(2, path2.length);
+                    } else {
+                        path2 = path2.slice(3, path2.length);
+                    }
+                    for (var i = path.length - 2; i >= 0; i--) {
+                        if (path.charAt(i) == "/") {
+                            path = path.slice(0, i + 1);
+                            break;
+                        } else if (i == 0) {
+                            path = "";
+                        }
+                    }
+                }
                 path += path2;
                 return path;
             }

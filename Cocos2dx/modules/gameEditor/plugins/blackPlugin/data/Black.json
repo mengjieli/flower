@@ -1,5 +1,5 @@
 {
-  "name": "black.Black",
+  "name": "uieditor.Black",
   "desc": "用户操作",
   "members": {
     "operationHistory": {

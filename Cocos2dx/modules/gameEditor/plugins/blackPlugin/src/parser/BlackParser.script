@@ -7,12 +7,12 @@ var BlackParser = (function (_super) {
     }
 
     BlackParser.prototype.load = function () {
-        this.data = flower.DataManager.createData("black.UIFile");
+        this.data = flower.DataManager.createData("uieditor.UIFile");
         var xml = new flower.XMLElement();
         xml.parse(this.file.content);
         //分析 namesapce
         for (var i = 0; i < xml.namespaces.length; i++) {
-            var namespace = flower.DataManager.createData("black.NameSpace");
+            var namespace = flower.DataManager.createData("uieditor.NameSpace");
             namespace.name.value = xml.namespaces[i].name;
             namespace.content.value = xml.namespaces[i].value;
             this.data.namespaces.push(namespace);

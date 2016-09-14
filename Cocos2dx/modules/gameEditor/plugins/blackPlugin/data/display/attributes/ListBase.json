@@ -1,6 +1,6 @@
 {
-  "name": "black.ListBase",
-  "extends": "black.DataGroup",
+  "name": "uieditor.ListBase",
+  "extends": "uieditor.DataGroup",
   "init": {
     "requireSelection": true,
     "itemSelectedEnabled": true,

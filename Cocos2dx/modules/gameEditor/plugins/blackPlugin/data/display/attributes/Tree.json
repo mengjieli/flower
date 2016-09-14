@@ -1,6 +1,6 @@
 {
-  "name": "black.Tree",
-  "extends": "black.DataGroup",
+  "name": "uieditor.Tree",
+  "extends": "uieditor.DataGroup",
   "init":{
     "requireSelection":true,
     "itemSelectedEnabled":true,

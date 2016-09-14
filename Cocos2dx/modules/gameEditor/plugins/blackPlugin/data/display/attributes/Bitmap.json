@@ -1,6 +1,6 @@
 {
-  "name": "black.Bitmap",
-  "extends": "black.DisplayObject",
+  "name": "uieditor.Bitmap",
+  "extends": "uieditor.DisplayObject",
   "members": {
     "texture": {
       "type": "*"

@@ -1,6 +1,6 @@
 {
-  "name": "black.ToggleSwitch",
-  "extends": "black.ToggleButton",
+  "name": "uieditor.ToggleSwitch",
+  "extends": "uieditor.ToggleButton",
   "members": {
   }
 }

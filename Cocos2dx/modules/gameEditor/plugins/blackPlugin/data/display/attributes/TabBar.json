@@ -1,6 +1,6 @@
 {
-  "name": "black.List",
-  "extends": "black.ListBase",
+  "name": "uieditor.List",
+  "extends": "uieditor.ListBase",
   "init": {
     "layout": {
       "fixElementSize": false,

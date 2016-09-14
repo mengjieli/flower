@@ -1,6 +1,6 @@
 {
-  "name": "black.Alert",
-  "extends": "black.Panel",
+  "name": "uieditor.Alert",
+  "extends": "uieditor.Panel",
   "members": {
     "confirmButton": {
       "type": "black.UI",

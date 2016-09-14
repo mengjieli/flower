@@ -1,0 +1,12 @@
+function init() {
+
+
+
+    var uiData = this.data.data.ui;
+    var clazz = module[uiData.name.value];
+    this.ui = new clazz(uiData);
+    this.container.addChild(this.ui);
+}
+
+registerView("Black", UIView);
+

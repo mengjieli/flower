@@ -1,5 +1,5 @@
 {
-  "name": "black.Layout",
+  "name": "uieditor.Layout",
   "members": {
     "fixElementSize": {
       "type": "bool"

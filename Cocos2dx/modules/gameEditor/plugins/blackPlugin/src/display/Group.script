@@ -1,0 +1,20 @@
+var Group = (function (_super) {
+
+    __extends(Group, _super);
+
+    function Group(data) {
+        _super.call(this, data);
+        this.show = new flower.Rect();
+        this.show.fillAlpha = 0;
+        this.show.lineColor = 0;
+        this.show.lineWidth = 1;
+        this.show.percentWidth = 100;
+        this.show.percentHeight = 100;
+        this.addChild(this.show);
+    }
+
+    return Group;
+
+})(module.Sprite);
+
+module.Group = Group;

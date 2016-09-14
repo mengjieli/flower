@@ -1,6 +1,6 @@
 {
-  "name": "black.Image",
-  "extends": "black.Bitmap",
+  "name": "uieditor.Image",
+  "extends": "uieditor.Bitmap",
   "members": {
     "source": {
       "type": "string"

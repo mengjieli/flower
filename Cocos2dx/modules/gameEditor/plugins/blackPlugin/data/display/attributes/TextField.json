@@ -1,6 +1,6 @@
 {
-  "name": "black.TextField",
-  "extends": "black.DisplayObject",
+  "name": "uieditor.TextField",
+  "extends": "uieditor.DisplayObject",
   "members": {
     "text": {
       "type": "string"

@@ -1,6 +1,6 @@
 {
-  "name": "black.Rect",
-  "extends": "black.Shape",
+  "name": "uieditor.Rect",
+  "extends": "uieditor.Shape",
   "members": {
     "left": {
       "type": "number"

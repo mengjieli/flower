@@ -1,6 +1,6 @@
 {
-  "name": "black.ViewStack",
-  "extends": "black.Group",
+  "name": "uieditor.ViewStack",
+  "extends": "uieditor.Group",
   "members": {
     "selectedItemChange":{
       "type":"string"
