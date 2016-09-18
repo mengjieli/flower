@@ -3132,12 +3132,22 @@ class DisplayObject extends EventDispatcher {
         return p[4] != null ? p[4] : this.$getContentBounds().height;
     }
 
-    $getBounds() {
+    $getBounds(fromParent = false) {
         var rect = this.$DisplayObject[7];
         if (this.$hasFlags(0x0004)) {
             this.$removeFlags(0x0004);
             var contentRect = this.$getContentBounds();
             rect.copyFrom(contentRect);
+            var width = this.width;
+            var height = this.height;
+            if (rect.width != width) {
+                rect.x = 0;
+                rect.width = width;
+            }
+            if (rect.height != height) {
+                rect.y = 0;
+                rect.height = height = height;
+            }
             var matrix = this.$getMatrix();
             matrix.$transformRectangle(rect);
         }
@@ -3746,7 +3756,7 @@ class Sprite extends DisplayObject {
         var maxY = 0;
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
-            var bounds = children[i].$getBounds();
+            var bounds = children[i].$getBounds(true);
             if (i == 0) {
                 maxX = bounds.x + bounds.width;
                 maxY = bounds.y + bounds.height;
@@ -3758,19 +3768,6 @@ class Sprite extends DisplayObject {
                     maxY = bounds.y + bounds.height;
                 }
             }
-            //var child = children[i];
-            //var bounds = children[i].$getBounds();
-            //if (i == 0) {
-            //    maxX = bounds.x + child.width;
-            //    maxY = bounds.y + child.height;
-            //} else {
-            //    if (bounds.x + child.width > maxX) {
-            //        maxX = bounds.x + child.width;
-            //    }
-            //    if (bounds.y + child.height > maxY) {
-            //        maxY = bounds.y + child.height;
-            //    }
-            //}
         }
         rect.x = minX;
         rect.y = minY;
@@ -9306,7 +9303,7 @@ class Path {
             return false;
         }
         for (var i = 0; i < arr1.length - 1; i++) {
-            if(arr1[i] != arr2[i]) {
+            if (arr1[i] != arr2[i]) {
                 return false;
             }
         }
@@ -9320,6 +9317,21 @@ class Path {
         }
         if (path2.charAt(0) == "/") {
             path2 = path2.slice(1, path2.length);
+        }
+        while ((path2.slice(0, 2) == "./" || path2.slice(0, 3) == "../") && path != "") {
+            if(path2.slice(0, 2) == "./") {
+                path2 = path2.slice(2, path2.length);
+            } else {
+                path2 = path2.slice(3, path2.length);
+            }
+            for (var i = path.length - 2; i >= 0; i--) {
+                if (path.charAt(i) == "/") {
+                    path = path.slice(0, i + 1);
+                    break;
+                } else if (i == 0) {
+                    path = "";
+                }
+            }
         }
         path += path2;
         return path;

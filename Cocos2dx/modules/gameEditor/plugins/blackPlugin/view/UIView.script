@@ -2,9 +2,14 @@ function init() {
     var uiData = this.data.data.ui;
     var clazz = module[uiData.name.value];
     this.ui = new clazz(uiData);
-    this.container.addChild(this.ui);
+    this.container1.addChild(this.ui);
     this.detailPanel = new uieditor.UIDetailView();
     this.setSelectedUI(this.ui);
+
+    this.addListener(flower.TouchEvent.TOUCH_END,function(){
+        console.log("click",this.container1.name,this.container1.id);
+        $root.abc = true;
+    },this);
 }
 
 function setSelectedUI(ui) {

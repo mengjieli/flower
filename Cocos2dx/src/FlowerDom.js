@@ -3731,11 +3731,23 @@ var flower = {};
         }, {
             key: "$getBounds",
             value: function $getBounds() {
+                var fromParent = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
                 var rect = this.$DisplayObject[7];
                 if (this.$hasFlags(0x0004)) {
                     this.$removeFlags(0x0004);
                     var contentRect = this.$getContentBounds();
                     rect.copyFrom(contentRect);
+                    var width = this.width;
+                    var height = this.height;
+                    if (rect.width != width) {
+                        rect.x = 0;
+                        rect.width = width;
+                    }
+                    if (rect.height != height) {
+                        rect.y = 0;
+                        rect.height = height = height;
+                    }
                     var matrix = this.$getMatrix();
                     matrix.$transformRectangle(rect);
                 }
@@ -4417,7 +4429,7 @@ var flower = {};
                 var maxY = 0;
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
-                    var bounds = children[i].$getBounds();
+                    var bounds = children[i].$getBounds(true);
                     if (i == 0) {
                         maxX = bounds.x + bounds.width;
                         maxY = bounds.y + bounds.height;
@@ -4429,19 +4441,6 @@ var flower = {};
                             maxY = bounds.y + bounds.height;
                         }
                     }
-                    //var child = children[i];
-                    //var bounds = children[i].$getBounds();
-                    //if (i == 0) {
-                    //    maxX = bounds.x + child.width;
-                    //    maxY = bounds.y + child.height;
-                    //} else {
-                    //    if (bounds.x + child.width > maxX) {
-                    //        maxX = bounds.x + child.width;
-                    //    }
-                    //    if (bounds.y + child.height > maxY) {
-                    //        maxY = bounds.y + child.height;
-                    //    }
-                    //}
                 }
                 rect.x = minX;
                 rect.y = minY;

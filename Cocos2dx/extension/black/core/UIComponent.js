@@ -268,42 +268,19 @@ class UIComponent {
             this.$invalidateContentBounds();
         }
 
-        //p.$getWidth = function () {
-        //    var p = this.$UIComponent;
-        //    if (p[0] != null && p[1] == null && p [2] != null) {
-        //        return (p[2] - p[0]) * 2;
-        //    }
-        //    else if (p[0] == null && p[1] != null && p[2] != null) {
-        //        return (p[1] - p[2]) * 2;
-        //    } else if (p[0] != null && p[1] != null) {
-        //        if (this.parent) {
-        //            return parent.width - p[1] - p[0];
-        //        }
-        //    } else {
-        //        if (p[6] && this.parent) {
-        //            this.width = parent.width * p[6] / 100;
-        //        }
-        //    }
-        //    return $root._get(Object.getPrototypeOf(p), "$getWidth", this).call(this);
-        //}
-        //
-        //p.$getHeight = function () {
-        //    var p = this.$UIComponent;
-        //    if (p[3] != null && p[4] == null && p [5] != null) {
-        //        return (p[5] - p[3]) * 2;
-        //    } else if (p[3] == null && p[4] != null && p[5] != null) {
-        //        return (p[4] - p[5]) * 2;
-        //    } else if (p[3] != null && p[4] != null) {
-        //        if (this.parent) {
-        //            return parent.height - p[4] - p[3];
-        //        }
-        //    } else {
-        //        if (p[7] && this.parent) {
-        //            return parent.height * p[7] / 100;
-        //        }
-        //    }
-        //    return $root._get(Object.getPrototypeOf(p), "$getHeight", this).call(this);
-        //}
+        p.$getBounds = function (fromParent = false) {
+            var rect = $root._get(Object.getPrototypeOf(p), "$getBounds", this).call(this, fromParent);
+            if (fromParent) {
+                var ui = this.$UIComponent;
+                if ((ui[0] == null || ui[1] == null) && ui[6] != null) {
+                    rect.width = 0;
+                }
+                if ((ui[3] == null || ui[4] == null) && ui[7] != null) {
+                    rect.height = 0;
+                }
+            }
+            return rect;
+        }
 
         Object.defineProperty(p, "left", {
             get: function () {

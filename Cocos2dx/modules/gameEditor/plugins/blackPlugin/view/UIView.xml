@@ -3,7 +3,7 @@
               xmlns:s="modules/software/module.json" xmlns:b="./../module.json">
     <f:script src="./UIView.script"/>
     <f:Rect fillColor="0x333333" percentWidth="100" percentHeight="100"/>
-    <f:Group horizontalCenter="0" verticalCenter="0" id="container">
+    <f:Group horizontalCenter="0" verticalCenter="0" id="container1">
         <f:Rect fillColor="0xffffff" percentWidth="100" percentHeight="100"/>
     </f:Group>
 </s:TitlePanel>

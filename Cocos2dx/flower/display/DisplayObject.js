@@ -323,12 +323,22 @@ class DisplayObject extends EventDispatcher {
         return p[4] != null ? p[4] : this.$getContentBounds().height;
     }
 
-    $getBounds() {
+    $getBounds(fromParent = false) {
         var rect = this.$DisplayObject[7];
         if (this.$hasFlags(0x0004)) {
             this.$removeFlags(0x0004);
             var contentRect = this.$getContentBounds();
             rect.copyFrom(contentRect);
+            var width = this.width;
+            var height = this.height;
+            if (rect.width != width) {
+                rect.x = 0;
+                rect.width = width;
+            }
+            if (rect.height != height) {
+                rect.y = 0;
+                rect.height = height = height;
+            }
             var matrix = this.$getMatrix();
             matrix.$transformRectangle(rect);
         }
