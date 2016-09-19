@@ -13,10 +13,27 @@ var DisplayObject = (function (_super) {
                 this.bindProperty(attributeName, "{data.display." + attributeName + "}");
             }
         }
+        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_END, this.onTouch, this);
+        this.addListener(flower.TouchEvent.TOUCH_MOVE, this.onTouch, this);
         this.init();
     }
 
     DisplayObject.prototype.init = function () {
+
+    }
+
+    DisplayObject.prototype.onTouch = function (e) {
+        switch (e.type) {
+            case flower.TouchEvent.TOUCH_BEGIN:
+                module.detailPanel.data = this.data;
+                showDetailPanel("UIDetail", this.data, module.detailPanel);
+                break;
+            case flower.TouchEvent.TOUCH_MOVE:
+                break;
+            case flower.TouchEvent.TOUCH_MOVE:
+                break;
+        }
 
     }
 

@@ -4,12 +4,9 @@ function init() {
     this.ui = new clazz(uiData);
     this.container1.addChild(this.ui);
     this.detailPanel = new uieditor.UIDetailView();
+    module.detailPanel = this.detailPanel;
     this.setSelectedUI(this.ui);
-
-    this.addListener(flower.TouchEvent.TOUCH_END,function(){
-        console.log("click",this.container1.name,this.container1.id);
-        $root.abc = true;
-    },this);
+    this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouch, this);
 }
 
 function setSelectedUI(ui) {
@@ -17,6 +14,22 @@ function setSelectedUI(ui) {
     var data = ui.data;
     this.detailPanel.data = data;
     showDetailPanel("UIDetail", data, this.detailPanel);
+}
+
+function onTouch(e) {
+    var target = e.target;
+    var isChild = false;
+    while (target) {
+        if (target == this.ui) {
+            isChild = true;
+            break;
+        }
+        target = target.parent;
+    }
+    if(!isChild) {
+        this.detailPanel.data = this.ui.data;
+        showDetailPanel("UIDetail", this.ui.data, this.detailPanel);
+    }
 }
 
 registerView("Black", UIView);

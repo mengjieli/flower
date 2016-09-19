@@ -2370,6 +2370,12 @@ var $root = eval("this");
             if (data != null) {
                 _this12._data = data;
             }
+            _this12.$IViewPort = {
+                0: 0, //contentStartX
+                1: 0, //contentStartY
+                2: 0, //contentEndX
+                3: 0 //contentEndY
+            };
             _this12.$initUIComponent();
             return _this12;
         }
@@ -2462,6 +2468,10 @@ var $root = eval("this");
                     }
                 }
                 this.$validateChildrenUIComponent();
+                this.$IViewPort[0] = this.$childrenBounds.x;
+                this.$IViewPort[1] = this.$childrenBounds.y;
+                this.$IViewPort[2] = this.$childrenBounds.x + this.$childrenBounds.width;
+                this.$IViewPort[3] = this.$childrenBounds.y + this.$childrenBounds.height;
             }
         }, {
             key: "$validateChildrenUIComponent",
@@ -2515,6 +2525,16 @@ var $root = eval("this");
                 }
             }
         }, {
+            key: "$getContentWidth",
+            value: function $getContentWidth() {
+                return this.$IViewPort[2] - this.$IViewPort[0];
+            }
+        }, {
+            key: "$getContentHeight",
+            value: function $getContentHeight() {
+                return this.$IViewPort[3] - this.$IViewPort[1];
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 flower.Binding.removeChangeObject(this);
@@ -2529,6 +2549,16 @@ var $root = eval("this");
             },
             set: function set(val) {
                 this.setData(val);
+            }
+        }, {
+            key: "contentWidth",
+            get: function get() {
+                return this.$getContentWidth();
+            }
+        }, {
+            key: "contentHeight",
+            get: function get() {
+                return this.$getContentHeight();
             }
         }]);
 
@@ -3492,8 +3522,8 @@ var $root = eval("this");
                 3: null, //viewer
                 4: 0, //viewerWidth
                 5: 0, //viewerHeight
-                6: 0, //contentWidth
-                7: 0, //contentHeight
+                //6: 0,    //contentWidth
+                //7: 0,    //contentHeight
                 8: null, //downItem
                 9: null, //selectedItem
                 10: false, //itemSelectedEnabled
@@ -3658,17 +3688,26 @@ var $root = eval("this");
                     if (layout) {
                         if (!p[3] || !layout.fixElementSize) {
                             var size = layout.getContentSize();
-                            p[6] = size.width;
-                            p[7] = size.height;
+                            p[52] = size.width;
+                            p[53] = size.height;
                             flower.Size.release(size);
                         } else if (p[2].length) {
                             var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                            p[6] = size.width;
-                            p[7] = size.height;
+                            p[52] = size.width;
+                            p[53] = size.height;
                             flower.Size.release(size);
                         }
                     }
                 }
+            }
+        }, {
+            key: "$validateUIComponent",
+            value: function $validateUIComponent(parent) {
+                _get(Object.getPrototypeOf(DataGroup.prototype), "$validateUIComponent", this).call(this, parent);
+                this.$IViewPort[0] = 0;
+                this.$IViewPort[1] = 0;
+                this.$IViewPort[2] = this.$DataGroup[52];
+                this.$IViewPort[3] = this.$DataGroup[53];
             }
         }, {
             key: "createItem",
@@ -3968,16 +4007,6 @@ var $root = eval("this");
             },
             get: function get() {
                 return this.$DataGroup[3];
-            }
-        }, {
-            key: "contentWidth",
-            get: function get() {
-                return this.$DataGroup[6];
-            }
-        }, {
-            key: "contentHeight",
-            get: function get() {
-                return this.$DataGroup[7];
             }
         }, {
             key: "scrollEnabled",
@@ -5948,12 +5977,22 @@ var $root = eval("this");
 
             var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this32._viewSize = flower.Size.create(0, 0);
-            _this32._scrollDisX = [];
-            _this32._scrollDisY = [];
-            _this32._scrollTime = [];
-            _this32._upGap = 18;
-
+            _this32.$Scroller = {
+                0: null, //viewport
+                1: flower.Size.create(0, 0), //viewSize
+                2: 0, //startX
+                3: 0, //startY
+                4: [], //scrollDisX
+                5: [], //scrollDisY
+                6: [], //scrollTime
+                //7: 0,  //lastTouchTime
+                8: 0, //throw Tween
+                9: 18, //upGap
+                10: null, //horizontalScrollBar
+                11: null, //verticalScrollBar
+                52: 0, //contentWidth
+                53: 0 };
+            //contentHeight
             _this32.addListener(flower.TouchEvent.TOUCH_BEGIN, _this32.__onTouchScroller, _this32);
             _this32.addListener(flower.TouchEvent.TOUCH_MOVE, _this32.__onTouchScroller, _this32);
             _this32.addListener(flower.TouchEvent.TOUCH_END, _this32.__onTouchScroller, _this32);
@@ -5978,66 +6017,67 @@ var $root = eval("this");
         }, {
             key: "__onTouchScroller",
             value: function __onTouchScroller(e) {
-                if (!this._viewport) {
+                var p = this.$Scroller;
+                if (!p[0]) {
                     return;
                 }
                 var x = this.lastTouchX;
                 var y = this.lastTouchY;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
-                        if (this._throw) {
-                            this._throw.dispose();
-                            this._throw = null;
+                        if (p[8]) {
+                            p[8].dispose();
+                            p[8] = null;
                         }
-                        this._startX = x - this._viewport.x;
-                        this._startY = y - this._viewport.y;
-                        this._scrollDisX.length = this._scrollDisY.length = this._scrollTime.length = 0;
+                        p[2] = x - p[0].x;
+                        p[3] = y - p[0].y;
+                        p[4].length = p[5].length = p[6].length = 0;
                         break;
                     case flower.TouchEvent.TOUCH_MOVE:
-                        if (Math.abs(x - this._startX) > this._upGap || Math.abs(y - this._startY) > this._upGap) {
-                            this._viewport.$releaseItem();
+                        if (Math.abs(x - p[2]) > p[9] || Math.abs(y - p[3]) > p[9]) {
+                            p[0].$releaseItem();
                         }
-                        var _x = this._viewport.x;
-                        var _y = this._viewport.y;
-                        if (this._viewport.contentWidth > this.width) {
-                            this._viewport.x = x - this._startX;
+                        var _x = p[0].x;
+                        var _y = p[0].y;
+                        if (p[0].contentWidth > this.width) {
+                            p[0].x = x - p[2];
                         }
-                        if (this._viewport.contentHeight > this.height) {
-                            this._viewport.y = y - this._startY;
+                        if (p[0].contentHeight > this.height) {
+                            p[0].y = y - p[3];
                         }
-                        if (this._viewport.y > this.height) {
-                            this._viewport.y = this.height;
+                        if (p[0].y > this.height) {
+                            p[0].y = this.height;
                         }
-                        if (this._viewport.y < -this._viewport.contentHeight) {
-                            this._viewport.y = -this._viewport.contentHeight;
+                        if (p[0].y < -p[0].contentHeight) {
+                            p[0].y = -p[0].contentHeight;
                         }
-                        if (this._viewport.x > this.width) {
-                            this._viewport.x = this.width;
+                        if (p[0].x > this.width) {
+                            p[0].x = this.width;
                         }
-                        if (this._viewport.x < -this._viewport.contentWidth) {
-                            this._viewport.x = -this._viewport.contentWidth;
+                        if (p[0].x < -p[0].contentWidth) {
+                            p[0].x = -p[0].contentWidth;
                         }
-                        this._scrollDisX.push(this._viewport.x - _x);
-                        this._scrollDisY.push(this._viewport.y - _y);
-                        this._scrollTime.push(flower.CoreTime.currentTime);
-                        if (this._scrollDisX.length > 4) {
-                            this._scrollDisX.shift();
-                            this._scrollDisY.shift();
-                            this._scrollTime.shift();
+                        p[4].push(p[0].x - _x);
+                        p[5].push(p[0].y - _y);
+                        p[6].push(flower.CoreTime.currentTime);
+                        if (p[4].length > 4) {
+                            p[4].shift();
+                            p[5].shift();
+                            p[6].shift();
                         }
-                        this._lastTouchTime = flower.CoreTime.currentTime;
+                        //p[7] = flower.CoreTime.currentTime;
                         break;
                     case flower.TouchEvent.TOUCH_END:
                     case flower.TouchEvent.TOUCH_RELEASE:
                         var timeGap = 0.5;
-                        if (this._scrollTime.length) {
-                            timeGap = flower.CoreTime.currentTime - this._scrollTime[0];
+                        if (p[6].length) {
+                            timeGap = flower.CoreTime.currentTime - p[6][0];
                         }
                         var disX = 0;
                         var disY = 0;
-                        for (var i = 0; i < this._scrollDisX.length; i++) {
-                            disX += this._scrollDisX[i];
-                            disY += this._scrollDisY[i];
+                        for (var i = 0; i < p[4].length; i++) {
+                            disX += p[4][i];
+                            disY += p[5][i];
                         }
                         disX = disX * 100 / timeGap;
                         disY = disY * 100 / timeGap;
@@ -6053,19 +6093,19 @@ var $root = eval("this");
                         if (disY > 600) {
                             disY = 600;
                         }
-                        var toX = this._viewport.x + disX * 5;
-                        var toY = this._viewport.y + disY * 5;
+                        var toX = p[0].x + disX * 5;
+                        var toY = p[0].y + disY * 5;
                         var flag = true;
-                        if (-toX + this.width > this._viewport.contentWidth) {
-                            toX = this.width - this._viewport.contentWidth;
+                        if (-toX + this.width > p[0].contentWidth) {
+                            toX = this.width - p[0].contentWidth;
                             flag = false;
                         }
                         if (toX > 0) {
                             toX = 0;
                             flag = false;
                         }
-                        if (-toY + this.height > this._viewport.contentHeight) {
-                            toY = this.height - this._viewport.contentHeight;
+                        if (-toY + this.height > p[0].contentHeight) {
+                            toY = this.height - p[0].contentHeight;
                             flag = false;
                         }
                         if (toY > 0) {
@@ -6076,8 +6116,8 @@ var $root = eval("this");
                             //trace("quit", timeGap);
                             break;
                         }
-                        var timeX = Math.abs(toX - this._viewport.x) / 350;
-                        var timeY = Math.abs(toY - this._viewport.y) / 350;
+                        var timeX = Math.abs(toX - p[0].x) / 350;
+                        var timeY = Math.abs(toY - p[0].y) / 350;
                         var time = timeX > timeY ? timeX : timeY;
                         if (time < 0.5) {
                             time = 0.5;
@@ -6085,7 +6125,7 @@ var $root = eval("this");
                         if (time > 5) {
                             time = 5;
                         }
-                        this._throw = flower.Tween.to(this._viewport, time, {
+                        p[8] = flower.Tween.to(p[0], time, {
                             x: toX,
                             y: toY
                         }, flower.Ease.CUBIC_EASE_OUT);
@@ -6095,9 +6135,10 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                if (this._viewport) {
-                    this._viewport.width = this.width;
-                    this._viewport.height = this.height;
+                var p = this.$Scroller;
+                if (p[0]) {
+                    p[0].width = this.width;
+                    p[0].height = this.height;
                 }
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
@@ -6108,12 +6149,13 @@ var $root = eval("this");
         }, {
             key: "dispose",
             value: function dispose() {
-                flower.Size.release(this._viewSize);
+                flower.Size.release(this.$Scroller[1]);
                 _get(Object.getPrototypeOf(Scroller.prototype), "dispose", this).call(this);
             }
         }, {
             key: "$setViewport",
             value: function $setViewport(val) {
+                var p = this.$Scroller;
                 if (typeof val == "string") {
                     var clazz = $root[val];
                     if (!clazz) {
@@ -6124,44 +6166,82 @@ var $root = eval("this");
                     }
                     val = new clazz();
                 }
-                if (this._viewport == val) {
+                if (p[0] == val) {
                     return;
                 }
-                //if (this._viewport) {
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-                //}
-                this._viewport = val;
-                this._viewport.viewer = this;
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-                if (this._viewport.parent != this) {
-                    this.addChild(this._viewport);
+                p[0] = val;
+                p[0].viewer = this;
+                if (p[0].parent != this) {
+                    this.addChild(p[0]);
+                }
+                if (p[10]) {
+                    p[10].viewport = p[0];
+                }
+                if (p[11]) {
+                    p[11].viewport = p[0];
+                }
+            }
+
+            /**
+             * 设置水平滚动条
+             * @param val
+             */
+
+        }, {
+            key: "$setHorizontalScrollBar",
+            value: function $setHorizontalScrollBar(val) {
+                var p = this.$Scroller;
+                if (p[10] == val) {
+                    return;
+                }
+                if (val == null) {
+                    p[10].viewport = null;
+                }
+                p[10] = val;
+                if (p[10]) {
+                    p[10].viewport = p[0];
+                }
+            }
+
+            /**
+             * 设置垂直滚动条
+             * @param val
+             */
+
+        }, {
+            key: "$setVerticalScrollBar",
+            value: function $setVerticalScrollBar(val) {
+                var p = this.$Scroller;
+                if (p[11] == val) {
+                    return;
+                }
+                if (val == null) {
+                    p[11].viewport = null;
+                }
+                p[11] = val;
+                if (p[11]) {
+                    p[11].viewport = p[0];
                 }
             }
         }, {
             key: "$setWidth",
             value: function $setWidth(val) {
-                this._viewSize.width = val;
+                this.$Scroller[1].width = val;
             }
         }, {
             key: "$setHeight",
             value: function $setHeight(val) {
-                this._viewSize.height = val;
+                this.$Scroller[1].height = val;
             }
         }, {
             key: "$getWidth",
             value: function $getWidth() {
-                return this._viewSize.width;
+                return this.$Scroller[1].width;
             }
         }, {
             key: "$getHeight",
             value: function $getHeight() {
-                return this._viewSize.height;
+                return this.$Scroller[1].height;
             }
 
             //////////////////////////////////get&set//////////////////////////////////
@@ -6172,15 +6252,20 @@ var $root = eval("this");
                 this.$setViewport(val);
             },
             get: function get() {
-                return this._viewport;
+                return this.$Scroller[0];
             }
         }, {
             key: "releaseItemDistance",
             get: function get() {
-                return this._upGap;
+                return this.$Scroller[9];
             },
             set: function set(val) {
-                this._upGap = +val || 0;
+                this.$Scroller[9] = +val || 0;
+            }
+        }, {
+            key: "horizontalScrollBar",
+            set: function set(val) {
+                this.$setHorizontalScrollBar(val);
             }
         }]);
 
@@ -6410,9 +6495,7 @@ var $root = eval("this");
                     p[9] = true;
                     if (p[7] instanceof flower.Value) {
                         p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
-                        if (p[7].enumList) {
-                            this.dataProvider = new flower.ArrayValue(p[7].enumList);
-                        }
+                        this.dataProvider = new flower.ArrayValue(p[7].enumList);
                     }
                     p[9] = false;
                     this.__typeValueChange();

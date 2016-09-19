@@ -1,9 +1,13 @@
 class Sprite extends DisplayObject {
 
     __children;
+    __childrenBounds;
 
     constructor() {
         super();
+        this.$Sprite = {
+            0: new flower.Rectangle() //childrenBounds
+        }
         this.$initContainer();
     }
 
@@ -218,6 +222,11 @@ class Sprite extends DisplayObject {
         rect.y = minY;
         rect.width = maxX - minX;
         rect.height = maxY - minY;
+        var childrenBounds = this.$Sprite[0];
+        childrenBounds.x = rect.x;
+        childrenBounds.y = rect.y;
+        childrenBounds.width = rect.width;
+        childrenBounds.height = rect.height;
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -266,6 +275,10 @@ class Sprite extends DisplayObject {
 
     get numChildren() {
         return this.__children.length;
+    }
+
+    get $childrenBounds() {
+        return this.$Sprite[0];
     }
 
     $releaseContainer() {

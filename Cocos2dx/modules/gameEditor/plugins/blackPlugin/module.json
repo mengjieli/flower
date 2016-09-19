@@ -11,6 +11,7 @@
     "./src/display/TextInput.script",
     "./src/display/Rect.script",
     "./src/display/Sprite.script",
+    "./src/display/Mask.script",
     "./src/display/Group.script",
     "./src/display/Image.script"
   ],
@@ -33,7 +34,9 @@
     "./data/display/attributes/Shape.json",
     "./data/display/attributes/TextField.json",
     "./data/display/attributes/Sprite.json",
+    "./data/display/attributes/Mask.json",
     "./data/display/attributes/Group.json",
+    "./data/display/attributes/MaskUI.json",
     "./data/display/attributes/Image.json",
     "./data/display/attributes/Rect.json",
     "./data/display/layout/Layout.json",

@@ -1,24 +1,30 @@
-var Sprite = (function (_super) {
+var Mask = (function (_super) {
 
-    __extends(Sprite, _super);
+    __extends(Mask, _super);
 
-    function Sprite(data) {
+    function Mask(data) {
         this.childs = [];
         _super.call(this, data);
     }
 
-    Sprite.prototype.init = function () {
+    Mask.prototype.init = function () {
+        this.container = new flower.MaskUI();
+        this.container.percentWidth = 100;
+        this.container.percentHeight = 100;
+        this.addChild(this.container);
+
         var children = this.data.children;
         for (var i = 0; i < children.length; i++) {
             var childData = children[i];
             var clazz = module[childData.name.value];
             var ui = new clazz(childData);
-            this.addChild(ui);
+            this.container.addChild(ui);
             this.childs.push(ui);
         }
     }
 
-    Sprite.prototype.onTouch = function (e) {
+
+    Mask.prototype.onTouch = function (e) {
         var target = e.target;
         var isChild = false;
         while (target && this.childs.length) {
@@ -36,8 +42,8 @@ var Sprite = (function (_super) {
         _super.prototype.onTouch.call(this, e);
     }
 
-    return Sprite;
+    return Mask;
 
 })(module.DisplayObject);
 
-module.Sprite = Sprite;
+module.Mask = Mask;

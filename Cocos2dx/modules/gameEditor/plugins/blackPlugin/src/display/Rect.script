@@ -8,6 +8,12 @@ var Rect = (function (_super) {
 
     Rect.prototype.init = function () {
         this.show = new flower.Rect();
+        var display = this.data.display;
+        var keys = display.membersKey;
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+        }
+        this.addChild(this.show);
     }
 
     return Rect;

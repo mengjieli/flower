@@ -4210,6 +4210,9 @@ var flower = {};
 
             var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
+            _this15.$Sprite = {
+                0: new flower.Rectangle() //childrenBounds
+            };
             _this15.$initContainer();
             return _this15;
         }
@@ -4446,6 +4449,11 @@ var flower = {};
                 rect.y = minY;
                 rect.width = maxX - minX;
                 rect.height = maxY - minY;
+                var childrenBounds = this.$Sprite[0];
+                childrenBounds.x = rect.x;
+                childrenBounds.y = rect.y;
+                childrenBounds.width = rect.width;
+                childrenBounds.height = rect.height;
             }
         }, {
             key: "$getMouseTarget",
@@ -4516,6 +4524,11 @@ var flower = {};
             key: "numChildren",
             get: function get() {
                 return this.__children.length;
+            }
+        }, {
+            key: "$childrenBounds",
+            get: function get() {
+                return this.$Sprite[0];
             }
         }]);
 

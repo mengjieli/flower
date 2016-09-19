@@ -30,6 +30,21 @@
     "isReady": {
       "desc": "是否加载完毕",
       "type": "bool"
+    },
+    "exports": {
+      "desc": "是否导出",
+      "type": "bool",
+      "init": true,
+      "enumList": [
+        {
+          "label": "true",
+          "type": true
+        },
+        {
+          "label": "false",
+          "type": false
+        }
+      ]
     }
   }
 }

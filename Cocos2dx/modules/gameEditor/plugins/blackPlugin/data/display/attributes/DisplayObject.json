@@ -30,18 +30,58 @@
     },
     "visible": {
       "type": "bool",
-      "init": true
+      "init": true,
+      "enumList":[
+        {
+          "label":"true",
+          "type":true
+        },
+        {
+          "label":"false",
+          "type":false
+        }
+      ]
     },
     "touchEnabled": {
       "type": "bool",
-      "init": true
+      "init": true,
+      "enumList":[
+        {
+          "label":"true",
+          "type":true
+        },
+        {
+          "label":"false",
+          "type":false
+        }
+      ]
     },
     "multiplyTouchEnabled": {
       "type": "bool",
-      "init": true
+      "init": true,
+      "enumList":[
+        {
+          "label":"true",
+          "type":true
+        },
+        {
+          "label":"false",
+          "type":false
+        }
+      ]
     },
     "focusEnabled": {
-      "type": "bool"
+      "type": "bool",
+      "enumList":[
+        {
+          "label":"true",
+          "type":true
+        },
+        {
+          "label":"false",
+          "type":false
+        }
+      ]
     },
     "name": {
       "desc": "在编辑器中会生成一个 16 位的随机字母数字组合(唯一名)",

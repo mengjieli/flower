@@ -11,8 +11,8 @@ class DataGroup extends Group {
             3: null, //viewer
             4: 0,    //viewerWidth
             5: 0,    //viewerHeight
-            6: 0,    //contentWidth
-            7: 0,    //contentHeight
+            //6: 0,    //contentWidth
+            //7: 0,    //contentHeight
             8: null, //downItem
             9: null, //selectedItem
             10: false,//itemSelectedEnabled
@@ -171,18 +171,26 @@ class DataGroup extends Group {
             if (layout) {
                 if (!p[3] || !layout.fixElementSize) {
                     var size = layout.getContentSize();
-                    p[6] = size.width;
-                    p[7] = size.height;
+                    p[52] = size.width;
+                    p[53] = size.height;
                     flower.Size.release(size);
                 }
                 else if (p[2].length) {
                     var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                    p[6] = size.width;
-                    p[7] = size.height;
+                    p[52] = size.width;
+                    p[53] = size.height;
                     flower.Size.release(size);
                 }
             }
         }
+    }
+
+    $validateUIComponent(parent) {
+        super.$validateUIComponent(parent);
+        this.$IViewPort[0] = 0;
+        this.$IViewPort[1] = 0;
+        this.$IViewPort[2] = this.$DataGroup[52];
+        this.$IViewPort[3] = this.$DataGroup[53];
     }
 
     createItem(data, index) {
@@ -469,18 +477,9 @@ class DataGroup extends Group {
         return this.$DataGroup[3];
     }
 
-    get contentWidth() {
-        return this.$DataGroup[6];
-    }
-
-    get contentHeight() {
-        return this.$DataGroup[7];
-    }
-
     get scrollEnabled() {
         return true;
     }
-
 
     get selectedIndex() {
         return this.getItemDataIndex(this.$DataGroup[9]);

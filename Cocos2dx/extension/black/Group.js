@@ -8,6 +8,12 @@ class Group extends flower.Sprite {
         if (data != null) {
             this._data = data;
         }
+        this.$IViewPort = {
+            0: 0,    //contentStartX
+            1: 0,    //contentStartY
+            2: 0,    //contentEndX
+            3: 0    //contentEndY
+        }
         this.$initUIComponent();
     }
 
@@ -101,6 +107,10 @@ class Group extends flower.Sprite {
             }
         }
         this.$validateChildrenUIComponent();
+        this.$IViewPort[0] = this.$childrenBounds.x;
+        this.$IViewPort[1] = this.$childrenBounds.y;
+        this.$IViewPort[2] = this.$childrenBounds.x + this.$childrenBounds.width;
+        this.$IViewPort[3] = this.$childrenBounds.y + this.$childrenBounds.height;
     }
 
     $validateChildrenUIComponent() {
@@ -149,6 +159,22 @@ class Group extends flower.Sprite {
             super.$onFrameEnd();
             this.$resetLayout();
         }
+    }
+
+    $getContentWidth() {
+        return this.$IViewPort[2] - this.$IViewPort[0];
+    }
+
+    $getContentHeight() {
+        return this.$IViewPort[3] - this.$IViewPort[1];
+    }
+
+    get contentWidth() {
+        return this.$getContentWidth();
+    }
+
+    get contentHeight() {
+        return this.$getContentHeight();
     }
 
     dispose() {

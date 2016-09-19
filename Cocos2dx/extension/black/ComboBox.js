@@ -208,9 +208,7 @@ class ComboBox extends Group {
             p[9] = true;
             if (p[7] instanceof flower.Value) {
                 p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
-                if (p[7].enumList) {
-                    this.dataProvider = new flower.ArrayValue(p[7].enumList);
-                }
+                this.dataProvider = new flower.ArrayValue(p[7].enumList);
             }
             p[9] = false;
             this.__typeValueChange();

@@ -39,7 +39,7 @@ class UIComponent {
                 9: null, //uiHeight
                 10: {}, //binds
                 11: new StringValue(),//state
-                12: false, //absoluteState
+                12: false,//absoluteState
                 13: this, //eventThis
                 14: null, //layout
             };

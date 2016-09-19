@@ -1,0 +1,21 @@
+var MaskUI = (function (_super) {
+
+    __extends(MaskUI, _super);
+
+    function MaskUI(data) {
+        _super.call(this, data);
+        this.show = new flower.Rect();
+        this.show.fillAlpha = 0.1;
+        this.show.fillColor = 0;
+        this.show.lineColor = 0;
+        this.show.lineWidth = 1;
+        this.show.percentWidth = 100;
+        this.show.percentHeight = 100;
+        this.addChild(this.show);
+    }
+
+    return MaskUI;
+
+})(module.Mask);
+
+module.MaskUI = MaskUI;
