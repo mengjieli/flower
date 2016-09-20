@@ -12,7 +12,9 @@ class Group extends flower.Sprite {
             0: 0,    //contentStartX
             1: 0,    //contentStartY
             2: 0,    //contentEndX
-            3: 0    //contentEndY
+            3: 0,    //contentEndY
+            4: null, //scrollH
+            5: null, //scrollV
         }
         this.$initUIComponent();
     }
@@ -175,6 +177,34 @@ class Group extends flower.Sprite {
 
     get contentHeight() {
         return this.$getContentHeight();
+    }
+
+    get scrollH() {
+        return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+    }
+
+    set scrollH(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[4] == val) {
+            return;
+        }
+        this.$IViewPort[4] = val;
+    }
+
+    get scrollV() {
+        return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+    }
+
+    set scrollV(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[5] == val) {
+            return;
+        }
+        this.$IViewPort[5] = val;
     }
 
     dispose() {

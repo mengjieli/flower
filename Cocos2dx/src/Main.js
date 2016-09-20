@@ -34,6 +34,9 @@ var Main = function () {
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
+            var image = new flower.Image("")
+
+            return;
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

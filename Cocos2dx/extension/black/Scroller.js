@@ -31,6 +31,26 @@ class Scroller extends MaskUI {
         //this.addChild(bg);
     }
 
+    addChildAt(child, index) {
+        if (child instanceof flower.HScrollBar) {
+            _super.prototype.addChildAt.call(this, child, index);
+            this.horizontalScrollBar = child;
+        } else if (child instanceof flower.VScrollBar) {
+            _super.prototype.addChildAt.call(this, child, index);
+            this.verticalScrollBar = child;
+        } else {
+            if (index == this.numChildren || index == this.numChildren - 1) {
+                if (index == this.numChildren && this.getChildAt(this.numChildren) instanceof flower.ScrollBar) {
+                    index--;
+                }
+                if (index == this.numChildren - 1 && this.getChildAt(this.numChildren - 1) instanceof flower.ScrollBar) {
+                    index--;
+                }
+            }
+            _super.prototype.addChildAt.call(this, child, index);
+        }
+    }
+
     $createShape() {
         var shape = new Rect();
         shape.percentWidth = 100;
@@ -216,6 +236,9 @@ class Scroller extends MaskUI {
         p[10] = val;
         if (p[10]) {
             p[10].viewport = p[0];
+            if (p[10].parent != this) {
+                this.addChild(p[10]);
+            }
         }
     }
 
@@ -234,6 +257,9 @@ class Scroller extends MaskUI {
         p[11] = val;
         if (p[11]) {
             p[11].viewport = p[0];
+            if (p[11].parent != this) {
+                this.addChild(p[11]);
+            }
         }
     }
 
@@ -272,6 +298,10 @@ class Scroller extends MaskUI {
 
     set horizontalScrollBar(val) {
         this.$setHorizontalScrollBar(val);
+    }
+
+    set verticalScrollBar(val) {
+        this.$setVerticalScrollBar(val);
     }
 }
 

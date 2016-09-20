@@ -2117,7 +2117,9 @@ class Group extends flower.Sprite {
             0: 0,    //contentStartX
             1: 0,    //contentStartY
             2: 0,    //contentEndX
-            3: 0    //contentEndY
+            3: 0,    //contentEndY
+            4: null, //scrollH
+            5: null, //scrollV
         }
         this.$initUIComponent();
     }
@@ -2280,6 +2282,34 @@ class Group extends flower.Sprite {
 
     get contentHeight() {
         return this.$getContentHeight();
+    }
+
+    get scrollH() {
+        return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+    }
+
+    set scrollH(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[4] == val) {
+            return;
+        }
+        this.$IViewPort[4] = val;
+    }
+
+    get scrollV() {
+        return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+    }
+
+    set scrollV(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[5] == val) {
+            return;
+        }
+        this.$IViewPort[5] = val;
     }
 
     dispose() {
@@ -3199,6 +3229,124 @@ class UIParser extends Group {
 
 black.UIParser = UIParser;
 //////////////////////////End File:extension/black/UIParser.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/ScrollBar.js///////////////////////////
+class ScrollBar extends Group {
+
+    constructor() {
+        super();
+        this.$ScrollerBar = {
+            0: null,  //viewport
+            1: true,  //autoVisibility
+            2: null,  //thumb
+            3: 0, //viewportX
+            4: 0, //viewportY
+            5: 0, //viewportScrollH
+            6: 0, //viewportScrollV
+            7: 0, //viewportContentWidth
+            8: 0,  //viewportContentHeight
+            9: 0, //viewportWidth
+            10: 0, //viewportHeight
+            20: null //horizontal:true vertical:false
+        };
+    }
+
+
+    $onFrameEnd() {
+        var p = this.$ScrollerBar;
+        if (p[0] && p[20]) {
+            var viewport = p[0];
+            if (p[20]) {
+                if ((p[3] != viewport.x || p[5] != viewport.scrollH || p[7] != viewport.contentWidth || p[9] != viewport.width)) {
+                    if (viewport.x < viewport.scrollH) {
+                        viewport.x = viewport.scrollH;
+                    }
+                    if (viewport.x + viewport.width > viewport.scrollH + viewport.contentWidth) {
+                        viewport.x = viewport.scrollH + viewport.contentWidth - viewport.width;
+                    }
+                    p[3] = viewport.x;
+                    p[5] = viewport.scrollH;
+                    p[7] = viewport.contentWidth;
+                    p[9] = viewport.width;
+                    if (p[2]) {
+                        p[2].x = (this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
+                        if (p[1]) {
+                            if (p[7] <= p[9]) {
+                                p[2].visible = false;
+                            } else {
+                                p[2].visible = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!p[20] && (p[4] != viewport.y || p[6] != viewport.scrollV || p[8] != viewport.contentHeight || p[10] != viewport.height)) {
+                if (viewport.y < viewport.scrollV) {
+                    viewport.y = viewport.scrollV;
+                }
+                if (viewport.y + viewport.height > viewport.scrollV + viewport.contentHeight) {
+                    viewport.y = viewport.scrollV + viewport.contentHeight - viewport.height;
+                }
+                p[4] = viewport.y;
+                p[6] = viewport.scrollV;
+                p[8] = viewport.contentHeight;
+                p[10] = viewport.height;
+                if (p[2]) {
+                    p[2].y = (this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
+                    if (p[1]) {
+                        if (p[8] <= p[10]) {
+                            p[2].visible = false;
+                        } else {
+                            p[2].visible = true;
+                        }
+                    }
+                }
+            }
+        }
+        super.$onFrameEnd();
+    }
+
+
+    set viewport(val) {
+        var p = this.$ScrollerBar;
+        if (p[0] == val) {
+            return;
+        }
+        p[0] = val;
+
+    }
+
+    get viewport() {
+        return this.$ScrollerBar[0];
+    }
+}
+//////////////////////////End File:extension/black/ScrollBar.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/VScrollBar.js///////////////////////////
+class VScrollBar extends ScrollBar {
+
+    constructor() {
+        super();
+        this.$ScrollerBar[20] = false;
+    }
+}
+//////////////////////////End File:extension/black/VScrollBar.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/HScrollBar.js///////////////////////////
+class HScrollBar extends ScrollBar {
+
+    constructor() {
+        super();
+        this.$ScrollerBar[20] = true;
+    }
+}
+//////////////////////////End File:extension/black/HScrollBar.js///////////////////////////
 
 
 

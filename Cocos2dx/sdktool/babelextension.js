@@ -187,6 +187,9 @@ var list = [
 
     "Group",
     "UIParser",
+    "ScrollBar",
+    "VScrollBar",
+    "HScrollBar",
     "DataGroup",
     "ItemRenderer",
     "Label",
