@@ -226,9 +226,9 @@ class Scroller extends MaskUI {
                     p[11].visible = false;
                 } else if (p[13] == "auto") {
                     if (p[11].autoVisibility) {
-                        p[11].visible = p[16] && p[0].contentWidth > p[0].width ? true : false;
+                        p[11].visible = p[16] && p[0].contentHeight > p[0].height ? true : false;
                     } else {
-                        p[11].visible = p[0].contentWidth > p[0].width ? true : false;
+                        p[11].visible = p[0].contentHeight > p[0].height ? true : false;
                     }
                 }
             }

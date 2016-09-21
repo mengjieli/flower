@@ -310,10 +310,10 @@ var $root = eval("this");
                     var rect = $root._get(Object.getPrototypeOf(p), "$getBounds", this).call(this, fromParent);
                     if (fromParent) {
                         var ui = this.$UIComponent;
-                        if ((ui[0] == null || ui[1] == null) && ui[6] != null) {
+                        if ((ui[0] == null || ui[1] == null) && ui[6] != null || ui[0] != null && ui[1] != null) {
                             rect.width = 0;
                         }
-                        if ((ui[3] == null || ui[4] == null) && ui[7] != null) {
+                        if ((ui[3] == null || ui[4] == null) && ui[7] != null || ui[3] != null && ui[4] != null) {
                             rect.height = 0;
                         }
                     }
@@ -6402,20 +6402,14 @@ var $root = eval("this");
                             p[11].visible = false;
                         } else if (p[13] == "auto") {
                             if (p[11].autoVisibility) {
-                                p[11].visible = p[16] && p[0].contentWidth > p[0].width ? true : false;
+                                p[11].visible = p[16] && p[0].contentHeight > p[0].height ? true : false;
                             } else {
-                                p[11].visible = p[0].contentWidth > p[0].width ? true : false;
+                                p[11].visible = p[0].contentHeight > p[0].height ? true : false;
                             }
                         }
                     }
                     p[0].width = this.width - (p[11] && p[13] != "off" && !p[11].autoVisibility ? p[11].width : 0);
                     p[0].height = this.height - (p[10] && p[12] != "off" && !p[10].autoVisibility ? p[10].height : 0);
-                }
-                if (p[10]) {
-                    console.log("HScrollBar", p[10].visible, p[10].x, p[10].y);
-                }
-                if (p[11]) {
-                    console.log("HScrollBar", p[11].visible, p[11].x, p[11].y);
                 }
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();

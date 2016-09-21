@@ -3908,7 +3908,7 @@ class Sprite extends DisplayObject {
         var maxY = 0;
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
-            if (!children[i].alpha || !children[i].visible) {
+            if (!children[i].visible) {
                 continue;
             }
             var bounds = children[i].$getBounds(true);

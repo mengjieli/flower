@@ -272,10 +272,10 @@ class UIComponent {
             var rect = $root._get(Object.getPrototypeOf(p), "$getBounds", this).call(this, fromParent);
             if (fromParent) {
                 var ui = this.$UIComponent;
-                if ((ui[0] == null || ui[1] == null) && ui[6] != null) {
+                if ((ui[0] == null || ui[1] == null) && ui[6] != null || (ui[0] != null && ui[1] != null)) {
                     rect.width = 0;
                 }
-                if ((ui[3] == null || ui[4] == null) && ui[7] != null) {
+                if ((ui[3] == null || ui[4] == null) && ui[7] != null || (ui[3] != null && ui[4] != null)) {
                     rect.height = 0;
                 }
             }

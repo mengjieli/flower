@@ -1,6 +1,6 @@
 <f:List class="LabelList" selectTime="touch_end" xmlns:f="flower">
     <f:itemRenderer>
-        <f:ItemRenderer class="LabelItemRenderer" percentWidth="100" height="20">
+        <f:ItemRenderer name="test" class="LabelItemRenderer" percentWidth="100" height="20">
             <f:Rect percentWidth="100" percentHeight="100" fillColor.down="0xd6d4d0"
                     fillColor.selectedDown="0x96b97d" fillColor.selectedUp="0x96b97d"
                     fillColor.over="0x98b7dd"
