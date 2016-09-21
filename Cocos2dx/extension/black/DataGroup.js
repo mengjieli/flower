@@ -11,8 +11,8 @@ class DataGroup extends Group {
             3: null, //viewer
             4: 0,    //viewerWidth
             5: 0,    //viewerHeight
-            //6: 0,    //contentWidth
-            //7: 0,    //contentHeight
+            6: 0,    //elementWidth
+            7: 0,    //elementHeight
             8: null, //downItem
             9: null, //selectedItem
             10: false,//itemSelectedEnabled
@@ -105,16 +105,16 @@ class DataGroup extends Group {
                 }
             } else {
                 layout.$clear();
-                var elementWidth = 0;
-                var elementHeight = 0;
-                if (p[0].length) {
+                var elementWidth = p[6];
+                var elementHeight = p[7];
+                if (p[0].length && (!elementWidth || !elementHeight)) {
                     if (!items.length) {
                         item = this.createItem(list.getItemAt(0), 0);
                         item.data = list.getItemAt(0);
                         items.push(item);
                     }
-                    elementWidth = items[0].width;
-                    elementHeight = items[0].height;
+                    p[6] = elementWidth = items[0].width > elementWidth ? items[0].width : elementWidth;
+                    p[7] = elementHeight = items[0].height > elementHeight ? items[0].height : elementHeight;
                 }
                 var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
@@ -176,7 +176,7 @@ class DataGroup extends Group {
                     flower.Size.release(size);
                 }
                 else if (p[2].length) {
-                    var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                    var size = layout.measureSize(p[6], p[7], list.length);
                     p[52] = size.width;
                     p[53] = size.height;
                     flower.Size.release(size);
@@ -462,6 +462,7 @@ class DataGroup extends Group {
         this.removeAll();
         p[2] = null;
         p[1] = val;
+        p[6] = p[7] = 0;
         this.$addFlags(0x4000);
     }
 

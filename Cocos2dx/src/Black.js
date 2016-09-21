@@ -3718,8 +3718,8 @@ var $root = eval("this");
                 3: null, //viewer
                 4: 0, //viewerWidth
                 5: 0, //viewerHeight
-                //6: 0,    //contentWidth
-                //7: 0,    //contentHeight
+                6: 0, //elementWidth
+                7: 0, //elementHeight
                 8: null, //downItem
                 9: null, //selectedItem
                 10: false, //itemSelectedEnabled
@@ -3818,16 +3818,16 @@ var $root = eval("this");
                         }
                     } else {
                         layout.$clear();
-                        var elementWidth = 0;
-                        var elementHeight = 0;
-                        if (p[0].length) {
+                        var elementWidth = p[6];
+                        var elementHeight = p[7];
+                        if (p[0].length && (!elementWidth || !elementHeight)) {
                             if (!items.length) {
                                 item = this.createItem(list.getItemAt(0), 0);
                                 item.data = list.getItemAt(0);
                                 items.push(item);
                             }
-                            elementWidth = items[0].width;
-                            elementHeight = items[0].height;
+                            p[6] = elementWidth = items[0].width > elementWidth ? items[0].width : elementWidth;
+                            p[7] = elementHeight = items[0].height > elementHeight ? items[0].height : elementHeight;
                         }
                         var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                         firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
@@ -3888,7 +3888,7 @@ var $root = eval("this");
                             p[53] = size.height;
                             flower.Size.release(size);
                         } else if (p[2].length) {
-                            var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
+                            var size = layout.measureSize(p[6], p[7], list.length);
                             p[52] = size.width;
                             p[53] = size.height;
                             flower.Size.release(size);
@@ -4189,6 +4189,7 @@ var $root = eval("this");
                 this.removeAll();
                 p[2] = null;
                 p[1] = val;
+                p[6] = p[7] = 0;
                 this.$addFlags(0x4000);
             }
         }, {
@@ -6181,7 +6182,7 @@ var $root = eval("this");
                 4: [], //scrollDisX
                 5: [], //scrollDisY
                 6: [], //scrollTime
-                //7: 0,  //lastTouchTime
+                7: 0.3, //scrollOut
                 8: 0, //throw Tween
                 9: 18, //	scrollThreshold
                 10: null, //horizontalScrollBar
@@ -6279,22 +6280,22 @@ var $root = eval("this");
                             if (p[0].contentWidth > p[0].width) {
                                 p[0].x = x - p[2];
                             }
-                            if (p[0].x > p[0].width) {
-                                p[0].x = p[0].width;
+                            if (p[0].x > 0) {
+                                p[0].x = p[0].x * p[7];
                             }
-                            if (p[0].x < -p[0].contentWidth) {
-                                p[0].x = -p[0].contentWidth;
+                            if (p[0].x < -p[0].contentWidth + p[0].width) {
+                                p[0].x = -p[0].contentWidth + p[0].width + (p[0].x - (-p[0].contentWidth + p[0].width)) * p[7];
                             }
                         }
                         if (p[16]) {
                             if (p[0].contentHeight > p[0].height) {
                                 p[0].y = y - p[3];
                             }
-                            if (p[0].y > p[0].height) {
-                                p[0].y = p[0].height;
+                            if (p[0].y > 0) {
+                                p[0].y = p[0].y * p[7];
                             }
-                            if (p[0].y < -p[0].contentHeight) {
-                                p[0].y = -p[0].contentHeight;
+                            if (p[0].y < -p[0].contentHeight + p[0].height) {
+                                p[0].y = -p[0].contentHeight + p[0].height + (p[0].y - (-p[0].contentHeight + p[0].height)) * p[7];
                             }
                         }
                         p[4].push(p[0].x - _x);
@@ -6345,8 +6346,12 @@ var $root = eval("this");
                             toX = 0;
                             flag = false;
                         }
-                        if (-toY + p[0].height > p[0].contentHeight) {
+                        if (toY < -p[0].contentHeight + p[0].height) {
                             toY = p[0].height - p[0].contentHeight;
+                            if (p[0] == 961) {
+                                flower.breakPoint();
+                                p[0].contentHeight;
+                            }
                             flag = false;
                         }
                         if (toY > 0) {
@@ -6568,6 +6573,18 @@ var $root = eval("this");
             },
             get: function get() {
                 return this.$Scroller[9];
+            }
+        }, {
+            key: "scrollOut",
+            set: function set(val) {
+                val = +val || 0;
+                if (val < 0) {
+                    val = 0;
+                }
+                this.$Scroller[7] = val;
+            },
+            get: function get() {
+                return this.$Scroller[7];
             }
         }]);
 

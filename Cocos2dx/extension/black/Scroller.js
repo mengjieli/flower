@@ -11,7 +11,7 @@ class Scroller extends MaskUI {
             4: [], //scrollDisX
             5: [], //scrollDisY
             6: [], //scrollTime
-            //7: 0,  //lastTouchTime
+            7: 0.3,  //scrollOut
             8: 0,  //throw Tween
             9: 18, //	scrollThreshold
             10: null, //horizontalScrollBar
@@ -104,22 +104,22 @@ class Scroller extends MaskUI {
                     if (p[0].contentWidth > p[0].width) {
                         p[0].x = x - p[2];
                     }
-                    if (p[0].x > p[0].width) {
-                        p[0].x = p[0].width;
+                    if (p[0].x > 0) {
+                        p[0].x = p[0].x * p[7];
                     }
-                    if (p[0].x < -p[0].contentWidth) {
-                        p[0].x = -p[0].contentWidth;
+                    if (p[0].x < -p[0].contentWidth + p[0].width) {
+                        p[0].x = -p[0].contentWidth + p[0].width + (p[0].x - (-p[0].contentWidth + p[0].width)) * p[7];
                     }
                 }
                 if (p[16]) {
                     if (p[0].contentHeight > p[0].height) {
                         p[0].y = y - p[3];
                     }
-                    if (p[0].y > p[0].height) {
-                        p[0].y = p[0].height;
+                    if (p[0].y > 0) {
+                        p[0].y = p[0].y * p[7];
                     }
-                    if (p[0].y < -p[0].contentHeight) {
-                        p[0].y = -p[0].contentHeight;
+                    if (p[0].y < -p[0].contentHeight + p[0].height) {
+                        p[0].y = -p[0].contentHeight + p[0].height + (p[0].y - (-p[0].contentHeight + p[0].height)) * p[7];
                     }
                 }
                 p[4].push(p[0].x - _x);
@@ -170,8 +170,12 @@ class Scroller extends MaskUI {
                     toX = 0;
                     flag = false;
                 }
-                if (-toY + p[0].height > p[0].contentHeight) {
+                if (toY < -p[0].contentHeight + p[0].height) {
                     toY = p[0].height - p[0].contentHeight;
+                    if (p[0] == 961) {
+                        flower.breakPoint();
+                        p[0].contentHeight;
+                    }
                     flag = false;
                 }
                 if (toY > 0) {
@@ -378,6 +382,17 @@ class Scroller extends MaskUI {
         return this.$Scroller[9];
     }
 
+    set scrollOut(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        this.$Scroller[7] = val;
+    }
+
+    get scrollOut() {
+        return this.$Scroller[7];
+    }
 }
 
 exports.Scroller = Scroller;

@@ -4094,12 +4094,10 @@ var flower = {};
         }, {
             key: "focusEnabled",
             get: function get() {
-                var p = this.$DisplayObject;
-                return p[50];
+                return this.$DisplayObject[50];
             },
             set: function set(val) {
-                var p = this.$DisplayObject;
-                p[50] = val;
+                this.$DisplayObject[50] = val;
             }
         }, {
             key: "id",
