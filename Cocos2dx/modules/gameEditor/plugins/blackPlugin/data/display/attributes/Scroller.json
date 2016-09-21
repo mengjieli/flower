@@ -9,7 +9,7 @@
     "viewport": {
       "type": "*"
     },
-    "releaseItemDistance": {
+    "scrollThreshold": {
       "type": "uint",
       "init": 18
     }

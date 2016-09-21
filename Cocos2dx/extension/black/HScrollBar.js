@@ -5,3 +5,5 @@ class HScrollBar extends ScrollBar {
         this.$ScrollerBar[20] = true;
     }
 }
+
+exports.HScrollBar = HScrollBar;

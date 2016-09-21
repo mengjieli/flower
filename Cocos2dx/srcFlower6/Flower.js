@@ -3556,9 +3556,13 @@ flower.DisplayObject = DisplayObject;
 class Sprite extends DisplayObject {
 
     __children;
+    __childrenBounds;
 
     constructor() {
         super();
+        this.$Sprite = {
+            0: new flower.Rectangle() //childrenBounds
+        }
         this.$initContainer();
     }
 
@@ -3724,7 +3728,7 @@ class Sprite extends DisplayObject {
 
     getChildAt(index) {
         index = index & ~0;
-        if (index < 0 || index > this.__children.length) {
+        if (index < 0 || index > this.__children.length - 1) {
             $error(1007, "getChildAt", index, this.__children.length);
             return null;
         }
@@ -3756,6 +3760,9 @@ class Sprite extends DisplayObject {
         var maxY = 0;
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
+            if (!children[i].alpha || !children[i].visible) {
+                continue;
+            }
             var bounds = children[i].$getBounds(true);
             if (i == 0) {
                 maxX = bounds.x + bounds.width;
@@ -3773,6 +3780,11 @@ class Sprite extends DisplayObject {
         rect.y = minY;
         rect.width = maxX - minX;
         rect.height = maxY - minY;
+        var childrenBounds = this.$Sprite[0];
+        childrenBounds.x = rect.x;
+        childrenBounds.y = rect.y;
+        childrenBounds.width = rect.width;
+        childrenBounds.height = rect.height;
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -3821,6 +3833,10 @@ class Sprite extends DisplayObject {
 
     get numChildren() {
         return this.__children.length;
+    }
+
+    get $childrenBounds() {
+        return this.$Sprite[0];
     }
 
     $releaseContainer() {

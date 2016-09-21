@@ -5,3 +5,5 @@ class VScrollBar extends ScrollBar {
         this.$ScrollerBar[20] = false;
     }
 }
+
+exports.VScrollBar = VScrollBar;

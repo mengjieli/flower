@@ -2,7 +2,7 @@
               xmlns:s="modules/software/module.json"
               xmlns:b="./../module.json">
     <f:script src="./PropertyPanel.script"/>
-    <s:ScrollerList id="scrollerList" percentWidth="100" percentHeight="100">
+    <s:ScrollerList id="scrollerList" left="0" right="0" percentHeight="100">
         <f:viewport>
             <f:List id="list" itemSelectedEnabled="false">
                 <f:layout>

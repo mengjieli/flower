@@ -34,9 +34,42 @@ var Main = function () {
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
-            var image = new flower.Image("")
-
-            return;
+            var xml =
+                '<f:Group x="100" y="100" width="1010" height="500" xmlns:f="flower">' +
+                    '<f:Rect fillColor="0x333333" percentWidth="100" percentHeight="100"/>' +
+                    '<f:Scroller scrollPolicyH="on" scrollPolicyV="on" percentWidth="100" percentHeight="100">' +
+                        '<f:HScrollBar percentWidth="100" height="10" bottom="0" autoVisibility="false">' +
+                            '<f:Rect fillColor="0x666666" fillAlpha="0.3" percentWidth="100" percentHeight="100"/>' +
+                            '<f:thumb>' +
+                                '<f:Rect fillColor="0xbbbbbb"  fillAlpha="0.6" id="thumb" width="100" percentHeight="100"/>' +
+                            '</f:thumb>' +
+                        '</f:HScrollBar>' +
+                        '<f:VScrollBar autoVisiblity="false" percentHeight="100" width="10" right="0" autoVisibility="false">' +
+                            '<f:Rect fillColor="0x666666" fillAlpha="0.3" percentWidth="100" percentHeight="100"/>' +
+                            '<f:thumb>' +
+                                '<f:Rect fillColor="0xbbbbbb"  fillAlpha="0.6"  id="thumb" height="100" percentWidth="100"/>' +
+                            '</f:thumb>' +
+                        '</f:VScrollBar>' +
+                        '<f:Group>' +
+                            '<f:Group  width="1000" height="800">' +
+                                '<f:Rect fillColor="0x668866" percentWidth="100" percentHeight="100"/>' +
+                                '<f:Label fontColor="0xffffff" text="(0,0)" x="0" y="0"/>' +
+                                '<f:Label fontColor="0xffffff" text="(500,0)" x="480" y="0"/>' +
+                                '<f:Label fontColor="0xffffff" text="(1000,0)" x="940" y="0"/>' +
+                                '<f:Label fontColor="0xffffff" text="(0,400)" x="0" y="380"/>' +
+                                '<f:Label fontColor="0xffffff" text="(0,800)" x="0" y="780"/>' +
+                                '<f:Label fontColor="0xffffff" text="(500,800)" x="480" y="780"/>' +
+                                '<f:Label fontColor="0xffffff" text="(1000,800)" x="940" y="780"/>' +
+                                '<f:Label fontColor="0xffffff" text="(1000,400)" x="940" y="380"/>' +
+                            '</f:Group>' +
+                        '</f:Group>' +
+                    '</f:Scroller>' +
+                '</f:Group>'
+            //var ui = new flower.UIParser();
+            //ui.parseUI(xml);
+            //flower.Stage.getInstance().addChild(ui);
+            //
+            //return;
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

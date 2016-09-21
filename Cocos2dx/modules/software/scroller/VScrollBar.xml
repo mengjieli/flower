@@ -1,0 +1,4 @@
+<f:VScrollBar class="VScrollBar" autoVisibility="false" percentHeight="100" width="10" right="0" xmlns:f="flower">
+    <f:Rect fillColor="0x666666" fillAlpha="1" percentWidth="100" percentHeight="100"/>
+    <f:Rect fillColor="0xbbbbbb"  fillAlpha="1" id="thumb" percentWidth="100"/>
+</f:VScrollBar>

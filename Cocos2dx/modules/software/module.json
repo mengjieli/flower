@@ -2,6 +2,9 @@
   "namespace": "s",
   "name": "software",
   "components": [
+    "./scroller/HScrollBar.xml",
+    "./scroller/VScrollBar.xml",
+    "./scroller/Scroller.xml",
     "./button/Button.xml",
     "./button/Button1.xml",
     "./checkBox/CheckBox.xml",

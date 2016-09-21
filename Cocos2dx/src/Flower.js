@@ -3987,6 +3987,9 @@ var flower = {};
 
             var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
+            _this15.$Sprite = {
+                0: new flower.Rectangle() //childrenBounds
+            };
             _this15.$initContainer();
             return _this15;
         }
@@ -4169,7 +4172,7 @@ var flower = {};
             key: "getChildAt",
             value: function getChildAt(index) {
                 index = index & ~0;
-                if (index < 0 || index > this.__children.length) {
+                if (index < 0 || index > this.__children.length - 1) {
                     $error(1007, "getChildAt", index, this.__children.length);
                     return null;
                 }
@@ -4206,6 +4209,9 @@ var flower = {};
                 var maxY = 0;
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
+                    if (!children[i].alpha || !children[i].visible) {
+                        continue;
+                    }
                     var bounds = children[i].$getBounds(true);
                     if (i == 0) {
                         maxX = bounds.x + bounds.width;
@@ -4223,6 +4229,11 @@ var flower = {};
                 rect.y = minY;
                 rect.width = maxX - minX;
                 rect.height = maxY - minY;
+                var childrenBounds = this.$Sprite[0];
+                childrenBounds.x = rect.x;
+                childrenBounds.y = rect.y;
+                childrenBounds.width = rect.width;
+                childrenBounds.height = rect.height;
             }
         }, {
             key: "$getMouseTarget",
@@ -4293,6 +4304,11 @@ var flower = {};
             key: "numChildren",
             get: function get() {
                 return this.__children.length;
+            }
+        }, {
+            key: "$childrenBounds",
+            get: function get() {
+                return this.$Sprite[0];
             }
         }]);
 

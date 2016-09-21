@@ -1,0 +1,4 @@
+<f:Scroller class="Scroller" xmlns:f="flower" xmlns:s="./../module.json">
+    <s:HScrollBar/>
+    <s:VScrollBar/>
+</f:Scroller>

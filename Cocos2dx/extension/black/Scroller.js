@@ -13,9 +13,14 @@ class Scroller extends MaskUI {
             6: [], //scrollTime
             //7: 0,  //lastTouchTime
             8: 0,  //throw Tween
-            9: 18, //upGap
+            9: 18, //	scrollThreshold
             10: null, //horizontalScrollBar
             11: null, //verticalScrollBar
+            12: "auto", //scrollPolicyH
+            13: "auto", //scrollPolicyV
+            14: false, //isDraging
+            15: false, //dragH
+            16: false, //dragV
             52: 0,//contentWidth
             53: 0,//contentHeight
         }
@@ -33,21 +38,24 @@ class Scroller extends MaskUI {
 
     addChildAt(child, index) {
         if (child instanceof flower.HScrollBar) {
-            _super.prototype.addChildAt.call(this, child, index);
+            super.addChildAt(child, index);
             this.horizontalScrollBar = child;
         } else if (child instanceof flower.VScrollBar) {
-            _super.prototype.addChildAt.call(this, child, index);
+            super.addChildAt(child, index);
             this.verticalScrollBar = child;
         } else {
             if (index == this.numChildren || index == this.numChildren - 1) {
-                if (index == this.numChildren && this.getChildAt(this.numChildren) instanceof flower.ScrollBar) {
+                if (index == this.numChildren && this.numChildren - 1 >= 0 && this.getChildAt(this.numChildren - 1) instanceof flower.ScrollBar) {
                     index--;
                 }
-                if (index == this.numChildren - 1 && this.getChildAt(this.numChildren - 1) instanceof flower.ScrollBar) {
+                if (index == this.numChildren - 1 && this.numChildren - 2 >= 0 && this.getChildAt(this.numChildren - 2) instanceof flower.ScrollBar) {
                     index--;
                 }
             }
-            _super.prototype.addChildAt.call(this, child, index);
+            super.addChildAt(child, index);
+            if (this.viewport == null) {
+                this.viewport = child;
+            }
         }
     }
 
@@ -74,30 +82,45 @@ class Scroller extends MaskUI {
                 p[2] = x - p[0].x;
                 p[3] = y - p[0].y;
                 p[4].length = p[5].length = p[6].length = 0;
+                p[14] = true;
+                p[15] = false;
+                p[16] = false;
                 break;
             case flower.TouchEvent.TOUCH_MOVE:
-                if (Math.abs(x - p[2]) > p[9] || Math.abs(y - p[3]) > p[9]) {
+                if ((Math.abs(x - p[0].x - p[2]) > p[9] || Math.abs(y - p[0].y - p[3]) > p[9]) && p[0] instanceof flower.DataGroup) {
                     p[0].$releaseItem();
+                }
+                if (!p[15] && this.$Scroller[12] != "off" && Math.abs(x - p[0].x - p[2]) > p[9]) {
+                    p[15] = true;
+                    p[2] = x - p[0].x;
+                }
+                if (!p[16] && this.$Scroller[13] != "off" && Math.abs(y - p[0].y - p[3]) > p[9]) {
+                    p[16] = true;
+                    p[3] = y - p[0].y;
                 }
                 var _x = p[0].x;
                 var _y = p[0].y;
-                if (p[0].contentWidth > this.width) {
-                    p[0].x = x - p[2];
+                if (p[15]) {
+                    if (p[0].contentWidth > p[0].width) {
+                        p[0].x = x - p[2];
+                    }
+                    if (p[0].x > p[0].width) {
+                        p[0].x = p[0].width;
+                    }
+                    if (p[0].x < -p[0].contentWidth) {
+                        p[0].x = -p[0].contentWidth;
+                    }
                 }
-                if (p[0].contentHeight > this.height) {
-                    p[0].y = y - p[3];
-                }
-                if (p[0].y > this.height) {
-                    p[0].y = this.height;
-                }
-                if (p[0].y < -p[0].contentHeight) {
-                    p[0].y = -p[0].contentHeight;
-                }
-                if (p[0].x > this.width) {
-                    p[0].x = this.width;
-                }
-                if (p[0].x < -p[0].contentWidth) {
-                    p[0].x = -p[0].contentWidth;
+                if (p[16]) {
+                    if (p[0].contentHeight > p[0].height) {
+                        p[0].y = y - p[3];
+                    }
+                    if (p[0].y > p[0].height) {
+                        p[0].y = p[0].height;
+                    }
+                    if (p[0].y < -p[0].contentHeight) {
+                        p[0].y = -p[0].contentHeight;
+                    }
                 }
                 p[4].push(p[0].x - _x);
                 p[5].push(p[0].y - _y);
@@ -111,6 +134,7 @@ class Scroller extends MaskUI {
                 break;
             case flower.TouchEvent.TOUCH_END:
             case flower.TouchEvent.TOUCH_RELEASE:
+                p[14] = p[15] = p[16] = false;
                 var timeGap = 0.5;
                 if (p[6].length) {
                     timeGap = flower.CoreTime.currentTime - p[6][0];
@@ -138,16 +162,16 @@ class Scroller extends MaskUI {
                 var toX = p[0].x + disX * 5;
                 var toY = p[0].y + disY * 5;
                 var flag = true;
-                if (-toX + this.width > p[0].contentWidth) {
-                    toX = this.width - p[0].contentWidth;
+                if (-toX + p[0].width > p[0].contentWidth) {
+                    toX = p[0].width - p[0].contentWidth;
                     flag = false;
                 }
                 if (toX > 0) {
                     toX = 0;
                     flag = false;
                 }
-                if (-toY + this.height > p[0].contentHeight) {
-                    toY = this.height - p[0].contentHeight;
+                if (-toY + p[0].height > p[0].contentHeight) {
+                    toY = p[0].height - p[0].contentHeight;
                     flag = false;
                 }
                 if (toY > 0) {
@@ -178,8 +202,38 @@ class Scroller extends MaskUI {
     $onFrameEnd() {
         var p = this.$Scroller;
         if (p[0]) {
-            p[0].width = this.width;
-            p[0].height = this.height;
+            if (p[10]) {
+                if (p[12] == "on") {
+                    if (p[10].autoVisibility) {
+                        p[10].visible = p[15] ? true : false;
+                    }
+                } else if (p[12] == "off") {
+                    p[10].visible = false;
+                } else if (p[12] == "auto") {
+                    if (p[10].autoVisibility) {
+                        p[10].visible = p[15] && p[0].contentWidth > p[0].width ? true : false;
+                    } else {
+                        p[10].visible = p[0].contentWidth > p[0].width ? true : false;
+                    }
+                }
+            }
+            if (p[11]) {
+                if (p[13] == "on") {
+                    if (p[11].autoVisibility) {
+                        p[11].visible = p[16] ? true : false;
+                    }
+                } else if (p[13] == "off") {
+                    p[11].visible = false;
+                } else if (p[13] == "auto") {
+                    if (p[11].autoVisibility) {
+                        p[11].visible = p[16] && p[0].contentWidth > p[0].width ? true : false;
+                    } else {
+                        p[11].visible = p[0].contentWidth > p[0].width ? true : false;
+                    }
+                }
+            }
+            p[0].width = this.width - (p[11] && p[13] != "off" && !p[11].autoVisibility ? p[11].width : 0);
+            p[0].height = this.height - (p[10] && p[12] != "off" && !p[10].autoVisibility ? p[10].height : 0);
         }
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
@@ -210,7 +264,7 @@ class Scroller extends MaskUI {
         }
         p[0] = val;
         p[0].viewer = this;
-        if (p[0].parent != this) {
+        if (p[0].parent == null) {
             this.addChild(p[0]);
         }
         if (p[10]) {
@@ -236,7 +290,7 @@ class Scroller extends MaskUI {
         p[10] = val;
         if (p[10]) {
             p[10].viewport = p[0];
-            if (p[10].parent != this) {
+            if (p[10].parent == null) {
                 this.addChild(p[10]);
             }
         }
@@ -257,7 +311,7 @@ class Scroller extends MaskUI {
         p[11] = val;
         if (p[11]) {
             p[11].viewport = p[0];
-            if (p[11].parent != this) {
+            if (p[11].parent == null) {
                 this.addChild(p[11]);
             }
         }
@@ -288,14 +342,6 @@ class Scroller extends MaskUI {
         return this.$Scroller[0];
     }
 
-    get releaseItemDistance() {
-        return this.$Scroller[9];
-    }
-
-    set releaseItemDistance(val) {
-        this.$Scroller[9] = +val || 0;
-    }
-
     set horizontalScrollBar(val) {
         this.$setHorizontalScrollBar(val);
     }
@@ -303,6 +349,35 @@ class Scroller extends MaskUI {
     set verticalScrollBar(val) {
         this.$setVerticalScrollBar(val);
     }
+
+    set scrollPolicyH(val) {
+        this.$Scroller[12] = val;
+    }
+
+    get scrollPolicyH() {
+        return this.$Scroller[12];
+    }
+
+    set scrollPolicyV(val) {
+        this.$Scroller[13] = val;
+    }
+
+    get scrollPolicyV() {
+        return this.$Scroller[13];
+    }
+
+    set scrollThreshold(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        this.$Scroller[9] = val;
+    }
+
+    get scrollThreshold() {
+        return this.$Scroller[9];
+    }
+
 }
 
 exports.Scroller = Scroller;

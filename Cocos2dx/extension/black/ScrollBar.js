@@ -18,56 +18,45 @@ class ScrollBar extends Group {
         };
     }
 
-
     $onFrameEnd() {
         var p = this.$ScrollerBar;
-        if (p[0] && p[20]) {
+        if (p[0] && p[20] != null) {
             var viewport = p[0];
             if (p[20]) {
                 if ((p[3] != viewport.x || p[5] != viewport.scrollH || p[7] != viewport.contentWidth || p[9] != viewport.width)) {
-                    if (viewport.x < viewport.scrollH) {
-                        viewport.x = viewport.scrollH;
-                    }
-                    if (viewport.x + viewport.width > viewport.scrollH + viewport.contentWidth) {
-                        viewport.x = viewport.scrollH + viewport.contentWidth - viewport.width;
-                    }
                     p[3] = viewport.x;
                     p[5] = viewport.scrollH;
                     p[7] = viewport.contentWidth;
                     p[9] = viewport.width;
                     if (p[2]) {
                         p[2].width = this.width * p[9] / p[7];
-                        p[2].x = (this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
-                        if (p[1]) {
-                            if (p[7] <= p[9]) {
-                                p[2].visible = false;
-                            } else {
-                                p[2].visible = true;
-                            }
+                        var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
+                        if (x < 0) {
+                            x = 0;
                         }
+                        if (x + p[2].width > this.width) {
+                            x = this.width - p[2].width;
+                        }
+                        p[2].x = x;
                     }
                 }
             }
-            if (!p[20] && (p[4] != viewport.y || p[6] != viewport.scrollV || p[8] != viewport.contentHeight || p[10] != viewport.height)) {
-                if (viewport.y < viewport.scrollV) {
-                    viewport.y = viewport.scrollV;
-                }
-                if (viewport.y + viewport.height > viewport.scrollV + viewport.contentHeight) {
-                    viewport.y = viewport.scrollV + viewport.contentHeight - viewport.height;
-                }
-                p[4] = viewport.y;
-                p[6] = viewport.scrollV;
-                p[8] = viewport.contentHeight;
-                p[10] = viewport.height;
-                if (p[2]) {
-                    p[2].height = this.height * p[10] / p[8];
-                    p[2].y = (this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
-                    if (p[1]) {
-                        if (p[8] <= p[10]) {
-                            p[2].visible = false;
-                        } else {
-                            p[2].visible = true;
+            if (!p[20]) {
+                if ((p[4] != viewport.y || p[6] != viewport.scrollH || p[8] != viewport.contentHeight || p[10] != viewport.height)) {
+                    p[4] = viewport.y;
+                    p[6] = viewport.scrollH;
+                    p[8] = viewport.contentHeight;
+                    p[10] = viewport.height;
+                    if (p[2]) {
+                        p[2].height = this.height * p[10] / p[8];
+                        var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
+                        if (y < 0) {
+                            y = 0;
                         }
+                        if (y + p[2].height > this.height) {
+                            y = this.height - p[2].height;
+                        }
+                        p[2].y = y;
                     }
                 }
             }
@@ -82,10 +71,40 @@ class ScrollBar extends Group {
             return;
         }
         p[0] = val;
-
     }
 
     get viewport() {
         return this.$ScrollerBar[0];
     }
+
+    set thumb(val) {
+        var p = this.$ScrollerBar;
+        if (p[2] == val) {
+            return;
+        }
+        p[2] = val;
+        if (p[2]) {
+            if (p[2].parent != this) {
+                this.addChild(p[2]);
+            }
+        }
+    }
+
+    get thumb() {
+        return this.$ScrollerBar[2];
+    }
+
+    set autoVisibility(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        this.$ScrollerBar[1] = val;
+    }
+
+    get autoVisibility() {
+        return this.$ScrollerBar[1];
+    }
 }
+
+exports.ScrollBar = ScrollBar;

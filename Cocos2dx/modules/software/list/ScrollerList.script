@@ -7,6 +7,7 @@ function get dataProvider() {
 }
 
 function set viewport(val) {
+    this.container.addChild(val);
     this.scroller.viewport = val;
 }
 
