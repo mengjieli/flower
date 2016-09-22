@@ -3498,8 +3498,12 @@ class DataGroup extends Group {
                         item.data = list.getItemAt(0);
                         items.push(item);
                     }
-                    p[6] = elementWidth = items[0].width > elementWidth ? items[0].width : elementWidth;
-                    p[7] = elementHeight = items[0].height > elementHeight ? items[0].height : elementHeight;
+                    if (!elementWidth) {
+                        p[6] = elementWidth = items[0].width;
+                    }
+                    if (!elementHeight) {
+                        p[7] = elementHeight = items[0].height;
+                    }
                 }
                 var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
@@ -5722,9 +5726,7 @@ class Scroller extends MaskUI {
                 var _x = p[0].x;
                 var _y = p[0].y;
                 if (p[15]) {
-                    if (p[0].contentWidth > p[0].width) {
-                        p[0].x = x - p[2];
-                    }
+                    p[0].x = x - p[2];
                     if (p[0].x > 0) {
                         p[0].x = p[0].x * p[7];
                     }
@@ -5733,9 +5735,7 @@ class Scroller extends MaskUI {
                     }
                 }
                 if (p[16]) {
-                    if (p[0].contentHeight > p[0].height) {
-                        p[0].y = y - p[3];
-                    }
+                    p[0].y = y - p[3];
                     if (p[0].y > 0) {
                         p[0].y = p[0].y * p[7];
                     }

@@ -1,0 +1,16 @@
+<f:Group height="25" xmlns:f="flower">
+    <f:layout>
+        <f:HorizontalLayout fixElementSize="false" name="test" gap="15"/>
+    </f:layout>
+    <f:Group percentHeight="100">
+        <f:Label text="屏幕宽:" verticalCenter="0" x="5"/>
+        <f:Input width="50" verticalCenter="0" x="55"/>
+    </f:Group>
+    <f:Group percentHeight="100">
+        <f:Label text="屏幕高:" verticalCenter="0" x="5"/>
+        <f:Input width="50" verticalCenter="0" x="55"/>
+    </f:Group>
+    <f:Group percentHeight="100">
+        <f:Label text="背景:" verticalCenter="0" x="5"/>
+    </f:Group>
+</f:Group>

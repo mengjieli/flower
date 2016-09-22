@@ -113,8 +113,12 @@ class DataGroup extends Group {
                         item.data = list.getItemAt(0);
                         items.push(item);
                     }
-                    p[6] = elementWidth = items[0].width > elementWidth ? items[0].width : elementWidth;
-                    p[7] = elementHeight = items[0].height > elementHeight ? items[0].height : elementHeight;
+                    if (!elementWidth) {
+                        p[6] = elementWidth = items[0].width;
+                    }
+                    if (!elementHeight) {
+                        p[7] = elementHeight = items[0].height;
+                    }
                 }
                 var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
