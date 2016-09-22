@@ -2,15 +2,29 @@
   "name": "uieditor.Button",
   "extends": "uieditor.Group",
   "init": {
-    "absoluteState": true
+    "absoluteState": {
+      "content":"true"
+    }
   },
   "members": {
     "enabled": {
-      "type": "bool",
-      "init": true
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "click": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

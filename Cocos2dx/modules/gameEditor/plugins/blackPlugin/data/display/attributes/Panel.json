@@ -3,48 +3,38 @@
   "extends": "uieditor.Group",
   "members": {
     "title": {
-      "type": "string"
-    },
-    "titleLabel": {
-      "type": "black.UI",
-      "init": null
-    },
-    "closeButton": {
-      "type": "black.UI",
-      "init": null
-    },
-    "iconImage": {
-      "type": "black.UI",
-      "init": null
+      "type": "uieditor.AttributeString"
     },
     "icon": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "scaleMode": {
-      "type": "string",
-      "init": "no_scale",
-      "enumList": [
-        {
-          "label": "NoScale",
-          "type": "no_scale"
-        },
-        {
-          "label": "ShowAll",
-          "type": "show_all"
-        },
-        {
-          "label": "NoBorder",
-          "type": "no_border"
-        },
-        {
-          "label": "ScaleWidth",
-          "type": "scale_width"
-        },
-        {
-          "label": "ScaleHeight",
-          "type": "scale_height"
-        }
-      ]
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "no_scale",
+        "list": [
+          {
+            "label": "NoScale",
+            "type": "no_scale"
+          },
+          {
+            "label": "ShowAll",
+            "type": "show_all"
+          },
+          {
+            "label": "NoBorder",
+            "type": "no_border"
+          },
+          {
+            "label": "ScaleWidth",
+            "type": "scale_width"
+          },
+          {
+            "label": "ScaleHeight",
+            "type": "scale_height"
+          }
+        ]
+      }
     }
   }
 }

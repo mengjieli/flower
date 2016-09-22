@@ -10,11 +10,11 @@ function init() {
         var label1 = labels[i];
         var label2 = labels[i + 1];
         var fxml =
-            '<f:Group horizontalCenter="0" xmlns:f="flower">' +
+            '<f:Group horizontalCenter="0" xmlns:f="flower" xmlns:s="modules/software/module.json">' +
             '<f:Label horizontalCenter="-95" width="50" text="' + label1 + '" verticalCenter="0"/>' +
-            '<f:Input id="' + atr1 + 'Input" horizontalCenter="-40" width="50" verticalCenter="0"/>' +
+            '<s:Input id="' + atr1 + 'Input" horizontalCenter="-40" width="50" verticalCenter="0"/>' +
             '<f:Label text="' + label2 + '" width="50" horizontalCenter="40" verticalCenter="0"/>' +
-            '<f:Input id="' + atr2 + 'Input" horizontalCenter="95" width="50" verticalCenter="0"/>' +
+            '<s:Input id="' + atr2 + 'Input" horizontalCenter="95" width="50" verticalCenter="0"/>' +
             '</f:Group>';
         var ui = (new flower.UIParser()).parseUI(fxml);
         container.addChild(ui);

@@ -3,26 +3,61 @@
   "extends": "uieditor.DisplayObject",
   "members": {
     "text": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "fontColor": {
-      "type": "uint"
+      "type": "uieditor.AttributeString"
     },
     "fontSize": {
-      "type": "number",
-      "init": 12
+      "type": "uieditor.AttributeString"
     },
     "autoSize": {
-      "type": "bool",
-      "init": true
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "multiLine": {
-      "type": "bool",
-      "init": true
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "wordWrap": {
-      "type": "bool",
-      "init": true
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     }
   }
 }

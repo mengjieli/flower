@@ -4,26 +4,26 @@
     <f:script src="./DialogEffect.script"/>
     <f:Group horizontalCenter="0">
         <f:Label horizontalCenter="-55" width="60" text="剧情id" verticalCenter="0"/>
-        <f:Input id="dialogIdInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="dialogIdInput" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="30">
         <f:Label horizontalCenter="-55" width="60" text="参数1" verticalCenter="0"/>
-        <f:Input id="param1Input" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="param1Input" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="60">
         <f:Label horizontalCenter="-55" width="60" text="参数2" verticalCenter="0"/>
-        <f:Input id="param2Input" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="param2Input" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="90">
         <f:Label horizontalCenter="-55" width="60" text="参数3" verticalCenter="0"/>
-        <f:Input id="param3Input" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="param3Input" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="120">
         <f:Label horizontalCenter="-55" width="60" text="参数4" verticalCenter="0"/>
-        <f:Input id="param4Input" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="param4Input" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="150">
         <f:Label horizontalCenter="-55" width="60" text="触发器id" verticalCenter="0"/>
-        <f:Input id="triggerIdInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="triggerIdInput" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
 </f:Group>

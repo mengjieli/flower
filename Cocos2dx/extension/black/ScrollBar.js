@@ -16,7 +16,7 @@ class ScrollBar extends Group {
             10: 0, //viewportHeight
             20: null //horizontal:true vertical:false
         };
-    }
+    }0
 
     $onFrameEnd() {
         var p = this.$ScrollerBar;

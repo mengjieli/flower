@@ -1,0 +1,15 @@
+function set value(val) {
+    this.input.value = val;
+}
+
+function get value() {
+    return this.input.value;
+}
+
+function set text(val) {
+    this.input.text = val;
+}
+
+function get text() {
+    return this.input.text;
+}

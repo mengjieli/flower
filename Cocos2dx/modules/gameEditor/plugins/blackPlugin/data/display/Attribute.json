@@ -1,6 +1,6 @@
 {
-  "name": "uieditor.AttributeValue",
-  "desc": "UI 属性值",
+  "name": "uieditor.Attribute",
+  "desc": "记录 UI 属性",
   "members": {
     "name": {
       "desc": "名称",
@@ -8,7 +8,7 @@
     },
     "content": {
       "desc": "值",
-      "type": "*"
+      "type": "string"
     }
   }
 }

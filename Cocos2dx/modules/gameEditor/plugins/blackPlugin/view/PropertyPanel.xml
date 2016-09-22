@@ -11,7 +11,7 @@
                 <f:itemRenderer>
                     <f:ItemRenderer percentWidth="100">
                             <f:Label x="5" text="{data.name}" verticalCenter="0"/>
-                            <f:Input value="{$data.content}" left="150" right="0" verticalCenter="0" visible="{$!data.content.enumList}"/>
+                            <s:Input value="{$data.content}" left="150" right="0" verticalCenter="0" visible="{$!data.content.enumList}"/>
                             <s:ComboBox value="{$data.content}" left="150" right="0" verticalCenter="0" visible="{$data.content.enumList}"/>
                     </f:ItemRenderer>
                 </f:itemRenderer>

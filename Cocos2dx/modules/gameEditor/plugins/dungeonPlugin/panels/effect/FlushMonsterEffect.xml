@@ -22,26 +22,26 @@
                                     alpha.selectedUp="1"/>
                             <f:Group>
                                 <f:Label x="5" text="id" verticalCenter="0"/>
-                                <f:Input id="idInput" x="40" width="50"
+                                <s:Input id="idInput" x="40" width="50"
                                          verticalCenter="0"/>
                                 <f:Label x="105" text="tag" verticalCenter="0"/>
-                                <f:Input id="tagInput" x="140" width="50"
+                                <s:Input id="tagInput" x="140" width="50"
                                          verticalCenter="0"/>
                             </f:Group>
                             <f:Group y="25">
                                 <f:Label x="5" text="出生x" verticalCenter="0"/>
-                                <f:Input id="bornXInput" x="40" width="50"
+                                <s:Input id="bornXInput" x="40" width="50"
                                          verticalCenter="0"/>
                                 <f:Label x="105" text="出生y" verticalCenter="0"/>
-                                <f:Input id="bornYInput" x="140" width="50"
+                                <s:Input id="bornYInput" x="140" width="50"
                                          verticalCenter="0"/>
                             </f:Group>
                             <f:Group y="50">
                                 <f:Label x="5" text="移动x" verticalCenter="0"/>
-                                <f:Input id="moveXInput" x="40" width="50"
+                                <s:Input id="moveXInput" x="40" width="50"
                                          verticalCenter="0"/>
                                 <f:Label x="105" text="移动y" verticalCenter="0"/>
-                                <f:Input id="moveYInput" x="140" width="50"
+                                <s:Input id="moveYInput" x="140" width="50"
                                          verticalCenter="0"/>
                             </f:Group>
                             <f:Group y="75">

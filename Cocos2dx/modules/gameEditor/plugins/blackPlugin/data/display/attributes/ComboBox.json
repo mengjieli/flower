@@ -2,29 +2,14 @@
   "name": "uieditor.ComboBox",
   "extends": "uieditor.Group",
   "members": {
-    "label": {
-      "type": "black.UI",
-      "init": null
-    },
-    "button": {
-      "type": "black.UI",
-      "init": null
-    },
-    "list": {
-      "type": "black.UI",
-      "init": null
-    },
     "labelField": {
-      "type": "string",
-      "init": "label"
+      "type": "uieditor.AttributeString"
     },
     "valueField": {
-      "type": "string",
-      "init": "type"
+      "type": "uieditor.AttributeString"
     },
     "dataProvider": {
-      "type": "flower.ArrayValue",
-      "init": null
+      "type": "uieditor.AttributeString"
     }
   }
 }

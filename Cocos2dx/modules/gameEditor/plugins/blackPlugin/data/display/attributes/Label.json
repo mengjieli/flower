@@ -3,58 +3,71 @@
   "extends": "uieditor.TextField",
   "members": {
     "left": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "right": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "horizontalCenter": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "top": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "bottom": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "verticalCenter": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "percentWidth": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "percentHeight": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "absoluteState": {
-      "type": "bool"
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "false",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "creationComplete": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "add": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "addToStage": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "remove": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "removeFromStage": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "touchBegin": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "touchEnd": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "touchRelease": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "rightClick": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

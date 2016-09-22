@@ -18,7 +18,7 @@ function init() {
         if (dropDownList[atr1]) {
             fxml += '<s:ComboBox id="' + atr1 + 'ComboBox" horizontalCenter="30" width="100" verticalCenter="0"/>';
         } else {
-            fxml += '<f:Input id="' + atr1 + 'Input" horizontalCenter="30" width="100" verticalCenter="0" ' + (inputFalse[atr1] ? 'touchEnabled="false"' : '') + '/>';
+            fxml += '<s:Input id="' + atr1 + 'Input" horizontalCenter="30" width="100" verticalCenter="0" ' + (inputFalse[atr1] ? 'touchEnabled="false"' : '') + '/>';
         }
         fxml += '</f:Group>';
         var ui = (new flower.UIParser()).parseUI(fxml);

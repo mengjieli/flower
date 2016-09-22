@@ -1,23 +1,22 @@
 {
   "name": "uieditor.List",
   "extends": "uieditor.ListBase",
-  "init": {
-    "layout": {
-      "fixElementSize": false,
-      "__className": "black.HorizontalLayout"
-    }
-  },
   "members": {
     "more": {
-      "type": "bool"
-    },
-    "moreButton": {
-      "type": "black.UI",
-      "init": null
-    },
-    "moreList": {
-      "type": "black.UI",
-      "init": null
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "false",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     }
   }
 }

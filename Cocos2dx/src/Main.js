@@ -34,11 +34,13 @@ var Main = function () {
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
+
             //var ui = new flower.UIParser();
             //ui.parseUIAsync("res/Test.xml");
             //flower.Stage.getInstance().addChild(ui);
-            //
             //return;
+
+
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

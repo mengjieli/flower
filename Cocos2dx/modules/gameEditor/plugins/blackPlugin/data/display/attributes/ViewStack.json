@@ -3,7 +3,7 @@
   "extends": "uieditor.Group",
   "members": {
     "selectedItemChange":{
-      "type":"string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

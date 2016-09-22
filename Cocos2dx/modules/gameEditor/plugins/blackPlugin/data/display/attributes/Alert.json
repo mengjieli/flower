@@ -3,29 +3,14 @@
   "extends": "uieditor.Panel",
   "members": {
     "confirmButton": {
-      "type": "black.UI",
-      "init": null
-    },
-    "cancelButton": {
-      "type": "black.UI",
-      "init": null
-    },
-    "cancelButton": {
-      "type": "black.UI",
-      "init": null
-    },
-    "contentLabel": {
-      "type": "black.UI",
-      "init": null
-    },
     "content": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "confirm": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "cancel": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

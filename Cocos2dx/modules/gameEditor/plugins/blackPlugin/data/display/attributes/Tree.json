@@ -1,18 +1,9 @@
 {
   "name": "uieditor.Tree",
   "extends": "uieditor.DataGroup",
-  "init":{
-    "requireSelection":true,
-    "itemSelectedEnabled":true,
-    "itemClickedEnabled":true,
-    "layout": {
-      "__className": "black.VerticalLayout"
-    }
-  },
   "members": {
     "pathField": {
-      "type": "string",
-      "init": "path"
+      "type": "uieditor.AttributeString"
     }
   }
 }

@@ -3,22 +3,28 @@
   "extends": "uieditor.DisplayObject",
   "members": {
     "fillColor": {
-      "type": "uint",
-      "init": "0xffffff"
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "0xffffff"
+      }
     },
     "fillAlpha": {
-      "type": "number",
-      "init": 1
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "1"
+      }
     },
     "lineWidth": {
-      "type": "int"
+      "type": "uieditor.AttributeString"
     },
     "lineColor": {
-      "type": "uint"
+      "type": "uieditor.AttributeString"
     },
     "lineAlpha": {
-      "type": "number",
-      "init": 1
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "1"
+      }
     }
   }
 }

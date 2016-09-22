@@ -2,7 +2,7 @@
     <f:Group percentWidth="100">
         <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
         <f:Label id="label" left="0" right="-30" verticalCenter="0"/>
-        <f:Button id="button" width="20" height="20" right="0">
+        <f:Button id="button" width="20" height="17" right="0">
             <f:Rect percentWidth="100" percentHeight="100" fillColor.up="0x5e5d5d" fillColor.down="0x464646"/>
         </f:Button>
     </f:Group>

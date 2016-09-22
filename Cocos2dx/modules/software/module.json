@@ -9,6 +9,7 @@
     "./button/Button1.xml",
     "./checkBox/CheckBox.xml",
     "./label/Label.xml",
+    "./label/Input.xml",
     "./panel/Panel.xml",
     "./panel/Alert.xml",
     "./panel/TitlePanel.xml",

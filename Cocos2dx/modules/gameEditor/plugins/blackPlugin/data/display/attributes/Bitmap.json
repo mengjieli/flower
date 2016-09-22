@@ -3,10 +3,10 @@
   "extends": "uieditor.DisplayObject",
   "members": {
     "texture": {
-      "type": "*"
+      "type": "uieditor.AttributeString"
     },
     "scale9Grid": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

@@ -3,49 +3,89 @@
   "extends": "uieditor.Group",
   "members": {
     "dataProvider": {
-      "type": "flower.ArrayValue",
-      "init": "*"
+      "type": "uieditor.AttributeString"
     },
     "itemRenderer": {
-      "type": "black.UI",
-      "init": null
+      "type": "uieditor.AttributeString"
     },
     "itemSelectedEnabled": {
-      "type": "bool"
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "false",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "itemClickedEnabled": {
-      "type": "bool",
-      "init": true
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "requireSelection": {
-      "type": "bool"
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "false",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "selectTime": {
-      "type": "string",
-      "init": "touch_begin",
-      "enumList": [
-        {
-          "label": "触摸开始",
-          "type": "touch_begin"
-        },
-        {
-          "label": "触摸结束",
-          "type": "touch_end"
-        }
-      ]
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "touch_begin",
+        "list": [
+          {
+            "label": "触摸开始",
+            "type": "touch_begin"
+          },
+          {
+            "label": "触摸结束",
+            "type": "touch_end"
+          }
+        ]
+      }
     },
     "validDownStateTime": {
-      "type": "uint",
-      "init": 100
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "100"
+      }
     },
     "clickItem": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "selectedItemChange": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "touchBeginItem": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

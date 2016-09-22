@@ -14,12 +14,12 @@
                 </f:layout>
                 <f:Group percentHeight="100">
                     <f:Label text="屏幕宽:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.screenWidth.value = arguments[0].currentTarget.text;"
+                    <s:Input stopInput="this.data.data.screenWidth.value = arguments[0].currentTarget.text;"
                              text="{data.data.screenWidth}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="屏幕高:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.screenHeight.value = arguments[0].currentTarget.text;"
+                    <s:Input stopInput="this.data.data.screenHeight.value = arguments[0].currentTarget.text;"
                              text="{data.data.screenHeight}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">
@@ -36,32 +36,32 @@
                 </f:layout>
                 <f:Group percentHeight="100">
                     <f:Label text="出生点x:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.settings.bornX.value = arguments[0].currentTarget.text;this.data.parser.save();"
+                    <s:Input stopInput="this.data.data.settings.bornX.value = arguments[0].currentTarget.text;this.data.parser.save();"
                              text="{data.data.settings.bornX}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="出生点y:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.settings.bornY.value = arguments[0].currentTarget.text;this.data.parser.save();"
+                    <s:Input stopInput="this.data.data.settings.bornY.value = arguments[0].currentTarget.text;this.data.parser.save();"
                              text="{data.data.settings.bornY}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="己方hp:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.settings.myHp.value = arguments[0].currentTarget.text;this.data.parser.save();"
+                    <s:Input stopInput="this.data.data.settings.myHp.value = arguments[0].currentTarget.text;this.data.parser.save();"
                              text="{data.data.settings.myHp}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="己方攻击力:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.settings.myAttack.value = arguments[0].currentTarget.text;this.data.parser.save();"
+                    <s:Input stopInput="this.data.data.settings.myAttack.value = arguments[0].currentTarget.text;this.data.parser.save();"
                              text="{data.data.settings.myAttack}" width="50" verticalCenter="0" x="75"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="怪物hp:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.settings.monsterHp.value = arguments[0].currentTarget.text;this.data.parser.save();"
+                    <s:Input stopInput="this.data.data.settings.monsterHp.value = arguments[0].currentTarget.text;this.data.parser.save();"
                              text="{data.data.settings.monsterHp}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="怪物攻击力:" verticalCenter="0" x="5"/>
-                    <f:Input stopInput="this.data.data.settings.monsterAttack.value = arguments[0].currentTarget.text;this.data.parser.save();"
+                    <s:Input stopInput="this.data.data.settings.monsterAttack.value = arguments[0].currentTarget.text;this.data.parser.save();"
                              text="{data.data.settings.monsterAttack}" width="50" verticalCenter="0" x="75"/>
                 </f:Group>
             </f:Group>

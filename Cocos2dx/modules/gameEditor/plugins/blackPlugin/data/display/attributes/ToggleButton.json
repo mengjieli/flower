@@ -3,10 +3,22 @@
   "extends": "uieditor.Button",
   "members": {
     "selected": {
-      "type": "bool"
+      "type": "uieditor.AttributeString",
+      "init": {
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "change": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

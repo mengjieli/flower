@@ -1222,7 +1222,6 @@ class PlatformTexture {
     dispose() {
         if (Platform.native) {
             cc.TextureCache.getInstance().removeTextureForKey(this.url);
-            this.textrue.releaseData();
         } else {
             this.textrue.releaseData();
         }
@@ -3521,13 +3520,11 @@ class DisplayObject extends EventDispatcher {
     }
 
     get focusEnabled() {
-        var p = this.$DisplayObject;
-        return p[50];
+        return this.$DisplayObject[50];
     }
 
     set focusEnabled(val) {
-        var p = this.$DisplayObject;
-        p[50] = val;
+        this.$DisplayObject[50] = val;
     }
 
     get id() {
@@ -4320,7 +4317,8 @@ class TextInput extends DisplayObject {
             2: 0x000000, //fontColor
             3: true, //editEnabled
             4: false, //inputing
-            5: false //autoSize
+            5: false, //autoSize
+            6: false  //multiline
         };
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
@@ -4363,7 +4361,7 @@ class TextInput extends DisplayObject {
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
-            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, p[6], p[5]);
             rect.x = 0;
             rect.y = 0;
             rect.width = this.width;//size.width;
@@ -4430,7 +4428,7 @@ class TextInput extends DisplayObject {
         this.$invalidateContentBounds();
         this.$nativeShow.setSize(this.width, this.height);
     }
-    
+
     $setFontSize(val) {
         var p = this.$TextField;
         if (p[1] == val) {
@@ -4484,7 +4482,7 @@ class TextInput extends DisplayObject {
     $keyDown(e) {
         var p = this.$TextField;
         p[0] = this.$nativeShow.getNativeText();
-        if (e.keyCode == 13) {
+        if (e.keyCode == 13 && !p[6]) {
             this.$inputEnd();
         }
     }

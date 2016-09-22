@@ -9,15 +9,15 @@
     </f:Group>
     <f:Group horizontalCenter="0" y="30">
         <f:Label horizontalCenter="-55" width="60" text="伤害次数" verticalCenter="0"/>
-        <f:Input id="countInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="countInput" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="60">
         <f:Label horizontalCenter="-55" width="60" text="伤害值" verticalCenter="0"/>
-        <f:Input id="damageInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="damageInput" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" y="90">
         <f:Label horizontalCenter="-55" width="60" text="伤害间隔(ms)" verticalCenter="0"/>
-        <f:Input id="timeGapInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+        <s:Input id="timeGapInput" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
     <f:Group horizontalCenter="0" top="130" bottom="0">
         <f:Label horizontalCenter="0" text="坐标点"/>
@@ -34,10 +34,10 @@
                                     alpha.up="0" alpha.over="0.5"
                                     alpha.selectedUp="1"/>
                             <f:Label x="5" text="x" verticalCenter="0"/>
-                            <f:Input id="xInput" x="15" width="50"
+                            <s:Input id="xInput" x="15" width="50"
                                      verticalCenter="0"/>
                             <f:Label x="80" text="y" verticalCenter="0"/>
-                            <f:Input id="yInput" x="90" width="50"
+                            <s:Input id="yInput" x="90" width="50"
                                      verticalCenter="0"/>
                         </f:ItemRenderer>
                     </f:itemRenderer>

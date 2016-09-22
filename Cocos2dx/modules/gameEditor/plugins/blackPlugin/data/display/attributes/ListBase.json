@@ -2,9 +2,15 @@
   "name": "uieditor.ListBase",
   "extends": "uieditor.DataGroup",
   "init": {
-    "requireSelection": true,
-    "itemSelectedEnabled": true,
-    "itemClickedEnabled": true
+    "requireSelection": {
+      "content": "true"
+    },
+    "itemSelectedEnabled": {
+      "content": "true"
+    },
+    "itemClickedEnabled": {
+      "content": "true"
+    }
   },
   "members": {
   }

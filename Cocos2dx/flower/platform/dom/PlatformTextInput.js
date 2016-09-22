@@ -14,6 +14,8 @@ class PlatformTextInput extends PlatformDisplayObject {
         input.style.position = "absolute";
         input.style.left = "0px";
         input.style.top = "0px";
+        input.style["background"] = "none";
+        input.style["border"] = "none";
         input.style["font-style"] = "normal";
         input.style["transform-origin"] = "left top";
         this.show = input;

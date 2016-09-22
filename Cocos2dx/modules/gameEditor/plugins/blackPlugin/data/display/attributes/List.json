@@ -1,11 +1,6 @@
 {
   "name": "uieditor.List",
   "extends": "uieditor.ListBase",
-  "init": {
-    "layout": {
-      "__className": "black.VerticalLayout"
-    }
-  },
   "members": {
   }
 }

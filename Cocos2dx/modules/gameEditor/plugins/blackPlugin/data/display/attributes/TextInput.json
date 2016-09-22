@@ -1,25 +1,31 @@
 {
   "name": "uieditor.TextInput",
   "extends": "uieditor.DisplayObject",
-  "init": {
-    "width": 100,
-    "height": 21,
-    "focusEnabled": true
-  },
   "members": {
     "text": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "editEnabled": {
-      "type": "bool",
-      "init": true
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "fontColor": {
-      "type": "uint"
+      "type": "uieditor.AttributeString"
     },
     "fontSize": {
-      "type": "number",
-      "init": 12
+      "type": "uieditor.AttributeString"
     }
   }
 }

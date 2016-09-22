@@ -933,6 +933,8 @@ var flower = {};
             input.style.position = "absolute";
             input.style.left = "0px";
             input.style.top = "0px";
+            input.style["background"] = "none";
+            input.style["border"] = "none";
             input.style["font-style"] = "normal";
             input.style["transform-origin"] = "left top";
             _this3.show = input;
@@ -4967,7 +4969,8 @@ var flower = {};
                 2: 0x000000, //fontColor
                 3: true, //editEnabled
                 4: false, //inputing
-                5: false //autoSize
+                5: false, //autoSize
+                6: false //multiline
             };
             _this19.addListener(Event.FOCUS_IN, _this19.$onFocusIn, _this19);
             _this19.addListener(Event.FOCUS_OUT, _this19.$onFocusOut, _this19);
@@ -5014,7 +5017,7 @@ var flower = {};
                     var d = this.$DisplayObject;
                     var p = this.$TextField;
                     //text, width, height, size, wordWrap, multiline, autoSize
-                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
+                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, p[6], p[5]);
                     rect.x = 0;
                     rect.y = 0;
                     rect.width = this.width; //size.width;
@@ -5146,7 +5149,7 @@ var flower = {};
             value: function $keyDown(e) {
                 var p = this.$TextField;
                 p[0] = this.$nativeShow.getNativeText();
-                if (e.keyCode == 13) {
+                if (e.keyCode == 13 && !p[6]) {
                     this.$inputEnd();
                 }
             }

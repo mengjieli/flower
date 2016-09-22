@@ -1,91 +1,109 @@
 {
   "name": "uieditor.DisplayObject",
   "members": {
+    "id": {
+      "type": "uieditor.AttributeString"
+    },
     "x": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "y": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "width": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "height": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "scaleX": {
-      "type": "number",
-      "init": 1
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "1"
+      }
     },
     "scaleY": {
-      "type": "number",
-      "init": 1
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "1"
+      }
     },
     "rotation": {
-      "type": "number"
+      "type": "uieditor.AttributeString"
     },
     "alpha": {
-      "type": "number",
-      "init": 1
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "1"
+      }
     },
     "visible": {
-      "type": "bool",
-      "init": true,
-      "enumList":[
-        {
-          "label":"true",
-          "type":true
-        },
-        {
-          "label":"false",
-          "type":false
-        }
-      ]
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "touchEnabled": {
-      "type": "bool",
-      "init": true,
-      "enumList":[
-        {
-          "label":"true",
-          "type":true
-        },
-        {
-          "label":"false",
-          "type":false
-        }
-      ]
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "multiplyTouchEnabled": {
-      "type": "bool",
-      "init": true,
-      "enumList":[
-        {
-          "label":"true",
-          "type":true
-        },
-        {
-          "label":"false",
-          "type":false
-        }
-      ]
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "focusEnabled": {
-      "type": "bool",
-      "enumList":[
-        {
-          "label":"true",
-          "type":true
-        },
-        {
-          "label":"false",
-          "type":false
-        }
-      ]
+      "type": "uieditor.AttributeString",
+      "init": {
+        "content": "true",
+        "list": [
+          {
+            "label": "true",
+            "type": "true"
+          },
+          {
+            "label": "false",
+            "type": "false"
+          }
+        ]
+      }
     },
     "name": {
       "desc": "在编辑器中会生成一个 16 位的随机字母数字组合(唯一名)",
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

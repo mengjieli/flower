@@ -27,7 +27,7 @@
     "./data/operation/Operation.json",
     "./data/display/UIFile.json",
     "./data/display/UI.json",
-    "./data/display/AttributeValue.json",
+    "./data/display/Attribute.json",
     "./data/display/NameSpace.json",
     "./data/display/attributes/DisplayObject.json",
     "./data/display/attributes/Bitmap.json",

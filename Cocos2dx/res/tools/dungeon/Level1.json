@@ -1,7 +1,7 @@
 {
  "itemId": 121,
- "screenWidth": 600,
- "screenHeight": 600,
+ "screenWidth": 400,
+ "screenHeight": 300,
  "triggers": [
   {
    "itemId": 59,

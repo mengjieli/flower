@@ -3,10 +3,10 @@
   "extends": "uieditor.ToggleButton",
   "members": {
     "groupName": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     },
     "change": {
-      "type": "string"
+      "type": "uieditor.AttributeString"
     }
   }
 }

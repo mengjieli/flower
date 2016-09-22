@@ -1,14 +1,10 @@
 {
-  "name": "uieditor.RadioButtonGroup",
+  "name": "uieditor.ScrollBar",
   "extends": "uieditor.Group",
   "members": {
-    "groupName": {
-      "type": "uieditor.AttributeString"
-    },
-    "enabled": {
+    "autoVisibility": {
       "type": "uieditor.AttributeString",
       "init": {
-        "content": "true",
         "list": [
           {
             "label": "true",
@@ -20,9 +16,6 @@
           }
         ]
       }
-    },
-    "change": {
-      "type": "uieditor.AttributeString"
     }
   }
 }
