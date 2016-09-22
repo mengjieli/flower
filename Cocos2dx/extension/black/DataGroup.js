@@ -139,7 +139,7 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i - firstItemIndex] = item;
-                    layout.updateList(p[4], p[5], firstItemIndex);
+                    layout.updateList(p[4], p[5], firstItemIndex, p[6], p[7]);
                     if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                         break;
                     }

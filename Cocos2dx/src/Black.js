@@ -2116,6 +2116,8 @@ var $root = eval("this");
             key: "updateList",
             value: function updateList(width, height) {
                 var startIndex = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+                var elementWidth = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var elementHeight = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
             }
         }, {
             key: "$clear",
@@ -2231,6 +2233,8 @@ var $root = eval("this");
             key: "updateList",
             value: function updateList(width, height) {
                 var startIndex = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+                var elementWidth = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var elementHeight = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
 
                 //flower.trace("update layout",flower.EnterFrame.frame);
                 if (!this.flag) {
@@ -2246,11 +2250,13 @@ var $root = eval("this");
                 var i;
                 if (this._align == flower.Layout.VerticalAlign) {
                     if (this._fixElementSize) {
-                        var eh = list[0].height;
-                        for (i = 0; i < len; i++) {
-                            list[i].y = (i + startIndex) * (eh + this._gap);
+                        if (list.length) {
+                            elementHeight = elementHeight || list[0].height;
                         }
-                        this._maxY = (len + startIndex) * (eh + this._gap);
+                        for (i = 0; i < len; i++) {
+                            list[i].y = (i + startIndex) * (elementHeight + this._gap);
+                        }
+                        this._maxY = (len + startIndex) * (elementHeight + this._gap);
                     } else {
                         var y = 0;
                         for (i = 0; i < len; i++) {
@@ -2262,11 +2268,13 @@ var $root = eval("this");
                 }
                 if (this._align == flower.Layout.HorizontalAlign) {
                     if (this._fixElementSize) {
-                        var ew = list[0].width;
-                        for (i = 0; i < len; i++) {
-                            list[i].x = (i + startIndex) * (ew + this._gap);
+                        if (list.length) {
+                            elementWidth = elementWidth || list[0].height;
                         }
-                        this._maxX = (len + startIndex) * (ew + this._gap);
+                        for (i = 0; i < len; i++) {
+                            list[i].x = (i + startIndex) * (elementWidth + this._gap);
+                        }
+                        this._maxX = (len + startIndex) * (elementWidth + this._gap);
                     } else {
                         var x = 0;
                         for (i = 0; i < len; i++) {
@@ -3852,7 +3860,7 @@ var $root = eval("this");
                             }
                             item.$setItemIndex(i);
                             newItems[i - firstItemIndex] = item;
-                            layout.updateList(p[4], p[5], firstItemIndex);
+                            layout.updateList(p[4], p[5], firstItemIndex, p[6], p[7]);
                             if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                                 break;
                             }
@@ -6266,11 +6274,11 @@ var $root = eval("this");
                         if ((Math.abs(x - p[0].x - p[2]) > p[9] || Math.abs(y - p[0].y - p[3]) > p[9]) && p[0] instanceof flower.DataGroup) {
                             p[0].$releaseItem();
                         }
-                        if (!p[15] && this.$Scroller[12] != "off" && Math.abs(x - p[0].x - p[2]) > p[9]) {
+                        if (!p[15] && this.$Scroller[12] != "off" && Math.abs(x - p[0].x - p[2]) > p[9] && p[0].contentWidth > p[0].width) {
                             p[15] = true;
                             p[2] = x - p[0].x;
                         }
-                        if (!p[16] && this.$Scroller[13] != "off" && Math.abs(y - p[0].y - p[3]) > p[9]) {
+                        if (!p[16] && this.$Scroller[13] != "off" && Math.abs(y - p[0].y - p[3]) > p[9] && p[0].contentHeight > p[0].height) {
                             p[16] = true;
                             p[3] = y - p[0].y;
                         }

@@ -90,11 +90,11 @@ class Scroller extends MaskUI {
                 if ((Math.abs(x - p[0].x - p[2]) > p[9] || Math.abs(y - p[0].y - p[3]) > p[9]) && p[0] instanceof flower.DataGroup) {
                     p[0].$releaseItem();
                 }
-                if (!p[15] && this.$Scroller[12] != "off" && Math.abs(x - p[0].x - p[2]) > p[9]) {
+                if (!p[15] && this.$Scroller[12] != "off" && Math.abs(x - p[0].x - p[2]) > p[9] && p[0].contentWidth > p[0].width) {
                     p[15] = true;
                     p[2] = x - p[0].x;
                 }
-                if (!p[16] && this.$Scroller[13] != "off" && Math.abs(y - p[0].y - p[3]) > p[9]) {
+                if (!p[16] && this.$Scroller[13] != "off" && Math.abs(y - p[0].y - p[3]) > p[9] && p[0].contentHeight > p[0].height) {
                     p[16] = true;
                     p[3] = y - p[0].y;
                 }
