@@ -1,3 +1,4 @@
 <f:Group xmlns:f="flower">
-    <f:Input text="what?\nabc" width="300" height="400" />
+    <f:Rect lineWidth="1" percentWidth="100" percentHeight="100"/>
+    <f:TextArea text="<font color='#ff0000'>what?\nabc</font>" width="300" height="400" />
 </f:Group>

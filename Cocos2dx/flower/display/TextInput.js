@@ -4,7 +4,6 @@ class TextInput extends DisplayObject {
 
     constructor(text = "") {
         super();
-        this.$nativeShow = Platform.create("TextInput");
         this.$TextField = {
             0: "", //text
             1: 12, //fontSize
@@ -12,8 +11,10 @@ class TextInput extends DisplayObject {
             3: true, //editEnabled
             4: false, //inputing
             5: false, //autoSize
-            6: false  //multiline
+            6: false, //multiline
+            7: false, //wordWrap
         };
+        this.$initNativeShow();
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
         this.addListener(KeyboardEvent.KEY_DOWN, this.$keyDown, this);
@@ -24,6 +25,16 @@ class TextInput extends DisplayObject {
         this.height = 21;
         this.focusEnabled = true;
         this.$nativeShow.setChangeBack(this.$onTextChange, this);
+    }
+
+    $initNativeShow(textArea = false) {
+        if (textArea) {
+            this.$TextField[6] = true;
+            this.$TextField[7] = true;
+            this.$nativeShow = Platform.create("TextArea");
+        } else {
+            this.$nativeShow = Platform.create("TextInput");
+        }
     }
 
     $onTextChange() {
@@ -55,7 +66,7 @@ class TextInput extends DisplayObject {
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
-            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, p[6], p[5]);
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[7], p[6], p[5]);
             rect.x = 0;
             rect.y = 0;
             rect.width = this.width;//size.width;
@@ -135,11 +146,42 @@ class TextInput extends DisplayObject {
     }
 
     $setEditEnabled(val) {
+        if (val == "false") {
+            val = false;
+        }
+        var p = this.$TextField;
+        if (p[3] == val) {
+            return false;
+        }
+        p[3] = val;
+        return true;
+    }
+
+    $setMultiline(val) {
+        if (val == "false") {
+            val = false;
+        }
         var p = this.$TextField;
         if (p[6] == val) {
             return false;
         }
         p[6] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setWordWrap(val) {
+        if (val == "false") {
+            val = false;
+        }
+        var p = this.$TextField;
+        if (p[7] == val) {
+            return false;
+        }
+        p[7] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         return true;
     }
 
@@ -148,8 +190,8 @@ class TextInput extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        if (this.editEnabled) {
-            var p = this.$TextField;
+        var p = this.$TextField;
+        if (p[3]) {
             this.$nativeShow.startInput();
             p[4] = true;
             this.dispatchWith(Event.START_INPUT);
@@ -170,6 +212,8 @@ class TextInput extends DisplayObject {
             this.$nativeShow.stopInput();
         }
         this.text = this.$nativeShow.getNativeText();
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         this.dispatchWith(Event.STOP_INPUT);
     }
 
@@ -182,8 +226,7 @@ class TextInput extends DisplayObject {
     }
 
     get text() {
-        var p = this.$TextField;
-        return p[0];
+        return this.$TextField[0];
     }
 
     set text(val) {
@@ -191,8 +234,7 @@ class TextInput extends DisplayObject {
     }
 
     get fontColor() {
-        var p = this.$TextField;
-        return p[2];
+        return this.$TextField[2];
     }
 
     set fontColor(val) {
@@ -200,8 +242,7 @@ class TextInput extends DisplayObject {
     }
 
     get fontSize() {
-        var p = this.$TextField;
-        return p[1];
+        return this.$TextField[1];
     }
 
     set fontSize(val) {
@@ -209,8 +250,7 @@ class TextInput extends DisplayObject {
     }
 
     get editEnabled() {
-        var p = this.$TextField;
-        return p[3];
+        return this.$TextField[3];
     }
 
     set editEnabled(val) {

@@ -269,39 +269,24 @@ class Platform {
     static create(name) {
         var pools = Platform.pools;
         if (name == "Sprite") {
-            //if (pools.Sprite && pools.Sprite.length) {
-            //    return pools.Sprite.pop();
-            //}
             return new PlatformSprite();
         }
         if (name == "Bitmap") {
-            //if (pools.Bitmap && pools.Bitmap.length) {
-            //    return pools.Bitmap.pop();
-            //}
             return new PlatformBitmap();
         }
         if (name == "TextField") {
-            //if (pools.TextField && pools.TextField.length) {
-            //    return pools.TextField.pop();
-            //}
             return new PlatformTextField();
         }
         if (name == "TextInput") {
-            //if (pools.TextInput && pools.TextInput.length) {
-            //    return pools.TextInput.pop();
-            //}
             return new PlatformTextInput();
         }
+        if (name == "TextArea") {
+            return new PlatformTextArea();
+        }
         if (name == "Shape") {
-            //if (pools.Shape && pools.Shape.length) {
-            //    return pools.Shape.pop();
-            //}
             return new PlatformShape();
         }
         if (name == "Mask") {
-            //if (pools.Mask && pools.Mask.length) {
-            //    return pools.Mask.pop();
-            //}
             return new PlatformMask();
         }
         return null;
@@ -1050,6 +1035,202 @@ class PlatformTextInput extends PlatformDisplayObject {
 //PlatformTextInput.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
 //PlatformTextInput.$mesureTxt.retain();
 //////////////////////////End File:flower/platform/dom/PlatformTextInput.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/dom/PlatformTextArea.js///////////////////////////
+class PlatformTextArea extends PlatformDisplayObject {
+
+    static $mesureTxt;
+
+    show;
+
+    __changeBack = null;
+    __changeBackThis = null;
+
+
+    constructor() {
+        super();
+        var input = document.createElement("textarea");
+        input.style.position = "absolute";
+        input.style.left = "0px";
+        input.style.top = "0px";
+        input.style["background"] = "none";
+        input.style["border"] = "none";
+        input.style["font-style"] = "normal";
+        input.style["transform-origin"] = "left top";
+        this.show = input;
+    }
+
+    setFontColor(color) {
+        this.show.style.color = '#' + this.toColor16(color >> 16) + this.toColor16(color >> 8 & 0xFF) + this.toColor16(color & 0xFF);
+    }
+
+    setSize(width, height) {
+        var txt = this.show;
+        txt.style.width = width + "px";
+        txt.style.height = height + "px";
+    }
+
+    setChangeBack(changeBack, thisObj) {
+        this.__changeBack = changeBack;
+        this.__changeBackThis = thisObj;
+    }
+
+    onTextFieldAttachWithIME(sender) {
+        console.log("start input");
+    }
+
+    onTextFieldDetachWithIME(sender) {
+        console.log("stop input");
+    }
+
+    onTextFieldInsertText(sender, text, len) {
+        //console.log(text + " : " + len);
+        if (this.__changeBack) {
+            this.__changeBack.call(this.__changeBackThis);
+        }
+    }
+
+    onTextFieldDeleteBackward() {
+
+    }
+
+    getNativeText() {
+        return this.show.value;
+    }
+
+    changeText(text, width, height, size, wordWrap, multiline, autoSize, deleteMore = false) {
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.style.fontSize = size + "px";
+        var txt = this.show;
+        txt.style.fontSize = size + "px";
+        txt.value = "";
+        var txtText = "";
+        var start = 0;
+        if (text == "") {
+            txt.value = "";
+        }
+        var txtHeight = 0;
+        var txtWidth = 0;
+        for (var i = 0; i < text.length; i++) {
+            //取一行文字进行处理
+            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+                var str = text.slice(start, i);
+                $mesureTxt.innerHTML = str;
+                var lineWidth = $mesureTxt.offsetWidth;
+                var findEnd = i;
+                var changeLine = false;
+                txtWidth = lineWidth > txtWidth ? lineWidth : txtWidth;
+                //如果这一行的文字宽大于设定宽
+                while (!autoSize && width && lineWidth > width) {
+                    changeLine = true;
+                    findEnd--;
+                    $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                    lineWidth = $mesureTxt.offsetWidth;
+                }
+                if (wordWrap && changeLine) {
+                    i = findEnd;
+                    txt.value = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                } else {
+                    txt.value = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                }
+                txtHeight += size + 3;
+                //如果文字的高度已经大于设定的高，回退一次
+                if (!autoSize && height && txtHeight > height && deleteMore) {
+                    txt.value = (txtText);
+                    break;
+                } else {
+                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                    if (wordWrap && changeLine) {
+                        txtText += "\n";
+                    }
+                }
+                start = i;
+                if (multiline == false) {
+                    break;
+                }
+            }
+        }
+        //txt.value = flower.StringDo.replaceString(txt.value, "\n", "</br>");
+        //txt.value = flower.StringDo.replaceString(txt.value, "\r", "</br>");
+        return {
+            width: txtWidth,
+            height: txtHeight
+        };
+    }
+
+    setFilters(filters) {
+
+    }
+
+    startInput() {
+        this.show.focus();
+        //this.show.attachWithIME();
+    }
+
+    stopInput() {
+        //this.show.detachWithIME();
+    }
+
+    release() {
+        this.__changeBack = null;
+        this.__changeBackThis = null;
+        var show = this.show;
+        show.innerHTML = ("");
+        show.style.fontSize = "12px";
+        this.setFontColor(0);
+        super.release();
+    }
+
+    toColor16(color) {
+        var abc;
+        var num = math.floor(color / 16);
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        var str = abc + "";
+        num = color % 16;
+        abc = num + "";
+        if (num == 15) {
+            abc = "f";
+        }
+        if (num == 14) {
+            abc = "e";
+        }
+        if (num == 13) {
+            abc = "d";
+        }
+        if (num == 12) {
+            abc = "c";
+        }
+        if (num == 11) {
+            abc = "b";
+        }
+        if (num == 10) {
+            abc = "a";
+        }
+        str += abc;
+        return str;
+    }
+}
+//////////////////////////End File:flower/platform/dom/PlatformTextArea.js///////////////////////////
 
 
 
@@ -4461,7 +4642,6 @@ class TextInput extends DisplayObject {
 
     constructor(text = "") {
         super();
-        this.$nativeShow = Platform.create("TextInput");
         this.$TextField = {
             0: "", //text
             1: 12, //fontSize
@@ -4469,8 +4649,10 @@ class TextInput extends DisplayObject {
             3: true, //editEnabled
             4: false, //inputing
             5: false, //autoSize
-            6: false  //multiline
+            6: false, //multiline
+            7: false, //wordWrap
         };
+        this.$initNativeShow();
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
         this.addListener(KeyboardEvent.KEY_DOWN, this.$keyDown, this);
@@ -4481,6 +4663,16 @@ class TextInput extends DisplayObject {
         this.height = 21;
         this.focusEnabled = true;
         this.$nativeShow.setChangeBack(this.$onTextChange, this);
+    }
+
+    $initNativeShow(textArea = false) {
+        if (textArea) {
+            this.$TextField[6] = true;
+            this.$TextField[7] = true;
+            this.$nativeShow = Platform.create("TextArea");
+        } else {
+            this.$nativeShow = Platform.create("TextInput");
+        }
     }
 
     $onTextChange() {
@@ -4512,7 +4704,7 @@ class TextInput extends DisplayObject {
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
-            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, p[6], p[5]);
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[7], p[6], p[5]);
             rect.x = 0;
             rect.y = 0;
             rect.width = this.width;//size.width;
@@ -4592,11 +4784,42 @@ class TextInput extends DisplayObject {
     }
 
     $setEditEnabled(val) {
+        if (val == "false") {
+            val = false;
+        }
+        var p = this.$TextField;
+        if (p[3] == val) {
+            return false;
+        }
+        p[3] = val;
+        return true;
+    }
+
+    $setMultiline(val) {
+        if (val == "false") {
+            val = false;
+        }
         var p = this.$TextField;
         if (p[6] == val) {
             return false;
         }
         p[6] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setWordWrap(val) {
+        if (val == "false") {
+            val = false;
+        }
+        var p = this.$TextField;
+        if (p[7] == val) {
+            return false;
+        }
+        p[7] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         return true;
     }
 
@@ -4605,8 +4828,8 @@ class TextInput extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        if (this.editEnabled) {
-            var p = this.$TextField;
+        var p = this.$TextField;
+        if (p[3]) {
             this.$nativeShow.startInput();
             p[4] = true;
             this.dispatchWith(Event.START_INPUT);
@@ -4627,6 +4850,8 @@ class TextInput extends DisplayObject {
             this.$nativeShow.stopInput();
         }
         this.text = this.$nativeShow.getNativeText();
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         this.dispatchWith(Event.STOP_INPUT);
     }
 
@@ -4639,8 +4864,7 @@ class TextInput extends DisplayObject {
     }
 
     get text() {
-        var p = this.$TextField;
-        return p[0];
+        return this.$TextField[0];
     }
 
     set text(val) {
@@ -4648,8 +4872,7 @@ class TextInput extends DisplayObject {
     }
 
     get fontColor() {
-        var p = this.$TextField;
-        return p[2];
+        return this.$TextField[2];
     }
 
     set fontColor(val) {
@@ -4657,8 +4880,7 @@ class TextInput extends DisplayObject {
     }
 
     get fontSize() {
-        var p = this.$TextField;
-        return p[1];
+        return this.$TextField[1];
     }
 
     set fontSize(val) {
@@ -4666,8 +4888,7 @@ class TextInput extends DisplayObject {
     }
 
     get editEnabled() {
-        var p = this.$TextField;
-        return p[3];
+        return this.$TextField[3];
     }
 
     set editEnabled(val) {

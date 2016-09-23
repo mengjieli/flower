@@ -25,6 +25,7 @@ class UIParser extends Group {
 
             "Label": "flower.Label",
             "Input": "flower.Input",
+            "TextArea": "flower.TextArea",
             "Image": "flower.Image",
             "Group": "flower.Group",
             "ScrollBar": "flower.ScrollBar",

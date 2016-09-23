@@ -39,8 +39,7 @@ var Main = function () {
             //ui.parseUIAsync("res/Test.xml");
             //flower.Stage.getInstance().addChild(ui);
             //return;
-
-
+            
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

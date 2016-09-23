@@ -194,6 +194,7 @@ var list = [
     "ItemRenderer",
     "Label",
     "Input",
+    "TextArea",
     "Rect",
     "Image",
     "TileImage",

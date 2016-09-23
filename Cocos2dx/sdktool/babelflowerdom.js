@@ -168,6 +168,7 @@ var list = [
     "PlatformSprite",
     "PlatformTextField",
     "PlatformTextInput",
+    "PlatformTextArea",
     "PlatformBitmap",
     "PlatformShape",
     "PlatformMask",

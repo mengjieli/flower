@@ -284,39 +284,24 @@ var flower = {};
             value: function create(name) {
                 var pools = Platform.pools;
                 if (name == "Sprite") {
-                    //if (pools.Sprite && pools.Sprite.length) {
-                    //    return pools.Sprite.pop();
-                    //}
                     return new PlatformSprite();
                 }
                 if (name == "Bitmap") {
-                    //if (pools.Bitmap && pools.Bitmap.length) {
-                    //    return pools.Bitmap.pop();
-                    //}
                     return new PlatformBitmap();
                 }
                 if (name == "TextField") {
-                    //if (pools.TextField && pools.TextField.length) {
-                    //    return pools.TextField.pop();
-                    //}
                     return new PlatformTextField();
                 }
                 if (name == "TextInput") {
-                    //if (pools.TextInput && pools.TextInput.length) {
-                    //    return pools.TextInput.pop();
-                    //}
                     return new PlatformTextInput();
                 }
+                if (name == "TextArea") {
+                    return new PlatformTextArea();
+                }
                 if (name == "Shape") {
-                    //if (pools.Shape && pools.Shape.length) {
-                    //    return pools.Shape.pop();
-                    //}
                     return new PlatformShape();
                 }
                 if (name == "Mask") {
-                    //if (pools.Mask && pools.Mask.length) {
-                    //    return pools.Mask.pop();
-                    //}
                     return new PlatformMask();
                 }
                 return null;
@@ -1125,22 +1110,234 @@ var flower = {};
     //PlatformTextInput.$mesureTxt.retain();
     //////////////////////////End File:flower/platform/dom/PlatformTextInput.js///////////////////////////
 
+    //////////////////////////File:flower/platform/dom/PlatformTextArea.js///////////////////////////
+
+
+    var PlatformTextArea = function (_PlatformDisplayObjec4) {
+        _inherits(PlatformTextArea, _PlatformDisplayObjec4);
+
+        function PlatformTextArea() {
+            _classCallCheck(this, PlatformTextArea);
+
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformTextArea).call(this));
+
+            _this4.__changeBack = null;
+            _this4.__changeBackThis = null;
+
+            var input = document.createElement("textarea");
+            input.style.position = "absolute";
+            input.style.left = "0px";
+            input.style.top = "0px";
+            input.style["background"] = "none";
+            input.style["border"] = "none";
+            input.style["font-style"] = "normal";
+            input.style["transform-origin"] = "left top";
+            _this4.show = input;
+            return _this4;
+        }
+
+        _createClass(PlatformTextArea, [{
+            key: "setFontColor",
+            value: function setFontColor(color) {
+                this.show.style.color = '#' + this.toColor16(color >> 16) + this.toColor16(color >> 8 & 0xFF) + this.toColor16(color & 0xFF);
+            }
+        }, {
+            key: "setSize",
+            value: function setSize(width, height) {
+                var txt = this.show;
+                txt.style.width = width + "px";
+                txt.style.height = height + "px";
+            }
+        }, {
+            key: "setChangeBack",
+            value: function setChangeBack(changeBack, thisObj) {
+                this.__changeBack = changeBack;
+                this.__changeBackThis = thisObj;
+            }
+        }, {
+            key: "onTextFieldAttachWithIME",
+            value: function onTextFieldAttachWithIME(sender) {
+                console.log("start input");
+            }
+        }, {
+            key: "onTextFieldDetachWithIME",
+            value: function onTextFieldDetachWithIME(sender) {
+                console.log("stop input");
+            }
+        }, {
+            key: "onTextFieldInsertText",
+            value: function onTextFieldInsertText(sender, text, len) {
+                //console.log(text + " : " + len);
+                if (this.__changeBack) {
+                    this.__changeBack.call(this.__changeBackThis);
+                }
+            }
+        }, {
+            key: "onTextFieldDeleteBackward",
+            value: function onTextFieldDeleteBackward() {}
+        }, {
+            key: "getNativeText",
+            value: function getNativeText() {
+                return this.show.value;
+            }
+        }, {
+            key: "changeText",
+            value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+                var deleteMore = arguments.length <= 7 || arguments[7] === undefined ? false : arguments[7];
+
+                var $mesureTxt = PlatformTextField.$mesureTxt;
+                $mesureTxt.style.fontSize = size + "px";
+                var txt = this.show;
+                txt.style.fontSize = size + "px";
+                txt.value = "";
+                var txtText = "";
+                var start = 0;
+                if (text == "") {
+                    txt.value = "";
+                }
+                var txtHeight = 0;
+                var txtWidth = 0;
+                for (var i = 0; i < text.length; i++) {
+                    //取一行文字进行处理
+                    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+                        var str = text.slice(start, i);
+                        $mesureTxt.innerHTML = str;
+                        var lineWidth = $mesureTxt.offsetWidth;
+                        var findEnd = i;
+                        var changeLine = false;
+                        txtWidth = lineWidth > txtWidth ? lineWidth : txtWidth;
+                        //如果这一行的文字宽大于设定宽
+                        while (!autoSize && width && lineWidth > width) {
+                            changeLine = true;
+                            findEnd--;
+                            $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                            lineWidth = $mesureTxt.offsetWidth;
+                        }
+                        if (wordWrap && changeLine) {
+                            i = findEnd;
+                            txt.value = txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                        } else {
+                            txt.value = txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                        }
+                        txtHeight += size + 3;
+                        //如果文字的高度已经大于设定的高，回退一次
+                        if (!autoSize && height && txtHeight > height && deleteMore) {
+                            txt.value = txtText;
+                            break;
+                        } else {
+                            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                            if (wordWrap && changeLine) {
+                                txtText += "\n";
+                            }
+                        }
+                        start = i;
+                        if (multiline == false) {
+                            break;
+                        }
+                    }
+                }
+                //txt.value = flower.StringDo.replaceString(txt.value, "\n", "</br>");
+                //txt.value = flower.StringDo.replaceString(txt.value, "\r", "</br>");
+                return {
+                    width: txtWidth,
+                    height: txtHeight
+                };
+            }
+        }, {
+            key: "setFilters",
+            value: function setFilters(filters) {}
+        }, {
+            key: "startInput",
+            value: function startInput() {
+                this.show.focus();
+                //this.show.attachWithIME();
+            }
+        }, {
+            key: "stopInput",
+            value: function stopInput() {
+                //this.show.detachWithIME();
+            }
+        }, {
+            key: "release",
+            value: function release() {
+                this.__changeBack = null;
+                this.__changeBackThis = null;
+                var show = this.show;
+                show.innerHTML = "";
+                show.style.fontSize = "12px";
+                this.setFontColor(0);
+                _get(Object.getPrototypeOf(PlatformTextArea.prototype), "release", this).call(this);
+            }
+        }, {
+            key: "toColor16",
+            value: function toColor16(color) {
+                var abc;
+                var num = math.floor(color / 16);
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                var str = abc + "";
+                num = color % 16;
+                abc = num + "";
+                if (num == 15) {
+                    abc = "f";
+                }
+                if (num == 14) {
+                    abc = "e";
+                }
+                if (num == 13) {
+                    abc = "d";
+                }
+                if (num == 12) {
+                    abc = "c";
+                }
+                if (num == 11) {
+                    abc = "b";
+                }
+                if (num == 10) {
+                    abc = "a";
+                }
+                str += abc;
+                return str;
+            }
+        }]);
+
+        return PlatformTextArea;
+    }(PlatformDisplayObject);
+    //////////////////////////End File:flower/platform/dom/PlatformTextArea.js///////////////////////////
+
     //////////////////////////File:flower/platform/dom/PlatformBitmap.js///////////////////////////
 
 
-    var PlatformBitmap = function (_PlatformDisplayObjec4) {
-        _inherits(PlatformBitmap, _PlatformDisplayObjec4);
+    var PlatformBitmap = function (_PlatformDisplayObjec5) {
+        _inherits(PlatformBitmap, _PlatformDisplayObjec5);
 
         function PlatformBitmap() {
             _classCallCheck(this, PlatformBitmap);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformBitmap).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformBitmap).call(this));
 
-            _this4.__texture = null;
-            _this4.__textureScaleX = 1;
-            _this4.__textureScaleY = 1;
-            _this4.scaleX = 1;
-            _this4.scaleY = 1;
+            _this5.__texture = null;
+            _this5.__textureScaleX = 1;
+            _this5.__textureScaleY = 1;
+            _this5.scaleX = 1;
+            _this5.scaleY = 1;
 
 
             var image = document.createElement("img");
@@ -1148,12 +1345,12 @@ var flower = {};
             image.style.left = "0px";
             image.style.top = "0px";
             image.style["transform-origin"] = "left top";
-            _this4.show = image;
+            _this5.show = image;
 
             //this.show = new cc.Sprite();
             //this.show.setAnchorPoint(0, 1);
             //this.show.retain();
-            return _this4;
+            return _this5;
         }
 
         _createClass(PlatformBitmap, [{
@@ -1288,21 +1485,21 @@ var flower = {};
     //////////////////////////File:flower/platform/dom/PlatformShape.js///////////////////////////
 
 
-    var PlatformShape = function (_PlatformDisplayObjec5) {
-        _inherits(PlatformShape, _PlatformDisplayObjec5);
+    var PlatformShape = function (_PlatformDisplayObjec6) {
+        _inherits(PlatformShape, _PlatformDisplayObjec6);
 
         function PlatformShape() {
             _classCallCheck(this, PlatformShape);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformShape).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformShape).call(this));
 
             var shape = document.createElement("div");
             shape.style.position = "absolute";
             shape.style.left = "0px";
             shape.style.top = "0px";
-            _this5.show = shape;
-            _this5.elements = [];
-            return _this5;
+            _this6.show = shape;
+            _this6.elements = [];
+            return _this6;
         }
 
         _createClass(PlatformShape, [{
@@ -1424,14 +1621,14 @@ var flower = {};
         function PlatformMask() {
             _classCallCheck(this, PlatformMask);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformMask).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlatformMask).call(this));
 
-            _this6.shapeWidth = 0;
-            _this6.shapeHeight = 0;
-            _this6.shapeX = 0;
-            _this6.shapeY = 0;
-            flower.EnterFrame.add(_this6.update, _this6);
-            return _this6;
+            _this7.shapeWidth = 0;
+            _this7.shapeHeight = 0;
+            _this7.shapeX = 0;
+            _this7.shapeY = 0;
+            flower.EnterFrame.add(_this7.update, _this7);
+            return _this7;
         }
 
         _createClass(PlatformMask, [{
@@ -2316,14 +2513,14 @@ var flower = {};
 
             _classCallCheck(this, TouchEvent);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(TouchEvent).call(this, type, bubbles));
 
-            _this7.$touchId = 0;
-            _this7.$touchX = 0;
-            _this7.$touchY = 0;
-            _this7.$stageX = 0;
-            _this7.$stageY = 0;
-            return _this7;
+            _this8.$touchId = 0;
+            _this8.$touchX = 0;
+            _this8.$touchY = 0;
+            _this8.$stageX = 0;
+            _this8.$stageY = 0;
+            return _this8;
         }
 
         _createClass(TouchEvent, [{
@@ -2446,10 +2643,10 @@ var flower = {};
 
             _classCallCheck(this, DragEvent);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragEvent).call(this, type, bubbles));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragEvent).call(this, type, bubbles));
 
-            _this9.$accept = false;
-            return _this9;
+            _this10.$accept = false;
+            return _this10;
         }
 
         //DisplayObject
@@ -2519,11 +2716,11 @@ var flower = {};
 
             _classCallCheck(this, KeyboardEvent);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(KeyboardEvent).call(this, type, bubbles));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(KeyboardEvent).call(this, type, bubbles));
 
-            _this10.__keyCode = key;
-            _this10.__key = String.fromCharCode(key);
-            return _this10;
+            _this11.__keyCode = key;
+            _this11.__key = String.fromCharCode(key);
+            return _this11;
         }
 
         _createClass(KeyboardEvent, [{
@@ -2617,16 +2814,16 @@ var flower = {};
 
             _classCallCheck(this, ColorFilter);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(ColorFilter).call(this, 1));
 
-            _this11.__h = 0;
-            _this11.__s = 0;
-            _this11.__l = 0;
+            _this12.__h = 0;
+            _this12.__s = 0;
+            _this12.__l = 0;
 
-            _this11.h = h;
-            _this11.s = s;
-            _this11.l = l;
-            return _this11;
+            _this12.h = h;
+            _this12.s = s;
+            _this12.l = l;
+            return _this12;
         }
 
         _createClass(ColorFilter, [{
@@ -2700,16 +2897,16 @@ var flower = {};
 
             _classCallCheck(this, StrokeFilter);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrokeFilter).call(this, 2));
 
-            _this12.__size = 0;
-            _this12.__r = 0;
-            _this12.__g = 0;
-            _this12.__b = 0;
+            _this13.__size = 0;
+            _this13.__r = 0;
+            _this13.__g = 0;
+            _this13.__b = 0;
 
-            _this12.size = size;
-            _this12.color = color;
-            return _this12;
+            _this13.size = size;
+            _this13.color = color;
+            return _this13;
         }
 
         _createClass(StrokeFilter, [{
@@ -2755,14 +2952,14 @@ var flower = {};
 
             _classCallCheck(this, BlurFilter);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(BlurFilter).call(this, 100));
 
-            _this13.__blurX = 0;
-            _this13.__blurY = 0;
+            _this14.__blurX = 0;
+            _this14.__blurY = 0;
 
-            _this13.blurX = blurX;
-            _this13.blurY = blurY;
-            return _this13;
+            _this14.blurX = blurX;
+            _this14.blurY = blurY;
+            return _this14;
         }
 
         _createClass(BlurFilter, [{
@@ -3335,16 +3532,16 @@ var flower = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this14.__flags = 0;
-            _this14.__alpha = 1;
-            _this14.__parentAlpha = 1;
-            _this14.__concatAlpha = 1;
-            _this14.__visible = true;
+            _this15.__flags = 0;
+            _this15.__alpha = 1;
+            _this15.__parentAlpha = 1;
+            _this15.__concatAlpha = 1;
+            _this15.__visible = true;
 
             var id = DisplayObject.id++;
-            _this14.$DisplayObject = {
+            _this15.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -3365,7 +3562,7 @@ var flower = {};
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
-            return _this14;
+            return _this15;
         }
 
         /**
@@ -4138,13 +4335,13 @@ var flower = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this15.$Sprite = {
+            _this16.$Sprite = {
                 0: new flower.Rectangle() //childrenBounds
             };
-            _this15.$initContainer();
-            return _this15;
+            _this16.$initContainer();
+            return _this16;
         }
 
         _createClass(Sprite, [{
@@ -4554,13 +4751,13 @@ var flower = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this17.$nativeShow = Platform.create("Bitmap");
-            _this17.texture = texture;
-            _this17.$Bitmap = {
+            _this18.$nativeShow = Platform.create("Bitmap");
+            _this18.texture = texture;
+            _this18.$Bitmap = {
                 0: null };
-            return _this17;
+            return _this18;
         }
 
         _createClass(Bitmap, [{
@@ -4706,10 +4903,10 @@ var flower = {};
 
             _classCallCheck(this, TextField);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
 
-            _this18.$nativeShow = Platform.create("TextField");
-            _this18.$TextField = {
+            _this19.$nativeShow = Platform.create("TextField");
+            _this19.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -4718,9 +4915,9 @@ var flower = {};
                 5: true //autoSize
             };
             if (text != "") {
-                _this18.text = text;
+                _this19.text = text;
             }
-            return _this18;
+            return _this19;
         }
 
         _createClass(TextField, [{
@@ -4960,32 +5157,46 @@ var flower = {};
 
             _classCallCheck(this, TextInput);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
 
-            _this19.$nativeShow = Platform.create("TextInput");
-            _this19.$TextField = {
+            _this20.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
                 3: true, //editEnabled
                 4: false, //inputing
                 5: false, //autoSize
-                6: false //multiline
-            };
-            _this19.addListener(Event.FOCUS_IN, _this19.$onFocusIn, _this19);
-            _this19.addListener(Event.FOCUS_OUT, _this19.$onFocusOut, _this19);
-            _this19.addListener(KeyboardEvent.KEY_DOWN, _this19.$keyDown, _this19);
+                6: false, //multiline
+                7: false };
+            //wordWrap
+            _this20.$initNativeShow();
+            _this20.addListener(Event.FOCUS_IN, _this20.$onFocusIn, _this20);
+            _this20.addListener(Event.FOCUS_OUT, _this20.$onFocusOut, _this20);
+            _this20.addListener(KeyboardEvent.KEY_DOWN, _this20.$keyDown, _this20);
             if (text != "") {
-                _this19.text = text;
+                _this20.text = text;
             }
-            _this19.width = 100;
-            _this19.height = 21;
-            _this19.focusEnabled = true;
-            _this19.$nativeShow.setChangeBack(_this19.$onTextChange, _this19);
-            return _this19;
+            _this20.width = 100;
+            _this20.height = 21;
+            _this20.focusEnabled = true;
+            _this20.$nativeShow.setChangeBack(_this20.$onTextChange, _this20);
+            return _this20;
         }
 
         _createClass(TextInput, [{
+            key: "$initNativeShow",
+            value: function $initNativeShow() {
+                var textArea = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+                if (textArea) {
+                    this.$TextField[6] = true;
+                    this.$TextField[7] = true;
+                    this.$nativeShow = Platform.create("TextArea");
+                } else {
+                    this.$nativeShow = Platform.create("TextInput");
+                }
+            }
+        }, {
             key: "$onTextChange",
             value: function $onTextChange() {
                 if (!this.$nativeShow) {
@@ -5017,7 +5228,7 @@ var flower = {};
                     var d = this.$DisplayObject;
                     var p = this.$TextField;
                     //text, width, height, size, wordWrap, multiline, autoSize
-                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, p[6], p[5]);
+                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[7], p[6], p[5]);
                     rect.x = 0;
                     rect.y = 0;
                     rect.width = this.width; //size.width;
@@ -5104,11 +5315,44 @@ var flower = {};
         }, {
             key: "$setEditEnabled",
             value: function $setEditEnabled(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                var p = this.$TextField;
+                if (p[3] == val) {
+                    return false;
+                }
+                p[3] = val;
+                return true;
+            }
+        }, {
+            key: "$setMultiline",
+            value: function $setMultiline(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 var p = this.$TextField;
                 if (p[6] == val) {
                     return false;
                 }
                 p[6] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setWordWrap",
+            value: function $setWordWrap(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                var p = this.$TextField;
+                if (p[7] == val) {
+                    return false;
+                }
+                p[7] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
                 return true;
             }
         }, {
@@ -5118,8 +5362,8 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                if (this.editEnabled) {
-                    var p = this.$TextField;
+                var p = this.$TextField;
+                if (p[3]) {
                     this.$nativeShow.startInput();
                     p[4] = true;
                     this.dispatchWith(Event.START_INPUT);
@@ -5142,6 +5386,8 @@ var flower = {};
                     this.$nativeShow.stopInput();
                 }
                 this.text = this.$nativeShow.getNativeText();
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
                 this.dispatchWith(Event.STOP_INPUT);
             }
         }, {
@@ -5180,8 +5426,7 @@ var flower = {};
         }, {
             key: "text",
             get: function get() {
-                var p = this.$TextField;
-                return p[0];
+                return this.$TextField[0];
             },
             set: function set(val) {
                 this.$setText(val);
@@ -5189,8 +5434,7 @@ var flower = {};
         }, {
             key: "fontColor",
             get: function get() {
-                var p = this.$TextField;
-                return p[2];
+                return this.$TextField[2];
             },
             set: function set(val) {
                 this.$setFontColor(val);
@@ -5198,8 +5442,7 @@ var flower = {};
         }, {
             key: "fontSize",
             get: function get() {
-                var p = this.$TextField;
-                return p[1];
+                return this.$TextField[1];
             },
             set: function set(val) {
                 this.$setFontSize(val);
@@ -5207,8 +5450,7 @@ var flower = {};
         }, {
             key: "editEnabled",
             get: function get() {
-                var p = this.$TextField;
-                return p[3];
+                return this.$TextField[3];
             },
             set: function set(val) {
                 this.$setEditEnabled(val);
@@ -5229,10 +5471,10 @@ var flower = {};
         function Shape() {
             _classCallCheck(this, Shape);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
 
-            _this20.$nativeShow = Platform.create("Shape");
-            _this20.$Shape = {
+            _this21.$nativeShow = Platform.create("Shape");
+            _this21.$Shape = {
                 0: 0xffffff, //fillColor
                 1: 1, //fillAlpha
                 2: 0, //lineWidth
@@ -5244,8 +5486,8 @@ var flower = {};
                 8: null, //maxY
                 9: [] //record
             };
-            _this20.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
-            return _this20;
+            _this21.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            return _this21;
         }
 
         _createClass(Shape, [{
@@ -5510,39 +5752,39 @@ var flower = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this21.__mouseX = 0;
-            _this21.__mouseY = 0;
-            _this21.__nativeMouseMoveEvent = [];
-            _this21.__nativeRightClickEvent = [];
-            _this21.__nativeTouchEvent = [];
-            _this21.__mouseOverList = [_this21];
-            _this21.__dragOverList = [_this21];
-            _this21.__touchList = [];
-            _this21.__lastMouseX = -1;
-            _this21.__lastMouseY = -1;
-            _this21.__lastRightX = -1;
-            _this21.__lastRightY = -1;
-            _this21.__focus = null;
-            _this21.__touchTarget = null;
-            _this21.$keyEvents = [];
+            _this22.__mouseX = 0;
+            _this22.__mouseY = 0;
+            _this22.__nativeMouseMoveEvent = [];
+            _this22.__nativeRightClickEvent = [];
+            _this22.__nativeTouchEvent = [];
+            _this22.__mouseOverList = [_this22];
+            _this22.__dragOverList = [_this22];
+            _this22.__touchList = [];
+            _this22.__lastMouseX = -1;
+            _this22.__lastMouseY = -1;
+            _this22.__lastRightX = -1;
+            _this22.__lastRightY = -1;
+            _this22.__focus = null;
+            _this22.__touchTarget = null;
+            _this22.$keyEvents = [];
 
-            _this21.__stage = _this21;
-            Stage.stages.push(_this21);
-            _this21.$background = new Shape();
-            _this21.__forntLayer = new Sprite();
-            _this21.addChild(_this21.__forntLayer);
-            _this21.$debugSprite = new Sprite();
-            _this21.__forntLayer.addChild(_this21.$debugSprite);
-            _this21.$pop = PopManager.getInstance();
-            _this21.__forntLayer.addChild(_this21.$pop);
-            _this21.$menu = MenuManager.getInstance();
-            _this21.__forntLayer.addChild(_this21.$menu);
-            _this21.$drag = DragManager.getInstance();
-            _this21.__forntLayer.addChild(_this21.$drag);
-            _this21.backgroundColor = 0;
-            return _this21;
+            _this22.__stage = _this22;
+            Stage.stages.push(_this22);
+            _this22.$background = new Shape();
+            _this22.__forntLayer = new Sprite();
+            _this22.addChild(_this22.__forntLayer);
+            _this22.$debugSprite = new Sprite();
+            _this22.__forntLayer.addChild(_this22.$debugSprite);
+            _this22.$pop = PopManager.getInstance();
+            _this22.__forntLayer.addChild(_this22.$pop);
+            _this22.$menu = MenuManager.getInstance();
+            _this22.__forntLayer.addChild(_this22.$menu);
+            _this22.$drag = DragManager.getInstance();
+            _this22.__forntLayer.addChild(_this22.$drag);
+            _this22.backgroundColor = 0;
+            return _this22;
         }
 
         _createClass(Stage, [{
@@ -6085,12 +6327,12 @@ var flower = {};
         function DragManager() {
             _classCallCheck(this, DragManager);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
 
-            _this22.__isDragging = false;
+            _this23.__isDragging = false;
 
-            _this22.touchEnabled = false;
-            return _this22;
+            _this23.touchEnabled = false;
+            return _this23;
         }
 
         _createClass(DragManager, [{
@@ -6196,10 +6438,10 @@ var flower = {};
         function MenuManager() {
             _classCallCheck(this, MenuManager);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
 
-            _this23.__addFrame = 0;
-            return _this23;
+            _this24.__addFrame = 0;
+            return _this24;
         }
 
         _createClass(MenuManager, [{
@@ -6301,10 +6543,10 @@ var flower = {};
         function PopManager() {
             _classCallCheck(this, PopManager);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
 
-            _this24.__panels = [];
-            return _this24;
+            _this25.__panels = [];
+            return _this25;
         }
 
         _createClass(PopManager, [{
@@ -6702,16 +6944,16 @@ var flower = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this25._createRes = false;
-            _this25._isLoading = false;
-            _this25._selfDispose = false;
+            _this26._createRes = false;
+            _this26._isLoading = false;
+            _this26._selfDispose = false;
 
-            _this25.$setResource(res);
-            _this25._language = LANGUAGE;
-            _this25._scale = SCALE ? SCALE : null;
-            return _this25;
+            _this26.$setResource(res);
+            _this26._language = LANGUAGE;
+            _this26._scale = SCALE ? SCALE : null;
+            return _this26;
         }
 
         _createClass(URLLoader, [{
@@ -7035,12 +7277,12 @@ var flower = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this26.__list = list;
-            _this26.__dataList = [];
-            _this26.__index = 0;
-            return _this26;
+            _this27.__list = list;
+            _this27.__dataList = [];
+            _this27.__index = 0;
+            return _this27;
         }
 
         _createClass(URLLoaderList, [{
@@ -7122,10 +7364,10 @@ var flower = {};
         function WebSocket() {
             _classCallCheck(this, WebSocket);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
 
-            _this27._isConnect = false;
-            return _this27;
+            _this28._isConnect = false;
+            return _this28;
         }
 
         _createClass(WebSocket, [{
@@ -7209,17 +7451,17 @@ var flower = {};
 
             _classCallCheck(this, VBWebSocket);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
 
-            _this28.remotes = {};
-            _this28.backs = {};
-            _this28.zbacks = {};
+            _this29.remotes = {};
+            _this29.backs = {};
+            _this29.zbacks = {};
 
-            _this28._remote = remote;
-            _this28.remotes = {};
-            _this28.backs = {};
-            _this28.zbacks = {};
-            return _this28;
+            _this29._remote = remote;
+            _this29.remotes = {};
+            _this29.backs = {};
+            _this29.zbacks = {};
+            return _this29;
         }
 
         _createClass(VBWebSocket, [{
@@ -7599,14 +7841,14 @@ var flower = {};
         function PlistLoader(url, nativeURL) {
             _classCallCheck(this, PlistLoader);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
 
-            _this29.disposeFlag = false;
+            _this30.disposeFlag = false;
 
-            _this29._url = url;
-            _this29._nativeURL = nativeURL;
-            _this29.__load();
-            return _this29;
+            _this30._url = url;
+            _this30._nativeURL = nativeURL;
+            _this30.__load();
+            return _this30;
         }
 
         _createClass(PlistLoader, [{
@@ -10458,12 +10700,12 @@ var flower = {};
         function XMLElement() {
             _classCallCheck(this, XMLElement);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
 
-            _this30.namespaces = [];
-            _this30.attributes = [];
-            _this30.elements = _this30.list = [];
-            return _this30;
+            _this31.namespaces = [];
+            _this31.attributes = [];
+            _this31.elements = _this31.list = [];
+            return _this31;
         }
 
         _createClass(XMLElement, [{
