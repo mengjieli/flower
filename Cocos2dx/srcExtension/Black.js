@@ -2092,6 +2092,31 @@ black.VerticalLayout = VerticalLayout;
 
 
 
+//////////////////////////File:extension/black/utils/Language.js///////////////////////////
+/**
+ * 简单的多语言管理
+ */
+class Language {
+
+    static __languages = {};
+
+    static register(key, language, value) {
+        if (!Language.__languages[language]) {
+            Language.__languages[language] = {};
+        }
+        Language.__languages[language][key] = value;
+    }
+
+    static getLanguage(key, language) {
+        return Language.__languages[language][key];
+    }
+}
+
+black.Language = Language;
+//////////////////////////End File:extension/black/utils/Language.js///////////////////////////
+
+
+
 //////////////////////////File:extension/black/utils/PanelScaleMode.js///////////////////////////
 class PanelScaleMode {
     static NO_SCALE = "no_scale";
@@ -2103,6 +2128,18 @@ class PanelScaleMode {
 
 black.PanelScaleMode = PanelScaleMode;
 //////////////////////////End File:extension/black/utils/PanelScaleMode.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/utils/ScrollPolicy.js///////////////////////////
+class ScrollPolicy {
+    static ON = "on";
+    static OFF = "off";
+    static AUTO = "auto";
+}
+
+black.ScrollPolicy = ScrollPolicy;
+//////////////////////////End File:extension/black/utils/ScrollPolicy.js///////////////////////////
 
 
 

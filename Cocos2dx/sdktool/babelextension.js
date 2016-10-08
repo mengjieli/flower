@@ -159,7 +159,7 @@ function compressComplete() {
         })
 }
 
-var file = new File("extension/");
+var file = new File("extension/black");
 var files = file.readFilesWidthEnd("js");
 var list = [
     "Black",
@@ -183,7 +183,9 @@ var list = [
     "HorizontalLayout",
     "VerticalLayout",
 
+    "Language",
     "PanelScaleMode",
+    "ScrollPolicy",
 
     "Group",
     "UIParser",

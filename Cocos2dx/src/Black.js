@@ -2349,6 +2349,40 @@ var $root = eval("this");
     black.VerticalLayout = VerticalLayout;
     //////////////////////////End File:extension/black/layout/VerticalLayout.js///////////////////////////
 
+    //////////////////////////File:extension/black/utils/Language.js///////////////////////////
+    /**
+     * 简单的多语言管理
+     */
+
+    var Language = function () {
+        function Language() {
+            _classCallCheck(this, Language);
+        }
+
+        _createClass(Language, null, [{
+            key: "register",
+            value: function register(key, language, value) {
+                if (!Language.__languages[language]) {
+                    Language.__languages[language] = {};
+                }
+                Language.__languages[language][key] = value;
+            }
+        }, {
+            key: "getLanguage",
+            value: function getLanguage(key, language) {
+                return Language.__languages[language][key];
+            }
+        }]);
+
+        return Language;
+    }();
+
+    Language.__languages = {};
+
+
+    black.Language = Language;
+    //////////////////////////End File:extension/black/utils/Language.js///////////////////////////
+
     //////////////////////////File:extension/black/utils/PanelScaleMode.js///////////////////////////
 
     var PanelScaleMode = function PanelScaleMode() {
@@ -2364,6 +2398,20 @@ var $root = eval("this");
 
     black.PanelScaleMode = PanelScaleMode;
     //////////////////////////End File:extension/black/utils/PanelScaleMode.js///////////////////////////
+
+    //////////////////////////File:extension/black/utils/ScrollPolicy.js///////////////////////////
+
+    var ScrollPolicy = function ScrollPolicy() {
+        _classCallCheck(this, ScrollPolicy);
+    };
+
+    ScrollPolicy.ON = "on";
+    ScrollPolicy.OFF = "off";
+    ScrollPolicy.AUTO = "auto";
+
+
+    black.ScrollPolicy = ScrollPolicy;
+    //////////////////////////End File:extension/black/utils/ScrollPolicy.js///////////////////////////
 
     //////////////////////////File:extension/black/Group.js///////////////////////////
 

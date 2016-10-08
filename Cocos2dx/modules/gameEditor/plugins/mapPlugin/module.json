@@ -1,0 +1,12 @@
+{
+  "name": "Map",
+  "scripts": [
+    "./src/Map.script"
+  ],
+  "components": [
+  ],
+  "classes": {
+  },
+  "data": [
+  ]
+}

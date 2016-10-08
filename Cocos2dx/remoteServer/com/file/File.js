@@ -27,7 +27,7 @@ function File(url) {
  *
  */
 File.prototype.isDirection = function () {
-    return this.state.isDirectory();//this.type==global.FileType.DIRECTION?true:false;
+    return this.state?this.state.isDirectory():false;//this.type==global.FileType.DIRECTION?true:false;
 }
 
 /**

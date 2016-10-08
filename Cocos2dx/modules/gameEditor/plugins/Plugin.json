@@ -1,4 +1,5 @@
 [
   "blackPlugin/module.json",
-  "dungeonPlugin/module.json"
+  "dungeonPlugin/module.json",
+  "mapPlugin/module.json"
 ]

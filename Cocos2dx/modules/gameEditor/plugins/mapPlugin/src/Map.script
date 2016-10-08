@@ -1,0 +1,33 @@
+//setDirectionMenu("Map", [
+//    {
+//        "label": "测试菜单",
+//        "isVisible": function (item) {
+//            trace("是否可见", flower.ObjectDo.toString(item));
+//            return true;
+//        },
+//        "click": function (item) {
+//            trace("点击", flower.ObjectDo.toString(item));
+//        }
+//    }
+//]);
+
+var Map = (function (_super) {
+
+    __extends(Map, _super);
+
+    function Map() {
+        _super.call(this);
+
+        this.percentWidth = 100;
+        this.percentHeight = 100;
+
+        this.init();
+    }
+
+    return Map;
+
+})(flower.Group);
+
+//UIParser.registerLocalUIClass("Map", Map, "dg");
+
+//module.Map = Map;

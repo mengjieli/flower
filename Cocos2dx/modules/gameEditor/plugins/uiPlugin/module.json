@@ -1,5 +1,4 @@
 {
-  "namespace": "ui",
   "name": "ui",
   "scripts": [
     "./script/parser/UIFileParser.script",

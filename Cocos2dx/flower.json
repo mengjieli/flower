@@ -22,6 +22,42 @@
         "res/language/zh_CN.json"
       ]
     },
+    "imagePacker": {
+      "name": "图片打包",
+      "plugin": "ImagePacker",
+      "list": [
+      ]
+    },
+    "test": {
+      "name": "自动测试",
+      "plugin": "AutoTest",
+      "list": [
+      ]
+    },
+    "test/item": {
+      "name": "测试项",
+      "plugin": "AutoTest",
+      "list": [
+      ]
+    },
+    "test/case": {
+      "name": "测试用例",
+      "plugin": "AutoTest",
+      "list": [
+      ]
+    },
+    "test/running": {
+      "name": "正在运行的测试",
+      "plugin": "RunningTest",
+      "list": [
+      ]
+    },
+    "bug": {
+      "name": "Bug 统计",
+      "plugin": "BugStatistics",
+      "list": [
+      ]
+    },
     "tools": {
       "name": "工具",
       "list": []
@@ -32,6 +68,22 @@
       "list": [
         "res/tools/dungeon/Level1.json",
         "res/tools/dungeon/Dungeon1_1.json"
+      ]
+    },
+    "tools/castle": {
+      "name": "地图编辑器",
+      "plugin": "Map",
+      "list": [
+      ]
+    },
+    "tools/testSameImage": {
+      "name": "测试重复图片",
+      "plugin": "SameImage",
+      "list": [
+        "res/tools/testSameImage/Root.json",
+        "res/tools/testSameImage/Res.json",
+        "res/tools/testSameImage/UI.json",
+        "res/tools/testSameImage/Map.json"
       ]
     }
   }
