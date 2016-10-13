@@ -1,48 +1,11 @@
 {
-  "name": "uieditor",
+  "name": "ue",
   "scripts": [
-    "./src/Black.script",
-    "./src/parser/BlackParser.script",
-    "./src/parser/UIParser.script",
-    "./src/parser/UIData.script",
-    "./src/display/DisplayObject.script",
-    "./src/display/Bitmap.script",
-    "./src/display/TextField.script",
-    "./src/display/TextInput.script",
-    "./src/display/Rect.script",
-    "./src/display/Sprite.script",
-    "./src/display/Mask.script",
-    "./src/display/Group.script",
-    "./src/display/Image.script"
   ],
   "components": [
-    "./view/UIView.xml",
-    "./view/PropertyPanel.xml",
-    "./view/UIDetailView.xml"
   ],
   "classes": {
   },
   "data": [
-    "./data/Black.json",
-    "./data/operation/Operation.json",
-    "./data/display/UIFile.json",
-    "./data/display/UI.json",
-    "./data/display/Attribute.json",
-    "./data/display/NameSpace.json",
-    "./data/display/attributes/DisplayObject.json",
-    "./data/display/attributes/Bitmap.json",
-    "./data/display/attributes/Shape.json",
-    "./data/display/attributes/TextField.json",
-    "./data/display/attributes/Sprite.json",
-    "./data/display/attributes/Mask.json",
-    "./data/display/attributes/Group.json",
-    "./data/display/attributes/MaskUI.json",
-    "./data/display/attributes/Image.json",
-    "./data/display/attributes/Rect.json",
-    "./data/display/layout/Layout.json",
-    "./data/display/layout/LinearLayout.json",
-    "./data/display/layout/HorizontalLayout.json",
-    "./data/display/layout/VerticalLayout.json"
-  ],
-  "execute": "initBlack();"
+  ]
 }

@@ -1,5 +1,4 @@
 {
-  "namespace": "s",
   "name": "software",
   "components": [
     "./scroller/HScrollBar.xml",

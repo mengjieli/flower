@@ -44,11 +44,11 @@ var params = {};
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc) {
+function start(completeFunc, nativeStage, touchShow) {
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
-
+    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+    flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
@@ -164,7 +164,7 @@ flower.sys = {
     $tip: $tip,
     $warn: $warn,
     $error: $error,
-    getLanguage: getLanguage
+    getLanguage: getLanguage,
 }
 flower.params = params;
 
@@ -5663,7 +5663,7 @@ class Stage extends Sprite {
             this.$dispatchKeyEvent(this.$keyEvents.shift());
         }
         super.$onFrameEnd();
-        this.$background.$onFrameEnd();
+        //this.$background.$onFrameEnd();
     }
 
     $setWidth(val) {
@@ -6126,6 +6126,14 @@ class Texture {
         }
     }
 
+    get $use() {
+        return this.__use;
+    }
+
+    set $use(val) {
+        this.__use = val;
+    }
+
     get url() {
         return this.__url;
     }
@@ -6541,7 +6549,14 @@ class URLLoader extends EventDispatcher {
                 break;
             }
         }
-        if(this.isDispose) {
+        if (this.isDispose) {
+            if (this._data && this._type == ResType.IMAGE) {
+                if(this._recordUse) {
+                    this._data.$use = true;
+                }
+                this._data.$delCount();
+                this._data = null;
+            }
             return;
         }
         this.dispatchWith(Event.COMPLETE, this._data);
@@ -6563,6 +6578,14 @@ class URLLoader extends EventDispatcher {
         else {
             $error(2003, this._loadInfo.url);
         }
+    }
+
+    $useImage() {
+        if (!this._data) {
+            this._recordUse = true;
+            return;
+        }
+        this._data.$use = true;
     }
 
     dispose() {
@@ -6760,13 +6783,15 @@ class VBWebSocket extends WebSocket {
     remotes = {};
     backs = {};
     zbacks = {};
+    errorCodeType;
 
-    constructor(remote = false) {
+    constructor(remote = false, errorCodeType = "uint") {
         super();
         this._remote = remote;
         this.remotes = {};
         this.backs = {};
         this.zbacks = {};
+        this.errorCodeType = errorCodeType;
     }
 
     get remote() {
@@ -6793,10 +6818,15 @@ class VBWebSocket extends WebSocket {
             var zbackList = this.zbacks[backCmd];
             if (zbackList) {
                 removeList = [];
-                var errorCode = bytes.readUInt();
+                var errorCode;
+                if (this.errorCodeType == "uint") {
+                    errorCode = bytes.readUInt();
+                } else if (this.errorCodeType == "int") {
+                    errorCode = bytes.readInt();
+                }
                 a = zbackList.concat();
                 for (i = 0; i < a.length; i++) {
-                    a[i].func.call(a[i].thisObj, backCmd, errorCode,bytes);
+                    a[i].func.call(a[i].thisObj, backCmd, errorCode, bytes);
                     if (a[i].once) {
                         removeList.push(a[i].id);
                     }
@@ -7655,7 +7685,7 @@ class ResType {
         if (end == "json") {
             return ResType.JSON;
         }
-        if (end == "png" || end == "jpg") {
+        if (end == "png" || end == "jpg" || end == "PNG" || end == "JPG") {
             return ResType.IMAGE;
         }
         if (end == "plist") {
@@ -8899,6 +8929,7 @@ class EnterFrame {
     static $update(now, gap) {
         flower.EnterFrame.frame++;
         flower.CallLater.$run();
+        flower.DelayCall.$run();
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
             flower.EnterFrame.waitAdd = [];
@@ -8964,6 +8995,63 @@ class CallLater {
 
 flower.CallLater = CallLater;
 //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/DelayCall.js///////////////////////////
+class DelayCall {
+
+    _func;
+    _thisObj;
+    _data;
+
+    constructor(time, func, thisObj, args = null) {
+        this._func = func;
+        this._thisObj = thisObj;
+        this._data = args || [];
+        this._time = time;
+        this._start = flower.CoreTime.currentTime;
+        this.$complete = false;
+        DelayCall._next.push(this);
+    }
+
+    $update() {
+        if (!this.$complete && flower.CoreTime.currentTime - this._start > this._time) {
+            this._func.apply(this._thisObj, this._data);
+            this._func = null;
+            this._thisObj = null;
+            this._data = null;
+            this.$complete = true;
+        }
+    }
+
+    dispose() {
+        this.$complete = true;
+    }
+
+
+    static _list = [];
+    static _next = [];
+
+    static $run() {
+        var list = DelayCall._list;
+        for (var i = 0; i < list.length; i++) {
+            list[i].$update();
+        }
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].$complete) {
+                list.splice(i, 1);
+                i--;
+            }
+        }
+        DelayCall._list = DelayCall._list.concat(DelayCall._next);
+        DelayCall._next.length = 0;
+    }
+
+}
+
+flower.DelayCall = DelayCall;
+//////////////////////////End File:flower/utils/DelayCall.js///////////////////////////
 
 
 
@@ -9699,7 +9787,14 @@ class Path {
     static joinPath(path1, path2) {
         var path = path1;
         if (path.charAt(path.length - 1) != "/") {
-            path += "/";
+            for (var i = path.length - 2; i >= 0; i--) {
+                if (path.charAt(i) == "/") {
+                    path = path.slice(0, i + 1);
+                    break;
+                } else if (i == 0) {
+                    path = "";
+                }
+            }
         }
         if (path2.charAt(0) == "/") {
             path2 = path2.slice(1, path2.length);
@@ -9709,13 +9804,13 @@ class Path {
                 path2 = path2.slice(2, path2.length);
             } else {
                 path2 = path2.slice(3, path2.length);
-            }
-            for (var i = path.length - 2; i >= 0; i--) {
-                if (path.charAt(i) == "/") {
-                    path = path.slice(0, i + 1);
-                    break;
-                } else if (i == 0) {
-                    path = "";
+                for (var i = path.length - 2; i >= 0; i--) {
+                    if (path.charAt(i) == "/") {
+                        path = path.slice(0, i + 1);
+                        break;
+                    } else if (i == 0) {
+                        path = "";
+                    }
                 }
             }
         }

@@ -87,12 +87,15 @@ class Image extends flower.Bitmap {
         this.__source = val;
         if (val == "" || val == null) {
             this.texture = null;
-        }
-        else if (val instanceof flower.Texture) {
+        } else if (val instanceof flower.Texture) {
             this.texture = val;
         } else {
             if (this.__loader) {
+                this.__loader.$useImage();
                 this.__loader.dispose();
+            }
+            if (typeof val == "string" && val.slice(0, 2) == "./" && this.$filePath) {
+                val = flower.Path.joinPath(this.$filePath, val);
             }
             this.__loader = new flower.URLLoader(val);
             this.__loader.load();
@@ -108,6 +111,7 @@ class Image extends flower.Bitmap {
     __onLoadComplete(e) {
         this.__loader = null;
         this.texture = e.data;
+        this.dispatchWith(flower.Event.COMPLETE);
     }
 
     //$onFrameEnd() {
@@ -119,6 +123,7 @@ class Image extends flower.Bitmap {
 
     dispose() {
         if (this.__loader) {
+            this.__loader.$useImage();
             this.__loader.dispose();
         }
         this.removeAllBindProperty();
@@ -132,6 +137,10 @@ class Image extends flower.Bitmap {
 
     set source(val) {
         this.$setSource(val);
+    }
+
+    get isLoading() {
+        return this.__loader?true:false;
     }
 }
 

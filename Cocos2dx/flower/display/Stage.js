@@ -469,7 +469,7 @@ class Stage extends Sprite {
             this.$dispatchKeyEvent(this.$keyEvents.shift());
         }
         super.$onFrameEnd();
-        this.$background.$onFrameEnd();
+        //this.$background.$onFrameEnd();
     }
 
     $setWidth(val) {

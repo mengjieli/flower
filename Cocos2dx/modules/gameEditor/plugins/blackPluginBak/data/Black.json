@@ -1,21 +1,21 @@
 {
-  "name": "ue.Black",
-  "desc": "插件总数据",
+  "name": "uieditor.Black",
+  "desc": "用户操作",
   "members": {
     "operationHistory": {
       "desc": "操作记录",
       "type": "Array",
-      "typeValue": "ue.Operation"
+      "typeValue": "black.Operation"
     },
     "uis": {
       "desc": "所有 UI文件 数据",
       "type": "Array",
-      "typeValue": "ue.UIFile"
+      "typeValue": "black.UIFile"
     },
     "modules": {
       "desc": "所有 Module 数据",
       "type": "Array",
-      "typeValue": "ue.Module"
+      "typeValue": "black.Module"
     }
   }
 }

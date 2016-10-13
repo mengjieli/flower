@@ -1,9 +1,17 @@
-function set value(val) {
-    this.input.value = val;
+function set eventThis(val) {
+    this.input.eventThis = val;
 }
 
-function get value() {
-    return this.input.value;
+function get eventThis() {
+    return this.input.eventThis;
+}
+
+function set data(val) {
+    this.input.data = val;
+}
+
+function get data() {
+    return this.input.data;
 }
 
 function set text(val) {
@@ -12,4 +20,20 @@ function set text(val) {
 
 function get text() {
     return this.input.text;
+}
+
+function set startInput(val) {
+    this.input.startInput = val;
+}
+
+function get startInput() {
+    return this.input.startInput;
+}
+
+function set stopInput(val) {
+    this.input.stopInput = val;
+}
+
+function get stopInput() {
+    return this.input.stopInput;
 }

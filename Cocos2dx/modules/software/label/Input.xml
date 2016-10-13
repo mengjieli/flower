@@ -1,5 +1,5 @@
 <f:Group class="Input" xmlns:f="flower">
-    <f:script src="./input.script"/>
+    <f:script src="./Input.script"/>
     <f:Rect percentWidth="100" height="17" fillColor="0xffffff" lineWidth="1" lineColor="0"/>
     <f:Input id="input" percentWidth="100" verticalCenter="0"/>
 </f:Group>

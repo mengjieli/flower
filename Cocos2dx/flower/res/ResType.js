@@ -16,7 +16,7 @@ class ResType {
         if (end == "json") {
             return ResType.JSON;
         }
-        if (end == "png" || end == "jpg") {
+        if (end == "png" || end == "jpg" || end == "PNG" || end == "JPG") {
             return ResType.IMAGE;
         }
         if (end == "plist") {

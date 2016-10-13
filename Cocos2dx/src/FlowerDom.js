@@ -54,11 +54,11 @@ var flower = {};
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc) {
+    function start(completeFunc, nativeStage, touchShow) {
         var stage = new Stage();
         Platform._runBack = CoreTime.$run;
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
-
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+        flower.sys.engineType = Platform.type;
         var loader = new URLLoader("res/flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
             var cfg = e.data;
@@ -6226,7 +6226,7 @@ var flower = {};
                     this.$dispatchKeyEvent(this.$keyEvents.shift());
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
-                this.$background.$onFrameEnd();
+                //this.$background.$onFrameEnd();
             }
         }, {
             key: "$setWidth",
@@ -6768,6 +6768,14 @@ var flower = {};
              */
 
         }, {
+            key: "$use",
+            get: function get() {
+                return this.__use;
+            },
+            set: function set(val) {
+                this.__use = val;
+            }
+        }, {
             key: "url",
             get: function get() {
                 return this.__url;
@@ -7162,6 +7170,13 @@ var flower = {};
                     }
                 }
                 if (this.isDispose) {
+                    if (this._data && this._type == ResType.IMAGE) {
+                        if (this._recordUse) {
+                            this._data.$use = true;
+                        }
+                        this._data.$delCount();
+                        this._data = null;
+                    }
                     return;
                 }
                 this.dispatchWith(Event.COMPLETE, this._data);
@@ -7183,6 +7198,15 @@ var flower = {};
                 } else {
                     $error(2003, this._loadInfo.url);
                 }
+            }
+        }, {
+            key: "$useImage",
+            value: function $useImage() {
+                if (!this._data) {
+                    this._recordUse = true;
+                    return;
+                }
+                this._data.$use = true;
             }
         }, {
             key: "dispose",
@@ -7448,6 +7472,7 @@ var flower = {};
 
         function VBWebSocket() {
             var remote = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var errorCodeType = arguments.length <= 1 || arguments[1] === undefined ? "uint" : arguments[1];
 
             _classCallCheck(this, VBWebSocket);
 
@@ -7461,6 +7486,7 @@ var flower = {};
             _this29.remotes = {};
             _this29.backs = {};
             _this29.zbacks = {};
+            _this29.errorCodeType = errorCodeType;
             return _this29;
         }
 
@@ -7486,7 +7512,12 @@ var flower = {};
                     var zbackList = this.zbacks[backCmd];
                     if (zbackList) {
                         removeList = [];
-                        var errorCode = bytes.readUInt();
+                        var errorCode;
+                        if (this.errorCodeType == "uint") {
+                            errorCode = bytes.readUInt();
+                        } else if (this.errorCodeType == "int") {
+                            errorCode = bytes.readInt();
+                        }
                         a = zbackList.concat();
                         for (i = 0; i < a.length; i++) {
                             a[i].func.call(a[i].thisObj, backCmd, errorCode, bytes);
@@ -8433,7 +8464,7 @@ var flower = {};
                 if (end == "json") {
                     return ResType.JSON;
                 }
-                if (end == "png" || end == "jpg") {
+                if (end == "png" || end == "jpg" || end == "PNG" || end == "JPG") {
                     return ResType.IMAGE;
                 }
                 if (end == "plist") {
@@ -9783,6 +9814,7 @@ var flower = {};
             value: function $update(now, gap) {
                 flower.EnterFrame.frame++;
                 flower.CallLater.$run();
+                flower.DelayCall.$run();
                 if (flower.EnterFrame.waitAdd.length) {
                     flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
                     flower.EnterFrame.waitAdd = [];
@@ -9865,6 +9897,67 @@ var flower = {};
 
     flower.CallLater = CallLater;
     //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
+
+    //////////////////////////File:flower/utils/DelayCall.js///////////////////////////
+
+    var DelayCall = function () {
+        function DelayCall(time, func, thisObj) {
+            var args = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+            _classCallCheck(this, DelayCall);
+
+            this._func = func;
+            this._thisObj = thisObj;
+            this._data = args || [];
+            this._time = time;
+            this._start = flower.CoreTime.currentTime;
+            this.$complete = false;
+            DelayCall._next.push(this);
+        }
+
+        _createClass(DelayCall, [{
+            key: "$update",
+            value: function $update() {
+                if (!this.$complete && flower.CoreTime.currentTime - this._start > this._time) {
+                    this._func.apply(this._thisObj, this._data);
+                    this._func = null;
+                    this._thisObj = null;
+                    this._data = null;
+                    this.$complete = true;
+                }
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                this.$complete = true;
+            }
+        }], [{
+            key: "$run",
+            value: function $run() {
+                var list = DelayCall._list;
+                for (var i = 0; i < list.length; i++) {
+                    list[i].$update();
+                }
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].$complete) {
+                        list.splice(i, 1);
+                        i--;
+                    }
+                }
+                DelayCall._list = DelayCall._list.concat(DelayCall._next);
+                DelayCall._next.length = 0;
+            }
+        }]);
+
+        return DelayCall;
+    }();
+
+    DelayCall._list = [];
+    DelayCall._next = [];
+
+
+    flower.DelayCall = DelayCall;
+    //////////////////////////End File:flower/utils/DelayCall.js///////////////////////////
 
     //////////////////////////File:flower/utils/ObjectDo.js///////////////////////////
 
@@ -10649,7 +10742,14 @@ var flower = {};
             value: function joinPath(path1, path2) {
                 var path = path1;
                 if (path.charAt(path.length - 1) != "/") {
-                    path += "/";
+                    for (var i = path.length - 2; i >= 0; i--) {
+                        if (path.charAt(i) == "/") {
+                            path = path.slice(0, i + 1);
+                            break;
+                        } else if (i == 0) {
+                            path = "";
+                        }
+                    }
                 }
                 if (path2.charAt(0) == "/") {
                     path2 = path2.slice(1, path2.length);
@@ -10659,13 +10759,13 @@ var flower = {};
                         path2 = path2.slice(2, path2.length);
                     } else {
                         path2 = path2.slice(3, path2.length);
-                    }
-                    for (var i = path.length - 2; i >= 0; i--) {
-                        if (path.charAt(i) == "/") {
-                            path = path.slice(0, i + 1);
-                            break;
-                        } else if (i == 0) {
-                            path = "";
+                        for (var i = path.length - 2; i >= 0; i--) {
+                            if (path.charAt(i) == "/") {
+                                path = path.slice(0, i + 1);
+                                break;
+                            } else if (i == 0) {
+                                path = "";
+                            }
                         }
                     }
                 }

@@ -21,11 +21,13 @@ class ArrayValue extends Value {
         this.list = init || [];
         this._length = this.list.length;
         this.__value = this;
+        this._lengthValue = new flower.IntValue();
     }
 
     push(item) {
         this.list.push(item);
         this._length = this._length + 1;
+        this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.ADDED, item);
         this.dispatchWith(flower.Event.UPDATE, this);
     }
@@ -38,6 +40,7 @@ class ArrayValue extends Value {
         }
         this.list.splice(index, 0, item);
         this._length = this._length + 1;
+        this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.ADDED, item);
         this.dispatchWith(flower.Event.UPDATE, this);
     }
@@ -48,6 +51,7 @@ class ArrayValue extends Value {
         }
         var item = this.list.shift();
         this._length = this._length - 1;
+        this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
         this.dispatchWith(flower.Event.UPDATE, this);
         return item;
@@ -65,6 +69,7 @@ class ArrayValue extends Value {
                 this.list.splice(startIndex, 0, args[i]);
             }
             this._length = this._length + 1;
+            this._lengthValue.value = this._length;
             for (i = 0; i < args.length; i++) {
                 this.dispatchWith(flower.Event.ADDED, args[i]);
             }
@@ -73,6 +78,7 @@ class ArrayValue extends Value {
         else {
             list = this.list.splice(startIndex, delCount);
             this._length = this._length - delCount;
+            this._lengthValue.value = this._length;
             for (i = 0; i < list.length; i++) {
                 this.dispatchWith(flower.Event.REMOVED, list[i]);
             }
@@ -93,6 +99,7 @@ class ArrayValue extends Value {
         }
         var item = this.list.pop();
         this._length = this._length - 1;
+        this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
         this.dispatchWith(flower.Event.UPDATE, this);
         return item;
@@ -105,6 +112,7 @@ class ArrayValue extends Value {
         while (this.list.length) {
             var item = this.list.pop();
             this._length = this._length - 1;
+            this._lengthValue.value = this._length;
             this.dispatchWith(flower.Event.REMOVED, item);
         }
         this.dispatchWith(flower.Event.UPDATE, this);
@@ -115,6 +123,7 @@ class ArrayValue extends Value {
             if (this.list[i] == item) {
                 this.list.splice(i, 1);
                 this._length = this._length - 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
                 this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
@@ -131,6 +140,7 @@ class ArrayValue extends Value {
         }
         var item = this.list.splice(index, 1)[0];
         this._length = this._length - 1;
+        this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
         this.dispatchWith(flower.Event.UPDATE, this);
         return item;
@@ -171,6 +181,7 @@ class ArrayValue extends Value {
             return;
         }
         this._length = this._length - 1;
+        this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
         this.dispatchWith(flower.Event.UPDATE, this);
         return item;
@@ -318,11 +329,7 @@ class ArrayValue extends Value {
     }
 
     sort() {
-        var _arguments__ = [];
-        for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
-            _arguments__ = arguments[argumentsLength];
-        }
-        this.list.sort.apply(this.list.sort, _arguments__);
+        this.list.sort.apply(this.list, arguments);
         this.dispatchWith(flower.Event.UPDATE, this);
     }
 
@@ -470,10 +477,15 @@ class ArrayValue extends Value {
             while (this.list.length > val) {
                 var item = this.list.pop();
                 this._length = this._length - 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
             }
             this.dispatchWith(flower.Event.UPDATE, this);
         }
+    }
+
+    get lengthIntValue() {
+        return this._lengthValue;
     }
 }
 

@@ -85,6 +85,14 @@
         "res/tools/testSameImage/UI.json",
         "res/tools/testSameImage/Map.json"
       ]
+    },
+    "tools/textureCheck": {
+      "name": "纹理检测",
+      "plugin": "TextureCheck",
+      "list": [
+        "res/tools/textureCheck/Server.json",
+        "res/tools/textureCheck/Local.json"
+      ]
     }
   }
 }

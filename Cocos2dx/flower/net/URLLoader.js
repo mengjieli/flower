@@ -253,7 +253,14 @@ class URLLoader extends EventDispatcher {
                 break;
             }
         }
-        if(this.isDispose) {
+        if (this.isDispose) {
+            if (this._data && this._type == ResType.IMAGE) {
+                if(this._recordUse) {
+                    this._data.$use = true;
+                }
+                this._data.$delCount();
+                this._data = null;
+            }
             return;
         }
         this.dispatchWith(Event.COMPLETE, this._data);
@@ -275,6 +282,14 @@ class URLLoader extends EventDispatcher {
         else {
             $error(2003, this._loadInfo.url);
         }
+    }
+
+    $useImage() {
+        if (!this._data) {
+            this._recordUse = true;
+            return;
+        }
+        this._data.$use = true;
     }
 
     dispose() {

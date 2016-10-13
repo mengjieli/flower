@@ -14,12 +14,12 @@
                 </f:layout>
                 <f:Group percentHeight="100">
                     <f:Label text="屏幕宽:" verticalCenter="0" x="5"/>
-                    <s:Input stopInput="this.data.data.screenWidth.value = arguments[0].currentTarget.text;"
+                    <s:Input name="abc" stopInput="flower.breakPoint();this.data.data.screenWidth.value = arguments[0].currentTarget.text;"
                              text="{data.data.screenWidth}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="屏幕高:" verticalCenter="0" x="5"/>
-                    <s:Input stopInput="this.data.data.screenHeight.value = arguments[0].currentTarget.text;"
+                    <s:Input stopInput="this.data.data.screenHeight.value = arguments[0].currentTarget.text;this.data.parser.save();"
                              text="{data.data.screenHeight}" width="50" verticalCenter="0" x="55"/>
                 </f:Group>
                 <f:Group percentHeight="100">

@@ -1,5 +1,5 @@
 {
-  "name": "ue.UIFile",
+  "name": "uieditor.UIFile",
   "desc": "UI文件 数据",
   "members": {
     "exportClass": {
@@ -9,7 +9,7 @@
     "namespaces": {
       "desc": "命名空间",
       "type": "Array",
-      "typeValue": "ue.NameSpace"
+      "typeValue": "uieditor.NameSapce"
     },
     "module": {
       "desc": "所属模块信息",
@@ -17,7 +17,7 @@
     },
     "ui": {
       "desc": "显示对象",
-      "type": "ue.UI"
+      "type": "uieditor.UI"
     }
   }
 }

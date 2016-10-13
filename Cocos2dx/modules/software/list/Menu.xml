@@ -1,4 +1,4 @@
-<f:Group class="Menu" width="150" xmlns:f="flower" xmlns:s="modules/software/module.json">
+<f:Group class="Menu" width="150" xmlns:f="flower" xmlns:s="./../module.json">
     <f:script src="./Menu.script"/>
     <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff" lineColor="0xcccccc" lineWidth="1"/>
     <s:LabelList percentWidth="100" id="list" selectTime="touch_begin"

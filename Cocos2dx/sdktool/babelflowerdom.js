@@ -250,6 +250,7 @@ var list = [
 
     "EnterFrame",
     "CallLater",
+    "DelayCall",
     "ObjectDo",
     "StringDo",
     "VByteArray",

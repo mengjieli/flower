@@ -44,11 +44,11 @@ var params = {};
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc) {
+function start(completeFunc, nativeStage, touchShow) {
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
-
+    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+    flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
@@ -164,7 +164,7 @@ flower.sys = {
     $tip: $tip,
     $warn: $warn,
     $error: $error,
-    getLanguage: getLanguage
+    getLanguage: getLanguage,
 }
 flower.params = params;
 
@@ -182,7 +182,7 @@ class Platform {
     static width;
     static height;
 
-    static start(engine, root, background) {
+    static start(engine, root, background, nativeStage = null, touchShow = null) {
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
@@ -193,43 +193,68 @@ class Platform {
                 cc.eventManager.addListener({
                     event: cc.EventListener.TOUCH_ONE_BY_ONE,
                     swallowTouches: true,
-                    onTouchBegan: this.onTouchesBegan.bind(this),
-                    onTouchMoved: this.onTouchesMoved.bind(this),
-                    onTouchEnded: this.onTouchesEnded.bind(this)
+                    onTouchBegan: function (touch) {
+                        engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this),
+                    onTouchMoved: function (touch) {
+                        engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this),
+                    onTouchEnded: function (touch) {
+                        engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this)
                 }, this);
                 cc.eventManager.addListener({
                     event: cc.EventListener.MOUSE,
-                    onMouseMove: this.onMouseMove.bind(this)
+                    onMouseMove: function (e) {
+                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                    }.bind(this)
                 }, this);
             },
             update: function (dt) {
                 trace("dt", dt);
-            },
-            onMouseMove: function (e) {
-                engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
-            },
-            onTouchesBegan: function (touch) {
-                engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                return true;
-            },
-            onTouchesMoved: function (touch) {
-                engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                return true;
-            },
-            onTouchesEnded: function (touch) {
-                engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                return true;
-            },
+            }
         });
         Platform.stage2 = root.show;
-        Platform.stage = new scene();
+        Platform.stage = nativeStage || new scene();
         Platform.stage.update = Platform._run;
-        cc.director.runScene(Platform.stage);
+        if (nativeStage == null) {
+            cc.director.runScene(Platform.stage);
+        } else {
+            //注册鼠标事件
+            cc.eventManager.addListener({
+                event: cc.EventListener.TOUCH_ONE_BY_ONE,
+                swallowTouches: true,
+                onTouchBegan: function (touch) {
+                    if (engine.$getMouseTarget(math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y), true) == engine) {
+                        return false;
+                    }
+                    engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                },
+                onTouchMoved: function (touch) {
+                    engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                },
+                onTouchEnded: function (touch) {
+                    engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                }
+            }, touchShow || nativeStage);
+            cc.eventManager.addListener({
+                event: cc.EventListener.MOUSE,
+                onMouseMove: function (e) {
+                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                }
+            }, cc.director.getRunningScene());
+        }
         Platform.width = cc.director.getWinSize().width;
         Platform.height = cc.director.getWinSize().height;
         engine.$resize(Platform.width, Platform.height);
-        background.show.setPositionY(Platform.height);
-        Platform.stage.addChild(background.show);
+        //background.show.setPositionY(Platform.height);
+        //Platform.stage.addChild(background.show);
         root.show.setPositionY(Platform.height);
         Platform.stage.addChild(root.show);
         if ('keyboard' in cc.sys.capabilities) {
@@ -4310,7 +4335,6 @@ class TextInput extends DisplayObject {
 
     constructor(text = "") {
         super();
-        this.$nativeShow = Platform.create("TextInput");
         this.$TextField = {
             0: "", //text
             1: 12, //fontSize
@@ -4318,8 +4342,10 @@ class TextInput extends DisplayObject {
             3: true, //editEnabled
             4: false, //inputing
             5: false, //autoSize
-            6: false  //multiline
+            6: false, //multiline
+            7: false, //wordWrap
         };
+        this.$initNativeShow();
         this.addListener(Event.FOCUS_IN, this.$onFocusIn, this);
         this.addListener(Event.FOCUS_OUT, this.$onFocusOut, this);
         this.addListener(KeyboardEvent.KEY_DOWN, this.$keyDown, this);
@@ -4330,6 +4356,16 @@ class TextInput extends DisplayObject {
         this.height = 21;
         this.focusEnabled = true;
         this.$nativeShow.setChangeBack(this.$onTextChange, this);
+    }
+
+    $initNativeShow(textArea = false) {
+        if (textArea) {
+            this.$TextField[6] = true;
+            this.$TextField[7] = true;
+            this.$nativeShow = Platform.create("TextArea");
+        } else {
+            this.$nativeShow = Platform.create("TextInput");
+        }
     }
 
     $onTextChange() {
@@ -4361,7 +4397,7 @@ class TextInput extends DisplayObject {
             var d = this.$DisplayObject;
             var p = this.$TextField;
             //text, width, height, size, wordWrap, multiline, autoSize
-            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, p[6], p[5]);
+            var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[7], p[6], p[5]);
             rect.x = 0;
             rect.y = 0;
             rect.width = this.width;//size.width;
@@ -4441,11 +4477,42 @@ class TextInput extends DisplayObject {
     }
 
     $setEditEnabled(val) {
+        if (val == "false") {
+            val = false;
+        }
+        var p = this.$TextField;
+        if (p[3] == val) {
+            return false;
+        }
+        p[3] = val;
+        return true;
+    }
+
+    $setMultiline(val) {
+        if (val == "false") {
+            val = false;
+        }
         var p = this.$TextField;
         if (p[6] == val) {
             return false;
         }
         p[6] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
+        return true;
+    }
+
+    $setWordWrap(val) {
+        if (val == "false") {
+            val = false;
+        }
+        var p = this.$TextField;
+        if (p[7] == val) {
+            return false;
+        }
+        p[7] = val;
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         return true;
     }
 
@@ -4454,8 +4521,8 @@ class TextInput extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        if (this.editEnabled) {
-            var p = this.$TextField;
+        var p = this.$TextField;
+        if (p[3]) {
             this.$nativeShow.startInput();
             p[4] = true;
             this.dispatchWith(Event.START_INPUT);
@@ -4476,6 +4543,8 @@ class TextInput extends DisplayObject {
             this.$nativeShow.stopInput();
         }
         this.text = this.$nativeShow.getNativeText();
+        this.$addFlags(0x0800);
+        this.$invalidateContentBounds();
         this.dispatchWith(Event.STOP_INPUT);
     }
 
@@ -4488,8 +4557,7 @@ class TextInput extends DisplayObject {
     }
 
     get text() {
-        var p = this.$TextField;
-        return p[0];
+        return this.$TextField[0];
     }
 
     set text(val) {
@@ -4497,8 +4565,7 @@ class TextInput extends DisplayObject {
     }
 
     get fontColor() {
-        var p = this.$TextField;
-        return p[2];
+        return this.$TextField[2];
     }
 
     set fontColor(val) {
@@ -4506,8 +4573,7 @@ class TextInput extends DisplayObject {
     }
 
     get fontSize() {
-        var p = this.$TextField;
-        return p[1];
+        return this.$TextField[1];
     }
 
     set fontSize(val) {
@@ -4515,8 +4581,7 @@ class TextInput extends DisplayObject {
     }
 
     get editEnabled() {
-        var p = this.$TextField;
-        return p[3];
+        return this.$TextField[3];
     }
 
     set editEnabled(val) {
@@ -5291,7 +5356,7 @@ class Stage extends Sprite {
             this.$dispatchKeyEvent(this.$keyEvents.shift());
         }
         super.$onFrameEnd();
-        this.$background.$onFrameEnd();
+        //this.$background.$onFrameEnd();
     }
 
     $setWidth(val) {
@@ -5754,6 +5819,14 @@ class Texture {
         }
     }
 
+    get $use() {
+        return this.__use;
+    }
+
+    set $use(val) {
+        this.__use = val;
+    }
+
     get url() {
         return this.__url;
     }
@@ -6169,7 +6242,14 @@ class URLLoader extends EventDispatcher {
                 break;
             }
         }
-        if(this.isDispose) {
+        if (this.isDispose) {
+            if (this._data && this._type == ResType.IMAGE) {
+                if(this._recordUse) {
+                    this._data.$use = true;
+                }
+                this._data.$delCount();
+                this._data = null;
+            }
             return;
         }
         this.dispatchWith(Event.COMPLETE, this._data);
@@ -6191,6 +6271,14 @@ class URLLoader extends EventDispatcher {
         else {
             $error(2003, this._loadInfo.url);
         }
+    }
+
+    $useImage() {
+        if (!this._data) {
+            this._recordUse = true;
+            return;
+        }
+        this._data.$use = true;
     }
 
     dispose() {
@@ -6388,13 +6476,15 @@ class VBWebSocket extends WebSocket {
     remotes = {};
     backs = {};
     zbacks = {};
+    errorCodeType;
 
-    constructor(remote = false) {
+    constructor(remote = false, errorCodeType = "uint") {
         super();
         this._remote = remote;
         this.remotes = {};
         this.backs = {};
         this.zbacks = {};
+        this.errorCodeType = errorCodeType;
     }
 
     get remote() {
@@ -6421,10 +6511,15 @@ class VBWebSocket extends WebSocket {
             var zbackList = this.zbacks[backCmd];
             if (zbackList) {
                 removeList = [];
-                var errorCode = bytes.readUInt();
+                var errorCode;
+                if (this.errorCodeType == "uint") {
+                    errorCode = bytes.readUInt();
+                } else if (this.errorCodeType == "int") {
+                    errorCode = bytes.readInt();
+                }
                 a = zbackList.concat();
                 for (i = 0; i < a.length; i++) {
-                    a[i].func.call(a[i].thisObj, backCmd, errorCode,bytes);
+                    a[i].func.call(a[i].thisObj, backCmd, errorCode, bytes);
                     if (a[i].once) {
                         removeList.push(a[i].id);
                     }
@@ -7283,7 +7378,7 @@ class ResType {
         if (end == "json") {
             return ResType.JSON;
         }
-        if (end == "png" || end == "jpg") {
+        if (end == "png" || end == "jpg" || end == "PNG" || end == "JPG") {
             return ResType.IMAGE;
         }
         if (end == "plist") {
@@ -8527,6 +8622,7 @@ class EnterFrame {
     static $update(now, gap) {
         flower.EnterFrame.frame++;
         flower.CallLater.$run();
+        flower.DelayCall.$run();
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
             flower.EnterFrame.waitAdd = [];
@@ -8592,6 +8688,63 @@ class CallLater {
 
 flower.CallLater = CallLater;
 //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/DelayCall.js///////////////////////////
+class DelayCall {
+
+    _func;
+    _thisObj;
+    _data;
+
+    constructor(time, func, thisObj, args = null) {
+        this._func = func;
+        this._thisObj = thisObj;
+        this._data = args || [];
+        this._time = time;
+        this._start = flower.CoreTime.currentTime;
+        this.$complete = false;
+        DelayCall._next.push(this);
+    }
+
+    $update() {
+        if (!this.$complete && flower.CoreTime.currentTime - this._start > this._time) {
+            this._func.apply(this._thisObj, this._data);
+            this._func = null;
+            this._thisObj = null;
+            this._data = null;
+            this.$complete = true;
+        }
+    }
+
+    dispose() {
+        this.$complete = true;
+    }
+
+
+    static _list = [];
+    static _next = [];
+
+    static $run() {
+        var list = DelayCall._list;
+        for (var i = 0; i < list.length; i++) {
+            list[i].$update();
+        }
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].$complete) {
+                list.splice(i, 1);
+                i--;
+            }
+        }
+        DelayCall._list = DelayCall._list.concat(DelayCall._next);
+        DelayCall._next.length = 0;
+    }
+
+}
+
+flower.DelayCall = DelayCall;
+//////////////////////////End File:flower/utils/DelayCall.js///////////////////////////
 
 
 
@@ -9327,7 +9480,14 @@ class Path {
     static joinPath(path1, path2) {
         var path = path1;
         if (path.charAt(path.length - 1) != "/") {
-            path += "/";
+            for (var i = path.length - 2; i >= 0; i--) {
+                if (path.charAt(i) == "/") {
+                    path = path.slice(0, i + 1);
+                    break;
+                } else if (i == 0) {
+                    path = "";
+                }
+            }
         }
         if (path2.charAt(0) == "/") {
             path2 = path2.slice(1, path2.length);
@@ -9337,13 +9497,13 @@ class Path {
                 path2 = path2.slice(2, path2.length);
             } else {
                 path2 = path2.slice(3, path2.length);
-            }
-            for (var i = path.length - 2; i >= 0; i--) {
-                if (path.charAt(i) == "/") {
-                    path = path.slice(0, i + 1);
-                    break;
-                } else if (i == 0) {
-                    path = "";
+                for (var i = path.length - 2; i >= 0; i--) {
+                    if (path.charAt(i) == "/") {
+                        path = path.slice(0, i + 1);
+                        break;
+                    } else if (i == 0) {
+                        path = "";
+                    }
                 }
             }
         }

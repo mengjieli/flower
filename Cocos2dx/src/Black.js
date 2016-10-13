@@ -594,6 +594,7 @@ var $root = eval("this");
             _this2.list = init || [];
             _this2._length = _this2.list.length;
             _this2.__value = _this2;
+            _this2._lengthValue = new flower.IntValue();
             return _this2;
         }
 
@@ -602,6 +603,7 @@ var $root = eval("this");
             value: function push(item) {
                 this.list.push(item);
                 this._length = this._length + 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.ADDED, item);
                 this.dispatchWith(flower.Event.UPDATE, this);
             }
@@ -615,6 +617,7 @@ var $root = eval("this");
                 }
                 this.list.splice(index, 0, item);
                 this._length = this._length + 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.ADDED, item);
                 this.dispatchWith(flower.Event.UPDATE, this);
             }
@@ -626,6 +629,7 @@ var $root = eval("this");
                 }
                 var item = this.list.shift();
                 this._length = this._length - 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
                 this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
@@ -651,6 +655,7 @@ var $root = eval("this");
                         this.list.splice(startIndex, 0, args[i]);
                     }
                     this._length = this._length + 1;
+                    this._lengthValue.value = this._length;
                     for (i = 0; i < args.length; i++) {
                         this.dispatchWith(flower.Event.ADDED, args[i]);
                     }
@@ -658,6 +663,7 @@ var $root = eval("this");
                 } else {
                     list = this.list.splice(startIndex, delCount);
                     this._length = this._length - delCount;
+                    this._lengthValue.value = this._length;
                     for (i = 0; i < list.length; i++) {
                         this.dispatchWith(flower.Event.REMOVED, list[i]);
                     }
@@ -680,6 +686,7 @@ var $root = eval("this");
                 }
                 var item = this.list.pop();
                 this._length = this._length - 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
                 this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
@@ -693,6 +700,7 @@ var $root = eval("this");
                 while (this.list.length) {
                     var item = this.list.pop();
                     this._length = this._length - 1;
+                    this._lengthValue.value = this._length;
                     this.dispatchWith(flower.Event.REMOVED, item);
                 }
                 this.dispatchWith(flower.Event.UPDATE, this);
@@ -704,6 +712,7 @@ var $root = eval("this");
                     if (this.list[i] == item) {
                         this.list.splice(i, 1);
                         this._length = this._length - 1;
+                        this._lengthValue.value = this._length;
                         this.dispatchWith(flower.Event.REMOVED, item);
                         this.dispatchWith(flower.Event.UPDATE, this);
                         return item;
@@ -721,6 +730,7 @@ var $root = eval("this");
                 }
                 var item = this.list.splice(index, 1)[0];
                 this._length = this._length - 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
                 this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
@@ -764,6 +774,7 @@ var $root = eval("this");
                     return;
                 }
                 this._length = this._length - 1;
+                this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
                 this.dispatchWith(flower.Event.UPDATE, this);
                 return item;
@@ -932,11 +943,7 @@ var $root = eval("this");
         }, {
             key: "sort",
             value: function sort() {
-                var _arguments__ = [];
-                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
-                    _arguments__ = arguments[argumentsLength];
-                }
-                this.list.sort.apply(this.list.sort, _arguments__);
+                this.list.sort.apply(this.list, arguments);
                 this.dispatchWith(flower.Event.UPDATE, this);
             }
         }, {
@@ -1095,10 +1102,16 @@ var $root = eval("this");
                     while (this.list.length > val) {
                         var item = this.list.pop();
                         this._length = this._length - 1;
+                        this._lengthValue.value = this._length;
                         this.dispatchWith(flower.Event.REMOVED, item);
                     }
                     this.dispatchWith(flower.Event.UPDATE, this);
                 }
+            }
+        }, {
+            key: "lengthIntValue",
+            get: function get() {
+                return this._lengthValue;
             }
         }]);
 
@@ -3317,6 +3330,7 @@ var $root = eval("this");
                             setObject += before + "\tvar " + thisObj + " = new " + this.classes.f[createClassName] + "();\n";
                         }
                         setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
+                        setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".$filePath = \"" + this.loadURL + "\";\n";
                     }
                 }
                 var idAtr = xml.getAttribute("id");
@@ -5258,7 +5272,11 @@ var $root = eval("this");
                     this.texture = val;
                 } else {
                     if (this.__loader) {
+                        this.__loader.$useImage();
                         this.__loader.dispose();
+                    }
+                    if (typeof val == "string" && val.slice(0, 2) == "./" && this.$filePath) {
+                        val = flower.Path.joinPath(this.$filePath, val);
                     }
                     this.__loader = new flower.URLLoader(val);
                     this.__loader.load();
@@ -5276,6 +5294,7 @@ var $root = eval("this");
             value: function __onLoadComplete(e) {
                 this.__loader = null;
                 this.texture = e.data;
+                this.dispatchWith(flower.Event.COMPLETE);
             }
 
             //$onFrameEnd() {
@@ -5289,6 +5308,7 @@ var $root = eval("this");
             key: "dispose",
             value: function dispose() {
                 if (this.__loader) {
+                    this.__loader.$useImage();
                     this.__loader.dispose();
                 }
                 this.removeAllBindProperty();
@@ -5302,6 +5322,11 @@ var $root = eval("this");
             },
             set: function set(val) {
                 this.$setSource(val);
+            }
+        }, {
+            key: "isLoading",
+            get: function get() {
+                return this.__loader ? true : false;
             }
         }]);
 
@@ -7751,6 +7776,7 @@ var $root = eval("this");
             key: "__onLoadModuleComplete",
             value: function __onLoadModuleComplete(e) {
                 var cfg = e.data;
+                this.config = cfg;
                 this.__name = cfg.name;
                 flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
                 this.__list = [];
@@ -7842,7 +7868,10 @@ var $root = eval("this");
                         this.script += e.data + "\n\n\n";
                         if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
                             //trace("执行script:\n", this.script);
+                            this.script += "flower.Module.$currentModule.data = module;";
+                            Module.$currentModule = this;
                             eval(this.script);
+                            Module.$currentModule = null;
                         }
                     }
                 }
@@ -7872,6 +7901,11 @@ var $root = eval("this");
                     loader.load();
                 }
                 this.__index++;
+            }
+        }, {
+            key: "url",
+            get: function get() {
+                return this.__url;
             }
         }, {
             key: "progress",

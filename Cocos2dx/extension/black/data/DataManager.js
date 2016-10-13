@@ -1,4 +1,5 @@
 class DataManager {
+    
     _defines = {};
     _root = {};
 

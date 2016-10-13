@@ -727,6 +727,7 @@ class UIParser extends Group {
                     setObject += before + "\tvar " + thisObj + " = new " + this.classes.f[createClassName] + "();\n";
                 }
                 setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
+                setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".$filePath = \"" + this.loadURL + "\";\n";
             }
         }
         var idAtr = xml.getAttribute("id");

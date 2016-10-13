@@ -38,7 +38,14 @@ class Path {
     static joinPath(path1, path2) {
         var path = path1;
         if (path.charAt(path.length - 1) != "/") {
-            path += "/";
+            for (var i = path.length - 2; i >= 0; i--) {
+                if (path.charAt(i) == "/") {
+                    path = path.slice(0, i + 1);
+                    break;
+                } else if (i == 0) {
+                    path = "";
+                }
+            }
         }
         if (path2.charAt(0) == "/") {
             path2 = path2.slice(1, path2.length);
@@ -48,13 +55,13 @@ class Path {
                 path2 = path2.slice(2, path2.length);
             } else {
                 path2 = path2.slice(3, path2.length);
-            }
-            for (var i = path.length - 2; i >= 0; i--) {
-                if (path.charAt(i) == "/") {
-                    path = path.slice(0, i + 1);
-                    break;
-                } else if (i == 0) {
-                    path = "";
+                for (var i = path.length - 2; i >= 0; i--) {
+                    if (path.charAt(i) == "/") {
+                        path = path.slice(0, i + 1);
+                        break;
+                    } else if (i == 0) {
+                        path = "";
+                    }
                 }
             }
         }

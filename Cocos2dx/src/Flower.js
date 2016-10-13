@@ -54,11 +54,11 @@ var flower = {};
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc) {
+    function start(completeFunc, nativeStage, touchShow) {
         var stage = new Stage();
         Platform._runBack = CoreTime.$run;
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
-
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+        flower.sys.engineType = Platform.type;
         var loader = new URLLoader("res/flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
             var cfg = e.data;
@@ -203,6 +203,9 @@ var flower = {};
         _createClass(Platform, null, [{
             key: "start",
             value: function start(engine, root, background) {
+                var nativeStage = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+                var touchShow = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
                 RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
                 Platform.native = cc.sys.isNative;
                 var scene = cc.Scene.extend({
@@ -213,43 +216,68 @@ var flower = {};
                         cc.eventManager.addListener({
                             event: cc.EventListener.TOUCH_ONE_BY_ONE,
                             swallowTouches: true,
-                            onTouchBegan: this.onTouchesBegan.bind(this),
-                            onTouchMoved: this.onTouchesMoved.bind(this),
-                            onTouchEnded: this.onTouchesEnded.bind(this)
+                            onTouchBegan: function (touch) {
+                                engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                                return true;
+                            }.bind(this),
+                            onTouchMoved: function (touch) {
+                                engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                                return true;
+                            }.bind(this),
+                            onTouchEnded: function (touch) {
+                                engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                                return true;
+                            }.bind(this)
                         }, this);
                         cc.eventManager.addListener({
                             event: cc.EventListener.MOUSE,
-                            onMouseMove: this.onMouseMove.bind(this)
+                            onMouseMove: function (e) {
+                                engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                            }.bind(this)
                         }, this);
                     },
                     update: function update(dt) {
                         trace("dt", dt);
-                    },
-                    onMouseMove: function onMouseMove(e) {
-                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
-                    },
-                    onTouchesBegan: function onTouchesBegan(touch) {
-                        engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                        return true;
-                    },
-                    onTouchesMoved: function onTouchesMoved(touch) {
-                        engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                        return true;
-                    },
-                    onTouchesEnded: function onTouchesEnded(touch) {
-                        engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                        return true;
                     }
                 });
                 Platform.stage2 = root.show;
-                Platform.stage = new scene();
+                Platform.stage = nativeStage || new scene();
                 Platform.stage.update = Platform._run;
-                cc.director.runScene(Platform.stage);
+                if (nativeStage == null) {
+                    cc.director.runScene(Platform.stage);
+                } else {
+                    //注册鼠标事件
+                    cc.eventManager.addListener({
+                        event: cc.EventListener.TOUCH_ONE_BY_ONE,
+                        swallowTouches: true,
+                        onTouchBegan: function onTouchBegan(touch) {
+                            if (engine.$getMouseTarget(math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y), true) == engine) {
+                                return false;
+                            }
+                            engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                            return true;
+                        },
+                        onTouchMoved: function onTouchMoved(touch) {
+                            engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                            return true;
+                        },
+                        onTouchEnded: function onTouchEnded(touch) {
+                            engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                            return true;
+                        }
+                    }, touchShow || nativeStage);
+                    cc.eventManager.addListener({
+                        event: cc.EventListener.MOUSE,
+                        onMouseMove: function onMouseMove(e) {
+                            engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                        }
+                    }, cc.director.getRunningScene());
+                }
                 Platform.width = cc.director.getWinSize().width;
                 Platform.height = cc.director.getWinSize().height;
                 engine.$resize(Platform.width, Platform.height);
-                background.show.setPositionY(Platform.height);
-                Platform.stage.addChild(background.show);
+                //background.show.setPositionY(Platform.height);
+                //Platform.stage.addChild(background.show);
                 root.show.setPositionY(Platform.height);
                 Platform.stage.addChild(root.show);
                 if ('keyboard' in cc.sys.capabilities) {
@@ -4806,7 +4834,6 @@ var flower = {};
 
             var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
 
-            _this19.$nativeShow = Platform.create("TextInput");
             _this19.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
@@ -4814,8 +4841,10 @@ var flower = {};
                 3: true, //editEnabled
                 4: false, //inputing
                 5: false, //autoSize
-                6: false //multiline
-            };
+                6: false, //multiline
+                7: false };
+            //wordWrap
+            _this19.$initNativeShow();
             _this19.addListener(Event.FOCUS_IN, _this19.$onFocusIn, _this19);
             _this19.addListener(Event.FOCUS_OUT, _this19.$onFocusOut, _this19);
             _this19.addListener(KeyboardEvent.KEY_DOWN, _this19.$keyDown, _this19);
@@ -4830,6 +4859,19 @@ var flower = {};
         }
 
         _createClass(TextInput, [{
+            key: "$initNativeShow",
+            value: function $initNativeShow() {
+                var textArea = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+                if (textArea) {
+                    this.$TextField[6] = true;
+                    this.$TextField[7] = true;
+                    this.$nativeShow = Platform.create("TextArea");
+                } else {
+                    this.$nativeShow = Platform.create("TextInput");
+                }
+            }
+        }, {
             key: "$onTextChange",
             value: function $onTextChange() {
                 if (!this.$nativeShow) {
@@ -4861,7 +4903,7 @@ var flower = {};
                     var d = this.$DisplayObject;
                     var p = this.$TextField;
                     //text, width, height, size, wordWrap, multiline, autoSize
-                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, p[6], p[5]);
+                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[7], p[6], p[5]);
                     rect.x = 0;
                     rect.y = 0;
                     rect.width = this.width; //size.width;
@@ -4948,11 +4990,44 @@ var flower = {};
         }, {
             key: "$setEditEnabled",
             value: function $setEditEnabled(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                var p = this.$TextField;
+                if (p[3] == val) {
+                    return false;
+                }
+                p[3] = val;
+                return true;
+            }
+        }, {
+            key: "$setMultiline",
+            value: function $setMultiline(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 var p = this.$TextField;
                 if (p[6] == val) {
                     return false;
                 }
                 p[6] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setWordWrap",
+            value: function $setWordWrap(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                var p = this.$TextField;
+                if (p[7] == val) {
+                    return false;
+                }
+                p[7] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
                 return true;
             }
         }, {
@@ -4962,8 +5037,8 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                if (this.editEnabled) {
-                    var p = this.$TextField;
+                var p = this.$TextField;
+                if (p[3]) {
                     this.$nativeShow.startInput();
                     p[4] = true;
                     this.dispatchWith(Event.START_INPUT);
@@ -4986,6 +5061,8 @@ var flower = {};
                     this.$nativeShow.stopInput();
                 }
                 this.text = this.$nativeShow.getNativeText();
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
                 this.dispatchWith(Event.STOP_INPUT);
             }
         }, {
@@ -5024,8 +5101,7 @@ var flower = {};
         }, {
             key: "text",
             get: function get() {
-                var p = this.$TextField;
-                return p[0];
+                return this.$TextField[0];
             },
             set: function set(val) {
                 this.$setText(val);
@@ -5033,8 +5109,7 @@ var flower = {};
         }, {
             key: "fontColor",
             get: function get() {
-                var p = this.$TextField;
-                return p[2];
+                return this.$TextField[2];
             },
             set: function set(val) {
                 this.$setFontColor(val);
@@ -5042,8 +5117,7 @@ var flower = {};
         }, {
             key: "fontSize",
             get: function get() {
-                var p = this.$TextField;
-                return p[1];
+                return this.$TextField[1];
             },
             set: function set(val) {
                 this.$setFontSize(val);
@@ -5051,8 +5125,7 @@ var flower = {};
         }, {
             key: "editEnabled",
             get: function get() {
-                var p = this.$TextField;
-                return p[3];
+                return this.$TextField[3];
             },
             set: function set(val) {
                 this.$setEditEnabled(val);
@@ -5828,7 +5901,7 @@ var flower = {};
                     this.$dispatchKeyEvent(this.$keyEvents.shift());
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
-                this.$background.$onFrameEnd();
+                //this.$background.$onFrameEnd();
             }
         }, {
             key: "$setWidth",
@@ -6370,6 +6443,14 @@ var flower = {};
              */
 
         }, {
+            key: "$use",
+            get: function get() {
+                return this.__use;
+            },
+            set: function set(val) {
+                this.__use = val;
+            }
+        }, {
             key: "url",
             get: function get() {
                 return this.__url;
@@ -6764,6 +6845,13 @@ var flower = {};
                     }
                 }
                 if (this.isDispose) {
+                    if (this._data && this._type == ResType.IMAGE) {
+                        if (this._recordUse) {
+                            this._data.$use = true;
+                        }
+                        this._data.$delCount();
+                        this._data = null;
+                    }
                     return;
                 }
                 this.dispatchWith(Event.COMPLETE, this._data);
@@ -6785,6 +6873,15 @@ var flower = {};
                 } else {
                     $error(2003, this._loadInfo.url);
                 }
+            }
+        }, {
+            key: "$useImage",
+            value: function $useImage() {
+                if (!this._data) {
+                    this._recordUse = true;
+                    return;
+                }
+                this._data.$use = true;
             }
         }, {
             key: "dispose",
@@ -7050,6 +7147,7 @@ var flower = {};
 
         function VBWebSocket() {
             var remote = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var errorCodeType = arguments.length <= 1 || arguments[1] === undefined ? "uint" : arguments[1];
 
             _classCallCheck(this, VBWebSocket);
 
@@ -7063,6 +7161,7 @@ var flower = {};
             _this28.remotes = {};
             _this28.backs = {};
             _this28.zbacks = {};
+            _this28.errorCodeType = errorCodeType;
             return _this28;
         }
 
@@ -7088,7 +7187,12 @@ var flower = {};
                     var zbackList = this.zbacks[backCmd];
                     if (zbackList) {
                         removeList = [];
-                        var errorCode = bytes.readUInt();
+                        var errorCode;
+                        if (this.errorCodeType == "uint") {
+                            errorCode = bytes.readUInt();
+                        } else if (this.errorCodeType == "int") {
+                            errorCode = bytes.readInt();
+                        }
                         a = zbackList.concat();
                         for (i = 0; i < a.length; i++) {
                             a[i].func.call(a[i].thisObj, backCmd, errorCode, bytes);
@@ -8035,7 +8139,7 @@ var flower = {};
                 if (end == "json") {
                     return ResType.JSON;
                 }
-                if (end == "png" || end == "jpg") {
+                if (end == "png" || end == "jpg" || end == "PNG" || end == "JPG") {
                     return ResType.IMAGE;
                 }
                 if (end == "plist") {
@@ -9385,6 +9489,7 @@ var flower = {};
             value: function $update(now, gap) {
                 flower.EnterFrame.frame++;
                 flower.CallLater.$run();
+                flower.DelayCall.$run();
                 if (flower.EnterFrame.waitAdd.length) {
                     flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
                     flower.EnterFrame.waitAdd = [];
@@ -9467,6 +9572,67 @@ var flower = {};
 
     flower.CallLater = CallLater;
     //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
+
+    //////////////////////////File:flower/utils/DelayCall.js///////////////////////////
+
+    var DelayCall = function () {
+        function DelayCall(time, func, thisObj) {
+            var args = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+            _classCallCheck(this, DelayCall);
+
+            this._func = func;
+            this._thisObj = thisObj;
+            this._data = args || [];
+            this._time = time;
+            this._start = flower.CoreTime.currentTime;
+            this.$complete = false;
+            DelayCall._next.push(this);
+        }
+
+        _createClass(DelayCall, [{
+            key: "$update",
+            value: function $update() {
+                if (!this.$complete && flower.CoreTime.currentTime - this._start > this._time) {
+                    this._func.apply(this._thisObj, this._data);
+                    this._func = null;
+                    this._thisObj = null;
+                    this._data = null;
+                    this.$complete = true;
+                }
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                this.$complete = true;
+            }
+        }], [{
+            key: "$run",
+            value: function $run() {
+                var list = DelayCall._list;
+                for (var i = 0; i < list.length; i++) {
+                    list[i].$update();
+                }
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].$complete) {
+                        list.splice(i, 1);
+                        i--;
+                    }
+                }
+                DelayCall._list = DelayCall._list.concat(DelayCall._next);
+                DelayCall._next.length = 0;
+            }
+        }]);
+
+        return DelayCall;
+    }();
+
+    DelayCall._list = [];
+    DelayCall._next = [];
+
+
+    flower.DelayCall = DelayCall;
+    //////////////////////////End File:flower/utils/DelayCall.js///////////////////////////
 
     //////////////////////////File:flower/utils/ObjectDo.js///////////////////////////
 
@@ -10251,7 +10417,14 @@ var flower = {};
             value: function joinPath(path1, path2) {
                 var path = path1;
                 if (path.charAt(path.length - 1) != "/") {
-                    path += "/";
+                    for (var i = path.length - 2; i >= 0; i--) {
+                        if (path.charAt(i) == "/") {
+                            path = path.slice(0, i + 1);
+                            break;
+                        } else if (i == 0) {
+                            path = "";
+                        }
+                    }
                 }
                 if (path2.charAt(0) == "/") {
                     path2 = path2.slice(1, path2.length);
@@ -10261,13 +10434,13 @@ var flower = {};
                         path2 = path2.slice(2, path2.length);
                     } else {
                         path2 = path2.slice(3, path2.length);
-                    }
-                    for (var i = path.length - 2; i >= 0; i--) {
-                        if (path.charAt(i) == "/") {
-                            path = path.slice(0, i + 1);
-                            break;
-                        } else if (i == 0) {
-                            path = "";
+                        for (var i = path.length - 2; i >= 0; i--) {
+                            if (path.charAt(i) == "/") {
+                                path = path.slice(0, i + 1);
+                                break;
+                            } else if (i == 0) {
+                                path = "";
+                            }
                         }
                     }
                 }

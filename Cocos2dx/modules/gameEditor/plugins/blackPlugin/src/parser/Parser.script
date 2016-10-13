@@ -1,0 +1,53 @@
+var Parser = (function (_super) {
+
+    __extends(Parser, _super);
+
+    function Parser(file) {
+        _super.call(this, file);
+    }
+
+    Parser.prototype.load = function () {
+        this.data = flower.DataManager.createData("ue.UIFile");
+        var xml = new flower.XMLElement();
+        xml.parse(this.file.content);
+        //分析 namesapce
+        for (var i = 0; i < xml.namespaces.length; i++) {
+            var namespace = flower.DataManager.createData("ue.NameSpace");
+            namespace.name.value = xml.namespaces[i].name;
+            namespace.content.value = xml.namespaces[i].value;
+            this.data.namespaces.push(namespace);
+        }
+        //分析导出类
+        if (xml.getAttribute("class")) {
+            this.data.exportClass.value = xml.getAttribute("class").value;
+        }
+        this.data.ui.file = this.data;
+        var parser = new UIParser(xml, this.data.ui);
+        parser.addListener(flower.Event.COMPLETE, this.loadComplete, this);
+        parser.load();
+        return true;
+    }
+
+    Parser.prototype.loadComplete = function () {
+        this.dispatchWith(flower.Event.COMPLETE);
+    }
+
+    Parser.prototype.save = function () {
+    }
+
+    //Object.defineProperty(BlackParser.prototype, "itemId", {
+    //    get: function () {
+    //        this.data.itemId.value = this.data.itemId.value + 1;
+    //        return this.data.itemId.value;
+    //    },
+    //    set: function (val) {
+    //    },
+    //    enumerable: true,
+    //    configurable: true
+    //});
+
+    return Parser;
+
+})(editor.Parser);
+
+registerParser("Black", Parser);

@@ -37,6 +37,7 @@ class EnterFrame {
     static $update(now, gap) {
         flower.EnterFrame.frame++;
         flower.CallLater.$run();
+        flower.DelayCall.$run();
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
             flower.EnterFrame.waitAdd = [];

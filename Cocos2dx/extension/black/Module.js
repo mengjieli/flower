@@ -31,6 +31,7 @@ class Module extends flower.EventDispatcher {
 
     __onLoadModuleComplete(e) {
         var cfg = e.data;
+        this.config = cfg;
         this.__name = cfg.name;
         flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
         this.__list = [];
@@ -120,7 +121,10 @@ class Module extends flower.EventDispatcher {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
                     //trace("执行script:\n", this.script);
+                    this.script += "flower.Module.$currentModule.data = module;";
+                    Module.$currentModule = this;
                     eval(this.script);
+                    Module.$currentModule = null;
                 }
             }
         }
@@ -152,9 +156,15 @@ class Module extends flower.EventDispatcher {
         this.__index++;
     }
 
+    get url() {
+        return this.__url;
+    }
+
     get progress() {
         return this.__progress;
     }
+
+    static $currentModule;
 }
 
 exports.Module = Module;

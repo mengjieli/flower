@@ -97,6 +97,14 @@ class Texture {
         }
     }
 
+    get $use() {
+        return this.__use;
+    }
+
+    set $use(val) {
+        this.__use = val;
+    }
+
     get url() {
         return this.__url;
     }

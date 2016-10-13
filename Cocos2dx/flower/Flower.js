@@ -19,11 +19,11 @@ var params = {};
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc) {
+function start(completeFunc, nativeStage, touchShow) {
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
-
+    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+    flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
@@ -139,7 +139,7 @@ exports.sys = {
     $tip: $tip,
     $warn: $warn,
     $error: $error,
-    getLanguage: getLanguage
+    getLanguage: getLanguage,
 }
 exports.params = params;
 

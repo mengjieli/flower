@@ -6,7 +6,7 @@ class Platform {
     static width;
     static height;
 
-    static start(engine, root, background) {
+    static start(engine, root, background, nativeStage = null, touchShow = null) {
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
@@ -17,43 +17,68 @@ class Platform {
                 cc.eventManager.addListener({
                     event: cc.EventListener.TOUCH_ONE_BY_ONE,
                     swallowTouches: true,
-                    onTouchBegan: this.onTouchesBegan.bind(this),
-                    onTouchMoved: this.onTouchesMoved.bind(this),
-                    onTouchEnded: this.onTouchesEnded.bind(this)
+                    onTouchBegan: function (touch) {
+                        engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this),
+                    onTouchMoved: function (touch) {
+                        engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this),
+                    onTouchEnded: function (touch) {
+                        engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this)
                 }, this);
                 cc.eventManager.addListener({
                     event: cc.EventListener.MOUSE,
-                    onMouseMove: this.onMouseMove.bind(this)
+                    onMouseMove: function (e) {
+                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                    }.bind(this)
                 }, this);
             },
             update: function (dt) {
                 trace("dt", dt);
-            },
-            onMouseMove: function (e) {
-                engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
-            },
-            onTouchesBegan: function (touch) {
-                engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                return true;
-            },
-            onTouchesMoved: function (touch) {
-                engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                return true;
-            },
-            onTouchesEnded: function (touch) {
-                engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
-                return true;
-            },
+            }
         });
         Platform.stage2 = root.show;
-        Platform.stage = new scene();
+        Platform.stage = nativeStage || new scene();
         Platform.stage.update = Platform._run;
-        cc.director.runScene(Platform.stage);
+        if (nativeStage == null) {
+            cc.director.runScene(Platform.stage);
+        } else {
+            //注册鼠标事件
+            cc.eventManager.addListener({
+                event: cc.EventListener.TOUCH_ONE_BY_ONE,
+                swallowTouches: true,
+                onTouchBegan: function (touch) {
+                    if (engine.$getMouseTarget(math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y), true) == engine) {
+                        return false;
+                    }
+                    engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                },
+                onTouchMoved: function (touch) {
+                    engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                },
+                onTouchEnded: function (touch) {
+                    engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                }
+            }, touchShow || nativeStage);
+            cc.eventManager.addListener({
+                event: cc.EventListener.MOUSE,
+                onMouseMove: function (e) {
+                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                }
+            }, cc.director.getRunningScene());
+        }
         Platform.width = cc.director.getWinSize().width;
         Platform.height = cc.director.getWinSize().height;
         engine.$resize(Platform.width, Platform.height);
-        background.show.setPositionY(Platform.height);
-        Platform.stage.addChild(background.show);
+        //background.show.setPositionY(Platform.height);
+        //Platform.stage.addChild(background.show);
         root.show.setPositionY(Platform.height);
         Platform.stage.addChild(root.show);
         if ('keyboard' in cc.sys.capabilities) {
