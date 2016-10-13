@@ -7249,6 +7249,10 @@ class Module extends flower.EventDispatcher {
         return this.__progress;
     }
 
+    get name() {
+        return this.__name;
+    }
+
     static $currentModule;
 }
 

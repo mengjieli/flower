@@ -7912,6 +7912,11 @@ var $root = eval("this");
             get: function get() {
                 return this.__progress;
             }
+        }, {
+            key: "name",
+            get: function get() {
+                return this.__name;
+            }
         }]);
 
         return Module;
