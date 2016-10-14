@@ -1,0 +1,10 @@
+{
+  "name": "ue.Script",
+  "desc": "UI 代码",
+  "members": {
+    "src": {
+      "desc": "路径",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "ue.Attribute",
+  "desc": "属性",
+  "members": {
+    "name": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    }
+  }
+}

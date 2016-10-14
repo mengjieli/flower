@@ -860,16 +860,16 @@ var Main = function () {
                     "creationTime": 12226,
                     "life": 2
                 }];
-            flower.URLLoader.urlHead = "";
-            var module = new flower.Module("modules/software/module.json");
-            module.load();
-            module.addListener(flower.Event.COMPLETE,function(){
-
-                var ui = new flower.UIParser();
-                ui.parseUIAsync("res/Test2.xml",{list:new flower.ArrayValue(list)});
-                flower.Stage.getInstance().addChild(ui);
-            });
-            return;
+            //flower.URLLoader.urlHead = "";
+            //var module = new flower.Module("modules/software/module.json");
+            //module.load();
+            //module.addListener(flower.Event.COMPLETE,function(){
+            //
+            //    var ui = new flower.UIParser();
+            //    ui.parseUIAsync("res/Test2.xml",{list:new flower.ArrayValue(list)});
+            //    flower.Stage.getInstance().addChild(ui);
+            //});
+            //return;
 
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);

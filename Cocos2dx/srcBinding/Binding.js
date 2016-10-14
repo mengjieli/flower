@@ -1273,7 +1273,7 @@ class Binding {
                     if (content.charAt(j) == "}") {
                         var needValue = false;
                         var bindContent = content.slice(i + 1, j);
-                        if (bindContent  && bindContent.charAt(0) == "$") {
+                        if (bindContent && bindContent.charAt(0) == "$") {
                             needValue = true;
                             bindContent = bindContent.slice(1, bindContent.length);
                         }
@@ -1393,7 +1393,7 @@ class Binding {
 
 }
 
-Binding.addBindingCheck(flower.Math);
+Binding.addBindingCheck($root);
 
 binding.Binding = Binding;
 //////////////////////////End File:binding/Binding.js///////////////////////////

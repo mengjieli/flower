@@ -2,83 +2,66 @@ var UIParser = (function (_super) {
 
     __extends(UIParser, _super);
 
-    function UIParser(xml, data) {
+    function UIParser(xml, uiFile) {
         _super.call(this);
         this.xml = xml;
-        this.data = data;
-        this.data.xml = xml;
+        this.data = flower.DataManager.createData("ue.UI");
+        this.data.file = uiFile;
+        this.uiFile = uiFile;
     }
 
     UIParser.prototype.load = function () {
-        //分析类名
-        var name = this.xml.name;
-        var namespace = name.split(":")[0];
-        var className = name.split(":")[1];
-        if (namespace == "f") {
-            this.data.display = flower.DataManager.createData("ue." + className);
-            this.data.name = className;
-        }
-        var display = this.data.display;
+        //分析属性
         for (var i = 0; i < this.xml.attributes.length; i++) {
             var attribute = this.xml.attributes[i];
-            var attributeValue = flower.DataManager.createData("ue.AttributeValue");
+            var attributeValue = flower.DataManager.createData("ue.Attribute");
             attributeValue.name = attribute.name;
-            attributeValue.content = new flower.StringValue(attribute.value);
+            attributeValue.content = attribute.value;
             this.data.attributes.push(attributeValue);
-            if (display.hasMember(attribute.name)) {
-                display[attribute.name].value = attribute.value;
-            }
+            //if (display.hasMember(attribute.name)) {
+            //    display[attribute.name].value = attribute.value;
+            //}
         }
+        //分析子属性
         for (var i = 0; i < this.xml.elements.length; i++) {
             var element = this.xml.elements[i];
             var namespace = element.name.split(":")[0];
             var name = element.name.split(":")[1];
-            if (namespace == "f" && name.charCodeAt(0) >= "a".charCodeAt(0) && name.charCodeAt(0) <= "z".charCodeAt(0)) { //属性
-                var attributeValue = flower.DataManager.createData("ue.AttributeValue");
-                attributeValue.name = name;
-                if (element.value != "") { //普通文字属性
-                    attributeValue.content = new flower.StringValue(element.value);
-                } else {
-                    var clazz = flower[name];
-                    if ((new clazz()) instanceof flower.DisplayObject) { //如果是 ui 属性
-                        var data = flower.DataManager.createData("ue.UI");
-                        attributeValue.content = data;
-                        var ui = new UIParser(element.elements[0], data);
-                        ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
-                        ui.load();
-                    } else { //其它非显示对象属性
-                        attributeValue.content = this.decodeNoDisplay(element);
-                    }
-                }
-                this.data.attributes.push(attributeValue);
+            var child = flower.DataManager.createData("ue.Child");
+            if (namespace == "f" && name == "script") {
+                child.type = 3;
+                var script = flower.DataManager.createData("ue.script");
+                script.src = element.getAttribute("src") ? element.getAttribute("src").value : "";
+                child.content = script;
+            } else if (namespace == "f" && name.charCodeAt(0) >= "a".charCodeAt(0) && name.charCodeAt(0) <= "z".charCodeAt(0)) { //属性
+                child.type = 2;
+                child.content = element;
             } else {
+                child.type = 1;
                 var data = flower.DataManager.createData("ue.UI");
-                this.data.children.push(data);
-                var ui = new UIParser(element, data);
+                var ui = new UIParser(element, this.uiFile);
                 ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
                 ui.load();
+                child.content = data;
             }
+            this.data.children.push(child);
         }
         this.loadUIComplete();
     }
 
     UIParser.prototype.loadUIComplete = function () {
-        for (var i = 0; i < this.data.attributes; i++) {
-            if (this.data.attributes[i] instanceof black.UIParser && !this.data.attributes[i].isReady) {
-                return;
-            }
-        }
-        for (var i = 0; i < this.data.children.length; i++) {
-            if (!this.data.children[i].isReady) {
-                return;
-            }
-        }
-        this.data.isReady = true;
+        //for (var i = 0; i < this.data.attributes; i++) {
+        //    if (this.data.attributes[i] instanceof black.UIParser && !this.data.attributes[i].isReady) {
+        //        return;
+        //    }
+        //}
+        //for (var i = 0; i < this.data.children.length; i++) {
+        //    if (!this.data.children[i].isReady) {
+        //        return;
+        //    }
+        //}
+        //this.data.isReady = true;
         new flower.CallLater(this.dispatchWith, this, [flower.Event.COMPLETE]);
-    }
-
-    UIParser.prototype.decodeNoDisplay = function (xml) {
-
     }
 
     //Object.defineProperty(UIParser.prototype, "itemId", {

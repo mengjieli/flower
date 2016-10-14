@@ -1401,7 +1401,7 @@ var $root = eval("this");
     Binding.changeList = {};
 
 
-    Binding.addBindingCheck(flower.Math);
+    Binding.addBindingCheck($root);
 
     binding.Binding = Binding;
     //////////////////////////End File:binding/Binding.js///////////////////////////

@@ -1,6 +1,6 @@
 {
   "name": "ue.Black",
-  "desc": "插件总数据",
+  "desc": "Black 所有数据",
   "members": {
     "operationHistory": {
       "desc": "操作记录",
@@ -10,7 +10,7 @@
     "uis": {
       "desc": "所有 UI文件 数据",
       "type": "Array",
-      "typeValue": "ue.UIFile"
+      "typeValue": "ue.FXML"
     },
     "modules": {
       "desc": "所有 Module 数据",

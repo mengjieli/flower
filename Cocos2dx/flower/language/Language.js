@@ -1,3 +1,11 @@
+class Language {
+
+    static currentLanguage = "";
+    static __languages = [];
+
+}
+
+
 var $locale_strings = {};
 
 /**
@@ -14,9 +22,10 @@ function getLanguage(code, ...args) {
     }
     var length = args.length;
     for (var i = 0; i < length; i++) {
-        text = StringDo.replaceString(text,"{" + i + "}", args[i]);
+        text = StringDo.replaceString(text, "{" + i + "}", args[i]);
     }
     return text;
 }
 
 exports.sys.getLanguage = getLanguage;
+

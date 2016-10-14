@@ -1,0 +1,14 @@
+<s:TitlePanel percentWidth="100" percentHeight="100" class="UIView" title="{data.name}" xmlns:f="flower"
+              xmlns:s="modules/software/module.json" xmlns:u="./../module.json">
+    <f:script src="./UIView.script"/>
+    <f:Group id="container" left="0" right="0" top="0" bottom="0">
+        <f:Rect id="background" percentWidth="100" percentHeight="100" fillColor="0x666666"/>
+        <u:ToolBar percentWidth="100"/>
+        <f:Group top="25" bottom="0" percentWidth="100">
+            <f:Group horizontalCenter="0" verticalCenter="0">
+                <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
+                <u:UI data="{data.data.ui}"/>
+            </f:Group>
+        </f:Group>
+    </f:Group>
+</s:TitlePanel>

@@ -1,0 +1,14 @@
+{
+  "name": "ue.Child",
+  "desc": "UI Child",
+  "members": {
+    "type": {
+      "desc": "类型",
+      "detail": "1.子对象(ue.UI) 2.属性(flower.XML) 3.代码(ue.Script)",
+      "type": "int"
+    },
+    "content": {
+      "type": "*"
+    }
+  }
+}

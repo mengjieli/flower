@@ -1,0 +1,20 @@
+var UI = (function (_super) {
+
+    __extends(UI, _super);
+
+    function UI(data) {
+        _super.call(this);
+
+        this.width = 200;
+        this.height = 200;
+    }
+
+    UI.prototype.setData = function (val) {
+        _super.prototype.setData.call(this, val);
+    }
+
+    return UI;
+
+})(flower.Group);
+
+flower.UIParser.registerLocalUIClass("UI", UI, "ue");

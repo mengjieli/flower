@@ -1,3 +1,10 @@
+/**
+ * 定义 Data 时，如下关键字不能作为属性名称
+ * `value
+ * className
+ * membersKey
+ * dispose
+ */
 class ObjectValue extends Value {
 
     constructor(init = null) {

@@ -1,0 +1,12 @@
+{
+  "name": "ue.NameSpace",
+  "desc": "命名空间",
+  "members": {
+    "name": {
+      "type":"string"
+    },
+    "content":{
+      "type":"string"
+    }
+  }
+}

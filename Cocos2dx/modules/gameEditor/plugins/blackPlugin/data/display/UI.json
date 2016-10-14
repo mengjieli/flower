@@ -1,0 +1,20 @@
+{
+  "name": "ue.UI",
+  "desc": "UI 对象",
+  "members": {
+    "attributes": {
+      "desc": "属性",
+      "type": "Array",
+      "typeValue": "ue.Attribute"
+    },
+    "children": {
+      "type": "Array",
+      "typeValue": "ue.Child"
+    },
+    "file": {
+      "type": "ue.FXML",
+      "init": null,
+      "save": false
+    }
+  }
+}
