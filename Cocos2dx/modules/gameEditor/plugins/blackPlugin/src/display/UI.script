@@ -11,6 +11,38 @@ var UI = (function (_super) {
 
     UI.prototype.setData = function (val) {
         _super.prototype.setData.call(this, val);
+        this.resetAttributes();
+    }
+
+    UI.prototype.resetAttributes = function () {
+        var attributes = {
+            x: 0,
+            y: 0,
+            width: null,
+            height: null,
+            scaleX: 1,
+            scaleY: 1,
+            rotation: 0
+        };
+        var uiFlag = false;
+        if (uiFlag) {
+            attributes.left = null;
+            attributes.right = null;
+            attributes.top = null;
+            attributes.bottom = null;
+            attributes.verticalCenter = null;
+            attributes.horizontalCenter = null;
+            attributes.percentWidth = null;
+            attributes.percentHeight = null;
+        }
+        for (var key in attributes) {
+            var value = attributes[key];
+            if (this.data.attributes.getItemWith("name",key)) {
+                value = this.data.attributes.getItemWith("name",key).content.value;
+            }
+            trace(key,value)
+            this[key] = value;
+        }
     }
 
     return UI;
