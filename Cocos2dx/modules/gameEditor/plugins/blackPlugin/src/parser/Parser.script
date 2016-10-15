@@ -9,6 +9,7 @@ var Parser = (function (_super) {
     Parser.prototype.load = function () {
         this.data = flower.DataManager.createData("ue.FXML");
         var xml = new flower.XMLElement();
+        this.data.xml = xml;
         xml.parse(this.file.content);
         //分析 namesapce
         for (var i = 0; i < xml.namespaces.length; i++) {

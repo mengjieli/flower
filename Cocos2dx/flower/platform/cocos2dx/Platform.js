@@ -1,6 +1,6 @@
 class Platform {
     static type = "cocos2dx";
-    static native;
+    static native = cc.sys.isNative;
 
     static stage;
     static width;
@@ -8,7 +8,6 @@ class Platform {
 
     static start(engine, root, background, nativeStage = null, touchShow = null) {
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
-        Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
             ctor: function () {
                 this._super();

@@ -188,6 +188,7 @@ var list = [
     "ScrollPolicy",
 
     "Group",
+    "RichText",
     "UIParser",
     "ScrollBar",
     "VScrollBar",

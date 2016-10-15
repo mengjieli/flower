@@ -1,6 +1,7 @@
 {
   "name": "ue",
   "scripts": [
+    "./src/display/FXMLEditor.script",
     "./src/display/UI.script",
     "./src/Black.script",
     "./src/parser/Parser.script",

@@ -3,6 +3,7 @@ class Stage extends Sprite {
     __mouseX = 0;
     __mouseY = 0;
     __forntLayer;
+    $input;
     $background;
     $debugSprite
     $pop;
@@ -13,6 +14,8 @@ class Stage extends Sprite {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.$input = new flower.TextInput();
+        this.addChild(this.$input);
         this.$background = new Shape();
         this.__forntLayer = new Sprite();
         this.addChild(this.__forntLayer);
@@ -37,9 +40,17 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.__forntLayer) {
+        if (child != this.__forntLayer && this.__forntLayer) {
             this.addChild(this.__forntLayer);
         }
+    }
+
+    removeChild(child) {
+        if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop
+            || child == this.$menu || child == this.$drag) {
+            return;
+        }
+        super.removeChild(child);
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
@@ -381,7 +392,6 @@ class Stage extends Sprite {
             alt: KeyboardEvent.$alt,
             key: key
         });
-
     }
 
     $onKeyUp(key) {

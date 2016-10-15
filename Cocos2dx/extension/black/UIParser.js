@@ -28,6 +28,7 @@ class UIParser extends Group {
             "TextArea": "flower.TextArea",
             "Image": "flower.Image",
             "Group": "flower.Group",
+            "RichText": "flower.RichText",
             "ScrollBar": "flower.ScrollBar",
             "HScrollBar": "flower.HScrollBar",
             "VScrollBar": "flower.VScrollBar",

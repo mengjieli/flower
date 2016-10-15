@@ -1949,6 +1949,14 @@ flower.CoreTime = CoreTime;
 
 
 //////////////////////////File:flower/language/Language.js///////////////////////////
+class Language {
+
+    static currentLanguage = "";
+    static __languages = [];
+
+}
+
+
 var $locale_strings = {};
 
 /**
@@ -1965,12 +1973,14 @@ function getLanguage(code, ...args) {
     }
     var length = args.length;
     for (var i = 0; i < length; i++) {
-        text = StringDo.replaceString(text,"{" + i + "}", args[i]);
+        text = StringDo.replaceString(text, "{" + i + "}", args[i]);
     }
     return text;
 }
 
 flower.sys.getLanguage = getLanguage;
+
+
 //////////////////////////End File:flower/language/Language.js///////////////////////////
 
 
@@ -4863,6 +4873,18 @@ class TextInput extends DisplayObject {
         }
     }
 
+    $startNativeInput() {
+        this.$nativeShow.startInput();
+    }
+
+    $stopNativeInput() {
+        this.$nativeShow.stopInput();
+    }
+
+    $getNativeText() {
+        return this.$nativeShow.getNativeText();
+    }
+
     get text() {
         return this.$TextField[0];
     }
@@ -5197,6 +5219,7 @@ class Stage extends Sprite {
     __mouseX = 0;
     __mouseY = 0;
     __forntLayer;
+    $input;
     $background;
     $debugSprite
     $pop;
@@ -5207,6 +5230,8 @@ class Stage extends Sprite {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+        this.$input = new flower.TextInput();
+        this.addChild(this.$input);
         this.$background = new Shape();
         this.__forntLayer = new Sprite();
         this.addChild(this.__forntLayer);
@@ -5231,9 +5256,17 @@ class Stage extends Sprite {
 
     addChildAt(child, index) {
         super.addChildAt(child, index);
-        if (child != this.__forntLayer) {
+        if (child != this.__forntLayer && this.__forntLayer) {
             this.addChild(this.__forntLayer);
         }
+    }
+
+    removeChild(child) {
+        if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop
+            || child == this.$menu || child == this.$drag) {
+            return;
+        }
+        super.removeChild(child);
     }
 
     ///////////////////////////////////////触摸事件处理///////////////////////////////////////
@@ -5575,7 +5608,6 @@ class Stage extends Sprite {
             alt: KeyboardEvent.$alt,
             key: key
         });
-
     }
 
     $onKeyUp(key) {
@@ -9935,9 +9967,9 @@ class XMLElement extends XMLAttribute {
     }
 
     __isStringEmpty(str) {
-        for(var i = 0,len = str.length; i < len; i++) {
+        for (var i = 0, len = str.length; i < len; i++) {
             var char = str.charAt(i);
-            if(char != " " && char != "\t" && char != "\r" && char != "\n" && char != "　") {
+            if (char != " " && char != "\t" && char != "\r" && char != "\n" && char != "　") {
                 return false;
             }
         }
@@ -9982,7 +10014,7 @@ class XMLElement extends XMLAttribute {
                 i++;
                 break;
             }
-            else if (c == " " || c == "\t" || c == "\r" || c == "\n" || c=="　") {
+            else if (c == " " || c == "\t" || c == "\r" || c == "\n" || c == "　") {
             }
             else {
                 for (j = i + 1; j < len; j++) {
@@ -10121,6 +10153,10 @@ class XMLElement extends XMLAttribute {
             }
         }
         return i;
+    }
+
+    toString() {
+        return "<" + this.name + "/>"
     }
 
     static parse(content) {

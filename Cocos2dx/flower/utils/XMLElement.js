@@ -92,9 +92,9 @@ class XMLElement extends XMLAttribute {
     }
 
     __isStringEmpty(str) {
-        for(var i = 0,len = str.length; i < len; i++) {
+        for (var i = 0, len = str.length; i < len; i++) {
             var char = str.charAt(i);
-            if(char != " " && char != "\t" && char != "\r" && char != "\n" && char != "　") {
+            if (char != " " && char != "\t" && char != "\r" && char != "\n" && char != "　") {
                 return false;
             }
         }
@@ -139,7 +139,7 @@ class XMLElement extends XMLAttribute {
                 i++;
                 break;
             }
-            else if (c == " " || c == "\t" || c == "\r" || c == "\n" || c=="　") {
+            else if (c == " " || c == "\t" || c == "\r" || c == "\n" || c == "　") {
             }
             else {
                 for (j = i + 1; j < len; j++) {
@@ -278,6 +278,10 @@ class XMLElement extends XMLAttribute {
             }
         }
         return i;
+    }
+
+    toString() {
+        return "<" + this.name + "/>"
     }
 
     static parse(content) {

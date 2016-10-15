@@ -2,13 +2,23 @@
               xmlns:s="modules/software/module.json" xmlns:u="./../module.json">
     <f:script src="./UIView.script"/>
     <f:Group id="container" left="0" right="0" top="0" bottom="0">
-        <f:Rect id="background" percentWidth="100" percentHeight="100" fillColor="0x666666"/>
         <u:ToolBar percentWidth="100"/>
-        <f:Group top="25" bottom="0" percentWidth="100">
-            <f:Group horizontalCenter="0" verticalCenter="0">
-                <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
-                <u:UI data="{data.data.ui}"/>
-            </f:Group>
-        </f:Group>
+        <s:Tab percentWidth="100" percentHeight="100">
+            <f:panels>
+                <f:Array>
+                    <s:TitlePanel title="源文件" percentWidth="100" percentHeight="100">
+                        <f:Rect id="background" percentWidth="100" percentHeight="100" fillColor="0xffffff" lineWidth="1"/>
+                        <u:FXMLEditor data="{data.data}" percentWidth="100" percentHeight="100" />
+                    </s:TitlePanel>
+                    <s:TitlePanel title="设计" percentWidth="100" percentHeight="100">
+                        <f:Rect id="background" percentWidth="100" percentHeight="100" fillColor="0x333333" lineWidth="1"/>
+                        <f:Group horizontalCenter="0" verticalCenter="0">
+                            <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
+                            <u:UI data="{data.data.ui}"/>
+                        </f:Group>
+                    </s:TitlePanel>
+                </f:Array>
+            </f:panels>
+        </s:Tab>
     </f:Group>
 </s:TitlePanel>

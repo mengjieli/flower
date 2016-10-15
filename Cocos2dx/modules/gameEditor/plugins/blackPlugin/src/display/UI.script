@@ -5,12 +5,35 @@ var UI = (function (_super) {
     function UI(data) {
         _super.call(this);
 
-        this.width = 200;
-        this.height = 200;
+        this.group = new flower.Group();
+        this.group.percentWidth = 100;
+        this.group.percentHeight = 100;
+        this.addChild(this.group);
+
+        this.background = new flower.Rect();
+        this.background.percentWidth = 100;
+        this.background.percentHeight = 100;
+        this.background.fillAlpha = 0;
+        this.background.lineWidth = 1;
+        this.background.lineAlpha = 0.1;
+        this.group.addChild(this.background);
+
+        this.container = new flower.Group();
+        this.container.percentWidth = this.container.percentHeight = 100;
+        this.group.addChild(this.container);
+
+        this.editorContainer = new flower.Sprite();
+        this.editorContainer.width = this.editorContainer.height = 0;
+        this.addChild(this.editorContainer);
+
+        this.title = new flower.Label();
+        this.title.alpha = 0.3;
+        this.editorContainer.addChild(this.title);
     }
 
     UI.prototype.setData = function (val) {
         _super.prototype.setData.call(this, val);
+        this.title.bindProperty("text", "{data.name}", [this]);
         this.resetAttributes();
     }
 
@@ -37,11 +60,19 @@ var UI = (function (_super) {
         }
         for (var key in attributes) {
             var value = attributes[key];
-            if (this.data.attributes.getItemWith("name",key)) {
-                value = this.data.attributes.getItemWith("name",key).content.value;
+            if (this.data.attributes.getItemWith("name", key)) {
+                value = this.data.attributes.getItemWith("name", key).content.value;
             }
-            trace(key,value)
             this[key] = value;
+        }
+        this.container.removeAll();
+        for (var i = 0; i < this.data.children.length; i++) {
+            var childData = this.data.children[i];
+            if (childData.type.value == 1) {
+                var child = new UI();
+                child.data = childData.content;
+                this.container.addChild(child);
+            }
         }
     }
 

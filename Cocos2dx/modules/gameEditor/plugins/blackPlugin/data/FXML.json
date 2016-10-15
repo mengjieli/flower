@@ -15,6 +15,9 @@
       "desc": "显示对象",
       "type": "ue.UI",
       "init":null
+    },
+    "xml":{
+      "type":"*"
     }
   }
 }

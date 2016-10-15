@@ -207,7 +207,6 @@ var flower = {};
                 var touchShow = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
                 RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
-                Platform.native = cc.sys.isNative;
                 var scene = cc.Scene.extend({
                     ctor: function ctor() {
                         this._super();
@@ -402,6 +401,7 @@ var flower = {};
 
 
     Platform.type = "cocos2dx";
+    Platform.native = cc.sys.isNative;
     Platform.lastTime = new Date().getTime();
     Platform.frame = 0;
     Platform.pools = {};
@@ -1803,6 +1803,15 @@ var flower = {};
     //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
     //////////////////////////File:flower/language/Language.js///////////////////////////
+
+    var Language = function Language() {
+        _classCallCheck(this, Language);
+    };
+
+    Language.currentLanguage = "";
+    Language.__languages = [];
+
+
     var $locale_strings = {};
 
     /**
@@ -1830,6 +1839,7 @@ var flower = {};
     }
 
     flower.sys.getLanguage = getLanguage;
+
     //////////////////////////End File:flower/language/Language.js///////////////////////////
 
     //////////////////////////File:flower/language/zh_CN.js///////////////////////////
@@ -5075,6 +5085,21 @@ var flower = {};
                 }
             }
         }, {
+            key: "$startNativeInput",
+            value: function $startNativeInput() {
+                this.$nativeShow.startInput();
+            }
+        }, {
+            key: "$stopNativeInput",
+            value: function $stopNativeInput() {
+                this.$nativeShow.stopInput();
+            }
+        }, {
+            key: "$getNativeText",
+            value: function $getNativeText() {
+                return this.$nativeShow.getNativeText();
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 if (this.$hasFlags(0x0800)) {
@@ -5447,6 +5472,8 @@ var flower = {};
 
             _this21.__stage = _this21;
             Stage.stages.push(_this21);
+            _this21.$input = new flower.TextInput();
+            _this21.addChild(_this21.$input);
             _this21.$background = new Shape();
             _this21.__forntLayer = new Sprite();
             _this21.addChild(_this21.__forntLayer);
@@ -5466,9 +5493,17 @@ var flower = {};
             key: "addChildAt",
             value: function addChildAt(child, index) {
                 _get(Object.getPrototypeOf(Stage.prototype), "addChildAt", this).call(this, child, index);
-                if (child != this.__forntLayer) {
+                if (child != this.__forntLayer && this.__forntLayer) {
                     this.addChild(this.__forntLayer);
                 }
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(child) {
+                if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop || child == this.$menu || child == this.$drag) {
+                    return;
+                }
+                _get(Object.getPrototypeOf(Stage.prototype), "removeChild", this).call(this, child);
             }
 
             ///////////////////////////////////////触摸事件处理///////////////////////////////////////
@@ -10753,6 +10788,11 @@ var flower = {};
                     }
                 }
                 return i;
+            }
+        }, {
+            key: "toString",
+            value: function toString() {
+                return "<" + this.name + "/>";
             }
         }], [{
             key: "parse",

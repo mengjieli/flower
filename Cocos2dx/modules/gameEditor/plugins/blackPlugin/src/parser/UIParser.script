@@ -11,6 +11,33 @@ var UIParser = (function (_super) {
     }
 
     UIParser.prototype.load = function () {
+        //分析名称
+        this.data.name.value = this.xml.name.split(":")[1];
+        //分析是否为 UI 组件
+        var nameSign = this.xml.name.split(":")[0];
+        var name = this.xml.name.split(":")[1];
+        if (nameSign == "f") {
+            var displays = [
+                "Bitmap", "BlendMode", "Mask", "Shape", "Sprite", "Stage", "TextField", "TextInput"
+            ];
+            for (var i = 0; i < displays.length; i++) {
+                if (displays[i] == name) {
+                    this.data.displayType.value = 0;
+                }
+            }
+            var uiComponents = [
+                "Label", "Input", "TextArea", "Image", "Group", "ScrollBar", "HScrollBar", "VScrollBar",
+                "Button", "Rect", "MaskUI", "Scroller", "DataGroup", "ItemRenderer", "ToggleButton", "ToggleSwitch",
+                "RadioButton", "RadioButtonGroup", "ListBase", "List", "TabBar", "ViewStack", "ComboBox", "Panel",
+                "Alert", "Tree", "RichText"
+            ];
+            for (var i = 0; i < uiComponents.length; i++) {
+                if (uiComponents[i] == name) {
+                    this.data.displayType.value = 1;
+                    break;
+                }
+            }
+        }
         //分析属性
         for (var i = 0; i < this.xml.attributes.length; i++) {
             var attribute = this.xml.attributes[i];
@@ -38,11 +65,10 @@ var UIParser = (function (_super) {
                 child.content = element;
             } else {
                 child.type = 1;
-                var data = flower.DataManager.createData("ue.UI");
                 var ui = new UIParser(element, this.uiFile);
                 ui.addListener(flower.Event.COMPLETE, this.loadUIComplete, this);
                 ui.load();
-                child.content = data;
+                child.content = ui.data;
             }
             this.data.children.push(child);
         }

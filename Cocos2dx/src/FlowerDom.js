@@ -2128,6 +2128,15 @@ var flower = {};
     //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
     //////////////////////////File:flower/language/Language.js///////////////////////////
+
+    var Language = function Language() {
+        _classCallCheck(this, Language);
+    };
+
+    Language.currentLanguage = "";
+    Language.__languages = [];
+
+
     var $locale_strings = {};
 
     /**
@@ -2155,6 +2164,7 @@ var flower = {};
     }
 
     flower.sys.getLanguage = getLanguage;
+
     //////////////////////////End File:flower/language/Language.js///////////////////////////
 
     //////////////////////////File:flower/language/zh_CN.js///////////////////////////
@@ -5400,6 +5410,21 @@ var flower = {};
                 }
             }
         }, {
+            key: "$startNativeInput",
+            value: function $startNativeInput() {
+                this.$nativeShow.startInput();
+            }
+        }, {
+            key: "$stopNativeInput",
+            value: function $stopNativeInput() {
+                this.$nativeShow.stopInput();
+            }
+        }, {
+            key: "$getNativeText",
+            value: function $getNativeText() {
+                return this.$nativeShow.getNativeText();
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 if (this.$hasFlags(0x0800)) {
@@ -5772,6 +5797,8 @@ var flower = {};
 
             _this22.__stage = _this22;
             Stage.stages.push(_this22);
+            _this22.$input = new flower.TextInput();
+            _this22.addChild(_this22.$input);
             _this22.$background = new Shape();
             _this22.__forntLayer = new Sprite();
             _this22.addChild(_this22.__forntLayer);
@@ -5791,9 +5818,17 @@ var flower = {};
             key: "addChildAt",
             value: function addChildAt(child, index) {
                 _get(Object.getPrototypeOf(Stage.prototype), "addChildAt", this).call(this, child, index);
-                if (child != this.__forntLayer) {
+                if (child != this.__forntLayer && this.__forntLayer) {
                     this.addChild(this.__forntLayer);
                 }
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(child) {
+                if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop || child == this.$menu || child == this.$drag) {
+                    return;
+                }
+                _get(Object.getPrototypeOf(Stage.prototype), "removeChild", this).call(this, child);
             }
 
             ///////////////////////////////////////触摸事件处理///////////////////////////////////////
@@ -11078,6 +11113,11 @@ var flower = {};
                     }
                 }
                 return i;
+            }
+        }, {
+            key: "toString",
+            value: function toString() {
+                return "<" + this.name + "/>";
             }
         }], [{
             key: "parse",
