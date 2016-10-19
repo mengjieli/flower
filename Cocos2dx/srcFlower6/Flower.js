@@ -3867,6 +3867,7 @@ class Sprite extends DisplayObject {
         }
         //super.$onFrameEnd();
         Stage.displayCount++;
+        Stage.spriteCount++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4331,6 +4332,7 @@ class TextField extends DisplayObject {
         }
         //super.$onFrameEnd();
         Stage.displayCount++;
+        Stage.textCount++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4904,6 +4906,7 @@ class Shape extends DisplayObject {
         this.$redraw();
         //super.$onFrameEnd();
         Stage.displayCount++;
+        Stage.shapeCount++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4930,6 +4933,10 @@ flower.Shape = Shape;
 class Stage extends Sprite {
 
     static displayCount = 0;
+    static textCount = 0;
+    static bitmapCount = 0;
+    static shapeCount = 0;
+    static spriteCount = 0;
 
     __mouseX = 0;
     __mouseY = 0;
@@ -5375,6 +5382,10 @@ class Stage extends Sprite {
 
     $onFrameEnd() {
         Stage.displayCount = 0;
+        Stage.textCount = 0;
+        Stage.bitmapCount = 0;
+        Stage.shapeCount = 0;
+        Stage.spriteCount = 0;
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
         var rightClickList = this.__nativeRightClickEvent;
@@ -5411,8 +5422,9 @@ class Stage extends Sprite {
             this.$dispatchKeyEvent(this.$keyEvents.shift());
         }
         super.$onFrameEnd();
-        trace("DisplayCount:",Stage.displayCount);
         //this.$background.$onFrameEnd();
+        Stage.bitmapCount = Stage.displayCount - Stage.textCount - Stage.shapeCount - Stage.spriteCount;
+        //trace("Display:", Stage.displayCount, "  Text:", Stage.textCount, "  Bitmap:", Stage.bitmapCount, "  Shape:", Stage.shapeCount, "  Sprite:", Stage.spriteCount);
     }
 
     $setWidth(val) {

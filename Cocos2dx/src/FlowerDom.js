@@ -4645,6 +4645,7 @@ var flower = {};
                 }
                 //super.$onFrameEnd();
                 Stage.displayCount++;
+                Stage.spriteCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5095,6 +5096,7 @@ var flower = {};
                 }
                 //super.$onFrameEnd();
                 Stage.displayCount++;
+                Stage.textCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5721,6 +5723,7 @@ var flower = {};
                 this.$redraw();
                 //super.$onFrameEnd();
                 Stage.displayCount++;
+                Stage.shapeCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -6247,6 +6250,10 @@ var flower = {};
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 Stage.displayCount = 0;
+                Stage.textCount = 0;
+                Stage.bitmapCount = 0;
+                Stage.shapeCount = 0;
+                Stage.spriteCount = 0;
                 var touchList = this.__nativeTouchEvent;
                 var mouseMoveList = this.__nativeMouseMoveEvent;
                 var rightClickList = this.__nativeRightClickEvent;
@@ -6283,8 +6290,9 @@ var flower = {};
                     this.$dispatchKeyEvent(this.$keyEvents.shift());
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
-                trace("DisplayCount:", Stage.displayCount);
                 //this.$background.$onFrameEnd();
+                Stage.bitmapCount = Stage.displayCount - Stage.textCount - Stage.shapeCount - Stage.spriteCount;
+                //trace("Display:", Stage.displayCount, "  Text:", Stage.textCount, "  Bitmap:", Stage.bitmapCount, "  Shape:", Stage.shapeCount, "  Sprite:", Stage.spriteCount);
             }
         }, {
             key: "$setWidth",
@@ -6372,6 +6380,10 @@ var flower = {};
     }(Sprite);
 
     Stage.displayCount = 0;
+    Stage.textCount = 0;
+    Stage.bitmapCount = 0;
+    Stage.shapeCount = 0;
+    Stage.spriteCount = 0;
     Stage.stages = [];
 
 

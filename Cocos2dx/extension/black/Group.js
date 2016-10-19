@@ -160,7 +160,6 @@ class Group extends flower.Sprite {
                     }
                 }
                 //super.$onFrameEnd();
-                flower.Stage.displayCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -190,7 +189,6 @@ class Group extends flower.Sprite {
                     }
                 }
                 //super.$onFrameEnd();
-                flower.Stage.displayCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -219,7 +217,6 @@ class Group extends flower.Sprite {
                     }
                 }
                 //super.$onFrameEnd();
-                flower.Stage.displayCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -249,7 +246,6 @@ class Group extends flower.Sprite {
                 }
             }
             //super.$onFrameEnd();
-            flower.Stage.displayCount++;
             var p = this.$DisplayObject;
             if (this.$hasFlags(0x0002)) {
                 this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -257,6 +253,8 @@ class Group extends flower.Sprite {
 
             this.$resetLayout();
         }
+        flower.Stage.displayCount++;
+        flower.Stage.spriteCount++;
     }
 
     $getContentWidth() {

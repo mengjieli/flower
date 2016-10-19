@@ -249,6 +249,7 @@ class Shape extends DisplayObject {
         this.$redraw();
         //super.$onFrameEnd();
         Stage.displayCount++;
+        Stage.shapeCount++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());

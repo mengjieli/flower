@@ -2600,7 +2600,6 @@ var $root = eval("this");
                             }
                         }
                         //super.$onFrameEnd();
-                        flower.Stage.displayCount++;
                         var p = this.$DisplayObject;
                         if (this.$hasFlags(0x0002)) {
                             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -2630,7 +2629,6 @@ var $root = eval("this");
                             }
                         }
                         //super.$onFrameEnd();
-                        flower.Stage.displayCount++;
                         var p = this.$DisplayObject;
                         if (this.$hasFlags(0x0002)) {
                             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -2659,7 +2657,6 @@ var $root = eval("this");
                             }
                         }
                         //super.$onFrameEnd();
-                        flower.Stage.displayCount++;
                         var p = this.$DisplayObject;
                         if (this.$hasFlags(0x0002)) {
                             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -2689,7 +2686,6 @@ var $root = eval("this");
                         }
                     }
                     //super.$onFrameEnd();
-                    flower.Stage.displayCount++;
                     var p = this.$DisplayObject;
                     if (this.$hasFlags(0x0002)) {
                         this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -2697,6 +2693,8 @@ var $root = eval("this");
 
                     this.$resetLayout();
                 }
+                flower.Stage.displayCount++;
+                flower.Stage.spriteCount++;
             }
         }, {
             key: "$getContentWidth",
@@ -4844,6 +4842,7 @@ var $root = eval("this");
                 }
                 //super.$onFrameEnd();
                 flower.Stage.displayCount++;
+                flower.Stage.textCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5386,6 +5385,7 @@ var $root = eval("this");
                 this.$redraw();
                 //super.$onFrameEnd();
                 flower.Stage.displayCount++;
+                flower.Stage.shapeCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
