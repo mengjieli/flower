@@ -515,6 +515,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     $onFrameEnd() {
+        Stage.displayCount++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());

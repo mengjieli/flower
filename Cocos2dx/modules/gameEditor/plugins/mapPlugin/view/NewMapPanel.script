@@ -1,7 +1,6 @@
 function init() {
     var change = function (e) {
         this.path = flower.Path.joinPath(this.data.path, this.nameInput.text + ".json");
-        trace("???",this.data.path,this.path)
         this.pathLabel.text = "路径: " + this.path;
     };
     change.apply(this);
@@ -13,7 +12,7 @@ function onSure() {
         software.Alert.show("名称不能为空");
     } else {
         this.closePanel();
-        var data = flower.DataManager.createData("dg.DungeonData");
+        var data = flower.DataManager.createData("map.Map");
         var cfg = data.value;
         saveFile(this.path, JSON.stringify(cfg), function (flag) {
             if (flag) {
@@ -25,4 +24,4 @@ function onSure() {
     }
 }
 
-setNewFilePanel("Dungeon", NewDungeonPanel);
+setNewFilePanel("Map", NewMapPanel);

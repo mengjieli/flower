@@ -1783,7 +1783,9 @@ var flower = {};
                 CoreTime.lastTimeGap = gap;
                 CoreTime.currentTime += gap;
                 EnterFrame.$update(CoreTime.currentTime, gap);
-                Stage.$onFrameEnd();
+                if (CoreTime.$playEnterFrame) {
+                    Stage.$onFrameEnd();
+                }
                 TextureManager.getInstance().$check();
             }
         }, {
@@ -1797,6 +1799,7 @@ var flower = {};
     }();
 
     CoreTime.currentTime = 0;
+    CoreTime.$playEnterFrame = true;
 
 
     flower.CoreTime = CoreTime;
@@ -3767,6 +3770,7 @@ var flower = {};
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
+                Stage.displayCount++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4310,9 +4314,16 @@ var flower = {};
                     this.$removeFlags(0x0100);
                 }
                 for (var i = 0, len = children.length; i < len; i++) {
-                    children[i].$onFrameEnd();
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
                 }
-                _get(Object.getPrototypeOf(Sprite.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "$releaseContainer",
@@ -4757,7 +4768,12 @@ var flower = {};
                 if (this.$hasFlags(0x0800)) {
                     this.$getContentBounds();
                 }
-                _get(Object.getPrototypeOf(TextField.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",
@@ -5378,7 +5394,12 @@ var flower = {};
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 this.$redraw();
-                _get(Object.getPrototypeOf(Shape.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",
@@ -5900,6 +5921,7 @@ var flower = {};
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
+                Stage.displayCount = 0;
                 var touchList = this.__nativeTouchEvent;
                 var mouseMoveList = this.__nativeMouseMoveEvent;
                 var rightClickList = this.__nativeRightClickEvent;
@@ -5936,6 +5958,7 @@ var flower = {};
                     this.$dispatchKeyEvent(this.$keyEvents.shift());
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
+                trace("DisplayCount:", Stage.displayCount);
                 //this.$background.$onFrameEnd();
             }
         }, {
@@ -6023,6 +6046,7 @@ var flower = {};
         return Stage;
     }(Sprite);
 
+    Stage.displayCount = 0;
     Stage.stages = [];
 
 
@@ -10450,6 +10474,9 @@ var flower = {};
         }, {
             key: "joinPath",
             value: function joinPath(path1, path2) {
+                if (path1.charAt(path1.length - 1) != "/" && path1.split("/")[path1.split("/").length - 1].split(".").length == 1) {
+                    path1 += "/";
+                }
                 var path = path1;
                 if (path.charAt(path.length - 1) != "/") {
                     for (var i = path.length - 2; i >= 0; i--) {

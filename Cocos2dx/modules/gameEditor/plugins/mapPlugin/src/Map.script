@@ -1,16 +1,3 @@
-//setDirectionMenu("Map", [
-//    {
-//        "label": "测试菜单",
-//        "isVisible": function (item) {
-//            trace("是否可见", flower.ObjectDo.toString(item));
-//            return true;
-//        },
-//        "click": function (item) {
-//            trace("点击", flower.ObjectDo.toString(item));
-//        }
-//    }
-//]);
-
 var Map = (function (_super) {
 
     __extends(Map, _super);
@@ -31,3 +18,4 @@ var Map = (function (_super) {
 //UIParser.registerLocalUIClass("Map", Map, "dg");
 
 //module.Map = Map;
+

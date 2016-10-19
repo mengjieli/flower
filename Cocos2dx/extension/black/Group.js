@@ -141,24 +141,120 @@ class Group extends flower.Sprite {
             var count = 6;
             while (count && this.$hasFlags(0x1000)) {
                 this.$validateUIComponent();
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
                 flag = true;
                 count--;
             }
             if (!flag) {
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
             }
             while (count && this.$hasFlags(0x1000)) {
                 this.$validateUIComponent();
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
                 flag = true;
                 count--;
             }
         } else {
-            super.$onFrameEnd();
+            //super.$onFrameEnd();
+            var children = this.__children;
+            /**
+             * 子对象序列改变
+             */
+            if (this.$hasFlags(0x0100)) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                this.$nativeShow.resetChildIndex(children);
+                this.$removeFlags(0x0100);
+            }
+            for (var i = 0, len = children.length; i < len; i++) {
+                if (children[i].visible) {
+                    children[i].$onFrameEnd();
+                }
+            }
+            //super.$onFrameEnd();
+            flower.Stage.displayCount++;
+            var p = this.$DisplayObject;
+            if (this.$hasFlags(0x0002)) {
+                this.$nativeShow.setAlpha(this.$getConcatAlpha());
+            }
+
             this.$resetLayout();
         }
     }

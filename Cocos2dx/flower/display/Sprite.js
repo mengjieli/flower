@@ -271,9 +271,16 @@ class Sprite extends DisplayObject {
             this.$removeFlags(0x0100);
         }
         for (var i = 0, len = children.length; i < len; i++) {
-            children[i].$onFrameEnd();
+            if (children[i].visible) {
+                children[i].$onFrameEnd();
+            }
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     get numChildren() {

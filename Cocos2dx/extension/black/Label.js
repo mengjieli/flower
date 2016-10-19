@@ -76,10 +76,19 @@ class Label extends flower.TextField {
     }
 
     $onFrameEnd() {
-        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-        //    this.$validateUIComponent();
-        //}
-        super.$onFrameEnd();
+        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+            this.$validateUIComponent();
+        }
+        //super.$onFrameEnd();
+        if (this.$hasFlags(0x0800)) {
+            this.$getContentBounds();
+        }
+        //super.$onFrameEnd();
+        flower.Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {

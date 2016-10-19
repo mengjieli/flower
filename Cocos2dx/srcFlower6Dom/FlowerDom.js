@@ -1929,12 +1929,15 @@ class CoreTime {
 
     static currentTime = 0;
     static lastTimeGap;
+    static $playEnterFrame = true;
 
     static $run(gap) {
         CoreTime.lastTimeGap = gap;
         CoreTime.currentTime += gap;
         EnterFrame.$update(CoreTime.currentTime, gap);
-        Stage.$onFrameEnd();
+        if(CoreTime.$playEnterFrame) {
+            Stage.$onFrameEnd();
+        }
         TextureManager.getInstance().$check();
     }
 
@@ -3665,6 +3668,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     $onFrameEnd() {
+        Stage.displayCount++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4165,9 +4169,16 @@ class Sprite extends DisplayObject {
             this.$removeFlags(0x0100);
         }
         for (var i = 0, len = children.length; i < len; i++) {
-            children[i].$onFrameEnd();
+            if (children[i].visible) {
+                children[i].$onFrameEnd();
+            }
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     get numChildren() {
@@ -4626,7 +4637,12 @@ class TextField extends DisplayObject {
         if (this.$hasFlags(0x0800)) {
             this.$getContentBounds();
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {
@@ -5194,7 +5210,12 @@ class Shape extends DisplayObject {
 
     $onFrameEnd() {
         this.$redraw();
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {
@@ -5215,6 +5236,8 @@ flower.Shape = Shape;
 
 //////////////////////////File:flower/display/Stage.js///////////////////////////
 class Stage extends Sprite {
+
+    static displayCount = 0;
 
     __mouseX = 0;
     __mouseY = 0;
@@ -5659,6 +5682,7 @@ class Stage extends Sprite {
     ///////////////////////////////////////键盘事件处理///////////////////////////////////////
 
     $onFrameEnd() {
+        Stage.displayCount = 0;
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
         var rightClickList = this.__nativeRightClickEvent;
@@ -5695,6 +5719,7 @@ class Stage extends Sprite {
             this.$dispatchKeyEvent(this.$keyEvents.shift());
         }
         super.$onFrameEnd();
+        trace("DisplayCount:",Stage.displayCount);
         //this.$background.$onFrameEnd();
     }
 
@@ -9817,6 +9842,9 @@ class Path {
     }
 
     static joinPath(path1, path2) {
+        if (path1.charAt(path1.length - 1) != "/" && path1.split("/")[path1.split("/").length - 1].split(".").length == 1) {
+            path1 += "/";
+        }
         var path = path1;
         if (path.charAt(path.length - 1) != "/") {
             for (var i = path.length - 2; i >= 0; i--) {
@@ -9832,7 +9860,7 @@ class Path {
             path2 = path2.slice(1, path2.length);
         }
         while ((path2.slice(0, 2) == "./" || path2.slice(0, 3) == "../") && path != "") {
-            if(path2.slice(0, 2) == "./") {
+            if (path2.slice(0, 2) == "./") {
                 path2 = path2.slice(2, path2.length);
             } else {
                 path2 = path2.slice(3, path2.length);

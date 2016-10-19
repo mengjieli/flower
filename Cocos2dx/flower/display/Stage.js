@@ -1,5 +1,7 @@
 class Stage extends Sprite {
 
+    static displayCount = 0;
+
     __mouseX = 0;
     __mouseY = 0;
     __forntLayer;
@@ -443,6 +445,7 @@ class Stage extends Sprite {
     ///////////////////////////////////////键盘事件处理///////////////////////////////////////
 
     $onFrameEnd() {
+        Stage.displayCount = 0;
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
         var rightClickList = this.__nativeRightClickEvent;
@@ -479,6 +482,7 @@ class Stage extends Sprite {
             this.$dispatchKeyEvent(this.$keyEvents.shift());
         }
         super.$onFrameEnd();
+        trace("DisplayCount:",Stage.displayCount);
         //this.$background.$onFrameEnd();
     }
 

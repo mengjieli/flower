@@ -2307,24 +2307,120 @@ class Group extends flower.Sprite {
             var count = 6;
             while (count && this.$hasFlags(0x1000)) {
                 this.$validateUIComponent();
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
                 flag = true;
                 count--;
             }
             if (!flag) {
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
             }
             while (count && this.$hasFlags(0x1000)) {
                 this.$validateUIComponent();
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
                 flag = true;
                 count--;
             }
         } else {
-            super.$onFrameEnd();
+            //super.$onFrameEnd();
+            var children = this.__children;
+            /**
+             * 子对象序列改变
+             */
+            if (this.$hasFlags(0x0100)) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                this.$nativeShow.resetChildIndex(children);
+                this.$removeFlags(0x0100);
+            }
+            for (var i = 0, len = children.length; i < len; i++) {
+                if (children[i].visible) {
+                    children[i].$onFrameEnd();
+                }
+            }
+            //super.$onFrameEnd();
+            flower.Stage.displayCount++;
+            var p = this.$DisplayObject;
+            if (this.$hasFlags(0x0002)) {
+                this.$nativeShow.setAlpha(this.$getConcatAlpha());
+            }
+
             this.$resetLayout();
         }
     }
@@ -2396,13 +2492,17 @@ class RichText extends Group {
             0: "", //text
             1: "", //htmlText
             2: 0,  //lines
-            3: 0,  //positionX
-            4: 0,  //positionY
-            5: [], //cacheTextFields
+            4: 0,  //length
+            5: 0,  //positionX
+            6: 0,  //positionY
+            7: [], //cacheTextFields
             8: "", //lastInputText
-            9: new flower.Shape(),//focus
             10: 0,  //fontColor
             11: 12, //fontSize
+            30: "", //229 firstChar
+            31: false, // is 229
+            32: 0, //inputPos
+            33: new flower.Shape(),//focus
         };
         this.focusEnabled = true;
         this.width = this.height = 100;
@@ -2431,26 +2531,49 @@ class RichText extends Group {
     $startInput() {
         this.__input.text = "";
         this.__input.$startNativeInput();
-        this.addListener(flower.KeyboardEvent.KEY_DOWN,this.__onKeyDown,this);
+        this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.add(this.__update, this);
     }
 
     $stopInput() {
         this.__input.$stopNativeInput();
-        this.removeListener(flower.KeyboardEvent.KEY_DOWN,this.__onKeyDown,this);
+        this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.remove(this.__update, this);
     }
 
     __update() {
-        trace(this.__input.$getNativeText());
+        var p = this.$RichText;
+        var str = this.__input.$getNativeText();
+        if (p[31]) {
+            if (p[30] == "") {
+                if (str.length) {
+                    p[30] = str.charAt(0);
+                }
+            } else {
+                if (!str.length || str.charAt(0) != p[30]) {
+                    this.text += str;
+                    this.__input.text = "";
+                    this.$RichText[7] = false;
+                }
+            }
+        } else {
+            this.text += str;
+            this.__input.text = "";
+        }
     }
 
     __onKeyDown(e) {
-        trace(e.keyCode);
+        if (e.keyCode == 229) {
+            if(!this.$RichText[31]) {
+                this.$RichText[31] = true;
+                this.$RichText[30] = "";
+            }
+        }
     }
 
     set text(val) {
-
+        this.$RichText[0] += val;
+        trace(this.$RichText[0]);
     }
 
     get text() {
@@ -4317,10 +4440,19 @@ class Label extends flower.TextField {
     }
 
     $onFrameEnd() {
-        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-        //    this.$validateUIComponent();
-        //}
-        super.$onFrameEnd();
+        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+            this.$validateUIComponent();
+        }
+        //super.$onFrameEnd();
+        if (this.$hasFlags(0x0800)) {
+            this.$getContentBounds();
+        }
+        //super.$onFrameEnd();
+        flower.Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {
@@ -4796,7 +4928,14 @@ class Rect extends flower.Shape {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        this.$redraw();
+        //super.$onFrameEnd();
+        flower.Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {

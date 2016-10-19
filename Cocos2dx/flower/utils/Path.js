@@ -36,6 +36,9 @@ class Path {
     }
 
     static joinPath(path1, path2) {
+        if (path1.charAt(path1.length - 1) != "/" && path1.split("/")[path1.split("/").length - 1].split(".").length == 1) {
+            path1 += "/";
+        }
         var path = path1;
         if (path.charAt(path.length - 1) != "/") {
             for (var i = path.length - 2; i >= 0; i--) {
@@ -51,7 +54,7 @@ class Path {
             path2 = path2.slice(1, path2.length);
         }
         while ((path2.slice(0, 2) == "./" || path2.slice(0, 3) == "../") && path != "") {
-            if(path2.slice(0, 2) == "./") {
+            if (path2.slice(0, 2) == "./") {
                 path2 = path2.slice(2, path2.length);
             } else {
                 path2 = path2.slice(3, path2.length);

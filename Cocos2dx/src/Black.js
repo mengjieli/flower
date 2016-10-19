@@ -2581,24 +2581,120 @@ var $root = eval("this");
                     var count = 6;
                     while (count && this.$hasFlags(0x1000)) {
                         this.$validateUIComponent();
-                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        //super.$onFrameEnd();
+                        var children = this.__children;
+                        /**
+                         * 子对象序列改变
+                         */
+                        if (this.$hasFlags(0x0100)) {
+                            if (!this.$nativeShow) {
+                                $warn(1002, this.name);
+                                return;
+                            }
+                            this.$nativeShow.resetChildIndex(children);
+                            this.$removeFlags(0x0100);
+                        }
+                        for (var i = 0, len = children.length; i < len; i++) {
+                            if (children[i].visible) {
+                                children[i].$onFrameEnd();
+                            }
+                        }
+                        //super.$onFrameEnd();
+                        flower.Stage.displayCount++;
+                        var p = this.$DisplayObject;
+                        if (this.$hasFlags(0x0002)) {
+                            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                        }
+
                         this.$resetLayout();
                         flag = true;
                         count--;
                     }
                     if (!flag) {
-                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        //super.$onFrameEnd();
+                        var children = this.__children;
+                        /**
+                         * 子对象序列改变
+                         */
+                        if (this.$hasFlags(0x0100)) {
+                            if (!this.$nativeShow) {
+                                $warn(1002, this.name);
+                                return;
+                            }
+                            this.$nativeShow.resetChildIndex(children);
+                            this.$removeFlags(0x0100);
+                        }
+                        for (var i = 0, len = children.length; i < len; i++) {
+                            if (children[i].visible) {
+                                children[i].$onFrameEnd();
+                            }
+                        }
+                        //super.$onFrameEnd();
+                        flower.Stage.displayCount++;
+                        var p = this.$DisplayObject;
+                        if (this.$hasFlags(0x0002)) {
+                            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                        }
+
                         this.$resetLayout();
                     }
                     while (count && this.$hasFlags(0x1000)) {
                         this.$validateUIComponent();
-                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        //super.$onFrameEnd();
+                        var children = this.__children;
+                        /**
+                         * 子对象序列改变
+                         */
+                        if (this.$hasFlags(0x0100)) {
+                            if (!this.$nativeShow) {
+                                $warn(1002, this.name);
+                                return;
+                            }
+                            this.$nativeShow.resetChildIndex(children);
+                            this.$removeFlags(0x0100);
+                        }
+                        for (var i = 0, len = children.length; i < len; i++) {
+                            if (children[i].visible) {
+                                children[i].$onFrameEnd();
+                            }
+                        }
+                        //super.$onFrameEnd();
+                        flower.Stage.displayCount++;
+                        var p = this.$DisplayObject;
+                        if (this.$hasFlags(0x0002)) {
+                            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                        }
+
                         this.$resetLayout();
                         flag = true;
                         count--;
                     }
                 } else {
-                    _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                    //super.$onFrameEnd();
+                    var children = this.__children;
+                    /**
+                     * 子对象序列改变
+                     */
+                    if (this.$hasFlags(0x0100)) {
+                        if (!this.$nativeShow) {
+                            $warn(1002, this.name);
+                            return;
+                        }
+                        this.$nativeShow.resetChildIndex(children);
+                        this.$removeFlags(0x0100);
+                    }
+                    for (var i = 0, len = children.length; i < len; i++) {
+                        if (children[i].visible) {
+                            children[i].$onFrameEnd();
+                        }
+                    }
+                    //super.$onFrameEnd();
+                    flower.Stage.displayCount++;
+                    var p = this.$DisplayObject;
+                    if (this.$hasFlags(0x0002)) {
+                        this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                    }
+
                     this.$resetLayout();
                 }
             }
@@ -2690,14 +2786,18 @@ var $root = eval("this");
                 0: "", //text
                 1: "", //htmlText
                 2: 0, //lines
-                3: 0, //positionX
-                4: 0, //positionY
-                5: [], //cacheTextFields
+                4: 0, //length
+                5: 0, //positionX
+                6: 0, //positionY
+                7: [], //cacheTextFields
                 8: "", //lastInputText
-                9: new flower.Shape(), //focus
                 10: 0, //fontColor
-                11: 12 };
-            //fontSize
+                11: 12, //fontSize
+                30: "", //229 firstChar
+                31: false, // is 229
+                32: 0, //inputPos
+                33: new flower.Shape() };
+            //focus
             _this13.focusEnabled = true;
             _this13.width = _this13.height = 100;
             _this13.addListener(flower.Event.FOCUS_IN, _this13.$startInput, _this13);
@@ -2740,16 +2840,41 @@ var $root = eval("this");
         }, {
             key: "__update",
             value: function __update() {
-                trace(this.__input.$getNativeText());
+                var p = this.$RichText;
+                var str = this.__input.$getNativeText();
+                if (p[31]) {
+                    if (p[30] == "") {
+                        if (str.length) {
+                            p[30] = str.charAt(0);
+                        }
+                    } else {
+                        if (!str.length || str.charAt(0) != p[30]) {
+                            this.text += str;
+                            this.__input.text = "";
+                            this.$RichText[7] = false;
+                        }
+                    }
+                } else {
+                    this.text += str;
+                    this.__input.text = "";
+                }
             }
         }, {
             key: "__onKeyDown",
             value: function __onKeyDown(e) {
-                trace(e.keyCode);
+                if (e.keyCode == 229) {
+                    if (!this.$RichText[31]) {
+                        this.$RichText[31] = true;
+                        this.$RichText[30] = "";
+                    }
+                }
             }
         }, {
             key: "text",
-            set: function set(val) {},
+            set: function set(val) {
+                this.$RichText[0] += val;
+                trace(this.$RichText[0]);
+            },
             get: function get() {
                 return this.$RichText[0];
             }
@@ -4710,10 +4835,19 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                //    this.$validateUIComponent();
-                //}
-                _get(Object.getPrototypeOf(Label.prototype), "$onFrameEnd", this).call(this);
+                if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+                    this.$validateUIComponent();
+                }
+                //super.$onFrameEnd();
+                if (this.$hasFlags(0x0800)) {
+                    this.$getContentBounds();
+                }
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",
@@ -5248,7 +5382,14 @@ var $root = eval("this");
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
                 }
-                _get(Object.getPrototypeOf(Rect.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                this.$redraw();
+                //super.$onFrameEnd();
+                flower.Stage.displayCount++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",

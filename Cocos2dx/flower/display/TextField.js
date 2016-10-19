@@ -213,7 +213,12 @@ class TextField extends DisplayObject {
         if (this.$hasFlags(0x0800)) {
             this.$getContentBounds();
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {

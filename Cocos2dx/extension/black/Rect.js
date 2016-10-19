@@ -160,7 +160,14 @@ class Rect extends flower.Shape {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        this.$redraw();
+        //super.$onFrameEnd();
+        flower.Stage.displayCount++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {
