@@ -2008,56 +2008,56 @@ var flower = {};
     PlatformWebSocket.webSockets = [];
 
     var DebugInfo = function () {
-        /**
-         *
-         * @type {{}}
-         */
-
         function DebugInfo() {
             _classCallCheck(this, DebugInfo);
-
-            this.objects = {};
-            this.textures = [];
         }
 
-        /**
-         * 所有纹理纹理信息
-         * @type {Array}
-         */
-
-
-        /**
-         * 平台对象纪录
-         * @type {{}}
-         */
-
-
-        _createClass(DebugInfo, [{
+        _createClass(DebugInfo, null, [{
             key: "addTexture",
+
+
+            /**
+             * 显示对象统计
+             */
+
+            /**
+             * 所有纹理纹理信息
+             * @type {Array}
+             */
             value: function addTexture(texture) {
-                this.textures.push(texture);
+                DebugInfo.textures.push(texture);
             }
+
+            /**
+             * 帧遍历显示对象统计
+             * @param texture
+             */
+
+
+            /**
+             * native显示对象统计
+             */
+
         }, {
             key: "delTexture",
             value: function delTexture(texture) {
-                for (var i = 0; i < this.textures.length; i++) {
-                    if (this.textures[i] == texture) {
-                        this.textures.splice(i, 1);
+                var textures = DebugInfo.textures;
+                for (var i = 0; i < textures.length; i++) {
+                    if (textures[i] == texture) {
+                        textures.splice(i, 1);
                         break;
                     }
                 }
-            }
-        }], [{
-            key: "getInstance",
-            value: function getInstance() {
-                return DebugInfo.instance;
             }
         }]);
 
         return DebugInfo;
     }();
 
-    DebugInfo.instance = new DebugInfo();
+    DebugInfo.textures = [];
+    DebugInfo.nativeDisplayInfo = new NativeDisplayInfo();
+    DebugInfo.displayInfo = new DisplayInfo();
+    DebugInfo.frameInfo = new FrameInfo();
 
 
     flower.DebugInfo = DebugInfo;
@@ -3575,6 +3575,8 @@ var flower = {};
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
+            //parentFilters
+            DebugInfo.displayInfo.display++;
             return _this15;
         }
 
@@ -3597,7 +3599,6 @@ var flower = {};
 
         _createClass(DisplayObject, [{
             key: "$hasFlags",
-            //parentFilters
             value: function $hasFlags(flags) {
                 return (this.__flags & flags) == flags ? true : false;
             }
@@ -4095,7 +4096,7 @@ var flower = {};
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                Stage.displayCount++;
+                DebugInfo.frameInfo.display++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4168,6 +4169,7 @@ var flower = {};
                 if (this.parent) {
                     this.parent.removeChild(this);
                 }
+                DebugInfo.displayInfo.display--;
                 _get(Object.getPrototypeOf(DisplayObject.prototype), "dispose", this).call(this);
             }
         }, {
@@ -4355,6 +4357,7 @@ var flower = {};
                 0: new flower.Rectangle() //childrenBounds
             };
             _this16.$initContainer();
+            DebugInfo.displayInfo.sprite++;
             return _this16;
         }
 
@@ -4644,8 +4647,8 @@ var flower = {};
                     }
                 }
                 //super.$onFrameEnd();
-                Stage.displayCount++;
-                Stage.spriteCount++;
+                DebugInfo.frameInfo.display++;
+                DebugInfo.frameInfo.sprite++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4664,6 +4667,11 @@ var flower = {};
         }, {
             key: "dispose",
             value: function dispose() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                DebugInfo.displayInfo.sprite--;
                 var children = this.__children;
                 while (children.length) {
                     var child = children[children.length - 1];
@@ -4779,12 +4787,13 @@ var flower = {};
             _this18.texture = texture;
             _this18.$Bitmap = {
                 0: null };
+            //scale9Grid
+            Stage.bitmapCount++;
             return _this18;
         }
 
         _createClass(Bitmap, [{
             key: "$setTexture",
-            //scale9Grid
             value: function $setTexture(val) {
                 if (val == this.__texture) {
                     return false;
@@ -4885,6 +4894,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
+                Stage.bitmapCount--;
                 this.texture = null;
                 _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
                 Platform.release("Bitmap", this.$nativeShow);
@@ -4939,6 +4949,7 @@ var flower = {};
             if (text != "") {
                 _this19.text = text;
             }
+            DebugInfo.displayInfo.text++;
             return _this19;
         }
 
@@ -5095,8 +5106,8 @@ var flower = {};
                     this.$getContentBounds();
                 }
                 //super.$onFrameEnd();
-                Stage.displayCount++;
-                Stage.textCount++;
+                DebugInfo.frameInfo.display++;
+                DebugInfo.frameInfo.text++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5109,6 +5120,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
+                DebugInfo.displayInfo.text--;
                 _get(Object.getPrototypeOf(TextField.prototype), "dispose", this).call(this);
                 Platform.release("TextField", this.$nativeShow);
                 this.$nativeShow = null;
@@ -5530,6 +5542,7 @@ var flower = {};
                 9: [] //record
             };
             _this21.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            DebugInfo.displayInfo.shape++;
             return _this21;
         }
 
@@ -5722,8 +5735,8 @@ var flower = {};
             value: function $onFrameEnd() {
                 this.$redraw();
                 //super.$onFrameEnd();
-                Stage.displayCount++;
-                Stage.shapeCount++;
+                DebugInfo.frameInfo.display++;
+                DebugInfo.frameInfo.shape++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5732,6 +5745,7 @@ var flower = {};
         }, {
             key: "dispose",
             value: function dispose() {
+                DebugInfo.displayInfo.shape--;
                 if (!this.$nativeShow) {
                     $warn(1002, this.name);
                     return;
@@ -6249,11 +6263,11 @@ var flower = {};
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                Stage.displayCount = 0;
-                Stage.textCount = 0;
-                Stage.bitmapCount = 0;
-                Stage.shapeCount = 0;
-                Stage.spriteCount = 0;
+                DebugInfo.frameInfo.display = 0;
+                DebugInfo.frameInfo.text = 0;
+                DebugInfo.frameInfo.bitmap = 0;
+                DebugInfo.frameInfo.shape = 0;
+                DebugInfo.frameInfo.sprite = 0;
                 var touchList = this.__nativeTouchEvent;
                 var mouseMoveList = this.__nativeMouseMoveEvent;
                 var rightClickList = this.__nativeRightClickEvent;
@@ -6291,8 +6305,8 @@ var flower = {};
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
                 //this.$background.$onFrameEnd();
-                Stage.bitmapCount = Stage.displayCount - Stage.textCount - Stage.shapeCount - Stage.spriteCount;
-                //trace("Display:", Stage.displayCount, "  Text:", Stage.textCount, "  Bitmap:", Stage.bitmapCount, "  Shape:", Stage.shapeCount, "  Sprite:", Stage.spriteCount);
+                DebugInfo.frameInfo.bitmap = DebugInfo.frameInfo.display - DebugInfo.frameInfo.text - DebugInfo.frameInfo.shape - DebugInfo.frameInfo.sprite;
+                //trace("Display:", DebugInfo.frameInfo.display, "  Text:", DebugInfo.frameInfo.text, "  Bitmap:", DebugInfo.frameInfo.bitmap, "  Shape:", DebugInfo.frameInfo.shape, "  Sprite:", DebugInfo.frameInfo.sprite);
             }
         }, {
             key: "$setWidth",
@@ -6379,11 +6393,6 @@ var flower = {};
         return Stage;
     }(Sprite);
 
-    Stage.displayCount = 0;
-    Stage.textCount = 0;
-    Stage.bitmapCount = 0;
-    Stage.shapeCount = 0;
-    Stage.spriteCount = 0;
     Stage.stages = [];
 
 
@@ -6959,7 +6968,7 @@ var flower = {};
                 var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
                 this.list.push(texture);
                 if (DEBUG) {
-                    DebugInfo.getInstance().addTexture(texture);
+                    DebugInfo.addTexture(texture);
                 }
                 return texture;
             }
@@ -6993,7 +7002,7 @@ var flower = {};
                         if (texture.dispose()) {
                             this.list.splice(i, 1);
                             if (DEBUG) {
-                                DebugInfo.getInstance().delTexture(texture);
+                                DebugInfo.delTexture(texture);
                             }
                             i--;
                         }

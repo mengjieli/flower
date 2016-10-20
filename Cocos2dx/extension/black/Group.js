@@ -253,8 +253,8 @@ class Group extends flower.Sprite {
 
             this.$resetLayout();
         }
-        flower.Stage.displayCount++;
-        flower.Stage.spriteCount++;
+        flower.DebugInfo.frameInfo.display++;
+        flower.DebugInfo.frameInfo.sprite++;
     }
 
     $getContentWidth() {

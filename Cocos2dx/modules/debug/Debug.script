@@ -14,7 +14,7 @@ function start() {
  * @param gap
  */
 function update(now, gap) {
-    var textures = flower.DebugInfo.getInstance().textures;
+    var textures = flower.DebugInfo.textures;
     var find;
     var txtInfo;
     for (var i = 0; textures.length > i; i++) {

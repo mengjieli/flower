@@ -163,8 +163,8 @@ class Rect extends flower.Shape {
         //super.$onFrameEnd();
         this.$redraw();
         //super.$onFrameEnd();
-        flower.Stage.displayCount++;
-        flower.Stage.shapeCount++;
+        flower.DebugInfo.frameInfo.display++;
+        flower.DebugInfo.frameInfo.shape++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());

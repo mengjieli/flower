@@ -9,6 +9,7 @@ class Sprite extends DisplayObject {
             0: new flower.Rectangle() //childrenBounds
         }
         this.$initContainer();
+        DebugInfo.displayInfo.sprite++;
     }
 
     $initContainer() {
@@ -276,8 +277,8 @@ class Sprite extends DisplayObject {
             }
         }
         //super.$onFrameEnd();
-        Stage.displayCount++;
-        Stage.spriteCount++;
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.sprite++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -302,6 +303,11 @@ class Sprite extends DisplayObject {
     }
 
     dispose() {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        DebugInfo.displayInfo.sprite--;
         var children = this.__children;
         while (children.length) {
             var child = children[children.length - 1];

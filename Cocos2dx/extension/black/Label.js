@@ -84,8 +84,8 @@ class Label extends flower.TextField {
             this.$getContentBounds();
         }
         //super.$onFrameEnd();
-        flower.Stage.displayCount++;
-        flower.Stage.textCount++;
+        flower.DebugInfo.frameInfo.display++;
+        flower.DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());

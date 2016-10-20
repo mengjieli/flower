@@ -16,6 +16,7 @@ class TextField extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
+        DebugInfo.displayInfo.text++;
     }
 
     $checkSettingSize(rect) {
@@ -214,8 +215,8 @@ class TextField extends DisplayObject {
             this.$getContentBounds();
         }
         //super.$onFrameEnd();
-        Stage.displayCount++;
-        Stage.textCount++;
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -227,6 +228,7 @@ class TextField extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
+        DebugInfo.displayInfo.text--;
         super.dispose();
         Platform.release("TextField", this.$nativeShow);
         this.$nativeShow = null;

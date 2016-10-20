@@ -18,6 +18,7 @@ class Shape extends DisplayObject {
             9: []       //record
         };
         this.$nativeShow.draw([{x: 0, y: 0}, {x: 1, y: 0}], 0, 0, 0, 0, 0);
+        DebugInfo.displayInfo.shape++;
     }
 
     drawRect(x, y, width, height) {
@@ -248,8 +249,8 @@ class Shape extends DisplayObject {
     $onFrameEnd() {
         this.$redraw();
         //super.$onFrameEnd();
-        Stage.displayCount++;
-        Stage.shapeCount++;
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.shape++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -257,6 +258,7 @@ class Shape extends DisplayObject {
     }
 
     dispose() {
+        DebugInfo.displayInfo.shape--;
         if (!this.$nativeShow) {
             $warn(1002, this.name);
             return;

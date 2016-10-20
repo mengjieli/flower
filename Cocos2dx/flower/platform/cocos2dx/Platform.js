@@ -119,36 +119,42 @@ class Platform {
             if (pools.Sprite && pools.Sprite.length) {
                 return pools.Sprite.pop();
             }
+            DebugInfo.nativeDisplayInfo.sprite++;
             return new PlatformSprite();
         }
         if (name == "Bitmap") {
             if (pools.Bitmap && pools.Bitmap.length) {
                 return pools.Bitmap.pop();
             }
+            DebugInfo.nativeDisplayInfo.bitmap++;
             return new PlatformBitmap();
         }
         if (name == "TextField") {
             if (pools.TextField && pools.TextField.length) {
                 return pools.TextField.pop();
             }
+            DebugInfo.nativeDisplayInfo.text++;
             return new PlatformTextField();
         }
         if (name == "TextInput") {
             if (pools.TextInput && pools.TextInput.length) {
                 return pools.TextInput.pop();
             }
+            DebugInfo.nativeDisplayInfo.text++;
             return new PlatformTextInput();
         }
         if (name == "Shape") {
             if (pools.Shape && pools.Shape.length) {
                 return pools.Shape.pop();
             }
+            DebugInfo.nativeDisplayInfo.shape++;
             return new PlatformShape();
         }
         if (name == "Mask") {
             if (pools.Mask && pools.Mask.length) {
                 return pools.Mask.pop();
             }
+            DebugInfo.nativeDisplayInfo.sprite++;
             return new PlatformMask();
         }
         return null;

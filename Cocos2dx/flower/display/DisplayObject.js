@@ -67,6 +67,7 @@ class DisplayObject extends EventDispatcher {
             60: [], //filters
             61: [], //parentFilters
         }
+        DebugInfo.displayInfo.display++;
     }
 
     /**
@@ -515,7 +516,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     $onFrameEnd() {
-        Stage.displayCount++;
+        DebugInfo.frameInfo.display++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -580,6 +581,7 @@ class DisplayObject extends EventDispatcher {
         if (this.parent) {
             this.parent.removeChild(this);
         }
+        DebugInfo.displayInfo.display--;
         super.dispose();
     }
 

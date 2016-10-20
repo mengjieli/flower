@@ -10,6 +10,7 @@ class Bitmap extends DisplayObject {
         this.$Bitmap = {
             0: null,    //scale9Grid
         }
+        Stage.bitmapCount++;
     }
 
     $setTexture(val) {
@@ -124,6 +125,7 @@ class Bitmap extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
+        Stage.bitmapCount--;
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);

@@ -2,45 +2,41 @@
  * 调试信息
  */
 class DebugInfo {
-
-    /**
-     * 平台对象纪录
-     * @type {{}}
-     */
-    platformObjects;
-    /**
-     *
-     * @type {{}}
-     */
-    objects = {};
-
     /**
      * 所有纹理纹理信息
      * @type {Array}
      */
-    textures = [];
+    static textures = [];
 
-    constructor() {
+    /**
+     * native显示对象统计
+     */
+    static nativeDisplayInfo = new NativeDisplayInfo();
 
+    /**
+     * 显示对象统计
+     */
+    static displayInfo = new DisplayInfo();
+
+    /**
+     * 帧遍历显示对象统计
+     * @param texture
+     */
+    static frameInfo = new FrameInfo();
+
+
+    static addTexture(texture) {
+        DebugInfo.textures.push(texture);
     }
 
-    addTexture(texture) {
-        this.textures.push(texture);
-    }
-
-    delTexture(texture) {
-        for (var i = 0; i < this.textures.length; i++) {
-            if (this.textures[i] == texture) {
-                this.textures.splice(i, 1);
+    static delTexture(texture) {
+        var textures = DebugInfo.textures;
+        for (var i = 0; i < textures.length; i++) {
+            if (textures[i] == texture) {
+                textures.splice(i, 1);
                 break;
             }
         }
-    }
-
-    static instance = new DebugInfo();
-
-    static getInstance() {
-        return DebugInfo.instance;
     }
 }
 

@@ -1,11 +1,5 @@
 class Stage extends Sprite {
 
-    static displayCount = 0;
-    static textCount = 0;
-    static bitmapCount = 0;
-    static shapeCount = 0;
-    static spriteCount = 0;
-
     __mouseX = 0;
     __mouseY = 0;
     __forntLayer;
@@ -449,11 +443,11 @@ class Stage extends Sprite {
     ///////////////////////////////////////键盘事件处理///////////////////////////////////////
 
     $onFrameEnd() {
-        Stage.displayCount = 0;
-        Stage.textCount = 0;
-        Stage.bitmapCount = 0;
-        Stage.shapeCount = 0;
-        Stage.spriteCount = 0;
+        DebugInfo.frameInfo.display = 0;
+        DebugInfo.frameInfo.text = 0;
+        DebugInfo.frameInfo.bitmap = 0;
+        DebugInfo.frameInfo.shape = 0;
+        DebugInfo.frameInfo.sprite = 0;
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
         var rightClickList = this.__nativeRightClickEvent;
@@ -491,8 +485,8 @@ class Stage extends Sprite {
         }
         super.$onFrameEnd();
         //this.$background.$onFrameEnd();
-        Stage.bitmapCount = Stage.displayCount - Stage.textCount - Stage.shapeCount - Stage.spriteCount;
-        //trace("Display:", Stage.displayCount, "  Text:", Stage.textCount, "  Bitmap:", Stage.bitmapCount, "  Shape:", Stage.shapeCount, "  Sprite:", Stage.spriteCount);
+        DebugInfo.frameInfo.bitmap = DebugInfo.frameInfo.display - DebugInfo.frameInfo.text - DebugInfo.frameInfo.shape - DebugInfo.frameInfo.sprite;
+        //trace("Display:", DebugInfo.frameInfo.display, "  Text:", DebugInfo.frameInfo.text, "  Bitmap:", DebugInfo.frameInfo.bitmap, "  Shape:", DebugInfo.frameInfo.shape, "  Sprite:", DebugInfo.frameInfo.sprite);
     }
 
     $setWidth(val) {

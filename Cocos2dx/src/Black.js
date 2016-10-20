@@ -2693,8 +2693,8 @@ var $root = eval("this");
 
                     this.$resetLayout();
                 }
-                flower.Stage.displayCount++;
-                flower.Stage.spriteCount++;
+                flower.DebugInfo.frameInfo.display++;
+                flower.DebugInfo.frameInfo.sprite++;
             }
         }, {
             key: "$getContentWidth",
@@ -4841,8 +4841,8 @@ var $root = eval("this");
                     this.$getContentBounds();
                 }
                 //super.$onFrameEnd();
-                flower.Stage.displayCount++;
-                flower.Stage.textCount++;
+                flower.DebugInfo.frameInfo.display++;
+                flower.DebugInfo.frameInfo.text++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5384,8 +5384,8 @@ var $root = eval("this");
                 //super.$onFrameEnd();
                 this.$redraw();
                 //super.$onFrameEnd();
-                flower.Stage.displayCount++;
-                flower.Stage.shapeCount++;
+                flower.DebugInfo.frameInfo.display++;
+                flower.DebugInfo.frameInfo.shape++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());

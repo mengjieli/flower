@@ -295,36 +295,42 @@ class Platform {
             if (pools.Sprite && pools.Sprite.length) {
                 return pools.Sprite.pop();
             }
+            DebugInfo.nativeDisplayInfo.sprite++;
             return new PlatformSprite();
         }
         if (name == "Bitmap") {
             if (pools.Bitmap && pools.Bitmap.length) {
                 return pools.Bitmap.pop();
             }
+            DebugInfo.nativeDisplayInfo.bitmap++;
             return new PlatformBitmap();
         }
         if (name == "TextField") {
             if (pools.TextField && pools.TextField.length) {
                 return pools.TextField.pop();
             }
+            DebugInfo.nativeDisplayInfo.text++;
             return new PlatformTextField();
         }
         if (name == "TextInput") {
             if (pools.TextInput && pools.TextInput.length) {
                 return pools.TextInput.pop();
             }
+            DebugInfo.nativeDisplayInfo.text++;
             return new PlatformTextInput();
         }
         if (name == "Shape") {
             if (pools.Shape && pools.Shape.length) {
                 return pools.Shape.pop();
             }
+            DebugInfo.nativeDisplayInfo.shape++;
             return new PlatformShape();
         }
         if (name == "Mask") {
             if (pools.Mask && pools.Mask.length) {
                 return pools.Mask.pop();
             }
+            DebugInfo.nativeDisplayInfo.sprite++;
             return new PlatformMask();
         }
         return null;
@@ -1537,55 +1543,40 @@ class PlatformWebSocket {
 
 
 
-//////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
-/**
- * 调试信息
- */
-class DebugInfo {
+//////////////////////////File:flower/debug/NativeDisplayInfo.js///////////////////////////
+class NativeDisplayInfo {
+    display = 0;
+    text = 0;
+    bitmap = 0;
+    shape = 0;
+    sprite = 0;
+}
+//////////////////////////End File:flower/debug/NativeDisplayInfo.js///////////////////////////
 
-    /**
-     * 平台对象纪录
-     * @type {{}}
-     */
-    platformObjects;
-    /**
-     *
-     * @type {{}}
-     */
-    objects = {};
 
-    /**
-     * 所有纹理纹理信息
-     * @type {Array}
-     */
-    textures = [];
 
-    constructor() {
-
-    }
-
-    addTexture(texture) {
-        this.textures.push(texture);
-    }
-
-    delTexture(texture) {
-        for (var i = 0; i < this.textures.length; i++) {
-            if (this.textures[i] == texture) {
-                this.textures.splice(i, 1);
-                break;
-            }
-        }
-    }
-
-    static instance = new DebugInfo();
-
-    static getInstance() {
-        return DebugInfo.instance;
-    }
+//////////////////////////File:flower/debug/DisplayInfo.js///////////////////////////
+class DisplayInfo {
+    display = 0;
+    text = 0;
+    bitmap = 0;
+    shape = 0;
+    sprite = 0;
 }
 
-flower.DebugInfo = DebugInfo;
-//////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
+//////////////////////////End File:flower/debug/DisplayInfo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
+class FrameInfo {
+    display = 0;
+    text = 0;
+    bitmap = 0;
+    shape = 0;
+    sprite = 0;
+}
+//////////////////////////End File:flower/debug/FrameInfo.js///////////////////////////
 
 
 
@@ -1613,6 +1604,54 @@ class TextureInfo {
 
 flower.TextureInfo = TextureInfo;
 //////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
+/**
+ * 调试信息
+ */
+class DebugInfo {
+    /**
+     * 所有纹理纹理信息
+     * @type {Array}
+     */
+    static textures = [];
+
+    /**
+     * native显示对象统计
+     */
+    static nativeDisplayInfo = new NativeDisplayInfo();
+
+    /**
+     * 显示对象统计
+     */
+    static displayInfo = new DisplayInfo();
+
+    /**
+     * 帧遍历显示对象统计
+     * @param texture
+     */
+    static frameInfo = new FrameInfo();
+
+
+    static addTexture(texture) {
+        DebugInfo.textures.push(texture);
+    }
+
+    static delTexture(texture) {
+        var textures = DebugInfo.textures;
+        for (var i = 0; i < textures.length; i++) {
+            if (textures[i] == texture) {
+                textures.splice(i, 1);
+                break;
+            }
+        }
+    }
+}
+
+flower.DebugInfo = DebugInfo;
+//////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
 
 
 
@@ -2912,6 +2951,7 @@ class DisplayObject extends EventDispatcher {
             60: [], //filters
             61: [], //parentFilters
         }
+        DebugInfo.displayInfo.display++;
     }
 
     /**
@@ -3360,7 +3400,7 @@ class DisplayObject extends EventDispatcher {
     }
 
     $onFrameEnd() {
-        Stage.displayCount++;
+        DebugInfo.frameInfo.display++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -3425,6 +3465,7 @@ class DisplayObject extends EventDispatcher {
         if (this.parent) {
             this.parent.removeChild(this);
         }
+        DebugInfo.displayInfo.display--;
         super.dispose();
     }
 
@@ -3599,6 +3640,7 @@ class Sprite extends DisplayObject {
             0: new flower.Rectangle() //childrenBounds
         }
         this.$initContainer();
+        DebugInfo.displayInfo.sprite++;
     }
 
     $initContainer() {
@@ -3866,8 +3908,8 @@ class Sprite extends DisplayObject {
             }
         }
         //super.$onFrameEnd();
-        Stage.displayCount++;
-        Stage.spriteCount++;
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.sprite++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -3892,6 +3934,11 @@ class Sprite extends DisplayObject {
     }
 
     dispose() {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        DebugInfo.displayInfo.sprite--;
         var children = this.__children;
         while (children.length) {
             var child = children[children.length - 1];
@@ -3988,6 +4035,7 @@ class Bitmap extends DisplayObject {
         this.$Bitmap = {
             0: null,    //scale9Grid
         }
+        Stage.bitmapCount++;
     }
 
     $setTexture(val) {
@@ -4102,6 +4150,7 @@ class Bitmap extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
+        Stage.bitmapCount--;
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);
@@ -4133,6 +4182,7 @@ class TextField extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
+        DebugInfo.displayInfo.text++;
     }
 
     $checkSettingSize(rect) {
@@ -4331,8 +4381,8 @@ class TextField extends DisplayObject {
             this.$getContentBounds();
         }
         //super.$onFrameEnd();
-        Stage.displayCount++;
-        Stage.textCount++;
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4344,6 +4394,7 @@ class TextField extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
+        DebugInfo.displayInfo.text--;
         super.dispose();
         Platform.release("TextField", this.$nativeShow);
         this.$nativeShow = null;
@@ -4675,6 +4726,7 @@ class Shape extends DisplayObject {
             9: []       //record
         };
         this.$nativeShow.draw([{x: 0, y: 0}, {x: 1, y: 0}], 0, 0, 0, 0, 0);
+        DebugInfo.displayInfo.shape++;
     }
 
     drawRect(x, y, width, height) {
@@ -4905,8 +4957,8 @@ class Shape extends DisplayObject {
     $onFrameEnd() {
         this.$redraw();
         //super.$onFrameEnd();
-        Stage.displayCount++;
-        Stage.shapeCount++;
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.shape++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4914,6 +4966,7 @@ class Shape extends DisplayObject {
     }
 
     dispose() {
+        DebugInfo.displayInfo.shape--;
         if (!this.$nativeShow) {
             $warn(1002, this.name);
             return;
@@ -4931,12 +4984,6 @@ flower.Shape = Shape;
 
 //////////////////////////File:flower/display/Stage.js///////////////////////////
 class Stage extends Sprite {
-
-    static displayCount = 0;
-    static textCount = 0;
-    static bitmapCount = 0;
-    static shapeCount = 0;
-    static spriteCount = 0;
 
     __mouseX = 0;
     __mouseY = 0;
@@ -5381,11 +5428,11 @@ class Stage extends Sprite {
     ///////////////////////////////////////键盘事件处理///////////////////////////////////////
 
     $onFrameEnd() {
-        Stage.displayCount = 0;
-        Stage.textCount = 0;
-        Stage.bitmapCount = 0;
-        Stage.shapeCount = 0;
-        Stage.spriteCount = 0;
+        DebugInfo.frameInfo.display = 0;
+        DebugInfo.frameInfo.text = 0;
+        DebugInfo.frameInfo.bitmap = 0;
+        DebugInfo.frameInfo.shape = 0;
+        DebugInfo.frameInfo.sprite = 0;
         var touchList = this.__nativeTouchEvent;
         var mouseMoveList = this.__nativeMouseMoveEvent;
         var rightClickList = this.__nativeRightClickEvent;
@@ -5423,8 +5470,8 @@ class Stage extends Sprite {
         }
         super.$onFrameEnd();
         //this.$background.$onFrameEnd();
-        Stage.bitmapCount = Stage.displayCount - Stage.textCount - Stage.shapeCount - Stage.spriteCount;
-        //trace("Display:", Stage.displayCount, "  Text:", Stage.textCount, "  Bitmap:", Stage.bitmapCount, "  Shape:", Stage.shapeCount, "  Sprite:", Stage.spriteCount);
+        DebugInfo.frameInfo.bitmap = DebugInfo.frameInfo.display - DebugInfo.frameInfo.text - DebugInfo.frameInfo.shape - DebugInfo.frameInfo.sprite;
+        //trace("Display:", DebugInfo.frameInfo.display, "  Text:", DebugInfo.frameInfo.text, "  Bitmap:", DebugInfo.frameInfo.bitmap, "  Shape:", DebugInfo.frameInfo.shape, "  Sprite:", DebugInfo.frameInfo.sprite);
     }
 
     $setWidth(val) {
@@ -6001,7 +6048,7 @@ class TextureManager {
         var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
         this.list.push(texture);
         if (DEBUG) {
-            DebugInfo.getInstance().addTexture(texture);
+            DebugInfo.addTexture(texture);
         }
         return texture;
     }
@@ -6032,7 +6079,7 @@ class TextureManager {
                 if (texture.dispose()) {
                     this.list.splice(i, 1);
                     if (DEBUG) {
-                        DebugInfo.getInstance().delTexture(texture);
+                        DebugInfo.delTexture(texture);
                     }
                     i--;
                 }
