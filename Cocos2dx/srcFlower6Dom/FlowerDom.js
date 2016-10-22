@@ -763,6 +763,7 @@ class PlatformTextField extends PlatformDisplayObject {
         }
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML," ","&nbsp;");
         $mesureTxt.innerHTML = txt.innerHTML;
         txt.style.width = $mesureTxt.offsetWidth + "px";
         return {
@@ -828,6 +829,13 @@ class PlatformTextField extends PlatformDisplayObject {
         }
         str += abc;
         return str;
+    }
+
+    static measureTextWidth(size, text) {
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.style.fontSize = size + "px";
+        $mesureTxt.innerHTML = text;
+        return $mesureTxt.offsetWidth;
     }
 }
 
@@ -902,6 +910,10 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     getNativeText() {
         return this.show.value;
+    }
+
+    setNativeText(val) {
+        this.show.value = val;
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
@@ -1845,6 +1857,70 @@ class PlatformWebSocket {
 
 
 
+//////////////////////////File:flower/debug/NativeDisplayInfo.js///////////////////////////
+class NativeDisplayInfo {
+    display = 0;
+    text = 0;
+    bitmap = 0;
+    shape = 0;
+    sprite = 0;
+}
+//////////////////////////End File:flower/debug/NativeDisplayInfo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/debug/DisplayInfo.js///////////////////////////
+class DisplayInfo {
+    display = 0;
+    text = 0;
+    bitmap = 0;
+    shape = 0;
+    sprite = 0;
+}
+
+//////////////////////////End File:flower/debug/DisplayInfo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
+class FrameInfo {
+    display = 0;
+    text = 0;
+    bitmap = 0;
+    shape = 0;
+    sprite = 0;
+}
+//////////////////////////End File:flower/debug/FrameInfo.js///////////////////////////
+
+
+
+//////////////////////////File:flower/debug/TextureInfo.js///////////////////////////
+class TextureInfo {
+
+    __texture;
+
+    constructor(texture) {
+        this.__texture = texture;
+    }
+
+    get url() {
+        return this.__texture.url;
+    }
+
+    get nativeURL() {
+        return this.__texture.nativeURL;
+    }
+
+    get count() {
+        return this.__texture.count;
+    }
+}
+
+flower.TextureInfo = TextureInfo;
+//////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
+
+
+
 //////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
 /**
  * 调试信息
@@ -1890,33 +1966,6 @@ class DebugInfo {
 
 flower.DebugInfo = DebugInfo;
 //////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
-
-
-
-//////////////////////////File:flower/debug/TextureInfo.js///////////////////////////
-class TextureInfo {
-
-    __texture;
-
-    constructor(texture) {
-        this.__texture = texture;
-    }
-
-    get url() {
-        return this.__texture.url;
-    }
-
-    get nativeURL() {
-        return this.__texture.nativeURL;
-    }
-
-    get count() {
-        return this.__texture.count;
-    }
-}
-
-flower.TextureInfo = TextureInfo;
-//////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
 
 
 
@@ -4911,6 +4960,10 @@ class TextInput extends DisplayObject {
         return this.$nativeShow.getNativeText();
     }
 
+    $setNativeText(val) {
+        this.$nativeShow.setNativeText(val);
+    }
+
     get text() {
         return this.$TextField[0];
     }
@@ -5253,6 +5306,7 @@ class Stage extends Sprite {
     __mouseX = 0;
     __mouseY = 0;
     __forntLayer;
+    $inputSprite;
     $input;
     $background;
     $debugSprite
@@ -5264,8 +5318,17 @@ class Stage extends Sprite {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+
+        this.$inputSprite = new Sprite();
+        this.addChild(this.$inputSprite);
+        this.$inputSprite.touchEnabled = false;
         this.$input = new flower.TextInput();
-        this.addChild(this.$input);
+        this.$input.width = 50;
+        this.$inputSprite.addChild(this.$input);
+        var rect = new flower.Shape();
+        rect.drawRect(0, 0, 50, 20);
+        rect.alpha = 0.1;
+        this.$inputSprite.addChild(rect);
         this.$background = new Shape();
         this.__forntLayer = new Sprite();
         this.addChild(this.__forntLayer);
@@ -5296,7 +5359,7 @@ class Stage extends Sprite {
     }
 
     removeChild(child) {
-        if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop
+        if (child == this.$inputSprite || child == this.$background || child == this.$debugSprite || child == this.$pop
             || child == this.$menu || child == this.$drag) {
             return;
         }
@@ -5642,6 +5705,9 @@ class Stage extends Sprite {
             alt: KeyboardEvent.$alt,
             key: key
         });
+        while (this.$keyEvents.length) {
+            this.$dispatchKeyEvent(this.$keyEvents.shift());
+        }
     }
 
     $onKeyUp(key) {
@@ -5661,6 +5727,9 @@ class Stage extends Sprite {
             alt: KeyboardEvent.$alt,
             key: key
         });
+        while (this.$keyEvents.length) {
+            this.$dispatchKeyEvent(this.$keyEvents.shift());
+        }
     }
 
     $dispatchKeyEvent(info) {
@@ -9552,6 +9621,28 @@ class StringDo {
             return parseInt(before) + (end != "" ? parseInt(end) / (Math.pow(10, end.length)) : 0);
         }
         return null;
+    }
+
+    static split(text, array) {
+        if (!array) {
+            return [text];
+        }
+        if (typeof array == "string") {
+            array = [array];
+        }
+        var list = [];
+        var start = 0;
+        for (var i = 0, len = text.length; i < len; i++) {
+            for (var a = 0; a < array.length; a++) {
+                if (text.slice(i, i + array[a].length) == array[a]) {
+                    list.push(text.slice(start, i));
+                    i += array[a].length - 1;
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        return list;
     }
 }
 

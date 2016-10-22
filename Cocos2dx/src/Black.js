@@ -2794,8 +2794,9 @@ var $root = eval("this");
                 30: "", //229 firstChar
                 31: false, // is 229
                 32: 0, //inputPos
-                33: new flower.Shape() };
+                33: _this13.__getDefaultFocus() };
             //focus
+            _this13.addChild(_this13.__getDefaultFocus());
             _this13.focusEnabled = true;
             _this13.width = _this13.height = 100;
             _this13.addListener(flower.Event.FOCUS_IN, _this13.$startInput, _this13);
@@ -2805,6 +2806,16 @@ var $root = eval("this");
         }
 
         _createClass(RichText, [{
+            key: "__getDefaultFocus",
+            value: function __getDefaultFocus() {
+                var rect = new flower.Rect();
+                rect.fillColor = 0;
+                rect.width = 2;
+                rect.height = 12;
+                rect.visible = false;
+                return rect;
+            }
+        }, {
             key: "$getMouseTarget",
             value: function $getMouseTarget(touchX, touchY, multiply) {
                 if (this.touchEnabled == false || this.visible == false) return null;
@@ -2827,6 +2838,19 @@ var $root = eval("this");
                 this.__input.$startNativeInput();
                 this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
                 flower.EnterFrame.add(this.__update, this);
+                this.__showFocus();
+            }
+        }, {
+            key: "__showFocus",
+            value: function __showFocus() {
+                var focus = this.$RichText[33];
+                focus.visible = true;
+                focus.x = focus.y = 50;
+            }
+        }, {
+            key: "__hideFocus",
+            value: function __hideFocus() {
+                this.$RichText[33].visible = false;
             }
         }, {
             key: "$stopInput",
@@ -2834,6 +2858,7 @@ var $root = eval("this");
                 this.__input.$stopNativeInput();
                 this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
                 flower.EnterFrame.remove(this.__update, this);
+                this.__hideFocus();
             }
         }, {
             key: "__update",
@@ -2848,13 +2873,17 @@ var $root = eval("this");
                     } else {
                         if (!str.length || str.charAt(0) != p[30]) {
                             this.text += str;
-                            this.__input.text = "";
+                            this.__input.$setNativeText("");
                             this.$RichText[7] = false;
+                            p[31] = false;
+                            p[30] == "";
                         }
                     }
                 } else {
-                    this.text += str;
-                    this.__input.text = "";
+                    if (str != "") {
+                        this.text += str;
+                        this.__input.$setNativeText("");
+                    }
                 }
             }
         }, {
@@ -2870,8 +2899,7 @@ var $root = eval("this");
         }, {
             key: "text",
             set: function set(val) {
-                this.$RichText[0] += val;
-                trace(this.$RichText[0]);
+                this.$RichText[0] = val;
             },
             get: function get() {
                 return this.$RichText[0];

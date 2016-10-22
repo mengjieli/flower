@@ -59,6 +59,10 @@ class PlatformTextInput extends PlatformDisplayObject {
         return this.show.value;
     }
 
+    setNativeText(val) {
+        this.show.value = val;
+    }
+
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.style.fontSize = size + "px";

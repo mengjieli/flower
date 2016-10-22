@@ -42,7 +42,7 @@ var Server = (function () {
      * 重新开始
      */
     Server.prototype.start = function () {
-        this.stop();
+        this.stop(true);
         this.time = 0;
         this.hasInit = true;
         //运行
@@ -56,7 +56,7 @@ var Server = (function () {
         this.gameStartFlag = true;
     }
 
-    Server.prototype.stop = function () {
+    Server.prototype.stop = function (notSetPlaying) {
         while (this.triggers.length) {
             this.triggers.pop().dispose();
         }
@@ -69,7 +69,9 @@ var Server = (function () {
         flower.EnterFrame.remove(this.update, this);
         this.data.settings.time.value = 0;
         this.time = 0;
-        this.data.settings.isPlaying = false;
+        if(!notSetPlaying) {
+            this.data.settings.isPlaying = false;
+        }
         this.callObject.stop();
         this.path.reset();
         this.gameStartFlag = false;

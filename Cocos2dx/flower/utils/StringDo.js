@@ -340,6 +340,28 @@ class StringDo {
         }
         return null;
     }
+
+    static split(text, array) {
+        if (!array) {
+            return [text];
+        }
+        if (typeof array == "string") {
+            array = [array];
+        }
+        var list = [];
+        var start = 0;
+        for (var i = 0, len = text.length; i < len; i++) {
+            for (var a = 0; a < array.length; a++) {
+                if (text.slice(i, i + array[a].length) == array[a]) {
+                    list.push(text.slice(start, i));
+                    i += array[a].length - 1;
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        return list;
+    }
 }
 
 exports.StringDo = StringDo;

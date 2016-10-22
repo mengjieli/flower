@@ -69,6 +69,7 @@ class PlatformTextField extends PlatformDisplayObject {
         }
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML," ","&nbsp;");
         $mesureTxt.innerHTML = txt.innerHTML;
         txt.style.width = $mesureTxt.offsetWidth + "px";
         return {
@@ -134,6 +135,13 @@ class PlatformTextField extends PlatformDisplayObject {
         }
         str += abc;
         return str;
+    }
+
+    static measureTextWidth(size, text) {
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.style.fontSize = size + "px";
+        $mesureTxt.innerHTML = text;
+        return $mesureTxt.offsetWidth;
     }
 }
 

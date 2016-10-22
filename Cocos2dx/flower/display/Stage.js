@@ -3,6 +3,7 @@ class Stage extends Sprite {
     __mouseX = 0;
     __mouseY = 0;
     __forntLayer;
+    $inputSprite;
     $input;
     $background;
     $debugSprite
@@ -14,8 +15,17 @@ class Stage extends Sprite {
         super();
         this.__stage = this;
         Stage.stages.push(this);
+
+        this.$inputSprite = new Sprite();
+        this.addChild(this.$inputSprite);
+        this.$inputSprite.touchEnabled = false;
         this.$input = new flower.TextInput();
-        this.addChild(this.$input);
+        this.$input.width = 50;
+        this.$inputSprite.addChild(this.$input);
+        var rect = new flower.Shape();
+        rect.drawRect(0, 0, 50, 20);
+        rect.alpha = 0.1;
+        this.$inputSprite.addChild(rect);
         this.$background = new Shape();
         this.__forntLayer = new Sprite();
         this.addChild(this.__forntLayer);
@@ -46,7 +56,7 @@ class Stage extends Sprite {
     }
 
     removeChild(child) {
-        if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop
+        if (child == this.$inputSprite || child == this.$background || child == this.$debugSprite || child == this.$pop
             || child == this.$menu || child == this.$drag) {
             return;
         }
@@ -392,6 +402,9 @@ class Stage extends Sprite {
             alt: KeyboardEvent.$alt,
             key: key
         });
+        while (this.$keyEvents.length) {
+            this.$dispatchKeyEvent(this.$keyEvents.shift());
+        }
     }
 
     $onKeyUp(key) {
@@ -411,6 +424,9 @@ class Stage extends Sprite {
             alt: KeyboardEvent.$alt,
             key: key
         });
+        while (this.$keyEvents.length) {
+            this.$dispatchKeyEvent(this.$keyEvents.shift());
+        }
     }
 
     $dispatchKeyEvent(info) {

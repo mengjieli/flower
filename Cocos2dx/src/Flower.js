@@ -944,6 +944,11 @@ var flower = {};
                 return this.show.getString();
             }
         }, {
+            key: "setNativeText",
+            value: function setNativeText(val) {
+                this.show.setString(val);
+            }
+        }, {
             key: "changeText",
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
                 var $mesureTxt = PlatformTextField.$mesureTxt;
@@ -5179,6 +5184,11 @@ var flower = {};
                 return this.$nativeShow.getNativeText();
             }
         }, {
+            key: "$setNativeText",
+            value: function $setNativeText(val) {
+                this.$nativeShow.setNativeText(val);
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 if (this.$hasFlags(0x0800)) {
@@ -5559,8 +5569,17 @@ var flower = {};
 
             _this21.__stage = _this21;
             Stage.stages.push(_this21);
+
+            _this21.$inputSprite = new Sprite();
+            _this21.addChild(_this21.$inputSprite);
+            _this21.$inputSprite.touchEnabled = false;
             _this21.$input = new flower.TextInput();
-            _this21.addChild(_this21.$input);
+            _this21.$input.width = 50;
+            _this21.$inputSprite.addChild(_this21.$input);
+            var rect = new flower.Shape();
+            rect.drawRect(0, 0, 50, 20);
+            rect.alpha = 0.1;
+            _this21.$inputSprite.addChild(rect);
             _this21.$background = new Shape();
             _this21.__forntLayer = new Sprite();
             _this21.addChild(_this21.__forntLayer);
@@ -5587,7 +5606,7 @@ var flower = {};
         }, {
             key: "removeChild",
             value: function removeChild(child) {
-                if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop || child == this.$menu || child == this.$drag) {
+                if (child == this.$inputSprite || child == this.$background || child == this.$debugSprite || child == this.$pop || child == this.$menu || child == this.$drag) {
                     return;
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "removeChild", this).call(this, child);
@@ -5932,6 +5951,9 @@ var flower = {};
                     alt: KeyboardEvent.$alt,
                     key: key
                 });
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
+                }
             }
         }, {
             key: "$onKeyUp",
@@ -5952,6 +5974,9 @@ var flower = {};
                     alt: KeyboardEvent.$alt,
                     key: key
                 });
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
+                }
             }
         }, {
             key: "$dispatchKeyEvent",

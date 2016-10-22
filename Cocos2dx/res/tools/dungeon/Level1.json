@@ -1,7 +1,7 @@
 {
  "itemId": 121,
  "screenWidth": 500,
- "screenHeight": 300,
+ "screenHeight": 600,
  "triggers": [
   {
    "itemId": 59,
@@ -18,7 +18,7 @@
      "effectValue": {
       "coord": {
        "x": 0,
-       "y": 170
+       "y": 570
       },
       "time": 0,
       "pos": 2,

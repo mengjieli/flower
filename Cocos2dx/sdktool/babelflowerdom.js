@@ -178,8 +178,11 @@ var list = [
     "PlatformShaderType",
     "PlatformWebSocket",
 
-    "DebugInfo",
+    "NativeDisplayInfo",
+    "DisplayInfo",
+    "FrameInfo",
     "TextureInfo",
+    "DebugInfo",
 
     "CoreTime",
 

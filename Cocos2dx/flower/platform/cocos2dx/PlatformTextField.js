@@ -30,7 +30,7 @@ class PlatformTextField extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
-        if(text == "") {
+        if (text == "") {
             txt.setString("");
         }
         for (var i = 0; i < text.length; i++) {
@@ -94,6 +94,13 @@ class PlatformTextField extends PlatformDisplayObject {
         show.setFontSize((RETINA ? 2.0 : 1) * 12);
         this.setFontColor(0);
         super.release();
+    }
+
+    static measureTextWidth(size, text) {
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.setFontSize(size);
+        $mesureTxt.setString(text);
+        return $mesureTxt.getContentSize().width;
     }
 }
 

@@ -237,6 +237,10 @@ class TextInput extends DisplayObject {
         return this.$nativeShow.getNativeText();
     }
 
+    $setNativeText(val) {
+        this.$nativeShow.setNativeText(val);
+    }
+
     get text() {
         return this.$TextField[0];
     }

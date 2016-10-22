@@ -820,6 +820,7 @@ var flower = {};
                 }
                 txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\n", "</br>");
                 txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\r", "</br>");
+                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, " ", "&nbsp;");
                 $mesureTxt.innerHTML = txt.innerHTML;
                 txt.style.width = $mesureTxt.offsetWidth + "px";
                 return {
@@ -886,6 +887,14 @@ var flower = {};
                 }
                 str += abc;
                 return str;
+            }
+        }], [{
+            key: "measureTextWidth",
+            value: function measureTextWidth(size, text) {
+                var $mesureTxt = PlatformTextField.$mesureTxt;
+                $mesureTxt.style.fontSize = size + "px";
+                $mesureTxt.innerHTML = text;
+                return $mesureTxt.offsetWidth;
             }
         }]);
 
@@ -969,6 +978,11 @@ var flower = {};
             key: "getNativeText",
             value: function getNativeText() {
                 return this.show.value;
+            }
+        }, {
+            key: "setNativeText",
+            value: function setNativeText(val) {
+                this.show.value = val;
             }
         }, {
             key: "changeText",
@@ -1999,13 +2013,88 @@ var flower = {};
     }();
     //////////////////////////End File:flower/platform/dom/PlatformWebSocket.js///////////////////////////
 
+    //////////////////////////File:flower/debug/NativeDisplayInfo.js///////////////////////////
+
+
+    PlatformWebSocket.webSockets = [];
+
+    var NativeDisplayInfo = function NativeDisplayInfo() {
+        _classCallCheck(this, NativeDisplayInfo);
+
+        this.display = 0;
+        this.text = 0;
+        this.bitmap = 0;
+        this.shape = 0;
+        this.sprite = 0;
+    };
+    //////////////////////////End File:flower/debug/NativeDisplayInfo.js///////////////////////////
+
+    //////////////////////////File:flower/debug/DisplayInfo.js///////////////////////////
+
+
+    var DisplayInfo = function DisplayInfo() {
+        _classCallCheck(this, DisplayInfo);
+
+        this.display = 0;
+        this.text = 0;
+        this.bitmap = 0;
+        this.shape = 0;
+        this.sprite = 0;
+    };
+
+    //////////////////////////End File:flower/debug/DisplayInfo.js///////////////////////////
+
+    //////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
+
+
+    var FrameInfo = function FrameInfo() {
+        _classCallCheck(this, FrameInfo);
+
+        this.display = 0;
+        this.text = 0;
+        this.bitmap = 0;
+        this.shape = 0;
+        this.sprite = 0;
+    };
+    //////////////////////////End File:flower/debug/FrameInfo.js///////////////////////////
+
+    //////////////////////////File:flower/debug/TextureInfo.js///////////////////////////
+
+
+    var TextureInfo = function () {
+        function TextureInfo(texture) {
+            _classCallCheck(this, TextureInfo);
+
+            this.__texture = texture;
+        }
+
+        _createClass(TextureInfo, [{
+            key: "url",
+            get: function get() {
+                return this.__texture.url;
+            }
+        }, {
+            key: "nativeURL",
+            get: function get() {
+                return this.__texture.nativeURL;
+            }
+        }, {
+            key: "count",
+            get: function get() {
+                return this.__texture.count;
+            }
+        }]);
+
+        return TextureInfo;
+    }();
+
+    flower.TextureInfo = TextureInfo;
+    //////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
+
     //////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
     /**
      * 调试信息
      */
-
-
-    PlatformWebSocket.webSockets = [];
 
     var DebugInfo = function () {
         function DebugInfo() {
@@ -2062,38 +2151,6 @@ var flower = {};
 
     flower.DebugInfo = DebugInfo;
     //////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
-
-    //////////////////////////File:flower/debug/TextureInfo.js///////////////////////////
-
-    var TextureInfo = function () {
-        function TextureInfo(texture) {
-            _classCallCheck(this, TextureInfo);
-
-            this.__texture = texture;
-        }
-
-        _createClass(TextureInfo, [{
-            key: "url",
-            get: function get() {
-                return this.__texture.url;
-            }
-        }, {
-            key: "nativeURL",
-            get: function get() {
-                return this.__texture.nativeURL;
-            }
-        }, {
-            key: "count",
-            get: function get() {
-                return this.__texture.count;
-            }
-        }]);
-
-        return TextureInfo;
-    }();
-
-    flower.TextureInfo = TextureInfo;
-    //////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
 
     //////////////////////////File:flower/core/CoreTime.js///////////////////////////
 
@@ -5455,6 +5512,11 @@ var flower = {};
                 return this.$nativeShow.getNativeText();
             }
         }, {
+            key: "$setNativeText",
+            value: function $setNativeText(val) {
+                this.$nativeShow.setNativeText(val);
+            }
+        }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 if (this.$hasFlags(0x0800)) {
@@ -5835,8 +5897,17 @@ var flower = {};
 
             _this22.__stage = _this22;
             Stage.stages.push(_this22);
+
+            _this22.$inputSprite = new Sprite();
+            _this22.addChild(_this22.$inputSprite);
+            _this22.$inputSprite.touchEnabled = false;
             _this22.$input = new flower.TextInput();
-            _this22.addChild(_this22.$input);
+            _this22.$input.width = 50;
+            _this22.$inputSprite.addChild(_this22.$input);
+            var rect = new flower.Shape();
+            rect.drawRect(0, 0, 50, 20);
+            rect.alpha = 0.1;
+            _this22.$inputSprite.addChild(rect);
             _this22.$background = new Shape();
             _this22.__forntLayer = new Sprite();
             _this22.addChild(_this22.__forntLayer);
@@ -5863,7 +5934,7 @@ var flower = {};
         }, {
             key: "removeChild",
             value: function removeChild(child) {
-                if (child == this.$input || child == this.$background || child == this.$debugSprite || child == this.$pop || child == this.$menu || child == this.$drag) {
+                if (child == this.$inputSprite || child == this.$background || child == this.$debugSprite || child == this.$pop || child == this.$menu || child == this.$drag) {
                     return;
                 }
                 _get(Object.getPrototypeOf(Stage.prototype), "removeChild", this).call(this, child);
@@ -6208,6 +6279,9 @@ var flower = {};
                     alt: KeyboardEvent.$alt,
                     key: key
                 });
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
+                }
             }
         }, {
             key: "$onKeyUp",
@@ -6228,6 +6302,9 @@ var flower = {};
                     alt: KeyboardEvent.$alt,
                     key: key
                 });
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
+                }
             }
         }, {
             key: "$dispatchKeyEvent",
@@ -10489,6 +10566,29 @@ var flower = {};
                     return parseInt(before) + (end != "" ? parseInt(end) / Math.pow(10, end.length) : 0);
                 }
                 return null;
+            }
+        }, {
+            key: "split",
+            value: function split(text, array) {
+                if (!array) {
+                    return [text];
+                }
+                if (typeof array == "string") {
+                    array = [array];
+                }
+                var list = [];
+                var start = 0;
+                for (var i = 0, len = text.length; i < len; i++) {
+                    for (var a = 0; a < array.length; a++) {
+                        if (text.slice(i, i + array[a].length) == array[a]) {
+                            list.push(text.slice(start, i));
+                            i += array[a].length - 1;
+                            start = i + 1;
+                            break;
+                        }
+                    }
+                }
+                return list;
             }
         }]);
 

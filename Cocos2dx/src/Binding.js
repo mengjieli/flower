@@ -1284,8 +1284,10 @@ var $root = eval("this");
                                 }
                                 lastEnd = j + 1;
                                 var stmt = Compiler.parserExpr(bindContent, checks, { "this": thisObj }, {
+                                    "flower": flower,
                                     "Tween": flower.Tween,
-                                    "Ease": flower.Ease
+                                    "Ease": flower.Ease,
+                                    "Math": flower.Math
                                 }, this.list, needValue);
                                 if (stmt == null) {
                                     parseError = true;

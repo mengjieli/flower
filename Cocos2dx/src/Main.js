@@ -74,10 +74,20 @@ var Main = function () {
             //input.x = 300;
             //input.y = 250;
 
-            //var richText = new flower.RichText();
-            //flower.Stage.getInstance().addChild(richText);
-            //
-            //return;
+            var rect = new flower.Rect();
+            rect.width = 400;
+            rect.height = 400;
+            rect.fillColor = 0;
+            rect.fillAlpha = 0.5;
+            flower.Stage.getInstance().addChild(rect);
+            var richText = new flower.RichText();
+            richText.width = 400;
+            richText.height = 400;
+            flower.Stage.getInstance().addChild(richText);
+
+            //console.log(flower.StringDo.split("aaawqqw\rb21oiop21\ncsa,las;<br/>dsasa;asl;", ["\r", "\n", "<br/>"]));
+
+            return;
 
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
@@ -93,21 +103,6 @@ var Main = function () {
             ui.parseUIAsync("modules/gameEditor/EditorMain.xml");
             //ui.parseUIAsync("modules/dungeonEditor/Main.xml");
             stage.addChild(ui);
-
-            setTimeout(function(){
-                var btn = new flower.Rect();
-                btn.fillAlpha = 0.5;
-                btn.fillColor = 0xff0000;
-                btn.width = btn.height = 100;
-                btn.x = btn.y = 500;
-                stage.addChild(btn);
-                btn.addListener(flower.TouchEvent.TOUCH_BEGIN,function(e){
-                    flower.CoreTime.$playEnterFrame = !flower.CoreTime.$playEnterFrame;
-                    setTimeout(function(){
-                        flower.CoreTime.$playEnterFrame = !flower.CoreTime.$playEnterFrame;
-                    },5000);
-                });
-            },5000);
 
         }
     }]);

@@ -37,3 +37,11 @@ function set stopInput(val) {
 function get stopInput() {
     return this.input.stopInput;
 }
+
+function set value(val) {
+    this.input.value = val;
+}
+
+function get value() {
+    return this.input.value;
+}

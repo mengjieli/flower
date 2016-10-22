@@ -87,7 +87,7 @@
                                label="播放" click="this.data.data.settings.isPlaying.value = true;"/>
                 </f:Group>
                 <f:Group percentHeight="100">
-                    <f:Label text="{timeToMSM(data.data.settings.time)}" verticalCenter="0" />
+                    <f:Label text="{Math.timeToMSM(data.data.settings.time)}" verticalCenter="0" />
                 </f:Group>
                 <f:Group percentHeight="100">
                     <s:Button1 verticalCenter="0" height="16"

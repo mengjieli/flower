@@ -1,1 +1,91 @@
-{"name":"派克帝国","direction":{"module":{"name":"模块","plugin":"Black","list":["res/module/MainUI.xml"]},"data":{"name":"数据结构","plugin":"Data","list":["res/data/Paik.json"]},"language":{"name":"语言配置","plugin":"Language","list":["res/language/zh_CN.json"]},"imagePacker":{"name":"图片打包","plugin":"ImagePacker","list":[]},"test":{"name":"自动测试","plugin":"AutoTest","list":[]},"test/item":{"name":"测试项","plugin":"AutoTest","list":[]},"test/case":{"name":"测试用例","plugin":"AutoTest","list":[]},"test/running":{"name":"正在运行的测试","plugin":"RunningTest","list":[]},"bug":{"name":"Bug 统计","plugin":"BugStatistics","list":[]},"tools":{"name":"工具","list":[]},"tools/dungeon":{"name":"副本编辑器","plugin":"Dungeon","list":["res/tools/dungeon/Level1.json","res/tools/dungeon/Dungeon1_1.json"]},"tools/map":{"name":"地图编辑器","plugin":"Map","list":[]},"tools/testSameImage":{"name":"测试重复图片","plugin":"SameImage","list":["res/tools/testSameImage/Root.json","res/tools/testSameImage/Res.json","res/tools/testSameImage/UI.json","res/tools/testSameImage/Map.json"]},"tools/textureCheck":{"name":"纹理检测","plugin":"TextureCheck","list":["res/tools/textureCheck/Server.json","res/tools/textureCheck/Local.json"]}}}
+{
+  "name": "派克帝国",
+  "direction": {
+    "module": {
+      "name": "模块",
+      "plugin": "Black",
+      "list": [
+        "res/module/MainUI.xml"
+      ]
+    },
+    "data": {
+      "name": "数据结构",
+      "plugin": "Data",
+      "list": [
+        "res/data/Paik.json"
+      ]
+    },
+    "language": {
+      "name": "语言配置",
+      "plugin": "Language",
+      "list": [
+        "res/language/zh_CN.json"
+      ]
+    },
+    "imagePacker": {
+      "name": "图片打包",
+      "plugin": "ImagePacker",
+      "list": []
+    },
+    "test": {
+      "name": "自动测试",
+      "plugin": "AutoTest",
+      "list": []
+    },
+    "test/item": {
+      "name": "测试项",
+      "plugin": "AutoTest",
+      "list": []
+    },
+    "test/case": {
+      "name": "测试用例",
+      "plugin": "AutoTest",
+      "list": []
+    },
+    "test/running": {
+      "name": "正在运行的测试",
+      "plugin": "RunningTest",
+      "list": []
+    },
+    "bug": {
+      "name": "Bug 统计",
+      "plugin": "BugStatistics",
+      "list": []
+    },
+    "tools": {
+      "name": "工具",
+      "list": []
+    },
+    "tools/dungeon": {
+      "name": "副本编辑器",
+      "plugin": "Dungeon",
+      "list": [
+        "res/tools/dungeon/Level1.json",
+        "res/tools/dungeon/Dungeon1_1.json"
+      ]
+    },
+    "tools/map": {
+      "name": "地图编辑器",
+      "plugin": "Map",
+      "list": []
+    },
+    "tools/testSameImage": {
+      "name": "测试重复图片",
+      "plugin": "SameImage",
+      "list": [
+        "res/tools/testSameImage/Root.json",
+        "res/tools/testSameImage/Res.json",
+        "res/tools/testSameImage/UI.json",
+        "res/tools/testSameImage/Map.json"
+      ]
+    },
+    "tools/textureCheck": {
+      "name": "纹理检测",
+      "plugin": "TextureCheck",
+      "list": [
+        "res/tools/textureCheck/Server.json",
+        "res/tools/textureCheck/Local.json"
+      ]
+    }
+  }
+}

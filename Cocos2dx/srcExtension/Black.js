@@ -2500,13 +2500,23 @@ class RichText extends Group {
             30: "", //229 firstChar
             31: false, // is 229
             32: 0, //inputPos
-            33: new flower.Shape(),//focus
+            33: this.__getDefaultFocus(),//focus
         };
+        this.addChild(this.__getDefaultFocus());
         this.focusEnabled = true;
         this.width = this.height = 100;
         this.addListener(flower.Event.FOCUS_IN, this.$startInput, this);
-        this.addListener(flower.Event.FOCUS_OUT, this.$stopInput, this)
+        this.addListener(flower.Event.FOCUS_OUT, this.$stopInput, this);
         this.__input = flower.Stage.getInstance().$input;
+    }
+
+    __getDefaultFocus() {
+        var rect = new flower.Rect();
+        rect.fillColor = 0;
+        rect.width = 2;
+        rect.height = 12;
+        rect.visible = false;
+        return rect;
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -2531,12 +2541,24 @@ class RichText extends Group {
         this.__input.$startNativeInput();
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.add(this.__update, this);
+        this.__showFocus();
+    }
+
+    __showFocus() {
+        var focus = this.$RichText[33];
+        focus.visible = true;
+        focus.x = focus.y = 50;
+    }
+
+    __hideFocus() {
+        this.$RichText[33].visible = false;
     }
 
     $stopInput() {
         this.__input.$stopNativeInput();
         this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.remove(this.__update, this);
+        this.__hideFocus();
     }
 
     __update() {
@@ -2550,19 +2572,23 @@ class RichText extends Group {
             } else {
                 if (!str.length || str.charAt(0) != p[30]) {
                     this.text += str;
-                    this.__input.text = "";
+                    this.__input.$setNativeText("");
                     this.$RichText[7] = false;
+                    p[31] = false;
+                    p[30] == "";
                 }
             }
         } else {
-            this.text += str;
-            this.__input.text = "";
+            if (str != "") {
+                this.text += str;
+                this.__input.$setNativeText("");
+            }
         }
     }
 
     __onKeyDown(e) {
         if (e.keyCode == 229) {
-            if(!this.$RichText[31]) {
+            if (!this.$RichText[31]) {
                 this.$RichText[31] = true;
                 this.$RichText[30] = "";
             }
@@ -2570,8 +2596,7 @@ class RichText extends Group {
     }
 
     set text(val) {
-        this.$RichText[0] += val;
-        trace(this.$RichText[0]);
+        this.$RichText[0] = val;
     }
 
     get text() {
