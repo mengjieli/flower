@@ -81,8 +81,11 @@ var Main = function () {
             rect.fillAlpha = 0.5;
             flower.Stage.getInstance().addChild(rect);
             var richText = new flower.RichText();
-            richText.width = 400;
+            richText.width = 450;
             richText.height = 400;
+            richText.fontColor = 0x00ff00;
+            richText.fontSize = 16;
+            richText.htmlText = '我<img src="res/closeDown.png"/>时间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20\r<font size="16">我</font>11</font>12</font>27';
             flower.Stage.getInstance().addChild(richText);
 
             //console.log(flower.StringDo.split("aaawqqw\rb21oiop21\ncsa,las;<br/>dsasa;asl;", ["\r", "\n", "<br/>"]));

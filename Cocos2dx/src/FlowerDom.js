@@ -758,6 +758,7 @@ var flower = {};
             em.style.left = "0px";
             em.style.top = "0px";
             em.style["font-style"] = "normal";
+            em.style["vertical-align"] = "bottom";
             em.style["transform-origin"] = "left top";
             _this2.show = em;
             return _this2;
@@ -821,6 +822,9 @@ var flower = {};
                 txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\n", "</br>");
                 txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\r", "</br>");
                 txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, " ", "&nbsp;");
+                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "<", "&lt;");
+                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, ">", "&gt;");
+
                 $mesureTxt.innerHTML = txt.innerHTML;
                 txt.style.width = $mesureTxt.offsetWidth + "px";
                 return {
@@ -908,6 +912,8 @@ var flower = {};
     //measureTxt.style.width = "0px";
     PlatformTextField.$mesureTxt = measureTxt;
     //PlatformTextField.$mesureTxt.retain();
+
+    flower.$measureTextWidth = PlatformTextField.measureTextWidth;
     //////////////////////////End File:flower/platform/dom/PlatformTextField.js///////////////////////////
 
     //////////////////////////File:flower/platform/dom/PlatformTextInput.js///////////////////////////
@@ -5902,6 +5908,8 @@ var flower = {};
             _this22.addChild(_this22.$inputSprite);
             _this22.$inputSprite.touchEnabled = false;
             _this22.$input = new flower.TextInput();
+            _this22.$input.x = -100;
+            _this22.$input.y = -100;
             _this22.$input.width = 50;
             _this22.$inputSprite.addChild(_this22.$input);
             var rect = new flower.Shape();
@@ -6819,8 +6827,8 @@ var flower = {};
             this.__url = url;
             this.__nativeURL = nativeURL;
             this.$count = 0;
-            this.__width = w;
-            this.__height = h;
+            this.__width = +w;
+            this.__height = +h;
             this.__settingWidth = settingWidth;
             this.__settingHeight = settingHeight;
         }

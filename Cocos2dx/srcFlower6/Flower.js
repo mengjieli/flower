@@ -730,7 +730,7 @@ class PlatformTextField extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
-        if(text == "") {
+        if (text == "") {
             txt.setString("");
         }
         for (var i = 0; i < text.length; i++) {
@@ -795,10 +795,19 @@ class PlatformTextField extends PlatformDisplayObject {
         this.setFontColor(0);
         super.release();
     }
+
+    static measureTextWidth(size, text) {
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.setFontSize(size);
+        $mesureTxt.setString(text);
+        return $mesureTxt.getContentSize().width;
+    }
 }
 
 PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
 PlatformTextField.$mesureTxt.retain();
+
+flower.$measureTextWidth = PlatformTextField.measureTextWidth;
 //////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
 
 
@@ -5013,6 +5022,8 @@ class Stage extends Sprite {
         this.addChild(this.$inputSprite);
         this.$inputSprite.touchEnabled = false;
         this.$input = new flower.TextInput();
+        this.$input.x = -100;
+        this.$input.y = -100;
         this.$input.width = 50;
         this.$inputSprite.addChild(this.$input);
         var rect = new flower.Shape();
@@ -9311,6 +9322,28 @@ class StringDo {
             return parseInt(before) + (end != "" ? parseInt(end) / (Math.pow(10, end.length)) : 0);
         }
         return null;
+    }
+
+    static split(text, array) {
+        if (!array) {
+            return [text];
+        }
+        if (typeof array == "string") {
+            array = [array];
+        }
+        var list = [];
+        var start = 0;
+        for (var i = 0, len = text.length; i < len; i++) {
+            for (var a = 0; a < array.length; a++) {
+                if (text.slice(i, i + array[a].length) == array[a]) {
+                    list.push(text.slice(start, i));
+                    i += array[a].length - 1;
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        return list;
     }
 }
 

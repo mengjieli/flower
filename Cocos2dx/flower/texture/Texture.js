@@ -26,8 +26,8 @@ class Texture {
         this.__url = url;
         this.__nativeURL = nativeURL;
         this.$count = 0;
-        this.__width = w;
-        this.__height = h;
+        this.__width = +w;
+        this.__height = +h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
     }

@@ -11,6 +11,7 @@ class PlatformTextField extends PlatformDisplayObject {
         em.style.left = "0px";
         em.style.top = "0px";
         em.style["font-style"] = "normal";
+        em.style["vertical-align"] = "bottom";
         em.style["transform-origin"] = "left top";
         this.show = em;
     }
@@ -70,6 +71,9 @@ class PlatformTextField extends PlatformDisplayObject {
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML," ","&nbsp;");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"<","&lt;");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,">","&gt;");
+
         $mesureTxt.innerHTML = txt.innerHTML;
         txt.style.width = $mesureTxt.offsetWidth + "px";
         return {
@@ -152,3 +156,5 @@ document.body.appendChild(measureTxt);
 //measureTxt.style.width = "0px";
 PlatformTextField.$mesureTxt = measureTxt;
 //PlatformTextField.$mesureTxt.retain();
+
+flower.$measureTextWidth = PlatformTextField.measureTextWidth;

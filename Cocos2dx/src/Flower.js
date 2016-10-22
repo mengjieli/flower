@@ -859,6 +859,14 @@ var flower = {};
                 this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextField.prototype), "release", this).call(this);
             }
+        }], [{
+            key: "measureTextWidth",
+            value: function measureTextWidth(size, text) {
+                var $mesureTxt = PlatformTextField.$mesureTxt;
+                $mesureTxt.setFontSize(size);
+                $mesureTxt.setString(text);
+                return $mesureTxt.getContentSize().width;
+            }
         }]);
 
         return PlatformTextField;
@@ -866,6 +874,8 @@ var flower = {};
 
     PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
     PlatformTextField.$mesureTxt.retain();
+
+    flower.$measureTextWidth = PlatformTextField.measureTextWidth;
     //////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
@@ -5574,6 +5584,8 @@ var flower = {};
             _this21.addChild(_this21.$inputSprite);
             _this21.$inputSprite.touchEnabled = false;
             _this21.$input = new flower.TextInput();
+            _this21.$input.x = -100;
+            _this21.$input.y = -100;
             _this21.$input.width = 50;
             _this21.$inputSprite.addChild(_this21.$input);
             var rect = new flower.Shape();
@@ -10238,6 +10250,29 @@ var flower = {};
                     return parseInt(before) + (end != "" ? parseInt(end) / Math.pow(10, end.length) : 0);
                 }
                 return null;
+            }
+        }, {
+            key: "split",
+            value: function split(text, array) {
+                if (!array) {
+                    return [text];
+                }
+                if (typeof array == "string") {
+                    array = [array];
+                }
+                var list = [];
+                var start = 0;
+                for (var i = 0, len = text.length; i < len; i++) {
+                    for (var a = 0; a < array.length; a++) {
+                        if (text.slice(i, i + array[a].length) == array[a]) {
+                            list.push(text.slice(start, i));
+                            i += array[a].length - 1;
+                            start = i + 1;
+                            break;
+                        }
+                    }
+                }
+                return list;
             }
         }]);
 

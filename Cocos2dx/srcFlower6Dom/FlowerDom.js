@@ -705,6 +705,7 @@ class PlatformTextField extends PlatformDisplayObject {
         em.style.left = "0px";
         em.style.top = "0px";
         em.style["font-style"] = "normal";
+        em.style["vertical-align"] = "bottom";
         em.style["transform-origin"] = "left top";
         this.show = em;
     }
@@ -764,6 +765,9 @@ class PlatformTextField extends PlatformDisplayObject {
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
         txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML," ","&nbsp;");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"<","&lt;");
+        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,">","&gt;");
+
         $mesureTxt.innerHTML = txt.innerHTML;
         txt.style.width = $mesureTxt.offsetWidth + "px";
         return {
@@ -846,6 +850,8 @@ document.body.appendChild(measureTxt);
 //measureTxt.style.width = "0px";
 PlatformTextField.$mesureTxt = measureTxt;
 //PlatformTextField.$mesureTxt.retain();
+
+flower.$measureTextWidth = PlatformTextField.measureTextWidth;
 //////////////////////////End File:flower/platform/dom/PlatformTextField.js///////////////////////////
 
 
@@ -5323,6 +5329,8 @@ class Stage extends Sprite {
         this.addChild(this.$inputSprite);
         this.$inputSprite.touchEnabled = false;
         this.$input = new flower.TextInput();
+        this.$input.x = -100;
+        this.$input.y = -100;
         this.$input.width = 50;
         this.$inputSprite.addChild(this.$input);
         var rect = new flower.Shape();
@@ -6197,8 +6205,8 @@ class Texture {
         this.__url = url;
         this.__nativeURL = nativeURL;
         this.$count = 0;
-        this.__width = w;
-        this.__height = h;
+        this.__width = +w;
+        this.__height = +h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
     }

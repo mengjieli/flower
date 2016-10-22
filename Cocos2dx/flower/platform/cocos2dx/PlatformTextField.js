@@ -106,3 +106,5 @@ class PlatformTextField extends PlatformDisplayObject {
 
 PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
 PlatformTextField.$mesureTxt.retain();
+
+flower.$measureTextWidth = PlatformTextField.measureTextWidth;
