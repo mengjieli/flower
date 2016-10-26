@@ -189,7 +189,7 @@ class ArrayValue extends Value {
 
     getItemIndex(item) {
         for (var i = 0, len = this.list.length; i < len; i++) {
-            if (this.list[i] == item) {
+            if (this.list[i] == item || !(item instanceof flower.Value) && this.list[i] instanceof Value && this.list[i].value == item) {
                 return i;
             }
         }
@@ -362,7 +362,7 @@ class ArrayValue extends Value {
             return null;
         }
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i][this.key] == value) {
+            if (this.list[i][this.key] instanceof Value && this.list[i][this.key].value == value || this.list[i][this.key] == value) {
                 return this.list[i];
             }
         }

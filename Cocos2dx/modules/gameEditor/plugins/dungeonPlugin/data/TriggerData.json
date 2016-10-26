@@ -12,6 +12,26 @@
       "type": "string",
       "init": "新触发器"
     },
+    "count": {
+      "desc": "执行次数",
+      "type": "int",
+      "init": 1
+    },
+    "open": {
+      "desc": "状态",
+      "type": "bool",
+      "init": true,
+      "enumList": [
+        {
+          "label": "开启",
+          "type": true
+        },
+        {
+          "label": "关闭",
+          "type": false
+        }
+      ]
+    },
     "startCondition": {
       "desc": "启动条件类型",
       "type": "int",
@@ -40,6 +60,10 @@
         {
           "label": "全队灭亡",
           "type": 6
+        },
+        {
+          "label": "指定怪物死亡",
+          "type": 7
         }
       ]
     },

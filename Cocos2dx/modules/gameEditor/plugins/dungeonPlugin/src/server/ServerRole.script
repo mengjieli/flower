@@ -149,7 +149,7 @@ var ServerRole = (function () {
         if (this.hp == 0) {
             this.hasDie = true;
             this.callObject.roleDie(this.id);
-            if(this.type == 0) {
+            if (this.type == 0) {
                 this.triggerRunning.dieCount++;
             }
             this.serverPath.removeRoler(this, this.x, this.y);
@@ -160,6 +160,16 @@ var ServerRole = (function () {
                     var startValue = trigger.startValue;
                     var type = startValue.type.value;
                     if (this.triggerRunning.isAllDie(type)) {
+                        this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
+                    }
+                }
+                if (!trigger.hasPlay.value && trigger.startCondition.value == 7) {
+                    var startValue = trigger.startValue;
+                    var index = startValue.tags.getItemIndex(this.data.tag.value);
+                    if (index != -1) {
+                        startValue.dieTags[index].value = true;
+                    }
+                    if (startValue.dieTags.getItemIndex(false) == -1) {
                         this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
                     }
                 }
@@ -176,10 +186,10 @@ var ServerRole = (function () {
                     continue;
                 }
                 var monsters = this.triggerRunning.getMonsterByTag(tag);
-                var flag = true;
+                var flag = false;
                 for (var i = 0; i < monsters.length; i++) {
-                    if (monsters[i].hp / monsters[i].maxHp > hp) {
-                        flag = false;
+                    if (monsters[i].hp / monsters[i].maxHp <= hp) {
+                        flag = true;
                         break;
                     }
                 }

@@ -8,12 +8,42 @@ var ConfigModel = (function (_super) {
 
     ConfigModel.prototype.load = function () {
         this.configs = {};
-        var loader = new flower.URLLoader("res/tools/dungeon/res/config/rolerAction.csv");
-        loader.once(flower.Event.COMPLETE, this.loadConfigComplete, this);
-        loader.load();
+
+        var loaders = [
+            {
+                url: "res/tools/dungeon/res/config/rolerAction.csv",
+                func: this.loadRolerComplete
+            },
+            {
+                url: "res/tools/dungeon/res/effect/effect.csv",
+                func: this.loadEffectComplete
+            }
+        ];
+        for (var i = 0; i < loaders.length; i++) {
+            var item = loaders[i];
+            var loader = new flower.URLLoader(item.url);
+            item.loader = loader;
+            loader.load();
+            loader.addListener(flower.Event.COMPLETE, function (e) {
+                var complete = true;
+                for (var i = 0; i < loaders.length; i++) {
+                    var item = loaders[i];
+                    if (item.loader == e.currentTarget) {
+                        item.func.call(this, e);
+                        item.loader = null;
+                    }
+                    if (item.loader) {
+                        complete = false;
+                    }
+                }
+                if (complete) {
+                    this.dispatchWith(flower.Event.COMPLETE);
+                }
+            }, this);
+        }
     }
 
-    ConfigModel.prototype.loadConfigComplete = function (e) {
+    ConfigModel.prototype.loadRolerComplete = function (e) {
         var content = e.data;
         var name = flower.Path.getName(e.currentTarget.url);
         name = name.split(".")[0];
@@ -45,7 +75,43 @@ var ConfigModel = (function (_super) {
             roler.id = id;
             array.push(roler);
         }
-        this.dispatchWith(flower.Event.COMPLETE);
+    }
+
+    ConfigModel.prototype.loadEffectComplete = function (e) {
+        var content = e.data;
+        var name = flower.Path.getName(e.currentTarget.url);
+        name = name.split(".")[0];
+        var cfg = {};
+        var list = content.split("\n");
+        var array = new flower.ArrayValue();
+        this.configs[name] = array;
+        for (var i = 1; i < list.length; i++) {
+            var items = list[i].split(",");
+            var end = items[items.length - 1];
+            while (end.charAt(end.length - 1) == "\r" || end.charAt(end.length - 1) == "\n") {
+                end = end.slice(0, end.length - 1);
+            }
+            items[items.length - 1] = end;
+            var name = items[0];
+            if (name == "") {
+                continue;
+            }
+            var urls = [];
+            var length = flower.StringDo.parseNumber(items[1]);
+            for (var f = 0; f < length; f++) {
+                var str = "00" + f;
+                str = str.slice(str.length - 3, str.length);
+                urls.push(items[0] + "_" + str);
+            }
+            var config = {
+                "label": name,
+                "type": name,
+                "frames": urls,
+                "frameRate": flower.StringDo.parseNumber(items[2]),
+                "loop": flower.StringDo.parseNumber(items[3])
+            }
+            array.push(config);
+        }
     }
 
     ConfigModel.prototype.getConfig = function (configName) {

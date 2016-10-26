@@ -1,7 +1,7 @@
 function init() {
     var container = this.container;
-    var labels = ["名称", "延迟(ms)", "类型"];
-    var attributes = ["name", "delay", "type"];
+    var labels = ["名称",  "类型"];
+    var attributes = ["name", "type"];
     var inputFalse = {
         //"itemId": true
     };
@@ -31,7 +31,7 @@ function init() {
     }
 
     var fxml =
-        '<f:ViewStack percentWidth="100" top="80" bottom="0" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:dg="modules/gameEditor/plugins/dungeonPlugin/module.json">' +
+        '<f:ViewStack percentWidth="100" top="55" bottom="0" xmlns:f="flower" xmlns:s="modules/software/module.json" xmlns:dg="modules/gameEditor/plugins/dungeonPlugin/module.json">' +
         '<f:Group/>' +
         '<dg:FlushMonsterEffect/>' +
         '<dg:HurtEffect/>' +
@@ -44,7 +44,8 @@ function init() {
         '<dg:CameraMoveEffect/>' +
         '<dg:CameraRangeEffect/>' +
         '<dg:DialogEffect/>' +
-        '<f:Group/>' +
+        '<dg:AddAnimationEffect/>' +
+        '<dg:RemoveAnimationEffect/>' +
         '</f:ViewStack>';
     this.viewStack = (new flower.UIParser()).parseUI(fxml);
     container.addChild(this.viewStack);
@@ -78,6 +79,10 @@ function setData(val) {
             } else if (this.data.type.value == 11) {
                 this.data.effectValue = flower.DataManager.createData("dg.DialogEffect");
             } else if (this.data.type.value == 12) {
+                this.data.effectValue = flower.DataManager.createData("dg.AddAnimationEffect");
+            } else if (this.data.type.value == 13) {
+                this.data.effectValue = flower.DataManager.createData("dg.RemoveAnimationEffect");
+            } else if (this.data.type.value == 12) { //暂时不需要
                 this.data.effectValue = flower.DataManager.createData("dg.StartEffect");
             } else {
                 this.data.effectValue = null;

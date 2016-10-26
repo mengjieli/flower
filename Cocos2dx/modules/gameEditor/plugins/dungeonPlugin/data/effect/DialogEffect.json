@@ -1,6 +1,6 @@
 {
   "name": "dg.DialogEffect",
-  "desc": "镜头范围",
+  "desc": "增加动画",
   "members": {
     "dialogId": {
       "desc": "剧情id",

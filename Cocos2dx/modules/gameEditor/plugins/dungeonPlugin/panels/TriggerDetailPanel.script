@@ -1,12 +1,13 @@
 function init() {
     var container = this.container;
-    var labels = ["名称", "id", "延时", "启动条件"];
-    var attributes = ["name", "itemId", "delay", "startCondition"];
+    var labels = ["名称", "id", "延时","执行次数","初始状态", "启动条件"];
+    var attributes = ["name", "itemId", "delay","count","open","startCondition"];
     var inputFalse = {
         "itemId": true
     };
     var dropDownList = {
-        "startCondition": true
+        "startCondition": true,
+        "open":true
     }
     this.attributes = attributes;
     for (var i = 0; i < attributes.length; i++) {
@@ -38,6 +39,7 @@ function init() {
         '<dg:FinishCondition/>' +
         '<f:Group/>' +
         '<dg:AllDieCondition/>' +
+        '<dg:MonsterDieCondition/>' +
         '</f:ViewStack>';
     this.viewStack = (new flower.UIParser()).parseUI(fxml);
     container.addChild(this.viewStack);
@@ -64,6 +66,8 @@ function setData(val) {
                 this.data.startValue = flower.DataManager.createData("dg.FinishCondition");
             } else if (this.data.startCondition.value == 6) {
                 this.data.startValue = flower.DataManager.createData("dg.AllDieCondition");
+            } else if (this.data.startCondition.value == 7) {
+                this.data.startValue = flower.DataManager.createData("dg.MonsterDieCondition");
             } else {
                 this.data.startValue = null;
             }

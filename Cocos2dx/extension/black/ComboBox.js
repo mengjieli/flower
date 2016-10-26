@@ -169,7 +169,11 @@ class ComboBox extends Group {
     }
 
     set labelField(val) {
-        this.$comboBox[4] = val;
+        var p = this.$comboBox;
+        if(p[4] == val) {
+            return;
+        }
+        p[4] = val;
         if (p[0]) {
             if (p[8] && p[8][p[4]]) {
                 p[0].text = p[8][p[4]];

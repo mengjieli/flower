@@ -1,0 +1,22 @@
+{
+  "name": "dg.AddAnimationEffect",
+  "desc": "镜头范围",
+  "members": {
+    "url": {
+      "desc": "资源名称",
+      "type": "string"
+    },
+    "tag": {
+      "desc": "资源 tag",
+      "type": "int"
+    },
+    "x": {
+      "desc": "像素坐标 x",
+      "type": "int"
+    },
+    "y": {
+      "desc": "像素坐标 y",
+      "type": "int"
+    }
+  }
+}

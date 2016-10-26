@@ -1,0 +1,17 @@
+{
+  "name": "dg.MonsterDieCondition",
+  "desc": "指定怪物死亡",
+  "members": {
+    "tags": {
+      "desc": "怪物",
+      "type": "Array",
+      "typeValue": "int"
+    },
+    "dieTags": {
+      "desc": "标签为 tag 的怪是否死亡",
+      "type": "Array",
+      "typeValue": "bool",
+      "save": false
+    }
+  }
+}

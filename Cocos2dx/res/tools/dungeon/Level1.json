@@ -1,11 +1,13 @@
 {
- "itemId": 121,
+ "itemId": 128,
  "screenWidth": 500,
  "screenHeight": 600,
  "triggers": [
   {
    "itemId": 59,
    "name": "初始化镜头参数",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 0,
    "startValue": null,
@@ -45,12 +47,27 @@
       "triggerId": 0,
       "__className": "dg.CameraRangeEffect"
      }
+    },
+    {
+     "itemId": 128,
+     "name": "刷陷阱",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "trapBoom1",
+      "tag": 10001,
+      "x": 260,
+      "y": 620,
+      "__className": "dg.AddAnimationEffect"
+     }
     }
    ]
   },
   {
    "itemId": 70,
    "name": "开场效果-镜头右移",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 0,
    "startValue": null,
@@ -75,6 +92,8 @@
   {
    "itemId": 110,
    "name": "开场效果-镜头左移",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 3000,
    "startValue": null,
@@ -99,6 +118,8 @@
   {
    "itemId": 119,
    "name": "剧情对话",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 4300,
    "startValue": null,
@@ -123,6 +144,8 @@
   {
    "itemId": 112,
    "name": "关卡正式开始",
+   "count": 1,
+   "open": true,
    "startCondition": 5,
    "delay": 0,
    "startValue": null,
@@ -141,6 +164,8 @@
   {
    "itemId": 74,
    "name": "刷怪-1波1排",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 500,
    "startValue": null,
@@ -154,7 +179,7 @@
       "monsters": [
        {
         "id": 3305001,
-        "tag": 1,
+        "tag": 1001,
         "bornCoord": {
          "x": 5,
          "y": 8
@@ -167,7 +192,7 @@
        },
        {
         "id": 3305001,
-        "tag": 1,
+        "tag": 1002,
         "bornCoord": {
          "x": 6,
          "y": 10
@@ -187,6 +212,8 @@
   {
    "itemId": 116,
    "name": "刷怪-1波2排",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 1500,
    "startValue": null,
@@ -200,7 +227,7 @@
       "monsters": [
        {
         "id": 3305001,
-        "tag": 1,
+        "tag": 1003,
         "bornCoord": {
          "x": 7,
          "y": 8
@@ -213,7 +240,7 @@
        },
        {
         "id": 3305001,
-        "tag": 1,
+        "tag": 1004,
         "bornCoord": {
          "x": 8,
          "y": 10
@@ -233,6 +260,8 @@
   {
    "itemId": 81,
    "name": "奇兵触发器",
+   "count": 1,
+   "open": true,
    "startCondition": 2,
    "delay": 0,
    "startValue": {
@@ -294,6 +323,8 @@
   {
    "itemId": 82,
    "name": "刷奇兵",
+   "count": 1,
+   "open": true,
    "startCondition": 5,
    "delay": 0,
    "startValue": null,
@@ -353,12 +384,18 @@
   {
    "itemId": 85,
    "name": "刷怪-2波",
-   "startCondition": 3,
+   "count": 1,
+   "open": true,
+   "startCondition": 7,
    "delay": 0,
    "startValue": {
-    "tag": 1,
-    "hp": 0,
-    "__className": "dg.HPCondition"
+    "tags": [
+     1001,
+     1002,
+     1003,
+     1004
+    ],
+    "__className": "dg.MonsterDieCondition"
    },
    "effects": [
     {
@@ -370,7 +407,7 @@
       "monsters": [
        {
         "id": 3305001,
-        "tag": 2,
+        "tag": 2001,
         "bornCoord": {
          "x": 1,
          "y": 12
@@ -383,7 +420,7 @@
        },
        {
         "id": 3305001,
-        "tag": 2,
+        "tag": 2002,
         "bornCoord": {
          "x": 1,
          "y": 10
@@ -396,7 +433,7 @@
        },
        {
         "id": 3305001,
-        "tag": 2,
+        "tag": 2003,
         "bornCoord": {
          "x": 1,
          "y": 8
@@ -416,12 +453,17 @@
   {
    "itemId": 88,
    "name": "刷怪-3波",
-   "startCondition": 3,
+   "count": 1,
+   "open": true,
+   "startCondition": 7,
    "delay": 0,
    "startValue": {
-    "tag": 2,
-    "hp": 0,
-    "__className": "dg.HPCondition"
+    "tags": [
+     2001,
+     2002,
+     2003
+    ],
+    "__className": "dg.MonsterDieCondition"
    },
    "effects": [
     {
@@ -479,6 +521,8 @@
   {
    "itemId": 99,
    "name": "失败-超时",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 60000,
    "startValue": null,
@@ -495,6 +539,8 @@
   {
    "itemId": 101,
    "name": "失败-我方全灭",
+   "count": 1,
+   "open": true,
    "startCondition": 6,
    "delay": 0,
    "startValue": {
@@ -514,6 +560,8 @@
   {
    "itemId": 102,
    "name": "成功-敌方全灭",
+   "count": 1,
+   "open": true,
    "startCondition": 6,
    "delay": 0,
    "startValue": {
@@ -533,12 +581,18 @@
   {
    "itemId": 93,
    "name": "任务-坚守1波",
-   "startCondition": 3,
+   "count": 1,
+   "open": true,
+   "startCondition": 7,
    "delay": 0,
    "startValue": {
-    "tag": 1,
-    "hp": 0,
-    "__className": "dg.HPCondition"
+    "tags": [
+     1001,
+     1002,
+     1003,
+     1004
+    ],
+    "__className": "dg.MonsterDieCondition"
    },
    "effects": [
     {
@@ -557,12 +611,17 @@
   {
    "itemId": 95,
    "name": "任务-坚守2波",
-   "startCondition": 3,
+   "count": 1,
+   "open": true,
+   "startCondition": 7,
    "delay": 0,
    "startValue": {
-    "tag": 2,
-    "hp": 0,
-    "__className": "dg.HPCondition"
+    "tags": [
+     2001,
+     2002,
+     2003
+    ],
+    "__className": "dg.MonsterDieCondition"
    },
    "effects": [
     {
@@ -581,6 +640,8 @@
   {
    "itemId": 97,
    "name": "任务-首战告捷",
+   "count": 1,
+   "open": true,
    "startCondition": 4,
    "delay": 0,
    "startValue": {
@@ -605,6 +666,8 @@
   {
    "itemId": 105,
    "name": "任务-速战速决",
+   "count": 1,
+   "open": true,
    "startCondition": 4,
    "delay": 0,
    "startValue": {
@@ -629,6 +692,8 @@
   {
    "itemId": 108,
    "name": "任务-毫发未伤",
+   "count": 1,
+   "open": true,
    "startCondition": 4,
    "delay": 0,
    "startValue": {

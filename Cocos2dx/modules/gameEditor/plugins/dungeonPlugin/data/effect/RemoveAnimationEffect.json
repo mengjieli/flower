@@ -1,0 +1,10 @@
+{
+  "name": "dg.RemoveAnimationEffect",
+  "desc": "移除动画",
+  "members": {
+    "tag": {
+      "desc": "资源 tag",
+      "type": "int"
+    }
+  }
+}

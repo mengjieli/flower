@@ -45,6 +45,19 @@ var Server = (function () {
         this.stop(true);
         this.time = 0;
         this.hasInit = true;
+
+        var triggers = this.data.triggers;
+        for (var i = 0; i < triggers.length; i++) {
+            var trigger = triggers[i];
+            if (trigger.startCondition.value == 7) {
+                var startValue = trigger.startValue;
+                startValue.dieTags.length = 0;
+                for (var d = 0; d < startValue.tags.length; d++) {
+                    startValue.dieTags.push(new flower.BooleanValue(false));
+                }
+            }
+        }
+
         //运行
         flower.EnterFrame.add(this.update, this);
         this.gameStartFlag = false;
@@ -69,7 +82,7 @@ var Server = (function () {
         flower.EnterFrame.remove(this.update, this);
         this.data.settings.time.value = 0;
         this.time = 0;
-        if(!notSetPlaying) {
+        if (!notSetPlaying) {
             this.data.settings.isPlaying = false;
         }
         this.callObject.stop();
@@ -243,7 +256,7 @@ var Server = (function () {
 
     Server.prototype.hasTrigger = function (triggerId) {
         for (var i = 0; i < this.triggers.length; i++) {
-            if(this.triggers[i].data.itemId.value == triggerId) {
+            if (this.triggers[i].data.itemId.value == triggerId) {
                 return true;
             }
         }

@@ -783,7 +783,7 @@ var $root = eval("this");
             key: "getItemIndex",
             value: function getItemIndex(item) {
                 for (var i = 0, len = this.list.length; i < len; i++) {
-                    if (this.list[i] == item) {
+                    if (this.list[i] == item || !(item instanceof flower.Value) && this.list[i] instanceof Value && this.list[i].value == item) {
                         return i;
                     }
                 }
@@ -980,7 +980,7 @@ var $root = eval("this");
                     return null;
                 }
                 for (var i = 0; i < this.list.length; i++) {
-                    if (this.list[i][this.key] == value) {
+                    if (this.list[i][this.key] instanceof Value && this.list[i][this.key].value == value || this.list[i][this.key] == value) {
                         return this.list[i];
                     }
                 }
@@ -7772,7 +7772,11 @@ var $root = eval("this");
                 return this.$comboBox[4];
             },
             set: function set(val) {
-                this.$comboBox[4] = val;
+                var p = this.$comboBox;
+                if (p[4] == val) {
+                    return;
+                }
+                p[4] = val;
                 if (p[0]) {
                     if (p[8] && p[8][p[4]]) {
                         p[0].text = p[8][p[4]];

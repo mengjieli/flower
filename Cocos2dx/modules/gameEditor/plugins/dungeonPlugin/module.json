@@ -40,6 +40,7 @@
     "./panels/startCondition/MoveCondition.xml",
     "./panels/startCondition/FinishCondition.xml",
     "./panels/startCondition/AllDieCondition.xml",
+    "./panels/startCondition/MonsterDieCondition.xml",
     "./panels/EffectDetailPanel.xml",
     "./panels/effect/FlushMonsterEffect.xml",
     "./panels/effect/HurtEffect.xml",
@@ -48,6 +49,8 @@
     "./panels/effect/CameraRangeEffect.xml",
     "./panels/effect/DialogEffect.xml",
     "./panels/effect/StartTriggerEffect.xml",
+    "./panels/effect/AddAnimationEffect.xml",
+    "./panels/effect/RemoveAnimationEffect.xml",
     "./view/DungeonView.xml"
   ],
   "classes": {
@@ -61,6 +64,7 @@
     "./data/startCondition/MoveCondition.json",
     "./data/startCondition/FinishCondition.json",
     "./data/startCondition/AllDieCondition.json",
+    "./data/startCondition/MonsterDieCondition.json",
     "./data/effect/FlushMonsterEffect.json",
     "./data/effect/FlushMonsterEffectItem.json",
     "./data/effect/HurtEffect.json",
@@ -70,6 +74,8 @@
     "./data/effect/DialogEffect.json",
     "./data/effect/StartTriggerEffect.json",
     "./data/effect/StartEffect.json",
+    "./data/effect/AddAnimationEffect.json",
+    "./data/effect/RemoveAnimationEffect.json",
     "./data/running/map/MapData.json",
     "./data/running/map/Camera.json",
     "./data/running/map/CameraMove.json",

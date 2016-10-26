@@ -1,0 +1,37 @@
+function setData(val) {
+    _super.prototype.setData.call(this, val);
+    var tags = val.tags;
+    var str = "";
+    for (var i = 0; i < tags.length; i++) {
+        str += tags[i].value + (i < tags.length - 1 ? "," : "");
+    }
+    this.input.text = str;
+}
+
+function inputOver() {
+    var text = this.input.text;
+    text = flower.StringDo.replaceString(text, " ", "");
+    text = flower.StringDo.replaceString(text, "，", ",");
+    var tags = this.data.tags;
+    tags.length = 0;
+    if (text != "") {
+        var arr = text.split(",");
+        for (var i = 0; i < arr.length; i++) {
+            tags.push(new flower.IntValue(arr[i]));
+        }
+    }
+    var str = "";
+    for (var i = 0; i < tags.length; i++) {
+        str += tags[i].value + (i < tags.length - 1 ? "," : "");
+    }
+    this.input.text = str;
+    this.save();
+}
+
+function set save(func) {
+    this.__save = func;
+}
+
+function get save() {
+    return this.__save;
+}

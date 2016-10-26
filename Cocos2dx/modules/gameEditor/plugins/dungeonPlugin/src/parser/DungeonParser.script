@@ -9,6 +9,11 @@ var DungeonParser = (function (_super) {
     DungeonParser.prototype.load = function () {
         var config = this.file.content;
         this.data = flower.DataManager.createData("dg.DungeonData", config);
+        this.loadBackground();
+        return true;
+    }
+
+    DungeonParser.prototype.loadBackground = function () {
         (new flower.Direction("res/tools/dungeon/background")).readDirectionList(function (list) {
             var enumList = [];
             var find = false;
@@ -29,7 +34,16 @@ var DungeonParser = (function (_super) {
             this.data.settings.background.enumList = enumList;
             this.loadConfig();
         }, this);
-        return true;
+    }
+
+    DungeonParser.prototype.loadAnimation = function () {
+        var loader = new flower.URLLoader("res/tools/dungeon/res/effect/effect.csv");
+        loader.load();
+        loader.addListener(flower.Event.COMPLETE, function (e) {
+            console.log(e.data);
+
+
+        }, this);
     }
 
     DungeonParser.prototype.loadConfig = function () {
