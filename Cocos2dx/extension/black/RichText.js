@@ -256,7 +256,7 @@ class RichText extends Group {
     __update(now, gap) {
         var p = this.$RichText;
         p[36] += gap;
-        if (p[36] < 1000 || Math.floor(p[36] / 500) % 2 == 0) {
+        if (p[36] < 500 || Math.floor(p[36] / 500) % 2 == 0) {
             p[33].visible = true;
         } else {
             p[33].visible = false;
