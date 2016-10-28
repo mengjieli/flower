@@ -2624,9 +2624,11 @@ class RichText extends Group {
         var x = this.lastTouchX;
         var y = this.lastTouchY;
         var find = false;
+        var inputDisplay;
+        var inputX;
+        var index = 0;
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
-            var index = 0;
             if (y >= line.y && y < line.y + line.height) {
                 y -= line.y;
                 var displayLines = line.displayLines;
@@ -2637,20 +2639,21 @@ class RichText extends Group {
                         for (var d = 0; d < displays.length; d++) {
                             var display = displays[d];
                             if (x > display.x && x <= display.x + display.width) {
-                                focus.x = display.x + display.width;
+                                focus.x = display.x + line.x + dline.x;
                                 focus.y = line.y + dline.y;
                                 focus.height = dline.height
                                 find = true;
-                                p[37] = line;
-                                p[38] = index;
+                                inputDisplay = display;
+                                inputX = x - display.x - dline.x;
                                 break;
                             } else if (d == displays.length - 1) {
-                                focus.x = display.x + display.width;
+                                focus.x = display.x + line.x + dline.x;
                                 focus.y = line.y + dline.y;
                                 focus.height = dline.height;
                                 find = true;
-                                p[37] = line;
-                                p[38] = index;
+                                inputDisplay = display;
+                                inputX = x - display.x - dline.x;
+                                break;
                             }
                             index += display.htmlText.length;
                         }
@@ -2659,17 +2662,46 @@ class RichText extends Group {
                 }
                 break;
             }
+            index += line.endHtmlText.length;
         }
         if (!find) {
             var line = lines[lines.length - 1];
             var dline = line.displayLines[line.displayLines.length - 1];
             var display = dline.displays[dline.displays.length - 1];
-            focus.x = display.x + display.width;
+            index = this.htmlText.length - display.htmlText.length;
+            focus.x = display.x + line.x + dline.x;
             focus.y = line.y + dline.y;
             focus.height = dline.height;
-            p[37] = line;
-            p[38] += line.htmlText.length - display.htmlText.length;
+            inputDisplay = display;
+            inputX = x - display.x - dline.x;
         }
+        if (inputDisplay.type != 0) {
+            if (inputX < inputDisplay.width / 2) {
+
+            } else {
+                index += 1;
+                focus.x += display.width;
+            }
+        } else {
+            var text = display.text;
+            var size = display.font.size;
+            var lastWidth = 0;
+            var find = false;
+            for (var i = 1; i <= text.length; i++) {
+                var textWidth = flower.$measureTextWidth(size, text.slice(0, i));
+                var charWidth = textWidth - lastWidth;
+                if (inputX - lastWidth < charWidth / 2) {
+                    focus.x += lastWidth;
+                    find = true;
+                    break;
+                }
+                lastWidth = textWidth;
+            }
+            if (!find) {
+                focus.x += lastWidth;
+            }
+        }
+        p[38] = index;
     }
 
     //输入字符
@@ -2762,11 +2794,13 @@ class RichText extends Group {
             "endHtmlText": "",
             "width": 0,
             "height": 0,
+            "x": 0,
             "y": 0,
             "align": "left",
             "displayLines": [{
                 "width": 0,
                 "height": 0,
+                "x":0,
                 "y": 0,
                 "displays": []
             }],
@@ -2974,6 +3008,7 @@ class RichText extends Group {
                         "text": "",
                         "htmlText": "",
                         "endHtmlText": "",
+                        "x": 0,
                         "y": line.y + line.height,
                         "width": 0,
                         "height": 0,
@@ -2981,6 +3016,7 @@ class RichText extends Group {
                         "displayLines": [{
                             "width": 0,
                             "height": 0,
+                            "x": 0,
                             "y": 0,
                             "displays": []
                         }],
