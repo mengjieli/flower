@@ -1,65 +1,26 @@
-var ChangeLayer = (function (_super) {
+var Layer = (function (_super) {
 
-    __extends(ChangeLayer, _super);
+    __extends(Layer, _super);
 
-    function ChangeLayer() {
+    function Layer(top) {
         _super.call(this);
+        this.top = top;
         this.images = [];
         this.animations = [];
     }
 
-    ChangeLayer.prototype.setData = function (val) {
+    Layer.prototype.setData = function (val) {
         this.data = val;
         this.y = this.data.size.height.value;
-        this.list = new flower.ArrayValue();
-        var dataList = this.data.objects;
-        dataList.addListener(flower.Event.UPDATE, this.dataUpdate, this);
-        for (var i = 0; i < dataList.length; i++) {
-            this.list.push(new MapObject(dataList[i]));
-            this.addChild(this.list[this.list.length - 1]);
-        }
-
         this.data.images.addListener(flower.Event.ADDED, this.addImage, this);
         this.data.images.addListener(flower.Event.REMOVED, this.removeImage, this);
         this.data.animations.addListener(flower.Event.ADDED, this.addAnimation, this);
         this.data.animations.addListener(flower.Event.REMOVED, this.removeAnimation, this);
     }
 
-    ChangeLayer.prototype.dataUpdate = function () {
-        var dataList = this.data.objects;
-        for (var i = 0; i < dataList.length; i++) {
-            if (this.list.getItemWith("data", dataList[i]) == null) {
-                this.list.push(new MapObject(dataList[i]));
-                this.addChild(this.list[this.list.length - 1]);
-            }
-        }
-        for (var i = 0; i < this.list.length; i++) {
-            if (dataList.getItemIndex(this.list[i].data) == -1) {
-                this.list.splice(i, 1)[0].dispose();
-            }
-        }
-    }
-
-    ChangeLayer.prototype.update = function (dt) {
-        var list = [];
-        for (var i = 0; i < this.numChildren; i++) {
-            var child = this.getChildAt(i);
-            list.push({child: child, y: child.y});
-        }
-        list.sort(function (a, b) {
-            return a.y > b.y ? true : false;
-        });
-        for (var i = 0; i < list.length; i++) {
-            var child = list[i].child;
-            if (this.getChildIndex(child) != i) {
-                this.setChildIndex(child, i);
-            }
-        }
-    }
-
-    ChangeLayer.prototype.addImage = function (e) {
+    Layer.prototype.addImage = function (e) {
         var imageData = e.data;
-        if (imageData.layer.value == 2) {
+        if (imageData.layer.value == 1 && !this.top || imageData.layer.value == 3 && this.top) {
             var group = new flower.Group();
             this.addChild(group);
             group.x = imageData.x.value;
@@ -75,7 +36,7 @@ var ChangeLayer = (function (_super) {
         }
     }
 
-    ChangeLayer.prototype.removeImage = function (e) {
+    Layer.prototype.removeImage = function (e) {
         var images = this.images;
         for (var i = 0; i < this.images.length; i++) {
             if (images[i].data == e.data) {
@@ -86,9 +47,9 @@ var ChangeLayer = (function (_super) {
         }
     }
 
-    ChangeLayer.prototype.addAnimation = function (e) {
+    Layer.prototype.addAnimation = function (e) {
         var data = e.data;
-        if (data.layer.value == 2) {
+        if (data.layer.value == 1 && !this.top || data.layer.value == 3 && this.top) {
             var group = new flower.Group();
             this.addChild(group);
             group.x = data.x.value;
@@ -105,7 +66,7 @@ var ChangeLayer = (function (_super) {
         }
     }
 
-    ChangeLayer.prototype.removeAnimation = function (e) {
+    Layer.prototype.removeAnimation = function (e) {
         var animtions = this.animations;
         for (var i = 0; i < animtions.length; i++) {
             if (animtions[i].data == e.data) {
@@ -118,8 +79,8 @@ var ChangeLayer = (function (_super) {
         }
     }
 
-    return ChangeLayer;
+    return Layer;
 
 })(flower.Sprite);
 
-module.ChangeLayer = ChangeLayer;
+module.Layer = Layer;

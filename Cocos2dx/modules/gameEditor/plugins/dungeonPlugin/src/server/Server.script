@@ -35,7 +35,7 @@ var Server = (function () {
                 this.pause();
             }
         }, this);
-        this.path = new ServerPath(this.data, this.monsters, this.armys, this);
+        this.path = new ServerPath(this.data, this.monsters, this.armys,this.callObject, this);
     }
 
     /**
@@ -49,6 +49,7 @@ var Server = (function () {
         var triggers = this.data.triggers;
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
+            trigger.openFlag = trigger.open.value;
             if (trigger.startCondition.value == 7) {
                 var startValue = trigger.startValue;
                 startValue.dieTags.length = 0;
@@ -63,6 +64,10 @@ var Server = (function () {
         this.gameStartFlag = false;
         this.sendAllTask();
         this.dieCount = 0;
+
+
+        this.gameStart();
+        this.callObject.startGame();
     }
 
     Server.prototype.gameStart = function () {
@@ -134,7 +139,7 @@ var Server = (function () {
         }
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
-            if (!this.hasTrigger(trigger.itemId.value) && trigger.startCondition.value == 1) {
+            if (trigger.openFlag.value && !this.hasTrigger(trigger.itemId.value) && trigger.startCondition.value == 1) {
                 this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
             }
         }
@@ -151,9 +156,9 @@ var Server = (function () {
                 var trigger = triggers[i];
                 if (!trigger.hasPlay.value && trigger.startCondition.value == 4) {
                     var triggerValue = trigger.startValue;
-                    if (triggerValue.type.value == 0 && this.dieCount < triggerValue.param.value ||
+                    if (trigger.openFlag.value && (triggerValue.type.value == 0 && this.dieCount < triggerValue.param.value ||
                         triggerValue.type.value == 1 && this.time < triggerValue.param.value ||
-                        triggerValue.type.value == 2) {
+                        triggerValue.type.value == 2)) {
                         this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
                     }
                 }
@@ -169,7 +174,10 @@ var Server = (function () {
                 var trigger = triggers[i];
                 if (trigger.itemId.value == triggerId) {
                     if (!this.hasTrigger(triggerId)) {
-                        this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
+                        trigger.openFlag = true;
+                        if(trigger.startCondition.value == 5) {
+                            this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
+                        }
                     } else {
                         for (var t = 0; t < this.triggers.length; t++) {
                             if (this.triggers[t].data.itemId.value == triggerId) {

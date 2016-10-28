@@ -1,9 +1,10 @@
 var ServerPath = (function () {
 
-    function ServerPath(dungeonData, monsters, armys, server) {
+    function ServerPath(dungeonData, monsters, armys,callObject, server) {
         this.dungeonData = dungeonData;
         this.monsters = monsters;
         this.armys = armys;
+        this.callObject = callObject;
         this.server = server;
 
         this.astar = new AStarSix();
@@ -47,7 +48,7 @@ var ServerPath = (function () {
         var triggers = this.dungeonData.triggers;
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
-            if (!trigger.hasPlay.value && trigger.startCondition.value == 2) {
+            if (trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 2) {
                 var startValue = trigger.startValue;
                 if (roler.type == startValue.armyType.value && startValue.points.getItemWith("x", x, "y", y)) {
                     this.server.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.server));

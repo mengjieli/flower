@@ -44,6 +44,8 @@ var MapNet = (function () {
         this.data.objects.removeAll();
         this.data.start.value = false;
         this.data.tasks.removeAll();
+        this.data.images.removeAll();
+        this.data.animations.removeAll();
     }
 
     /**
@@ -179,6 +181,47 @@ var MapNet = (function () {
             software.Alert.show("恭喜通关");
         } else {
             software.Alert.show("通关失败");
+        }
+    }
+
+    MapNet.prototype.addAnimation = function (tag, type, url, layer, x, y) {
+        if (type == 1) { //图片
+            var image = flower.DataManager.createData("dg.Image");
+            image.tag = tag;
+            image.layer = layer;
+            image.x = x;
+            image.y = y;
+            image.url = "res/tools/dungeon/res/image/" + module.ConfigModel.getConfig("image").getItemWith("type", url).url;
+            this.data.images.push(image);
+        } else if (type == 2) { //动画
+            var animation = flower.DataManager.createData("dg.Animation");
+            animation.tag = tag;
+            animation.layer = layer;
+            animation.x = x;
+            animation.y = y;
+            var cfg = module.ConfigModel.getConfig("effect").getItemWith("type", url);
+            //name,length,frameRate,loop
+            animation.config = {
+                url: "res/tools/dungeon/res/effect/",
+                name: cfg.type + "_000",
+                format: "png",
+                start: 0,
+                end: cfg.length - 1,
+                frameRate: cfg.frameRate,
+                x: 0,
+                y: 0,
+                scaleX: 1,
+                scaleY: 1,
+                loop: cfg.loop,
+                bottom: true
+            }
+            this.data.animations.push(animation);
+        }
+    }
+
+    MapNet.prototype.removeAnimation = function (tag) {
+        if (!this.data.images.removeItemWith("tag", tag)) {
+            this.data.animations.removeItemWith("tag", tag);
         }
     }
 

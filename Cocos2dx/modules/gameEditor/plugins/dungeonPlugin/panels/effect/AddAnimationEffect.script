@@ -1,13 +1,15 @@
 function setData(val) {
     _super.prototype.setData.call(this, val);
-    var atrs = ["url", "tag", "x", "y"];
-    if (!this.data.url.enumList) {
+    var atrs = ["tag","type", "url", "layer",  "x", "y"];
+    if (this.data.type.value == 1) {
+        this.data.url.enumList = dg.ConfigModel.getConfig("image");
+    } else if (this.data.type.value == 2) {
         this.data.url.enumList = dg.ConfigModel.getConfig("effect");
     }
     if (!this.data.url.enumList.getItemWith("label", this.data.url.value)) {
         this.data.url.value = this.data.url.enumList[0].label;
     }
-    var dropDownList = {"url": true};
+    var dropDownList = {"type": true, "url": true, "layer": true};
     for (var i = 0; i < atrs.length; i++) {
         var atr = atrs[i];
         var arr = atr.split(".");
@@ -21,6 +23,15 @@ function setData(val) {
             if (dropDownList[atr]) {
                 this[atr + "ComboBox"].value = value;
                 value.addListener(flower.Event.UPDATE, function (e) {
+                    if (atr == "type") {
+                        if (this.data.type.value == 1) {
+                            this.data.url.enumList = dg.ConfigModel.getConfig("image");
+                        } else if (this.data.type.value == 2) {
+                            this.data.url.enumList = dg.ConfigModel.getConfig("effect");
+                        }
+                        this.urlComboBox.dataProvider = this.data.url.enumList;
+                        this.data.url.value = this.data.url.enumList[0].label;
+                    }
                     this.save();
                 }, this);
             } else {

@@ -51,6 +51,16 @@
     "dialog": {
       "desc": "剧情对话",
       "type": "int"
+    },
+    "animations": {
+      "desc": "动画列表",
+      "type": "Array",
+      "typeValue": "dg.Animation"
+    },
+    "images": {
+      "desc": "图片列表",
+      "type": "Array",
+      "typeValue": "dg.Image"
     }
   }
 }

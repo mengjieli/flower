@@ -24,7 +24,8 @@ var Animation = (function (_super) {
      */
     function Animation(data) {
         _super.call(this);
-        this.__container = new flower.Sprite();
+        this.__container = new flower.Group();
+        this.__container.width = this.__container.height = 0;
         this.__container.x = data.x;
         this.__container.y = data.y;
         this.addChild(this.__container);
@@ -52,6 +53,9 @@ var Animation = (function (_super) {
             }
             this.__framesURL.push(name);
             this.__frames.push(image);
+            if(data.bottom) {
+                image.bottom = 0;
+            }
         }
         this.__frame = 0;
         this.__time = 0;

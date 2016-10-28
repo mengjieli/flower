@@ -82,13 +82,17 @@ var ExportCSVModel = (function () {
                     param += "[[" + val.rect.x + "," + val.rect.y + "]," + val.rect.width + "," + val.rect.height + "]";
                 } else if (effect.type == 11) { //剧情对话 [3000,0,0,0,0,500001]
                     param += "[" + val.dialogId + "," + val.param1 + "," + val.param2 + "," + val.param3 + "," + val.param4 + "," + val.triggerId + "]";
+                } else if (effect.type == 12) { //增加动画 [url,tag,type,layer,[x,y]]
+                    param += "['" + val.url + "'," + val.tag + "," + val.type + "," + val.layer + ",[" + val.x + "," + val.y + "]]";
+                } else if (effect.type == 13) { //删除动画 [tag]
+                    param += "[" + val.tag + "]";
                 }
                 param += (p < trigger.effects.length - 1 ? "," : "");
             }
             type += "]\"";
             param += "]";
-            content += type + "," + "\"" + param;
-            content += trigger.count + "," + (trigger.open?"1":"0") + "\"\n";
+            content += type + "," + "\"" + param + "\"";
+            content +=  "," + trigger.count + "," + (trigger.open?"1":"0") + "\n";
         }
         if (window) {
             var url = "res/tools/dungeon/res/save/" + (new Date()).getTime() + ".txt";

@@ -5024,11 +5024,11 @@ class Stage extends Sprite {
         this.$input = new flower.TextInput();
         this.$input.x = -100;
         this.$input.y = -100;
-        this.$input.width = 50;
+        this.$input.width = 10;
         this.$inputSprite.addChild(this.$input);
         var rect = new flower.Shape();
         rect.drawRect(0, 0, 50, 20);
-        rect.alpha = 0.1;
+        rect.alpha = 0.01;
         this.$inputSprite.addChild(rect);
         this.$background = new Shape();
         this.__forntLayer = new Sprite();
@@ -5898,8 +5898,8 @@ class Texture {
         this.__url = url;
         this.__nativeURL = nativeURL;
         this.$count = 0;
-        this.__width = w;
-        this.__height = h;
+        this.__width = +w;
+        this.__height = +h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
     }

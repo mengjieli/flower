@@ -2563,11 +2563,12 @@ class RichText extends Group {
             29: new flower.Sprite(),
             30: "", //229 firstChar
             31: false, // is 229
-            32: 0, //inputPos
             33: this.__getDefaultFocus(),//focus
             34: 0, //0.不需要刷新  1.表示某一行改变  2.表示显示内容上下移动  3.全部刷新
             35: 0, //0.无 1.改变的行数 2.旧的显示位置y 3.无
             36: 0, //input time
+            37: null, //input text display
+            38: null, //input text index
         };
         this.addChild(this.$RichText[29]);
         this.addChild(this.$RichText[33]);
@@ -2581,7 +2582,7 @@ class RichText extends Group {
     __getDefaultFocus() {
         var rect = new flower.Rect();
         rect.fillColor = 0;
-        rect.width = 1;
+        rect.width = 0.5;
         rect.height = 12;
         rect.visible = false;
         return rect;
@@ -2605,7 +2606,7 @@ class RichText extends Group {
     }
 
     $startInput() {
-        if(this.$RichText[2]) {
+        if (this.$RichText[2]) {
             return;
         }
         this.$RichText[2] = true;
@@ -2614,12 +2615,64 @@ class RichText extends Group {
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.add(this.__update, this);
         this.__showFocus();
+        this.__measureInputPos();
+    }
+
+    __measureInputPos() {
+        var p = this.$RichText;
+        var focus = p[33];
+        var lines = p[3];
+        var x = this.lastTouchX;
+        var y = this.lastTouchY;
+        var find = false;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (y >= line.y && y < line.y + line.height) {
+                y -= line.y;
+                var displayLines = line.displayLines;
+                for (var dl = 0; dl < displayLines.length; dl++) {
+                    var dline = displayLines[dl];
+                    if (y >= dline.y && y <= dline.y + dline.height) {
+                        var displays = dline.displays;
+                        for (var d = 0; d < displays.length; d++) {
+                            var display = displays[d];
+                            if (x > display.x && x <= display.x + display.width) {
+                                focus.x = display.x + display.width;
+                                focus.y = line.y + dline.y;
+                                focus.height = dline.height;
+                                p[37] = display;
+                                find = true;
+                                break;
+                            } else if (d == displays.length - 1) {
+                                focus.x = display.x + display.width;
+                                focus.y = line.y + dline.y;
+                                focus.height = dline.height;
+                                p[37] = display;
+                                find = true;
+                            }
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        if (!find) {
+            var line = lines[lines.length - 1];
+            var dline = line.displayLines[line.displayLines.length - 1];
+            var display = dline.displays[dline.displays.length - 1];
+            focus.x = display.x + display.width;
+            focus.y = line.y + dline.y;
+            focus.height = dline.height;
+            p[37] = display;
+        }
+        console.log(p[37]);
     }
 
     __showFocus() {
         var focus = this.$RichText[33];
         focus.visible = true;
-        focus.x = focus.y = 50;
+        this.$RichText[36] = 0;
     }
 
     __hideFocus() {
@@ -2637,7 +2690,7 @@ class RichText extends Group {
     __update(now, gap) {
         var p = this.$RichText;
         p[36] += gap;
-        if (Math.floor(p[36] / 500) % 2 == 0) {
+        if (p[36] < 1000 || Math.floor(p[36] / 500) % 2 == 0) {
             p[33].visible = true;
         } else {
             p[33].visible = false;
@@ -2683,12 +2736,12 @@ class RichText extends Group {
         p[5] = text;
         var lines = p[3];
         lines.length = 0;
-
         var line = {
             "index": 0,
             "lineCount": 1,
             "text": "",
             "htmlText": "",
+            "endHtmlText": "",
             "width": 0,
             "height": 0,
             "y": 0,
@@ -2700,28 +2753,29 @@ class RichText extends Group {
                 "displays": []
             }],
             "displays": [],
-
             "posX": 0
         };
-
         var signs = [];
         var last = -1;
         var textContent = "";
         var textStart = 0;
-
         var font = {
             color: p[10],
             size: p[11],
             colors: [p[10]],
             sizes: [p[11]],
             under: 0 //下划线
-        }
-
+        };
+        var lineHtml = "";
+        var elementHtml = "";
+        var signHtml = "";
         for (var i = 0, len = text.length; i < len; i++) {
             var char = text.charAt(i);
             var textChange = false;
             var addSingle = null;
             var oldFont = font;
+            lineHtml += char;
+            elementHtml += char;
             if (char == "<" && decodeHtml) {
                 last = i;
             } else if (char == ">" && decodeHtml) {
@@ -2844,30 +2898,56 @@ class RichText extends Group {
                         }
                     }
                 }
+                if (textChange && !end) {
+                    signHtml = text.slice(last, i + 1);
+                }
                 textContent += text.slice(textStart, last);
                 textStart = i + 1;
                 last = -1;
             }
             var newLine = false;
-            if (char == "\r" || char == "\n" || text.slice(i, i + 4) == "</br>") {
+            if (char == "\r" || char == "\n" || text.slice(i, i + 5) == "<br/>") {
                 newLine = true;
                 textContent += text.slice(textStart, i);
-                if (text.slice(i, i + 4) == "</br>") {
-                    textStart = i + 3;
+                if (text.slice(i, i + 5) == "<br/>") {
+                    textStart = i + 5;
+                    i += 4;
+                    elementHtml += "br/>";
+                    signHtml = "<br/>";
+                    line.endHtmlText = "<br/>";
                 } else {
                     textStart = i + 1;
+                    signHtml = char;
+                    line.endHtmlText = char;
                 }
+                lineHtml = lineHtml.slice(0, lineHtml.length - 1);
             }
             if (i == text.length - 1) {
                 textContent += text.slice(textStart, last != -1 ? last : text.length);
             }
             //如果需要截断文字
             if (textChange || newLine || i == text.length - 1) {
-                //分析之前的文字
-                this.$decodeTextDisplay(line, textContent, oldFont);
+                var deviceText = "";
+                if (textChange && !end || newLine) {
+                    deviceText = signHtml;
+                    elementHtml = elementHtml.slice(0, elementHtml.length - deviceText.length);
+                    if (newLine) {
+                        deviceText = "";
+                    }
+                }
+                if (elementHtml.length) {
+                    //分析之前的文字
+                    this.$decodeTextDisplay(line, textContent, oldFont, elementHtml);
+                }
+                elementHtml = deviceText;
                 textContent = "";
                 if (i == text.length - 1 || newLine) {
                     lines.push(line);
+                }
+                if (newLine || i == text.length - 1) {
+                    this.$decodeTextDisplay(line, "", oldFont, "");
+                    line.htmlText = lineHtml;
+                    lineHtml = "";
                 }
                 if (newLine) {
                     line = {
@@ -2875,6 +2955,7 @@ class RichText extends Group {
                         "lineCount": 1,
                         "text": "",
                         "htmlText": "",
+                        "endHtmlText": "",
                         "y": line.y + line.height,
                         "width": 0,
                         "height": 0,
@@ -2891,14 +2972,15 @@ class RichText extends Group {
             }
             if (addSingle) {
                 if (addSingle.name == "img") {
-                    this.$addImage(line, addSingle.attributes);
+                    this.$addImage(line, addSingle.attributes, elementHtml);
+                    elementHtml = "";
                 }
             }
         }
         p[34] = 3;
     }
 
-    $decodeTextDisplay(line, text, font) {
+    $decodeTextDisplay(line, text, font, htmlText) {
         var p = this.$RichText;
         var item;
         var txt;
@@ -2911,7 +2993,7 @@ class RichText extends Group {
             item = {
                 "type": 0,
                 "text": text,
-                "htmlText": text,
+                "htmlText": htmlText,
                 "width": flower.$measureTextWidth(font.size, text),
                 "height": font.size,
                 "x": line.posX,
@@ -2923,6 +3005,7 @@ class RichText extends Group {
             line.width = line.width > displayLine.width ? line.width : displayLine.width;
             line.height = line.height > displayLine.y + displayLine.height ? line.height : displayLine.y + displayLine.height;
             line.posX += item.width;
+            line.text += item.text;
         }
     }
 
@@ -2961,6 +3044,7 @@ class RichText extends Group {
         line.width = line.width > displayLine.width ? line.width : displayLine.width;
         line.height = line.height > displayLine.y + displayLine.height ? line.height : displayLine.y + displayLine.height;
         line.posX += item.width;
+        this.text += item.text;
     }
 
     $loadImageComplete(e) {
@@ -2979,7 +3063,7 @@ class RichText extends Group {
                     if (item.type == 1 && item.loader == e.currentTarget) {
                         var bitmap = item.display;
                         bitmap.texture = e.data;
-                        item.width = bitmap.width;
+                        item.width = bitmap.width + 2;
                         item.height = bitmap.height;
                         displayLine.height = displayLine.height > item.height ? displayLine.height : item.height;
                         line.height = line.height > displayLine.y + displayLine.height ? line.height : displayLine.y + displayLine.height;
@@ -3021,7 +3105,7 @@ class RichText extends Group {
                             for (var d = 0; d < displays.length; d++) {
                                 var display = displays[d];
                                 container.addChild(display.display);
-                                display.display.x = display.x;
+                                display.display.x = display.x + (display.type == 1 ? 1 : 0);
                                 display.display.y = line.y + displayLine.y + displayLine.height - display.height;
                             }
                         }

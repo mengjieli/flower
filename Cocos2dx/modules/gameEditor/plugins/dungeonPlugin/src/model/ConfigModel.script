@@ -17,6 +17,10 @@ var ConfigModel = (function (_super) {
             {
                 url: "res/tools/dungeon/res/effect/effect.csv",
                 func: this.loadEffectComplete
+            },
+            {
+                url: "res/tools/dungeon/res/image/image.csv",
+                func: this.loadImageComplete
             }
         ];
         for (var i = 0; i < loaders.length; i++) {
@@ -107,8 +111,37 @@ var ConfigModel = (function (_super) {
                 "label": name,
                 "type": name,
                 "frames": urls,
+                "length": length,
                 "frameRate": flower.StringDo.parseNumber(items[2]),
                 "loop": flower.StringDo.parseNumber(items[3])
+            }
+            array.push(config);
+        }
+    }
+
+    ConfigModel.prototype.loadImageComplete = function (e) {
+        var content = e.data;
+        var name = flower.Path.getName(e.currentTarget.url);
+        name = name.split(".")[0];
+        var cfg = {};
+        var list = content.split("\n");
+        var array = new flower.ArrayValue();
+        this.configs[name] = array;
+        for (var i = 1; i < list.length; i++) {
+            var items = list[i].split(",");
+            var end = items[items.length - 1];
+            while (end.charAt(end.length - 1) == "\r" || end.charAt(end.length - 1) == "\n") {
+                end = end.slice(0, end.length - 1);
+            }
+            items[items.length - 1] = end;
+            var name = items[0];
+            if (name == "") {
+                continue;
+            }
+            var config = {
+                "label": name,
+                "type": name,
+                "url": items[1]
             }
             array.push(config);
         }

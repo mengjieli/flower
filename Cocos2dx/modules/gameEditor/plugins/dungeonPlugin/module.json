@@ -12,6 +12,7 @@
     "./src/core/GridLayer.script",
     "./src/core/ChangeLayer.script",
     "./src/core/UILayer.script",
+    "./src/core/Layer.script",
     "./src/net/MapNet.script",
     "./src/net/ServerNet.script",
     "./src/display/Grid.script",
@@ -85,6 +86,8 @@
     "./data/running/map/MapMonster.json",
     "./data/running/map/Attack.json",
     "./data/running/map/GetMapObject.json",
-    "./data/running/map/Task.json"
+    "./data/running/map/Task.json",
+    "./data/running/map/Image.json",
+    "./data/running/map/Animation.json"
   ]
 }

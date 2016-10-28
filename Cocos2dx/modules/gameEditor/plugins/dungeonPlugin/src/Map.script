@@ -44,9 +44,15 @@ var Map = (function (_super) {
         //添加格子层
         this.gridLayer = new GridLayer();
         this.container.addChild(this.gridLayer);
+        //添加底层
+        this.bottomLayer = new Layer();
+        this.container.addChild(this.bottomLayer);
         //添加交换层
         this.changeLayer = new ChangeLayer();
         this.container.addChild(this.changeLayer);
+        //添加顶层
+        this.topLayer = new Layer(true);
+        this.container.addChild(this.topLayer);
         //ui层
         this.ui = new UILayer(this.serverNet);
         this.addChild(this.ui);
@@ -78,7 +84,9 @@ var Map = (function (_super) {
         this.camera.setData(this.data.camera, dungeonData.settings);
         //设置其他数据
         this.gridLayer.setData(this.data);
+        this.bottomLayer.setData(this.data);
         this.changeLayer.setData(this.data);
+        this.topLayer.setData(this.data);
         this.ui.setData(this.data);
         this.ui.width = dungeonData.screenWidth.value;
         this.ui.height = dungeonData.screenHeight.value;

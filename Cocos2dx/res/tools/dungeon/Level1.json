@@ -1,5 +1,5 @@
 {
- "itemId": 128,
+ "itemId": 133,
  "screenWidth": 500,
  "screenHeight": 600,
  "triggers": [
@@ -49,19 +49,37 @@
      }
     },
     {
-     "itemId": 128,
-     "name": "刷陷阱",
+     "itemId": 129,
+     "name": "增加太阳",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "trap1",
+      "tag": 1,
+      "type": 2,
+      "layer": 2,
+      "x": 100,
+      "y": 400,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 130,
+     "name": "增加魔法阵",
      "delay": 0,
      "type": 12,
      "effectValue": {
       "url": "trapBoom1",
-      "tag": 10001,
-      "x": 260,
-      "y": 620,
+      "tag": 2,
+      "type": 2,
+      "layer": 2,
+      "x": 100,
+      "y": 500,
       "__className": "dg.AddAnimationEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 70,
@@ -87,7 +105,8 @@
       "__className": "dg.CameraMoveEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 110,
@@ -113,7 +132,8 @@
       "__className": "dg.CameraMoveEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 119,
@@ -139,27 +159,8 @@
       "__className": "dg.DialogEffect"
      }
     }
-   ]
-  },
-  {
-   "itemId": 112,
-   "name": "关卡正式开始",
-   "count": 1,
-   "open": true,
-   "startCondition": 5,
-   "delay": 0,
-   "startValue": null,
-   "effects": [
-    {
-     "itemId": 115,
-     "name": "开始",
-     "delay": 0,
-     "type": 12,
-     "effectValue": {
-      "__className": "dg.StartEffect"
-     }
-    }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 74,
@@ -207,7 +208,8 @@
       "__className": "dg.FlushMonsterEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 116,
@@ -255,7 +257,8 @@
       "__className": "dg.FlushMonsterEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 81,
@@ -317,8 +320,19 @@
       "triggerId": 82,
       "__className": "dg.StartTriggerEffect"
      }
+    },
+    {
+     "itemId": 132,
+     "name": "删除太阳",
+     "delay": 0,
+     "type": 13,
+     "effectValue": {
+      "tag": 1,
+      "__className": "dg.RemoveAnimationEffect"
+     }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 82,
@@ -379,7 +393,8 @@
       "__className": "dg.FlushMonsterEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 85,
@@ -447,8 +462,19 @@
       ],
       "__className": "dg.FlushMonsterEffect"
      }
+    },
+    {
+     "itemId": 133,
+     "name": "删除阵法",
+     "delay": 0,
+     "type": 13,
+     "effectValue": {
+      "tag": 2,
+      "__className": "dg.RemoveAnimationEffect"
+     }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 88,
@@ -516,7 +542,8 @@
       "__className": "dg.FlushMonsterEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 99,
@@ -534,7 +561,8 @@
      "type": 6,
      "effectValue": null
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 101,
@@ -555,7 +583,8 @@
      "type": 6,
      "effectValue": null
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 102,
@@ -576,7 +605,8 @@
      "type": 5,
      "effectValue": null
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 93,
@@ -606,7 +636,8 @@
       "__className": "dg.MissionCompleteEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 95,
@@ -635,7 +666,8 @@
       "__className": "dg.MissionCompleteEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 97,
@@ -661,7 +693,8 @@
       "__className": "dg.MissionCompleteEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 105,
@@ -687,7 +720,8 @@
       "__className": "dg.MissionCompleteEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   },
   {
    "itemId": 108,
@@ -713,7 +747,8 @@
       "__className": "dg.MissionCompleteEffect"
      }
     }
-   ]
+   ],
+   "openFlag": true
   }
  ],
  "settings": {

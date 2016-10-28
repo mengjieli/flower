@@ -156,14 +156,14 @@ var ServerRole = (function () {
             var triggers = this.dungeonData.triggers;
             for (var t = 0; t < triggers.length; t++) {
                 var trigger = triggers[t];
-                if (!trigger.hasPlay.value && trigger.startCondition.value == 6) {
+                if (trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 6) {
                     var startValue = trigger.startValue;
                     var type = startValue.type.value;
                     if (this.triggerRunning.isAllDie(type)) {
                         this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
                     }
                 }
-                if (!trigger.hasPlay.value && trigger.startCondition.value == 7) {
+                if (trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 7) {
                     var startValue = trigger.startValue;
                     var index = startValue.tags.getItemIndex(this.data.tag.value);
                     if (index != -1) {
@@ -178,7 +178,7 @@ var ServerRole = (function () {
         var triggers = this.dungeonData.triggers;
         for (var t = 0; t < triggers.length; t++) {
             var trigger = triggers[t];
-            if (!trigger.hasPlay.value && trigger.startCondition.value == 3) {
+            if (trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 3) {
                 var startValue = trigger.startValue;
                 var tag = startValue.tag.value;
                 var hp = startValue.hp.value;

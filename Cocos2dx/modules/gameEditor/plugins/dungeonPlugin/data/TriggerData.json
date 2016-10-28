@@ -81,6 +81,10 @@
       "type": "Array",
       "typeValue": "dg.TriggerEffectData"
     },
+    "openFlag": {
+      "desc": "是否开启",
+      "type": "bool"
+    },
     "hasPlay": {
       "desc": "是否触发过",
       "type": "bool",

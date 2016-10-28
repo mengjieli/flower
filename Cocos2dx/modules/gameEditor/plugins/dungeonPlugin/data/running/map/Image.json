@@ -1,29 +1,14 @@
 {
-  "name": "dg.AddAnimationEffect",
-  "desc": "镜头范围",
+  "name": "dg.Image",
+  "desc": "图片信息",
   "members": {
-    "url": {
-      "desc": "资源名称",
-      "type": "string"
-    },
     "tag": {
       "desc": "资源 tag",
       "type": "int"
     },
-    "type": {
-      "desc": "类型",
-      "type": "int",
-      "init": 1,
-      "enumList": [
-        {
-          "label": "图片",
-          "type": 1
-        },
-        {
-          "label": "动画",
-          "type": 2
-        }
-      ]
+    "url": {
+      "desc": "资源路径",
+      "type": "string"
     },
     "layer": {
       "desc": "层次",
@@ -31,7 +16,7 @@
       "init": 1,
       "enumList": [
         {
-          "label": "最下层",
+          "label": "底层",
           "type": 1
         },
         {
@@ -39,7 +24,7 @@
           "type": 2
         },
         {
-          "label": "最上层",
+          "label": "顶层",
           "type": 3
         }
       ]

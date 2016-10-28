@@ -36,16 +36,6 @@ var DungeonParser = (function (_super) {
         }, this);
     }
 
-    DungeonParser.prototype.loadAnimation = function () {
-        var loader = new flower.URLLoader("res/tools/dungeon/res/effect/effect.csv");
-        loader.load();
-        loader.addListener(flower.Event.COMPLETE, function (e) {
-            console.log(e.data);
-
-
-        }, this);
-    }
-
     DungeonParser.prototype.loadConfig = function () {
         var model = ConfigModel.getInstance();
         model.once(flower.Event.COMPLETE, function (e) {
