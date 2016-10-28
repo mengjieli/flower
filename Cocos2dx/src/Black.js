@@ -2853,7 +2853,6 @@ var $root = eval("this");
                 10: 0, //fontColor
                 11: 12, //fontSize
                 12: false, //wordWrap 是否自动换行
-
                 29: new flower.Sprite(),
                 30: "", //229 firstChar
                 31: false, // is 229
@@ -2861,9 +2860,9 @@ var $root = eval("this");
                 34: 0, //0.不需要刷新  1.表示某一行改变  2.表示显示内容上下移动  3.全部刷新
                 35: 0, //0.无 1.改变的行数 2.旧的显示位置y 3.无
                 36: 0, //input time
-                37: null, //input text display
+                37: null, //input line
                 38: null };
-            //input text index
+            //input htmlText index
             _this13.addChild(_this13.$RichText[29]);
             _this13.addChild(_this13.$RichText[33]);
             _this13.focusEnabled = true;
@@ -2925,6 +2924,7 @@ var $root = eval("this");
                 var find = false;
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
+                    var index = 0;
                     if (y >= line.y && y < line.y + line.height) {
                         y -= line.y;
                         var displayLines = line.displayLines;
@@ -2938,16 +2938,19 @@ var $root = eval("this");
                                         focus.x = display.x + display.width;
                                         focus.y = line.y + dline.y;
                                         focus.height = dline.height;
-                                        p[37] = display;
                                         find = true;
+                                        p[37] = line;
+                                        p[38] = index;
                                         break;
                                     } else if (d == displays.length - 1) {
                                         focus.x = display.x + display.width;
                                         focus.y = line.y + dline.y;
                                         focus.height = dline.height;
-                                        p[37] = display;
                                         find = true;
+                                        p[37] = line;
+                                        p[38] = index;
                                     }
+                                    index += display.htmlText.length;
                                 }
                                 break;
                             }
@@ -2962,9 +2965,27 @@ var $root = eval("this");
                     focus.x = display.x + display.width;
                     focus.y = line.y + dline.y;
                     focus.height = dline.height;
-                    p[37] = display;
+                    p[37] = line;
+                    p[38] += line.htmlText.length - display.htmlText.length;
                 }
-                console.log(p[37]);
+            }
+
+            //输入字符
+
+        }, {
+            key: "__inputText",
+            value: function __inputText(text) {
+                var p = this.$RichText;
+                var lines = p[3];
+                var line = p[37];
+                var htmlText = line.htmlText;
+                htmlText = htmlText.slice(0, p[38]) + text + htmlText.slice(p[38], htmlText.length);
+                line.htmlText = htmlText;
+                htmlText = "";
+                for (var l = 0; l < lines.length; l++) {
+                    htmlText += lines[l].htmlText + lines[l].endHtmlText;
+                }
+                this.htmlText = htmlText;
             }
         }, {
             key: "__showFocus",
@@ -3005,7 +3026,7 @@ var $root = eval("this");
                         }
                     } else {
                         if (!str.length || str.charAt(0) != p[30]) {
-                            this.text += str;
+                            this.__inputText(str);
                             this.__input.$setNativeText("");
                             this.$RichText[7] = false;
                             p[31] = false;
@@ -3014,7 +3035,7 @@ var $root = eval("this");
                     }
                 } else {
                     if (str != "") {
-                        this.text += str;
+                        this.__inputText(str);
                         this.__input.$setNativeText("");
                     }
                 }
@@ -3277,7 +3298,7 @@ var $root = eval("this");
                     }
                     if (addSingle) {
                         if (addSingle.name == "img") {
-                            this.$addImage(line, addSingle.attributes, elementHtml);
+                            this.$addImage(line, addSingle.attributes, oldFont, elementHtml);
                             elementHtml = "";
                         }
                     }
@@ -3302,7 +3323,8 @@ var $root = eval("this");
                         "width": flower.$measureTextWidth(font.size, text),
                         "height": font.size,
                         "x": line.posX,
-                        "display": txt
+                        "display": txt,
+                        "font": flower.ObjectDo.clone(font)
                     };
                     displayLine.displays.push(item);
                     displayLine.width = displayLine.width > item.x + item.width ? displayLine.width : item.x + item.width;
@@ -3315,7 +3337,7 @@ var $root = eval("this");
             }
         }, {
             key: "$addImage",
-            value: function $addImage(line, attributes, htmlText) {
+            value: function $addImage(line, attributes, font, htmlText) {
                 var p = this.$RichText;
                 var item;
                 var bitmap;
@@ -3342,7 +3364,8 @@ var $root = eval("this");
                     "height": 0,
                     "x": line.posX,
                     "display": bitmap,
-                    "loader": loader
+                    "loader": loader,
+                    "font": flower.ObjectDo.clone(font)
                 };
                 displayLine.displays.push(item);
                 displayLine.width = displayLine.width > item.x + item.width ? displayLine.width : item.x + item.width;

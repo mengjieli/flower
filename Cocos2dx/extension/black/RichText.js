@@ -75,7 +75,6 @@ class RichText extends Group {
             10: 0,  //fontColor
             11: 12, //fontSize
             12: false, //wordWrap 是否自动换行
-
             29: new flower.Sprite(),
             30: "", //229 firstChar
             31: false, // is 229
@@ -83,8 +82,8 @@ class RichText extends Group {
             34: 0, //0.不需要刷新  1.表示某一行改变  2.表示显示内容上下移动  3.全部刷新
             35: 0, //0.无 1.改变的行数 2.旧的显示位置y 3.无
             36: 0, //input time
-            37: null, //input text display
-            38: null, //input text index
+            37: null, //input line
+            38: null, //input htmlText index
         };
         this.addChild(this.$RichText[29]);
         this.addChild(this.$RichText[33]);
@@ -143,6 +142,7 @@ class RichText extends Group {
         var find = false;
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
+            var index = 0;
             if (y >= line.y && y < line.y + line.height) {
                 y -= line.y;
                 var displayLines = line.displayLines;
@@ -155,17 +155,20 @@ class RichText extends Group {
                             if (x > display.x && x <= display.x + display.width) {
                                 focus.x = display.x + display.width;
                                 focus.y = line.y + dline.y;
-                                focus.height = dline.height;
-                                p[37] = display;
+                                focus.height = dline.height
                                 find = true;
+                                p[37] = line;
+                                p[38] = index;
                                 break;
                             } else if (d == displays.length - 1) {
                                 focus.x = display.x + display.width;
                                 focus.y = line.y + dline.y;
                                 focus.height = dline.height;
-                                p[37] = display;
                                 find = true;
+                                p[37] = line;
+                                p[38] = index;
                             }
+                            index += display.htmlText.length;
                         }
                         break;
                     }
@@ -180,9 +183,24 @@ class RichText extends Group {
             focus.x = display.x + display.width;
             focus.y = line.y + dline.y;
             focus.height = dline.height;
-            p[37] = display;
+            p[37] = line;
+            p[38] += line.htmlText.length - display.htmlText.length;
         }
-        console.log(p[37]);
+    }
+
+    //输入字符
+    __inputText(text) {
+        var p = this.$RichText;
+        var lines = p[3];
+        var line = p[37];
+        var htmlText = line.htmlText;
+        htmlText = htmlText.slice(0, p[38]) + text + htmlText.slice(p[38], htmlText.length);
+        line.htmlText = htmlText;
+        htmlText = "";
+        for (var l = 0; l < lines.length; l++) {
+            htmlText += lines[l].htmlText + lines[l].endHtmlText;
+        }
+        this.htmlText = htmlText;
     }
 
     __showFocus() {
@@ -219,7 +237,7 @@ class RichText extends Group {
                 }
             } else {
                 if (!str.length || str.charAt(0) != p[30]) {
-                    this.text += str;
+                    this.__inputText(str);
                     this.__input.$setNativeText("");
                     this.$RichText[7] = false;
                     p[31] = false;
@@ -228,7 +246,7 @@ class RichText extends Group {
             }
         } else {
             if (str != "") {
-                this.text += str;
+                this.__inputText(str);
                 this.__input.$setNativeText("");
             }
         }
@@ -488,7 +506,7 @@ class RichText extends Group {
             }
             if (addSingle) {
                 if (addSingle.name == "img") {
-                    this.$addImage(line, addSingle.attributes, elementHtml);
+                    this.$addImage(line, addSingle.attributes, oldFont, elementHtml);
                     elementHtml = "";
                 }
             }
@@ -513,7 +531,8 @@ class RichText extends Group {
                 "width": flower.$measureTextWidth(font.size, text),
                 "height": font.size,
                 "x": line.posX,
-                "display": txt
+                "display": txt,
+                "font": flower.ObjectDo.clone(font)
             };
             displayLine.displays.push(item);
             displayLine.width = displayLine.width > item.x + item.width ? displayLine.width : item.x + item.width;
@@ -525,7 +544,7 @@ class RichText extends Group {
         }
     }
 
-    $addImage(line, attributes, htmlText) {
+    $addImage(line, attributes, font, htmlText) {
         var p = this.$RichText;
         var item;
         var bitmap;
@@ -552,7 +571,8 @@ class RichText extends Group {
             "height": 0,
             "x": line.posX,
             "display": bitmap,
-            "loader": loader
+            "loader": loader,
+            "font": flower.ObjectDo.clone(font)
         }
         displayLine.displays.push(item);
         displayLine.width = displayLine.width > item.x + item.width ? displayLine.width : item.x + item.width;

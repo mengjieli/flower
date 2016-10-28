@@ -13,7 +13,7 @@ var FXMLEditor = (function (_super) {
         this.rect.percentHeight = 100;
         this.addChild(this.rect);
 
-        this.textArea = new flower.TextArea();
+        this.textArea = new flower.RichText();
         this.textArea.left = 50;
         this.textArea.right = 0;
         this.textArea.percentHeight = 100;

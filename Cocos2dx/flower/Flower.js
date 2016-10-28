@@ -58,7 +58,6 @@ function start(completeFunc, nativeStage, touchShow) {
             });
             loader.load();
         }
-
         if (config.remote) {
             flower.RemoteServer.start(startLoad);
         } else {
