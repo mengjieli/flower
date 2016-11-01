@@ -7,7 +7,7 @@ class PlatformURLLoader {
 
     static loadText(url, back, errorBack, thisObj, method, params, contentType) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj, method, params, contentType]);
             return;
         }
         PlatformURLLoader.isLoading = true;
@@ -57,7 +57,7 @@ class PlatformURLLoader {
 
     static loadTexture(url, back, errorBack, thisObj, params) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj,params]);
             return;
         }
         PlatformURLLoader.isLoading = true;

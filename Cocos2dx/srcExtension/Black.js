@@ -2706,17 +2706,18 @@ class RichText extends Group {
 
     //输入字符
     __inputText(text) {
-        var p = this.$RichText;
-        var lines = p[3];
-        var line = p[37];
-        var htmlText = line.htmlText;
-        htmlText = htmlText.slice(0, p[38]) + text + htmlText.slice(p[38], htmlText.length);
-        line.htmlText = htmlText;
-        htmlText = "";
-        for (var l = 0; l < lines.length; l++) {
-            htmlText += lines[l].htmlText + lines[l].endHtmlText;
-        }
-        this.htmlText = htmlText;
+        trace("text:",text,text.length)
+        //var p = this.$RichText;
+        //var lines = p[3];
+        //var line = p[37];
+        //var htmlText = line.htmlText;
+        //htmlText = htmlText.slice(0, p[38]) + text + htmlText.slice(p[38], htmlText.length);
+        //line.htmlText = htmlText;
+        //htmlText = "";
+        //for (var l = 0; l < lines.length; l++) {
+        //    htmlText += lines[l].htmlText + lines[l].endHtmlText;
+        //}
+        //this.htmlText = htmlText;
     }
 
     __showFocus() {
@@ -2735,6 +2736,10 @@ class RichText extends Group {
         this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.remove(this.__update, this);
         this.__hideFocus();
+    }
+
+    __inputLine(line, htmlText) {
+
     }
 
     __update(now, gap) {
@@ -2800,7 +2805,7 @@ class RichText extends Group {
             "displayLines": [{
                 "width": 0,
                 "height": 0,
-                "x":0,
+                "x": 0,
                 "y": 0,
                 "displays": []
             }],

@@ -1,0 +1,182 @@
+var MapUtils = (function () {
+
+    function MapUtils() {
+    }
+
+    MapUtils.singleWidth = 900;
+    MapUtils.singleHeight = 624;
+    MapUtils.col = 3; //每个大地图列有多少个小地图
+    MapUtils.row = 3; //每个大地图行有多少个小地图
+    MapUtils.width = 90;
+    MapUtils.height = 78;
+    MapUtils.obliqueDis = Math.sqrt(MapUtils.height * MapUtils.height * 2.25 * 0.25 + MapUtils.width * MapUtils.width * 0.25); //相邻斜格的距离
+    MapUtils.obliqueSin = MapUtils.height * 1.5 * 0.5 / MapUtils.obliqueDis;
+    MapUtils.obliqueCos = MapUtils.width * 0.5 / MapUtils.obliqueDis;
+    MapUtils.obliqueDisWidth = MapUtils.obliqueDis * MapUtils.obliqueCos;
+    MapUtils.obliqueDisHeight = MapUtils.obliqueDis * MapUtils.obliqueSin;
+    MapUtils.tan = 1 / Math.sqrt(3);
+    MapUtils.mapWidth = MapUtils.singleWidth * MapUtils.col;
+    MapUtils.mapHeight = MapUtils.singleHeight * MapUtils.row;
+    MapUtils.blockWidth = 30;
+    MapUtils.blockHeight = 32;
+    /**
+     * 像素位置(x,y)转换成六边形坐标(x,y)
+     * @param x
+     * @param y
+     */
+    MapUtils.transPositionToPoint = function (x, y) {
+        x += 0.5 * MapUtils.width;
+        y += MapUtils.height * 0.5;
+        var tan = MapUtils.tan;
+        var halfLen = MapUtils.height * 0.25;
+        var halfWidth = MapUtils.width * 0.5;
+        var p = {x: 0, y: 0};
+        var h = Math.floor(y / halfLen);
+        if (h % 3 == 0) {
+            var w = Math.floor(x / halfWidth);
+            if (w % 2 == 0) {
+                if (y - h * halfLen - tan * (x - w * halfWidth) < 0) {
+                    p.y = Math.floor(h / 3) - 1;
+                } else {
+                    p.y = Math.floor(h / 3);
+                }
+            } else {
+                if (y - h * halfLen + tan * (x - (w + 1) * halfWidth) < 0) {
+                    p.y = Math.floor(h / 3) - 1;
+                } else {
+                    p.y = Math.floor(h / 3);
+                }
+            }
+        } else {
+            p.y = Math.floor(h / 3);
+        }
+        if (p.y % 2 == 0) {
+            p.x = Math.floor(x / (2 * halfWidth));
+        } else {
+            p.x = Math.floor((x + halfWidth) / (2 * halfWidth)) - 1;
+        }
+        return p;
+    }
+
+    /**
+     * 六边形坐标(x,y)转换成像素位置(x,y)
+     * @param x
+     * @param y
+     */
+    MapUtils.transPointToPosition = function (x, y) {
+        var p = {x: 0, y: 0};
+        if (y % 2 == 0) {
+            p.x = x * MapUtils.width
+            p.y = (0.5 * y * 3) * MapUtils.height * 0.5;
+        } else {
+            p.x = (x + 0.5) * MapUtils.width;
+            p.y = (0.5 * (y - 1) * 3 + 1.5) * MapUtils.height * 0.5
+        }
+        return p;
+    }
+
+    /**
+     * 计算两点距离
+     * @param sx
+     * @param sy
+     * @param ex
+     * @param ey
+     * @returns {*}
+     */
+    MapUtils.getDistance = function (sx, sy, ex, ey) {
+        var d = (ey + (sy % 2 == 0 ? (ey > sy ? 1 : (ey < sy ? -1 : 0)) : 0) - sy) / 2;
+        var tx = ex + (ey > sy ? Math.floor(d) : -Math.ceil(d));
+        var dy = Math.abs(ey - sy);
+        var dx = Math.abs(tx - sx);
+        if (tx > sx) {
+            return dx + (dy > dx ? dy - dx : 0)
+        }
+        return dx + dy;
+    }
+
+
+    /**
+     * 是否为边界
+     * @param x
+     * @param y
+     */
+    MapUtils.isSide = function (x, y) {
+        //trace("判断边界",x,y);
+        if (x < 0) {
+            x = -x - ServerMapConfig.getInstance().serverMapWidth * Math.floor(-x / ServerMapConfig.getInstance().serverMapWidth);
+        } else {
+            x = x % ServerMapConfig.getInstance().serverMapWidth;
+        }
+        if (y < 0) {
+            y = -y - ServerMapConfig.getInstance().serverMapHeight * Math.floor(-y / ServerMapConfig.getInstance().serverMapHeight);
+        } else {
+            y = y % ServerMapConfig.getInstance().serverMapHeight;
+        }
+        if (x <= 1 || x >= ServerMapConfig.getInstance().serverMapWidth - 2 || y <= 1 || y >= ServerMapConfig.getInstance().serverMapHeight) {
+            //trace("是边界");
+            return true;
+        }
+        //trace("不是边界");
+        return false;
+    }
+
+    MapUtils.getDistancePoint = function (x, y, distance, dir) {
+        if (distance == 0) {
+            return {x: x, y: y};
+        }
+        if (dir == 0) {
+            return {x: x - distance, y: y}
+        } else if (dir == 1) {
+            return {x: x + Math.ceil(((y % 2 == 0 ? -1 : 0) - distance) / 2), y: y - distance}
+        } else if (dir == 2) {
+            return {x: x + Math.floor(((y % 2 == 0 ? 0 : 1) + distance) / 2), y: y - distance}
+        } else if (dir == 3) {
+            return {x: x + distance, y: y};
+        } else if (dir == 4) {
+            return {x: x + Math.floor(((y % 2 == 0 ? 0 : 1) + distance) / 2), y: y + distance}
+        } else if (dir == 5) {
+            return {x: x + Math.ceil(((y % 2 == 0 ? -1 : 0) - distance) / 2), y: y + distance}
+        }
+    }
+
+    MapUtils.getDirection = function (orginX, orginY, x, y) {
+        var r = Math.atan2(-y + orginY, x - orginX);
+        r = r * 180 / Math.PI;
+        r = r + 360;
+        r = r % 360;
+        if (r <= 22.5 || r >= 360 - 22.5) {
+            return Role.Dir.Right;
+        } else if (r >= 22.5 && r <= 90) {
+            return Role.Dir.RightDown;
+        } else if (r >= 90 && r <= 180 - 22.5) {
+            return Role.Dir.LeftDown;
+        } else if (r >= 180 - 22.5 && r <= 180 + 22.5) {
+            return Role.Dir.Left;
+        } else if (r >= 180 + 22.5 && r <= 270) {
+            return Role.Dir.LeftUp;
+        } else {
+            return Role.Dir.RightUp;
+        }
+    }
+
+    /**
+     * 获取距离一个点为 distance 的点集合
+     * @param x
+     * @param y
+     * @param distance
+     */
+    MapUtils.getRoundPoints = function (x, y, distance) {
+        var points = [];
+        for (var dir = 0; dir < 6; dir++) {
+            var start = MapUtils.getDistancePoint(x, y, distance, dir);
+            var transDir = (dir + 2) % 6;
+            for (var i = 0; i < distance; i++) {
+                points.push(MapUtils.getDistancePoint(start.x, start.y, i, transDir));
+            }
+        }
+        return points;
+    }
+
+    return MapUtils;
+})();
+module.MapUtils = MapUtils;

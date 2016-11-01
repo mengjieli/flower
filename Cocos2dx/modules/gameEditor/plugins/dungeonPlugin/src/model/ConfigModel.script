@@ -8,7 +8,6 @@ var ConfigModel = (function (_super) {
 
     ConfigModel.prototype.load = function () {
         this.configs = {};
-
         var loaders = [
             {
                 url: "res/tools/dungeon/res/config/rolerAction.csv",
@@ -141,7 +140,8 @@ var ConfigModel = (function (_super) {
             var config = {
                 "label": name,
                 "type": name,
-                "url": items[1]
+                "url": items[1],
+                "scale": parseInt(items[2])
             }
             array.push(config);
         }

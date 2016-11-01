@@ -26,8 +26,7 @@ var Layer = (function (_super) {
             group.x = imageData.x.value;
             group.y = -imageData.y.value;
             group.width = group.height = 0;
-            var image = new flower.Image(imageData.url.value);
-            image.bottom = 0;
+            var image = new MapImage(imageData);
             group.addChild(image);
             this.images.push({
                 image: image,
@@ -55,9 +54,7 @@ var Layer = (function (_super) {
             group.x = data.x.value;
             group.y = -data.y.value;
             group.width = group.height = 0;
-            var animation = new Animation(data.config);
-            animation.bottom = 0;
-            animation.play(data.config.loop,true);
+            var animation = new MapAnimation(data);
             group.addChild(animation);
             this.animations.push({
                 animation: animation,
@@ -70,7 +67,7 @@ var Layer = (function (_super) {
         var animtions = this.animations;
         for (var i = 0; i < animtions.length; i++) {
             if (animtions[i].data == e.data) {
-                if(animtions[i].animation.parent) {
+                if (animtions[i].animation.parent) {
                     animtions[i].animation.parent.dispose();
                 }
                 animtions.splice(i, 1);

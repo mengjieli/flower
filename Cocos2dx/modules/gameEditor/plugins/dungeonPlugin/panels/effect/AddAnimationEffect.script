@@ -1,6 +1,6 @@
 function setData(val) {
     _super.prototype.setData.call(this, val);
-    var atrs = ["tag","type", "url", "layer",  "x", "y"];
+    var atrs = ["tag", "type", "url", "layer", "ease", "easeTime", "x", "y"];
     if (this.data.type.value == 1) {
         this.data.url.enumList = dg.ConfigModel.getConfig("image");
     } else if (this.data.type.value == 2) {
@@ -9,7 +9,7 @@ function setData(val) {
     if (!this.data.url.enumList.getItemWith("label", this.data.url.value)) {
         this.data.url.value = this.data.url.enumList[0].label;
     }
-    var dropDownList = {"type": true, "url": true, "layer": true};
+    var dropDownList = {"type": true, "url": true, "layer": true, "ease": true};
     for (var i = 0; i < atrs.length; i++) {
         var atr = atrs[i];
         var arr = atr.split(".");

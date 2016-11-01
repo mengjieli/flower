@@ -61,7 +61,8 @@
       "plugin": "Dungeon",
       "list": [
         "res/tools/dungeon/Level1.json",
-        "res/tools/dungeon/Dungeon1_1.json"
+        "res/tools/dungeon/Dungeon1_1.json",
+        "res/tools/dungeon/tes.json"
       ]
     },
     "tools/map": {
@@ -85,6 +86,13 @@
       "list": [
         "res/tools/textureCheck/Server.json",
         "res/tools/textureCheck/Local.json"
+      ]
+    },
+    "tools/smallTool": {
+      "name": "小工具",
+      "plugin": "SmallTool",
+      "list": [
+        "res/tools/smallTool/PointToPosition.json"
       ]
     }
   }

@@ -1,0 +1,20 @@
+var MapDisplay = (function (_super) {
+
+    __extends(MapDisplay, _super);
+
+    function MapDisplay(data) {
+        _super.call(this, data);
+
+        this.horizontalCenter = 0;
+        this.verticalCenter = 0;
+        //this.bottom = 0;
+
+        if (data.ease.value == 2) {
+            flower.Tween.to(this, data.easeTime.value / 1000, {alpha: 1}, "None", {alpha: 0});
+        }
+    }
+
+    return MapDisplay;
+})(flower.Group);
+
+module.MapDisplay = MapDisplay;

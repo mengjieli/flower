@@ -1,5 +1,5 @@
 {
- "itemId": 133,
+ "itemId": 136,
  "screenWidth": 500,
  "screenHeight": 600,
  "triggers": [
@@ -58,6 +58,8 @@
       "tag": 1,
       "type": 2,
       "layer": 2,
+      "ease": 2,
+      "easeTime": 1000,
       "x": 100,
       "y": 400,
       "__className": "dg.AddAnimationEffect"
@@ -73,8 +75,27 @@
       "tag": 2,
       "type": 2,
       "layer": 2,
+      "ease": 1,
+      "easeTime": 500,
       "x": 100,
       "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 134,
+     "name": "效果134",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "black",
+      "tag": 1100,
+      "type": 1,
+      "layer": 4,
+      "ease": 2,
+      "easeTime": 500,
+      "x": 0,
+      "y": 0,
       "__className": "dg.AddAnimationEffect"
      }
     }
@@ -328,6 +349,8 @@
      "type": 13,
      "effectValue": {
       "tag": 1,
+      "ease": 2,
+      "easeTime": 500,
       "__className": "dg.RemoveAnimationEffect"
      }
     }
@@ -470,6 +493,8 @@
      "type": 13,
      "effectValue": {
       "tag": 2,
+      "ease": 1,
+      "easeTime": 500,
       "__className": "dg.RemoveAnimationEffect"
      }
     }
@@ -745,6 +770,30 @@
       "missionId": 50011,
       "missionName": "毫发未伤",
       "__className": "dg.MissionCompleteEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 135,
+   "name": "触发器135",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 1000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 136,
+     "name": "效果136",
+     "delay": 0,
+     "type": 13,
+     "effectValue": {
+      "tag": 1100,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
      }
     }
    ],

@@ -74,12 +74,12 @@ var Trigger = (function () {
                 this.callObject.startDialog(value.dialogId.value);
                 break;
             case 12:
-                this.callObject.addAnimation(value.tag.value, value.type.value, value.url.value, value.layer.value, value.x.value, value.y.value);
+                this.callObject.addAnimation(value.tag.value, value.type.value, value.url.value, value.layer.value, value.ease.value, value.easeTime.value, value.x.value, value.y.value);
                 //this.triggerRunning.gameStart();
                 //this.callObject.startGame();
                 break;
             case 13:
-                this.callObject.removeAnimation(value.tag.value);
+                this.callObject.removeAnimation(value.tag.value, value.ease.value, value.easeTime.value);
                 break;
         }
     }

@@ -184,19 +184,24 @@ var MapNet = (function () {
         }
     }
 
-    MapNet.prototype.addAnimation = function (tag, type, url, layer, x, y) {
+    MapNet.prototype.addAnimation = function (tag, type, url, layer, ease, easeTime, x, y) {
         if (type == 1) { //图片
             var image = flower.DataManager.createData("dg.Image");
             image.tag = tag;
             image.layer = layer;
+            image.ease = ease;
+            image.easeTime = easeTime;
             image.x = x;
             image.y = y;
             image.url = "res/tools/dungeon/res/image/" + module.ConfigModel.getConfig("image").getItemWith("type", url).url;
+            image.config = module.ConfigModel.getConfig("image").getItemWith("type", url);
             this.data.images.push(image);
         } else if (type == 2) { //动画
             var animation = flower.DataManager.createData("dg.Animation");
             animation.tag = tag;
             animation.layer = layer;
+            animation.ease = ease;
+            animation.easeTime = easeTime;
             animation.x = x;
             animation.y = y;
             var cfg = module.ConfigModel.getConfig("effect").getItemWith("type", url);
@@ -212,14 +217,13 @@ var MapNet = (function () {
                 y: 0,
                 scaleX: 1,
                 scaleY: 1,
-                loop: cfg.loop,
-                bottom: true
+                loop: cfg.loop
             }
             this.data.animations.push(animation);
         }
     }
 
-    MapNet.prototype.removeAnimation = function (tag) {
+    MapNet.prototype.removeAnimation = function (tag, ease, easeTime) {
         if (!this.data.images.removeItemWith("tag", tag)) {
             this.data.animations.removeItemWith("tag", tag);
         }

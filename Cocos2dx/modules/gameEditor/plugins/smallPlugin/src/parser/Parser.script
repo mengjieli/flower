@@ -1,0 +1,36 @@
+var Parser = (function (_super) {
+
+    __extends(Parser, _super);
+
+    function Parser(file) {
+        _super.call(this, file);
+    }
+
+    Parser.prototype.load = function () {
+        var config = this.file.content;
+        this.data = {
+            type: config.type
+        }
+        console.log(this.data);
+        return false;
+    }
+
+    Parser.prototype.onLoadComplete = function (e) {
+        this.dispatch(e);
+    }
+
+    Parser.prototype.onLoadError = function (e) {
+        this.dispatch(e);
+    }
+
+    Parser.prototype.save = function () {
+        var path = this.file.path;
+        (new flower.File(path)).saveText(flower.ObjectDo.toString(this.data.value, 100000000));
+    }
+
+    return Parser;
+
+})(editor.Parser);
+
+module.Parser = Parser;
+registerParser("SmallTool", Parser);

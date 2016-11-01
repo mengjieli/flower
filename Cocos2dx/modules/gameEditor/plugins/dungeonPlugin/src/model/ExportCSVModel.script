@@ -83,9 +83,9 @@ var ExportCSVModel = (function () {
                 } else if (effect.type == 11) { //剧情对话 [3000,0,0,0,0,500001]
                     param += "[" + val.dialogId + "," + val.param1 + "," + val.param2 + "," + val.param3 + "," + val.param4 + "," + val.triggerId + "]";
                 } else if (effect.type == 12) { //增加动画 [url,tag,type,layer,[x,y]]
-                    param += "['" + val.url + "'," + val.tag + "," + val.type + "," + val.layer + ",[" + val.x + "," + val.y + "]]";
+                    param += "['" + val.url + "'," + val.tag + "," + val.type + "," + val.layer + "," + val.ease + "," + val.easeTime + ",[" + val.x + "," + val.y + "]]";
                 } else if (effect.type == 13) { //删除动画 [tag]
-                    param += "[" + val.tag + "]";
+                    param += "[" + val.tag + "," + val.ease + "," + val.easeTime + "]";
                 }
                 param += (p < trigger.effects.length - 1 ? "," : "");
             }

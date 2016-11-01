@@ -1,7 +1,7 @@
 function setData(val) {
     _super.prototype.setData.call(this, val);
-    var atrs = ["tag"];
-    var dropDownList = {};
+    var atrs = ["tag","ease","easeTime"];
+    var dropDownList = {ease:true};
     for (var i = 0; i < atrs.length; i++) {
         var atr = atrs[i];
         var arr = atr.split(".");

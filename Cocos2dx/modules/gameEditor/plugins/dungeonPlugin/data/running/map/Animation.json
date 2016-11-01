@@ -25,6 +25,12 @@
         }
       ]
     },
+    "ease": {
+      "type": "int"
+    },
+    "easeTime": {
+      "type": "int"
+    },
     "x": {
       "desc": "像素坐标 x",
       "type": "int"

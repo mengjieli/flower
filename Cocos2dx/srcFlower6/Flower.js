@@ -83,7 +83,6 @@ function start(completeFunc, nativeStage, touchShow) {
             });
             loader.load();
         }
-
         if (config.remote) {
             flower.RemoteServer.start(startLoad);
         } else {
@@ -283,7 +282,7 @@ class Platform {
         Platform.lastTime = now;
         if (PlatformURLLoader.loadingList.length) {
             var item = PlatformURLLoader.loadingList.shift();
-            item[0](item[1], item[2], item[3], item[4]);
+            item[0].apply(null,item.slice(1,item.length));
         }
     }
 
@@ -1283,7 +1282,7 @@ class PlatformURLLoader {
 
     static loadText(url, back, errorBack, thisObj, method, params, contentType) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj, method, params, contentType]);
             return;
         }
         PlatformURLLoader.isLoading = true;
@@ -1359,9 +1358,9 @@ class PlatformURLLoader {
         }
     }
 
-    static loadTexture(url, back, errorBack, thisObj) {
+    static loadTexture(url, back, errorBack, thisObj,params) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj,params]);
             return;
         }
         PlatformURLLoader.isLoading = true;

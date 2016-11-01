@@ -1,0 +1,18 @@
+var MapAnimation = (function (_super) {
+
+    __extends(MapAnimation, _super);
+
+    function MapAnimation(data) {
+        _super.call(this, data);
+        data.config.horizontalCenter = 0;
+        data.config.verticalCenter = 0;
+        this.show = new Animation(data.config);
+        this.show.play(data.config.loop, true);
+        this.addChild(this.show);
+    }
+
+    return MapAnimation;
+
+})(MapDisplay);
+
+module.MapAnimation = MapAnimation;

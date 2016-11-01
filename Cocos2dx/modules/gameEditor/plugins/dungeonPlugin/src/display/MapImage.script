@@ -1,0 +1,27 @@
+var MapImage = (function (_super) {
+
+    __extends(MapImage, _super);
+
+    function MapImage(data) {
+        _super.call(this, data);
+
+        this.show = new flower.Image(data.url.value);
+        this.addChild(this.show);
+
+        if (data.config.scale == 1) {
+            this.show.addListener(flower.Event.COMPLETE, this.loadImageComplete, this);
+        }
+    }
+
+    MapImage.prototype.loadImageComplete = function (e) {
+        if(this.data.config.scale == 1) {
+            this.show.scaleX = flower.Stage.getInstance().width/this.show.width;
+            this.show.scaleY = flower.Stage.getInstance().height/this.show.height;
+        }
+    }
+
+    return MapImage;
+
+})(MapDisplay);
+
+module.MapImage = MapImage;

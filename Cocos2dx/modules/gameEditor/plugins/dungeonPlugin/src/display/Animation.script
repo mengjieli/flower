@@ -53,8 +53,11 @@ var Animation = (function (_super) {
             }
             this.__framesURL.push(name);
             this.__frames.push(image);
-            if(data.bottom) {
-                image.bottom = 0;
+            if(data.horizontalCenter != null) {
+                image.horizontalCenter = data.horizontalCenter;
+            }
+            if(data.verticalCenter != null) {
+                image.verticalCenter = data.verticalCenter;
             }
         }
         this.__frame = 0;

@@ -6,4 +6,12 @@
         <f:Label horizontalCenter="-55" width="60" text="动画tag" verticalCenter="0"/>
         <s:Input id="tagInput" horizontalCenter="30" width="100" verticalCenter="0"/>
     </f:Group>
+    <f:Group horizontalCenter="0" y="30">
+        <f:Label horizontalCenter="-55" width="60" text="缓动类型" verticalCenter="0"/>
+        <s:ComboBox id="easeComboBox" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+    <f:Group horizontalCenter="0" y="60">
+        <f:Label horizontalCenter="-55" width="60" text="缓动时间" verticalCenter="0"/>
+        <s:Input id="easeTimeInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
 </f:Group>

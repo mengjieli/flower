@@ -93,7 +93,6 @@ var flower = {};
                 });
                 loader.load();
             }
-
             if (config.remote) {
                 flower.RemoteServer.start(startLoad);
             } else {
@@ -302,7 +301,7 @@ var flower = {};
                 Platform.lastTime = now;
                 if (PlatformURLLoader.loadingList.length) {
                     var item = PlatformURLLoader.loadingList.shift();
-                    item[0](item[1], item[2], item[3], item[4]);
+                    item[0].apply(null, item.slice(1, item.length));
                 }
             }
         }, {
@@ -1403,7 +1402,7 @@ var flower = {};
             key: "loadText",
             value: function loadText(url, back, errorBack, thisObj, method, params, contentType) {
                 if (PlatformURLLoader.isLoading) {
-                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
+                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj, method, params, contentType]);
                     return;
                 }
                 PlatformURLLoader.isLoading = true;
@@ -1479,9 +1478,9 @@ var flower = {};
             }
         }, {
             key: "loadTexture",
-            value: function loadTexture(url, back, errorBack, thisObj) {
+            value: function loadTexture(url, back, errorBack, thisObj, params) {
                 if (PlatformURLLoader.isLoading) {
-                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
+                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj, params]);
                     return;
                 }
                 PlatformURLLoader.isLoading = true;

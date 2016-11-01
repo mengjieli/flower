@@ -1,0 +1,14 @@
+{
+  "name": "SmallTool",
+  "scripts": [
+    "./src/parser/Parser.script",
+    "./src/utils/MapUtils.script"
+  ],
+  "components": [
+    "./view/SmallView.xml"
+  ],
+  "classes": {
+  },
+  "data": [
+  ]
+}

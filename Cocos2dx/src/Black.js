@@ -3005,17 +3005,18 @@ var $root = eval("this");
         }, {
             key: "__inputText",
             value: function __inputText(text) {
-                var p = this.$RichText;
-                var lines = p[3];
-                var line = p[37];
-                var htmlText = line.htmlText;
-                htmlText = htmlText.slice(0, p[38]) + text + htmlText.slice(p[38], htmlText.length);
-                line.htmlText = htmlText;
-                htmlText = "";
-                for (var l = 0; l < lines.length; l++) {
-                    htmlText += lines[l].htmlText + lines[l].endHtmlText;
-                }
-                this.htmlText = htmlText;
+                trace("text:", text, text.length);
+                //var p = this.$RichText;
+                //var lines = p[3];
+                //var line = p[37];
+                //var htmlText = line.htmlText;
+                //htmlText = htmlText.slice(0, p[38]) + text + htmlText.slice(p[38], htmlText.length);
+                //line.htmlText = htmlText;
+                //htmlText = "";
+                //for (var l = 0; l < lines.length; l++) {
+                //    htmlText += lines[l].htmlText + lines[l].endHtmlText;
+                //}
+                //this.htmlText = htmlText;
             }
         }, {
             key: "__showFocus",
@@ -3038,6 +3039,9 @@ var $root = eval("this");
                 flower.EnterFrame.remove(this.__update, this);
                 this.__hideFocus();
             }
+        }, {
+            key: "__inputLine",
+            value: function __inputLine(line, htmlText) {}
         }, {
             key: "__update",
             value: function __update(now, gap) {

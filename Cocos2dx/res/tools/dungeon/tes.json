@@ -1,0 +1,63 @@
+{
+ "itemId": 12,
+ "screenWidth": 480,
+ "screenHeight": 320,
+ "triggers": [
+  {
+   "itemId": 10,
+   "name": "触发器10",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 11,
+     "name": "效果11",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "pillar",
+      "tag": 0,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 100,
+      "y": 100,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 12,
+     "name": "效果12",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "tree1",
+      "tag": 0,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 100,
+      "y": 100,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "showGrid": true,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

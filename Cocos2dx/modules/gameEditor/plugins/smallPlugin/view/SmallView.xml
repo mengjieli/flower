@@ -1,0 +1,23 @@
+<s:TitlePanel percentWidth="100" percentHeight="100" class="SmallView" creationComplete="this.init();"
+              title="{data.name}" xmlns:f="flower"
+              xmlns:s="modules/software/module.json">
+    <f:script src="./SmallView.script"/>
+
+    <f:Group y="0">
+        <f:Label text="坐标转像素" x="10" y="10"/>
+        <f:Label text="x" x="10" y="33"/>
+        <s:Input id="coordX" width="50" x="25" y="30"/>
+        <f:Label text="y" x="100" y="33"/>
+        <s:Input id="coordY" width="50" x="115" y="30"/>
+        <f:Label id="position" text="像素" x="200" y="33"/>
+    </f:Group>
+
+    <f:Group y="60">
+        <f:Label text="像素转坐标" x="10" y="10"/>
+        <f:Label text="x" x="10" y="33"/>
+        <s:Input id="positionX" width="50" x="25" y="30"/>
+        <f:Label text="y" x="100" y="33"/>
+        <s:Input id="positionY" width="50" x="115" y="30"/>
+        <f:Label id="coord" text="坐标" x="200" y="33"/>
+    </f:Group>
+</s:TitlePanel>

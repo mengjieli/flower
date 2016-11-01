@@ -105,7 +105,7 @@ HttpServer.prototype.sendResource = function (request, response) {
         }
     }
     url = url.split("?")[0];
-    var file = new File(this.root + url);
+    var file = new File(decodeURIComponent(this.root + url));
     if (!file.isExist()) {
         //console.log("[http-server]", this.root + url, " [Error File not exist!]" + "from :" + this.getRequestIP(request));
         response.writeHead(404, {

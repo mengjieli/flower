@@ -29,6 +29,12 @@
         }
       ]
     },
+    "ease": {
+      "type": "int"
+    },
+    "easeTime": {
+      "type": "int"
+    },
     "x": {
       "desc": "像素坐标 x",
       "type": "int"
@@ -36,6 +42,9 @@
     "y": {
       "desc": "像素坐标 y",
       "type": "int"
+    },
+    "config": {
+      "type": "*"
     }
   }
 }

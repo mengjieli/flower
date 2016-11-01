@@ -107,7 +107,7 @@ class Platform {
         Platform.lastTime = now;
         if (PlatformURLLoader.loadingList.length) {
             var item = PlatformURLLoader.loadingList.shift();
-            item[0](item[1], item[2], item[3], item[4]);
+            item[0].apply(null,item.slice(1,item.length));
         }
     }
 

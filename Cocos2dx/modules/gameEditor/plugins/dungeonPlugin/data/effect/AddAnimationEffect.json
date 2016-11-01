@@ -31,7 +31,7 @@
       "init": 1,
       "enumList": [
         {
-          "label": "最下层",
+          "label": "角色下层",
           "type": 1
         },
         {
@@ -39,10 +39,34 @@
           "type": 2
         },
         {
-          "label": "最上层",
+          "label": "角色上层",
           "type": 3
+        },
+        {
+          "label": "UI 层",
+          "type": 4
         }
       ]
+    },
+    "ease": {
+      "desc": "缓动",
+      "type": "int",
+      "init": 1,
+      "enumList": [
+        {
+          "label": "无",
+          "type": 1
+        },
+        {
+          "label": "渐现",
+          "type": 2
+        }
+      ]
+    },
+    "easeTime": {
+      "desc": "缓动时间(ms)",
+      "type": "int",
+      "init": 500
     },
     "x": {
       "desc": "像素坐标 x",
