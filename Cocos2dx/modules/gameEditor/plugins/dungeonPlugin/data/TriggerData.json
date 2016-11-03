@@ -12,6 +12,12 @@
       "type": "string",
       "init": "新触发器"
     },
+    "nameTip": {
+      "desc": "名称追加信息",
+      "type": "string",
+      "bind": "  ({executeTime}/{count})",
+      "save":false
+    },
     "count": {
       "desc": "执行次数",
       "type": "int",
@@ -99,6 +105,11 @@
       "desc": "文字颜色",
       "type": "number",
       "bind": "{hasStop?0x990000:(hasPlay?0x999999:0)}",
+      "save": false
+    },
+    "executeTime": {
+      "desc": "执行次数",
+      "type": "int",
       "save": false
     }
   }

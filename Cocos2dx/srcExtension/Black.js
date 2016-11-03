@@ -822,7 +822,7 @@ class ArrayValue extends Value {
     setItemsAttributeWith(findKey, findValue, setKey = "", setValue = null) {
         for (var i = 0; i < this.list.length; i++) {
             if (this.list[i][findKey] instanceof flower.Value && this.list[i][findKey].value == findValue) {
-                this.list[i][findKey].value = setValue
+                this.list[i][setKey].value = setValue
             } else if (this.list[i][findKey] == findValue) {
                 this.list[i][setKey] = setValue;
             }
@@ -1113,6 +1113,7 @@ class IntValue extends Value {
 
     $getValue() {
         if (this.__checkDistort) {
+            flower.breakPoint();
             var str = this.__value + "";
             var compare = "";
             for (var i = 0; i < this.__valueCheck.length; i++) {
@@ -2567,7 +2568,9 @@ class RichText extends Group {
             35: 0, //0.无 1.改变的行数 2.旧的显示位置y 3.无
             36: 0, //input time
             37: null, //input line
-            38: null, //input htmlText index
+            38: null, //input display
+            39: null, //input displayLine
+            40: null, //input htmlIndex
         };
         this.addChild(this.$RichText[29]);
         this.addChild(this.$RichText[33]);
@@ -2624,9 +2627,11 @@ class RichText extends Group {
         var x = this.lastTouchX;
         var y = this.lastTouchY;
         var find = false;
+        var inputLine;
+        var inputDLine;
         var inputDisplay;
+        var inputIndex;
         var inputX;
-        var index = 0;
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
             if (y >= line.y && y < line.y + line.height) {
@@ -2643,6 +2648,8 @@ class RichText extends Group {
                                 focus.y = line.y + dline.y;
                                 focus.height = dline.height
                                 find = true;
+                                inputLine = line;
+                                inputDLine = dline;
                                 inputDisplay = display;
                                 inputX = x - display.x - dline.x;
                                 break;
@@ -2651,35 +2658,70 @@ class RichText extends Group {
                                 focus.y = line.y + dline.y;
                                 focus.height = dline.height;
                                 find = true;
+                                inputLine = line;
+                                inputDLine = dline;
                                 inputDisplay = display;
                                 inputX = x - display.x - dline.x;
                                 break;
                             }
-                            index += display.htmlText.length;
                         }
                         break;
                     }
                 }
                 break;
             }
-            index += line.endHtmlText.length;
         }
         if (!find) {
             var line = lines[lines.length - 1];
             var dline = line.displayLines[line.displayLines.length - 1];
             var display = dline.displays[dline.displays.length - 1];
-            index = this.htmlText.length - display.htmlText.length;
             focus.x = display.x + line.x + dline.x;
             focus.y = line.y + dline.y;
             focus.height = dline.height;
+            inputLine = line;
+            inputDLine = dline;
             inputDisplay = display;
             inputX = x - display.x - dline.x;
         }
         if (inputDisplay.type != 0) {
             if (inputX < inputDisplay.width / 2) {
-
+                var fontDisplay = inputDisplay.font;
+                var fontBefore = null;
+                var displayBefore = null;
+                var index;
+                for (var dl = 0; dl < line.displayLines.length; dl++) {
+                    for (var d = 0; d < line[dl].displays.length; d++) {
+                        if (line[dl].displays[d] != inputDisplay) {
+                            displayBefore = line[dl].displays[d];
+                        } else {
+                            index = d;
+                            break;
+                        }
+                    }
+                }
+                if (displayBefore) {
+                    fontBefore = displayBefore.font;
+                    
+                } else {
+                    var font = fontDisplay;
+                    var txt = new flower.TextField(text);
+                    txt.fontSize = font.size;
+                    txt.fontColor = font.color;
+                    var item = {
+                        "type": 0,
+                        "text": "",
+                        "htmlText": "",
+                        "width": 0,
+                        "height": font.size,
+                        "x": focus.x,
+                        "display": txt,
+                        "font": font
+                    };
+                    inputDLine.displays.splice(index, 0, item);
+                    inputDisplay = item;
+                    inputIndex = 0;
+                }
             } else {
-                index += 1;
                 focus.x += display.width;
             }
         } else {
@@ -2701,12 +2743,14 @@ class RichText extends Group {
                 focus.x += lastWidth;
             }
         }
-        p[38] = index;
+        p[37] = inputLine;
+        p[38] = inputDLine;
+        p[39] = inputDisplay;
+        p[40] = inputIndex;
     }
 
     //输入字符
     __inputText(text) {
-        trace("text:",text,text.length)
         //var p = this.$RichText;
         //var lines = p[3];
         //var line = p[37];
@@ -3057,7 +3101,7 @@ class RichText extends Group {
                 "height": font.size,
                 "x": line.posX,
                 "display": txt,
-                "font": flower.ObjectDo.clone(font)
+                "font": font
             };
             displayLine.displays.push(item);
             displayLine.width = displayLine.width > item.x + item.width ? displayLine.width : item.x + item.width;
@@ -3097,7 +3141,7 @@ class RichText extends Group {
             "x": line.posX,
             "display": bitmap,
             "loader": loader,
-            "font": flower.ObjectDo.clone(font)
+            "font": font
         }
         displayLine.displays.push(item);
         displayLine.width = displayLine.width > item.x + item.width ? displayLine.width : item.x + item.width;

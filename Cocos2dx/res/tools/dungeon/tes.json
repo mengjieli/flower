@@ -1,11 +1,11 @@
 {
- "itemId": 12,
+ "itemId": 49,
  "screenWidth": 480,
- "screenHeight": 320,
+ "screenHeight": 600,
  "triggers": [
   {
-   "itemId": 10,
-   "name": "触发器10",
+   "itemId": 47,
+   "name": "触发器47",
    "count": 1,
    "open": true,
    "startCondition": 1,
@@ -13,37 +13,35 @@
    "startValue": null,
    "effects": [
     {
-     "itemId": 11,
-     "name": "效果11",
+     "itemId": 48,
+     "name": "效果48",
      "delay": 0,
-     "type": 12,
+     "type": 22,
+     "invalid": true,
      "effectValue": {
-      "url": "pillar",
-      "tag": 0,
-      "type": 1,
-      "layer": 1,
-      "ease": 1,
-      "easeTime": 500,
-      "x": 100,
-      "y": 100,
-      "__className": "dg.AddAnimationEffect"
+      "points": [
+       {
+        "x": 0,
+        "y": 9
+       }
+      ],
+      "__className": "dg.HideGridEffect"
      }
     },
     {
-     "itemId": 12,
-     "name": "效果12",
+     "itemId": 49,
+     "name": "效果49",
      "delay": 0,
-     "type": 12,
+     "type": 11,
+     "invalid": true,
      "effectValue": {
-      "url": "tree1",
-      "tag": 0,
-      "type": 1,
-      "layer": 1,
-      "ease": 1,
-      "easeTime": 500,
-      "x": 100,
-      "y": 100,
-      "__className": "dg.AddAnimationEffect"
+      "dialogId": 5,
+      "param1": 0,
+      "param2": 0,
+      "param3": 0,
+      "param4": 0,
+      "triggerId": 0,
+      "__className": "dg.DialogEffect"
      }
     }
    ],
@@ -52,7 +50,7 @@
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": true,
+  "showGrid": false,
   "bornX": 0,
   "bornY": 9,
   "myHp": 5000,

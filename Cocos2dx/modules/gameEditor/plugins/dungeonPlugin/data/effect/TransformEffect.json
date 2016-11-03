@@ -1,0 +1,12 @@
+{
+  "name": "dg.TransformEffect",
+  "desc": "移动",
+  "members": {
+    "x": {
+      "type": "int"
+    },
+    "y": {
+      "type": "int"
+    }
+  }
+}

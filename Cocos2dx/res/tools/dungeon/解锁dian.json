@@ -1,0 +1,197 @@
+{
+ "itemId": 16,
+ "screenWidth": 480,
+ "screenHeight": 320,
+ "triggers": [
+  {
+   "itemId": 2,
+   "name": "镜头",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 3,
+     "name": "效果3",
+     "delay": 0,
+     "type": 10,
+     "effectValue": {
+      "rect": {
+       "x": 0,
+       "y": 0,
+       "width": 1000,
+       "height": 2700
+      },
+      "__className": "dg.CameraRangeEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 4,
+   "name": "刷怪",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 5,
+     "name": "效果5",
+     "delay": 0,
+     "type": 1,
+     "effectValue": {
+      "monsters": [
+       {
+        "id": 112,
+        "tag": 1,
+        "bornCoord": {
+         "x": 2,
+         "y": 8
+        },
+        "moveCoord": {
+         "x": 2,
+         "y": 8
+        },
+        "ai": 0
+       },
+       {
+        "id": 111,
+        "tag": 2,
+        "bornCoord": {
+         "x": 4,
+         "y": 8
+        },
+        "moveCoord": {
+         "x": 4,
+         "y": 8
+        },
+        "ai": 0
+       }
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 10,
+   "name": "1号解锁点",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 11,
+     "name": "添加图片1",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "tree1",
+      "tag": 1,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 180,
+      "y": 600,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 12,
+   "name": "2号解锁点",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 13,
+     "name": "添加图片2",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "tree1",
+      "tag": 2,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 360,
+      "y": 600,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 14,
+   "name": "消灭解锁点1怪物",
+   "count": 1,
+   "open": true,
+   "startCondition": 7,
+   "delay": 0,
+   "startValue": {
+    "tags": [
+     1
+    ],
+    "__className": "dg.MonsterDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 15,
+     "name": "删除图片1",
+     "delay": 0,
+     "type": 13,
+     "effectValue": {
+      "tag": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 16,
+     "name": "添加新图片1",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "tree2",
+      "tag": 3,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 180,
+      "y": 600,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "showGrid": true,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

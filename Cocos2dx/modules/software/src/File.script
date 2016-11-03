@@ -49,6 +49,16 @@ var File = (function (_super) {
         configurable: true
     });
 
+    Object.defineProperty(File.prototype, "nameTip", {
+        get: function () {
+            return this.data.nameTip;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
     Object.defineProperty(File.prototype, "data", {
         get: function () {
             return this.__data;

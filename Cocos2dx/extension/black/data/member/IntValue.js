@@ -26,6 +26,7 @@ class IntValue extends Value {
 
     $getValue() {
         if (this.__checkDistort) {
+            flower.breakPoint();
             var str = this.__value + "";
             var compare = "";
             for (var i = 0; i < this.__valueCheck.length; i++) {

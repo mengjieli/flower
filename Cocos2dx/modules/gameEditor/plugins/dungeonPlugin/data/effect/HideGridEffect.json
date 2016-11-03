@@ -1,0 +1,11 @@
+{
+  "name": "dg.HideGridEffect",
+  "desc": "隐藏指定格子对象",
+  "members": {
+    "points": {
+      "desc": "坐标点(网格坐标)",
+      "type": "Array",
+      "typeValue": "Point"
+    }
+  }
+}

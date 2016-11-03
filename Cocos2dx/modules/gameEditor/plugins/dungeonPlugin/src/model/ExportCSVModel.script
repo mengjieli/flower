@@ -86,18 +86,54 @@ var ExportCSVModel = (function () {
                     param += "['" + val.url + "'," + val.tag + "," + val.type + "," + val.layer + "," + val.ease + "," + val.easeTime + ",[" + val.x + "," + val.y + "]]";
                 } else if (effect.type == 13) { //删除动画 [tag]
                     param += "[" + val.tag + "," + val.ease + "," + val.easeTime + "]";
+                } else if (effect.type == 14) { //范围伤害 [[x,y],id]
+                    param += "[[" + val.x + "," + val.y + "]," + val.id + "]";
+                } else if (effect.type == 15) { //传送 [x,y]
+                    param += "[" + val.x + "," + val.y + "]";
+                } else if (effect.type == 16) { //增加阻挡点 [[x,y],[x,y]...]
+                    param += "[";
+                    for (var bp = 0; bp < val.points.length; bp++) {
+                        param += "[" + val.points[bp].x + "," + val.points[bp].y + "]" + (bp < val.points.length - 1 ? "," : "");
+                    }
+                    param += "]";
+                } else if (effect.type == 17) { //删除阻挡点 [[x,y],[x,y]...]
+                    param += "[";
+                    for (var bp = 0; bp < val.points.length; bp++) {
+                        param += "[" + val.points[bp].x + "," + val.points[bp].y + "]" + (bp < val.points.length - 1 ? "," : "");
+                    }
+                    param += "]";
+                } else if (effect.type == 18) { //暂停游戏 [0]
+                    param += "[0]";
+                } else if (effect.type == 19) { //继续游戏 [0]
+                    param += "[0]";
+                } else if (effect.type == 20) { //隐藏全部 [0]
+                    param += "[0]";
+                } else if (effect.type == 21) { //显示全部 [0]
+                    param += "[0]";
+                } else if (effect.type == 22) { //隐藏格子上对象 [[x,y],[x,y]...]
+                    param += "[";
+                    for (var bp = 0; bp < val.points.length; bp++) {
+                        param += "[" + val.points[bp].x + "," + val.points[bp].y + "]" + (bp < val.points.length - 1 ? "," : "");
+                    }
+                    param += "]";
+                } else if (effect.type == 23) { //显示格子上对象 [[x,y],[x,y]...]
+                    param += "[";
+                    for (var bp = 0; bp < val.points.length; bp++) {
+                        param += "[" + val.points[bp].x + "," + val.points[bp].y + "]" + (bp < val.points.length - 1 ? "," : "");
+                    }
+                    param += "]";
                 }
                 param += (p < trigger.effects.length - 1 ? "," : "");
             }
             type += "]\"";
             param += "]";
             content += type + "," + "\"" + param + "\"";
-            content +=  "," + trigger.count + "," + (trigger.open?"1":"0") + "\n";
+            content += "," + trigger.count + "," + (trigger.open ? "1" : "0") + "\n";
         }
         if (window) {
             var url = "res/tools/dungeon/res/save/" + (new Date()).getTime() + ".txt";
             (new flower.File(url)).saveText(content, function () {
-                window.open(flower.RemoteServer.getInstance().httpURL + url);                 //在另外新建窗口中打开窗口
+                window.open(flower.RemoteServer.getInstance().httpURL + url);                 //在另外新建窗口中打开链接
             });
         } else {
             software.Alert.tip("请用浏览器打开应用，否则不能用此功能");

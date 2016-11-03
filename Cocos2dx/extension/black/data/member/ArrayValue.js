@@ -296,7 +296,7 @@ class ArrayValue extends Value {
     setItemsAttributeWith(findKey, findValue, setKey = "", setValue = null) {
         for (var i = 0; i < this.list.length; i++) {
             if (this.list[i][findKey] instanceof flower.Value && this.list[i][findKey].value == findValue) {
-                this.list[i][findKey].value = setValue
+                this.list[i][setKey].value = setValue
             } else if (this.list[i][findKey] == findValue) {
                 this.list[i][setKey] = setValue;
             }

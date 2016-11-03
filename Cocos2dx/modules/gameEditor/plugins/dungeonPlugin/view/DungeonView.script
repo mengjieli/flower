@@ -134,6 +134,12 @@ function addEffectToDirection(trigger, effect) {
                 this.data.parser.save();
                 this.direction.removeItem(target);
             }.bind(this)
+        },
+        {
+            "label": "屏蔽触发器",
+            "click": function (target) {
+                target.data.effect.invalid = !target.data.effect.invalid.value;
+            }.bind(this)
         }
     ], {trigger: trigger, effect: effect}, effect.color);
 }

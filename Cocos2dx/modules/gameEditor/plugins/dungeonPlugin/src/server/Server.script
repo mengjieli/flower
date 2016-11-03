@@ -35,7 +35,7 @@ var Server = (function () {
                 this.pause();
             }
         }, this);
-        this.path = new ServerPath(this.data, this.monsters, this.armys,this.callObject, this);
+        this.path = new ServerPath(this.data, this.monsters, this.armys, this.callObject, this);
     }
 
     /**
@@ -45,11 +45,13 @@ var Server = (function () {
         this.stop(true);
         this.time = 0;
         this.hasInit = true;
-
         var triggers = this.data.triggers;
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
             trigger.openFlag = trigger.open.value;
+            trigger.executeTime = 0;
+            trigger.hasPlay.value = false;
+            trigger.hasStop.value = false;
             if (trigger.startCondition.value == 7) {
                 var startValue = trigger.startValue;
                 startValue.dieTags.length = 0;
@@ -57,8 +59,11 @@ var Server = (function () {
                     startValue.dieTags.push(new flower.BooleanValue(false));
                 }
             }
+            for (var e = 0; e < trigger.effects.length; e++) {
+                var effect = trigger.effects[e];
+                effect.hasPlay.value = false;
+            }
         }
-
         //运行
         flower.EnterFrame.add(this.update, this);
         this.gameStartFlag = false;
@@ -95,6 +100,26 @@ var Server = (function () {
         this.gameStartFlag = false;
         this.hasInit = false;
         this.gameOverFlag = false;
+        this.data.settings.playerRunFlag.value = true;
+        var triggers = this.data.triggers;
+        for (var i = 0; i < triggers.length; i++) {
+            var trigger = triggers[i];
+            trigger.openFlag = trigger.open.value;
+            trigger.executeTime = 0;
+            trigger.hasPlay.value = false;
+            trigger.hasStop.value = false;
+            if (trigger.startCondition.value == 7) {
+                var startValue = trigger.startValue;
+                startValue.dieTags.length = 0;
+                for (var d = 0; d < startValue.tags.length; d++) {
+                    startValue.dieTags.push(new flower.BooleanValue(false));
+                }
+            }
+            for (var e = 0; e < trigger.effects.length; e++) {
+                var effect = trigger.effects[e];
+                effect.hasPlay.value = false;
+            }
+        }
     }
 
     /**
@@ -124,7 +149,7 @@ var Server = (function () {
         for (var i = 0; i < this.triggers.length; i++) {
             this.triggers[i].update(dt);
         }
-        if (this.gameStartFlag && this.gameOverFlag == false) {
+        if (this.gameStartFlag && this.gameOverFlag == false && this.data.settings.playerRunFlag.value) {
             for (var i = 0; i < this.monsters.length; i++) {
                 if (this.monsters[i].hasDie) {
                     this.monsters.splice(i, 1);
@@ -139,8 +164,14 @@ var Server = (function () {
         }
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
-            if (trigger.openFlag.value && !this.hasTrigger(trigger.itemId.value) && trigger.startCondition.value == 1) {
+            if (trigger.executeTime.value < trigger.count.value && trigger.openFlag.value && !this.hasTrigger(trigger.itemId.value) && trigger.startCondition.value == 1) {
                 this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
+            }
+        }
+        for (var i = 0; i < this.triggers.length; i++) {
+            if (this.triggers[i].over) {
+                this.triggers.splice(i, 1);
+                i--;
             }
         }
     }
@@ -156,7 +187,7 @@ var Server = (function () {
                 var trigger = triggers[i];
                 if (!trigger.hasPlay.value && trigger.startCondition.value == 4) {
                     var triggerValue = trigger.startValue;
-                    if (trigger.openFlag.value && (triggerValue.type.value == 0 && this.dieCount < triggerValue.param.value ||
+                    if (trigger.openFlag.value && trigger.executeTime.value < trigger.count.value && (triggerValue.type.value == 0 && this.dieCount < triggerValue.param.value ||
                         triggerValue.type.value == 1 && this.time < triggerValue.param.value ||
                         triggerValue.type.value == 2)) {
                         this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
@@ -169,32 +200,15 @@ var Server = (function () {
 
     Server.prototype.runTrigger = function (operate, triggerId) {
         var triggers = this.data.triggers;
-        if (operate == 0) {
-            for (var i = 0; i < triggers.length; i++) {
-                var trigger = triggers[i];
-                if (trigger.itemId.value == triggerId) {
-                    if (!this.hasTrigger(triggerId)) {
-                        trigger.openFlag = true;
-                        if(trigger.startCondition.value == 5) {
-                            this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
-                        }
-                    } else {
-                        for (var t = 0; t < this.triggers.length; t++) {
-                            if (this.triggers[t].data.itemId.value == triggerId) {
-                                this.triggers[t].restart();
-                                break;
-                            }
-                        }
-                    }
-                    break;
+        var triggerData = triggers.getItemWith("itemId", triggerId);
+        if (triggerData) {
+            if (operate == 0) {
+                triggerData.openFlag.value = true;
+                if (triggerData.startCondition.value == 5 && triggerData.executeTime.value < triggerData.count.value) {
+                    this.triggers.push(new Trigger(triggerData, this.data, this.callObject, this));
                 }
-            }
-        } else if (operate == 1) {
-            for (var t = 0; t < this.triggers.length; t++) {
-                if (this.triggers[t].data.itemId.value == triggerId) {
-                    this.triggers[t].stop();
-                    break;
-                }
+            } else {
+                triggerData.openFlag.value = false;
             }
         }
     }
@@ -250,6 +264,20 @@ var Server = (function () {
                 return this.monsters[i];
             }
         }
+    }
+
+    Server.prototype.getRoleAt = function (x, y) {
+        for (var i = 0; i < this.armys.length; i++) {
+            if (this.armys[i].x == x && this.armys[i].y == y) {
+                return this.armys[i];
+            }
+        }
+        for (var i = 0; i < this.monsters.length; i++) {
+            if (this.monsters[i].x == x && this.monsters[i].y == y) {
+                return this.monsters[i];
+            }
+        }
+        return null;
     }
 
     Server.prototype.getMonsterByTag = function (tag) {

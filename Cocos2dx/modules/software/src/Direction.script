@@ -49,6 +49,16 @@ var Direction = (function (_super) {
         configurable: true
     });
 
+    Object.defineProperty(Direction.prototype, "nameTip", {
+        get: function () {
+            return this.data.nameTip;
+        },
+        set: function (val) {
+        },
+        enumerable: true,
+        configurable: true
+    });
+
     Object.defineProperty(Direction.prototype, "data", {
         get: function () {
             return this.__data;

@@ -16,6 +16,11 @@
       "type": "bool",
       "save": false
     },
+    "playerRunFlag": {
+      "desc": "角色是否运行",
+      "type": "bool",
+      "save": false
+    },
     "reset": {
       "desc": "是否重置",
       "type": "int",

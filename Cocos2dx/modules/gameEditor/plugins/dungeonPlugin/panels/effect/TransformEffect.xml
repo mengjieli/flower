@@ -1,0 +1,13 @@
+<f:Group class="TransformEffect" percentWidth="100" percentHeight="100"
+         xmlns:f="flower" xmlns:s="modules/software/module.json"
+         xmlns:e="modules/gameEditor/module.json" >
+    <f:script src="./TransformEffect.script"/>
+    <f:Group horizontalCenter="0" y="0">
+        <f:Label horizontalCenter="-55" width="60" text="格子坐标x" verticalCenter="0"/>
+        <s:Input id="xInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+    <f:Group horizontalCenter="0" y="30">
+        <f:Label horizontalCenter="-55" width="60" text="格子坐标y" verticalCenter="0"/>
+        <s:Input id="yInput" horizontalCenter="30" width="100" verticalCenter="0"/>
+    </f:Group>
+</f:Group>

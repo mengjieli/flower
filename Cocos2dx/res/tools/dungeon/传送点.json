@@ -1,0 +1,478 @@
+{
+ "itemId": 52,
+ "screenWidth": 480,
+ "screenHeight": 320,
+ "triggers": [
+  {
+   "itemId": 2,
+   "name": "触发器2",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 3,
+     "name": "效果3",
+     "delay": 0,
+     "type": 10,
+     "invalid": true,
+     "effectValue": {
+      "rect": {
+       "x": 0,
+       "y": 0,
+       "width": 1000,
+       "height": 2700
+      },
+      "__className": "dg.CameraRangeEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 7,
+   "name": "失败",
+   "count": 1,
+   "open": true,
+   "startCondition": 6,
+   "delay": 0,
+   "startValue": {
+    "type": 0,
+    "__className": "dg.AllDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 8,
+     "name": "效果80",
+     "delay": 0,
+     "type": 6,
+     "invalid": true,
+     "effectValue": null
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 9,
+   "name": "传送门1",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 10,
+     "name": "传送门图片",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "tree1",
+      "tag": 1,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 180,
+      "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 39,
+     "name": "传送门特效1",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "trap1",
+      "tag": 4,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 180,
+      "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 13,
+   "name": "移动触发",
+   "count": 10000,
+   "open": true,
+   "startCondition": 2,
+   "delay": 0,
+   "startValue": {
+    "armyType": 0,
+    "points": [
+     {
+      "x": 2,
+      "y": 8
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+    {
+     "itemId": 14,
+     "name": "删除特效1",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 4,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 15,
+     "name": "开启延迟",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 18,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 24,
+     "name": "删除特效3",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 3,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 27,
+     "name": "删除特效2",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 21,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 35,
+     "name": "开启延迟2",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 31,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 38,
+     "name": "删除特效4",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 23,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 43,
+     "name": "关闭自身",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 1,
+      "triggerId": 13,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 44,
+     "name": "开启延迟启动移动触发",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 41,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 45,
+     "name": "传送",
+     "delay": 0,
+     "type": 15,
+     "invalid": true,
+     "effectValue": {
+      "x": 4,
+      "y": 8,
+      "__className": "dg.TransformEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 41,
+   "name": "延迟开启移动触发",
+   "count": 10000,
+   "open": false,
+   "startCondition": 5,
+   "delay": 5000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 42,
+     "name": "开启移动触发",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 13,
+      "__className": "dg.StartTriggerEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 18,
+   "name": "延迟开启",
+   "count": 10000,
+   "open": false,
+   "startCondition": 5,
+   "delay": 5000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 20,
+     "name": "开启特效3",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "trap1",
+      "tag": 3,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 180,
+      "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 25,
+   "name": "传送门2",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 26,
+     "name": "传送门图片2",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "tree1",
+      "tag": 20,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 360,
+      "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 40,
+     "name": "传送门特效2",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "trap1",
+      "tag": 21,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 360,
+      "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 31,
+   "name": "延迟开启2",
+   "count": 10000,
+   "open": false,
+   "startCondition": 5,
+   "delay": 5000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 33,
+     "name": "开启特效4",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "trap1",
+      "tag": 23,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 360,
+      "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 46,
+   "name": "移动触发2",
+   "count": 10000,
+   "open": true,
+   "startCondition": 2,
+   "delay": 0,
+   "startValue": {
+    "armyType": 0,
+    "points": [
+     {
+      "x": 4,
+      "y": 8
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+    {
+     "itemId": 47,
+     "name": "传送",
+     "delay": 0,
+     "type": 15,
+     "invalid": true,
+     "effectValue": {
+      "x": 2,
+      "y": 8,
+      "__className": "dg.TransformEffect"
+     }
+    },
+    {
+     "itemId": 48,
+     "name": "关闭自身",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 1,
+      "triggerId": 46,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 49,
+     "name": "开启延迟启动移动触发",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 50,
+      "__className": "dg.StartTriggerEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 50,
+   "name": "延迟开启移动触发",
+   "count": 10000,
+   "open": false,
+   "startCondition": 5,
+   "delay": 5000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 51,
+     "name": "开启移动触发",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 46,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 52,
+     "name": "效果52",
+     "delay": 0,
+     "type": 11,
+     "invalid": true,
+     "effectValue": {
+      "dialogId": 5,
+      "param1": 0,
+      "param2": 0,
+      "param3": 0,
+      "param4": 0,
+      "triggerId": 0,
+      "__className": "dg.DialogEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "showGrid": false,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

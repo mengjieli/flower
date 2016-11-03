@@ -42,6 +42,8 @@ var Role = (function (_super) {
         this.data.path.addListener(flower.Event.UPDATE, this.onPathChange, this);
         this.data.mapData.getObject.count.addListener(flower.Event.UPDATE, this.getObject, this);
 
+        this.bindProperty("visible", "{this.data.visible}");
+
         this.init();
     }
 
@@ -109,14 +111,22 @@ var Role = (function (_super) {
             this.moveFlag = true;
             var point = this.data.path.shift();
             var position = MapUtils.transPointToPosition(point.x, point.y);
-            this.playAction(Role.Action.RUN, this.getNetDir(this.data.coord.x.value, this.data.coord.y.value, point.x, point.y));
-            this.moveTween = flower.Tween.to(this.data.position, point.time / 1000, {
-                x: position.x,
-                y: position.y
-            }, null, {
-                x: this.data.position.x.value,
-                y: this.data.position.y.value
-            }).call(this.onMoveComplete, this, point.x, point.y);
+            if (point.time == 0) {
+                this.playAction(Role.Action.STAND);
+                this.moveFlag = false;
+                this.data.position.x = position.x;
+                this.data.position.y = position.y;
+                this.onMoveComplete(point.x, point.y);
+            } else {
+                this.playAction(Role.Action.RUN, this.getNetDir(this.data.coord.x.value, this.data.coord.y.value, point.x, point.y));
+                this.moveTween = flower.Tween.to(this.data.position, point.time / 1000, {
+                    x: position.x,
+                    y: position.y
+                }, null, {
+                    x: this.data.position.x.value,
+                    y: this.data.position.y.value
+                }).call(this.onMoveComplete, this, point.x, point.y);
+            }
             return true;
         }
         return false;

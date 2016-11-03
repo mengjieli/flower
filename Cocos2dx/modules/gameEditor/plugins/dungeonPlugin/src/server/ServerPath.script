@@ -1,6 +1,6 @@
 var ServerPath = (function () {
 
-    function ServerPath(dungeonData, monsters, armys,callObject, server) {
+    function ServerPath(dungeonData, monsters, armys, callObject, server) {
         this.dungeonData = dungeonData;
         this.monsters = monsters;
         this.armys = armys;
@@ -34,7 +34,8 @@ var ServerPath = (function () {
         }
     }
 
-    ServerPath.prototype.addRoler = function (roler, x, y) {
+    ServerPath.prototype.addRoler = function (roler, x, y, checkTranslate) {
+        checkTranslate = checkTranslate == null ? true : checkTranslate;
         var block = this.blocks[y * this.width + x];
         var list = block.list;
         for (var i = 0; i < list.length; i++) {
@@ -48,10 +49,10 @@ var ServerPath = (function () {
         var triggers = this.dungeonData.triggers;
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
-            if (trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 2) {
+            if (checkTranslate && trigger.executeTime.value < trigger.count.value && trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 2) {
                 var startValue = trigger.startValue;
                 if (roler.type == startValue.armyType.value && startValue.points.getItemWith("x", x, "y", y)) {
-                    this.server.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.server));
+                    this.server.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.server, roler));
                 }
             }
         }
@@ -67,13 +68,13 @@ var ServerPath = (function () {
     }
 
     ServerPath.prototype.canMove = function (x, y) {
-        return this.blocks[y * this.width + x].path == 1 ? true : false
+        return this.blocks[y * this.width + x].path >= 1 ? true : false
     }
 
     ServerPath.prototype.canPathMove = function (path) {
         var flag = true;
-        for(var i = 0; i < path.length; i++) {
-            if(!this.canMove(path[i].x,path[i].y)) {
+        for (var i = 0; i < path.length; i++) {
+            if (!this.canMove(path[i].x, path[i].y)) {
                 flag = false;
                 break;
             }
@@ -85,6 +86,19 @@ var ServerPath = (function () {
         return this.astar.findPath(startX, startY, endX, endY);
     }
 
+    ServerPath.prototype.addBlocks = function (points) {
+        for (var i = 0; i < points.length; i++) {
+            var block = this.blocks[points[i].y * this.width + points[i].x];
+            block.path--;
+        }
+    }
+
+    ServerPath.prototype.removeBlocks = function (points) {
+        for (var i = 0; i < points.length; i++) {
+            var block = this.blocks[points[i].y * this.width + points[i].x];
+            block.path++;
+        }
+    }
 
     return ServerPath;
 })();

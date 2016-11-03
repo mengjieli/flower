@@ -27,8 +27,8 @@ var Camera = (function () {
         }, this);
     }
 
-    Camera.prototype.reset = function() {
-        if(this.tween) {
+    Camera.prototype.reset = function () {
+        if (this.tween) {
             this.tween.dispose();
             this.tween = null;
         }
@@ -58,6 +58,7 @@ var Camera = (function () {
     }
 
     Camera.prototype.tweenTo = function (time, x, y, pos) {
+        console.log(x, y, pos, this.data);
         switch (pos) {
             case 2:
                 y = y - this.data.height.value * .5;
@@ -66,7 +67,7 @@ var Camera = (function () {
                 y = y - this.data.height.value;
                 break;
             case 4:
-                x = x - this.data.width * .5;
+                x = x - this.data.width.value * .5;
                 y = y - this.data.height.value;
                 break;
             case 5:
@@ -74,20 +75,21 @@ var Camera = (function () {
                 y = y - this.data.height.value;
                 break;
             case 6:
-                x = x - this.data.width;
+                x = x - this.data.width.value;
                 y = y - this.data.height.value * .5;
                 break;
             case 7:
-                x = x - this.data.width;
+                x = x - this.data.width.value;
                 break;
             case 8:
-                x = x - this.data.width * .5;
+                x = x - this.data.width.value * .5;
                 break;
-            case 5:
-                x = x - this.data.width * .5;
+            case 9:
+                x = x - this.data.width.value * .5;
                 y = y - this.data.height.value * .5;
                 break;
         }
+        trace(x, y);
         if (time == 0) {
             this.moveTo(x, y);
         } else {

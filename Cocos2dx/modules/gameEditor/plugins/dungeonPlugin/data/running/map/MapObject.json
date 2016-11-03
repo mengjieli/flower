@@ -11,6 +11,11 @@
           "type": 1
         }
       ]
+    },
+    "visible": {
+      "desc": "是否显示",
+      "type": "bool",
+      "init": true
     }
   }
 }

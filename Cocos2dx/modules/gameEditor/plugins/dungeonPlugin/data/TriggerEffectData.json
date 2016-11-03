@@ -67,8 +67,53 @@
         {
           "label": "删除动画",
           "type": 13
+        },
+        {
+          "label": "范围伤害",
+          "type": 14
+        },
+        {
+          "label": "传送",
+          "type": 15
+        },
+        {
+          "label": "增加阻挡点",
+          "type": 16
+        },
+        {
+          "label": "删除阻挡点",
+          "type": 17
+        },
+        {
+          "label": "暂停战斗",
+          "type": 18
+        },
+        {
+          "label": "继续战斗",
+          "type": 19
+        },
+        {
+          "label": "隐藏全部",
+          "type": 20
+        },
+        {
+          "label": "显示全部",
+          "type": 21
+        },
+        {
+          "label": "隐藏指定位置",
+          "type": 22
+        },
+        {
+          "label": "显示指定位置",
+          "type": 23
         }
       ]
+    },
+    "invalid": {
+      "desc": "停止使用",
+      "type": "bool",
+      "init": true
     },
     "effectValue": {
       "desc": "效果值",
@@ -86,7 +131,7 @@
     "color": {
       "desc": "文字颜色",
       "type": "number",
-      "bind": "{hasPlay?0x999999:0}",
+      "bind": "{invalid?(hasPlay?0x999999:0):0x990000}",
       "save": false
     }
   }

@@ -1,26 +1,35 @@
 var Trigger = (function () {
 
-    function Trigger(data, dungeonData, callObject, triggerRunning) {
+    function Trigger(data, dungeonData, callObject, triggerRunning, startRole) {
         this.data = data;
         this.dungeonData = dungeonData;
         this.callObject = callObject;
         this.triggerRunning = triggerRunning;
+        this.startRole = startRole;
         this.time = 0;
+        this.over = false;
+        this.data.executeTime.value = this.data.executeTime.value + 1;
         this.update(0);
     }
 
     Trigger.prototype.update = function (dt) {
-        if (this.data.hasStop.value) {
+        if (this.data.hasStop.value || this.over) {
             return;
         }
         this.time += dt;
+        for (var i = 0; i < this.data.effects.length; i++) {
+            var effect = this.data.effects[i];
+            if (!effect.hasPlay.value && this.data.delay.value <= this.time && effect.invalid.value) {
+                this.runEffect(effect);
+            }
+        }
         if (this.time >= this.data.delay.value && !this.data.hasPlay.value) {
             this.data.hasPlay.value = true;
         }
-        for (var i = 0; i < this.data.effects.length; i++) {
-            var effect = this.data.effects[i];
-            if (!effect.hasPlay.value && this.data.delay.value <= this.time) {
-                this.runEffect(effect);
+        if (this.time >= this.data.delay.value) {
+            this.over = true;
+            if (this.data.executeTime.value < this.data.count.value) {
+                this.restart();
             }
         }
     }
@@ -39,7 +48,10 @@ var Trigger = (function () {
     }
 
     Trigger.prototype.stop = function () {
-        this.data.hasStop.value = true;
+        if (this.time != 0) {
+            return;
+        }
+        this.over = true;
     }
 
     Trigger.prototype.runEffect = function (effect) {
@@ -80,6 +92,75 @@ var Trigger = (function () {
                 break;
             case 13:
                 this.callObject.removeAnimation(value.tag.value, value.ease.value, value.easeTime.value);
+                break;
+            case 14:
+                //范围伤害
+                var range = value.range.value;
+                var damage = value.damage.value;
+                var x = value.x.value;
+                var y = value.y.value;
+                var points = [{x: x, y: y}];
+                for (var i = 1; i <= range; i++) {
+                    points = points.concat(MapUtils.getRoundPoints(x, y, range));
+                }
+                for (var i = 0; i < points.length; i++) {
+                    x = points[i].x;
+                    y = points[i].y;
+                    var role = this.triggerRunning.getRoleAt(x, y);
+                    if (role) {
+                        role.changeHp(-damage, null);
+                    }
+                }
+                break;
+            case 15:
+                //传送部队
+                var roles = this.startRole.type == 0 ? this.triggerRunning.armys : this.triggerRunning.monsters;
+                var points = [{x: value.x.value, y: value.y.value}];
+                var range = 1;
+                var r = 0;
+                while (r < roles.length) {
+                    var role = roles[r];
+                    var find = false;
+                    var point = null;
+                    while (find == false) {
+                        if (!points.length) {
+                            points = MapUtils.getRoundPoints(value.x.value, value.y.value, range);
+                            range++;
+                        }
+                        point = points.pop();
+                        if (this.triggerRunning.path.canMove(point.x, point.y)) {
+                            find = true;
+                            role.transformTo(point.x, point.y);
+                            range = 1;
+                            points = [{x: value.x.value, y: value.y.value}];
+                        }
+                    }
+                    r++;
+                }
+                break;
+            case 16:
+                this.triggerRunning.path.addBlocks(value.points.value);
+                break;
+            case 17:
+                this.triggerRunning.path.removeBlocks(value.points.value);
+                break;
+            case 18:
+                this.dungeonData.settings.playerRunFlag.value = false;
+                break;
+            case 19:
+                this.dungeonData.settings.playerRunFlag.value = true;
+                break;
+            case 20:
+                this.callObject.hideAll();
+                break;
+            case 21:
+                this.callObject.showAll();
+                break;
+            case 22:
+                this.callObject.hideGrid(value.points.value);
+                break;
+            case 23:
+                this.callObject.showGrid(value.points.value);
                 break;
         }
     }
