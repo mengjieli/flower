@@ -3086,6 +3086,7 @@ var $root = eval("this");
         }, {
             key: "__inputText",
             value: function __inputText(text) {
+                text = this.__changeText(text);
                 var p = this.$RichText;
                 var txt = p[39];
                 this.htmlText = p[1].slice(0, p[42]) + text + p[1].slice(p[42], p[1].length);
@@ -3610,6 +3611,12 @@ var $root = eval("this");
             value: function setText(val) {
                 var p = this.$RichText;
                 p[0] = val;
+                val = this.__changeText(val);
+                this.$setHtmlText(val, false);
+            }
+        }, {
+            key: "__changeText",
+            value: function __changeText(val) {
                 for (var i = 0; i < val.length; i++) {
                     var char = val.charAt(i);
                     if (char == " ") {
@@ -3622,7 +3629,7 @@ var $root = eval("this");
                         val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
                     }
                 }
-                this.$setHtmlText(val, false);
+                return val;
             }
         }, {
             key: "text",
