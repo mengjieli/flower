@@ -58,7 +58,6 @@ var Camera = (function () {
     }
 
     Camera.prototype.tweenTo = function (time, x, y, pos) {
-        console.log(x, y, pos, this.data);
         switch (pos) {
             case 2:
                 y = y - this.data.height.value * .5;
@@ -89,7 +88,6 @@ var Camera = (function () {
                 y = y - this.data.height.value * .5;
                 break;
         }
-        trace(x, y);
         if (time == 0) {
             this.moveTo(x, y);
         } else {

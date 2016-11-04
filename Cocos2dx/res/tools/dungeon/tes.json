@@ -1,5 +1,5 @@
 {
- "itemId": 49,
+ "itemId": 50,
  "screenWidth": 480,
  "screenHeight": 600,
  "triggers": [
@@ -43,13 +43,31 @@
       "triggerId": 0,
       "__className": "dg.DialogEffect"
      }
+    },
+    {
+     "itemId": 50,
+     "name": "效果50",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 0,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 200,
+      "y": 500,
+      "__className": "dg.AddAnimationEffect"
+     }
     }
    ],
    "openFlag": true
   }
  ],
  "settings": {
-  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "background": "res/tools/dungeon/background/dungeon_map_3_2.png",
   "showGrid": false,
   "bornX": 0,
   "bornY": 9,

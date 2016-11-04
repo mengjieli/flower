@@ -142,6 +142,9 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     static measureTextWidth(size, text) {
+        text = flower.StringDo.replaceString(text," ","&nbsp;");
+        text = flower.StringDo.replaceString(text,"<","&lt;");
+        text= flower.StringDo.replaceString(text,">","&gt;");
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.style.fontSize = size + "px";
         $mesureTxt.innerHTML = text;

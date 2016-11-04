@@ -205,9 +205,9 @@ class RichText extends Group {
                 var displayBefore = null;
                 var index;
                 for (var dl = 0; dl < line.displayLines.length; dl++) {
-                    for (var d = 0; d < line[dl].displays.length; d++) {
-                        if (line[dl].displays[d] != inputDisplay) {
-                            displayBefore = line[dl].displays[d];
+                    for (var d = 0; d < line.displayLines[dl].displays.length; d++) {
+                        if (line.displayLines[dl].displays[d] != inputDisplay) {
+                            displayBefore = line.displayLines[dl].displays[d];
                         } else {
                             index = d;
                             break;
@@ -216,12 +216,8 @@ class RichText extends Group {
                 }
                 if (displayBefore) {
                     fontBefore = displayBefore.font;
-                    
                 } else {
                     var font = fontDisplay;
-                    var txt = new flower.TextField(text);
-                    txt.fontSize = font.size;
-                    txt.fontColor = font.color;
                     var item = {
                         "type": 0,
                         "text": "",
@@ -229,7 +225,7 @@ class RichText extends Group {
                         "width": 0,
                         "height": font.size,
                         "x": focus.x,
-                        "display": txt,
+                        "display": null,
                         "font": font
                     };
                     inputDLine.displays.splice(index, 0, item);
@@ -244,6 +240,7 @@ class RichText extends Group {
             var size = display.font.size;
             var lastWidth = 0;
             var find = false;
+            inputIndex = 0;
             for (var i = 1; i <= text.length; i++) {
                 var textWidth = flower.$measureTextWidth(size, text.slice(0, i));
                 var charWidth = textWidth - lastWidth;
@@ -252,6 +249,7 @@ class RichText extends Group {
                     find = true;
                     break;
                 }
+                inputIndex++;
                 lastWidth = textWidth;
             }
             if (!find) {
@@ -262,21 +260,52 @@ class RichText extends Group {
         p[38] = inputDLine;
         p[39] = inputDisplay;
         p[40] = inputIndex;
+        var inputTextPos = 0;
+        var inputHtmlTextPos = 0;
+        var find = false;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var displayLines = line.displayLines;
+            for (var dl = 0; dl < displayLines.length; dl++) {
+                var dline = displayLines[dl];
+                var displays = dline.displays;
+                for (var d = 0; d < displays.length; d++) {
+                    var display = displays[d];
+                    if (inputDisplay == display) {
+                        find = true;
+                        break;
+                    } else {
+                        if (display.type == 0) {
+                            inputTextPos += display.text.length;
+                        } else {
+                            inputTextPos += 0;
+                        }
+                        inputHtmlTextPos += display.htmlText.length;
+                    }
+                }
+                if (find) {
+                    break;
+                }
+            }
+            if (find) {
+                break;
+            }
+            inputHtmlTextPos += line.endHtmlText.length;
+        }
+        inputTextPos += inputIndex;
+        inputHtmlTextPos += inputDisplay.textStart + inputIndex;
+        p[41] = inputTextPos;
+        p[42] = inputHtmlTextPos;
     }
 
     //输入字符
     __inputText(text) {
-        //var p = this.$RichText;
-        //var lines = p[3];
-        //var line = p[37];
-        //var htmlText = line.htmlText;
-        //htmlText = htmlText.slice(0, p[38]) + text + htmlText.slice(p[38], htmlText.length);
-        //line.htmlText = htmlText;
-        //htmlText = "";
-        //for (var l = 0; l < lines.length; l++) {
-        //    htmlText += lines[l].htmlText + lines[l].endHtmlText;
-        //}
-        //this.htmlText = htmlText;
+        var p = this.$RichText;
+        var txt = p[39];
+        this.htmlText = p[1].slice(0, p[42]) + text + p[1].slice(p[42], p[1].length);
+        p[41] += text.length;
+        p[42] += text.length;
+
     }
 
     __showFocus() {
@@ -375,6 +404,9 @@ class RichText extends Group {
         var last = -1;
         var textContent = "";
         var textStart = 0;
+        var lastTextStart = -1;
+        var lastHtmlTextStart = 0;
+        var nextHtmlTextStart = 0;
         var font = {
             color: p[10],
             size: p[11],
@@ -394,128 +426,132 @@ class RichText extends Group {
             elementHtml += char;
             if (char == "<" && decodeHtml) {
                 last = i;
-            } else if (char == ">" && decodeHtml) {
-                if (last != -1) { //找到 <...>  结构
-                    //1. 分析标签名称
-                    var content = text.slice(last + 1, i);
-                    var name = null;
-                    var end = content.charAt(0) == "/" ? true : false;
-                    var single = content.charAt(content.length - 1) == "/" ? true : false;
-                    if (content.charAt(0) == "/") {
-                        content = content.slice(1, content.length);
+            } else if (char == ">" && decodeHtml && last != -1) { //找到 <...>  结构
+                //1. 分析标签名称
+                var content = text.slice(last + 1, i);
+                var name = null;
+                var end = content.charAt(0) == "/" ? true : false;
+                var single = content.charAt(content.length - 1) == "/" ? true : false;
+                if (content.charAt(0) == "/") {
+                    content = content.slice(1, content.length);
+                }
+                if (content.charAt(content.length - 1) == "/") {
+                    content = content.slice(0, content.length - 1);
+                }
+                var clen = content.length;
+                for (var c = 0; c < content.length; c++) {
+                    if (content.charAt(c) == " ") {
+                        name = content.slice(0, c);
+                        break;
                     }
-                    if (content.charAt(content.length - 1) == "/") {
-                        content = content.slice(0, content.length - 1);
-                    }
-                    var clen = content.length;
-                    for (var c = 0; c < content.length; c++) {
-                        if (content.charAt(c) == " ") {
-                            name = content.slice(0, c);
+                }
+                if (!name) {
+                    name = content;
+                }
+                var attributes = [];
+                //2. 分析属性
+                if (!end) {
+                    var c = name.length;
+                    while (c < content.length) {
+                        //跳过空格
+                        while (content.charAt(c) == " ") {
+                            c++;
+                        }
+                        //获取名称
+                        var pos = c;
+                        while ((content.charAt(c) != "=" && content.charAt(c) != " ") && c < clen) {
+                            c++;
+                        }
+                        if (c == content.length) {
                             break;
                         }
+                        var attributeName = content.slice(pos, c);
+                        //跳过空格
+                        while (content.charAt(c) == " ") {
+                            c++;
+                        }
+                        if (content.charAt(c) != "=") {
+                            break;
+                        }
+                        //跳过 =
+                        c++;
+                        //跳过空格
+                        while (content.charAt(c) == " ") {
+                            c++;
+                        }
+                        if (content.charAt(c) != "\"" && content.charAt(c) != "'") {
+                            break;
+                        }
+                        var begin = content.charAt(c);
+                        //跳过引号
+                        c++;
+                        pos = c;
+                        //获取属性
+                        while (content.charAt(c) != begin && c < clen) {
+                            c++;
+                        }
+                        if (c == content.length) {
+                            break;
+                        }
+                        var attributeValue = content.slice(pos, c);
+                        c++;
+                        attributes.push({
+                            "name": attributeName,
+                            "value": attributeValue
+                        });
                     }
-                    if (!name) {
-                        name = content;
+                }
+                //如果是单独的标签，比如 <img url="http://192.168.0.1:10000/res/a.png"/>
+                if (single) {
+                    if (name == "img") {
+                        textChange = true;
+                        nextHtmlTextStart = i + 1;
+                        addSingle = {
+                            name: name,
+                            attributes: attributes
+                        };
                     }
-                    var attributes = [];
-                    //2. 分析属性
+                } else {
                     if (!end) {
-                        var c = name.length;
-                        while (c < content.length) {
-                            //跳过空格
-                            while (content.charAt(c) == " ") {
-                                c++;
-                            }
-                            //获取名称
-                            var pos = c;
-                            while ((content.charAt(c) != "=" && content.charAt(c) != " ") && c < clen) {
-                                c++;
-                            }
-                            if (c == content.length) {
-                                break;
-                            }
-                            var attributeName = content.slice(pos, c);
-                            //跳过空格
-                            while (content.charAt(c) == " ") {
-                                c++;
-                            }
-                            if (content.charAt(c) != "=") {
-                                break;
-                            }
-                            //跳过 =
-                            c++;
-                            //跳过空格
-                            while (content.charAt(c) == " ") {
-                                c++;
-                            }
-                            if (content.charAt(c) != "\"" && content.charAt(c) != "'") {
-                                break;
-                            }
-                            var begin = content.charAt(c);
-                            //跳过引号
-                            c++;
-                            pos = c;
-                            //获取属性
-                            while (content.charAt(c) != begin && c < clen) {
-                                c++;
-                            }
-                            if (c == content.length) {
-                                break;
-                            }
-                            var attributeValue = content.slice(pos, c);
-                            c++;
-                            attributes.push({
-                                "name": attributeName,
-                                "value": attributeValue
-                            });
-                        }
-                    }
-                    //如果是单独的标签，比如 <img url="http://192.168.0.1:10000/res/a.png"/>
-                    if (single) {
-                        if (name == "img") {
+                        signs.push({
+                            name: name,
+                            attributes: attributes,
+                            font: font
+                        });
+                        font = flower.ObjectDo.clone(font);
+                        if (name == "font") {
                             textChange = true;
-                            addSingle = {
-                                name: name,
-                                attributes: attributes
-                            };
-                        }
-                    } else {
-                        if (!end) {
-                            signs.push({
-                                name: name,
-                                attributes: attributes,
-                                font: font
-                            });
-                            font = flower.ObjectDo.clone(font);
-                            if (name == "font") {
-                                textChange = true;
-                                for (var a = 0; a < attributes.length; a++) {
-                                    if (attributes[a].name == "size") {
-                                        if (parseInt(attributes[a].value)) {
-                                            font.size = parseInt(attributes[a].value);
-                                            font.sizes.push(font.size);
-                                        }
-                                    } else if (attributes[a].name == "color") {
-                                        if (attributes[a].value.charAt(0) == "#") {
-                                            font.color = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
-                                            font.colors.push(font.color);
-                                        }
+                            nextHtmlTextStart = last;
+                            for (var a = 0; a < attributes.length; a++) {
+                                if (attributes[a].name == "size") {
+                                    if (parseInt(attributes[a].value)) {
+                                        font.size = parseInt(attributes[a].value);
+                                        font.sizes.push(font.size);
+                                    }
+                                } else if (attributes[a].name == "color") {
+                                    if (attributes[a].value.charAt(0) == "#") {
+                                        font.color = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
+                                        font.colors.push(font.color);
                                     }
                                 }
                             }
-                        } else {
-                            if (signs.length && name == signs[signs.length - 1].name) {
-                                if (name == "font") {
-                                    textChange = true;
-                                    oldFont = font;
-                                }
-                                font = signs.pop().font;
+                        }
+                    } else {
+                        if (signs.length && name == signs[signs.length - 1].name) {
+                            if (name == "font") {
+                                textChange = true;
+                                nextHtmlTextStart = i + 1;
+                                oldFont = font;
                             }
+                            font = signs.pop().font;
                         }
                     }
                 }
                 if (textChange && !end) {
                     signHtml = text.slice(last, i + 1);
+                }
+                if (lastTextStart == -1) {
+                    lastTextStart = textStart;
                 }
                 textContent += text.slice(textStart, last);
                 textStart = i + 1;
@@ -524,6 +560,9 @@ class RichText extends Group {
             var newLine = false;
             if (char == "\r" || char == "\n" || text.slice(i, i + 5) == "<br/>") {
                 newLine = true;
+                if (lastTextStart == -1) {
+                    lastTextStart = textStart;
+                }
                 textContent += text.slice(textStart, i);
                 if (text.slice(i, i + 5) == "<br/>") {
                     textStart = i + 5;
@@ -537,8 +576,12 @@ class RichText extends Group {
                     line.endHtmlText = char;
                 }
                 lineHtml = lineHtml.slice(0, lineHtml.length - 1);
+                nextHtmlTextStart = i + 1;
             }
             if (i == text.length - 1) {
+                if (lastTextStart == -1) {
+                    lastTextStart = textStart;
+                }
                 textContent += text.slice(textStart, last != -1 ? last : text.length);
             }
             //如果需要截断文字
@@ -553,15 +596,17 @@ class RichText extends Group {
                 }
                 if (elementHtml.length) {
                     //分析之前的文字
-                    this.$decodeTextDisplay(line, textContent, oldFont, elementHtml);
+                    this.$decodeTextDisplay(line, textContent, oldFont, elementHtml, lastTextStart - lastHtmlTextStart);
                 }
+                lastTextStart = -1;
+                lastHtmlTextStart = nextHtmlTextStart;
                 elementHtml = deviceText;
                 textContent = "";
                 if (i == text.length - 1 || newLine) {
                     lines.push(line);
                 }
                 if (newLine || i == text.length - 1) {
-                    this.$decodeTextDisplay(line, "", oldFont, "");
+                    this.$decodeTextDisplay(line, "", oldFont, "", 0);
                     line.htmlText = lineHtml;
                     lineHtml = "";
                 }
@@ -593,29 +638,47 @@ class RichText extends Group {
                     this.$addImage(line, addSingle.attributes, oldFont, elementHtml);
                     elementHtml = "";
                 }
+                lastHtmlTextStart = nextHtmlTextStart;
+                lastTextStart = -1;
             }
         }
         p[34] = 3;
+        var text = "";
+        var htmlText = "";
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var displayLines = line.displayLines;
+            for (var dl = 0; dl < displayLines.length; dl++) {
+                var dline = displayLines[dl];
+                var displays = dline.displays;
+                for (var d = 0; d < displays.length; d++) {
+                    var display = displays[d];
+                    text += display.text;
+                    htmlText += display.htmlText;
+                }
+            }
+            htmlText += line.endHtmlText;
+        }
+        p[0] = text;
+        p[1] = htmlText;
     }
 
-    $decodeTextDisplay(line, text, font, htmlText) {
+    $decodeTextDisplay(line, text, font, htmlText, htmlStart) {
         var p = this.$RichText;
         var item;
-        var txt;
+        //var txt;
         var displayLine = line.displayLines[line.displayLines.length - 1];
         if (p[12]) {
         } else {
-            txt = new flower.TextField(text);
-            txt.fontSize = font.size;
-            txt.fontColor = font.color;
             item = {
                 "type": 0,
                 "text": text,
                 "htmlText": htmlText,
+                "textStart": htmlStart,
                 "width": flower.$measureTextWidth(font.size, text),
                 "height": font.size,
                 "x": line.posX,
-                "display": txt,
+                "display": null,
                 "font": font
             };
             displayLine.displays.push(item);
@@ -679,7 +742,6 @@ class RichText extends Group {
                 var displays = displayLine.displays;
                 line.posX = 0;
                 for (var d = 0; d < displays.length; d++) {
-                    var item = displays[d];
                     if (item.type == 1 && item.loader == e.currentTarget) {
                         var bitmap = item.display;
                         bitmap.texture = e.data;
@@ -723,10 +785,16 @@ class RichText extends Group {
                         if (line.y >= y) {
                             //开始显示
                             for (var d = 0; d < displays.length; d++) {
-                                var display = displays[d];
-                                container.addChild(display.display);
-                                display.display.x = display.x + (display.type == 1 ? 1 : 0);
-                                display.display.y = line.y + displayLine.y + displayLine.height - display.height;
+                                var item = displays[d];
+                                if (item.type == 0 && !item.display) {
+                                    var txt = new flower.TextField(item.text);
+                                    txt.fontSize = item.font.size;
+                                    txt.fontColor = item.font.color;
+                                    item.display = txt;
+                                }
+                                container.addChild(item.display);
+                                item.display.x = item.x + (item.type == 1 ? 1 : 0);
+                                item.display.y = line.y + displayLine.y + displayLine.height - item.height;
                             }
                         }
                         if (line.y + displayLine.y + displayLine.height > y + this.height) {
@@ -744,10 +812,26 @@ class RichText extends Group {
         super.$onFrameEnd();
     }
 
-    set text(val) {
+    setText(val) {
         var p = this.$RichText;
         p[0] = val;
+        for (var i = 0; i < val.length; i++) {
+            var char = val.charAt(i);
+            if (char == " ") {
+                val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
+            } else if (char == "<") {
+                val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
+            } else if (char == ">") {
+                val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
+            } else if (char == "&") {
+                val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
+            }
+        }
         this.$setHtmlText(val, false);
+    }
+
+    set text(val) {
+        this.setText(val);
     }
 
     get text() {

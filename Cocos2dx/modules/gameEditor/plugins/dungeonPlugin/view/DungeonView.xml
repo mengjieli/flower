@@ -24,7 +24,7 @@
                 </f:Group>
                 <f:Group percentHeight="100">
                     <f:Label text="背景:" verticalCenter="0" x="5"/>
-                    <s:ComboBox id="backgroundComboBox" width="120" verticalCenter="0" x="40"/>
+                    <s:ComboBox id="backgroundComboBox" width="150" verticalCenter="0" x="40"/>
                 </f:Group>
             </f:Group>
         </f:Group>

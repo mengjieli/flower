@@ -1,4 +1,5 @@
 <f:ComboBox width="100" class="ComboBox" xmlns:f="flower" xmlns:s="./../module.json">
+    <f:script src="./ComboBox.script"/>
     <f:Group percentWidth="100">
         <f:Rect percentWidth="100" percentHeight="100" fillColor="0xffffff"/>
         <f:Label id="label" left="0" right="-30" verticalCenter="0"/>

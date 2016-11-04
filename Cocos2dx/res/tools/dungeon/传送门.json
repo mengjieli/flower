@@ -65,7 +65,7 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 225,
+      "x": 850,
       "y": 570,
       "__className": "dg.AddAnimationEffect"
      }
@@ -126,7 +126,7 @@
     "armyType": 0,
     "points": [
      {
-      "x": 2,
+      "x": 9,
       "y": 9
      }
     ],
@@ -174,7 +174,7 @@
      }
     }
    ],
-   "openFlag": false
+   "openFlag": true
   },
   {
    "itemId": 14,
@@ -201,7 +201,7 @@
      "type": 15,
      "invalid": true,
      "effectValue": {
-      "x": 2,
+      "x": 9,
       "y": 9,
       "__className": "dg.TransformEffect"
      }
@@ -226,7 +226,7 @@
      "invalid": true,
      "effectValue": {
       "coord": {
-       "x": 230,
+       "x": 850,
        "y": 530
       },
       "time": 500,
@@ -235,7 +235,7 @@
      }
     }
    ],
-   "openFlag": false
+   "openFlag": true
   },
   {
    "itemId": 19,
@@ -309,7 +309,7 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 225,
+      "x": 850,
       "y": 570,
       "__className": "dg.AddAnimationEffect"
      }
@@ -400,7 +400,7 @@
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": false,
+  "showGrid": true,
   "bornX": 0,
   "bornY": 9,
   "myHp": 5000,
