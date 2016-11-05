@@ -2848,9 +2848,10 @@ var $root = eval("this");
                 1: "", //htmlText
                 2: false, //isInputting
                 3: [], //lines
-                4: 0, //posY
+                4: 0, //inputLength
                 5: "", //lastHtmlText
                 8: "", //lastInputText
+                9: false, //inputChange
                 10: 0, //fontColor
                 11: 12, //fontSize
                 12: false, //wordWrap 是否自动换行
@@ -2861,11 +2862,9 @@ var $root = eval("this");
                 34: 0, //0.不需要刷新  1.表示某一行改变  2.表示显示内容上下移动  3.全部刷新
                 35: 0, //0.无 1.改变的行数 2.旧的显示位置y 3.无
                 36: 0, //input time
-                37: null, //input line
-                38: null, //input display
-                39: null, //input displayLine
-                40: null };
-            //input htmlIndex
+                41: -1, //caretIndex
+                42: -1 };
+            //htmlInputPos
             _this13.addChild(_this13.$RichText[29]);
             _this13.addChild(_this13.$RichText[33]);
             _this13.focusEnabled = true;
@@ -2970,6 +2969,10 @@ var $root = eval("this");
                     }
                 }
                 if (!find) {
+                    if (!lines.length) {
+                        p[41] = p[42] = 0;
+                        return;
+                    }
                     var line = lines[lines.length - 1];
                     var dline = line.displayLines[line.displayLines.length - 1];
                     var display = dline.displays[dline.displays.length - 1];
@@ -3039,10 +3042,6 @@ var $root = eval("this");
                         focus.x += lastWidth;
                     }
                 }
-                p[37] = inputLine;
-                p[38] = inputDLine;
-                p[39] = inputDisplay;
-                p[40] = inputIndex;
                 var inputTextPos = 0;
                 var inputHtmlTextPos = 0;
                 var find = false;
@@ -3073,10 +3072,11 @@ var $root = eval("this");
                     if (find) {
                         break;
                     }
+                    inputTextPos++;
                     inputHtmlTextPos += line.endHtmlText.length;
                 }
                 inputTextPos += inputIndex;
-                inputHtmlTextPos += inputDisplay.textStart + inputIndex;
+                inputHtmlTextPos += inputDisplay.textStart + this.__changeText(inputDisplay.text.slice(0, inputIndex)).length;
                 p[41] = inputTextPos;
                 p[42] = inputHtmlTextPos;
             }
@@ -3086,12 +3086,10 @@ var $root = eval("this");
         }, {
             key: "__inputText",
             value: function __inputText(text) {
-                text = this.__changeText(text);
                 var p = this.$RichText;
-                var txt = p[39];
-                this.htmlText = p[1].slice(0, p[42]) + text + p[1].slice(p[42], p[1].length);
+                this.htmlText = p[1].slice(0, p[42]) + this.__changeText(text) + p[1].slice(p[42], p[1].length);
                 p[41] += text.length;
-                p[42] += text.length;
+                p[42] += this.__changeText(text).length;
             }
         }, {
             key: "__showFocus",
@@ -3148,15 +3146,69 @@ var $root = eval("this");
                         this.__input.$setNativeText("");
                     }
                 }
+                p[8] = str;
             }
         }, {
             key: "__onKeyDown",
             value: function __onKeyDown(e) {
+                var p = this.$RichText;
                 if (e.keyCode == 229) {
-                    if (!this.$RichText[31]) {
-                        this.$RichText[31] = true;
-                        this.$RichText[30] = "";
+                    if (!p[31]) {
+                        p[31] = true;
+                        p[30] = "";
+                    } else {
+                        if (p[8] == this.__input.$getNativeText()) {
+                            this.__inputText(p[8]);
+                            this.__input.$setNativeText("");
+                            this.$RichText[7] = false;
+                            p[31] = false;
+                            p[30] == "";
+                        }
                     }
+                } else if (e.keyCode == 13) {
+                    this.__inputText("\n");
+                } else if (e.keyCode == 37 || e.keyCode == 39) {
+                    if (e.keyCode == 37 && p[41] == 0 || e.keyCode == 39 && p[41] == p[4]) {
+                        return;
+                    }
+                    if (e.keyCode == 37) {
+                        p[41]--;
+                    } else if (e.keyCode == 39) {
+                        p[41]++;
+                    }
+                    var pos = p[41];
+                    var find = false;
+                    var lines = p[3];
+                    var htmlIndex = 0;
+                    for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i];
+                        if (pos >= line.inputPos && pos - line.inputPos < line.inputLength) {
+                            pos -= line.inputPos;
+                            var displayLines = line.displayLines;
+                            for (var dl = 0; dl < displayLines.length; dl++) {
+                                var dline = displayLines[dl];
+                                var displays = dline.displays;
+                                for (var d = 0; d < displays.length; d++) {
+                                    var item = displays[d];
+                                    if (pos >= item.inputPos && pos - item.inputPos < item.inputLength) {
+                                        htmlIndex += item.textStart + this.__changeText(item.text.slice(0, pos - item.inputPos)).length;
+                                        find = true;
+                                        break;
+                                    } else {
+                                        htmlIndex += item.htmlText.length;
+                                    }
+                                }
+                                if (find) {
+                                    break;
+                                }
+                            }
+                            break;
+                        } else {
+                            htmlIndex += line.htmlText.length + line.endHtmlText.length;
+                        }
+                    }
+                    p[42] = htmlIndex;
+                    p[9] = true;
                 }
             }
         }, {
@@ -3167,7 +3219,11 @@ var $root = eval("this");
                 if (p[5] == text) {
                     return;
                 }
+                if (p[2]) {
+                    p[9] = true;
+                }
                 p[5] = text;
+                p[4] = 0;
                 var lines = p[3];
                 lines.length = 0;
                 var line = {
@@ -3176,6 +3232,8 @@ var $root = eval("this");
                     "text": "",
                     "htmlText": "",
                     "endHtmlText": "",
+                    "inputPos": 0,
+                    "inputLength": 0,
                     "width": 0,
                     "height": 0,
                     "x": 0,
@@ -3189,7 +3247,8 @@ var $root = eval("this");
                         "displays": []
                     }],
                     "displays": [],
-                    "posX": 0
+                    "posX": 0,
+                    "currentPos": 0
                 };
                 var signs = [];
                 var last = -1;
@@ -3205,6 +3264,7 @@ var $root = eval("this");
                     sizes: [p[11]],
                     under: 0 //下划线
                 };
+                var inputPos = 0;
                 var lineHtml = "";
                 var elementHtml = "";
                 var signHtml = "";
@@ -3388,7 +3448,7 @@ var $root = eval("this");
                         }
                         if (elementHtml.length) {
                             //分析之前的文字
-                            this.$decodeTextDisplay(line, textContent, oldFont, elementHtml, lastTextStart - lastHtmlTextStart);
+                            inputPos += this.$decodeTextDisplay(line, textContent, oldFont, elementHtml, lastTextStart - lastHtmlTextStart);
                         }
                         lastTextStart = -1;
                         lastHtmlTextStart = nextHtmlTextStart;
@@ -3401,14 +3461,23 @@ var $root = eval("this");
                             this.$decodeTextDisplay(line, "", oldFont, "", 0);
                             line.htmlText = lineHtml;
                             lineHtml = "";
+                            if (i == text.length - 1 && !newLine) {
+                                line.inputLength++;
+                            }
+                            p[4] += line.inputLength;
                         }
                         if (newLine) {
+                            line.inputLength++;
+                            inputPos++;
+                            p[4] += line.inputLength;
                             line = {
                                 "index": line.index + line.lineCount,
                                 "lineCount": 1,
                                 "text": "",
                                 "htmlText": "",
                                 "endHtmlText": "",
+                                "inputPos": inputPos,
+                                "inputLength": 0,
                                 "x": 0,
                                 "y": line.y + line.height,
                                 "width": 0,
@@ -3421,13 +3490,19 @@ var $root = eval("this");
                                     "y": 0,
                                     "displays": []
                                 }],
-                                "posX": 0
+                                "posX": 0,
+                                "currentPos": 0
                             };
+                            if (i == text.length - 1) {
+                                line.inputLength = 1;
+                                this.$decodeTextDisplay(line, "", oldFont, "", 0);
+                                lines.push(line);
+                            }
                         }
                     }
                     if (addSingle) {
                         if (addSingle.name == "img") {
-                            this.$addImage(line, addSingle.attributes, oldFont, elementHtml);
+                            inputPos += this.$addImage(line, addSingle.attributes, oldFont, elementHtml);
                             elementHtml = "";
                         }
                         lastHtmlTextStart = nextHtmlTextStart;
@@ -3457,6 +3532,7 @@ var $root = eval("this");
         }, {
             key: "$decodeTextDisplay",
             value: function $decodeTextDisplay(line, text, font, htmlText, htmlStart) {
+                text = this.__changeRealText(text);
                 var p = this.$RichText;
                 var item;
                 //var txt;
@@ -3467,6 +3543,8 @@ var $root = eval("this");
                         "text": text,
                         "htmlText": htmlText,
                         "textStart": htmlStart,
+                        "inputPos": line.currentPos,
+                        "inputLength": text.length,
                         "width": flower.$measureTextWidth(font.size, text),
                         "height": font.size,
                         "x": line.posX,
@@ -3480,7 +3558,11 @@ var $root = eval("this");
                     line.height = line.height > displayLine.y + displayLine.height ? line.height : displayLine.y + displayLine.height;
                     line.posX += item.width;
                     line.text += item.text;
+                    line.htmlText += item.htmlText;
+                    line.currentPos += item.text.length;
                 }
+                line.inputLength += text.length;
+                return text.length;
             }
         }, {
             key: "$addImage",
@@ -3509,6 +3591,8 @@ var $root = eval("this");
                     "htmlText": htmlText,
                     "width": 0,
                     "height": 0,
+                    "inputPos": line.currentPos,
+                    "inputLength": 1,
                     "x": line.posX,
                     "display": bitmap,
                     "loader": loader,
@@ -3520,7 +3604,11 @@ var $root = eval("this");
                 line.width = line.width > displayLine.width ? line.width : displayLine.width;
                 line.height = line.height > displayLine.y + displayLine.height ? line.height : displayLine.y + displayLine.height;
                 line.posX += item.width;
-                this.text += item.text;
+                line.text += item.text;
+                line.htmlText += item.htmlText;
+                line.currentPos++;
+                line.inputLength++;
+                return 1;
             }
         }, {
             key: "$loadImageComplete",
@@ -3565,7 +3653,7 @@ var $root = eval("this");
             value: function $onFrameEnd() {
                 var p = this.$RichText;
                 if (p[34]) {
-                    var y = p[4];
+                    var y = 0;
                     var lines = p[3];
                     var container = p[29];
                     var flag = false;
@@ -3604,6 +3692,47 @@ var $root = eval("this");
                     }
                     p[34] = 0;
                 }
+                if (p[9]) {
+                    p[9] = false;
+                    var y = 0;
+                    var lines = p[3];
+                    var flag = false;
+                    var findInputPos = false;
+                    for (var l = 0; l < lines.length; l++) {
+                        var line = lines[l];
+                        if (p[41] >= line.inputPos && p[41] - line.inputPos < line.inputLength) {
+                            var displayLines = line.displayLines;
+                            for (var dl = 0; dl < displayLines.length; dl++) {
+                                var displayLine = displayLines[dl];
+                                var displays = displayLine.displays;
+                                if (line.y >= y) {
+                                    //开始显示
+                                    for (var d = 0; d < displays.length; d++) {
+                                        var item = displays[d];
+                                        if (p[41] - line.inputPos - item.inputPos >= 0 && p[41] - line.inputPos - item.inputPos < item.inputLength) {
+                                            p[33].visible = true;
+                                            p[33].x = item.display.x + flower.$measureTextWidth(item.font.size, item.text.slice(0, p[41] - line.inputPos - item.inputPos));
+                                            p[33].y = line.y + displayLine.y;
+                                            findInputPos = true;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!findInputPos) {
+                                p[33].x = item.display.x + item.display.width;
+                                p[33].y = line.y + displayLine.y;
+                            }
+                            break;
+                        }
+                        if (findInputPos) {
+                            break;
+                        }
+                    }
+                    if (!findInputPos) {
+                        p[33].visible = false;
+                    }
+                }
                 _get(Object.getPrototypeOf(RichText.prototype), "$onFrameEnd", this).call(this);
             }
         }, {
@@ -3627,6 +3756,22 @@ var $root = eval("this");
                         val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
                     } else if (char == "&") {
                         val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
+                    }
+                }
+                return val;
+            }
+        }, {
+            key: "__changeRealText",
+            value: function __changeRealText(val) {
+                for (var i = 0; i < val.length; i++) {
+                    if (val.slice(i, i + 5) == "&amp;") {
+                        val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
+                    } else if (val.slice(i, i + 6) == "&nbsp;") {
+                        val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
+                    } else if (val.slice(i, i + 4) == "&lt;") {
+                        val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
+                    } else if (val.slice(i, i + 4) == "&gt;") {
+                        val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
                     }
                 }
                 return val;

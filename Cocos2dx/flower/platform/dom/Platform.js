@@ -36,10 +36,14 @@ class Platform {
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
         document.body.onkeydown = function (e) {
-            engine.$onKeyDown(e.which);
+            setTimeout(function(){
+                engine.$onKeyDown(e.which);
+            },0);
         }
         document.body.onkeyup = function (e) {
-            engine.$onKeyUp(e.which);
+            setTimeout(function(){
+                engine.$onKeyUp(e.which);
+            },0);
         }
         div.appendChild(engine.$background.$nativeShow.show);
         div.appendChild(root.show);

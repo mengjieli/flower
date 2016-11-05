@@ -21,6 +21,11 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+        text = flower.StringDo.replaceString(text, "\n", "</br>");
+        text = flower.StringDo.replaceString(text, "\r", "</br>");
+        text = flower.StringDo.replaceString(text, " ", "&nbsp;");
+        text = flower.StringDo.replaceString(text, "<", "&lt;");
+        text = flower.StringDo.replaceString(text, ">", "&gt;");
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.style.fontSize = size + "px";
         var txt = this.show;
@@ -68,11 +73,6 @@ class PlatformTextField extends PlatformDisplayObject {
                 }
             }
         }
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML," ","&nbsp;");
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"<","&lt;");
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,">","&gt;");
 
         $mesureTxt.innerHTML = txt.innerHTML;
         txt.style.width = $mesureTxt.offsetWidth + "px";
@@ -142,9 +142,9 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     static measureTextWidth(size, text) {
-        text = flower.StringDo.replaceString(text," ","&nbsp;");
-        text = flower.StringDo.replaceString(text,"<","&lt;");
-        text= flower.StringDo.replaceString(text,">","&gt;");
+        text = flower.StringDo.replaceString(text, " ", "&nbsp;");
+        text = flower.StringDo.replaceString(text, "<", "&lt;");
+        text = flower.StringDo.replaceString(text, ">", "&gt;");
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.style.fontSize = size + "px";
         $mesureTxt.innerHTML = text;

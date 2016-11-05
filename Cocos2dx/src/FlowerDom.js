@@ -231,10 +231,14 @@ var flower = {};
                 mask.style.height = document.documentElement.clientHeight + "px";
                 document.body.appendChild(mask);
                 document.body.onkeydown = function (e) {
-                    engine.$onKeyDown(e.which);
+                    setTimeout(function () {
+                        engine.$onKeyDown(e.which);
+                    }, 0);
                 };
                 document.body.onkeyup = function (e) {
-                    engine.$onKeyUp(e.which);
+                    setTimeout(function () {
+                        engine.$onKeyUp(e.which);
+                    }, 0);
                 };
                 div.appendChild(engine.$background.$nativeShow.show);
                 div.appendChild(root.show);
@@ -771,6 +775,11 @@ var flower = {};
         }, {
             key: "changeText",
             value: function changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+                text = flower.StringDo.replaceString(text, "\n", "</br>");
+                text = flower.StringDo.replaceString(text, "\r", "</br>");
+                text = flower.StringDo.replaceString(text, " ", "&nbsp;");
+                text = flower.StringDo.replaceString(text, "<", "&lt;");
+                text = flower.StringDo.replaceString(text, ">", "&gt;");
                 var $mesureTxt = PlatformTextField.$mesureTxt;
                 $mesureTxt.style.fontSize = size + "px";
                 var txt = this.show;
@@ -818,11 +827,6 @@ var flower = {};
                         }
                     }
                 }
-                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\n", "</br>");
-                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "\r", "</br>");
-                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, " ", "&nbsp;");
-                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, "<", "&lt;");
-                txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML, ">", "&gt;");
 
                 $mesureTxt.innerHTML = txt.innerHTML;
                 txt.style.width = $mesureTxt.offsetWidth + "px";
