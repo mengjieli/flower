@@ -3001,6 +3001,7 @@ var $root = eval("this");
                             }
                         }
                         if (displayBefore) {
+                            inputIndex = 0;
                             fontBefore = displayBefore.font;
                         } else {
                             var font = fontDisplay;
@@ -3020,6 +3021,7 @@ var $root = eval("this");
                         }
                     } else {
                         focus.x += display.width;
+                        inputIndex = 1;
                     }
                 } else {
                     var text = display.text;
@@ -3079,6 +3081,7 @@ var $root = eval("this");
                 inputHtmlTextPos += inputDisplay.textStart + this.__changeText(inputDisplay.text.slice(0, inputIndex)).length;
                 p[41] = inputTextPos;
                 p[42] = inputHtmlTextPos;
+                console.log(p[41], p[42]);
             }
 
             //输入字符
