@@ -85,9 +85,9 @@ var Main = function () {
             richText.height = 400;
             richText.fontColor = 0x00ff00;
             richText.fontSize = 16;
-            richText.text = "1"
+            //richText.text = "什么情况"
             //richText.text = "我 说 <font size='12'>是</font>什     么";
-            //richText.htmlText = '我时间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>1227';
+            richText.htmlText = '我<img src="res/closeDown.png"/>时间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>1227';
             flower.Stage.getInstance().addChild(richText);
 
             //console.log(flower.StringDo.split("aaawqqw\rb21oiop21\ncsa,las;<br/>dsasa;asl;", ["\r", "\n", "<br/>"]));

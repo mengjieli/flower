@@ -44,6 +44,12 @@ var ExportCSVModel = (function () {
                 content += "";
             } else if (trigger.startCondition == 6) { //全队灭亡
                 content += "[" + start.type + "]";
+            } else if (trigger.startCondition == 7) { //全队灭亡
+                content += "[";
+                for (var t = 0; t < trigger.startValue.tags.length; t++) {
+                    content += trigger.startValue.tags[t] + (t < trigger.startValue.tags.length - 1 ? "," : "");
+                }
+                content += "]";
             }
             content += "\",";
             var type = "\"[";
@@ -69,7 +75,7 @@ var ExportCSVModel = (function () {
                 } else if (effect.type == 3) { //buff
                     param += "[]"
                 } else if (effect.type == 4) { //开关触发器
-                    param += "[" + val.triggerId + "]";
+                    param += "[" + val.triggerId + "," + (val.operate == 0 ? 1 : 0) + "]";
                 } else if (effect.type == 5) { //副本通关
                     param += "[" + 0 + "]";
                 } else if (effect.type == 6) { //通关失败
@@ -83,7 +89,7 @@ var ExportCSVModel = (function () {
                 } else if (effect.type == 11) { //剧情对话 [3000,0,0,0,0,500001]
                     param += "[" + val.dialogId + "," + val.param1 + "," + val.param2 + "," + val.param3 + "," + val.param4 + "," + val.triggerId + "]";
                 } else if (effect.type == 12) { //增加动画 [url,tag,type,layer,[x,y]]
-                    param += "['" + val.url + "'," + val.tag + "," + val.type + "," + val.layer + "," + val.ease + "," + val.easeTime + ",[" + val.x + "," + val.y + "]]";
+                    param += "[\"\"" + val.url + "\"\"," + val.tag + "," + val.type + "," + val.layer + "," + val.ease + "," + val.easeTime + ",[" + val.x + "," + val.y + "]]";
                 } else if (effect.type == 13) { //删除动画 [tag]
                     param += "[" + val.tag + "," + val.ease + "," + val.easeTime + "]";
                 } else if (effect.type == 14) { //范围伤害 [[x,y],id]
