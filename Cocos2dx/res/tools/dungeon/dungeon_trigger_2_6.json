@@ -1,0 +1,106 @@
+{
+ "itemId": 8,
+ "screenWidth": 1200,
+ "screenHeight": 700,
+ "triggers": [
+  {
+   "itemId": 2,
+   "name": "触发器2",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 3,
+     "name": "镜头锁定1",
+     "delay": 0,
+     "type": 10,
+     "invalid": true,
+     "effectValue": {
+      "rect": {
+       "x": 0,
+       "y": 0,
+       "width": 2700,
+       "height": 1800
+      },
+      "__className": "dg.CameraRangeEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 4,
+   "name": "触发器4",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 5,
+     "name": "怪物刷新",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+       {
+        "id": 3307102,
+        "tag": 1,
+        "bornCoord": {
+         "x": 13,
+         "y": 10
+        },
+        "moveCoord": {
+         "x": 13,
+         "y": 10
+        },
+        "ai": 0
+       }
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 7,
+   "name": "触发器7",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 8,
+     "name": "效果8",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 2,
+      "__className": "dg.StartTriggerEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/map_0_13.png",
+  "showGrid": true,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

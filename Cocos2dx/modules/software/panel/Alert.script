@@ -46,10 +46,16 @@ function closePanel() {
 
 function onSure() {
     this.closePanel();
+    if(this.params.sureCall) {
+        this.params.sureCall.apply(this.params.sureThis,this.params.sureParams);
+    }
 }
 
 function onCancel() {
     this.closePanel();
+    if(this.params.cancelCall) {
+        this.params.cancelCall.apply(this.params.cancelThis,this.params.cancelParams);
+    }
 }
 
 function onCloseComplete() {
@@ -60,8 +66,9 @@ function set content(val) {
     this.contentLabel.text = val;
 }
 
-static function show(content) {
+static function show(content,params) {
     var alert = new Alert();
     alert.content = content;
+    alert.params = params||{};
     flower.PopManager.pop(alert,true);
 }

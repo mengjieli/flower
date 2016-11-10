@@ -52,6 +52,22 @@
       "desc": "剧情对话",
       "type": "int"
     },
+    "dialogParam1": {
+      "desc": "剧情对话参数1",
+      "type": "int"
+    },
+    "dialogParam2": {
+      "desc": "剧情对话参数2",
+      "type": "int"
+    },
+    "dialogParam3": {
+      "desc": "剧情对话参数3",
+      "type": "int"
+    },
+    "dialogParam4": {
+      "desc": "剧情对话参数4",
+      "type": "int"
+    },
     "animations": {
       "desc": "动画列表",
       "type": "Array",

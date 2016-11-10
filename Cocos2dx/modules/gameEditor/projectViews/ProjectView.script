@@ -189,6 +189,9 @@ function addDirection(path, pluginName, name) {
 
 function addFile(path, pluginName) {
     var direction = this.tree.data.direction;
+    if(direction.getItemWith("path",path)) {
+        return;
+    }
     direction.push(this.createFile(path, pluginName));
     this.plugins[pluginName].list.push(path);
     this.saveDirection();

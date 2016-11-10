@@ -1,6 +1,6 @@
 {
- "itemId": 34,
- "screenWidth": 480,
+ "itemId": 74,
+ "screenWidth": 400,
  "screenHeight": 600,
  "triggers": [
   {
@@ -8,6 +8,7 @@
    "name": "启动触发器",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 0,
    "startValue": null,
@@ -16,16 +17,16 @@
      "itemId": 3,
      "name": "初始化镜头",
      "delay": 0,
-     "type": 9,
+     "type": 10,
      "invalid": true,
      "effectValue": {
-      "coord": {
+      "rect": {
        "x": 0,
-       "y": 500
+       "y": 0,
+       "width": 2500,
+       "height": 1470
       },
-      "time": 0,
-      "pos": 2,
-      "__className": "dg.CameraMoveEffect"
+      "__className": "dg.CameraRangeEffect"
      }
     },
     {
@@ -39,6 +40,34 @@
       "triggerId": 4,
       "__className": "dg.StartTriggerEffect"
      }
+    },
+    {
+     "itemId": 41,
+     "name": "镜头移动",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 690,
+       "y": 0
+      },
+      "time": 0,
+      "pos": 8,
+      "__className": "dg.CameraMoveEffect"
+     }
+    },
+    {
+     "itemId": 74,
+     "name": "开启传送门2",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 44,
+      "__className": "dg.StartTriggerEffect"
+     }
     }
    ],
    "openFlag": true
@@ -48,6 +77,7 @@
    "name": "开启传送门",
    "count": 10000,
    "open": false,
+   "status": 0,
    "startCondition": 5,
    "delay": 0,
    "startValue": null,
@@ -59,14 +89,14 @@
      "type": 12,
      "invalid": true,
      "effectValue": {
-      "url": "tree1",
+      "url": "portal",
       "tag": 101,
       "type": 1,
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 850,
-      "y": 570,
+      "x": 540,
+      "y": 351,
       "__className": "dg.AddAnimationEffect"
      }
     },
@@ -77,20 +107,20 @@
      "type": 12,
      "invalid": true,
      "effectValue": {
-      "url": "tree1",
+      "url": "portal",
       "tag": 102,
       "type": 1,
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 406,
-      "y": 570,
+      "x": 2025,
+      "y": 409,
       "__className": "dg.AddAnimationEffect"
      }
     },
     {
      "itemId": 13,
-     "name": "启动传送门1效果",
+     "name": "开启传送门1",
      "delay": 0,
      "type": 4,
      "invalid": true,
@@ -102,7 +132,7 @@
     },
     {
      "itemId": 16,
-     "name": "开启传送门2效果",
+     "name": "开启传送门2",
      "delay": 0,
      "type": 4,
      "invalid": true,
@@ -111,23 +141,60 @@
       "triggerId": 14,
       "__className": "dg.StartTriggerEffect"
      }
+    },
+    {
+     "itemId": 35,
+     "name": "开启传送门1特效",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 1000,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 540,
+      "y": 351,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 36,
+     "name": "开启传送门2特效",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 1111,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 2025,
+      "y": 409,
+      "__className": "dg.AddAnimationEffect"
+     }
     }
    ],
-   "openFlag": true
+   "openFlag": false
   },
   {
    "itemId": 11,
    "name": "传送1->2",
    "count": 10000,
    "open": false,
+   "status": 0,
    "startCondition": 2,
-   "delay": 0,
+   "delay": 200,
    "startValue": {
     "armyType": 0,
     "points": [
      {
-      "x": 9,
-      "y": 9
+      "x": 6,
+      "y": 6
      }
     ],
     "__className": "dg.MoveCondition"
@@ -140,8 +207,8 @@
      "type": 15,
      "invalid": true,
      "effectValue": {
-      "x": 4,
-      "y": 9,
+      "x": 22,
+      "y": 7,
       "__className": "dg.TransformEffect"
      }
     },
@@ -158,37 +225,38 @@
      }
     },
     {
-     "itemId": 33,
-     "name": "镜头缓动",
+     "itemId": 42,
+     "name": "镜头移动",
      "delay": 0,
      "type": 9,
      "invalid": true,
      "effectValue": {
       "coord": {
-       "x": 400,
-       "y": 530
+       "x": 2025,
+       "y": 409
       },
-      "time": 500,
+      "time": 1000,
       "pos": 9,
       "__className": "dg.CameraMoveEffect"
      }
     }
    ],
-   "openFlag": true
+   "openFlag": false
   },
   {
    "itemId": 14,
    "name": "传送2->1",
    "count": 10000,
    "open": false,
+   "status": 0,
    "startCondition": 2,
-   "delay": 0,
+   "delay": 200,
    "startValue": {
     "armyType": 0,
     "points": [
      {
-      "x": 4,
-      "y": 9
+      "x": 22,
+      "y": 7
      }
     ],
     "__className": "dg.MoveCondition"
@@ -201,8 +269,8 @@
      "type": 15,
      "invalid": true,
      "effectValue": {
-      "x": 9,
-      "y": 9,
+      "x": 6,
+      "y": 6,
       "__className": "dg.TransformEffect"
      }
     },
@@ -219,29 +287,30 @@
      }
     },
     {
-     "itemId": 34,
-     "name": "镜头缓动",
+     "itemId": 43,
+     "name": "镜头移动",
      "delay": 0,
      "type": 9,
      "invalid": true,
      "effectValue": {
       "coord": {
-       "x": 850,
-       "y": 530
+       "x": 540,
+       "y": 468
       },
-      "time": 500,
+      "time": 1000,
       "pos": 9,
       "__className": "dg.CameraMoveEffect"
      }
     }
    ],
-   "openFlag": true
+   "openFlag": false
   },
   {
    "itemId": 19,
    "name": "关闭传送门",
    "count": 10000,
    "open": false,
+   "status": 0,
    "startCondition": 5,
    "delay": 0,
    "startValue": null,
@@ -303,14 +372,14 @@
      "type": 12,
      "invalid": true,
      "effectValue": {
-      "url": "tree2",
+      "url": "portal",
       "tag": 201,
       "type": 1,
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 850,
-      "y": 570,
+      "x": 540,
+      "y": 351,
       "__className": "dg.AddAnimationEffect"
      }
     },
@@ -321,14 +390,14 @@
      "type": 12,
      "invalid": true,
      "effectValue": {
-      "url": "tree2",
+      "url": "portal",
       "tag": 202,
       "type": 1,
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 406,
-      "y": 570,
+      "x": 2025,
+      "y": 409,
       "__className": "dg.AddAnimationEffect"
      }
     },
@@ -343,15 +412,42 @@
       "triggerId": 29,
       "__className": "dg.StartTriggerEffect"
      }
+    },
+    {
+     "itemId": 39,
+     "name": "删除传送门1特效",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 1000,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 40,
+     "name": "删除传送门2特效",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 1111,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
     }
    ],
-   "openFlag": true
+   "openFlag": false
   },
   {
    "itemId": 29,
    "name": "传送门冷却CD",
    "count": 10000,
    "open": false,
+   "status": 0,
    "startCondition": 5,
    "delay": 5000,
    "startValue": null,
@@ -395,14 +491,434 @@
      }
     }
    ],
-   "openFlag": true
+   "openFlag": false
+  },
+  {
+   "itemId": 44,
+   "name": "开启传送门",
+   "count": 10000,
+   "open": false,
+   "status": 0,
+   "startCondition": 5,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 45,
+     "name": "传送门3图片",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 10,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 1665,
+      "y": 643,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 46,
+     "name": "传送门4图片",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 11,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 720,
+      "y": 1170,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 47,
+     "name": "开启传送门3",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 51,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 48,
+     "name": "开启传送门4",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 55,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 49,
+     "name": "开启传送门3特效",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 1233,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 1665,
+      "y": 643,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 50,
+     "name": "开启传送门4特效",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 1234,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 720,
+      "y": 1170,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 51,
+   "name": "传送3->4",
+   "count": 10000,
+   "open": false,
+   "status": 0,
+   "startCondition": 2,
+   "delay": 0,
+   "startValue": {
+    "armyType": 0,
+    "points": [
+     {
+      "x": 18,
+      "y": 11
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+    {
+     "itemId": 52,
+     "name": "传送到门4",
+     "delay": 0,
+     "type": 15,
+     "invalid": true,
+     "effectValue": {
+      "x": 8,
+      "y": 20,
+      "__className": "dg.TransformEffect"
+     }
+    },
+    {
+     "itemId": 53,
+     "name": "关闭传送门",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 60,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 54,
+     "name": "镜头移动",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 720,
+       "y": 1170
+      },
+      "time": 1000,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 55,
+   "name": "传送4->3",
+   "count": 10000,
+   "open": false,
+   "status": 0,
+   "startCondition": 2,
+   "delay": 0,
+   "startValue": {
+    "armyType": 0,
+    "points": [
+     {
+      "x": 8,
+      "y": 20
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+    {
+     "itemId": 56,
+     "name": "传送到门3",
+     "delay": 0,
+     "type": 15,
+     "invalid": true,
+     "effectValue": {
+      "x": 18,
+      "y": 11,
+      "__className": "dg.TransformEffect"
+     }
+    },
+    {
+     "itemId": 57,
+     "name": "关闭传送门",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 60,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 58,
+     "name": "镜头移动",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 1665,
+       "y": 643
+      },
+      "time": 0,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 60,
+   "name": "关闭传送门",
+   "count": 10000,
+   "open": false,
+   "status": 0,
+   "startCondition": 5,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 61,
+     "name": "关闭传送门3效果",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 1,
+      "triggerId": 51,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 62,
+     "name": "关闭传送门4效果",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 1,
+      "triggerId": 55,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 63,
+     "name": "删除传送门3图片",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 10,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 64,
+     "name": "删除传搜们4图片",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 11,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 65,
+     "name": "传送门3冷去图片",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 1212,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 1665,
+      "y": 643,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 66,
+     "name": "传送门4冷去图片",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "portal",
+      "tag": 1213,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 720,
+      "y": 1170,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 67,
+     "name": "开启传送门冷却CD",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 70,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 68,
+     "name": "删除传送门3特效",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 1233,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 69,
+     "name": "删除传送门4特效",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 1234,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 70,
+   "name": "传送门冷却CD",
+   "count": 10000,
+   "open": false,
+   "status": 0,
+   "startCondition": 5,
+   "delay": 5000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 71,
+     "name": "删除传送门3冷去图片",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 1212,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 72,
+     "name": "删除传送门4冷去图片",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 1213,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 73,
+     "name": "开启传送门",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 44,
+      "__className": "dg.StartTriggerEffect"
+     }
+    }
+   ],
+   "openFlag": false
   }
  ],
  "settings": {
-  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": true,
-  "bornX": 0,
-  "bornY": 9,
+  "background": "res/tools/dungeon/background/dungeon_map_3_5.png",
+  "bornX": 8,
+  "bornY": 3,
   "myHp": 5000,
   "myAttack": 200,
   "monsterHp": 500,

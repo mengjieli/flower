@@ -309,6 +309,10 @@ class File {
         new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
     }
 
+    isExist( back, thisObj) {
+        new IsDirectionExistRemote(back, thisObj, this.__path);
+    }
+
     delete(back, thisObj) {
         new DeleteFileRemote(back, thisObj, this.__path);
     }

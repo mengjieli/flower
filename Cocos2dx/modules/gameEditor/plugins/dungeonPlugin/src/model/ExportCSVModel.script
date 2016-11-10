@@ -22,7 +22,7 @@ var ExportCSVModel = (function () {
     }
 
     ExportCSVModel.prototype.export = function (data) {
-        var content = "id,name,trigger_type,delay,condition,effect_type,effect_params,times,open\n";
+        var content = "id,name,trigger_type,delay,condition,effect_type,effect_params,times,open,status\n";
         var triggers = data.triggers;
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
@@ -43,7 +43,7 @@ var ExportCSVModel = (function () {
             } else if (trigger.startCondition == 5) { //触发器触发
                 content += "";
             } else if (trigger.startCondition == 6) { //全队灭亡
-                content += "[" + start.type + "]";
+                content += "[" + start.type + "," + start.count + "]";
             } else if (trigger.startCondition == 7) { //全队灭亡
                 content += "[";
                 for (var t = 0; t < trigger.startValue.tags.length; t++) {
@@ -134,7 +134,7 @@ var ExportCSVModel = (function () {
             type += "]\"";
             param += "]";
             content += type + "," + "\"" + param + "\"";
-            content += "," + trigger.count + "," + (trigger.open ? "1" : "0") + "\n";
+            content += "," + trigger.count + "," + (trigger.open ? "1" : "0") + "," + trigger.status + "\n";
         }
         if (window) {
             var url = "res/tools/dungeon/res/save/" + (new Date()).getTime() + ".txt";

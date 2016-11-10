@@ -1,5 +1,5 @@
 {
- "itemId": 52,
+ "itemId": 53,
  "screenWidth": 480,
  "screenHeight": 320,
  "triggers": [
@@ -45,7 +45,7 @@
    "effects": [
     {
      "itemId": 8,
-     "name": "效果80",
+     "name": "效果8",
      "delay": 0,
      "type": 6,
      "invalid": true,
@@ -227,9 +227,25 @@
      "type": 15,
      "invalid": true,
      "effectValue": {
-      "x": 4,
+      "x": 7,
       "y": 8,
       "__className": "dg.TransformEffect"
+     }
+    },
+    {
+     "itemId": 52,
+     "name": "传送镜头移动效果",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 630,
+       "y": 500
+      },
+      "time": 1000,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
      }
     }
    ],
@@ -311,7 +327,7 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 360,
+      "x": 630,
       "y": 500,
       "__className": "dg.AddAnimationEffect"
      }
@@ -329,7 +345,7 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 360,
+      "x": 630,
       "y": 500,
       "__className": "dg.AddAnimationEffect"
      }
@@ -359,7 +375,7 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 360,
+      "x": 630,
       "y": 500,
       "__className": "dg.AddAnimationEffect"
      }
@@ -378,7 +394,7 @@
     "armyType": 0,
     "points": [
      {
-      "x": 4,
+      "x": 7,
       "y": 8
      }
     ],
@@ -420,9 +436,25 @@
       "triggerId": 50,
       "__className": "dg.StartTriggerEffect"
      }
+    },
+    {
+     "itemId": 53,
+     "name": "传送镜头移动效果",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 180,
+       "y": 500
+      },
+      "time": 1000,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
     }
    ],
-   "openFlag": false
+   "openFlag": true
   },
   {
    "itemId": 50,
@@ -444,30 +476,14 @@
       "triggerId": 46,
       "__className": "dg.StartTriggerEffect"
      }
-    },
-    {
-     "itemId": 52,
-     "name": "效果52",
-     "delay": 0,
-     "type": 11,
-     "invalid": true,
-     "effectValue": {
-      "dialogId": 5,
-      "param1": 0,
-      "param2": 0,
-      "param3": 0,
-      "param4": 0,
-      "triggerId": 0,
-      "__className": "dg.DialogEffect"
-     }
     }
    ],
-   "openFlag": false
+   "openFlag": true
   }
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": false,
+  "showGrid": true,
   "bornX": 0,
   "bornY": 9,
   "myHp": 5000,

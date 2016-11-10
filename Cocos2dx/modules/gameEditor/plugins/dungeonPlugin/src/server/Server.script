@@ -44,6 +44,7 @@ var Server = (function () {
     Server.prototype.start = function () {
         this.stop(true);
         this.time = 0;
+        this.dialogs = [];
         this.hasInit = true;
         var triggers = this.data.triggers;
         for (var i = 0; i < triggers.length; i++) {
@@ -69,6 +70,8 @@ var Server = (function () {
         this.gameStartFlag = false;
         this.sendAllTask();
         this.dieCount = 0;
+        this.armyDieCount = 0;
+        this.monsterDieCount = 0;
 
 
         this.gameStart();
@@ -80,6 +83,7 @@ var Server = (function () {
     }
 
     Server.prototype.stop = function (notSetPlaying) {
+        this.dialogs = [];
         while (this.triggers.length) {
             this.triggers.pop().dispose();
         }
@@ -165,7 +169,7 @@ var Server = (function () {
         for (var i = 0; i < triggers.length; i++) {
             var trigger = triggers[i];
             if (trigger.executeTime.value < trigger.count.value && trigger.openFlag.value && !this.hasTrigger(trigger.itemId.value) && trigger.startCondition.value == 1) {
-                this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
+                this.addTrigger(trigger, this.data, this.callObject, this);
             }
         }
         for (var i = 0; i < this.triggers.length; i++) {
@@ -174,6 +178,13 @@ var Server = (function () {
                 i--;
             }
         }
+    }
+
+    Server.prototype.addTrigger = function (triggerData, dungeonData, callObject, triggerRunning, startRole) {
+        if (this.data.settings.first.value == 1 && triggerData.status.value == 2 || this.data.settings.first.value == 2 && triggerData.status.value == 1) {
+            return;
+        }
+        this.triggers.push(new Trigger(triggerData, dungeonData, callObject, triggerRunning, startRole));
     }
 
     Server.prototype.gameOver = function (flag) {
@@ -190,7 +201,7 @@ var Server = (function () {
                     if (trigger.openFlag.value && trigger.executeTime.value < trigger.count.value && (triggerValue.type.value == 0 && this.dieCount < triggerValue.param.value ||
                         triggerValue.type.value == 1 && this.time < triggerValue.param.value ||
                         triggerValue.type.value == 2)) {
-                        this.triggers.push(new Trigger(trigger, this.data, this.callObject, this));
+                        this.addTrigger(trigger, this.data, this.callObject, this);
                     }
                 }
             }
@@ -205,7 +216,7 @@ var Server = (function () {
             if (operate == 0) {
                 triggerData.openFlag.value = true;
                 if (triggerData.startCondition.value == 5 && triggerData.executeTime.value < triggerData.count.value) {
-                    this.triggers.push(new Trigger(triggerData, this.data, this.callObject, this));
+                    this.addTrigger(triggerData, this.data, this.callObject, this);
                 }
             } else {
                 triggerData.openFlag.value = false;
@@ -395,11 +406,21 @@ var Server = (function () {
     }
 
     Server.prototype.completeDialog = function (id) {
-        for (var i = 0; i < this.triggers.length; i++) {
-            if (this.triggers[i].checkDialog(id)) {
-                return;
+        for (var d = 0; d < this.dialogs.length; d++) {
+            var triggerData = this.dialogs[d];
+            for (var i = 0; i < triggerData.effects.length; i++) {
+                var effect = triggerData.effects[i];
+                if (effect.hasPlay.value && effect.type.value == 11 && effect.effectValue.dialogId.value == id) {
+                    this.runTrigger(0, effect.effectValue.triggerId.value);
+                    this.dialogs.splice(d, 1);
+                    return;
+                }
             }
         }
+    }
+
+    Server.prototype.addDialog = function (triggerData) {
+        this.dialogs.push(triggerData);
     }
 
 

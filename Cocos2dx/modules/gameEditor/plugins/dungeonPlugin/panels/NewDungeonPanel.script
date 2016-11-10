@@ -1,7 +1,7 @@
 function init() {
     var change = function (e) {
         this.path = flower.Path.joinPath(this.data.path, this.nameInput.text + ".json");
-        trace("???",this.data.path,this.path)
+        trace("???", this.data.path, this.path)
         this.pathLabel.text = "路径: " + this.path;
     };
     change.apply(this);
@@ -12,17 +12,30 @@ function onSure() {
     if (this.nameInput.text == "") {
         software.Alert.show("名称不能为空");
     } else {
-        this.closePanel();
-        var data = flower.DataManager.createData("dg.DungeonData");
-        var cfg = data.value;
-        saveFile(this.path, JSON.stringify(cfg), function (flag) {
-            if (flag) {
-                addFile(this.path, this.data.pluginName);
+        (new flower.File(this.path)).isExist(function (bool) {
+            if (bool) {
+                software.Alert.show("已有相同名称的文件存在，是否覆盖？", {
+                    sureCall: this.newFile,
+                    sureThis: this
+                });
             } else {
-                software.Alert.show("保存文件失败");
+                this.newFile();
             }
         }, this);
     }
+}
+
+function newFile() {
+    this.closePanel();
+    var data = flower.DataManager.createData("dg.DungeonData");
+    var cfg = data.value;
+    saveFile(this.path, JSON.stringify(cfg), function (flag) {
+        if (flag) {
+            addFile(this.path, this.data.pluginName);
+        } else {
+            software.Alert.show("保存文件失败");
+        }
+    }, this);
 }
 
 setNewFilePanel("Dungeon", NewDungeonPanel);

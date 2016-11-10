@@ -98,6 +98,22 @@ function addTriggerToDirection(trigger) {
                 this.moveDirectionDown(target);
                 this.data.parser.save();
             }.bind(this)
+        },
+        {
+            "label": "粘贴效果",
+            "isVisible": function () {
+                return module.copyInfo && module.copyInfo.type == "Effect" ? true : false;
+            },
+            "click": function (target) {
+                flower.breakPoint();
+                var effect = flower.DataManager.createData("dg.TriggerEffectData");
+                effect.value = module.copyInfo.value;
+                effect.itemId.value = this.data.parser.itemId;
+                var trigger = target.data;
+                trigger.effects.push(effect);
+                this.data.parser.save();
+                this.addEffectToDirection(trigger, effect);
+            }.bind(this)
         }
     ], trigger, trigger.color);
 }
@@ -139,6 +155,16 @@ function addEffectToDirection(trigger, effect) {
             "label": "屏蔽触发器",
             "click": function (target) {
                 target.data.effect.invalid = !target.data.effect.invalid.value;
+            }.bind(this)
+        },
+        {
+            "label": "复制",
+            "click": function (target) {
+                var effect = target.data.effect;
+                module.copyInfo = {
+                    "type": "Effect",
+                    "value": effect.value
+                }
             }.bind(this)
         }
     ], {trigger: trigger, effect: effect}, effect.color);
@@ -196,6 +222,7 @@ function setData(val) {
     }, this);
     this.backgroundComboBox.value = this.data.data.settings.background;
     this.showGridCheckBox.value = this.data.data.settings.showGrid;
+    this.firstComboBox.value = this.data.data.settings.first;
 }
 
 registerView("Dungeon", DungeonView);

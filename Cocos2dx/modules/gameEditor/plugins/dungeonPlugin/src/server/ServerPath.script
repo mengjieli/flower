@@ -52,7 +52,7 @@ var ServerPath = (function () {
             if (checkTranslate && trigger.executeTime.value < trigger.count.value && trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 2) {
                 var startValue = trigger.startValue;
                 if (roler.type == startValue.armyType.value && startValue.points.getItemWith("x", x, "y", y)) {
-                    this.server.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.server, roler));
+                    this.server.addTrigger(trigger, this.dungeonData, this.callObject, this.server, roler);
                 }
             }
         }

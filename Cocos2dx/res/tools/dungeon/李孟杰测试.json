@@ -1,0 +1,45 @@
+{
+ "itemId": 17,
+ "screenWidth": 480,
+ "screenHeight": 320,
+ "triggers": [
+  {
+   "itemId": 14,
+   "name": "触发器14",
+   "count": 1,
+   "open": true,
+   "status": 0,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 15,
+     "name": "效果15",
+     "delay": 0,
+     "type": 11,
+     "invalid": true,
+     "effectValue": {
+      "dialogId": 1000000,
+      "param1": 1001,
+      "param2": 0,
+      "param3": 0,
+      "param4": 0,
+      "triggerId": 0,
+      "__className": "dg.DialogEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

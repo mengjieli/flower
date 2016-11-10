@@ -211,7 +211,11 @@ var MapNet = (function () {
      * 开始剧情对话
      * @param id
      */
-    MapNet.prototype.startDialog = function (id) {
+    MapNet.prototype.startDialog = function (id, param1, param2, param3, param4) {
+        this.data.param1 = param1;
+        this.data.param2 = param2;
+        this.data.param3 = param3;
+        this.data.param4 = param4;
         this.data.dialog.value = id;
         this.data.dialog.value = 0;
     }

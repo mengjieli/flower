@@ -1,38 +1,74 @@
 {
- "itemId": 10,
- "screenWidth": 580,
- "screenHeight": 420,
+ "itemId": 37,
+ "screenWidth": 700,
+ "screenHeight": 480,
  "triggers": [
   {
-   "itemId": 2,
-   "name": "触发器2",
+   "itemId": 9,
+   "name": "初始镜头参数",
+   "count": 1,
+   "open": true,
    "startCondition": 1,
    "delay": 0,
    "startValue": null,
    "effects": [
     {
-     "itemId": 5,
-     "name": "效果5",
+     "itemId": 11,
+     "name": "锁定镜头参数",
      "delay": 0,
-     "type": 4,
+     "type": 10,
      "effectValue": {
-      "operate": 0,
-      "triggerId": 4,
-      "__className": "dg.StartTriggerEffect"
+      "rect": {
+       "x": 0,
+       "y": 0,
+       "width": 1025,
+       "height": 1870
+      },
+      "__className": "dg.CameraRangeEffect"
      }
     }
-   ]
+   ],
+   "openFlag": false
   },
   {
-   "itemId": 4,
-   "name": "触发器4",
-   "startCondition": 5,
+   "itemId": 12,
+   "name": "镜头相关",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
    "delay": 0,
    "startValue": null,
    "effects": [
     {
-     "itemId": 6,
-     "name": "效果6",
+     "itemId": 14,
+     "name": "3秒镜头移动",
+     "delay": 0,
+     "type": 9,
+     "effectValue": {
+      "coord": {
+       "x": 250,
+       "y": 250
+      },
+      "time": 3000,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 22,
+   "name": "剧情对话",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 3000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 23,
+     "name": "效果2",
      "delay": 0,
      "type": 11,
      "effectValue": {
@@ -41,22 +77,25 @@
       "param2": 0,
       "param3": 0,
       "param4": 0,
-      "triggerId": 9,
+      "triggerId": 24,
       "__className": "dg.DialogEffect"
      }
     }
-   ]
+   ],
+   "openFlag": false
   },
   {
-   "itemId": 9,
-   "name": "触发器9",
+   "itemId": 24,
+   "name": "剧情对话2",
+   "count": 1,
+   "open": true,
    "startCondition": 5,
    "delay": 0,
    "startValue": null,
    "effects": [
     {
-     "itemId": 10,
-     "name": "效果10",
+     "itemId": 25,
+     "name": "效果25",
      "delay": 0,
      "type": 11,
      "effectValue": {
@@ -65,18 +104,170 @@
       "param2": 0,
       "param3": 0,
       "param4": 0,
-      "triggerId": 0,
+      "triggerId": 2,
       "__className": "dg.DialogEffect"
      }
     }
-   ]
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 2,
+   "name": "刷怪",
+   "count": 1,
+   "open": true,
+   "startCondition": 5,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 10,
+     "name": "第一组怪物",
+     "delay": 0,
+     "type": 1,
+     "effectValue": {
+      "monsters": [
+       {
+        "id": 3305001,
+        "tag": 1,
+        "bornCoord": {
+         "x": 5,
+         "y": 5
+        },
+        "moveCoord": {
+         "x": 5,
+         "y": 5
+        },
+        "ai": 0
+       },
+       {
+        "id": 3305001,
+        "tag": 0,
+        "bornCoord": {
+         "x": 5,
+         "y": 6
+        },
+        "moveCoord": {
+         "x": 5,
+         "y": 6
+        },
+        "ai": 0
+       },
+       {
+        "id": 3305001,
+        "tag": 0,
+        "bornCoord": {
+         "x": 7,
+         "y": 6
+        },
+        "moveCoord": {
+         "x": 7,
+         "y": 6
+        },
+        "ai": 0
+       },
+       {
+        "id": 3305001,
+        "tag": 0,
+        "bornCoord": {
+         "x": 8,
+         "y": 6
+        },
+        "moveCoord": {
+         "x": 8,
+         "y": 6
+        },
+        "ai": 0
+       }
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    },
+    {
+     "itemId": 36,
+     "name": "正式开始",
+     "delay": 0,
+     "type": 4,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 35,
+      "__className": "dg.StartTriggerEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 35,
+   "name": "正式开始",
+   "count": 1,
+   "open": true,
+   "startCondition": 5,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 37,
+     "name": "玩家开始操作",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "__className": "dg.StartEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 26,
+   "name": "通关失败-我方部队",
+   "count": 1,
+   "open": true,
+   "startCondition": 6,
+   "delay": 0,
+   "startValue": {
+    "type": 0,
+    "__className": "dg.AllDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 27,
+     "name": "失败",
+     "delay": 0,
+     "type": 6,
+     "effectValue": null
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 28,
+   "name": "通关成功-敌方部队",
+   "count": 1,
+   "open": true,
+   "startCondition": 6,
+   "delay": 0,
+   "startValue": {
+    "type": 1,
+    "__className": "dg.AllDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 29,
+     "name": "成功",
+     "delay": 0,
+     "type": 5,
+     "effectValue": null
+    }
+   ],
+   "openFlag": false
   }
  ],
  "settings": {
-  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "background": "res/tools/dungeon/background/dungeon1_3.jpg",
   "showGrid": true,
-  "bornX": 1,
-  "bornY": 10,
+  "bornX": 3,
+  "bornY": 9,
   "myHp": 500,
   "myAttack": 200,
   "monsterHp": 500,

@@ -151,7 +151,10 @@ var ServerRole = (function () {
             this.hasDie = true;
             this.callObject.roleDie(this.id);
             if (this.type == 0) {
+                this.triggerRunning.armyDieCount++;
                 this.triggerRunning.dieCount++;
+            } else {
+                this.triggerRunning.monsterDieCount++;
             }
             this.serverPath.removeRoler(this, this.x, this.y);
             var triggers = this.dungeonData.triggers;
@@ -160,8 +163,8 @@ var ServerRole = (function () {
                 if (trigger.executeTime.value < trigger.count.value && trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 6) {
                     var startValue = trigger.startValue;
                     var type = startValue.type.value;
-                    if (this.triggerRunning.isAllDie(type)) {
-                        this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
+                    if (type == 0 && this.triggerRunning.armyDieCount >= startValue.count.value || type == 1 && this.triggerRunning.monsterDieCount >= startValue.count.value) {
+                        this.triggerRunning.addTrigger(trigger, this.dungeonData, this.callObject, this.triggerRunning);
                     }
                 }
                 if (trigger.executeTime.value < trigger.count.value && trigger.openFlag.value && !trigger.hasPlay.value && trigger.startCondition.value == 7) {
@@ -171,7 +174,7 @@ var ServerRole = (function () {
                         startValue.dieTags[index].value = true;
                     }
                     if (startValue.dieTags.getItemIndex(false) == -1) {
-                        this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
+                        this.triggerRunning.addTrigger(trigger, this.dungeonData, this.callObject, this.triggerRunning);
                     }
                 }
             }
@@ -196,7 +199,7 @@ var ServerRole = (function () {
                 }
                 if (flag) {
                     this.triggerRunning.hasTriggerMonsterNoShowWithTag(tag);
-                    this.triggerRunning.triggers.push(new Trigger(trigger, this.dungeonData, this.callObject, this.triggerRunning));
+                    this.triggerRunning.addTrigger(trigger, this.dungeonData, this.callObject, this.triggerRunning);
                 }
             }
         }
@@ -303,7 +306,7 @@ var ServerRole = (function () {
         this.x = x;
         this.y = y;
         this.callObject.transform(this.id, x, y);
-        this.serverPath.addRoler(this, this.x, this.y,false);
+        this.serverPath.addRoler(this, this.x, this.y, false);
     }
 
     /**

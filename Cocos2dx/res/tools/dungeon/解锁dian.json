@@ -1,11 +1,11 @@
 {
- "itemId": 16,
+ "itemId": 33,
  "screenWidth": 480,
  "screenHeight": 320,
  "triggers": [
   {
    "itemId": 2,
-   "name": "镜头",
+   "name": "开始刷新",
    "count": 1,
    "open": true,
    "startCondition": 1,
@@ -14,85 +14,26 @@
    "effects": [
     {
      "itemId": 3,
-     "name": "效果3",
+     "name": "锁定镜头",
      "delay": 0,
      "type": 10,
+     "invalid": true,
      "effectValue": {
       "rect": {
        "x": 0,
        "y": 0,
-       "width": 1000,
-       "height": 2700
+       "width": 2133,
+       "height": 1095
       },
       "__className": "dg.CameraRangeEffect"
      }
-    }
-   ],
-   "openFlag": true
-  },
-  {
-   "itemId": 4,
-   "name": "刷怪",
-   "count": 1,
-   "open": true,
-   "startCondition": 1,
-   "delay": 0,
-   "startValue": null,
-   "effects": [
+    },
     {
-     "itemId": 5,
-     "name": "效果5",
-     "delay": 0,
-     "type": 1,
-     "effectValue": {
-      "monsters": [
-       {
-        "id": 112,
-        "tag": 1,
-        "bornCoord": {
-         "x": 2,
-         "y": 8
-        },
-        "moveCoord": {
-         "x": 2,
-         "y": 8
-        },
-        "ai": 0
-       },
-       {
-        "id": 111,
-        "tag": 2,
-        "bornCoord": {
-         "x": 4,
-         "y": 8
-        },
-        "moveCoord": {
-         "x": 4,
-         "y": 8
-        },
-        "ai": 0
-       }
-      ],
-      "__className": "dg.FlushMonsterEffect"
-     }
-    }
-   ],
-   "openFlag": true
-  },
-  {
-   "itemId": 10,
-   "name": "1号解锁点",
-   "count": 1,
-   "open": true,
-   "startCondition": 1,
-   "delay": 0,
-   "startValue": null,
-   "effects": [
-    {
-     "itemId": 11,
-     "name": "添加图片1",
+     "itemId": 17,
+     "name": "1号解锁点",
      "delay": 0,
      "type": 12,
+     "invalid": true,
      "effectValue": {
       "url": "tree1",
       "tag": 1,
@@ -100,28 +41,17 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 180,
-      "y": 600,
+      "x": 225,
+      "y": 409,
       "__className": "dg.AddAnimationEffect"
      }
-    }
-   ],
-   "openFlag": true
-  },
-  {
-   "itemId": 12,
-   "name": "2号解锁点",
-   "count": 1,
-   "open": true,
-   "startCondition": 1,
-   "delay": 0,
-   "startValue": null,
-   "effects": [
+    },
     {
-     "itemId": 13,
-     "name": "添加图片2",
+     "itemId": 18,
+     "name": "2号解锁点",
      "delay": 0,
      "type": 12,
+     "invalid": true,
      "effectValue": {
       "url": "tree1",
       "tag": 2,
@@ -129,8 +59,42 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 360,
-      "y": 600,
+      "x": 1260,
+      "y": 936,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 23,
+     "name": "镜头移动",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 1707,
+       "y": 186
+      },
+      "time": 0,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
+    },
+    {
+     "itemId": 24,
+     "name": "通关点",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "tree1",
+      "tag": 10,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 1845,
+      "y": 760,
       "__className": "dg.AddAnimationEffect"
      }
     }
@@ -146,7 +110,9 @@
    "delay": 0,
    "startValue": {
     "tags": [
-     1
+     50,
+     51,
+     52
     ],
     "__className": "dg.MonsterDieCondition"
    },
@@ -156,6 +122,7 @@
      "name": "删除图片1",
      "delay": 0,
      "type": 13,
+     "invalid": true,
      "effectValue": {
       "tag": 1,
       "ease": 1,
@@ -168,6 +135,7 @@
      "name": "添加新图片1",
      "delay": 0,
      "type": 12,
+     "invalid": true,
      "effectValue": {
       "url": "tree2",
       "tag": 3,
@@ -175,20 +143,180 @@
       "layer": 1,
       "ease": 1,
       "easeTime": 500,
-      "x": 180,
-      "y": 600,
+      "x": 225,
+      "y": 409,
       "__className": "dg.AddAnimationEffect"
      }
     }
    ],
-   "openFlag": false
+   "openFlag": true
+  },
+  {
+   "itemId": 20,
+   "name": "消灭解锁点2怪物",
+   "count": 1,
+   "open": true,
+   "startCondition": 7,
+   "delay": 0,
+   "startValue": {
+    "tags": [
+     53,
+     54,
+     55
+    ],
+    "__className": "dg.MonsterDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 21,
+     "name": "删除图片2",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 2,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 22,
+     "name": "添加新图片2",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "tree2",
+      "tag": 4,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 1260,
+      "y": 936,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 25,
+   "name": "通关点",
+   "count": 1,
+   "open": true,
+   "startCondition": 7,
+   "delay": 0,
+   "startValue": {
+    "tags": [
+     50,
+     51,
+     52,
+     53,
+     54,
+     55
+    ],
+    "__className": "dg.MonsterDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 27,
+     "name": "开启通关",
+     "delay": 0,
+     "type": 4,
+     "invalid": true,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 30,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 28,
+     "name": "删除通关点1",
+     "delay": 0,
+     "type": 13,
+     "invalid": true,
+     "effectValue": {
+      "tag": 10,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    },
+    {
+     "itemId": 29,
+     "name": "添加新通关点",
+     "delay": 0,
+     "type": 12,
+     "invalid": true,
+     "effectValue": {
+      "url": "tree2",
+      "tag": 11,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 1845,
+      "y": 760,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 33,
+     "name": "镜头移动",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 1845,
+       "y": 760
+      },
+      "time": 1000,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 30,
+   "name": "移动触发通关",
+   "count": 1,
+   "open": false,
+   "startCondition": 2,
+   "delay": 0,
+   "startValue": {
+    "armyType": 0,
+    "points": [
+     {
+      "x": 20,
+      "y": 13
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+    {
+     "itemId": 31,
+     "name": "副本通关",
+     "delay": 0,
+     "type": 5,
+     "invalid": true,
+     "effectValue": null
+    }
+   ],
+   "openFlag": true
   }
  ],
  "settings": {
-  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "background": "res/tools/dungeon/background/dungeon_map_3_4.png",
   "showGrid": true,
-  "bornX": 0,
-  "bornY": 9,
+  "bornX": 20,
+  "bornY": 2,
   "myHp": 5000,
   "myAttack": 200,
   "monsterHp": 500,

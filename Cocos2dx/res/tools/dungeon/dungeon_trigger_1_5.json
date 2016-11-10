@@ -1,0 +1,152 @@
+{
+ "itemId": 6,
+ "screenWidth": 700,
+ "screenHeight": 500,
+ "triggers": [
+  {
+   "itemId": 2,
+   "name": "镜头锁定",
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 3,
+     "name": "镜头效果",
+     "delay": 0,
+     "type": 10,
+     "effectValue": {
+      "rect": {
+       "x": 0,
+       "y": 0,
+       "width": 2700,
+       "height": 1800
+      },
+      "__className": "dg.CameraRangeEffect"
+     }
+    }
+   ]
+  },
+  {
+   "itemId": 5,
+   "name": "刷新怪物",
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 6,
+     "name": "刷新怪物1",
+     "delay": 0,
+     "type": 1,
+     "effectValue": {
+      "monsters": [
+       {
+        "id": 3305202,
+        "tag": 1,
+        "bornCoord": {
+         "x": 4,
+         "y": 19
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "ai": 0
+       },
+       {
+        "id": 3307102,
+        "tag": 2,
+        "bornCoord": {
+         "x": 8,
+         "y": 15
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "ai": 0
+       },
+       {
+        "id": 3305202,
+        "tag": 3,
+        "bornCoord": {
+         "x": 13,
+         "y": 14
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "ai": 0
+       },
+       {
+        "id": 3307102,
+        "tag": 4,
+        "bornCoord": {
+         "x": 16,
+         "y": 19
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "ai": 0
+       },
+       {
+        "id": 3305202,
+        "tag": 5,
+        "bornCoord": {
+         "x": 21,
+         "y": 19
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "ai": 0
+       },
+       {
+        "id": 3305202,
+        "tag": 6,
+        "bornCoord": {
+         "x": 25,
+         "y": 14
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "ai": 0
+       },
+       {
+        "id": 3307102,
+        "tag": 7,
+        "bornCoord": {
+         "x": 28,
+         "y": 10
+        },
+        "moveCoord": {
+         "x": 0,
+         "y": 0
+        },
+        "ai": 0
+       }
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ]
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_5.jpg",
+  "showGrid": true,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

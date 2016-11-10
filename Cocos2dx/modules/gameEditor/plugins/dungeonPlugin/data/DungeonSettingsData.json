@@ -6,10 +6,27 @@
       "desc": "背景图片",
       "type": "string"
     },
+    "first": {
+      "desc": "是否首次进入副本",
+      "type": "int",
+      "init": 1,
+      "enumList": [
+        {
+          "label": "首次进入",
+          "type": 1
+        },
+        {
+          "label": "第二次进入",
+          "type": 2
+        }
+      ],
+      "save": false
+    },
     "showGrid": {
       "desc": "是否显示格子",
       "type": "bool",
-      "init": true
+      "init": false,
+      "save": false
     },
     "isPlaying": {
       "desc": "是否正在运行",

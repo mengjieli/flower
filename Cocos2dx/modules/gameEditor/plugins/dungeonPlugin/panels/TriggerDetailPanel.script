@@ -1,13 +1,14 @@
 function init() {
     var container = this.container;
-    var labels = ["名称", "id", "延时","执行次数","初始状态", "启动条件"];
-    var attributes = ["name", "itemId", "delay","count","open","startCondition"];
+    var labels = ["名称", "id", "延时", "执行次数", "初始状态", "多次通关", "启动条件"];
+    var attributes = ["name", "itemId", "delay", "count", "open", "status", "startCondition"];
     var inputFalse = {
         "itemId": true
     };
     var dropDownList = {
         "startCondition": true,
-        "open":true
+        "open": true,
+        "status": true
     }
     this.attributes = attributes;
     for (var i = 0; i < attributes.length; i++) {

@@ -1,0 +1,225 @@
+{
+ "itemId": 22,
+ "screenWidth": 480,
+ "screenHeight": 320,
+ "triggers": [
+  {
+   "itemId": 2,
+   "name": "触发器2",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 7,
+     "name": "效果7",
+     "delay": 0,
+     "type": 10,
+     "effectValue": {
+      "rect": {
+       "x": 0,
+       "y": 0,
+       "width": 2700,
+       "height": 1000
+      },
+      "__className": "dg.CameraRangeEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 4,
+   "name": "失败",
+   "count": 1,
+   "open": true,
+   "startCondition": 6,
+   "delay": 0,
+   "startValue": {
+    "type": 0,
+    "__className": "dg.AllDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 8,
+     "name": "效果8",
+     "delay": 0,
+     "type": 6,
+     "effectValue": null
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 9,
+   "name": "成功",
+   "count": 1,
+   "open": true,
+   "startCondition": 6,
+   "delay": 0,
+   "startValue": {
+    "type": 1,
+    "__className": "dg.AllDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 10,
+     "name": "效果10",
+     "delay": 0,
+     "type": 5,
+     "effectValue": null
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 11,
+   "name": "图片",
+   "count": 1,
+   "open": false,
+   "startCondition": 5,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 12,
+     "name": "添加",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "trap1",
+      "tag": 0,
+      "type": 2,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 180,
+      "y": 585,
+      "__className": "dg.AddAnimationEffect"
+     }
+    },
+    {
+     "itemId": 14,
+     "name": "效果14",
+     "delay": 0,
+     "type": 4,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 15,
+      "__className": "dg.StartTriggerEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 15,
+   "name": "删除图片",
+   "count": 1,
+   "open": false,
+   "startCondition": 5,
+   "delay": 2000,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 16,
+     "name": "效果16",
+     "delay": 0,
+     "type": 13,
+     "effectValue": {
+      "tag": 0,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 18,
+   "name": "移动触发 ",
+   "count": 1,
+   "open": true,
+   "startCondition": 2,
+   "delay": 0,
+   "startValue": {
+    "armyType": 0,
+    "points": [
+     {
+      "x": 2,
+      "y": 10
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+    {
+     "itemId": 19,
+     "name": "开启特效",
+     "delay": 0,
+     "type": 4,
+     "effectValue": {
+      "operate": 0,
+      "triggerId": 11,
+      "__className": "dg.StartTriggerEffect"
+     }
+    },
+    {
+     "itemId": 22,
+     "name": "删除陷阱",
+     "delay": 0,
+     "type": 13,
+     "effectValue": {
+      "tag": 10,
+      "ease": 1,
+      "easeTime": 500,
+      "__className": "dg.RemoveAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 20,
+   "name": "陷阱点",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 21,
+     "name": "添加",
+     "delay": 0,
+     "type": 12,
+     "effectValue": {
+      "url": "tree1",
+      "tag": 10,
+      "type": 1,
+      "layer": 1,
+      "ease": 1,
+      "easeTime": 500,
+      "x": 180,
+      "y": 600,
+      "__className": "dg.AddAnimationEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_1.jpg",
+  "showGrid": true,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}

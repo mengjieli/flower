@@ -83,7 +83,8 @@ var Trigger = (function () {
                 this.callObject.setCameraRange(value.rect.x.value, value.rect.y.value, value.rect.width.value, value.rect.height.value);
                 break;
             case 11:
-                this.callObject.startDialog(value.dialogId.value);
+                this.triggerRunning.addDialog(this.data);
+                this.callObject.startDialog(value.dialogId.value,value.param1.value,value.param2.value,value.param3.value,value.param4.value);
                 break;
             case 12:
                 this.callObject.addAnimation(value.tag.value, value.type.value, value.url.value, value.layer.value, value.ease.value, value.easeTime.value, value.x.value, value.y.value);

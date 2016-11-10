@@ -15,8 +15,8 @@
     "nameTip": {
       "desc": "名称追加信息",
       "type": "string",
-      "bind": "  ({executeTime}/{count})",
-      "save":false
+      "bind": "  ({executeTime}/{count}) {status==1?'(首次)':(status==2?'(二次)':'')}",
+      "save": false
     },
     "count": {
       "desc": "执行次数",
@@ -35,6 +35,25 @@
         {
           "label": "关闭",
           "type": false
+        }
+      ]
+    },
+    "status": {
+      "desc": "是否首次有效",
+      "type": "int",
+      "init": 0,
+      "enumList": [
+        {
+          "label": "一直有效",
+          "type": 0
+        },
+        {
+          "label": "首次有效",
+          "type": 1
+        },
+        {
+          "label": "第二次有效",
+          "type": 2
         }
       ]
     },

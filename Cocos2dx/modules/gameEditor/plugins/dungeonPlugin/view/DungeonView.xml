@@ -2,10 +2,10 @@
               title="{data.name}" xmlns:f="flower"
               xmlns:s="modules/software/module.json" xmlns:dg="modules/gameEditor/plugins/dungeonPlugin/module.json">
     <f:script src="./DungeonView.script"/>
-    <f:Group width="200" percentHeight="100">
+    <f:Group width="250" percentHeight="100">
         <s:ScrollerTree id="tree" percentWidth="100" percentHeight="100" viewport="software:LabelTree"/>
     </f:Group>
-    <f:Group left="200" right="0" percentHeight="100">
+    <f:Group left="250" right="0" percentHeight="100">
         <f:Group height="25">
             <f:Rect percentWidth="100" percentHeight="100" fillColor="0xbbbbbb" lineColor="0x333333" lineWidth="1"/>
             <f:Group percentHeight="100">
@@ -73,7 +73,11 @@
                     <f:HorizontalLayout fixElementSize="false" gap="15"/>
                 </f:layout>
                 <f:Group percentHeight="100">
-                    <s:CheckBox id="showGridCheckBox" x="10" label="查看格子" verticalCenter="0"/>
+                    <f:Label text="多次通关:" verticalCenter="0" x="5"/>
+                    <s:ComboBox id="firstComboBox" width="100" verticalCenter="0" x="60"/>
+                </f:Group>
+                <f:Group percentHeight="100">
+                    <s:CheckBox id="showGridCheckBox" x="10" label.selectedUp="查看格子" label.up="隐藏格子" verticalCenter="0"/>
                 </f:Group>
                 <f:Group percentHeight="100">
                     <s:Button1 verticalCenter="0" height="16"

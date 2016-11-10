@@ -1,6 +1,6 @@
 function setData(val) {
     _super.prototype.setData.call(this, val);
-    var atrs = ["type"];
+    var atrs = ["type","count"];
     var dropDownList = {
         "type": true
     }

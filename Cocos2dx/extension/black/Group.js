@@ -250,7 +250,6 @@ class Group extends flower.Sprite {
             if (this.$hasFlags(0x0002)) {
                 this.$nativeShow.setAlpha(this.$getConcatAlpha());
             }
-
             this.$resetLayout();
         }
         flower.DebugInfo.frameInfo.display++;

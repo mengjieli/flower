@@ -1,0 +1,331 @@
+{
+ "itemId": 31,
+ "screenWidth": 960,
+ "screenHeight": 640,
+ "triggers": [
+  {
+   "itemId": 7,
+   "name": "地图大小",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 16,
+     "name": "地图大小限定",
+     "delay": 0,
+     "type": 10,
+     "invalid": true,
+     "effectValue": {
+      "rect": {
+       "x": 103,
+       "y": 247,
+       "width": 2697,
+       "height": 1563
+      },
+      "__className": "dg.CameraRangeEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 8,
+   "name": "初始镜头位置",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 17,
+     "name": "初始镜头位置",
+     "delay": 0,
+     "type": 9,
+     "invalid": true,
+     "effectValue": {
+      "coord": {
+       "x": 958,
+       "y": 749
+      },
+      "time": 2,
+      "pos": 9,
+      "__className": "dg.CameraMoveEffect"
+     }
+    },
+    {
+     "itemId": 25,
+     "name": "怪物不动",
+     "delay": 0,
+     "type": 18,
+     "invalid": true,
+     "effectValue": {
+      "__className": "dg.PauseEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 26,
+   "name": "镜头",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 29,
+     "name": "效果29",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 27,
+   "name": "触发器27",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 30,
+     "name": "效果30",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 28,
+   "name": "触发器28",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 31,
+     "name": "效果31",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": false
+  },
+  {
+   "itemId": 9,
+   "name": "怪物刷新",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 18,
+     "name": "刷怪",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 10,
+   "name": "首通奖励",
+   "count": 1,
+   "open": true,
+   "startCondition": 4,
+   "delay": 0,
+   "startValue": {
+    "type": 0,
+    "param": 0,
+    "__className": "dg.FinishCondition"
+   },
+   "effects": [
+    {
+     "itemId": 19,
+     "name": "任务",
+     "delay": 0,
+     "type": 7,
+     "invalid": true,
+     "effectValue": {
+      "missionId": 3400104,
+      "missionName": "",
+      "__className": "dg.MissionCompleteEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 11,
+   "name": "win",
+   "count": 1,
+   "open": true,
+   "startCondition": 2,
+   "delay": 0,
+   "startValue": {
+    "armyType": 0,
+    "points": [
+     {
+      "x": 29,
+      "y": 14
+     }
+    ],
+    "__className": "dg.MoveCondition"
+   },
+   "effects": [
+    {
+     "itemId": 20,
+     "name": "条件",
+     "delay": 0,
+     "type": 5,
+     "invalid": true,
+     "effectValue": null
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 12,
+   "name": "lost",
+   "count": 1,
+   "open": true,
+   "startCondition": 6,
+   "delay": 0,
+   "startValue": {
+    "type": 1,
+    "__className": "dg.AllDieCondition"
+   },
+   "effects": [
+    {
+     "itemId": 21,
+     "name": "条件",
+     "delay": 0,
+     "type": 6,
+     "invalid": true,
+     "effectValue": null
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 13,
+   "name": "触发器13",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 22,
+     "name": "效果22",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 14,
+   "name": "触发器14",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 23,
+     "name": "效果23",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 15,
+   "name": "触发器15",
+   "count": 1,
+   "open": true,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 24,
+     "name": "效果24",
+     "delay": 0,
+     "type": 1,
+     "invalid": true,
+     "effectValue": {
+      "monsters": [
+      ],
+      "__className": "dg.FlushMonsterEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  }
+ ],
+ "settings": {
+  "background": "res/tools/dungeon/background/dungeon1_4.jpg",
+  "showGrid": true,
+  "bornX": 0,
+  "bornY": 9,
+  "myHp": 5000,
+  "myAttack": 200,
+  "monsterHp": 500,
+  "monsterAttack": 50
+ }
+}
