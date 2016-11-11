@@ -1601,8 +1601,8 @@ var flower = {};
                     div.style.position = "absolute";
                     div.style.left = points[0].x + "px";
                     div.style.top = points[0].y + "px";
-                    div.style.width = points[1].x - points[0].x + "px";
-                    div.style.height = points[2].y - points[0].y + "px";
+                    div.style.width = points[1].x - points[0].x + (points[1].x > points[0].x ? -1 : 0) + "px";
+                    div.style.height = points[2].y - points[0].y + (points[2].y > points[0].y ? -1 : 0) + "px";
                     div.style.backgroundColor = "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + fillAlpha + ")";
                     if (lineAlpha && lineWidth) {
                         div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";

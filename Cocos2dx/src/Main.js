@@ -74,6 +74,7 @@ var Main = function () {
             //input.x = 300;
             //input.y = 250;
 
+            /*
             var rect = new flower.Rect();
             rect.width = 400;
             rect.height = 400;
@@ -94,13 +95,15 @@ var Main = function () {
                 setTimeout(function () {
                     richText.htmlText = '我<img src="res/closeDown.png"/>时间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>1227555';
                 }, 500);
-            }, 500000);
+            }, 5000);
             flower.Stage.getInstance().addChild(richText);
 
 
             //console.log(flower.StringDo.split("aaawqqw\rb21oiop21\ncsa,las;<br/>dsasa;asl;", ["\r", "\n", "<br/>"]));
 
             return;
+
+            */
 
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
