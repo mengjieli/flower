@@ -1,0 +1,988 @@
+ieLideMacBook-Pro-4:testGame mengjieli$ node Main.js
+0 0 100 0 0 20
+has login count
+0 0 100 0 0 20
+has login count
+user login~~~ 0
+has login count
+user login~~~ 1
+has login count
+user login~~~ 2
+has login count
+user login~~~ 3
+has login count
+user login~~~ 4
+has login count
+user login~~~ 5
+has login count
+user login~~~ 6
+has login count
+user login~~~ 7
+has login count
+{ loginCount: 0 }
+Account login A125zy
+Account login a0059
+Account login 2b
+Account login a1234569008
+Account login A1207810201
+Account login a1027061618
+Account login a111441111
+Account login a13008840732
+0 8 100 0 0 20
+has login count
+user login~~~ 8
+has login count
+user login~~~ 9
+has login count
+user login~~~ 10
+has login count
+user login~~~ 11
+has login count
+user login~~~ 12
+has login count
+user login~~~ 13
+has login count
+user login~~~ 14
+has login count
+Account login a13042058067
+Account login a13066961793
+Account login a13049832393
+Account login a13070969483
+Account login a13026624301
+Account login a13076935404
+{ loginCount: 0 }
+Account login a13118800671
+0 15 100 0 0 20
+has login count
+user login~~~ 15
+has login count
+user login~~~ 16
+has login count
+user login~~~ 17
+has login count
+user login~~~ 18
+has login count
+user login~~~ 19
+has login count
+Account login a13242093748
+Account login a13217694708
+Account login a13143756669
+Account login a13202005012
+Account login a13168039869
+{ loginCount: 0 }
+login user  A125zy
+!login 19
+1 19 100 1 4 20
+has login count
+user login~~~ 19
+has login count
+Account login a126
+login user  A1207810201
+!login 19
+2 19 100 2 4 20
+has login count
+user login~~~ 19
+has login count
+Account login a1208039380
+login user  a1234569008
+!login 19
+3 19 100 3 4 20
+has login count
+user login~~~ 19
+has login count
+Account login a12345698
+3 20 100 0 0 20
+has login count
+{ loginCount: 3 }
+login user  a111441111
+!login 19
+4 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a111500542
+login user  a13026624301
+!login 19
+5 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13026627239
+login user  a13049832393
+!login 19
+6 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13049836025
+login user  a13076935404
+!login 19
+7 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13076935525
+login user  a0059
+!login 19
+8 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a0060
+8 20 100 0 0 20
+has login count
+{ loginCount: 8 }
+login user  2b
+!login 19
+9 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login 2ltz
+login user  a13217694708
+!login 19
+10 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13217694710
+login user  a13168039869
+!login 19
+11 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13168041075
+login user  a13242093748
+!login 19
+login user  a12345698
+12 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+!login 19
+Account login a13242094793
+13 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a123456987
+login user  a13008840732
+!login 19
+14 19 100 6 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13008841626
+login user  a126
+!login 19
+15 19 100 7 -1 20
+has login count
+user login~~~ 19
+Account login a1260865870
+login user  a13143756669
+has login count
+!login 19
+16 19 100 8 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13143757779
+login user  a111500542
+!login 19
+17 19 100 9 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1115948234
+17 20 100 0 0 20
+has login count
+{ loginCount: 17 }
+login user  a13076935525
+!login 19
+18 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13076937328
+login user  a13026627239
+!login 19
+19 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13026629027
+login user  a13202005012
+!login 19
+20 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13202006206
+login user  a1208039380
+login user  a0060
+!login 19
+21 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+!login 19
+Account login a1208583988
+22 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a0061
+login user  a13042058067
+!login 19
+23 19 100 6 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13042058586
+23 20 100 0 0 20
+has login count
+{ loginCount: 23 }
+login user  a13217694710
+!login 19
+24 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13217694740
+login user  a13168041075
+!login 19
+25 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13168042379
+login user  a13242094793
+!login 19
+26 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13242094845
+login user  a13118800671
+!login 19
+27 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13118804335
+login user  a13066961793
+!login 19
+28 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13066962307
+login user  a1027061618
+!login 19
+29 19 100 6 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1027080178
+login user  a13143757779
+!login 19
+30 19 100 7 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13143758807
+30 20 100 0 0 20
+has login count
+{ loginCount: 30 }
+login user  a1115948234
+!login 19
+31 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1117967
+login user  a1260865870
+!login 19
+login user  a123456987
+32 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+!login 19
+Account login a126129
+33 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a123456987f
+login user  2ltz
+!login 19
+34 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login 304306775
+login user  a13042058586
+!login 19
+35 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13042059324
+35 20 100 0 0 20
+has login count
+{ loginCount: 35 }
+login user  a13217694740
+!login 19
+36 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13217694826
+login user  a13066962307
+!login 19
+37 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13066962617
+login user  a1208583988
+!login 19
+38 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1208891202
+login user  a13049836025
+!login 19
+39 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13049837048
+login user  a13070969483
+!login 19
+40 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13071300380
+login user  a13143758807
+!login 19
+41 19 100 6 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13143759948
+login user  a13118804335
+!login 19
+42 19 100 7 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13118882429
+42 20 100 0 0 20
+has login count
+{ loginCount: 42 }
+login user  a1117967
+!login 19
+43 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a11183
+login user  a123456987f
+!login 19
+44 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a123456A
+login user  a126129
+!login 19
+45 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a126147
+login user  a13217694826
+!login 19
+46 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13217694870
+46 20 100 0 0 20
+has login count
+{ loginCount: 46 }
+login user  a13076937328
+!login 19
+47 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13076938516
+login user  a13008841626
+!login 19
+48 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13008841723
+login user  a13049837048
+!login 19
+49 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13049837767
+login user  a13071300380
+!login 19
+50 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13071307769
+login user  304306775
+!login 19
+51 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login 3048706399
+login user  a1027080178
+!login 19
+52 19 100 6 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login A1027597985
+login user  a13118882429
+!login 19
+53 19 100 7 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13118891932
+login user  a13143759948
+!login 19
+54 19 100 8 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13143760124
+54 20 100 0 0 20
+has login count
+{ loginCount: 54 }
+login user  a126147
+!login 19
+55 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1261927332
+login user  a13217694870
+!login 19
+56 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13217695044
+login user  a13026629027
+!login 19
+57 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13026631128
+login user  a123456A
+!login 19
+58 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a123456aa
+login user  a13042059324
+!login 19
+59 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13042060062
+login user  a13242094845
+!login 19
+60 19 100 6 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13242098774
+login user  a0061
+!login 19
+61 19 100 7 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login A0061194
+login user  3048706399
+!login 19
+62 19 100 8 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login 306089649
+login user  a13071307769
+!login 19
+63 19 100 9 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13071310500
+63 20 100 0 0 20
+has login count
+{ loginCount: 63 }
+login user  a13202006206
+!login 19
+64 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13202006209
+login user  a1208891202
+!login 19
+65 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1209242042
+login user  a13008841723
+!login 19
+66 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13008842064
+login user  a13076938516
+!login 19
+67 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13076939175
+login user  a13217695044
+!login 19
+68 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13217695089
+login user  a13143760124
+!login 19
+69 19 100 6 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13143760232
+login user  a13066962617
+!login 19
+70 19 100 7 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13066962876
+login user  a1261927332
+!login 19
+71 19 100 8 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1263593537
+login user  a123456aa
+!login 19
+72 19 100 9 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a123456aaa
+72 20 100 0 0 20
+has login count
+{ loginCount: 72 }
+login user  306089649
+!login 19
+73 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login 314972774
+login user  a13071310500
+!login 19
+74 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13071316702
+login user  a13168042379
+!login 19
+75 19 100 3 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13168042945
+login user  A1027597985
+!login 19
+76 19 100 4 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a1027728448
+login user  a13026631128
+!login 19
+77 19 100 5 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13026632342
+77 20 100 0 0 20
+has login count
+{ loginCount: 77 }
+login user  a13066962876
+!login 19
+78 19 100 1 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13066963327
+login user  a13143760232
+!login 19
+79 19 100 2 -1 20
+has login count
+user login~~~ 19
+has login count
+Account login a13143760646
+login user  a13076939175
+!login 19
+80 19 100 3 -1 20
+has login count
+user login~~~ 19
+Account login a13076940712
+login user  a1263593537
+!login 19
+81 19 100 4 -1 20
+login user  a13049837767
+!login 18
+82 18 100 5 -2 20
+login user  a13118891932
+login user  a123456aaa
+!login 17
+83 17 100 6 -3 20
+!login 16
+84 16 100 7 -4 20
+login user  a11183
+login user  a13202006209
+!login 15
+85 15 100 8 -5 20
+!login 14
+86 14 100 9 -6 20
+86 14 100 0 0 20
+{ loginCount: 86 }
+login user  a13071316702
+!login 13
+87 13 100 1 -1 20
+87 13 100 0 0 20
+{ loginCount: 87 }
+login user  a13042060062
+!login 12
+88 12 100 1 -1 20
+login user  a13217695089
+!login 11
+89 11 100 2 -2 20
+login user  a13242098774
+!login 10
+90 10 100 3 -3 20
+login user  a13066963327
+!login 9
+91 9 100 4 -4 20
+login user  a13076940712
+!login 8
+92 8 100 5 -5 20
+login user  a13026632342
+!login 7
+93 7 100 6 -6 20
+93 7 100 0 0 20
+{ loginCount: 93 }
+login user  a13168042945
+!login 6
+94 6 100 1 -1 20
+login user  a13008842064
+!login 5
+95 5 100 2 -2 20
+95 5 100 0 0 20
+{ loginCount: 95 }
+95 5 100 0 0 20
+{ loginCount: 95 }
+login user  A0061194
+!login 4
+96 4 100 1 -1 20
+login user  a1209242042
+!login 3
+97 3 100 2 -2 20
+login user  314972774
+!login 2
+98 2 100 3 -3 20
+98 2 100 0 0 20
+{ loginCount: 98 }
+98 2 100 0 0 20
+{ loginCount: 98 }
+98 2 100 0 0 20
+{ loginCount: 98 }
+98 2 100 0 0 20
+{ loginCount: 98 }
+98 2 100 0 0 20
+login user  a1027728448
+login user  a13143760646
+!login 1
+99 1 100 1 -1 20
+!login 0
+100 0 100 2 -2 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+100 0 100 0 0 20
+{ loginCount: 100 }
+!login -1
+101 -1 100 1 -1 20
+!login -2
+102 -2 100 2 -2 20
+!login -3
+103 -3 100 3 -3 20
+!login -4
+104 -4 100 4 -4 20
+!login -5
+105 -5 100 5 -5 20
+!login -6
+106 -6 100 6 -6 20
+106 -6 100 0 0 20
+{ loginCount: 106 }
+!login -7
+107 -7 100 1 -1 20
+!login -8
+108 -8 100 2 -2 20
+!login -9
+109 -9 100 3 -3 20
+!login -10
+110 -10 100 4 -4 20
+!login -11
+111 -11 100 5 -5 20
+!login -12
+112 -12 100 6 -6 20
+!login -13
+113 -13 100 7 -7 20
+!login -14
+114 -14 100 8 -8 20
+!login -15
+115 -15 100 9 -9 20
+!login -16
+116 -16 100 10 -10 20
+116 -16 100 0 0 20
+{ loginCount: 116 }
+!login -17
+117 -17 100 1 -1 20
+!login -18
+118 -18 100 2 -2 20
+!login -19
+119 -19 100 3 -3 20
+!login -20
+120 -20 100 4 -4 20
+120 -20 100 0 0 20
+{ loginCount: 120 }
+!login -21
+121 -21 100 1 -1 20
+!login -22
+122 -22 100 2 -2 20
+!login -23
+123 -23 100 3 -3 20
+!login -24
+124 -24 100 4 -4 20
+!login -25
+125 -25 100 5 -5 20
+125 -25 100 0 0 20
+{ loginCount: 125 }
+!login -26
+126 -26 100 1 -1 20
+!login -27
+127 -27 100 2 -2 20
+!login -28
+128 -28 100 3 -3 20
+!login -29
+129 -29 100 4 -4 20
+!login -30
+130 -30 100 5 -5 20
+!login -31
+131 -31 100 6 -6 20
+!login -32
+132 -32 100 7 -7 20
+!login -33
+133 -33 100 8 -8 20
+133 -33 100 0 0 20
+{ loginCount: 133 }
+!login -34
+134 -34 100 1 -1 20
+!login -35
+135 -35 100 2 -2 20
+!login -36
+136 -36 100 3 -3 20
+!login -37
+137 -37 100 4 -4 20
+137 -37 100 0 0 20
+{ loginCount: 137 }
+!login -38
+138 -38 100 1 -1 20
+!login -39
+139 -39 100 2 -2 20
+!login -40
+140 -40 100 3 -3 20
+!login -41
+141 -41 100 4 -4 20
+!login -42
+142 -42 100 5 -5 20
+!login -43
+143 -43 100 6 -6 20
+!login -44
+144 -44 100 7 -7 20
+!login -45
+145 -45 100 8 -8 20
+!login -46
+146 -46 100 9 -9 20
+!login -47
+147 -47 100 10 -10 20
+!login -48
+148 -48 100 11 -11 20
+!login -49
+149 -49 100 12 -12 20
+149 -49 100 0 0 20
+{ loginCount: 149 }
+!login -50
+150 -50 100 1 -1 20
+150 -50 100 0 0 20
+{ loginCount: 150 }
+!login -51
+151 -51 100 1 -1 20
+!login -52
+152 -52 100 2 -2 20
+!login -53
+153 -53 100 3 -3 20
+!login -54
+154 -54 100 4 -4 20
+!login -55
+155 -55 100 5 -5 20
+!login -56
+156 -56 100 6 -6 20
+!login -57
+157 -57 100 7 -7 20
+157 -57 100 0 0 20
+{ loginCount: 157 }
+!login -58
+158 -58 100 1 -1 20
+!login -59
+159 -59 100 2 -2 20
+!login -60
+160 -60 100 3 -3 20
+!login -61
+161 -61 100 4 -4 20
+!login -62
+162 -62 100 5 -5 20
+!login -63
+163 -63 100 6 -6 20
+!login -64
+164 -64 100 7 -7 20
+!login -65
+165 -65 100 8 -8 20
+165 -65 100 0 0 20
+{ loginCount: 165 }
+!login -66
+166 -66 100 1 -1 20
+!login -67
+167 -67 100 2 -2 20
+!login -68
+168 -68 100 3 -3 20
+!login -69
+169 -69 100 4 -4 20
+!login -70
+170 -70 100 5 -5 20
+170 -70 100 0 0 20
+!login -71
+171 -71 100 1 -1 20
+!login -72
+172 -72 100 2 -2 20
+!login -73
+173 -73 100 3 -3 20
+{ loginCount: 173 }
+!login -74
+174 -74 100 4 -4 20
+!login -75
+175 -75 100 5 -5 20
+!login -76
+176 -76 100 6 -6 20
+!login -77
+177 -77 100 7 -7 20
+177 -77 100 0 0 20
+{ loginCount: 177 }
+!login -78
+178 -78 100 1 -1 20
+178 -78 100 0 0 20
+{ loginCount: 178 }
+!login -79
+179 -79 100 1 -1 20
+!login -80
+180 -80 100 2 -2 20
+!login -81
+181 -81 100 3 -3 20
+181 -81 100 0 0 20
+{ loginCount: 181 }
+!login -82
+182 -82 100 1 -1 20
+!login -83
+183 -83 100 2 -2 20
+183 -83 100 0 0 20
+{ loginCount: 183 }
+183 -83 100 0 0 20
+{ loginCount: 183 }
+!login -84
+184 -84 100 1 -1 20
+!login -85
+185 -85 100 2 -2 20
+185 -85 100 0 0 20
+{ loginCount: 185 }
+185 -85 100 0 0 20
+{ loginCount: 185 }
+^CMengJieLideMacBook-Pro-4:testGame mengjieli$ a

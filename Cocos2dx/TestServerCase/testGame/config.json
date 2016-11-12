@@ -1,0 +1,9 @@
+{
+  "httpIp": "106.75.145.132",
+  "gameIp": "106.75.145.132",
+  "loginCount": 2000,
+  "thread": 500,
+  "threadUser": 20,
+  "threadMaxUser": 20,
+  "loginSpeed": 100
+}
