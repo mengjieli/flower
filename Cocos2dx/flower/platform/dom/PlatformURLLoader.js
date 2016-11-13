@@ -14,7 +14,9 @@ class PlatformURLLoader {
         if (TIP) {
             $tip(2001, url);
         }
-        var pstr = "?";
+        var hasQ = url.split("?").length > 1 ? true : false;
+        var hasParam = hasQ ? (url.split("?")[1].length ? true : false) : false;
+        var pstr = hasParam ? (hasQ ? "&" : "") : "?";
         for (var key in params) {
             pstr += key + "=" + params[key] + "&";
         }
@@ -38,7 +40,6 @@ class PlatformURLLoader {
             xhr.setRequestHeader("Content-Type", contentType);
         } else if (method == "HEAD") {
             xhr.open("HEAD", url, true);
-            xhr.open("HEAD", url, true);
         }
         xhr.onloadend = function () {
             if (xhr.status != 200) {
@@ -57,7 +58,7 @@ class PlatformURLLoader {
 
     static loadTexture(url, back, errorBack, thisObj, params) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj,params]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj, params]);
             return;
         }
         PlatformURLLoader.isLoading = true;

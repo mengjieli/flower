@@ -1748,7 +1748,9 @@ var flower = {};
                 if (TIP) {
                     $tip(2001, url);
                 }
-                var pstr = "?";
+                var hasQ = url.split("?").length > 1 ? true : false;
+                var hasParam = hasQ ? url.split("?")[1].length ? true : false : false;
+                var pstr = hasParam ? hasQ ? "&" : "" : "?";
                 for (var key in params) {
                     pstr += key + "=" + params[key] + "&";
                 }
@@ -1771,7 +1773,6 @@ var flower = {};
                     }
                     xhr.setRequestHeader("Content-Type", contentType);
                 } else if (method == "HEAD") {
-                    xhr.open("HEAD", url, true);
                     xhr.open("HEAD", url, true);
                 }
                 xhr.onloadend = function () {
@@ -1946,8 +1947,8 @@ var flower = {};
 
         _createClass(PlatformWebSocket, [{
             key: "bindWebSocket",
-            value: function bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-                var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
+            value: function bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
+                var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
                 this.webSocket = websocket;
                 var openFunc = function openFunc() {
                     onConnect.call(thisObj);
@@ -7214,9 +7215,17 @@ var flower = {};
                         for (var key in this._params) {
                             params[key] = this._params;
                         }
-                        PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
+                        PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
                     }
                 }
+            }
+        }, {
+            key: "__concatURLHead",
+            value: function __concatURLHead(head, url) {
+                if (url.slice(0, 7) == "http://") {
+                    return url;
+                }
+                return head + url;
             }
         }, {
             key: "onLoadTexturePlistComplete",
@@ -7282,7 +7291,7 @@ var flower = {};
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
+                PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
             }
         }, {
             key: "loadTextComplete",
@@ -7568,6 +7577,8 @@ var flower = {};
         _createClass(WebSocket, [{
             key: "connect",
             value: function connect(ip, port) {
+                var path = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+
                 if (this._localWebSocket) {
                     this._localWebSocket.releaseWebSocket(this.localWebSocket);
                 }
@@ -7575,7 +7586,7 @@ var flower = {};
                 this._ip = ip;
                 this._port = port;
                 this._localWebSocket = new PlatformWebSocket();
-                this._localWebSocket.bindWebSocket(ip, port, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
+                this._localWebSocket.bindWebSocket(ip, port, path, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
             }
         }, {
             key: "onConnect",

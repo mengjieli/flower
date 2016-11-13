@@ -75,10 +75,10 @@ function __onLoadConfig(e) {
         }
     }
     if (flower.params.openDirection) {
-        this.expand(flower.params.openDirection);
+        this.expand(decodeURIComponent(flower.params.openDirection));
     }
     if (flower.params.openFile) {
-        this.openItem(flower.params.openFile);
+        this.openItem(decodeURIComponent(flower.params.openFile));
     }
 }
 

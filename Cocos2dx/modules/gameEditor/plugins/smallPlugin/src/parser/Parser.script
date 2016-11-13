@@ -11,7 +11,6 @@ var Parser = (function (_super) {
         this.data = {
             type: config.type
         }
-        console.log(this.data);
         return false;
     }
 

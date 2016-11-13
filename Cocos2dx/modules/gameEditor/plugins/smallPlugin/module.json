@@ -1,14 +1,20 @@
 {
-  "name": "SmallTool",
+  "name": "st",
   "scripts": [
     "./src/parser/Parser.script",
-    "./src/utils/MapUtils.script"
+    "./src/utils/MapUtils.script",
+    "./src/qaTest/QATestAccount.script",
+    "./src/qaTest/QATestNet.script"
   ],
   "components": [
     "./view/SmallView.xml"
   ],
   "classes": {
+    "PointToPosition": "./view/pointToPosition/PointToPosition.xml",
+    "QATest": "./view/qaTest/QATest.xml"
   },
   "data": [
+    "./data/qaTest/QATest.json",
+    "./data/qaTest/QATestAccount.json"
   ]
 }

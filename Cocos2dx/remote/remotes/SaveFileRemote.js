@@ -54,5 +54,6 @@ class SaveFileRemote extends Remote {
             }
             this.__back = this.__thisObj = null;
         }
+        this.dispose();
     }
 }

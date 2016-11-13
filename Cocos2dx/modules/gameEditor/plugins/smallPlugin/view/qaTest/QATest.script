@@ -1,0 +1,58 @@
+function init() {
+    var remote = new flower.Remote(this.getAccountBack, this);
+    var msg = new flower.VByteArray();
+    msg.writeUInt(10000);
+    msg.writeUInt(remote.id);
+    remote.send(msg);
+    this.data = flower.DataManager.createData("st.QATest");
+    this.httpInput.value = this.data.httpServer;
+    this.gameInput.value = this.data.gameServer;
+    this.maxInput.value = this.data.maxLogin;
+    this.sameTimeLoginInput.value = this.data.sameTimeLoginMax;
+}
+
+function getAccountBack(cmd, bytes, remote) {
+    var len = bytes.readUInt();
+    this.accounts = [];
+    if (len == 0) {
+        remote.dispose();
+        this.viewStack.selectedIndex = 1;
+        this.data.maxLogin = this.data.accounts.length;
+    } else {
+        for (var i = 0; i < len; i++) {
+            var user = bytes.readUTF();
+            var password = bytes.readUTF();
+            var account = flower.DataManager.createData("st.QATestAccount");
+            account.user = user;
+            account.password = password;
+            this.data.accounts.push(account);
+            //初始化操作对象
+            var testAccount = new module.QATestAccount(account);
+            account.operator = testAccount;
+            this.accounts.push(testAccount);
+        }
+    }
+    flower.EnterFrame.add(this.update, this);
+}
+
+function update(time, dt) {
+    this.data.currentLogin = this.data.accounts.getItemsWith("hasLogin", true).length;
+    if (!this.data.start.value) {
+        return;
+    }
+    this.data.sameTimeLogin = this.data.accounts.getItemsWith("isLogining", true).length;
+    if (this.data.sameTimeLogin.value < this.data.sameTimeLoginMax.value) {
+        var account;
+        var accounts = this.data.accounts;
+        for (var i = 0; i < accounts.length; i++) {
+            if (!accounts[i].invalid.value && !accounts[i].isLogining.value && !accounts[i].hasLogin.value) {
+                account = accounts[i];
+                break;
+            }
+        }
+        if (account) {
+            account.operator.login(this.data);
+            console.log("login ", account.user.value, this.data.sameTimeLogin.value);
+        }
+    }
+}

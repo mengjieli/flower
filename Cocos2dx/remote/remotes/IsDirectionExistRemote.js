@@ -22,5 +22,6 @@ class IsDirectionExistRemote extends Remote {
             this.__back.call(this.__thisObj, msg.readBoolean());
         }
         this.__back = this.__thisObj = null;
+        this.dispose();
     }
 }

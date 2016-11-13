@@ -1613,7 +1613,9 @@ class PlatformURLLoader {
         if (TIP) {
             $tip(2001, url);
         }
-        var pstr = "?";
+        var hasQ = url.split("?").length > 1 ? true : false;
+        var hasParam = hasQ ? (url.split("?")[1].length ? true : false) : false;
+        var pstr = hasParam ? (hasQ ? "&" : "") : "?";
         for (var key in params) {
             pstr += key + "=" + params[key] + "&";
         }
@@ -1637,7 +1639,6 @@ class PlatformURLLoader {
             xhr.setRequestHeader("Content-Type", contentType);
         } else if (method == "HEAD") {
             xhr.open("HEAD", url, true);
-            xhr.open("HEAD", url, true);
         }
         xhr.onloadend = function () {
             if (xhr.status != 200) {
@@ -1656,7 +1657,7 @@ class PlatformURLLoader {
 
     static loadTexture(url, back, errorBack, thisObj, params) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj,params]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj, params]);
             return;
         }
         PlatformURLLoader.isLoading = true;
@@ -1792,8 +1793,8 @@ class PlatformWebSocket {
 
     webSocket;
 
-    bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-        var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
+    bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
+        var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
         this.webSocket = websocket;
         var openFunc = function () {
             onConnect.call(thisObj);
@@ -6586,9 +6587,16 @@ class URLLoader extends EventDispatcher {
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
+                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
             }
         }
+    }
+
+    __concatURLHead(head,url) {
+        if(url.slice(0,7) == "http://") {
+            return url;
+        }
+        return head + url;
     }
 
     onLoadTexturePlistComplete(e) {
@@ -6647,7 +6655,7 @@ class URLLoader extends EventDispatcher {
         for (var key in this._params) {
             params[key] = this._params;
         }
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
+        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {
@@ -6871,7 +6879,7 @@ class WebSocket extends flower.EventDispatcher {
         super();
     }
 
-    connect(ip, port) {
+    connect(ip, port, path = "") {
         if (this._localWebSocket) {
             this._localWebSocket.releaseWebSocket(this.localWebSocket);
         }
@@ -6879,7 +6887,7 @@ class WebSocket extends flower.EventDispatcher {
         this._ip = ip;
         this._port = port;
         this._localWebSocket = new PlatformWebSocket();
-        this._localWebSocket.bindWebSocket(ip, port, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
+        this._localWebSocket.bindWebSocket(ip, port, path, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
     }
 
     get ip() {

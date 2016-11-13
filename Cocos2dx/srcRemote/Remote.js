@@ -259,8 +259,10 @@ class Remote {
 
     __id;
 
-    constructor() {
+    constructor(back, thisObj) {
         this.__id = Remote.id++;
+        this.back = back;
+        this.thisObj = thisObj;
         RemoteServer.getInstance().registerRemote(this);
     }
 
@@ -269,6 +271,9 @@ class Remote {
     }
 
     receive(cmd, bytes) {
+        if (this.back) {
+            this.back.call(this.thisObj, cmd, bytes, this);
+        }
     }
 
     dispose() {
@@ -444,6 +449,7 @@ class IsDirectionExistRemote extends Remote {
             this.__back.call(this.__thisObj, msg.readBoolean());
         }
         this.__back = this.__thisObj = null;
+        this.dispose();
     }
 }
 //////////////////////////End File:remote/remotes/IsDirectionExistRemote.js///////////////////////////
@@ -487,6 +493,7 @@ class ReadDirectionListRemote extends Remote {
             this.__back.call(this.__thisObj, list);
         }
         this.__back = this.__thisObj = null;
+        this.dispose();
     }
 }
 //////////////////////////End File:remote/remotes/ReadDirectionListRemote.js///////////////////////////
@@ -550,6 +557,7 @@ class SaveFileRemote extends Remote {
             }
             this.__back = this.__thisObj = null;
         }
+        this.dispose();
     }
 }
 //////////////////////////End File:remote/remotes/SaveFileRemote.js///////////////////////////
@@ -581,6 +589,7 @@ class DeleteFileRemote extends Remote {
             this.__back.call(this.__thisObj);
         }
         this.__back = this.__thisObj = null;
+        this.dispose();
     }
 }
 //////////////////////////End File:remote/remotes/DeleteFileRemote.js///////////////////////////

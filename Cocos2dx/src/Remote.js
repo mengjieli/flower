@@ -219,10 +219,12 @@ var remote = {};
     //////////////////////////File:remote/Remote.js///////////////////////////
 
     var Remote = function () {
-        function Remote() {
+        function Remote(back, thisObj) {
             _classCallCheck(this, Remote);
 
             this.__id = Remote.id++;
+            this.back = back;
+            this.thisObj = thisObj;
             RemoteServer.getInstance().registerRemote(this);
         }
 
@@ -233,7 +235,11 @@ var remote = {};
             }
         }, {
             key: "receive",
-            value: function receive(cmd, bytes) {}
+            value: function receive(cmd, bytes) {
+                if (this.back) {
+                    this.back.call(this.thisObj, cmd, bytes, this);
+                }
+            }
         }, {
             key: "dispose",
             value: function dispose() {
@@ -425,6 +431,7 @@ var remote = {};
                     this.__back.call(this.__thisObj, msg.readBoolean());
                 }
                 this.__back = this.__thisObj = null;
+                this.dispose();
             }
         }]);
 
@@ -475,6 +482,7 @@ var remote = {};
                     this.__back.call(this.__thisObj, list);
                 }
                 this.__back = this.__thisObj = null;
+                this.dispose();
             }
         }]);
 
@@ -545,6 +553,7 @@ var remote = {};
                     }
                     this.__back = this.__thisObj = null;
                 }
+                this.dispose();
             }
         }]);
 
@@ -583,6 +592,7 @@ var remote = {};
                     this.__back.call(this.__thisObj);
                 }
                 this.__back = this.__thisObj = null;
+                this.dispose();
             }
         }]);
 
