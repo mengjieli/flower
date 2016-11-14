@@ -5,5 +5,7 @@
   "4": "LoadUserConfigTask",
   "18": "GetClientListTask",
   "20": "TransformTask",
-  "22": "SendToClientTask"
+  "22": "SendToClientTask",
+
+  "10000": "GetQATestAccountTask"
 }

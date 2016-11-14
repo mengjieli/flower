@@ -2,8 +2,8 @@ class PlatformWebSocket {
 
     webSocket;
 
-    bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-        var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
+    bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
+        var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
         this.webSocket = websocket;
         var openFunc = function () {
             onConnect.call(thisObj);

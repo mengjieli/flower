@@ -8869,7 +8869,7 @@ var $root = eval("this");
                     } else if (item.type == "script") {
                         this.script += e.data + "\n\n\n";
                         if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                            //trace("执行script:\n", this.script);
+                            //console.log("执行script:\n", this.script);
                             this.script += "flower.Module.$currentModule.data = module;";
                             Module.$currentModule = this;
                             eval(this.script);

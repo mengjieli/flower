@@ -1,0 +1,17 @@
+//
+function init() {
+    flower.EnterFrame.add(this.update, this);
+}
+
+function update() {
+    var coordX = parseInt(this.coordX.text) || 0;
+    var coordY = parseInt(this.coordY.text) || 0;
+    var point = module.MapUtils.transPointToPosition(coordX,coordY);
+    this.position.text = "像素: ( " + parseInt(point.x) + " , " + parseInt(point.y) + " )";
+
+    var positionX = parseInt(this.positionX.text) || 0;
+    var positionY = parseInt(this.positionY.text) || 0;
+    point = module.MapUtils.transPositionToPoint(positionX,positionY);
+    this.coord.text = "坐标: ( " + point.x + " , " + point.y + " )";
+
+}

@@ -134,9 +134,16 @@ class URLLoader extends EventDispatcher {
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
+                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
             }
         }
+    }
+
+    __concatURLHead(head,url) {
+        if(url.slice(0,7) == "http://") {
+            return url;
+        }
+        return head + url;
     }
 
     onLoadTexturePlistComplete(e) {
@@ -195,7 +202,7 @@ class URLLoader extends EventDispatcher {
         for (var key in this._params) {
             params[key] = this._params;
         }
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
+        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {

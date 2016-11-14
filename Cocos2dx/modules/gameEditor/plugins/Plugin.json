@@ -1,6 +1,3 @@
 [
-  "blackPlugin/module.json",
-  "dungeonPlugin/module.json",
-  "mapPlugin/module.json",
   "smallPlugin/module.json"
 ]
