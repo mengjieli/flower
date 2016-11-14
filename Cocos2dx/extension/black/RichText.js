@@ -25,10 +25,66 @@ class RichText extends Group {
             100: false,//updateFlag
             101: {}, //DisplayCaches
             102: {}, //ids
+            200: 0, //lastTouchTime
+            201: false //doubleClick
         };
         this.addChild(this.$RichText[4]);
         this.addChild(this.$RichText[5]);
+        this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
         flower.EnterFrame.add(this.$update, this);
+    }
+
+    __onTouch(e) {
+        var p = this.$RichText;
+        switch (e.type) {
+            case flower.TouchEvent.TOUCH_BEGIN:
+                var doubleClick = false;
+                var tribleClick = false;
+                if (!p[201]) {
+                    if (flower.CoreTime.currentTime - p[200] < 200) {
+                        doubleClick = true;
+                    }
+                } else {
+                    if (flower.CoreTime.currentTime - p[200] < 200) {
+                        doubleClick = true;
+                        tribleClick = true;
+                    }
+                }
+                p[200] = flower.CoreTime.currentTime;
+                p[201] = doubleClick;
+                if (tribleClick) { //三击
+                    this.__tribleClick();
+                } else if (doubleClick) { //双击
+                    this.__doubleClick();
+                } else { //单击
+                    this.__click();
+                }
+                break;
+        }
+    }
+
+    /**
+     * 连续三次点击
+     * @private
+     */
+    __tribleClick() {
+        console.log("三击")
+    }
+
+    /**
+     * 连续两次点击
+     * @private
+     */
+    __doubleClick() {
+        console.log("双击")
+    }
+
+    /**
+     * 点击
+     * @private
+     */
+    __click() {
+        console.log("单击")
     }
 
     $setHtmlText(text) {
@@ -435,7 +491,7 @@ class RichText extends Group {
         }
         if (id != "") {
             ids[id] = image;
-            if(!this[id]) {
+            if (!this[id]) {
                 this[id] = image;
             }
         }
@@ -522,7 +578,7 @@ class RichText extends Group {
         }
         if (id != "") {
             ids[id] = ui;
-            if(!this[id]) {
+            if (!this[id]) {
                 this[id] = ui;
             }
         }
