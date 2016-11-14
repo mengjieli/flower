@@ -13,6 +13,9 @@ function loadPlugins() {
 
 function __onLoadPlugins(e) {
     var list = e.data;
+    if(flower.params.plugin) {
+        list = [flower.params.plugin];
+    }
     this.progress = flower.DataManager.getInstance().createData("ProgressData");
     this.progress.max.value = list.length;
     this.progress.tip.value = "加载插件";

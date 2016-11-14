@@ -74,7 +74,7 @@ var Main = function () {
             //input.x = 300;
             //input.y = 250;
 
-            /*
+            ///*
             var rect = new flower.Rect();
             rect.width = 400;
             rect.height = 400;
@@ -101,9 +101,7 @@ var Main = function () {
 
             //console.log(flower.StringDo.split("aaawqqw\rb21oiop21\ncsa,las;<br/>dsasa;asl;", ["\r", "\n", "<br/>"]));
 
-            return;
-
-            */
+            return;//*/
 
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
