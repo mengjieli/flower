@@ -136,6 +136,10 @@ class File {
         }
         return this.__parent;
     }
+
+    static get support() {
+        return flower.PlatformFile ? true : false;
+    }
 }
 
 exports.File = File;

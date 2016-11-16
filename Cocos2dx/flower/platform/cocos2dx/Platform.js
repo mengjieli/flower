@@ -11,7 +11,7 @@ class Platform {
 
     static start(engine, root, background, nativeStage = null, touchShow = null) {
         flower.system.platform = Platform.type;
-        flower.system.native = false;
+        flower.system.native = Platform.native;
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         var scene = cc.Scene.extend({
             ctor: function () {

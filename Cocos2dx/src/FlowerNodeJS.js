@@ -2194,6 +2194,11 @@ var flower = {};
                 }
                 return this.__parent;
             }
+        }], [{
+            key: "support",
+            get: function get() {
+                return flower.PlatformFile ? true : false;
+            }
         }]);
 
         return File;
