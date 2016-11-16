@@ -1,3 +1,6 @@
+var fs = require("fs");
+var path = require("path");
+
 class Platform {
     static type = "cocos2dx";
     static native = cc.sys.isNative;
@@ -7,6 +10,8 @@ class Platform {
     static height;
 
     static start(engine, root, background, nativeStage = null, touchShow = null) {
+        flower.system.platform = Platform.type;
+        flower.system.native = false;
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         var scene = cc.Scene.extend({
             ctor: function () {
@@ -107,7 +112,7 @@ class Platform {
         Platform.lastTime = now;
         if (PlatformURLLoader.loadingList.length) {
             var item = PlatformURLLoader.loadingList.shift();
-            item[0].apply(null,item.slice(1,item.length));
+            item[0].apply(null, item.slice(1, item.length));
         }
     }
 

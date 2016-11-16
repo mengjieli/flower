@@ -1,8 +1,8 @@
 .idea
 .idea/
 .idea/workspace.xml
-Cocos2dx/.settings/
 flash/
+Cocos2dx/.settings/
 Cocos2dx/cocosstudio/
 Cocos2dx/frameworks/
 Cocos2dx/runtime/

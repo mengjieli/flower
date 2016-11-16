@@ -1,7 +1,10 @@
+var fs = require("fs");
+var path = require("path");
+
 class Platform {
     static type = "remote";
     static startSync = true;
-    static native;
+    static native = true;
 
     static stage;
     static width;
@@ -9,6 +12,8 @@ class Platform {
     static server;
 
     static start(engine, root, background, readyBack) {
+        flower.system.platform = Platform.type;
+        flower.system.native = Platform.native;
         setTimeout(Platform._run, 0);
         //server =
     }

@@ -164,6 +164,7 @@ var files = file.readFilesWidthEnd("js");
 var list = [
     "Flower",
     "Platform",
+    "PlatformFile",
     "PlatformDisplayObject",
     "PlatformSprite",
     "PlatformTextField",
@@ -185,6 +186,8 @@ var list = [
     "DebugInfo",
 
     "CoreTime",
+
+    "File",
 
     "Language",
     "zh_CN",
@@ -294,7 +297,7 @@ while (list.length) {
     file = files[i];
     for (var i = 0; i < files.length; i++) {
         var f = files[i];
-        if(f.url.slice(0, "flower/platform/".length) == "flower/platform/" && f.url.slice(0, "flower/platform/nodejs/".length) != "flower/platform/nodejs/") continue;
+        if (f.url.slice(0, "flower/platform/".length) == "flower/platform/" && f.url.slice(0, "flower/platform/nodejs/".length) != "flower/platform/nodejs/") continue;
         if (f.name == name) {
             fileContent += "//////////////////////////File:" + files[i].url + "///////////////////////////\n";
             fileContent += files[i].readContent() + "\n";
@@ -307,6 +310,7 @@ fileContent += "var trace = flower.trace;\n";
 fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
 //fileContent += "var flower = exports;\n";
 file = new File("srcFlower6NodeJS/FlowerNodeJS.js");
+fileContent += "global.flower = flower";
 file.save(fileContent);
 
 

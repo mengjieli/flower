@@ -1,12 +1,14 @@
 class Platform {
     static type = "cocos2dx";
-    static native;
+    static native = false;
 
     static stage;
     static width;
     static height;
 
     static start(engine, root, background) {
+        flower.system.platform = Platform.type;
+        flower.system.native = Platform.native;
         var paramString = window.location.search;
         while (paramString.charAt(0) == "?") {
             paramString = paramString.slice(1, paramString.length);

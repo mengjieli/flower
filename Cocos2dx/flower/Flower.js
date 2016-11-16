@@ -151,5 +151,6 @@ exports.sys = {
     getLanguage: getLanguage,
 }
 exports.params = params;
-
+exports.system = {
+}
 $root.trace = trace;
