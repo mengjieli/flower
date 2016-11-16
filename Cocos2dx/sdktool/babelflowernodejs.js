@@ -2,7 +2,7 @@ require("./help/com/requirecom");
 require("./help/shell/requireshell");
 
 function compressComplete() {
-    new ShellCommand("babel", ["./srcFlower6Dom", "-d", "./src"], function () {
+    new ShellCommand("babel", ["./srcFlower6NodeJS", "-d", "./src"], function () {
             //console.log("complete!")
 
 //生成 js 依赖关系的文件
@@ -265,7 +265,7 @@ var list = [
 ];
 var fileContent = "";
 fileContent += `
-var LocalWebSocket = WebSocket;
+//var LocalWebSocket = WebSocket;
 var $root = eval(\"this\");
 var root = root || eval(\"this\");
 var __define = $root.__define || function (o, p, g, s) {
@@ -294,7 +294,7 @@ while (list.length) {
     file = files[i];
     for (var i = 0; i < files.length; i++) {
         var f = files[i];
-        if(f.url.slice(0, "flower/platform/".length) == "flower/platform/" && f.url.slice(0, "flower/platform/dom/".length) != "flower/platform/dom/") continue;
+        if(f.url.slice(0, "flower/platform/".length) == "flower/platform/" && f.url.slice(0, "flower/platform/nodejs/".length) != "flower/platform/nodejs/") continue;
         if (f.name == name) {
             fileContent += "//////////////////////////File:" + files[i].url + "///////////////////////////\n";
             fileContent += files[i].readContent() + "\n";
@@ -306,7 +306,7 @@ fileContent += "})(Math);\n";
 fileContent += "var trace = flower.trace;\n";
 fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
 //fileContent += "var flower = exports;\n";
-file = new File("srcFlower6Dom/FlowerDom.js");
+file = new File("srcFlower6NodeJS/FlowerNodeJS.js");
 file.save(fileContent);
 
 

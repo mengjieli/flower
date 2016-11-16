@@ -293,7 +293,7 @@ while (list.length) {
     file = files[i];
     for (var i = 0; i < files.length; i++) {
         var f = files[i];
-        if (f.url.slice(0, "flower/platform/dom/".length) == "flower/platform/dom/") continue;
+        if(f.url.slice(0, "flower/platform/".length) == "flower/platform/" && f.url.slice(0, "flower/platform/cocos2dx/".length) != "flower/platform/cocos2dx/") continue;
         if (f.name == name) {
             fileContent += "//////////////////////////File:" + files[i].url + "///////////////////////////\n";
             fileContent += files[i].readContent() + "\n";

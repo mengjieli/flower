@@ -163,7 +163,7 @@ var file = new File("remoteServer/");
 var files = file.readFilesWidthEnd("js");
 var fileContent = "";
 fileContent += 'require("./com/requirecom");\n';
-fileContent += 'require("./ftp/requireftp");\n';
+//fileContent += 'require("./ftp/requireftp");\n';
 fileContent += 'require("./net/requirenet");\n';
 fileContent += 'require("./shell/requireshell");\n';
 

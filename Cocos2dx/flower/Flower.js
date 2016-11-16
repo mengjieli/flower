@@ -22,7 +22,17 @@ var params = {};
 function start(completeFunc, nativeStage, touchShow) {
     var stage = new Stage();
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+    if (Platform.startSync) {
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+            start2(completeFunc, nativeStage, touchShow, stage);
+        });
+    } else {
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+        start2(completeFunc, nativeStage, touchShow, stage);
+    }
+}
+
+function start2(completeFunc, nativeStage, touchShow, stage) {
     flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
@@ -33,7 +43,6 @@ function start(completeFunc, nativeStage, touchShow) {
         stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;
         LANGUAGE = config.language || "";
-
         function startLoad() {
             loader = new URLLoader("res/blank.png");
             loader.addListener(Event.COMPLETE, function (e) {
@@ -58,6 +67,7 @@ function start(completeFunc, nativeStage, touchShow) {
             });
             loader.load();
         }
+
         if (config.remote) {
             flower.RemoteServer.start(startLoad);
         } else {

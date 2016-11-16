@@ -34,6 +34,7 @@ var Main = function () {
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
+            console.log("flower ready!");
 
             //var module = new flower.Module("modules/software/module.json");
             //module.load();
@@ -74,7 +75,7 @@ var Main = function () {
             //input.x = 300;
             //input.y = 250;
 
-            ///*
+            /*
             var rect = new flower.Rect();
             rect.width = 400;
             rect.height = 400;

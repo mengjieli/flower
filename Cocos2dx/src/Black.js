@@ -2800,15 +2800,82 @@ var $root = eval("this");
                 13: false, //wordWrap
                 30: 0, //caretIndex
                 31: 0, //caretHtmlIndex
-                32: null }, _defineProperty(_this13$$RichText, "32", null), _defineProperty(_this13$$RichText, 33, null), _defineProperty(_this13$$RichText, 34, 0), _defineProperty(_this13$$RichText, 100, false), _defineProperty(_this13$$RichText, 101, {}), _defineProperty(_this13$$RichText, 102, {}), _this13$$RichText);
-            //ids
+                32: null }, _defineProperty(_this13$$RichText, "32", null), _defineProperty(_this13$$RichText, 33, null), _defineProperty(_this13$$RichText, 34, 0), _defineProperty(_this13$$RichText, 100, false), _defineProperty(_this13$$RichText, 101, {}), _defineProperty(_this13$$RichText, 102, {}), _defineProperty(_this13$$RichText, 200, 0), _defineProperty(_this13$$RichText, 201, false), _this13$$RichText);
+            //doubleClick
             _this13.addChild(_this13.$RichText[4]);
             _this13.addChild(_this13.$RichText[5]);
+            _this13.addListener(flower.TouchEvent.TOUCH_BEGIN, _this13.__onTouch, _this13);
             flower.EnterFrame.add(_this13.$update, _this13);
             return _this13;
         }
 
         _createClass(RichText, [{
+            key: "__onTouch",
+            value: function __onTouch(e) {
+                var p = this.$RichText;
+                switch (e.type) {
+                    case flower.TouchEvent.TOUCH_BEGIN:
+                        var doubleClick = false;
+                        var tribleClick = false;
+                        if (!p[201]) {
+                            if (flower.CoreTime.currentTime - p[200] < 200) {
+                                doubleClick = true;
+                            }
+                        } else {
+                            if (flower.CoreTime.currentTime - p[200] < 200) {
+                                doubleClick = true;
+                                tribleClick = true;
+                            }
+                        }
+                        p[200] = flower.CoreTime.currentTime;
+                        p[201] = doubleClick;
+                        if (tribleClick) {
+                            //三击
+                            this.__tribleClick();
+                        } else if (doubleClick) {
+                            //双击
+                            this.__doubleClick();
+                        } else {
+                            //单击
+                            this.__click();
+                        }
+                        break;
+                }
+            }
+
+            /**
+             * 连续三次点击
+             * @private
+             */
+
+        }, {
+            key: "__tribleClick",
+            value: function __tribleClick() {
+                console.log("三击");
+            }
+
+            /**
+             * 连续两次点击
+             * @private
+             */
+
+        }, {
+            key: "__doubleClick",
+            value: function __doubleClick() {
+                console.log("双击");
+            }
+
+            /**
+             * 点击
+             * @private
+             */
+
+        }, {
+            key: "__click",
+            value: function __click() {
+                console.log("单击");
+            }
+        }, {
             key: "$setHtmlText",
             value: function $setHtmlText(text) {
                 this.__resetCaches();
@@ -8869,7 +8936,7 @@ var $root = eval("this");
                     } else if (item.type == "script") {
                         this.script += e.data + "\n\n\n";
                         if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                            //console.log("执行script:\n", this.script);
+                            //trace("执行script:\n", this.script);
                             this.script += "flower.Module.$currentModule.data = module;";
                             Module.$currentModule = this;
                             eval(this.script);

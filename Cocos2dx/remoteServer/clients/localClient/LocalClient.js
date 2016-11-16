@@ -1,6 +1,5 @@
 require("./../../com/requirecom");
 require("./../../shell/requireshell");
-require("./../../ftp/requireftp");
 require("./../../net/requirenet");
 
 
