@@ -109,4 +109,8 @@ class PlatformURLLoader {
         //};
         //xhr.send();
     }
+
+    static loadTextureBack(id, width, height) {
+
+    }
 }

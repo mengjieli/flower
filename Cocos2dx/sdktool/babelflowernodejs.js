@@ -162,6 +162,14 @@ function compressComplete() {
 var file = new File("flower/");
 var files = file.readFilesWidthEnd("js");
 var list = [
+    "EventDispatcher",
+    "Event",
+    "TouchEvent",
+    "MouseEvent",
+    "DragEvent",
+    "KeyboardEvent",
+
+
     "Flower",
     "Platform",
     "PlatformFile",
@@ -178,6 +186,11 @@ var list = [
     "PlatformProgram",
     "PlatformShaderType",
     "PlatformWebSocket",
+    "PlatformWebSocketServer",
+    "PlatformWebSocketClient",
+    "PlatformSocketServer",
+    "PlatformSocketClient",
+    "PlatformClient",
 
     "NativeDisplayInfo",
     "DisplayInfo",
@@ -191,13 +204,6 @@ var list = [
 
     "Language",
     "zh_CN",
-
-    "EventDispatcher",
-    "Event",
-    "TouchEvent",
-    "MouseEvent",
-    "DragEvent",
-    "KeyboardEvent",
 
 
     "Filter",
@@ -234,6 +240,10 @@ var list = [
     "WebSocket",
     "VBWebSocket",
     "Remote",
+    "WebSocketServer",
+    "WebSocketClient",
+    "SocketServer",
+    "SocketClient",
 
     "Plist",
     "PlistFrame",
@@ -260,11 +270,13 @@ var list = [
     "ObjectDo",
     "StringDo",
     "VByteArray",
+    "ByteArray",
     "Path",
     "XMLAttribute",
     "XMLElement",
     "XMLNameSpace",
-    "Math"
+    "Math",
+
 ];
 var fileContent = "";
 fileContent += `
@@ -289,8 +301,11 @@ function __extends(d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 }
+global.__define = __define;
+global.__extends = __extends;
 var flower = {};
 `;
+
 fileContent += "(function(math){\n";
 while (list.length) {
     var name = list.shift();

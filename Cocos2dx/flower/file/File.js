@@ -2,15 +2,16 @@ class File {
 
     __native;
     __url;
+    __name;
     __isExist;
     __isDirectory;
     __parent;
 
     constructor(url) {
         this.__url = url;
-        this.__native = new PlatformFile(url);
-        if (this.isDirectory && this.url.charAt(this.url.length - 1) != "/") {
-            this.__url += "/";
+        this.__name = url.split("/")[url.split("/").length - 1];
+        if (File.$newNativeFile) {
+            this.__native = new PlatformFile(url);
         }
     }
 
@@ -28,6 +29,7 @@ class File {
      * @returns {Array<File>}
      */
     getDirectoryListing() {
+        File.$newNativeFile = false;
         var files = [this];
         var natives = this.__native.readDirectionList(File);
         for (var i = 0; i < natives.length; i++) {
@@ -35,6 +37,7 @@ class File {
             file.__native = natives[i];
             files.push(file);
         }
+        File.$newNativeFile = true;
         return files;
     }
 
@@ -54,12 +57,14 @@ class File {
                 break;
             }
         }
+        File.$newNativeFile = false;
         var natives = this.__native.readFilesWidthEnd(File, File);
         for (var i = 0; i < natives.length; i++) {
             var file = new File(natives[i].url);
             file.__native = natives[i];
             files.push(file);
         }
+        File.$newNativeFile = true;
         return files;
     }
 
@@ -101,6 +106,10 @@ class File {
         return new File(this.url);
     }
 
+    get name() {
+        return this.__name;
+    }
+
     get url() {
         return this.__url;
     }
@@ -126,11 +135,11 @@ class File {
      * @returns {*}
      */
     get parent() {
+        var path = this.nativePath;
         if (!this.exists || path.split("/").length == 1) {
             this.__parent = null;
             return null;
         }
-        var path = this.nativePath;
         if (!this.__parent) {
             this.__parent = new File(path.slice(0, path.length - (path.split("/")[path.split("/").length - 1]).length));
         }
@@ -140,6 +149,8 @@ class File {
     static get support() {
         return flower.PlatformFile ? true : false;
     }
+
+    static $newNativeFile = true;
 }
 
 exports.File = File;

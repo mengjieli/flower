@@ -1,23 +1,75 @@
 var fs = require("fs");
 var path = require("path");
+var webSocket = require('websocket').server;
+var http = require('http');
+var net = require('net');
 
 class Platform {
     static type = "remote";
     static startSync = true;
     static native = true;
 
+    static engine;
     static stage;
     static width;
     static height;
     static server;
+    static IPV4;
+    static server;
+    static __init = false;
 
     static start(engine, root, background, readyBack) {
+        Platform.engine = engine;
+        Platform.getIPV4();
         flower.system.platform = Platform.type;
         flower.system.native = Platform.native;
         setTimeout(Platform._run, 0);
-        //server =
+
+        var server = new flower.SocketServer(PlatformClient);
+        Platform.server = server;
+        server.start(16788);
     }
 
+    static init(width, height) {
+        if (Platform.__init) {
+            return;
+        }
+        Platform.__init = true;
+        Platform.width = width;
+        Platform.height = height;
+        Platform.engine.$resize(Platform.width, Platform.height);
+        console.log("size", width, height);
+    }
+
+    static sendToClient(msg) {
+        var clients = Platform.server.clients;
+        for (var i = 0; i < clients.length; i++) {
+            clients[i].send(msg);
+        }
+    }
+
+    static getIPV4() {
+        var os = require('os');
+        var IPv4 = "localhost", hostName;
+        hostName = os.hostname();
+        var network = os.networkInterfaces();
+        var netKey;
+        for (var key in network) {
+            if (key.slice(0, "en".length) == "en") {
+                netKey = key;
+            }
+        }
+        try {
+            for (var i = 0; i < os.networkInterfaces()[netKey].length; i++) {
+                if (os.networkInterfaces()[netKey][i].family == 'IPv4') {
+                    IPv4 = os.networkInterfaces()[netKey][i].address;
+                }
+            }
+        } catch (e) {
+
+        }
+        Platform.IPv4 = IPv4;
+    }
 
     static _runBack;
     static lastTime = (new Date()).getTime();

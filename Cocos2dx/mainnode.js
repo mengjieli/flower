@@ -10,6 +10,7 @@
 
 require("./src/FlowerNodeJS");
 
+flower.start();
 
 //
 //var file = new File("src/Black.js");
@@ -36,6 +37,3 @@ require("./src/FlowerNodeJS");
 //}
 //content += "new Main();";
 //eval(content);
-
-var file = new flower.File("src");
-console.log(file)

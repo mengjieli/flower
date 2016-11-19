@@ -10,7 +10,7 @@ class PlatformFile {
     constructor(url) {
         this.__url = url;
         try {
-            this.state = fs.statSync(this.url);
+            this.state = fs.statSync(url);
             this.__isExist = fs.existsSync(url);
         } catch (e) {
             this.__isExist = false;
@@ -18,7 +18,7 @@ class PlatformFile {
         if (this.__isExist) {
             this.__getNativePath();
             this.__isDirectory = this.state.isDirectory();
-            this.__name = url.split("/")[url.split("/").length] - 1;
+            this.__name = url.split("/")[url.split("/").length - 1];
             if (!this.__isDirectory) {
                 var name = this.name;
                 if (name.split(".").length > 1) {
@@ -30,11 +30,11 @@ class PlatformFile {
     }
 
     __getNativePath() {
-        var path = process.cwd();
-        if (path.length && path.charAt(path.length - 1) != "/") {
-            path += "/";
+        var path = fs.realpathSync(this.__url);
+        if (path.length && path.charAt(path.length - 1) == "/") {
+            path = path.slice(0, path.length - 1);
         }
-        this.__nativePath = flower.Path.joinPath(path, this.__url);
+        this.__nativePath = path;
     }
 
     save(data, format, url) {
@@ -73,28 +73,32 @@ class PlatformFile {
         return content;
     }
 
-    readFilesWidthEnd(ends, clazz) {
-        clazz = clazz || PlatformFile;
+    readFilesWidthEnd(ends) {
         var files = [];
         if (!this.isDirectory) {
+            for (var i = 0; i < ends.length; i++) {
+                if (ends[i] == this.end) {
+                    files.push(this);
+                }
+            }
         } else if (this.isDirectory) {
             var list = fs.readdirSync(this.url);
             for (var i = 0; i < list.length; i++) {
-                file = new clazz(this.url + "/" + list[i]);
+                file = new PlatformFile(this.url + "/" + list[i]);
                 files = files.concat(file.readFilesWidthEnd(ends));
             }
         }
         return files;
     }
 
-    readDirectionList(clazz) {
-        clazz = clazz || PlatformFile;
+    readDirectionList() {
         var files = [];
         if (!this.isDirectory) {
         } else if (this.isDirectory) {
+            files.push(this);
             var list = fs.readdirSync(this.url);
             for (var i = 0; i < list.length; i++) {
-                file = new clazz(this.url + "/" + list[i]);
+                var file = new PlatformFile(this.nativePath + "/" + list[i]);
                 files = files.concat(file.readDirectionList());
             }
         }

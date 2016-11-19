@@ -234,12 +234,18 @@ class VByteArray {
         return val;
     }
 
+    clear() {
+        this.bytes.length = 0;
+        this.position = 0;
+        this.length = 0;
+    }
+
     get bytesAvailable() {
         return this.length - this.position;
     }
 
     get data() {
-        return this.bytes;
+        return this.bytes.concat();
     }
 
     toString() {

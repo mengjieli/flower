@@ -20,8 +20,498 @@ function __extends(d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 }
+global.__define = __define;
+global.__extends = __extends;
 var flower = {};
 (function(math){
+//////////////////////////File:flower/event/EventDispatcher.js///////////////////////////
+class EventDispatcher {
+
+    __EventDispatcher;
+    __hasDispose = false;
+
+    constructor(target) {
+        this.__EventDispatcher = {
+            0: target || this,
+            1: {}
+        }
+    }
+
+    get isDispose() {
+        return this.__hasDispose;
+    }
+
+    dispose() {
+        this.__EventDispatcher = null;
+        this.__hasDispose = true;
+    }
+
+    $release() {
+        this.__EventDispatcher = {
+            0: this,
+            1: {}
+        }
+    }
+
+    /**
+     *
+     * @param type
+     * @param listener
+     * @param thisObject
+     * @param priority 监听事件的优先级，暂未实现
+     */
+    once(type, listener, thisObject, priority = 0) {
+        this.__addListener(type, listener, thisObject, priority, true);
+    }
+
+    /**
+     *
+     * @param type
+     * @param listener
+     * @param thisObject
+     * @param priority 监听事件的优先级，暂未实现
+     */
+    addListener(type, listener, thisObject, priority = 0) {
+        this.__addListener(type, listener, thisObject, priority, false);
+    }
+
+    /**
+     * 监听事件
+     * @param type
+     * @param listener
+     * @param thisObject
+     * @param priority 监听事件的优先级，暂未实现
+     * @param once
+     * @private
+     */
+    __addListener(type, listener, thisObject, priority, once) {
+        if (DEBUG) {
+            if (this.__hasDispose) {
+                $error(1002);
+            }
+        }
+        var values = this.__EventDispatcher;
+        var events = values[1];
+        var list = events[type];
+        if (!list) {
+            list = values[1][type] = [];
+        }
+        for (var i = 0, len = list.length; i < len; i++) {
+            var item = list[i];
+            if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
+                return false;
+            }
+        }
+        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false});
+    }
+
+    removeListener(type, listener, thisObject) {
+        if (this.__hasDispose) {
+            return;
+        }
+        var values = this.__EventDispatcher;
+        var events = values[1];
+        var list = events[type];
+        if (!list) {
+            return;
+        }
+        for (var i = 0, len = list.length; i < len; i++) {
+            if (list[i].listener == listener && list[i].thisObject == thisObject && list[i].del == false) {
+                list[i].listener = null;
+                list[i].thisObject = null;
+                list[i].del = true;
+                break;
+            }
+        }
+    }
+
+    removeAllListener() {
+        if (this.__hasDispose) {
+            return;
+        }
+        var values = this.__EventDispatcher;
+        var events = values[1];
+        events = {};
+    }
+
+    hasListener(type) {
+        if (DEBUG) {
+            if (this.__hasDispose) {
+                $error(1002);
+            }
+        }
+        var events = this.__EventDispatcher[1];
+        var list = events[type];
+        if (!list) {
+            return false;
+        }
+        for (var i = 0, len = list.length; i < len; i++) {
+            if (list[i].del == false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    dispatch(event) {
+        if (!this.__EventDispatcher) {
+            return;
+        }
+        if (DEBUG) {
+            if (this.__hasDispose) {
+                $error(1002);
+            }
+        }
+        var list = this.__EventDispatcher[1][event.type];
+        if (!list) {
+            return;
+        }
+
+        for (var i = 0, len = list.length; i < len; i++) {
+            if (list[i].del == false) {
+                var listener = list[i].listener;
+                var thisObj = list[i].thisObject;
+                if (event.$target == null) {
+                    event.$target = this;
+                }
+                event.$currentTarget = this;
+                if (list[i].once) {
+                    list[i].listener = null;
+                    list[i].thisObject = null;
+                    list[i].del = true;
+                }
+                listener.call(thisObj, event);
+            }
+        }
+        for (i = 0; i < list.length; i++) {
+            if (list[i].del == true) {
+                list.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
+    dispatchWith(type, data = null, bubbles = false) {
+        if (DEBUG) {
+            if (this.__hasDispose) {
+                $error(1002);
+            }
+        }
+        var e = flower.Event.create(type, data, bubbles);
+        e.$target = this;
+        this.dispatch(e);
+        flower.Event.release(e);
+    }
+}
+
+flower.EventDispatcher = EventDispatcher;
+//////////////////////////End File:flower/event/EventDispatcher.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/Event.js///////////////////////////
+class Event {
+
+    $type;
+    $bubbles;
+    $cycle = false;
+    $target = null;
+    $currentTarget = null;
+    data;
+    _isPropagationStopped = false;
+
+    constructor(type, bubbles = false) {
+        this.$type = type;
+        this.$bubbles = bubbles;
+    }
+
+    stopPropagation() {
+        this._isPropagationStopped = true;
+    }
+
+    get isPropagationStopped() {
+        return this._isPropagationStopped;
+    }
+
+    get type() {
+        return this.$type;
+    }
+
+    get bubbles() {
+        return this.$bubbles;
+    }
+
+    get target() {
+        return this.$target;
+    }
+
+    get currentTarget() {
+        return this.$currentTarget;
+    }
+
+    static READY = "ready";
+    static COMPLETE = "complete";
+    static ADDED = "added";
+    static REMOVED = "removed";
+    static ADDED_TO_STAGE = "added_to_stage";
+    static REMOVED_FROM_STAGE = "removed_from_stage";
+    static CONNECT = "connect";
+    static CLOSE = "close";
+    static CHANGE = "change";
+    static ERROR = "error";
+    static UPDATE = "update";
+    static FOCUS_IN = "focus_in";
+    static FOCUS_OUT = "focus_out";
+    static CONFIRM = "confirm";
+    static CANCEL = "cancel";
+    static START_INPUT = "start_input";
+    static STOP_INPUT = "stop_input";
+    static DISTORT = "distort";
+    static CREATION_COMPLETE = "creation_complete";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
+    static CLICK_ITEM = "click_item";
+    static TOUCH_BEGIN_ITEM = "touch_begin_item";
+
+    static _eventPool = [];
+
+    static create(type, data = null, bubbles = false) {
+        var e;
+        if (!flower.Event._eventPool.length) {
+            e = new flower.Event(type);
+        }
+        else {
+            e = flower.Event._eventPool.pop();
+            e.$cycle = false;
+        }
+        e.$type = type;
+        e.$bubbles = bubbles;
+        e.data = data;
+        return e;
+    }
+
+    static release(e) {
+        if (e.$cycle) {
+            return;
+        }
+        e.$cycle = true;
+        e.data = null;
+        flower.Event._eventPool.push(e);
+    }
+}
+
+flower.Event = Event;
+//////////////////////////End File:flower/event/Event.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/TouchEvent.js///////////////////////////
+class TouchEvent extends Event {
+
+    $touchId = 0;
+    $touchX = 0;
+    $touchY = 0;
+    $stageX = 0;
+    $stageY = 0;
+
+    constructor(type, bubbles = true) {
+        super(type, bubbles);
+    }
+
+    get touchId() {
+        return this.$touchId;
+    }
+
+    get touchX() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchX;
+        }
+        return this.$touchX;
+    }
+
+    get touchY() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchY;
+        }
+        return this.$touchY;
+    }
+
+    get stageX() {
+        return this.$stageX;
+    }
+
+    get stageY() {
+        return this.$stageY;
+    }
+
+    static TOUCH_BEGIN = "touch_begin";
+    static TOUCH_MOVE = "touch_move";
+    static TOUCH_END = "touch_end";
+    static TOUCH_RELEASE = "touch_release";
+    /**
+     * 此事件是在没有 touch 的情况下发生的，即没有按下
+     * @type {string}
+     */
+    static MOVE = "move";
+}
+
+flower.TouchEvent = TouchEvent;
+//////////////////////////End File:flower/event/TouchEvent.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/MouseEvent.js///////////////////////////
+class MouseEvent extends Event {
+
+    $touchX;
+    $touchY;
+    $stageX;
+    $stageY;
+
+    constructor(type, bubbles = true) {
+        super(type, bubbles);
+    }
+
+    get mouseX() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchX;
+        }
+        return this.$touchX;
+    }
+
+    get mouseY() {
+        if (this.currentTarget) {
+            return this.currentTarget.lastTouchY;
+        }
+        return this.$touchY;
+    }
+
+    get stageX() {
+        return this.$stageX;
+    }
+
+    get stageY() {
+        return this.$stageY;
+    }
+
+    /**
+     * 此事件是在没有 touch 的情况下发生的，即没有按下
+     * @type {string}
+     */
+    static MOUSE_MOVE = "mouse_move";
+    static MOUSE_OVER = "mouse_over";
+    static MOUSE_OUT = "mouse_out";
+    static RIGHT_CLICK = "right_click";
+}
+
+flower.MouseEvent = MouseEvent;
+//////////////////////////End File:flower/event/MouseEvent.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/DragEvent.js///////////////////////////
+class DragEvent extends Event {
+
+    //DisplayObject
+    $dragSource;
+    $dragType;
+    $accept = false;
+
+    constructor(type, bubbles = true) {
+        super(type, bubbles);
+    }
+
+    get dragSource() {
+        return this.$dragSource;
+    }
+
+    get dragType() {
+        return this.$dragType;
+    }
+
+    get hasAccept() {
+        return this.$accept;
+    }
+
+    accept() {
+        this.$accept = true;
+    }
+
+    static DRAG_OVER = "drag_over";
+    static DRAG_OUT = "drag_out";
+    static DRAG_END = "drag_end";
+
+    static $Pools = [];
+
+    static create(type, bubbles, dragSource, dragType, dragData) {
+        var event = DragEvent.$Pools.pop();
+        if (!event) {
+            event = new DragEvent(type, bubbles);
+        } else {
+            event.$type = type;
+            event.$bubbles = bubbles;
+        }
+        event.data = dragData;
+        event.$dragSource = dragSource;
+        event.$dragType = dragType;
+        return event;
+    }
+
+    static release(e) {
+        DragEvent.$Pools.push(e);
+    }
+}
+
+flower.DragEvent = DragEvent;
+//////////////////////////End File:flower/event/DragEvent.js///////////////////////////
+
+
+
+//////////////////////////File:flower/event/KeyboardEvent.js///////////////////////////
+class KeyboardEvent extends Event {
+
+    __keyCode;
+    __key;
+
+
+    constructor(type, key, bubbles = true) {
+        super(type, bubbles);
+        this.__keyCode = key;
+        this.__key = String.fromCharCode(key);
+    }
+
+    get keyCode() {
+        return this.__keyCode;
+    }
+
+    get key() {
+        return this.__key;
+    }
+
+    get shift() {
+        return KeyboardEvent.$shift;
+    }
+
+    get control() {
+        return KeyboardEvent.$control;
+    }
+
+    get alt() {
+        return KeyboardEvent.$alt;
+    }
+
+    static $shift = false; //16
+    static $control = false; //17
+    static $alt = false; //18
+
+    static KEY_DOWN = "key_down";
+    static KEY_UP = "key_up";
+}
+
+flower.KeyboardEvent = KeyboardEvent;
+//////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
+
+
+
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
 var TIP = false;
@@ -186,6 +676,9 @@ $root.trace = trace;
 //////////////////////////File:flower/platform/nodejs/Platform.js///////////////////////////
 var fs = require("fs");
 var path = require("path");
+var webSocket = require('websocket').server;
+var http = require('http');
+var net = require('net');
 
 class Platform {
     static type = "remote";
@@ -196,14 +689,58 @@ class Platform {
     static width;
     static height;
     static server;
+    static IPV4;
+    static server;
+    static __init = false;
 
     static start(engine, root, background, readyBack) {
+        Platform.getIPV4();
         flower.system.platform = Platform.type;
         flower.system.native = Platform.native;
         setTimeout(Platform._run, 0);
-        //server =
+
+        var server = new flower.SocketServer(PlatformClient);
+        Platform.server = server;
+        server.start(16788);
     }
 
+    static init(width, height) {
+        if (Platform.__init) {
+            return;
+        }
+        Platform.__init = true;
+        console.log("size", width, height);
+    }
+
+    static sendToClient(msg) {
+        var clients = Platform.server.clients;
+        for (var i = 0; i < clients.length; i++) {
+            clients[i].send(msg);
+        }
+    }
+
+    static getIPV4() {
+        var os = require('os');
+        var IPv4 = "localhost", hostName;
+        hostName = os.hostname();
+        var network = os.networkInterfaces();
+        var netKey;
+        for (var key in network) {
+            if (key.slice(0, "en".length) == "en") {
+                netKey = key;
+            }
+        }
+        try {
+            for (var i = 0; i < os.networkInterfaces()[netKey].length; i++) {
+                if (os.networkInterfaces()[netKey][i].family == 'IPv4') {
+                    IPv4 = os.networkInterfaces()[netKey][i].address;
+                }
+            }
+        } catch (e) {
+
+        }
+        Platform.IPv4 = IPv4;
+    }
 
     static _runBack;
     static lastTime = (new Date()).getTime();
@@ -309,7 +846,7 @@ class PlatformFile {
     constructor(url) {
         this.__url = url;
         try {
-            this.state = fs.statSync(this.url);
+            this.state = fs.statSync(url);
             this.__isExist = fs.existsSync(url);
         } catch (e) {
             this.__isExist = false;
@@ -317,7 +854,7 @@ class PlatformFile {
         if (this.__isExist) {
             this.__getNativePath();
             this.__isDirectory = this.state.isDirectory();
-            this.__name = url.split("/")[url.split("/").length] - 1;
+            this.__name = url.split("/")[url.split("/").length - 1];
             if (!this.__isDirectory) {
                 var name = this.name;
                 if (name.split(".").length > 1) {
@@ -329,11 +866,11 @@ class PlatformFile {
     }
 
     __getNativePath() {
-        var path = process.cwd();
-        if (path.length && path.charAt(path.length - 1) != "/") {
-            path += "/";
+        var path = fs.realpathSync(this.__url);
+        if (path.length && path.charAt(path.length - 1) == "/") {
+            path = path.slice(0, path.length - 1);
         }
-        this.__nativePath = flower.Path.joinPath(path, this.__url);
+        this.__nativePath = path;
     }
 
     save(data, format, url) {
@@ -372,28 +909,32 @@ class PlatformFile {
         return content;
     }
 
-    readFilesWidthEnd(ends, clazz) {
-        clazz = clazz || PlatformFile;
+    readFilesWidthEnd(ends) {
         var files = [];
         if (!this.isDirectory) {
+            for (var i = 0; i < ends.length; i++) {
+                if (ends[i] == this.end) {
+                    files.push(this);
+                }
+            }
         } else if (this.isDirectory) {
             var list = fs.readdirSync(this.url);
             for (var i = 0; i < list.length; i++) {
-                file = new clazz(this.url + "/" + list[i]);
+                file = new PlatformFile(this.url + "/" + list[i]);
                 files = files.concat(file.readFilesWidthEnd(ends));
             }
         }
         return files;
     }
 
-    readDirectionList(clazz) {
-        clazz = clazz || PlatformFile;
+    readDirectionList() {
         var files = [];
         if (!this.isDirectory) {
         } else if (this.isDirectory) {
+            files.push(this);
             var list = fs.readdirSync(this.url);
             for (var i = 0; i < list.length; i++) {
-                file = new clazz(this.url + "/" + list[i]);
+                var file = new PlatformFile(this.nativePath + "/" + list[i]);
                 files = files.concat(file.readDirectionList());
             }
         }
@@ -1717,6 +2258,211 @@ class PlatformWebSocket {
 
 
 
+//////////////////////////File:flower/platform/nodejs/PlatformWebSocketServer.js///////////////////////////
+class PlatformWebSocketServer extends flower.EventDispatcher {
+
+    constructor(clientClass, big = true) {
+        super();
+        this.big = big;
+        this.clientClass = clientClass || PlatformWebSocketServerClient;
+        this.server = null;
+        this.clients = [];
+    }
+
+    start(port) {
+        var server = http.createServer(function (request, response) {
+        });
+        server.listen(port, function () {
+            this.dispatchWith(flower.Event.READY);
+            //console.log("Server on " + port);
+        }.bind(this));
+        this.server = new webSocket({
+            // WebSocket server is tied to a HTTP server. WebSocket request is just
+            // an enhanced HTTP request. For more info http://tools.ietf.org/html/rfc6455#page-6
+            httpServer: server
+        });
+        this.server.on('request', this.connectClient.bind(this));
+    }
+
+    connectClient(request) {
+        var connection = request.accept(null, request.origin);
+        var client = new this.clientClass(connection, this.big);
+        client.addListener(flower.Event.CLOSE, this.closeClient, this);
+        this.clients.push(client);
+        this.dispatchWith(flower.Event.CONNECT, client);
+        return client;
+    }
+
+    closeClient(event) {
+        var client = event.currentTarget;
+        client.removeListener(flower.Event.CLOSE, this.closeClient, this);
+        for (var i = 0, len = this.clients.length; i < len; i++) {
+            if (this.clients[i] == client) {
+                this.clients.splice(i, 1);
+                this.dispatchWith(flower.Event.CLOSE, client);
+                break;
+            }
+        }
+        return client;
+    }
+}
+//////////////////////////End File:flower/platform/nodejs/PlatformWebSocketServer.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/nodejs/PlatformWebSocketClient.js///////////////////////////
+class PlatformWebSocketClient extends flower.EventDispatcher {
+
+    constructor(connection, big) {
+        super();
+        this.big = big;
+        this.connection = connection;
+        this.connection.on('message', this.onReceive.bind(this));
+        this.connection.on('close', this.onClose.bind(this));
+    }
+
+    send(data) {
+        this.connection.sendBytes(new Buffer(data.data));
+    }
+
+    onReceive(data) {
+
+    }
+
+    onClose(e) {
+        this.dispatchWith(flower.Event.CLOSE);
+    }
+}
+//////////////////////////End File:flower/platform/nodejs/PlatformWebSocketClient.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/nodejs/PlatformSocketServer.js///////////////////////////
+class PlatformSocketServer extends flower.EventDispatcher {
+
+    constructor(clientClass, big = true) {
+        super();
+        this.big = big;
+        this.clientClass = clientClass || PlatformWebSocketServerClient;
+        this.server = null;
+        this.clients = [];
+    }
+
+    start(port) {
+        this.server = net.createServer(this.connectClient.bind(this));
+        this.server.listen(port, Platform.IPV4);
+    }
+
+    connectClient(socket) {
+        var client = new this.clientClass(socket, this.big);
+        client.addListener(flower.Event.CLOSE, this.closeClient, this);
+        this.clients.push(client);
+        this.dispatchWith(flower.Event.CONNECT, client);
+        return client;
+    }
+
+    closeClient(event) {
+        var client = event.currentTarget;
+        client.removeListener(flower.Event.CLOSE, this.closeClient, this);
+        for (var i = 0, len = this.clients.length; i < len; i++) {
+            if (this.clients[i] == client) {
+                this.clients.splice(i, 1);
+                this.dispatchWith(flower.Event.CLOSE, client);
+                break;
+            }
+        }
+        return client;
+    }
+}
+//////////////////////////End File:flower/platform/nodejs/PlatformSocketServer.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/nodejs/PlatformSocketClient.js///////////////////////////
+class PlatformSocketClient extends flower.EventDispatcher {
+
+    constructor(connection, big) {
+        super();
+        this.big = big;
+        this.connection = connection;
+        this.connection.on('data', this.onReceive.bind(this));
+        this.connection.on('end', this.onClose.bind(this));
+    }
+
+    send(data) {
+        this.connection.write(new Buffer(data.data));
+    }
+
+    onReceive(data) {
+
+    }
+
+    onClose(e) {
+        this.dispatchWith(flower.Event.CLOSE);
+    }
+}
+//////////////////////////End File:flower/platform/nodejs/PlatformSocketClient.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/nodejs/PlatformClient.js///////////////////////////
+class PlatformClient extends PlatformSocketClient {
+
+    constructor(connection, big) {
+        super(connection, big);
+        this.buffer = new flower.VByteArray();
+    }
+
+    onReceive(data) {
+        var buffer = this.buffer;
+        for (var d = 0; d < data.length; d++) {
+            buffer.writeByte(data[d]);
+        }
+        buffer.position = 0;
+        var len = buffer.readUInt();
+        while (buffer.bytesAvailable >= len) {
+            var array = [];
+            for (var l = 0; l < len; l++) {
+                array.push(buffer.readByte());
+            }
+            var msg = new flower.VByteArray();
+            msg.readFromArray(array);
+            var cmd = msg.readUInt();
+            this.onReceiveMessage(cmd, msg);
+        }
+        var newBuffer = new flower.VByteArray();
+        while (buffer.bytesAvailable) {
+            newBuffer.writeByte(buffer.readByte());
+        }
+        this.buffer = newBuffer;
+    }
+
+    onReceiveMessage(cmd, bytes) {
+        if (cmd == 1) {
+            Platform.init(bytes.readUInt(), bytes.readUInt());
+        }
+    }
+
+    send(msg) {
+        var array = msg.data;
+        msg.clear();
+        msg.writeUInt(array.length);
+        array = msg.data.concat(array);
+        msg.clear();
+        msg.readFromArray(array);
+        super.send(msg);
+    }
+
+    static message = {
+        1: [{name: "width", type: "uint"}, {name: "height", type: "uint"}]
+    }
+}
+
+
+//////////////////////////End File:flower/platform/nodejs/PlatformClient.js///////////////////////////
+
+
+
 //////////////////////////File:flower/debug/NativeDisplayInfo.js///////////////////////////
 class NativeDisplayInfo {
     display = 0;
@@ -1861,15 +2607,16 @@ class File {
 
     __native;
     __url;
+    __name;
     __isExist;
     __isDirectory;
     __parent;
 
     constructor(url) {
         this.__url = url;
-        this.__native = new PlatformFile(url);
-        if (this.isDirectory && this.url.charAt(this.url.length - 1) != "/") {
-            this.__url += "/";
+        this.__name = url.split("/")[url.split("/").length - 1];
+        if (File.$newNativeFile) {
+            this.__native = new PlatformFile(url);
         }
     }
 
@@ -1887,6 +2634,7 @@ class File {
      * @returns {Array<File>}
      */
     getDirectoryListing() {
+        File.$newNativeFile = false;
         var files = [this];
         var natives = this.__native.readDirectionList(File);
         for (var i = 0; i < natives.length; i++) {
@@ -1894,6 +2642,7 @@ class File {
             file.__native = natives[i];
             files.push(file);
         }
+        File.$newNativeFile = true;
         return files;
     }
 
@@ -1913,12 +2662,14 @@ class File {
                 break;
             }
         }
+        File.$newNativeFile = false;
         var natives = this.__native.readFilesWidthEnd(File, File);
         for (var i = 0; i < natives.length; i++) {
             var file = new File(natives[i].url);
             file.__native = natives[i];
             files.push(file);
         }
+        File.$newNativeFile = true;
         return files;
     }
 
@@ -1960,6 +2711,10 @@ class File {
         return new File(this.url);
     }
 
+    get name() {
+        return this.__name;
+    }
+
     get url() {
         return this.__url;
     }
@@ -1985,11 +2740,11 @@ class File {
      * @returns {*}
      */
     get parent() {
+        var path = this.nativePath;
         if (!this.exists || path.split("/").length == 1) {
             this.__parent = null;
             return null;
         }
-        var path = this.nativePath;
         if (!this.__parent) {
             this.__parent = new File(path.slice(0, path.length - (path.split("/")[path.split("/").length - 1]).length));
         }
@@ -1999,6 +2754,8 @@ class File {
     static get support() {
         return flower.PlatformFile ? true : false;
     }
+
+    static $newNativeFile = true;
 }
 
 flower.File = File;
@@ -2068,494 +2825,6 @@ locale_strings[2004] = "[加载Plist失败] {0}";
 
 flower.sys.$locale_strings = $locale_strings;
 //////////////////////////End File:flower/language/zh_CN.js///////////////////////////
-
-
-
-//////////////////////////File:flower/event/EventDispatcher.js///////////////////////////
-class EventDispatcher {
-
-    __EventDispatcher;
-    __hasDispose = false;
-
-    constructor(target) {
-        this.__EventDispatcher = {
-            0: target || this,
-            1: {}
-        }
-    }
-
-    get isDispose() {
-        return this.__hasDispose;
-    }
-
-    dispose() {
-        this.__EventDispatcher = null;
-        this.__hasDispose = true;
-    }
-
-    $release() {
-        this.__EventDispatcher = {
-            0: this,
-            1: {}
-        }
-    }
-
-    /**
-     *
-     * @param type
-     * @param listener
-     * @param thisObject
-     * @param priority 监听事件的优先级，暂未实现
-     */
-    once(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, true);
-    }
-
-    /**
-     *
-     * @param type
-     * @param listener
-     * @param thisObject
-     * @param priority 监听事件的优先级，暂未实现
-     */
-    addListener(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, false);
-    }
-
-    /**
-     * 监听事件
-     * @param type
-     * @param listener
-     * @param thisObject
-     * @param priority 监听事件的优先级，暂未实现
-     * @param once
-     * @private
-     */
-    __addListener(type, listener, thisObject, priority, once) {
-        if (DEBUG) {
-            if (this.__hasDispose) {
-                $error(1002);
-            }
-        }
-        var values = this.__EventDispatcher;
-        var events = values[1];
-        var list = events[type];
-        if (!list) {
-            list = values[1][type] = [];
-        }
-        for (var i = 0, len = list.length; i < len; i++) {
-            var item = list[i];
-            if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
-                return false;
-            }
-        }
-        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false});
-    }
-
-    removeListener(type, listener, thisObject) {
-        if (this.__hasDispose) {
-            return;
-        }
-        var values = this.__EventDispatcher;
-        var events = values[1];
-        var list = events[type];
-        if (!list) {
-            return;
-        }
-        for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].listener == listener && list[i].thisObject == thisObject && list[i].del == false) {
-                list[i].listener = null;
-                list[i].thisObject = null;
-                list[i].del = true;
-                break;
-            }
-        }
-    }
-
-    removeAllListener() {
-        if (this.__hasDispose) {
-            return;
-        }
-        var values = this.__EventDispatcher;
-        var events = values[1];
-        events = {};
-    }
-
-    hasListener(type) {
-        if (DEBUG) {
-            if (this.__hasDispose) {
-                $error(1002);
-            }
-        }
-        var events = this.__EventDispatcher[1];
-        var list = events[type];
-        if (!list) {
-            return false;
-        }
-        for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].del == false) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    dispatch(event) {
-        if (!this.__EventDispatcher) {
-            return;
-        }
-        if (DEBUG) {
-            if (this.__hasDispose) {
-                $error(1002);
-            }
-        }
-        var list = this.__EventDispatcher[1][event.type];
-        if (!list) {
-            return;
-        }
-
-        for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].del == false) {
-                var listener = list[i].listener;
-                var thisObj = list[i].thisObject;
-                if (event.$target == null) {
-                    event.$target = this;
-                }
-                event.$currentTarget = this;
-                if (list[i].once) {
-                    list[i].listener = null;
-                    list[i].thisObject = null;
-                    list[i].del = true;
-                }
-                listener.call(thisObj, event);
-            }
-        }
-        for (i = 0; i < list.length; i++) {
-            if (list[i].del == true) {
-                list.splice(i, 1);
-                i--;
-            }
-        }
-    }
-
-    dispatchWith(type, data = null, bubbles = false) {
-        if (DEBUG) {
-            if (this.__hasDispose) {
-                $error(1002);
-            }
-        }
-        var e = flower.Event.create(type, data, bubbles);
-        e.$target = this;
-        this.dispatch(e);
-        flower.Event.release(e);
-    }
-}
-
-flower.EventDispatcher = EventDispatcher;
-//////////////////////////End File:flower/event/EventDispatcher.js///////////////////////////
-
-
-
-//////////////////////////File:flower/event/Event.js///////////////////////////
-class Event {
-
-    $type;
-    $bubbles;
-    $cycle = false;
-    $target = null;
-    $currentTarget = null;
-    data;
-    _isPropagationStopped = false;
-
-    constructor(type, bubbles = false) {
-        this.$type = type;
-        this.$bubbles = bubbles;
-    }
-
-    stopPropagation() {
-        this._isPropagationStopped = true;
-    }
-
-    get isPropagationStopped() {
-        return this._isPropagationStopped;
-    }
-
-    get type() {
-        return this.$type;
-    }
-
-    get bubbles() {
-        return this.$bubbles;
-    }
-
-    get target() {
-        return this.$target;
-    }
-
-    get currentTarget() {
-        return this.$currentTarget;
-    }
-
-    static READY = "ready";
-    static COMPLETE = "complete";
-    static ADDED = "added";
-    static REMOVED = "removed";
-    static ADDED_TO_STAGE = "added_to_stage";
-    static REMOVED_FROM_STAGE = "removed_from_stage";
-    static CONNECT = "connect";
-    static CLOSE = "close";
-    static CHANGE = "change";
-    static ERROR = "error";
-    static UPDATE = "update";
-    static FOCUS_IN = "focus_in";
-    static FOCUS_OUT = "focus_out";
-    static CONFIRM = "confirm";
-    static CANCEL = "cancel";
-    static START_INPUT = "start_input";
-    static STOP_INPUT = "stop_input";
-    static DISTORT = "distort";
-    static CREATION_COMPLETE = "creation_complete";
-    static SELECTED_ITEM_CHANGE = "selected_item_change";
-    static CLICK_ITEM = "click_item";
-    static TOUCH_BEGIN_ITEM = "touch_begin_item";
-
-    static _eventPool = [];
-
-    static create(type, data = null, bubbles = false) {
-        var e;
-        if (!flower.Event._eventPool.length) {
-            e = new flower.Event(type);
-        }
-        else {
-            e = flower.Event._eventPool.pop();
-            e.$cycle = false;
-        }
-        e.$type = type;
-        e.$bubbles = bubbles;
-        e.data = data;
-        return e;
-    }
-
-    static release(e) {
-        if (e.$cycle) {
-            return;
-        }
-        e.$cycle = true;
-        e.data = null;
-        flower.Event._eventPool.push(e);
-    }
-}
-
-flower.Event = Event;
-//////////////////////////End File:flower/event/Event.js///////////////////////////
-
-
-
-//////////////////////////File:flower/event/TouchEvent.js///////////////////////////
-class TouchEvent extends Event {
-
-    $touchId = 0;
-    $touchX = 0;
-    $touchY = 0;
-    $stageX = 0;
-    $stageY = 0;
-
-    constructor(type, bubbles = true) {
-        super(type, bubbles);
-    }
-
-    get touchId() {
-        return this.$touchId;
-    }
-
-    get touchX() {
-        if (this.currentTarget) {
-            return this.currentTarget.lastTouchX;
-        }
-        return this.$touchX;
-    }
-
-    get touchY() {
-        if (this.currentTarget) {
-            return this.currentTarget.lastTouchY;
-        }
-        return this.$touchY;
-    }
-
-    get stageX() {
-        return this.$stageX;
-    }
-
-    get stageY() {
-        return this.$stageY;
-    }
-
-    static TOUCH_BEGIN = "touch_begin";
-    static TOUCH_MOVE = "touch_move";
-    static TOUCH_END = "touch_end";
-    static TOUCH_RELEASE = "touch_release";
-    /**
-     * 此事件是在没有 touch 的情况下发生的，即没有按下
-     * @type {string}
-     */
-    static MOVE = "move";
-}
-
-flower.TouchEvent = TouchEvent;
-//////////////////////////End File:flower/event/TouchEvent.js///////////////////////////
-
-
-
-//////////////////////////File:flower/event/MouseEvent.js///////////////////////////
-class MouseEvent extends Event {
-
-    $touchX;
-    $touchY;
-    $stageX;
-    $stageY;
-
-    constructor(type, bubbles = true) {
-        super(type, bubbles);
-    }
-
-    get mouseX() {
-        if (this.currentTarget) {
-            return this.currentTarget.lastTouchX;
-        }
-        return this.$touchX;
-    }
-
-    get mouseY() {
-        if (this.currentTarget) {
-            return this.currentTarget.lastTouchY;
-        }
-        return this.$touchY;
-    }
-
-    get stageX() {
-        return this.$stageX;
-    }
-
-    get stageY() {
-        return this.$stageY;
-    }
-
-    /**
-     * 此事件是在没有 touch 的情况下发生的，即没有按下
-     * @type {string}
-     */
-    static MOUSE_MOVE = "mouse_move";
-    static MOUSE_OVER = "mouse_over";
-    static MOUSE_OUT = "mouse_out";
-    static RIGHT_CLICK = "right_click";
-}
-
-flower.MouseEvent = MouseEvent;
-//////////////////////////End File:flower/event/MouseEvent.js///////////////////////////
-
-
-
-//////////////////////////File:flower/event/DragEvent.js///////////////////////////
-class DragEvent extends Event {
-
-    //DisplayObject
-    $dragSource;
-    $dragType;
-    $accept = false;
-
-    constructor(type, bubbles = true) {
-        super(type, bubbles);
-    }
-
-    get dragSource() {
-        return this.$dragSource;
-    }
-
-    get dragType() {
-        return this.$dragType;
-    }
-
-    get hasAccept() {
-        return this.$accept;
-    }
-
-    accept() {
-        this.$accept = true;
-    }
-
-    static DRAG_OVER = "drag_over";
-    static DRAG_OUT = "drag_out";
-    static DRAG_END = "drag_end";
-
-    static $Pools = [];
-
-    static create(type, bubbles, dragSource, dragType, dragData) {
-        var event = DragEvent.$Pools.pop();
-        if (!event) {
-            event = new DragEvent(type, bubbles);
-        } else {
-            event.$type = type;
-            event.$bubbles = bubbles;
-        }
-        event.data = dragData;
-        event.$dragSource = dragSource;
-        event.$dragType = dragType;
-        return event;
-    }
-
-    static release(e) {
-        DragEvent.$Pools.push(e);
-    }
-}
-
-flower.DragEvent = DragEvent;
-//////////////////////////End File:flower/event/DragEvent.js///////////////////////////
-
-
-
-//////////////////////////File:flower/event/KeyboardEvent.js///////////////////////////
-class KeyboardEvent extends Event {
-
-    __keyCode;
-    __key;
-
-
-    constructor(type, key, bubbles = true) {
-        super(type, bubbles);
-        this.__keyCode = key;
-        this.__key = String.fromCharCode(key);
-    }
-
-    get keyCode() {
-        return this.__keyCode;
-    }
-
-    get key() {
-        return this.__key;
-    }
-
-    get shift() {
-        return KeyboardEvent.$shift;
-    }
-
-    get control() {
-        return KeyboardEvent.$control;
-    }
-
-    get alt() {
-        return KeyboardEvent.$alt;
-    }
-
-    static $shift = false; //16
-    static $control = false; //17
-    static $alt = false; //18
-
-    static KEY_DOWN = "key_down";
-    static KEY_UP = "key_up";
-}
-
-flower.KeyboardEvent = KeyboardEvent;
-//////////////////////////End File:flower/event/KeyboardEvent.js///////////////////////////
 
 
 
@@ -7154,6 +7423,76 @@ flower.Remote = Remote;
 
 
 
+//////////////////////////File:flower/net/WebSocketServer.js///////////////////////////
+class WebSocketServer extends PlatformWebSocketServer {
+
+    constructor(clientClass, big = true) {
+        super(clientClass || WebSocketClient, big);
+    }
+}
+
+flower.WebSocketServer = WebSocketServer;
+//////////////////////////End File:flower/net/WebSocketServer.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/WebSocketClient.js///////////////////////////
+class WebSocketClient extends PlatformWebSocketClient {
+
+    constructor(connection, big) {
+        super(connection, big);
+    }
+
+    onReceive(data) {
+
+    }
+
+    send(data) {
+        super.send(data);
+    }
+}
+
+
+flower.WebSocketClient = WebSocketClient;
+//////////////////////////End File:flower/net/WebSocketClient.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/SocketServer.js///////////////////////////
+class SocketServer extends PlatformSocketServer {
+
+    constructor(clientClass, big = true) {
+        super(clientClass || WebSocketClient, big);
+    }
+}
+
+flower.SocketServer = SocketServer;
+//////////////////////////End File:flower/net/SocketServer.js///////////////////////////
+
+
+
+//////////////////////////File:flower/net/SocketClient.js///////////////////////////
+class SocketClient extends PlatformSocketClient {
+
+    constructor(connection, big) {
+        super(connection, big);
+    }
+
+    receive(data) {
+
+    }
+
+    send(data) {
+        super.send(data);
+    }
+}
+
+
+flower.SocketClient = SocketClient;
+//////////////////////////End File:flower/net/SocketClient.js///////////////////////////
+
+
+
 //////////////////////////File:flower/plist/Plist.js///////////////////////////
 class Plist {
 
@@ -9907,12 +10246,18 @@ class VByteArray {
         return val;
     }
 
+    clear() {
+        this.bytes.length = 0;
+        this.position = 0;
+        this.length = 0;
+    }
+
     get bytesAvailable() {
         return this.length - this.position;
     }
 
     get data() {
-        return this.bytes;
+        return this.bytes.concat();
     }
 
     toString() {
@@ -9926,6 +10271,246 @@ class VByteArray {
 
 flower.VByteArray = VByteArray;
 //////////////////////////End File:flower/utils/VByteArray.js///////////////////////////
+
+
+
+//////////////////////////File:flower/utils/ByteArray.js///////////////////////////
+class ByteArray {
+    
+    constructor() {
+        this.big = false;
+        this.position = 0;
+        this.bytes = [];
+        this.length = 0;
+    }
+
+    readFromArray(array) {
+        this.position = 0;
+        if (array) {
+            this.bytes = array;
+            this.length = array.length;
+        } else {
+            this.bytes = [];
+            this.length = 0;
+        }
+    }
+
+    initArray(array) {
+        if (array) {
+            this.bytes = array;
+            this.length = array.length;
+            this.position = 0;
+        }
+    }
+
+    writeInt(val) {
+        var flag = val >= 0 ? true : false;
+        val = val >= 0 ? val : (2147483648 + val);
+        val = val & 0xFFFFFFFF;
+        var big = this.big;
+        var bytes = this.bytes;
+        if (big) {
+            bytes.splice(this.position, 0, (!flag ? 128 : 0) + (val >> 24));
+            bytes.splice(this.position, 0, val >> 16 & 0xFF);
+            bytes.splice(this.position, 0, val >> 8 & 0xFF);
+            bytes.splice(this.position, 0, val & 0xFF);
+        }
+        else {
+            bytes.splice(this.position, 0, val & 0xFF);
+            bytes.splice(this.position, 0, val >> 8 & 0xFF);
+            bytes.splice(this.position, 0, val >> 16 & 0xFF);
+            bytes.splice(this.position, 0, (!flag ? 128 : 0) + (val >> 24));
+        }
+        this.length += 4;
+        this.position += 4;
+    }
+
+    writeByte(val) {
+        this.bytes.splice(this.position, 0, val);
+        this.length += 1;
+        this.position += 1;
+    }
+
+    writeArray(array) {
+        for (var i = 0, len = array.length; i < len; i++) {
+            this.bytes.splice(this.position, 0, array[i]);
+            this.length += 1;
+            this.position += 1;
+        }
+    }
+
+    writeBoolean(val) {
+        this.bytes.splice(this.position, 0, val == true ? 1 : 0);
+        this.length += 1;
+        this.position += 1;
+    }
+
+    writeUnsignedInt(val) {
+        var bytes = this.bytes;
+        if (this.big) {
+            bytes.splice(this.position, 0, val >> 24);
+            bytes.splice(this.position, 0, val >> 16 & 0xFF);
+            bytes.splice(this.position, 0, val >> 8 & 0xFF);
+            bytes.splice(this.position, 0, val & 0xFF);
+        }
+        else {
+            bytes.splice(this.position, 0, val & 0xFF);
+            bytes.splice(this.position, 0, val >> 8 & 0xFF);
+            bytes.splice(this.position, 0, val >> 16 & 0xFF);
+            bytes.splice(this.position, 0, val >> 24);
+        }
+        this.length += 4;
+        this.position += 4;
+    }
+
+    writeShort(val) {
+        val = val & 0xFFFF;
+        var bytes = this.bytes;
+        if (this.big) {
+            bytes.splice(this.position, 0, val >> 8 & 0xFF);
+            bytes.splice(this.position, 0, val & 0xFF);
+        }
+        else {
+            bytes.splice(this.position, 0, val & 0xFF);
+            bytes.splice(this.position, 0, val >> 8 & 0xFF);
+        }
+        this.length += 2;
+        this.position += 2;
+    }
+
+    writeUnsignedShort(val) {
+        val = val & 0xFFFF;
+        if (this.big) {
+            this.bytes.splice(this.position, 0, val >> 8 & 0xFF);
+            this.bytes.splice(this.position, 0, val & 0xFF);
+        }
+        else {
+            this.bytes.splice(this.position, 0, val & 0xFF);
+            this.bytes.splice(this.position, 0, val >> 8 & 0xFF);
+        }
+        this.length += 2;
+        this.position += 2;
+    }
+
+    writeUTF(val) {
+        var arr = VByteArray.stringToBytes(val);
+        this.writeShort(arr.length);
+        for (var i = 0; i < arr.length; i++) {
+            this.bytes.splice(this.position, 0, arr[i]);
+            this.position++;
+        }
+        this.length += arr.length;
+    }
+
+    writeUTFBytes(val) {
+        var arr = StringDo.stringToBytes(val);
+        for (var i = 0; i < arr.length; i++) {
+            this.bytes.splice(this.position, 0, arr[i]);
+            this.position++;
+        }
+        this.length += arr.length;
+    }
+
+    readInt() {
+        var val = 0;
+        var bytes = this.bytes;
+        if (this.big) {
+            val = bytes[this.position] | bytes[this.position + 1] << 8 | bytes[this.position + 2] << 16 | bytes[this.position + 3] << 24;
+        }
+        else {
+            val = bytes[this.position + 3] | bytes[this.position + 2] << 8 | bytes[this.position + 1] << 16 | bytes[this.position] << 24;
+        }
+        //if(val > (1<<31)) val = val - (1<<32);
+        this.position += 4;
+        return val;
+    }
+
+    readInt64() {
+        var val = 0;
+        var bytes = this.bytes;
+        if (this.big) {
+            val = bytes[this.position] | bytes[this.position + 1] << 8 | bytes[this.position + 2] << 16 | bytes[this.position + 3] << 24 | bytes[this.position + 4] << 32 | bytes[this.position + 5] << 40 | bytes[this.position + 6] << 48 | bytes[this.position + 7] << 56;
+        }
+        else {
+            val = bytes[this.position + 7] | bytes[this.position + 6] << 8 | bytes[this.position + 5] << 16 | bytes[this.position + 4] << 24 | bytes[this.position + 3] << 32 | bytes[this.position + 2] << 40 | bytes[this.position + 1] << 48 | bytes[this.position] << 56;
+        }
+        //if(val > (1<<31)) val = val - (1<<32);
+        this.position += 8;
+        return val;
+    }
+
+    readUnsignedInt() {
+        var val = 0;
+        var bytes = this.bytes;
+        if (this.big) {
+            val = bytes[this.position] | bytes[this.position + 1] << 8 | bytes[this.position + 2] << 16 | bytes[this.position + 3] << 24;
+        }
+        else {
+            val = bytes[this.position + 3] | bytes[this.position + 2] << 8 | bytes[this.position + 1] << 16 | bytes[this.position] << 24;
+        }
+        this.position += 4;
+        return val;
+    }
+
+    readByte() {
+        var val = this.bytes[this.position];
+        this.position += 1;
+        return val;
+    }
+
+    readShort() {
+        var val;
+        var bytes = this.bytes;
+        if (this.big) {
+            val = bytes[this.position] | bytes[this.position + 1] << 8;
+        }
+        else {
+            val = bytes[this.position] << 8 | bytes[this.position + 1];
+        }
+        if (val > (1 << 15))
+            val = val - (1 << 16);
+        this.position += 2;
+        return val;
+    }
+
+    readUnsignedShort() {
+        var val;
+        if (this.big) {
+            val = this.bytes[this.position] | this.bytes[this.position + 1] << 8;
+        }
+        else {
+            val = this.bytes[this.position] << 8 | this.bytes[this.position + 1];
+        }
+        if (val > (1 << 15))
+            val = val - (1 << 16);
+        this.position += 2;
+        return val;
+    }
+
+    readUTF() {
+        var len = this.readShort();
+        var val = StringDo.numberToString(this.bytes.slice(this.position, this.position + len));
+        this.position += len;
+        return val;
+    }
+
+    readUTFBytes(len) {
+        var val = StringDo.numberToString(this.bytes.slice(this.position, this.position + len));
+        this.position += len;
+        return val;
+    }
+
+    get bytesAvailable() {
+        return this.length - this.position;
+    }
+
+    get data() {
+        return this.bytes.concat();
+    }
+}
+
+flower.ByteArray = ByteArray;
+//////////////////////////End File:flower/utils/ByteArray.js///////////////////////////
 
 
 
