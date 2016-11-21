@@ -124,6 +124,7 @@ class Platform {
 
     static release(name, object) {
         object.release();
+        return;
         var pools = Platform.pools;
         if (!pools[name]) {
             pools[name] = [];

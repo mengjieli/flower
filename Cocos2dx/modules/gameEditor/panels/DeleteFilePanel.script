@@ -1,5 +1,5 @@
 function onSure() {
-    (new flower.File(this.data.path)).delete(function () {
+    (new flower.RemoteFile(this.data.path)).delete(function () {
         editor.ProjectView.deleteFile(this.data.path, this.data.pluginName);
     },this);
     this.closePanel();

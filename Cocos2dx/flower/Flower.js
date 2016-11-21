@@ -1,5 +1,5 @@
 var DEBUG = true;
-var TIP = false;
+var TIP = true;
 var $language = "zh_CN";
 var NATIVE = true;
 /**
@@ -14,19 +14,28 @@ var RETINA = false;
 var programmers = {};
 var config = {};
 var params = {};
+var hasStart = false;
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
 function start(completeFunc, nativeStage, touchShow) {
-    var stage = new Stage();
+    if (hasStart) {
+        if (completeFunc) completeFunc();
+        return;
+    }
+    hasStart = false;
     Platform._runBack = CoreTime.$run;
     if (Platform.startSync) {
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
-            start2(completeFunc, nativeStage, touchShow, stage);
+        Platform.getReady(function () {
+            var stage = new Stage();
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+                start2(completeFunc, nativeStage, touchShow, stage);
+            });
         });
     } else {
+        var stage = new Stage();
         Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
         start2(completeFunc, nativeStage, touchShow, stage);
     }
@@ -57,7 +66,7 @@ function start2(completeFunc, nativeStage, touchShow, stage) {
                         loader = new URLLoader("res/shaders/Source.fsh");
                         loader.addListener(Event.COMPLETE, function (e) {
                             programmers[loader.url] = e.data;
-                            completeFunc();
+                            if (completeFunc)completeFunc();
                         });
                         loader.load();
                     });
@@ -68,7 +77,7 @@ function start2(completeFunc, nativeStage, touchShow, stage) {
             loader.load();
         }
 
-        if (config.remote) {
+        if (config.remote && flower.RemoteServer) {
             flower.RemoteServer.start(startLoad);
         } else {
             startLoad();
@@ -151,6 +160,5 @@ exports.sys = {
     getLanguage: getLanguage,
 }
 exports.params = params;
-exports.system = {
-}
+exports.system = {}
 $root.trace = trace;

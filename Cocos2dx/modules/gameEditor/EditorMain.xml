@@ -6,7 +6,7 @@
                 <e:ProjectView/>
                 <s:ScrollerTree title="源文件" percentWidth="100" percentHeight="100" viewport="software:LabelTree">
                     <f:dataProvider>
-                        <f:Direction path="res"/>
+                        <f:RemoteDirection path="res"/>
                     </f:dataProvider>
                 </s:ScrollerTree>
             </f:Array>

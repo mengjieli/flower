@@ -19,18 +19,36 @@ class PlatformDisplayObject {
      */
     __programmerFlag = 0;
 
-    constructor() {
+    constructor(id) {
+        this.id = id;
     }
 
     setX(val) {
         this.__x = val;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(16);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setY(val) {
         this.__y = val;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(17);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setVisible(val) {
+        var msg = new flower.VByteArray();
+        msg.writeUInt(22);
+        msg.writeUInt(this.id);
+        msg.writeUTF((val?1:0) + "");
+        Platform.sendToClient(msg);
     }
 
     setWidth(val) {
@@ -45,19 +63,38 @@ class PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(18);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
 
     }
 
     setScaleY(val) {
         this.__scaleY = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(19);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setRotation(val) {
         this.__rotation = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(20);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setAlpha(val) {
-        this.show.style.opacity = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(21);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     addProgrammerFlag(flag) {

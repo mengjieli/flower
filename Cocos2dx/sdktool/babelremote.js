@@ -164,8 +164,8 @@ var files = file.readFilesWidthEnd("js");
 var list = [
     "RemoteServer",
     "Remote",
-    "File",
-    "Direction",
+    "RemoteFile",
+    "RemoteDirection",
     "zh_CN",
     "IsDirectionExistRemote",
     "ReadDirectionListRemote",

@@ -55,8 +55,8 @@ class UIParser extends Group {
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout",
 
-            "Direction": "flower.Direction",
-            "File": "flower.File"
+            "RemoteDirection": "flower.RemoteDirection",
+            "RemoteFile": "flower.RemoteFile"
         },
         local: {},
         localContent: {},

@@ -24,7 +24,7 @@ var Parser = (function (_super) {
 
     Parser.prototype.save = function () {
         var path = this.file.path;
-        (new flower.File(path)).saveText(flower.ObjectDo.toString(this.data.value, 100000000));
+        (new flower.RemoteFile(path)).saveText(flower.ObjectDo.toString(this.data.value, 100000000));
     }
 
     return Parser;

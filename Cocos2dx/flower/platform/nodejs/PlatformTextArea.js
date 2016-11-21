@@ -8,17 +8,15 @@ class PlatformTextArea extends PlatformDisplayObject {
     __changeBackThis = null;
 
 
-    constructor() {
-        super();
-        var input = document.createElement("textarea");
-        input.style.position = "absolute";
-        input.style.left = "0px";
-        input.style.top = "0px";
-        input.style["background"] = "none";
-        input.style["border"] = "none";
-        input.style["font-style"] = "normal";
-        input.style["transform-origin"] = "left top";
-        this.show = input;
+    constructor(id) {
+        super(id);
+
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("TextArea");
+        Platform.sendToClient(msg);
     }
 
     setFontColor(color) {

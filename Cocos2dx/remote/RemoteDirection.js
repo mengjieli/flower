@@ -1,4 +1,4 @@
-class Direction {
+class RemoteDirection {
 
     __path;
     __autoUpdate;
@@ -78,4 +78,4 @@ class Direction {
     }
 }
 
-exports.Direction = Direction;
+exports.RemoteDirection = RemoteDirection;

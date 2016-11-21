@@ -2,10 +2,11 @@ class PlatformTexture {
 
     textrue;
     url;
+    id;
 
-    constructor(url, texture) {
+    constructor(url,id) {
         this.url = url;
-        this.textrue = texture;
+        this.id = id;
     }
 
     dispose() {

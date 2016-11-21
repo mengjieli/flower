@@ -295,8 +295,8 @@ remote.Remote = Remote;
 
 
 
-//////////////////////////File:remote/File.js///////////////////////////
-class File {
+//////////////////////////File:remote/RemoteFile.js///////////////////////////
+class RemoteFile {
 
     __path;
     __autoUpdate;
@@ -323,13 +323,13 @@ class File {
     }
 }
 
-remote.File = File;
-//////////////////////////End File:remote/File.js///////////////////////////
+remote.RemoteFile = RemoteFile;
+//////////////////////////End File:remote/RemoteFile.js///////////////////////////
 
 
 
-//////////////////////////File:remote/Direction.js///////////////////////////
-class Direction {
+//////////////////////////File:remote/RemoteDirection.js///////////////////////////
+class RemoteDirection {
 
     __path;
     __autoUpdate;
@@ -409,8 +409,8 @@ class Direction {
     }
 }
 
-remote.Direction = Direction;
-//////////////////////////End File:remote/Direction.js///////////////////////////
+remote.RemoteDirection = RemoteDirection;
+//////////////////////////End File:remote/RemoteDirection.js///////////////////////////
 
 
 

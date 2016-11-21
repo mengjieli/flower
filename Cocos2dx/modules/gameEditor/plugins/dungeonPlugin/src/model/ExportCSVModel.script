@@ -138,7 +138,7 @@ var ExportCSVModel = (function () {
         }
         if (window) {
             var url = "res/tools/dungeon/res/save/" + (new Date()).getTime() + ".txt";
-            (new flower.File(url)).saveText(content, function () {
+            (new flower.RemoteFile(url)).saveText(content, function () {
                 window.open(flower.RemoteServer.getInstance().httpURL + url);                 //在另外新建窗口中打开链接
             });
         } else {

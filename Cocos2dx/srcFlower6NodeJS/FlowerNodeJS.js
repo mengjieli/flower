@@ -1,6 +1,6 @@
 
 //var LocalWebSocket = WebSocket;
-var $root = eval("this");
+var $root = global;
 var root = root || eval("this");
 var __define = $root.__define || function (o, p, g, s) {
         Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
@@ -514,7 +514,7 @@ flower.KeyboardEvent = KeyboardEvent;
 
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
-var TIP = false;
+var TIP = true;
 var $language = "zh_CN";
 var NATIVE = true;
 /**
@@ -529,19 +529,28 @@ var RETINA = false;
 var programmers = {};
 var config = {};
 var params = {};
+var hasStart = false;
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
 function start(completeFunc, nativeStage, touchShow) {
-    var stage = new Stage();
+    if (hasStart) {
+        if (completeFunc) completeFunc();
+        return;
+    }
+    hasStart = false;
     Platform._runBack = CoreTime.$run;
     if (Platform.startSync) {
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
-            start2(completeFunc, nativeStage, touchShow, stage);
+        Platform.getReady(function () {
+            var stage = new Stage();
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+                start2(completeFunc, nativeStage, touchShow, stage);
+            });
         });
     } else {
+        var stage = new Stage();
         Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
         start2(completeFunc, nativeStage, touchShow, stage);
     }
@@ -572,7 +581,7 @@ function start2(completeFunc, nativeStage, touchShow, stage) {
                         loader = new URLLoader("res/shaders/Source.fsh");
                         loader.addListener(Event.COMPLETE, function (e) {
                             programmers[loader.url] = e.data;
-                            completeFunc();
+                            if (completeFunc)completeFunc();
                         });
                         loader.load();
                     });
@@ -583,7 +592,7 @@ function start2(completeFunc, nativeStage, touchShow, stage) {
             loader.load();
         }
 
-        if (config.remote) {
+        if (config.remote && flower.RemoteServer) {
             flower.RemoteServer.start(startLoad);
         } else {
             startLoad();
@@ -666,8 +675,7 @@ flower.sys = {
     getLanguage: getLanguage,
 }
 flower.params = params;
-flower.system = {
-}
+flower.system = {}
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -677,39 +685,91 @@ $root.trace = trace;
 var fs = require("fs");
 var path = require("path");
 var webSocket = require('websocket').server;
+var WSClient = require('websocket').client;
 var http = require('http');
 var net = require('net');
+var querystring = require('querystring');
 
 class Platform {
     static type = "remote";
     static startSync = true;
     static native = true;
 
+    static engine;
     static stage;
     static width;
     static height;
     static server;
     static IPV4;
     static server;
+    static displayId = 1;
+
+    static __touchDown = false;
     static __init = false;
+    static __readyBack;
+    static __startBack;
 
-    static start(engine, root, background, readyBack) {
-        Platform.getIPV4();
-        flower.system.platform = Platform.type;
-        flower.system.native = Platform.native;
-        setTimeout(Platform._run, 0);
-
+    static getReady(readyBack) {
+        Platform.__readyBack = readyBack;
         var server = new flower.SocketServer(PlatformClient);
         Platform.server = server;
         server.start(16788);
+    }
+
+    static start(engine, root, background, back) {
+        Platform.__startBack = back;
+        Platform.engine = engine;
+        engine.$resize(Platform.width, Platform.height);
+        Platform.getIPV4();
+        flower.system.platform = Platform.type;
+        flower.system.native = Platform.native;
+
+        //var msg = new flower.VByteArray();
+        //msg.writeUInt(7);
+        //msg.writeUInt(0);
+        //msg.writeUInt(background.id);
+        //Platform.sendToClient(msg);
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(7);
+        msg.writeUInt(0);
+        msg.writeUInt(root.id);
+        Platform.sendToClient(msg);
+
+        setTimeout(Platform._run, 0);
+        back();
+    }
+
+    static receiveTouchKeyEvent(type, param1, param2) {
+        var engine = Platform.engine;
+        if (type == "mouseMove") {
+            engine.$addMouseMoveEvent(param1, param2);
+            if (Platform.__touchDown) {
+                engine.$addTouchEvent("move", 0, param1, param2);
+            }
+        } else if (type == "touchDown") {
+            engine.$addTouchEvent("begin", 0, param1, param2);
+        } else if (type == "touchUp") {
+            engine.$addTouchEvent("end", 0, param1, param2);
+        } else if (type == "keyDown") {
+            engine.$onKeyDown(param1);
+        } else if (type == "keyU[") {
+            engine.$onKeyUp(param1);
+        }
     }
 
     static init(width, height) {
         if (Platform.__init) {
             return;
         }
-        Platform.__init = true;
         console.log("size", width, height);
+        Platform.__init = true;
+        Platform.width = width;
+        Platform.height = height;
+        if (Platform.__readyBack) {
+            Platform.__readyBack();
+            Platform.__readyBack = null;
+        }
     }
 
     static sendToClient(msg) {
@@ -763,31 +823,32 @@ class Platform {
     static create(name) {
         var pools = Platform.pools;
         if (name == "Sprite") {
-            return new PlatformSprite();
+            return new PlatformSprite(Platform.displayId++);
         }
         if (name == "Bitmap") {
-            return new PlatformBitmap();
+            return new PlatformBitmap(Platform.displayId++);
         }
         if (name == "TextField") {
-            return new PlatformTextField();
+            return new PlatformTextField(Platform.displayId++);
         }
         if (name == "TextInput") {
-            return new PlatformTextInput();
+            return new PlatformTextInput(Platform.displayId++);
         }
         if (name == "TextArea") {
-            return new PlatformTextArea();
+            return new PlatformTextArea(Platform.displayId++);
         }
         if (name == "Shape") {
-            return new PlatformShape();
+            return new PlatformShape(Platform.displayId++);
         }
         if (name == "Mask") {
-            return new PlatformMask();
+            return new PlatformMask(Platform.displayId++);
         }
         return null;
     }
 
     static release(name, object) {
         object.release();
+        return;
         var pools = Platform.pools;
         if (!pools[name]) {
             pools[name] = [];
@@ -1051,18 +1112,36 @@ class PlatformDisplayObject {
      */
     __programmerFlag = 0;
 
-    constructor() {
+    constructor(id) {
+        this.id = id;
     }
 
     setX(val) {
         this.__x = val;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(16);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setY(val) {
         this.__y = val;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(17);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setVisible(val) {
+        var msg = new flower.VByteArray();
+        msg.writeUInt(22);
+        msg.writeUInt(this.id);
+        msg.writeUTF((val?1:0) + "");
+        Platform.sendToClient(msg);
     }
 
     setWidth(val) {
@@ -1077,19 +1156,38 @@ class PlatformDisplayObject {
 
     setScaleX(val) {
         this.__scaleX = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(18);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
 
     }
 
     setScaleY(val) {
         this.__scaleY = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(19);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setRotation(val) {
         this.__rotation = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(20);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     setAlpha(val) {
-        this.show.style.opacity = val;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(21);
+        msg.writeUInt(this.id);
+        msg.writeUTF(val + "");
+        Platform.sendToClient(msg);
     }
 
     addProgrammerFlag(flag) {
@@ -1289,8 +1387,8 @@ class PlatformSprite extends PlatformDisplayObject {
 
     __children = [];
 
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
         this.initShow();
     }
 
@@ -1298,35 +1396,48 @@ class PlatformSprite extends PlatformDisplayObject {
         //this.show = new cc.Node();
         //this.show.setAnchorPoint(0, 0);
         //this.show.retain();
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("Sprite");
+        Platform.sendToClient(msg);
     }
 
     addChild(child) {
-        this.__children.push(child.show);
+        var msg = new flower.VByteArray();
+        msg.writeUInt(7);
+        msg.writeUInt(this.id);
+        msg.writeUInt(child.id);
+        Platform.sendToClient(msg);
+        this.__children.push(child);
     }
 
     removeChild(child) {
         for (var i = 0; i < this.__children.length; i++) {
-            if (this.__children[i] == child.show) {
+            if (this.__children[i] == child) {
                 this.__children.splice(i, 1);
+                var msg = new flower.VByteArray();
+                msg.writeUInt(8);
+                msg.writeUInt(this.id);
+                msg.writeUInt(child.id);
+                Platform.sendToClient(msg);
                 break;
             }
         }
     }
 
-
-    setAlpha(val) {
-
-    }
-
     resetChildIndex(children) {
-        //for (var i = 0, len = children.length; i < len; i++) {
-        //    var show = children[i].$nativeShow.show;
-        //    if (this.__children[i] != show) {
-        //        this.removeChild(children[i].$nativeShow);
-        //        this.show.insertBefore(show, this.__children[i]);
-        //        this.__children.splice(i, 0, show);
-        //    }
-        //}
+        for (var i = 0, len = children.length; i < len; i++) {
+
+            var msg = new flower.VByteArray();
+            msg.writeUInt(9);
+            msg.writeUInt(this.id);
+            msg.writeUInt(children[i].$nativeShow.id);
+            msg.writeUInt(i);
+            Platform.sendToClient(msg);
+
+            //children[i].$nativeShow.show.setLocalZOrder(i);
+        }
     }
 
     setFilters(filters) {
@@ -1340,20 +1451,37 @@ class PlatformSprite extends PlatformDisplayObject {
 //////////////////////////File:flower/platform/nodejs/PlatformTextField.js///////////////////////////
 class PlatformTextField extends PlatformDisplayObject {
 
+    static sizes = [0,0,0,0,0,0,0,0,0,22,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,4,6,6,9,9,2,3,3,6,6,3,3,3,3,6,6,6,6,6,6,6,6,6,6,3,3,6,6,6,5,11,8,8,8,8,7,6,8,8,3,4,8,7,10,8,8,6,8,8,6,7,8,8,11,8,8,7,3,3,3,5,6,3,5,6,5,6,5,3,6,6,3,3,6,3,9,6,6,6,6,3,4,3,6,6,8,6,6,5,5,2,5,6,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,6,6,6,6,2,6,3,9,3,6,6,0,9,3,4,6,3,3,3,6,5,3,3,3,3,6,9,9,9,5,8,8,8,8,8,8,10,8,7,7,7,7,3,3,3,3,8,8,8,8,8,8,8,6,8,8,8,8,8,8,6,6,5,5,5,5,5,5,8,5,5,5,5,5,3,3,3,3,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,8,5,8,5,8,5,8,5,8,5,8,5,8,5,8,7,8,6,7,5,7,5,7,5,7,5,7,5,8,6,8,6,8,6,8,6,8,6,8,6,3,3,3,3,3,3,3,3,3,3,8,6,4,3,8,6,6,7,3,7,3,7,4,7,4,7,3,8,6,8,6,8,6,6,8,6,8,6,8,6,8,6,10,8,8,3,8,3,8,3,6,4,6,4,6,4,6,4,7,3,7,5,7,3,8,6,8,6,8,6,8,6,8,6,8,6,11,8,8,6,8,7,5,7,5,7,5,3,7,8,6,7,8,6,8,8,6,9,10,6,7,7,7,7,6,6,6,8,7,10,4,4,7,7,4,7,12,8,7,9,8,7,12,10,8,7,7,6,6,7,6,4,8,4,7,9,6,9,8,7,8,7,6,6,6,6,6,7,7,5,5,7,2,4,5,3,15,13,11,12,10,6,13,12,9,8,5,3,3,8,6,8,6,8,6,8,6,8,6,8,6,5,8,5,8,5,10,8,9,7,8,6,8,6,8,6,8,6,6,6,3,15,13,11,8,6,12,6,8,6,8,5,10,8,8,6,8,5,8,5,7,5,7,5,3,3,3,3,8,6,8,6,8,3,8,3,8,6,8,6,6,4,7,3,6,6,8,6,8,11,9,7,7,6,8,5,7,5,8,6,8,6,8,6,8,6,8,6,6,10,6,3,11,11,8,8,6,6,7,6,6,6,6,8,10,8,8,6,6,2,10,7,9,4,9,7,6,7,7,7,6,6,7,7,5,5,9,5,5,7,7,4,7,7,7,6,7,7,7,7,4,4,4,6,5,3,7,11,11,11,7,7,7,7,9,9,9,4,4,5,4,4,4,4,6,6,6,5,5,5,6,4,4,7,7,7,6,9,6,5,6,8,6,6,5,5,5,5,9,6,7,7,7,5,7,5,7,5,5,12,11,14,9,8,10,11,8,8,7,6,7,7,4,4,2,2,2,3,3,5,3,2,4,3,3,3,3,3,3,3,4,4,4,4,3,3,2,7,3,3,2,4,3,3,4,4,3,3,5,5,5,5,3,3,3,3,3,3,2,4,4,2,3,4,3,4,4,4,4,4,4,4,4,5,5,2,2,2,2,3,3,5,5,4,2,3,3,3,3,4,4,5,4,3,4,4,4,4,4,3,4,3,3,4,4,4,5,5,5,4,4,3,3,1,4,3,4,4,2,3,4,5,5,5,5,2,2,3,4,3,3,3,3,4,4,6,4,4,4,5,4,4,4,7,6,6,7,6,3,4,6,4,6,5,4,7,4,3,4,3,4,2,4,5,5,4,5,5,5,6,4,0,4,4,5,5,4,4,6,4,2,5,5,5,9,5,5,5,5,5,5,4,4,3,4,4,4,4,4,5,4,4,4,4,5,3,7,5,3,3,8,6,13,13,2,6,6,6,3,13,13,13,13,13,3,4,9,3,11,13,7,13,10,13,12,10,3,10,8,7,8,8,8,9,9,4,9,9,11,9,8,9,9,7,13,7,8,9,10,9,10,9,4,9,7,5,6,3,6,7,6,6,6,5,6,6,6,3,6,6,6,6,6,6,6,6,5,6,5,6,8,6,8,8,3,6,6,6,8,6,6,7,7,10,7,7,8,6,9,7,7,6,6,6,6,6,7,9,12,9,8,7,7,6];
+
     static $mesureTxt;
 
     show;
 
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
 
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("TextField");
+        Platform.sendToClient(msg);
     }
 
     setFontColor(color) {
+        var msg = new flower.VByteArray();
+        msg.writeUInt(32);
+        msg.writeUInt(this.id);
+        msg.writeUTF(color);
+        Platform.sendToClient(msg);
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
-
+        var msg = new flower.VByteArray();
+        msg.writeUInt(30);
+        msg.writeUInt(this.id);
+        msg.writeUInt(size);
+        msg.writeUTF(text);
+        Platform.sendToClient(msg);
         return {
             width: 0,
             height: 0
@@ -1365,7 +1493,6 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     release() {
-
         this.setFontColor(0);
         super.release();
     }
@@ -1452,8 +1579,15 @@ class PlatformTextInput extends PlatformDisplayObject {
     __changeBackThis = null;
 
 
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
+
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("TextInput");
+        Platform.sendToClient(msg);
     }
 
     setFontColor(color) {
@@ -1586,17 +1720,15 @@ class PlatformTextArea extends PlatformDisplayObject {
     __changeBackThis = null;
 
 
-    constructor() {
-        super();
-        var input = document.createElement("textarea");
-        input.style.position = "absolute";
-        input.style.left = "0px";
-        input.style.top = "0px";
-        input.style["background"] = "none";
-        input.style["border"] = "none";
-        input.style["font-style"] = "normal";
-        input.style["transform-origin"] = "left top";
-        this.show = input;
+    constructor(id) {
+        super(id);
+
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("TextArea");
+        Platform.sendToClient(msg);
     }
 
     setFontColor(color) {
@@ -1783,18 +1915,26 @@ class PlatformBitmap extends PlatformDisplayObject {
     scaleX = 1;
     scaleY = 1;
 
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
 
 
-
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("Bitmap");
+        Platform.sendToClient(msg);
         //this.show = new cc.Sprite();
         //this.show.setAnchorPoint(0, 1);
         //this.show.retain();
     }
 
     setTexture(texture) {
-
+        var msg = new flower.VByteArray();
+        msg.writeUInt(12);
+        msg.writeUInt(this.id);
+        msg.writeUInt(texture.$nativeTexture.id);
+        Platform.sendToClient(msg);
     }
 
 
@@ -1857,10 +1997,16 @@ class PlatformBitmap extends PlatformDisplayObject {
 
 //////////////////////////File:flower/platform/nodejs/PlatformShape.js///////////////////////////
 class PlatformShape extends PlatformDisplayObject {
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
 
         this.elements = [];
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("Shape");
+        Platform.sendToClient(msg);
     }
 
     toColor16(color) {
@@ -1911,13 +2057,27 @@ class PlatformShape extends PlatformDisplayObject {
     }
 
     draw(points, fillColor, fillAlpha, lineWidth, lineColor, lineAlpha) {
-
+        var msg = new flower.VByteArray();
+        msg.writeUInt(41);
+        msg.writeUInt(this.id);
+        msg.writeUInt(points.length);
+        for (var i = 0; i < points.length; i++) {
+            msg.writeUTF(points[i].x + "");
+            msg.writeUTF(points[i].y + "");
+        }
+        msg.writeUInt(fillColor);
+        msg.writeUTF(fillAlpha + "");
+        msg.writeUInt(lineWidth);
+        msg.writeUInt(lineColor);
+        msg.writeUTF(lineAlpha + "");
+        Platform.sendToClient(msg);
     }
 
     clear() {
-    }
-
-    setAlpha(val) {
+        var msg = new flower.VByteArray();
+        msg.writeUInt(40);
+        msg.writeUInt(this.id);
+        Platform.sendToClient(msg);
     }
 
 
@@ -1937,10 +2097,8 @@ class PlatformShape extends PlatformDisplayObject {
 //////////////////////////File:flower/platform/nodejs/PlatformMask.js///////////////////////////
 class PlatformMask extends PlatformSprite {
 
-    static id = 0;
-
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
         this.shapeWidth = 0;
         this.shapeHeight = 0;
         this.shapeX = 0;
@@ -1949,11 +2107,21 @@ class PlatformMask extends PlatformSprite {
 
 
     initShow() {
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("Mask");
+        Platform.sendToClient(msg);
     }
 
     setShape(shape, flowerShape) {
         this.shape = shape;
         this.flowerShape = flowerShape;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(11);
+        msg.writeUInt(this.id);
+        msg.writeUInt(shape.id);
+        Platform.sendToClient(msg);
         //this.show.setStencil(shape.show);
     }
 
@@ -1970,10 +2138,11 @@ class PlatformTexture {
 
     textrue;
     url;
+    id;
 
-    constructor(url, texture) {
+    constructor(url,id) {
         this.url = url;
-        this.textrue = texture;
+        this.id = id;
     }
 
     dispose() {
@@ -2001,46 +2170,55 @@ class PlatformURLLoader {
         if (TIP) {
             $tip(2001, url);
         }
-        var hasQ = url.split("?").length > 1 ? true : false;
-        var hasParam = hasQ ? (url.split("?")[1].length ? true : false) : false;
-        var pstr = hasParam ? (hasQ ? "&" : "") : "?";
-        for (var key in params) {
-            pstr += key + "=" + params[key] + "&";
+        if (url.slice(0, 7) != "http://") {
+            var file = new File(url);
+            if (file.exists) {
+                setTimeout(function () {
+                    back.call(thisObj, file.readContent());
+                    PlatformURLLoader.isLoading = false;
+                }, 0);
+            } else {
+                setTimeout(function () {
+                    errorBack.call(thisObj);
+                    PlatformURLLoader.isLoading = false;
+                }, 0);
+            }
+        } else {
+            var hasQ = url.split("?").length > 1 ? true : false;
+            var hasParam = hasQ ? (url.split("?")[1].length ? true : false) : false;
+            var pstr = hasParam ? (hasQ ? "&" : "") : "?";
+            for (var key in params) {
+                pstr += key + "=" + params[key] + "&";
+            }
+            if (pstr.charAt(pstr.length - 1) == "&") {
+                pstr = pstr.slice(0, pstr.length - 1);
+            }
+            if (pstr != "?") {
+                url += pstr;
+            }
+            if (method == null || method == "") {
+                method = "GET";
+            }
+            var ip = url.slice(7, url.length);
+            ip = ip.split("/")[0];
+            var path = url.slice(7 + ip.length, url.length);
+            var port = 0;
+            if (ip.split(":").length == 2) {
+                port = ip.split(":")[1];
+                ip = ip.split(":")[0];
+            }
+            var request = new PlatformHttpRequest(ip, port, path);
+            request.get();
+            request.addListener(Event.COMPLETE, function (e) {
+                PlatformURLLoader.isLoading = false;
+                back.call(thisObj, request.data);
+            });
+            request.addListener(Event.ERROR, function (e) {
+                errorBack.call(thisObj);
+                PlatformURLLoader.isLoading = false;
+            });
         }
-        if (pstr.charAt(pstr.length - 1) == "&") {
-            pstr = pstr.slice(0, pstr.length - 1);
-        }
-        if (pstr != "?") {
-            url += pstr;
-        }
-        //var xhr = new XMLHttpRequest();
-        //if (method == null || method == "") {
-        //    method = "GET";
-        //}
-        //if (method == "GET") {
-        //    xhr.open("GET", url, true);
-        //} else if (method == "POST") {
-        //    xhr.open("POST", url, true);
-        //    if (!contentType) {
-        //        contentType = "application/x-www-form-urlencoded";
-        //    }
-        //    xhr.setRequestHeader("Content-Type", contentType);
-        //} else if (method == "HEAD") {
-        //    xhr.open("HEAD", url, true);
-        //}
-        //xhr.onloadend = function () {
-        //    if (xhr.status != 200) {
-        //        errorBack.call(thisObj);
-        //    } else {
-        //        if (method == "HEAD") {
-        //            back.call(thisObj, xhr.getAllResponseHeaders());
-        //        } else {
-        //            back.call(thisObj, xhr.responseText);
-        //        }
-        //    }
-        //    PlatformURLLoader.isLoading = false;
-        //};
-        //xhr.send();
+
     }
 
     static loadTexture(url, back, errorBack, thisObj, params) {
@@ -2053,7 +2231,6 @@ class PlatformURLLoader {
             $tip(2002, url);
         }
         params = params || {};
-        params.img = "base64";
         var pstr = "?";
         for (var key in params) {
             pstr += key + "=" + params[key] + "&";
@@ -2064,38 +2241,30 @@ class PlatformURLLoader {
         if (pstr != "?") {
             url += pstr;
         }
-        //var xhr = new XMLHttpRequest();
-        //var method;
-        //if (method == null || method == "") {
-        //    method = "GET";
-        //}
-        //if (method == "GET") {
-        //    xhr.open("GET", url, true);
-        //} else if (method == "POST") {
-        //    xhr.open("POST", url, true);
-        //    if (!contentType) {
-        //        contentType = "application/x-www-form-urlencoded";
-        //    }
-        //    xhr.setRequestHeader("Content-Type", contentType);
-        //} else if (method == "HEAD") {
-        //    xhr.open("HEAD", url, true);
-        //    xhr.open("HEAD", url, true);
-        //}
-        //xhr.onloadend = function () {
-        //    if (xhr.status != 200) {
-        //        errorBack.call(thisObj);
-        //    } else {
-        //        var str = xhr.responseText;
-        //        var size = str.split("|")[0];
-        //        var content = "data:image/png;base64," + str.split("|")[1];
-        //        var width = size.split(",")[0];
-        //        var height = size.split(",")[1];
-        //        back.call(thisObj, content, width, height);
-        //    }
-        //    PlatformURLLoader.isLoading = false;
-        //};
-        //xhr.send();
+        var textureId = PlatformURLLoader.textureId++;
+        var msg = new flower.VByteArray();
+        msg.writeUInt(10);
+        msg.writeUInt(textureId);
+        msg.writeUTF(url);
+        Platform.sendToClient(msg);
+        PlatformURLLoader.loadTextureBack = function (id, width, height) {
+            if (id != textureId) {
+                return;
+            }
+            if(width && height) {
+                back.call(thisObj, id, width, height);
+            } else {
+                errorBack.call(thisObj);
+            }
+            PlatformURLLoader.isLoading = false;
+        }
     }
+
+    static loadTextureBack(id, width, height) {
+
+    }
+
+    static textureId = 1;
 }
 //////////////////////////End File:flower/platform/nodejs/PlatformURLLoader.js///////////////////////////
 
@@ -2180,46 +2349,37 @@ class PlatformProgram {
 class PlatformWebSocket {
 
     webSocket;
+    connection;
 
     bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-        var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
+        var websocket = new WSClient();
         this.webSocket = websocket;
-        var openFunc = function () {
+        websocket.connect("ws://" + ip + ":" + port + "/");
+        var openFunc = function (connection) {
+            this.connection = connection;
+            connection.on('message', receiveFunc);
+            connection.on('error', errorFunc);
+            connection.on('close', closeFunc);
             onConnect.call(thisObj);
         };
-        websocket.onopen = openFunc;
-        var receiveFunc = function (event) {
-            if (event.data instanceof Blob) {
-                var reader = new FileReader();
-                reader.onloadend = function () {
-                    var list = [];
-                    var data = new Uint8Array(this.result);
-                    for (var i = 0; i < data.length; i++) {
-                        list.push(data[i]);
-                    }
-                    onReceiveMessage.call(thisObj, "buffer", list);
-                }
-                reader.readAsArrayBuffer(event.data);
-            } else if (event.data instanceof ArrayBuffer) {
-                var list = [];
-                var data = new Uint8Array(event.data);
-                for (var i = 0; i < data.length; i++) {
-                    list.push(data[i]);
-                }
-                onReceiveMessage.call(thisObj, "buffer", list);
-            } else {
-                onReceiveMessage.call(thisObj, "string", event.data);
+        websocket.on("connect", openFunc.bind(this));
+        var openError = function () {
+            onError.call(thisObj);
+        }
+        websocket.on("connectFailed", openError);
+        var receiveFunc = function (message) {
+            if (message.type == "binary") {
+                onReceiveMessage.call(thisObj, "buffer", message.binaryData);
+            } else if (message.type == "utf8") {
+                onReceiveMessage.call(thisObj, "string", message.utf8Data);
             }
         };
-        websocket.onmessage = receiveFunc;
         var errorFunc = function () {
             onError.call(thisObj);
         };
-        websocket.onerror = errorFunc;
         var closeFunc = function () {
             onClose.call(thisObj);
         };
-        websocket.onclose = closeFunc;
         PlatformWebSocket.webSockets.push({
             "webSocket": websocket
         });
@@ -2227,11 +2387,11 @@ class PlatformWebSocket {
     }
 
     sendWebSocketUTF(data) {
-        this.webSocket.send(data);
+        this.connection.send(data);
     }
 
     sendWebSocketBytes(data) {
-        this.webSocket.send(new Uint8Array(data));
+        this.connection.sendBytes(new Buffer(data));
     }
 
     releaseWebSocket() {
@@ -2438,8 +2598,22 @@ class PlatformClient extends PlatformSocketClient {
     }
 
     onReceiveMessage(cmd, bytes) {
+        console.log(cmd, bytes.data);
         if (cmd == 1) {
             Platform.init(bytes.readUInt(), bytes.readUInt());
+        } else if (cmd == 11) {
+            PlatformURLLoader.loadTextureBack(bytes.readUInt(), bytes.readUInt(), bytes.readUInt());
+        } else if(cmd == 2) {
+            var type = bytes.readUTF();
+            var param1;
+            var param2;
+            if(type == "keyDown" || type == "keyUp") {
+                param1 = bytes.readUInt();
+            } else if(type == "touchDown" || type == "touchUp" || type == "mouseMove") {
+                param1 = bytes.readUInt();
+                param2 = bytes.readUInt();
+            }
+            Platform.receiveTouchKeyEvent(type,param1,param2);
         }
     }
 
@@ -2460,6 +2634,82 @@ class PlatformClient extends PlatformSocketClient {
 
 
 //////////////////////////End File:flower/platform/nodejs/PlatformClient.js///////////////////////////
+
+
+
+//////////////////////////File:flower/platform/nodejs/PlatformHttpRequest.js///////////////////////////
+class PlatformHttpRequest extends flower.EventDispatcher {
+
+    constructor(serverIp, port, path, encoding) {
+        super();
+        this.hasEnd = false;
+        this.serverIp = serverIp;
+        this.port = port || 0;
+        this.path = path || "";
+        this.encoding = encoding || "utf8";
+        if (this.encoding == "utf8") {
+            this.data = "";
+        } else if (this.encoding == "binary") {
+            this.data = new ArrayBuffer();
+        }
+    }
+
+    get(data, method) {
+        data = data || {};
+        var content = querystring.stringify(data);
+        var options = {
+            hostname: this.serverIp,
+            path: this.path,
+            method: method || 'GET'
+        };
+        if (this.port) {
+            options.port = this.port;
+        }
+        var req = http.request(options, this.onConnect.bind(this));
+        req.on("error", this.onError.bind(this));
+        req.on("end", this.onComplete.bind(this));
+        req.on("close", this.onClose.bind(this));
+        req.end();
+        this.req = req;
+    }
+
+    onConnect(request) {
+        request.setEncoding(this.encoding);
+        request.on("data", this.onData.bind(this));
+        this.request = request;
+    }
+
+    onData(data) {
+        if (this.encoding == "utf8") {
+            this.data += data;
+        } else if (this.encoding == "binary") {
+            this.data = this.data.concat(data);
+        }
+    }
+
+    onComplete() {
+        if (!this.hasEnd) {
+            this.hasEnd = true;
+            this.dispatchWith(Event.COMPLETE);
+        }
+    }
+
+    onClose() {
+        if (!this.hasEnd) {
+            this.hasEnd = true;
+            this.dispatchWith(Event.COMPLETE);
+        }
+    }
+
+    onError(e) {
+        //console.log('problem with request: ' + e.message);
+        if (!this.hasEnd) {
+            this.hasEnd = true;
+            this.dispatchWith(Event.ERROR);
+        }
+    }
+}
+//////////////////////////End File:flower/platform/nodejs/PlatformHttpRequest.js///////////////////////////
 
 
 
@@ -2709,6 +2959,10 @@ class File {
 
     clone() {
         return new File(this.url);
+    }
+
+    readContent(format, backFormat) {
+        return this.__native.readContent(format, backFormat);
     }
 
     get name() {
@@ -10959,4 +11213,6 @@ flower.Math = Math;
 
 })(Math);
 var trace = flower.trace;
-global.flower = flower
+global.flower = flower;
+eval('global._get = _get;');
+eval('global.$root = $root;');

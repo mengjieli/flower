@@ -1,46 +1,37 @@
 class PlatformWebSocket {
 
     webSocket;
+    connection;
 
     bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-        var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
+        var websocket = new WSClient();
         this.webSocket = websocket;
-        var openFunc = function () {
+        websocket.connect("ws://" + ip + ":" + port + "/");
+        var openFunc = function (connection) {
+            this.connection = connection;
+            connection.on('message', receiveFunc);
+            connection.on('error', errorFunc);
+            connection.on('close', closeFunc);
             onConnect.call(thisObj);
         };
-        websocket.onopen = openFunc;
-        var receiveFunc = function (event) {
-            if (event.data instanceof Blob) {
-                var reader = new FileReader();
-                reader.onloadend = function () {
-                    var list = [];
-                    var data = new Uint8Array(this.result);
-                    for (var i = 0; i < data.length; i++) {
-                        list.push(data[i]);
-                    }
-                    onReceiveMessage.call(thisObj, "buffer", list);
-                }
-                reader.readAsArrayBuffer(event.data);
-            } else if (event.data instanceof ArrayBuffer) {
-                var list = [];
-                var data = new Uint8Array(event.data);
-                for (var i = 0; i < data.length; i++) {
-                    list.push(data[i]);
-                }
-                onReceiveMessage.call(thisObj, "buffer", list);
-            } else {
-                onReceiveMessage.call(thisObj, "string", event.data);
+        websocket.on("connect", openFunc.bind(this));
+        var openError = function () {
+            onError.call(thisObj);
+        }
+        websocket.on("connectFailed", openError);
+        var receiveFunc = function (message) {
+            if (message.type == "binary") {
+                onReceiveMessage.call(thisObj, "buffer", message.binaryData);
+            } else if (message.type == "utf8") {
+                onReceiveMessage.call(thisObj, "string", message.utf8Data);
             }
         };
-        websocket.onmessage = receiveFunc;
         var errorFunc = function () {
             onError.call(thisObj);
         };
-        websocket.onerror = errorFunc;
         var closeFunc = function () {
             onClose.call(thisObj);
         };
-        websocket.onclose = closeFunc;
         PlatformWebSocket.webSockets.push({
             "webSocket": websocket
         });
@@ -48,11 +39,11 @@ class PlatformWebSocket {
     }
 
     sendWebSocketUTF(data) {
-        this.webSocket.send(data);
+        this.connection.send(data);
     }
 
     sendWebSocketBytes(data) {
-        this.webSocket.send(new Uint8Array(data));
+        this.connection.sendBytes(new Buffer(data));
     }
 
     releaseWebSocket() {

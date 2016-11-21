@@ -8,8 +8,15 @@ class PlatformTextInput extends PlatformDisplayObject {
     __changeBackThis = null;
 
 
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
+
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("TextInput");
+        Platform.sendToClient(msg);
     }
 
     setFontColor(color) {

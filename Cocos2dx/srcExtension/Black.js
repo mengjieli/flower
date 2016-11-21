@@ -1,5 +1,4 @@
 var black = {};
-var $root = eval("this");
 (function(){
 //////////////////////////File:extension/black/core/Black.js///////////////////////////
 var sys = {};
@@ -3444,8 +3443,8 @@ class UIParser extends Group {
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout",
 
-            "Direction": "flower.Direction",
-            "File": "flower.File"
+            "RemoteDirection": "flower.RemoteDirection",
+            "RemoteFile": "flower.RemoteFile"
         },
         local: {},
         localContent: {},

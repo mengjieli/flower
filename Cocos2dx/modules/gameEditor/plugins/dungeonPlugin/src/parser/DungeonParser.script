@@ -14,7 +14,7 @@ var DungeonParser = (function (_super) {
     }
 
     DungeonParser.prototype.loadBackground = function () {
-        (new flower.Direction("res/tools/dungeon/background")).readDirectionList(function (list) {
+        (new flower.RemoteDirection("res/tools/dungeon/background")).readDirectionList(function (list) {
             var enumList = [];
             var find = false;
             for (var i = 0; i < list.length; i++) {
@@ -54,7 +54,7 @@ var DungeonParser = (function (_super) {
 
     DungeonParser.prototype.save = function () {
         var path = this.file.path;
-        (new flower.File(path)).saveText(flower.ObjectDo.toString(this.data.value, 100000000));
+        (new flower.RemoteFile(path)).saveText(flower.ObjectDo.toString(this.data.value, 100000000));
     }
 
     Object.defineProperty(DungeonParser.prototype, "itemId", {

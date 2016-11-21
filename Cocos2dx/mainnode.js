@@ -9,31 +9,18 @@
 //    "src/Remote.js"];
 
 require("./src/FlowerNodeJS");
+require("./src/Black");
+require("./src/Binding");
+require("./src/Remote");
+var file = new flower.File("src/require.js");
+var content = file.readContent();
+content += "global.jsFiles = jsFiles;"
+eval(content);
+content = "";
+for (var i = 0; i < jsFiles.length; i++) {
+    content += (new flower.File(jsFiles[i])).readContent() + "\n\n\n";
+}
+content += "global.Main = Main;";
+eval(content);
+new Main();
 
-flower.start();
-
-//
-//var file = new File("src/Black.js");
-//var content = file.readContent();
-//eval(content);
-//
-//var file = new File("src/Binding.js");
-//var content = file.readContent();
-//eval(content);
-//
-//var file = new File("src/Remote.js");
-//var content = file.readContent();
-//eval(content);
-//
-//
-//var file = new File("src/require.js");
-//var content = file.readContent();
-//content += "_root.jsFiles = jsFiles;"
-//eval(content);
-//var jsFiles = _root.jsFiles;
-//content = "";
-//for (var i = 0; i < jsFiles.length; i++) {
-//    content += (new File(jsFiles[i])).readContent() + "\n\n\n";
-//}
-//content += "new Main();";
-//eval(content);

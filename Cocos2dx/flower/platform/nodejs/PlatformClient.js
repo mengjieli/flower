@@ -30,8 +30,22 @@ class PlatformClient extends PlatformSocketClient {
     }
 
     onReceiveMessage(cmd, bytes) {
+        console.log(cmd, bytes.data);
         if (cmd == 1) {
             Platform.init(bytes.readUInt(), bytes.readUInt());
+        } else if (cmd == 11) {
+            PlatformURLLoader.loadTextureBack(bytes.readUInt(), bytes.readUInt(), bytes.readUInt());
+        } else if(cmd == 2) {
+            var type = bytes.readUTF();
+            var param1;
+            var param2;
+            if(type == "keyDown" || type == "keyUp") {
+                param1 = bytes.readUInt();
+            } else if(type == "touchDown" || type == "touchUp" || type == "mouseMove") {
+                param1 = bytes.readUInt();
+                param2 = bytes.readUInt();
+            }
+            Platform.receiveTouchKeyEvent(type,param1,param2);
         }
     }
 

@@ -1,0 +1,4 @@
+<f:Group percentWidth="100" percentHeight="100" xmlns:f="flower">
+    <f:Rect fillColor="0x00ff00" lineWidth="1" percentWidth="100" percentHeight="100"/>
+    <f:Label text="什么？"/>
+</f:Group>

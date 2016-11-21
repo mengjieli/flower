@@ -1,4 +1,4 @@
-class File {
+class RemoteFile {
 
     __path;
     __autoUpdate;
@@ -25,4 +25,4 @@ class File {
     }
 }
 
-exports.File = File;
+exports.RemoteFile = RemoteFile;

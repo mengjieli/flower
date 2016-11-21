@@ -265,19 +265,19 @@ var remote = {};
     remote.Remote = Remote;
     //////////////////////////End File:remote/Remote.js///////////////////////////
 
-    //////////////////////////File:remote/File.js///////////////////////////
+    //////////////////////////File:remote/RemoteFile.js///////////////////////////
 
-    var File = function () {
-        function File(path) {
+    var RemoteFile = function () {
+        function RemoteFile(path) {
             var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-            _classCallCheck(this, File);
+            _classCallCheck(this, RemoteFile);
 
             this.__path = path;
             this.__autoUpdate = autoUpdate;
         }
 
-        _createClass(File, [{
+        _createClass(RemoteFile, [{
             key: "saveText",
             value: function saveText(text, back, thisObj) {
                 new SaveFileRemote(back, thisObj, this.__path, text, "text");
@@ -299,19 +299,19 @@ var remote = {};
             }
         }]);
 
-        return File;
+        return RemoteFile;
     }();
 
-    remote.File = File;
-    //////////////////////////End File:remote/File.js///////////////////////////
+    remote.RemoteFile = RemoteFile;
+    //////////////////////////End File:remote/RemoteFile.js///////////////////////////
 
-    //////////////////////////File:remote/Direction.js///////////////////////////
+    //////////////////////////File:remote/RemoteDirection.js///////////////////////////
 
-    var Direction = function () {
-        function Direction(path) {
+    var RemoteDirection = function () {
+        function RemoteDirection(path) {
             var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-            _classCallCheck(this, Direction);
+            _classCallCheck(this, RemoteDirection);
 
             this.__path = path;
             this.__autoUpdate = autoUpdate;
@@ -321,7 +321,7 @@ var remote = {};
             }
         }
 
-        _createClass(Direction, [{
+        _createClass(RemoteDirection, [{
             key: "isExist",
             value: function isExist(back, thisObj) {
                 new IsDirectionExistRemote(back, thisObj, this.__path);
@@ -388,11 +388,11 @@ var remote = {};
             }
         }]);
 
-        return Direction;
+        return RemoteDirection;
     }();
 
-    remote.Direction = Direction;
-    //////////////////////////End File:remote/Direction.js///////////////////////////
+    remote.RemoteDirection = RemoteDirection;
+    //////////////////////////End File:remote/RemoteDirection.js///////////////////////////
 
     //////////////////////////File:remote/language/zh_CN.js///////////////////////////
     var locale_strings = flower.sys.$locale_strings["zh_CN"];

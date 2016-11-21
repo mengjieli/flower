@@ -221,7 +221,7 @@ var list = [
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";
-fileContent += "var $root = eval(\"this\");\n";
+//fileContent += "var $root = eval(\"this\");\n";
 fileContent += "(function(){\n";
 while (list.length) {
     var name = list.shift();

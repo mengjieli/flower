@@ -106,6 +106,10 @@ class File {
         return new File(this.url);
     }
 
+    readContent(format, backFormat) {
+        return this.__native.readContent(format, backFormat);
+    }
+
     get name() {
         return this.__name;
     }

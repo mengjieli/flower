@@ -9,18 +9,26 @@ class PlatformBitmap extends PlatformDisplayObject {
     scaleX = 1;
     scaleY = 1;
 
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
 
 
-
+        var msg = new flower.VByteArray();
+        msg.writeUInt(6);
+        msg.writeUInt(this.id);
+        msg.writeUTF("Bitmap");
+        Platform.sendToClient(msg);
         //this.show = new cc.Sprite();
         //this.show.setAnchorPoint(0, 1);
         //this.show.retain();
     }
 
     setTexture(texture) {
-
+        var msg = new flower.VByteArray();
+        msg.writeUInt(12);
+        msg.writeUInt(this.id);
+        msg.writeUInt(texture.$nativeTexture.id);
+        Platform.sendToClient(msg);
     }
 
 

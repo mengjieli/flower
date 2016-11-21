@@ -104,6 +104,11 @@ var Main = function () {
 
             return;//*/
 
+
+            //var ui = new flower.UIParser();
+            //ui.parseUIAsync("res/Test3.xml");
+            //flower.Stage.getInstance().addChild(ui);
+
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

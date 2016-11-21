@@ -1,0 +1,1011 @@
+UIParser.registerLocalUIClass("NewMapPanel", NewMapPanel,"map");
+if($root.map == null) $root.map = {};
+$root.map.NewMapPanel = NewMapPanel
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/module.json
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/src/parser/Parser.script
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/src/utils/MapUtils.script
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/src/qaTest/QATestAccount.script
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/src/qaTest/QATestNet.script
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/data/qaTest/QATest.json
+数据结构:
+var QATest = (function (_super) {
+        __extends(QATest, _super);
+        function QATest(init) {
+                _super.call(this,null);
+                this.className = "st.QATest";
+                this.$setMember("accounts" , new ArrayValue(null,"st.QATestAccount"));
+                this.$setMember("httpServer" , new StringValue("106.75.145.132",null));
+                this.$setMember("gameServer" , new StringValue("106.75.145.132",null));
+                this.$setMember("start" , new BooleanValue(false,null));
+                this.$setMember("allLogin" , new IntValue(null,null,undefined));
+                this.$setMember("currentLogin" , new IntValue(null,null,undefined));
+                this.$setMember("currentLoginOut" , new IntValue(null,null,undefined));
+                this.$setMember("maxLogin" , new IntValue(null,null,undefined));
+                this.$setMember("sameTimeLoginMax" , new IntValue(5,null,undefined));
+                this.$setMember("sameTimeLogin" , new IntValue(null,null,undefined));
+                if(init) this.value = init;
+        }
+
+        Object.defineProperty(QATest.prototype,"accounts", {
+                get: function () {
+                        return this.__value["accounts"];
+                },
+                set: function (val) {
+                        this.setValue("accounts", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"httpServer", {
+                get: function () {
+                        return this.__value["httpServer"];
+                },
+                set: function (val) {
+                        this.setValue("httpServer", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"gameServer", {
+                get: function () {
+                        return this.__value["gameServer"];
+                },
+                set: function (val) {
+                        this.setValue("gameServer", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"start", {
+                get: function () {
+                        return this.__value["start"];
+                },
+                set: function (val) {
+                        this.setValue("start", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"allLogin", {
+                get: function () {
+                        return this.__value["allLogin"];
+                },
+                set: function (val) {
+                        this.setValue("allLogin", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"currentLogin", {
+                get: function () {
+                        return this.__value["currentLogin"];
+                },
+                set: function (val) {
+                        this.setValue("currentLogin", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"currentLoginOut", {
+                get: function () {
+                        return this.__value["currentLoginOut"];
+                },
+                set: function (val) {
+                        this.setValue("currentLoginOut", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"maxLogin", {
+                get: function () {
+                        return this.__value["maxLogin"];
+                },
+                set: function (val) {
+                        this.setValue("maxLogin", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"sameTimeLoginMax", {
+                get: function () {
+                        return this.__value["sameTimeLoginMax"];
+                },
+                set: function (val) {
+                        this.setValue("sameTimeLoginMax", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATest.prototype,"sameTimeLogin", {
+                get: function () {
+                        return this.__value["sameTimeLogin"];
+                },
+                set: function (val) {
+                        this.setValue("sameTimeLogin", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        return QATest;
+})(ObjectValue);
+DataManager.getInstance().$addClassDefine(QATest, "st.QATest");
+
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/data/qaTest/QATestAccount.json
+数据结构:
+var QATestAccount = (function (_super) {
+        __extends(QATestAccount, _super);
+        function QATestAccount(init) {
+                _super.call(this,null);
+                this.className = "st.QATestAccount";
+                this.$setMember("user" , new StringValue(null,null));
+                this.$setMember("password" , new StringValue(null,null));
+                this.$setMember("token" , new StringValue(null,null));
+                this.$setMember("isLogining" , new BooleanValue(false,null));
+                this.$setMember("hasLogin" , new BooleanValue(false,null));
+                this.$setMember("invalid" , new BooleanValue(false,null));
+                this.$setMember("nick" , new StringValue(null,null));
+                this.$setMember("operator" , null);
+                this.$setMemberSaveClass("operator" ,false);
+                if(init) this.value = init;
+        }
+
+        Object.defineProperty(QATestAccount.prototype,"user", {
+                get: function () {
+                        return this.__value["user"];
+                },
+                set: function (val) {
+                        this.setValue("user", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATestAccount.prototype,"password", {
+                get: function () {
+                        return this.__value["password"];
+                },
+                set: function (val) {
+                        this.setValue("password", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATestAccount.prototype,"token", {
+                get: function () {
+                        return this.__value["token"];
+                },
+                set: function (val) {
+                        this.setValue("token", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATestAccount.prototype,"isLogining", {
+                get: function () {
+                        return this.__value["isLogining"];
+                },
+                set: function (val) {
+                        this.setValue("isLogining", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATestAccount.prototype,"hasLogin", {
+                get: function () {
+                        return this.__value["hasLogin"];
+                },
+                set: function (val) {
+                        this.setValue("hasLogin", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATestAccount.prototype,"invalid", {
+                get: function () {
+                        return this.__value["invalid"];
+                },
+                set: function (val) {
+                        this.setValue("invalid", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATestAccount.prototype,"nick", {
+                get: function () {
+                        return this.__value["nick"];
+                },
+                set: function (val) {
+                        this.setValue("nick", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        Object.defineProperty(QATestAccount.prototype,"operator", {
+                get: function () {
+                        return this.__value["operator"];
+                },
+                set: function (val) {
+                        this.setValue("operator", val);
+                },
+                enumerable: true,
+                configurable: true
+        });
+
+        return QATestAccount;
+})(ObjectValue);
+DataManager.getInstance().$addClassDefine(QATestAccount, "st.QATestAccount");
+
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/view/SmallView.xml
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/view/SmallView.script
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.script
+解析类:
+                var registerParser = editor.PluginManager.registerParser;
+var registerView = editor.PluginManager.registerView;
+var setNewFilePanel = editor.PluginManager.setNewFilePanel;
+var setDirectionMenu = editor.PluginManager.setDirectionMenu;
+var setFileMenu = editor.PluginManager.setFileMenu;
+var addFile = editor.ProjectView.addFile;
+var saveFile = editor.ProjectView.saveFile;
+var deleteFile = editor.ProjectView.deleteFile;
+var showDetailPanel = editor.ProjectView.showDetailPanel;
+var module = $root.st;
+var moduleKey = "key55448738";
+var PointToPosition = (function (_super) {
+        __extends(PointToPosition, _super);
+        function PointToPosition(data) {
+                 _super.call(this);
+                this.PointToPosition_binds = [];
+                this.PointToPosition_initMain(this);
+                if(data) this.data = data;
+                this.PointToPosition_setBindProperty();
+                if(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);
+        }
+
+        PointToPosition.prototype.PointToPosition_initMain = function(parentObject) {
+                parentObject.percentWidth = 100;
+                parentObject.percentHeight = 100;
+                parentObject.creationComplete = "this.init();";
+                parentObject.addChild(this.PointToPosition_getGroup(parentObject));
+                parentObject.addChild(this.PointToPosition_getGroup2(parentObject));
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                label.text = "坐标转像素";
+                label.x = 10;
+                label.y = 10;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel2 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                label.text = "x";
+                label.x = 10;
+                label.y = 33;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getInput = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                this.coordX = input;
+                this.coordX.name = "coordX";
+                input.width = 50;
+                input.x = 25;
+                input.y = 30;
+                return input;
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel3 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                label.text = "y";
+                label.x = 100;
+                label.y = 33;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getInput2 = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                this.coordY = input;
+                this.coordY.name = "coordY";
+                input.width = 50;
+                input.x = 115;
+                input.y = 30;
+                return input;
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel4 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                this.position = label;
+                this.position.name = "position";
+                label.text = "像素";
+                label.x = 200;
+                label.y = 33;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getGroup = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                group.y = 0;
+                group.addChild(this.PointToPosition_getLabel(group));
+                group.addChild(this.PointToPosition_getLabel2(group));
+                group.addChild(this.PointToPosition_getInput(group));
+                group.addChild(this.PointToPosition_getLabel3(group));
+                group.addChild(this.PointToPosition_getInput2(group));
+                group.addChild(this.PointToPosition_getLabel4(group));
+                return group;
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel5 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                label.text = "像素转坐标";
+                label.x = 10;
+                label.y = 10;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel6 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                label.text = "x";
+                label.x = 10;
+                label.y = 33;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getInput3 = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                this.positionX = input;
+                this.positionX.name = "positionX";
+                input.width = 50;
+                input.x = 25;
+                input.y = 30;
+                return input;
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel7 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                label.text = "y";
+                label.x = 100;
+                label.y = 33;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getInput4 = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                this.positionY = input;
+                this.positionY.name = "positionY";
+                input.width = 50;
+                input.x = 115;
+                input.y = 30;
+                return input;
+        }
+
+        PointToPosition.prototype.PointToPosition_getLabel8 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                this.coord = label;
+                this.coord.name = "coord";
+                label.text = "坐标";
+                label.x = 200;
+                label.y = 33;
+                return label;
+        }
+
+        PointToPosition.prototype.PointToPosition_getGroup2 = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/pointToPosition/PointToPosition.xml";
+                group.y = 60;
+                group.addChild(this.PointToPosition_getLabel5(group));
+                group.addChild(this.PointToPosition_getLabel6(group));
+                group.addChild(this.PointToPosition_getInput3(group));
+                group.addChild(this.PointToPosition_getLabel7(group));
+                group.addChild(this.PointToPosition_getInput4(group));
+                group.addChild(this.PointToPosition_getLabel8(group));
+                return group;
+        }
+
+        PointToPosition.prototype.init = function() {
+    flower.EnterFrame.add(this.update, this);
+}
+        PointToPosition.prototype.update = function() {
+    var coordX = parseInt(this.coordX.text) || 0;
+    var coordY = parseInt(this.coordY.text) || 0;
+    var point = module.MapUtils.transPointToPosition(coordX,coordY);
+    this.position.text = "像素: ( " + parseInt(point.x) + " , " + parseInt(point.y) + " )";
+
+    var positionX = parseInt(this.positionX.text) || 0;
+    var positionY = parseInt(this.positionY.text) || 0;
+    point = module.MapUtils.transPositionToPoint(positionX,positionY);
+    this.coord.text = "坐标: ( " + point.x + " , " + point.y + " )";
+
+}
+        PointToPosition.prototype.PointToPosition_setBindProperty = function() {
+                for(var i = 0; i < this.PointToPosition_binds.length; i++) this.PointToPosition_binds[i][0].bindProperty(this.PointToPosition_binds[i][1],this.PointToPosition_binds[i][2],[this]);
+        }
+
+        return PointToPosition;
+})(flower.Group);
+
+
+UIParser.registerLocalUIClass("PointToPosition", PointToPosition,"st");
+if($root.st == null) $root.st = {};
+$root.st.PointToPosition = PointToPosition
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml
+[loadText] http://192.168.1.121:20001/modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.script
+解析类:
+                var registerParser = editor.PluginManager.registerParser;
+var registerView = editor.PluginManager.registerView;
+var setNewFilePanel = editor.PluginManager.setNewFilePanel;
+var setDirectionMenu = editor.PluginManager.setDirectionMenu;
+var setFileMenu = editor.PluginManager.setFileMenu;
+var addFile = editor.ProjectView.addFile;
+var saveFile = editor.ProjectView.saveFile;
+var deleteFile = editor.ProjectView.deleteFile;
+var showDetailPanel = editor.ProjectView.showDetailPanel;
+var module = $root.st;
+var moduleKey = "key55448738";
+var QATest = (function (_super) {
+        __extends(QATest, _super);
+        function QATest(data) {
+                 _super.call(this);
+                this.QATest_binds = [];
+                this.QATest_initMain(this);
+                if(data) this.data = data;
+                this.QATest_setBindProperty();
+                if(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);
+        }
+
+        QATest.prototype.QATest_initMain = function(parentObject) {
+                parentObject.percentWidth = 100;
+                parentObject.percentHeight = 100;
+                parentObject.creationComplete = "this.init();";
+                parentObject.addChild(this.QATest_getViewStack(parentObject));
+        }
+
+        QATest.prototype.QATest_getRect = function(parentObject) {
+                var rect = new flower.Rect();
+                if(rect.__UIComponent) rect.eventThis = this;
+                if(rect.__UIComponent) rect.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                rect.percentWidth = 100;
+                rect.percentHeight = 100;
+                rect.fillColor = 0;
+                rect.fillAlpha = "0.5";
+                return rect;
+        }
+
+        QATest.prototype.QATest_getLabel = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.text = "加载帐号中...";
+                label.verticalCenter = 0;
+                label.horizontalCenter = 0;
+                return label;
+        }
+
+        QATest.prototype.QATest_getGroup = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                group.percentWidth = 100;
+                group.percentHeight = 100;
+                group.addChild(this.QATest_getRect(group));
+                group.addChild(this.QATest_getLabel(group));
+                return group;
+        }
+
+        QATest.prototype.QATest_getLabel2 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.text = "http服务器Ip";
+                label.verticalCenter = 0;
+                return label;
+        }
+
+        QATest.prototype.QATest_getInput = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                this.httpInput = input;
+                this.httpInput.name = "httpInput";
+                input.x = 80;
+                input.width = 100;
+                input.verticalCenter = 0;
+                return input;
+        }
+
+        QATest.prototype.QATest_getGroup3 = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                group.x = 10;
+                group.y = 10;
+                group.addChild(this.QATest_getLabel2(group));
+                group.addChild(this.QATest_getInput(group));
+                return group;
+        }
+
+        QATest.prototype.QATest_getLabel3 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.text = "游戏服务器Ip";
+                label.verticalCenter = 0;
+                return label;
+        }
+
+        QATest.prototype.QATest_getInput2 = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                this.gameInput = input;
+                this.gameInput.name = "gameInput";
+                input.x = 80;
+                input.width = 100;
+                input.verticalCenter = 0;
+                return input;
+        }
+
+        QATest.prototype.QATest_getGroup4 = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                group.x = 10;
+                group.y = 40;
+                group.addChild(this.QATest_getLabel3(group));
+                group.addChild(this.QATest_getInput2(group));
+                return group;
+        }
+
+        QATest.prototype.QATest_getLabel4 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.text = "最大登陆人数";
+                label.verticalCenter = 0;
+                return label;
+        }
+
+        QATest.prototype.QATest_getInput3 = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                this.maxInput = input;
+                this.maxInput.name = "maxInput";
+                input.x = 80;
+                input.width = 100;
+                input.verticalCenter = 0;
+                return input;
+        }
+
+        QATest.prototype.QATest_getGroup5 = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                group.x = 210;
+                group.y = 10;
+                group.addChild(this.QATest_getLabel4(group));
+                group.addChild(this.QATest_getInput3(group));
+                return group;
+        }
+
+        QATest.prototype.QATest_getLabel5 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.text = "最大同时登陆";
+                label.verticalCenter = 0;
+                return label;
+        }
+
+        QATest.prototype.QATest_getInput4 = function(parentObject) {
+                var input = new (flower.UIParser.getLocalUIClass("Input","software"))();
+                if(input.__UIComponent) input.eventThis = this;
+                if(input.__UIComponent) input.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                this.sameTimeLoginInput = input;
+                this.sameTimeLoginInput.name = "sameTimeLoginInput";
+                input.x = 80;
+                input.width = 100;
+                input.verticalCenter = 0;
+                return input;
+        }
+
+        QATest.prototype.QATest_getGroup6 = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                group.x = 210;
+                group.y = 40;
+                group.addChild(this.QATest_getLabel5(group));
+                group.addChild(this.QATest_getInput4(group));
+                return group;
+        }
+
+        QATest.prototype.QATest_getButton1 = function(parentObject) {
+                var button1 = new (flower.UIParser.getLocalUIClass("Button1","software"))();
+                if(button1.__UIComponent) button1.eventThis = this;
+                if(button1.__UIComponent) button1.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                button1.x = 450;
+                button1.y = 10;
+                button1.width = 50;
+                button1.height = 16;
+                if(button1.__UIComponent) this.QATest_binds.push([button1,"visible", "{data.start}"]);
+                else button1.visible = "{data.start}";
+                button1.label = "暂停登陆";
+                button1.click = "this.data.start = false;";
+                return button1;
+        }
+
+        QATest.prototype.QATest_getButton12 = function(parentObject) {
+                var button1 = new (flower.UIParser.getLocalUIClass("Button1","software"))();
+                if(button1.__UIComponent) button1.eventThis = this;
+                if(button1.__UIComponent) button1.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                button1.x = 450;
+                button1.y = 10;
+                button1.width = 50;
+                button1.height = 16;
+                if(button1.__UIComponent) this.QATest_binds.push([button1,"visible", "{!data.start}"]);
+                else button1.visible = "{!data.start}";
+                button1.label = "开始登陆";
+                button1.click = "this.data.start = true;";
+                return button1;
+        }
+
+        QATest.prototype.QATest_getLabel6 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.x = 10;
+                if(label.__UIComponent) this.QATest_binds.push([label,"text", "全部客户端登陆人数: {data.allLogin}"]);
+                else label.text = "全部客户端登陆人数: {data.allLogin}";
+                label.y = 70;
+                return label;
+        }
+
+        QATest.prototype.QATest_getLabel7 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.x = 10;
+                if(label.__UIComponent) this.QATest_binds.push([label,"text", "当前客户端登陆人数: {data.currentLogin} / {data.accounts.lengthIntValue}"]);
+                else label.text = "当前客户端登陆人数: {data.currentLogin} / {data.accounts.lengthIntValue}";
+                label.y = 100;
+                return label;
+        }
+
+        QATest.prototype.QATest_getLabel8 = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                label.x = 10;
+                if(label.__UIComponent) this.QATest_binds.push([label,"text", "当前客户端掉线人次: {data.currentLoginOut}"]);
+                else label.text = "当前客户端掉线人次: {data.currentLoginOut}";
+                label.y = 130;
+                return label;
+        }
+
+        QATest.prototype.QATest_getGroup2 = function(parentObject) {
+                var group = new flower.Group();
+                if(group.__UIComponent) group.eventThis = this;
+                if(group.__UIComponent) group.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                group.percentWidth = 100;
+                group.percentHeight = 100;
+                group.addChild(this.QATest_getGroup3(group));
+                group.addChild(this.QATest_getGroup4(group));
+                group.addChild(this.QATest_getGroup5(group));
+                group.addChild(this.QATest_getGroup6(group));
+                group.addChild(this.QATest_getButton1(group));
+                group.addChild(this.QATest_getButton12(group));
+                group.addChild(this.QATest_getLabel6(group));
+                group.addChild(this.QATest_getLabel7(group));
+                group.addChild(this.QATest_getLabel8(group));
+                return group;
+        }
+
+        QATest.prototype.QATest_getViewStack = function(parentObject) {
+                var viewstack = new flower.ViewStack();
+                if(viewstack.__UIComponent) viewstack.eventThis = this;
+                if(viewstack.__UIComponent) viewstack.$filePath = "modules/gameEditor/plugins/smallPlugin/view/qaTest/QATest.xml";
+                this.viewStack = viewstack;
+                this.viewStack.name = "viewStack";
+                viewstack.percentWidth = 100;
+                viewstack.percentHeight = 100;
+                viewstack.addChild(this.QATest_getGroup(viewstack));
+                viewstack.addChild(this.QATest_getGroup2(viewstack));
+                return viewstack;
+        }
+
+        QATest.prototype.init = function() {
+    var remote = new flower.Remote(this.getAccountBack, this);
+    var msg = new flower.VByteArray();
+    msg.writeUInt(10000);
+    msg.writeUInt(remote.id);
+    remote.send(msg);
+    this.data = flower.DataManager.createData("st.QATest");
+    this.httpInput.value = this.data.httpServer;
+    this.gameInput.value = this.data.gameServer;
+    this.maxInput.value = this.data.maxLogin;
+    this.sameTimeLoginInput.value = this.data.sameTimeLoginMax;
+}
+        QATest.prototype.getAccountBack = function(cmd,bytes,remote) {
+    var len = bytes.readUInt();
+    this.accounts = [];
+    if (len == 0) {
+        remote.dispose();
+        this.viewStack.selectedIndex = 1;
+        this.data.maxLogin = this.data.accounts.length;
+    } else {
+        for (var i = 0; i < len; i++) {
+            var user = bytes.readUTF();
+            var password = bytes.readUTF();
+            var account = flower.DataManager.createData("st.QATestAccount");
+            account.user = user;
+            account.password = password;
+            this.data.accounts.push(account);
+
+            var testAccount = new module.QATestAccount(account);
+            account.operator = testAccount;
+            this.accounts.push(testAccount);
+        }
+    }
+    flower.EnterFrame.add(this.update, this);
+}
+        QATest.prototype.update = function(time,dt) {
+    this.data.currentLogin = this.data.accounts.getItemsWith("hasLogin", true).length;
+    if (!this.data.start.value) {
+        return;
+    }
+    this.data.sameTimeLogin = this.data.accounts.getItemsWith("isLogining", true).length;
+    if (this.data.sameTimeLogin.value < this.data.sameTimeLoginMax.value) {
+        var account;
+        var accounts = this.data.accounts;
+        for (var i = 0; i < accounts.length; i++) {
+            if (!accounts[i].invalid.value && !accounts[i].isLogining.value && !accounts[i].hasLogin.value) {
+                account = accounts[i];
+                break;
+            }
+        }
+        if (account) {
+            account.operator.login(this.data);
+            console.log("login ", account.user.value, this.data.sameTimeLogin.value);
+        }
+    }
+}
+        QATest.prototype.QATest_setBindProperty = function() {
+                for(var i = 0; i < this.QATest_binds.length; i++) this.QATest_binds[i][0].bindProperty(this.QATest_binds[i][1],this.QATest_binds[i][2],[this]);
+        }
+
+        return QATest;
+})(flower.Group);
+
+
+UIParser.registerLocalUIClass("QATest", QATest,"st");
+if($root.st == null) $root.st = {};
+$root.st.QATest = QATest
+解析类:
+                var registerParser = editor.PluginManager.registerParser;
+var registerView = editor.PluginManager.registerView;
+var setNewFilePanel = editor.PluginManager.setNewFilePanel;
+var setDirectionMenu = editor.PluginManager.setDirectionMenu;
+var setFileMenu = editor.PluginManager.setFileMenu;
+var addFile = editor.ProjectView.addFile;
+var saveFile = editor.ProjectView.saveFile;
+var deleteFile = editor.ProjectView.deleteFile;
+var showDetailPanel = editor.ProjectView.showDetailPanel;
+var module = $root.st;
+var moduleKey = "key55448738";
+var SmallView = (function (_super) {
+        __extends(SmallView, _super);
+        function SmallView(data) {
+                 _super.call(this);
+                this.SmallView_binds = [];
+                this.SmallView_initMain(this);
+                if(data) this.data = data;
+                this.SmallView_setBindProperty();
+                if(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);
+        }
+
+        SmallView.prototype.SmallView_initMain = function(parentObject) {
+                parentObject.percentWidth = 100;
+                parentObject.percentHeight = 100;
+                parentObject.creationComplete = "this.init();";
+                if(parentObject.__UIComponent) this.SmallView_binds.push([parentObject,"title", "{data.name}"]);
+                else parentObject.title = "{data.name}";
+                parentObject.addChild(this.SmallView_getViewStack(parentObject));
+        }
+
+        SmallView.prototype.SmallView_getPointToPosition = function(parentObject) {
+                var pointtoposition = new (flower.UIParser.getLocalUIClass("PointToPosition","st"))();
+                if(pointtoposition.__UIComponent) pointtoposition.eventThis = this;
+                if(pointtoposition.__UIComponent) pointtoposition.$filePath = "modules/gameEditor/plugins/smallPlugin/view/SmallView.xml";
+                return pointtoposition;
+        }
+
+        SmallView.prototype.SmallView_getQATest = function(parentObject) {
+                var qatest = new (flower.UIParser.getLocalUIClass("QATest","st"))();
+                if(qatest.__UIComponent) qatest.eventThis = this;
+                if(qatest.__UIComponent) qatest.$filePath = "modules/gameEditor/plugins/smallPlugin/view/SmallView.xml";
+                return qatest;
+        }
+
+        SmallView.prototype.SmallView_getViewStack = function(parentObject) {
+                var viewstack = new flower.ViewStack();
+                if(viewstack.__UIComponent) viewstack.eventThis = this;
+                if(viewstack.__UIComponent) viewstack.$filePath = "modules/gameEditor/plugins/smallPlugin/view/SmallView.xml";
+                this.viewStack = viewstack;
+                this.viewStack.name = "viewStack";
+                viewstack.percentWidth = 100;
+                viewstack.percentHeight = 100;
+                viewstack.addChild(this.SmallView_getPointToPosition(viewstack));
+                viewstack.addChild(this.SmallView_getQATest(viewstack));
+                return viewstack;
+        }
+
+        SmallView.prototype.init = function() {
+    var indexs = {
+        "PointToPosition": 0,
+        "QATest": 1
+    };
+    var data = this.data.data;
+    var type = data.type;
+    this.viewStack.selectedIndex = indexs[type];
+}
+        SmallView.prototype.SmallView_setBindProperty = function() {
+                for(var i = 0; i < this.SmallView_binds.length; i++) this.SmallView_binds[i][0].bindProperty(this.SmallView_binds[i][1],this.SmallView_binds[i][2],[this]);
+        }
+
+registerView("SmallTool", SmallView);   return SmallView;
+})(flower.UIParser.getLocalUIClass("TitlePanel","software"));
+
+
+UIParser.registerLocalUIClass("SmallView", SmallView,"st");
+if($root.st == null) $root.st = {};
+$root.st.SmallView = SmallView
+[loadText] http://192.168.1.121:20001/flower.json
+2 [ 2, 9, 116, 111, 117, 99, 104, 68, 111, 119, 110, 15, 161, 1 ]
+2 [ 2, 7, 116, 111, 117, 99, 104, 85, 112, 15, 161, 1 ]
+2 [ 2, 9, 116, 111, 117, 99, 104, 68, 111, 119, 110, 37, 180, 1 ]
+2 [ 2, 7, 116, 111, 117, 99, 104, 85, 112, 37, 180, 1 ]
+2 [ 2, 9, 116, 111, 117, 99, 104, 68, 111, 119, 110, 67, 200, 1 ]
+2 [ 2, 7, 116, 111, 117, 99, 104, 85, 112, 67, 200, 1 ]
+[loadText] http://192.168.1.121:20001/res/tools/dungeon/Level1.json
+[loadText] http://192.168.1.121:20001/res/tools/dungeon/res/config/rolerAction.csv
+[loadText] http://192.168.1.121:20001/res/tools/dungeon/res/image/image.csv
+[loadText] http://192.168.1.121:20001/res/tools/dungeon/res/effect/effect.csv
+[loadTexture] http://192.168.1.121:20001/res/tools/dungeon/background/dungeon1_1.jpg
+解析类:
+                var $UI22 = (function (_super) {
+        __extends($UI22, _super);
+        function $UI22(data) {
+                 _super.call(this);
+                this.$UI22_binds = [];
+                this.$UI22_initMain(this);
+                if(data) this.data = data;
+                this.$UI22_setBindProperty();
+                if(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);
+        }
+
+        $UI22.prototype.$UI22_initMain = function(parentObject) {
+                parentObject.percentWidth = 100;
+                parentObject.height = 20;
+                parentObject.addChild(this.$UI22_getRect(parentObject));
+                parentObject.addChild(this.$UI22_getLabel(parentObject));
+        }
+
+        $UI22.prototype.$UI22_getRect = function(parentObject) {
+                var rect = new flower.Rect();
+                if(rect.__UIComponent) rect.eventThis = this;
+                if(rect.__UIComponent) rect.$filePath = "undefined";
+                rect.fillAlpha = "0.8";
+                rect.fillColor = 0x3d3d3d;
+                rect.percentWidth = 100;
+                rect.percentHeight = 100;
+                return rect;
+        }
+
+        $UI22.prototype.$UI22_getLabel = function(parentObject) {
+                var label = new flower.Label();
+                if(label.__UIComponent) label.eventThis = this;
+                if(label.__UIComponent) label.$filePath = "undefined";
+                label.verticalCenter = 0;
+                label.horizontalCenter = 0;
+                if(label.__UIComponent) this.$UI22_binds.push([label,"text", "{data.name}:{data.id}"]);
+                else label.text = "{data.name}:{data.id}";
+                if(label.__UIComponent) this.$UI22_binds.push([label,"fontColor", "{data.complete?0x82ff57:0xa8a8a8}"]);
+                else label.fontColor = "{data.complete?0x82ff57:0xa8a8a8}";
+                return label;
+        }
+
+        $UI22.prototype.$UI22_setBindProperty = function() {
+                for(var i = 0; i < this.$UI22_binds.length; i++) this.$UI22_binds[i][0].bindProperty(this.$UI22_binds[i][1],this.$UI22_binds[i][2],[this]);
+        }
+
+        return $UI22;
+})(flower.ItemRenderer);
+
+
+UIParser.registerLocalUIClass("$UI22", $UI22,"local");
+$root.$UI22 = $UI22
+解析类:
+                var $UI21 = (function (_super) {
+        __extends($UI21, _super);
+        function $UI21(data) {
+                 _super.call(this);
+                this.$UI21_binds = [];
+                this.$UI21_initMain(this);
+                if(data) this.data = data;
+                this.$UI21_setBindProperty();
+                if(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);
+        }
+
+        $UI21.prototype.$UI21_initMain = function(parentObject) {
+                parentObject.percentWidth = 100;
+                parentObject.addChild(this.$UI21_getList(parentObject));
+        }
+
+        $UI21.prototype.$UI21_getList = function(parentObject) {
+                var list = new flower.List();
+                if(list.__UIComponent) list.eventThis = this;
+                if(list.__UIComponent) list.$filePath = "undefined";
+                this.list = list;
+                this.list.name = "list";
+                list.percentWidth = 100;
+                list.itemRenderer = flower.UIParser.getLocalUIClass("$UI22","local");
+                return list;
+        }
+
+        $UI21.prototype.$UI21_setBindProperty = function() {
+                for(var i = 0; i < this.$UI21_binds.length; i++) this.$UI21_binds[i][0].bindProperty(this.$UI21_binds[i][1],this.$UI21_binds[i][2],[this]);
+        }
+
+        return $UI21;
+})(flower.Group);
+
+
+UIParser.registerLocalUIClass("$UI21", $UI21,"local");
+$root.$UI21 = $UI21
+11 [ 11, 2, 140, 21, 208, 14 ]
+创建纹理:res/tools/dungeon/background/dungeon1_1.jpg

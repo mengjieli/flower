@@ -64,6 +64,7 @@ script.onload = function () {
         script.loadFlag = false;
         script.type = "text/javascript";
         script.src = jsFiles[i];
+
         script.onload = function () {
             script.loadFlag = true;
             i++;

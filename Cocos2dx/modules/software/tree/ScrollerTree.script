@@ -1,5 +1,5 @@
 function set dataProvider(val) {
-    if(val instanceof flower.Direction) {
+    if(val instanceof flower.RemoteDirection) {
         val = val.list;
     }
     if (this.scroller.viewport) {

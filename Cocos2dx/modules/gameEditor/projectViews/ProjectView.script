@@ -116,7 +116,7 @@ function createFile(path, pluginName) {
 }
 
 function saveDirection() {
-    (new flower.File(this.path)).saveText(JSON.stringify(this.config));
+    (new flower.RemoteFile(this.path)).saveText(JSON.stringify(this.config));
 }
 
 function openItem(url) {
@@ -215,9 +215,9 @@ function deleteFile(path, pluginName) {
 
 function saveFile(path, content, back, thisObj, type) {
     if (type == null) {
-        (new flower.File(path)).saveText(content, back, thisObj);
+        (new flower.RemoteFile(path)).saveText(content, back, thisObj);
     } else if (type == "png") {
-        (new flower.File(path)).savePNG(content, back, thisObj);
+        (new flower.RemoteFile(path)).savePNG(content, back, thisObj);
     }
 }
 

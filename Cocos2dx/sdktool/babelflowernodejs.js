@@ -191,6 +191,7 @@ var list = [
     "PlatformSocketServer",
     "PlatformSocketClient",
     "PlatformClient",
+    "PlatformHttpRequest",
 
     "NativeDisplayInfo",
     "DisplayInfo",
@@ -281,7 +282,7 @@ var list = [
 var fileContent = "";
 fileContent += `
 //var LocalWebSocket = WebSocket;
-var $root = eval(\"this\");
+var $root = global;
 var root = root || eval(\"this\");
 var __define = $root.__define || function (o, p, g, s) {
         Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
@@ -325,7 +326,9 @@ fileContent += "var trace = flower.trace;\n";
 fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
 //fileContent += "var flower = exports;\n";
 file = new File("srcFlower6NodeJS/FlowerNodeJS.js");
-fileContent += "global.flower = flower";
+fileContent += "global.flower = flower;\n";
+fileContent += "eval('global._get = _get;');\n";
+fileContent += "eval('global.$root = $root;');\n";
 file.save(fileContent);
 
 
