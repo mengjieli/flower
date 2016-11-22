@@ -2482,6 +2482,9 @@ black.Group = Group;
 
 //////////////////////////File:extension/black/RichText.js///////////////////////////
 class RichText extends Group {
+
+    __input;
+
     constructor() {
         super();
 
@@ -2495,6 +2498,7 @@ class RichText extends Group {
             6: "", //setHtmlText
             7: 0, //chars
             8: 0, //posY
+            9: 0.5, //shineGap
             10: 12,//fontSize
             11: 0, //fontColor
             12: 1, //linegap
@@ -2509,11 +2513,24 @@ class RichText extends Group {
             101: {}, //DisplayCaches
             102: {}, //ids
             200: 0, //lastTouchTime
-            201: false //doubleClick
+            201: false, //doubleClick
+            300: false, //isInputing
+            301: 0, //charIndex
+            302: 0, //htmlTextIndex
+            303: 0, //inputTime
+            304: false,//is 229
+            305: "", //229 firstChar
+            306: "", //last input text
+            311: null,
+            312: null,
+            313: null
         };
         this.addChild(this.$RichText[4]);
         this.addChild(this.$RichText[5]);
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+        this.addListener(flower.Event.FOCUS_OUT, this.__stopInput, this);
+        this.focusEnabled = true;
+        this.__input = flower.Stage.getInstance().$input;
         flower.EnterFrame.add(this.$update, this);
     }
 
@@ -2567,7 +2584,247 @@ class RichText extends Group {
      * @private
      */
     __click() {
-        console.log("单击")
+        this.__startInput(this.__getClickPos());
+    }
+
+    __startInput(info) {
+        var p = this.$RichText;
+        if (p[300]) {
+            return;
+        }
+        //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
+        p[300] = true;
+        p[301] = info.charIndex;
+        p[302] = info.htmlTextIndex;
+        this.__input.text = "";
+        this.__input.$startNativeInput();
+        this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
+        flower.EnterFrame.add(this.__update, this);
+        this.__showFocus(info);
+    }
+
+    __stopInput() {
+        this.$RichText[300] = false;
+        this.__input.$stopNativeInput();
+        this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
+        flower.EnterFrame.remove(this.__update, this);
+        this.__hideFocus();
+    }
+
+    __hideFocus() {
+        this.$RichText[5].visible = false;
+    }
+
+    __onKeyDown(e) {
+        var p = this.$RichText;
+        console.log(e.keyCode);
+        if (e.keyCode == 229) {
+            if (!p[304]) {
+                p[304] = true;
+                p[305] = "";
+                p[311] = p[301];
+                p[312] = p[302];
+                p[313] = p[1];
+            }
+            var str = this.__input.$getNativeText();
+            if (p[305] == "") {
+                if (str.length) {
+                    p[305] = str.charAt(0);
+                }
+            }
+            p[1] = p[313];
+            p[301] = p[311];
+            p[302] = p[312];
+            if (flower.StringDo.replaceString(p[306], "'", "") == str || str.charAt(0) != p[305]) {
+                this.__inputText(str);
+                this.__input.$setNativeText("");
+                this.$RichText[7] = false;
+                p[304] = false;
+                p[305] == "";
+                p[306] = "";
+            } else {
+                this.__inputText(str);
+                p[306] = str;
+            }
+        } else if (e.keyCode == 13) {
+            this.__inputText("\n");
+        } else if (e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) {
+            if (e.keyCode == 37) {
+                if (p[301] == 0) {
+                    return;
+                }
+                p[301]--;
+            } else if (e.keyCode == 39) {
+                if (p[301] == p[3]) {
+                    return;
+                }
+                p[301]++;
+            } else if (e.keyCode == 38) { //输入点上移一行
+
+            } else if (e.keyCode == 40) { //输入点下移一行
+
+            } else if (e.keyCode == 8) {
+                if (p[301] == 0) {
+                    return;
+                }
+                this.$deleteCaretChar();
+            }
+            this.$moveCaretIndex();
+        } else {
+            var str = this.__input.$getNativeText();
+            if (str.length) {
+                this.__inputText(str);
+                this.__input.$setNativeText("");
+            }
+        }
+    }
+
+    //输入字符
+    __inputText(text) {
+        //console.log("输入文字:", text);
+        var p = this.$RichText;
+        this.$setHtmlText(p[1].slice(0, p[302]) + this.__changeText(text) + p[1].slice(p[302], p[1].length), true);
+        p[301] += text.length;
+        p[302] += this.__changeText(text).length;
+        //console.log("输入完后:", p[1].slice(0, p[302]), "\n", p[1].slice(p[302], p[1].length));
+    }
+
+    //输入字符
+    __inputHtmlText(text) {
+        var p = this.$RichText;
+        this.$setHtmlText(p[1].slice(0, p[302]) + text + p[1].slice(p[302], p[1].length), true);
+        p[301] += this.__getHtmlInputLength(text);
+        p[302] += text.length;
+    }
+
+    /**
+     * 从输入点开始删除一个字符
+     * @param num
+     */
+    $deleteCaretChar() {
+        var p = this.$RichText;
+        var htmlIndex = p[302];
+        p[301]--;
+        this.$moveCaretIndex();
+        this.htmlText = p[1].slice(0, p[302]) + p[1].slice(htmlIndex, p[1].length);
+    }
+
+    $moveCaretIndex() {
+    }
+
+    __update(now, gap) {
+        var p = this.$RichText;
+        p[303] += gap;
+        if (p[303] < p[9] * 1000 || Math.floor(p[303] / (p[9] * 1000)) % 2 == 0) {
+            p[5].visible = true;
+        } else {
+            p[5].visible = false;
+        }
+    }
+
+    __showFocus(info) {
+        var p = this.$RichText;
+        p[5].visible = true;
+        p[5].x = info.focusX;
+        p[5].y = info.focusY;
+        p[5].height = info.focusHeight;
+    }
+
+    __getClickPos() {
+        var p = this.$RichText;
+        var x = this.lastTouchX;
+        var y = this.lastTouchY + p[8];
+        var lines = p[2];
+        var findLine;
+        var res = {
+            line: null,
+            subline: null,
+            display: null,
+            charIndex: 0,
+            htmlTextIndex: 0,
+            focusX: 0,
+            focusY: 0,
+            focusHeight: p[10]
+        };
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line.y <= y && line.y + line.height > y || i == lines.length - 1) {
+                findLine = line;
+                break;
+            }
+        }
+        if (!findLine) {
+            return res;
+        }
+        res.line = findLine;
+        res.charIndex = line.charIndex;
+        res.htmlTextIndex = line.htmlTextIndex;
+        res.focusX = line.x;
+        res.focusY = line.y;
+        res.focusHeight = line.height;
+        x -= line.x;
+        y -= line.y;
+        var findSubline;
+        for (var i = 0; i < findLine.sublines.length; i++) {
+            var subline = findLine.sublines[i];
+            if (subline.y <= y && subline.y + subline.height > y || i == findLine.sublines.length - 1) {
+                findSubline = subline;
+                break;
+            }
+        }
+        if (!findSubline) {
+            return res;
+        }
+        res.subline = findSubline;
+        res.charIndex += findSubline.charIndex;
+        res.htmlTextIndex += findSubline.htmlTextIndex;
+        res.focusX += findSubline.x;
+        res.focusY += findSubline.y;
+        res.focusHeight = findSubline.height;
+        x -= subline.x;
+        y -= subline.y;
+        var findDisplay;
+        for (var i = 0; i < findSubline.displays.length; i++) {
+            var display = findSubline.displays[i];
+            if (x >= display.x && x < display.x + display.width || i == findSubline.displays.length - 1) {
+                findDisplay = display;
+                break;
+            }
+        }
+        if (!findDisplay) {
+            return;
+        }
+        res.display = findDisplay;
+        res.charIndex += findDisplay.charIndex;
+        res.htmlTextIndex += findDisplay.htmlTextIndex;
+        res.focusX += findDisplay.x;
+        x -= findDisplay.x;
+        if (findDisplay.type == 0) {
+            res.htmlTextIndex += findDisplay.textStart;
+            var text = findDisplay.text;
+            var size = findDisplay.font.size;
+            var width = 0;
+            for (var i = 1; i <= text.length; i++) {
+                var textWidth = flower.$measureTextWidth(size, text.slice(0, i));
+                var charWidth = textWidth - width;
+                width = textWidth;
+                if (x <= charWidth * 0.5) {
+                    break;
+                } else {
+                    x -= charWidth;
+                    res.charIndex++;
+                    res.htmlTextIndex++;
+                    res.focusX += charWidth;
+                }
+            }
+        } else {
+            if (x > findDisplay.width * 0.5) {
+                res.charIndex += findDisplay.chars;
+                res.htmlTextIndex += findDisplay.htmlText.length;
+                res.focusX += findDisplay.width;
+            }
+        }
+        return res;
     }
 
     $setHtmlText(text) {
@@ -2788,6 +3045,7 @@ class RichText extends Group {
                     line.endHtmlText = char;
                 } else if (text.slice(i, i + "<br/>".length) == "<br/>") {
                     line.endHtmlText = "<br/>";
+                    lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
                 }
             }
             if (decodeText) {
@@ -2814,8 +3072,10 @@ class RichText extends Group {
             lastHtmlText += nextHtmlText;
         }
         p[1] = "";
+        p[3] = 0;
         for (var i = 0; i < lines.length; i++) {
             p[1] += lines[i].htmlText + lines[i].endHtmlText;
+            p[3] += lines[i].chars;
         }
         p[100] = true;
     }
@@ -2887,6 +3147,7 @@ class RichText extends Group {
                 font: font,
                 text: text,
                 htmlText: htmlText,
+                htmlTextIndex: subline.htmlText.length,
                 textStart: textStart,
                 width: width,
                 height: font.size,
@@ -2991,6 +3252,7 @@ class RichText extends Group {
             display: image,
             text: "",
             htmlText: htmlText,
+            htmlTextIndex: subline.htmlText.length,
             textStart: 0,
             width: image.width,
             height: image.height,
@@ -3078,6 +3340,7 @@ class RichText extends Group {
             display: ui,
             text: "",
             htmlText: htmlText,
+            htmlTextIndex: subline.htmlText.length,
             textStart: 0,
             width: ui.width,
             height: ui.height,
@@ -3145,6 +3408,7 @@ class RichText extends Group {
             text: "",
             htmlText: "",
             endHtmlText: "",
+            htmlTextIndex: 0,
             width: 0,
             height: font.size,
             x: 0,
@@ -3156,6 +3420,7 @@ class RichText extends Group {
         };
         if (lastLine) {
             line.y = lastLine.y + lastLine.height;
+            line.htmlTextIndex = lastLine.htmlTextIndex + lastLine.htmlText.length + lastLine.endHtmlText.length;
             line.charIndex = lastLine.charIndex + lastLine.chars;
             line.height = font.size + font.gap;
         }
@@ -3167,6 +3432,7 @@ class RichText extends Group {
             index: line.sublines.length,
             text: "",
             htmlText: "",
+            htmlTextIndex: line.htmlText.length,
             width: 0,
             gap: (line.index == 0 && line.sublines.length == 0 ? 0 : font.gap),
             height: font.size + (line.index == 0 && line.sublines.length == 0 ? 0 : font.gap),
@@ -3326,6 +3592,23 @@ class RichText extends Group {
         if (flag) {
             this.$setHtmlText(p[1]);
         }
+    }
+
+    $getMouseTarget(touchX, touchY, multiply) {
+        if (this.touchEnabled == false || this.visible == false)
+            return null;
+        if (multiply == true && this.multiplyTouchEnabled == false)
+            return null;
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, flower.Point.$TempPoint);
+        touchX = Math.floor(point.x);
+        touchY = Math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        if (touchX >= 0 && touchX < this.width && touchY >= 0 && touchY < this.height) {
+            return this;
+        }
+        return null;
     }
 
     dispose() {

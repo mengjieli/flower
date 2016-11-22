@@ -8,6 +8,7 @@
    "name": "初始化镜头参数",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 0,
    "startValue": null,
@@ -17,6 +18,7 @@
      "name": "镜头移动",
      "delay": 0,
      "type": 9,
+     "invalid": true,
      "effectValue": {
       "coord": {
        "x": 0,
@@ -32,6 +34,7 @@
      "name": "锁定视野",
      "delay": 0,
      "type": 10,
+     "invalid": true,
      "effectValue": {
       "rect": {
        "x": 0,
@@ -53,6 +56,7 @@
      "name": "增加太阳",
      "delay": 0,
      "type": 12,
+     "invalid": true,
      "effectValue": {
       "url": "trap1",
       "tag": 1,
@@ -70,6 +74,7 @@
      "name": "增加魔法阵",
      "delay": 0,
      "type": 12,
+     "invalid": true,
      "effectValue": {
       "url": "trapBoom1",
       "tag": 2,
@@ -87,6 +92,7 @@
      "name": "效果134",
      "delay": 0,
      "type": 12,
+     "invalid": true,
      "effectValue": {
       "url": "black",
       "tag": 1100,
@@ -107,6 +113,7 @@
    "name": "开场效果-镜头右移",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 0,
    "startValue": null,
@@ -116,6 +123,7 @@
      "name": "镜头右移",
      "delay": 0,
      "type": 9,
+     "invalid": true,
      "effectValue": {
       "coord": {
        "x": 300,
@@ -134,6 +142,7 @@
    "name": "开场效果-镜头左移",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 3000,
    "startValue": null,
@@ -143,6 +152,7 @@
      "name": "镜头左移",
      "delay": 0,
      "type": 9,
+     "invalid": true,
      "effectValue": {
       "coord": {
        "x": 0,
@@ -161,6 +171,7 @@
    "name": "剧情对话",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 4300,
    "startValue": null,
@@ -170,6 +181,7 @@
      "name": "剧情10001",
      "delay": 0,
      "type": 11,
+     "invalid": true,
      "effectValue": {
       "dialogId": 10001,
       "param1": 0,
@@ -188,6 +200,7 @@
    "name": "刷怪-1波1排",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 500,
    "startValue": null,
@@ -197,6 +210,7 @@
      "name": "第一波兵",
      "delay": 0,
      "type": 1,
+     "invalid": true,
      "effectValue": {
       "monsters": [
        {
@@ -237,6 +251,7 @@
    "name": "刷怪-1波2排",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 1500,
    "startValue": null,
@@ -246,6 +261,7 @@
      "name": "第一波第二排",
      "delay": 0,
      "type": 1,
+     "invalid": true,
      "effectValue": {
       "monsters": [
        {
@@ -286,6 +302,7 @@
    "name": "奇兵触发器",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 2,
    "delay": 0,
    "startValue": {
@@ -336,6 +353,7 @@
      "name": "开启奇兵",
      "delay": 0,
      "type": 4,
+     "invalid": true,
      "effectValue": {
       "operate": 0,
       "triggerId": 82,
@@ -347,6 +365,7 @@
      "name": "删除太阳",
      "delay": 0,
      "type": 13,
+     "invalid": true,
      "effectValue": {
       "tag": 1,
       "ease": 2,
@@ -362,6 +381,7 @@
    "name": "刷奇兵",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 5,
    "delay": 0,
    "startValue": null,
@@ -371,6 +391,7 @@
      "name": "第一波奇兵",
      "delay": 0,
      "type": 1,
+     "invalid": true,
      "effectValue": {
       "monsters": [
        {
@@ -424,6 +445,7 @@
    "name": "刷怪-2波",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 7,
    "delay": 0,
    "startValue": {
@@ -441,6 +463,7 @@
      "name": "第二波兵",
      "delay": 0,
      "type": 1,
+     "invalid": true,
      "effectValue": {
       "monsters": [
        {
@@ -491,6 +514,7 @@
      "name": "删除阵法",
      "delay": 0,
      "type": 13,
+     "invalid": true,
      "effectValue": {
       "tag": 2,
       "ease": 1,
@@ -506,6 +530,7 @@
    "name": "刷怪-3波",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 7,
    "delay": 0,
    "startValue": {
@@ -522,6 +547,7 @@
      "name": "第三波兵",
      "delay": 0,
      "type": 1,
+     "invalid": true,
      "effectValue": {
       "monsters": [
        {
@@ -575,6 +601,7 @@
    "name": "失败-超时",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 1,
    "delay": 60000,
    "startValue": null,
@@ -584,6 +611,7 @@
      "name": "超时通关失败",
      "delay": 0,
      "type": 6,
+     "invalid": true,
      "effectValue": null
     }
    ],
@@ -594,10 +622,12 @@
    "name": "失败-我方全灭",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 6,
    "delay": 0,
    "startValue": {
     "type": 0,
+    "count": 0,
     "__className": "dg.AllDieCondition"
    },
    "effects": [
@@ -606,6 +636,7 @@
      "name": "通关失败",
      "delay": 0,
      "type": 6,
+     "invalid": true,
      "effectValue": null
     }
    ],
@@ -616,10 +647,12 @@
    "name": "成功-敌方全灭",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 6,
    "delay": 0,
    "startValue": {
     "type": 1,
+    "count": 0,
     "__className": "dg.AllDieCondition"
    },
    "effects": [
@@ -628,6 +661,7 @@
      "name": "通关成功",
      "delay": 0,
      "type": 5,
+     "invalid": true,
      "effectValue": null
     }
    ],
@@ -638,6 +672,7 @@
    "name": "任务-坚守1波",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 7,
    "delay": 0,
    "startValue": {
@@ -655,6 +690,7 @@
      "name": "完成任务50001",
      "delay": 0,
      "type": 7,
+     "invalid": true,
      "effectValue": {
       "missionId": 50001,
       "missionName": "坚守1波",
@@ -669,6 +705,7 @@
    "name": "任务-坚守2波",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 7,
    "delay": 0,
    "startValue": {
@@ -685,6 +722,7 @@
      "name": "完成任务50002",
      "delay": 0,
      "type": 7,
+     "invalid": true,
      "effectValue": {
       "missionId": 50002,
       "missionName": "坚守2波",
@@ -699,6 +737,7 @@
    "name": "任务-首战告捷",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 4,
    "delay": 0,
    "startValue": {
@@ -712,6 +751,7 @@
      "name": "完成任务首战告捷",
      "delay": 0,
      "type": 7,
+     "invalid": true,
      "effectValue": {
       "missionId": 50100,
       "missionName": "首战告捷",
@@ -726,6 +766,7 @@
    "name": "任务-速战速决",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 4,
    "delay": 0,
    "startValue": {
@@ -739,6 +780,7 @@
      "name": "完成任务50010",
      "delay": 0,
      "type": 7,
+     "invalid": true,
      "effectValue": {
       "missionId": 50010,
       "missionName": "速战速决",
@@ -753,6 +795,7 @@
    "name": "任务-毫发未伤",
    "count": 1,
    "open": true,
+   "status": 0,
    "startCondition": 4,
    "delay": 0,
    "startValue": {
@@ -766,6 +809,7 @@
      "name": "完成任务50011",
      "delay": 0,
      "type": 7,
+     "invalid": true,
      "effectValue": {
       "missionId": 50011,
       "missionName": "毫发未伤",
@@ -774,35 +818,10 @@
     }
    ],
    "openFlag": true
-  },
-  {
-   "itemId": 135,
-   "name": "触发器135",
-   "count": 1,
-   "open": true,
-   "startCondition": 1,
-   "delay": 1000,
-   "startValue": null,
-   "effects": [
-    {
-     "itemId": 136,
-     "name": "效果136",
-     "delay": 0,
-     "type": 13,
-     "effectValue": {
-      "tag": 1100,
-      "ease": 1,
-      "easeTime": 500,
-      "__className": "dg.RemoveAnimationEffect"
-     }
-    }
-   ],
-   "openFlag": true
   }
  ],
  "settings": {
   "background": "res/tools/dungeon/background/dungeon1_1.jpg",
-  "showGrid": false,
   "bornX": 0,
   "bornY": 9,
   "myHp": 5000,
