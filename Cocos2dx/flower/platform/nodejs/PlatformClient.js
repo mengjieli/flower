@@ -21,6 +21,17 @@ class PlatformClient extends PlatformSocketClient {
             msg.readFromArray(array);
             var cmd = msg.readUInt();
             this.onReceiveMessage(cmd, msg);
+            if(buffer.bytesAvailable) {
+                var oldPosition = buffer.position;
+                try {
+                    len = buffer.readUInt();
+                } catch(e) {
+                    buffer.position = oldPosition;
+                    break;
+                }
+            } else {
+                break;
+            }
         }
         var newBuffer = new flower.VByteArray();
         while (buffer.bytesAvailable) {

@@ -49,15 +49,34 @@ var flower = {};
     var programmers = {};
     var config = {};
     var params = {};
+    var hasStart = false;
 
     /**
      * 启动引擎
      * @param language 使用的语言版本
      */
     function start(completeFunc, nativeStage, touchShow) {
-        var stage = new Stage();
+        if (hasStart) {
+            if (completeFunc) completeFunc();
+            return;
+        }
+        hasStart = false;
         Platform._runBack = CoreTime.$run;
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+        if (Platform.startSync) {
+            Platform.getReady(function () {
+                var stage = new Stage();
+                Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+                    start2(completeFunc, nativeStage, touchShow, stage);
+                });
+            });
+        } else {
+            var stage = new Stage();
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+            start2(completeFunc, nativeStage, touchShow, stage);
+        }
+    }
+
+    function start2(completeFunc, nativeStage, touchShow, stage) {
         flower.sys.engineType = Platform.type;
         var loader = new URLLoader("res/flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
@@ -68,7 +87,6 @@ var flower = {};
             stage.backgroundColor = cfg.backgroundColor || 0;
             SCALE = config.scale || 1;
             LANGUAGE = config.language || "";
-
             function startLoad() {
                 loader = new URLLoader("res/blank.png");
                 loader.addListener(Event.COMPLETE, function (e) {
@@ -83,7 +101,7 @@ var flower = {};
                             loader = new URLLoader("res/shaders/Source.fsh");
                             loader.addListener(Event.COMPLETE, function (e) {
                                 programmers[loader.url] = e.data;
-                                completeFunc();
+                                if (completeFunc) completeFunc();
                             });
                             loader.load();
                         });
@@ -93,7 +111,8 @@ var flower = {};
                 });
                 loader.load();
             }
-            if (config.remote) {
+
+            if (config.remote && flower.RemoteServer) {
                 flower.RemoteServer.start(startLoad);
             } else {
                 startLoad();
@@ -188,7 +207,7 @@ var flower = {};
         getLanguage: getLanguage
     };
     flower.params = params;
-
+    flower.system = {};
     $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -205,6 +224,8 @@ var flower = {};
                 var nativeStage = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
                 var touchShow = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
+                flower.system.platform = Platform.type;
+                flower.system.native = Platform.native;
                 RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
                 var scene = cc.Scene.extend({
                     ctor: function ctor() {
@@ -230,8 +251,13 @@ var flower = {};
                         cc.eventManager.addListener({
                             event: cc.EventListener.MOUSE,
                             onMouseMove: function (e) {
-                                engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
-                            }.bind(this)
+                                engine.$addMouseMoveEvent(math.floor(e.getLocation().x),  - math.floor(e.getLocation().y));
+                            }.bind(this),
+                            onMouseDown: function onMouseDown(e) {
+                                if (e.getButton() == 1) {
+                                    engine.$addRightClickEvent(math.floor(e.getLocation().x),  - math.floor(e.getLocation().y));
+                                }
+                            }
                         }, this);
                     },
                     update: function update(dt) {
@@ -267,7 +293,12 @@ var flower = {};
                     cc.eventManager.addListener({
                         event: cc.EventListener.MOUSE,
                         onMouseMove: function onMouseMove(e) {
-                            engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                            engine.$addMouseMoveEvent(math.floor(e.getLocation().x),  - math.floor(e.getLocation().y));
+                        },
+                        onMouseDown: function onMouseDown(e) {
+                            if (e.getButton() == 1) {
+                                engine.$addRightClickEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                            }
                         }
                     }, cc.director.getRunningScene());
                 }
@@ -1615,8 +1646,8 @@ var flower = {};
 
         _createClass(PlatformWebSocket, [{
             key: "bindWebSocket",
-            value: function bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-                var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
+            value: function bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
+                var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
                 this.webSocket = websocket;
                 var openFunc = function openFunc() {
                     onConnect.call(thisObj);
@@ -6883,9 +6914,17 @@ var flower = {};
                         for (var key in this._params) {
                             params[key] = this._params;
                         }
-                        PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
+                        PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
                     }
                 }
+            }
+        }, {
+            key: "__concatURLHead",
+            value: function __concatURLHead(head, url) {
+                if (url.slice(0, 7) == "http://") {
+                    return url;
+                }
+                return head + url;
             }
         }, {
             key: "onLoadTexturePlistComplete",
@@ -6951,7 +6990,7 @@ var flower = {};
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
+                PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
             }
         }, {
             key: "loadTextComplete",
@@ -7237,6 +7276,8 @@ var flower = {};
         _createClass(WebSocket, [{
             key: "connect",
             value: function connect(ip, port) {
+                var path = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+
                 if (this._localWebSocket) {
                     this._localWebSocket.releaseWebSocket(this.localWebSocket);
                 }
@@ -7244,7 +7285,7 @@ var flower = {};
                 this._ip = ip;
                 this._port = port;
                 this._localWebSocket = new PlatformWebSocket();
-                this._localWebSocket.bindWebSocket(ip, port, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
+                this._localWebSocket.bindWebSocket(ip, port, path, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
             }
         }, {
             key: "onConnect",
@@ -10519,6 +10560,13 @@ var flower = {};
                 return val;
             }
         }, {
+            key: "clear",
+            value: function clear() {
+                this.bytes.length = 0;
+                this.position = 0;
+                this.length = 0;
+            }
+        }, {
             key: "toString",
             value: function toString() {
                 var str = "";
@@ -10543,7 +10591,7 @@ var flower = {};
         }, {
             key: "data",
             get: function get() {
-                return this.bytes;
+                return this.bytes.concat();
             }
         }]);
 

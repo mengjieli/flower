@@ -69,7 +69,7 @@ class Platform {
             engine.$addTouchEvent("end", 0, param1, param2);
         } else if (type == "keyDown") {
             engine.$onKeyDown(param1);
-        } else if (type == "keyU[") {
+        } else if (type == "keyUp") {
             engine.$onKeyUp(param1);
         }
     }

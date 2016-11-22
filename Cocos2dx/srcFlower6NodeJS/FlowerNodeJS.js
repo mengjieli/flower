@@ -753,7 +753,7 @@ class Platform {
             engine.$addTouchEvent("end", 0, param1, param2);
         } else if (type == "keyDown") {
             engine.$onKeyDown(param1);
-        } else if (type == "keyU[") {
+        } else if (type == "keyUp") {
             engine.$onKeyUp(param1);
         }
     }
@@ -2589,6 +2589,17 @@ class PlatformClient extends PlatformSocketClient {
             msg.readFromArray(array);
             var cmd = msg.readUInt();
             this.onReceiveMessage(cmd, msg);
+            if(buffer.bytesAvailable) {
+                var oldPosition = buffer.position;
+                try {
+                    len = buffer.readUInt();
+                } catch(e) {
+                    buffer.position = oldPosition;
+                    break;
+                }
+            } else {
+                break;
+            }
         }
         var newBuffer = new flower.VByteArray();
         while (buffer.bytesAvailable) {

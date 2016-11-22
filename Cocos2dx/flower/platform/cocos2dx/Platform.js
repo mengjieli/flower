@@ -1,6 +1,3 @@
-var fs = require("fs");
-var path = require("path");
-
 class Platform {
     static type = "cocos2dx";
     static native = cc.sys.isNative;
@@ -37,8 +34,13 @@ class Platform {
                 cc.eventManager.addListener({
                     event: cc.EventListener.MOUSE,
                     onMouseMove: function (e) {
-                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
-                    }.bind(this)
+                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                    }.bind(this),
+                    onMouseDown:function(e) {
+                        if(e.getButton() == 1) {
+                            engine.$addRightClickEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                        }
+                    }
                 }, this);
             },
             update: function (dt) {
@@ -74,7 +76,12 @@ class Platform {
             cc.eventManager.addListener({
                 event: cc.EventListener.MOUSE,
                 onMouseMove: function (e) {
-                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x),  - math.floor(e.getLocation().y));
+                },
+                onMouseDown:function(e) {
+                    if(e.getButton() == 1) {
+                        engine.$addRightClickEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                    }
                 }
             }, cc.director.getRunningScene());
         }

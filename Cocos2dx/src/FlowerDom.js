@@ -34,7 +34,7 @@ var flower = {};
 (function (math) {
     //////////////////////////File:flower/Flower.js///////////////////////////
     var DEBUG = true;
-    var TIP = false;
+    var TIP = true;
     var $language = "zh_CN";
     var NATIVE = true;
     /**
@@ -49,15 +49,34 @@ var flower = {};
     var programmers = {};
     var config = {};
     var params = {};
+    var hasStart = false;
 
     /**
      * 启动引擎
      * @param language 使用的语言版本
      */
     function start(completeFunc, nativeStage, touchShow) {
-        var stage = new Stage();
+        if (hasStart) {
+            if (completeFunc) completeFunc();
+            return;
+        }
+        hasStart = false;
         Platform._runBack = CoreTime.$run;
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+        if (Platform.startSync) {
+            Platform.getReady(function () {
+                var stage = new Stage();
+                Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+                    start2(completeFunc, nativeStage, touchShow, stage);
+                });
+            });
+        } else {
+            var stage = new Stage();
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+            start2(completeFunc, nativeStage, touchShow, stage);
+        }
+    }
+
+    function start2(completeFunc, nativeStage, touchShow, stage) {
         flower.sys.engineType = Platform.type;
         var loader = new URLLoader("res/flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
@@ -68,7 +87,6 @@ var flower = {};
             stage.backgroundColor = cfg.backgroundColor || 0;
             SCALE = config.scale || 1;
             LANGUAGE = config.language || "";
-
             function startLoad() {
                 loader = new URLLoader("res/blank.png");
                 loader.addListener(Event.COMPLETE, function (e) {
@@ -83,7 +101,7 @@ var flower = {};
                             loader = new URLLoader("res/shaders/Source.fsh");
                             loader.addListener(Event.COMPLETE, function (e) {
                                 programmers[loader.url] = e.data;
-                                completeFunc();
+                                if (completeFunc) completeFunc();
                             });
                             loader.load();
                         });
@@ -93,7 +111,8 @@ var flower = {};
                 });
                 loader.load();
             }
-            if (config.remote) {
+
+            if (config.remote && flower.RemoteServer) {
                 flower.RemoteServer.start(startLoad);
             } else {
                 startLoad();
@@ -188,7 +207,7 @@ var flower = {};
         getLanguage: getLanguage
     };
     flower.params = params;
-
+    flower.system = {};
     $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -202,6 +221,8 @@ var flower = {};
         _createClass(Platform, null, [{
             key: "start",
             value: function start(engine, root, background) {
+                flower.system.platform = Platform.type;
+                flower.system.native = Platform.native;
                 var paramString = window.location.search;
                 while (paramString.charAt(0) == "?") {
                     paramString = paramString.slice(1, paramString.length);
@@ -313,6 +334,7 @@ var flower = {};
             key: "release",
             value: function release(name, object) {
                 object.release();
+                return;
                 var pools = Platform.pools;
                 if (!pools[name]) {
                     pools[name] = [];
@@ -363,6 +385,7 @@ var flower = {};
 
 
     Platform.type = "cocos2dx";
+    Platform.native = false;
     Platform.lastTime = new Date().getTime();
     Platform.frame = 0;
     Platform.pools = {};
@@ -10861,6 +10884,13 @@ var flower = {};
                 return val;
             }
         }, {
+            key: "clear",
+            value: function clear() {
+                this.bytes.length = 0;
+                this.position = 0;
+                this.length = 0;
+            }
+        }, {
             key: "toString",
             value: function toString() {
                 var str = "";
@@ -10885,7 +10915,7 @@ var flower = {};
         }, {
             key: "data",
             get: function get() {
-                return this.bytes;
+                return this.bytes.concat();
             }
         }]);
 

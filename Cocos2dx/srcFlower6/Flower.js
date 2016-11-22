@@ -39,15 +39,34 @@ var RETINA = false;
 var programmers = {};
 var config = {};
 var params = {};
+var hasStart = false;
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
 function start(completeFunc, nativeStage, touchShow) {
-    var stage = new Stage();
+    if (hasStart) {
+        if (completeFunc) completeFunc();
+        return;
+    }
+    hasStart = false;
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+    if (Platform.startSync) {
+        Platform.getReady(function () {
+            var stage = new Stage();
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+                start2(completeFunc, nativeStage, touchShow, stage);
+            });
+        });
+    } else {
+        var stage = new Stage();
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+        start2(completeFunc, nativeStage, touchShow, stage);
+    }
+}
+
+function start2(completeFunc, nativeStage, touchShow, stage) {
     flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
@@ -58,7 +77,6 @@ function start(completeFunc, nativeStage, touchShow) {
         stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;
         LANGUAGE = config.language || "";
-
         function startLoad() {
             loader = new URLLoader("res/blank.png");
             loader.addListener(Event.COMPLETE, function (e) {
@@ -73,7 +91,7 @@ function start(completeFunc, nativeStage, touchShow) {
                         loader = new URLLoader("res/shaders/Source.fsh");
                         loader.addListener(Event.COMPLETE, function (e) {
                             programmers[loader.url] = e.data;
-                            completeFunc();
+                            if (completeFunc)completeFunc();
                         });
                         loader.load();
                     });
@@ -83,7 +101,8 @@ function start(completeFunc, nativeStage, touchShow) {
             });
             loader.load();
         }
-        if (config.remote) {
+
+        if (config.remote && flower.RemoteServer) {
             flower.RemoteServer.start(startLoad);
         } else {
             startLoad();
@@ -166,7 +185,7 @@ flower.sys = {
     getLanguage: getLanguage,
 }
 flower.params = params;
-
+flower.system = {}
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -182,6 +201,8 @@ class Platform {
     static height;
 
     static start(engine, root, background, nativeStage = null, touchShow = null) {
+        flower.system.platform = Platform.type;
+        flower.system.native = Platform.native;
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
         var scene = cc.Scene.extend({
             ctor: function () {
@@ -208,7 +229,12 @@ class Platform {
                     event: cc.EventListener.MOUSE,
                     onMouseMove: function (e) {
                         engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
-                    }.bind(this)
+                    }.bind(this),
+                    onMouseDown:function(e) {
+                        if(e.getButton() == 1) {
+                            engine.$addRightClickEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                        }
+                    }
                 }, this);
             },
             update: function (dt) {
@@ -245,6 +271,11 @@ class Platform {
                 event: cc.EventListener.MOUSE,
                 onMouseMove: function (e) {
                     engine.$addMouseMoveEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                },
+                onMouseDown:function(e) {
+                    if(e.getButton() == 1) {
+                        engine.$addRightClickEvent(math.floor(e.getLocation().x), Platform.height - math.floor(e.getLocation().y));
+                    }
                 }
             }, cc.director.getRunningScene());
         }
@@ -282,7 +313,7 @@ class Platform {
         Platform.lastTime = now;
         if (PlatformURLLoader.loadingList.length) {
             var item = PlatformURLLoader.loadingList.shift();
-            item[0].apply(null,item.slice(1,item.length));
+            item[0].apply(null, item.slice(1, item.length));
         }
     }
 
@@ -1478,8 +1509,8 @@ class PlatformWebSocket {
 
     webSocket;
 
-    bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-        var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
+    bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
+        var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
         this.webSocket = websocket;
         var openFunc = function () {
             onConnect.call(thisObj);
@@ -6272,9 +6303,16 @@ class URLLoader extends EventDispatcher {
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
+                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
             }
         }
+    }
+
+    __concatURLHead(head,url) {
+        if(url.slice(0,7) == "http://") {
+            return url;
+        }
+        return head + url;
     }
 
     onLoadTexturePlistComplete(e) {
@@ -6333,7 +6371,7 @@ class URLLoader extends EventDispatcher {
         for (var key in this._params) {
             params[key] = this._params;
         }
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
+        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {
@@ -6557,7 +6595,7 @@ class WebSocket extends flower.EventDispatcher {
         super();
     }
 
-    connect(ip, port) {
+    connect(ip, port, path = "") {
         if (this._localWebSocket) {
             this._localWebSocket.releaseWebSocket(this.localWebSocket);
         }
@@ -6565,7 +6603,7 @@ class WebSocket extends flower.EventDispatcher {
         this._ip = ip;
         this._port = port;
         this._localWebSocket = new PlatformWebSocket();
-        this._localWebSocket.bindWebSocket(ip, port, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
+        this._localWebSocket.bindWebSocket(ip, port, path, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
     }
 
     get ip() {
@@ -9588,12 +9626,18 @@ class VByteArray {
         return val;
     }
 
+    clear() {
+        this.bytes.length = 0;
+        this.position = 0;
+        this.length = 0;
+    }
+
     get bytesAvailable() {
         return this.length - this.position;
     }
 
     get data() {
-        return this.bytes;
+        return this.bytes.concat();
     }
 
     toString() {

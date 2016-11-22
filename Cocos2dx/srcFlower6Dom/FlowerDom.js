@@ -24,7 +24,7 @@ var flower = {};
 (function(math){
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
-var TIP = false;
+var TIP = true;
 var $language = "zh_CN";
 var NATIVE = true;
 /**
@@ -39,15 +39,34 @@ var RETINA = false;
 var programmers = {};
 var config = {};
 var params = {};
+var hasStart = false;
 
 /**
  * 启动引擎
  * @param language 使用的语言版本
  */
 function start(completeFunc, nativeStage, touchShow) {
-    var stage = new Stage();
+    if (hasStart) {
+        if (completeFunc) completeFunc();
+        return;
+    }
+    hasStart = false;
     Platform._runBack = CoreTime.$run;
-    Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+    if (Platform.startSync) {
+        Platform.getReady(function () {
+            var stage = new Stage();
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+                start2(completeFunc, nativeStage, touchShow, stage);
+            });
+        });
+    } else {
+        var stage = new Stage();
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
+        start2(completeFunc, nativeStage, touchShow, stage);
+    }
+}
+
+function start2(completeFunc, nativeStage, touchShow, stage) {
     flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
@@ -58,7 +77,6 @@ function start(completeFunc, nativeStage, touchShow) {
         stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;
         LANGUAGE = config.language || "";
-
         function startLoad() {
             loader = new URLLoader("res/blank.png");
             loader.addListener(Event.COMPLETE, function (e) {
@@ -73,7 +91,7 @@ function start(completeFunc, nativeStage, touchShow) {
                         loader = new URLLoader("res/shaders/Source.fsh");
                         loader.addListener(Event.COMPLETE, function (e) {
                             programmers[loader.url] = e.data;
-                            completeFunc();
+                            if (completeFunc)completeFunc();
                         });
                         loader.load();
                     });
@@ -83,7 +101,8 @@ function start(completeFunc, nativeStage, touchShow) {
             });
             loader.load();
         }
-        if (config.remote) {
+
+        if (config.remote && flower.RemoteServer) {
             flower.RemoteServer.start(startLoad);
         } else {
             startLoad();
@@ -166,7 +185,7 @@ flower.sys = {
     getLanguage: getLanguage,
 }
 flower.params = params;
-
+flower.system = {}
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -175,13 +194,15 @@ $root.trace = trace;
 //////////////////////////File:flower/platform/dom/Platform.js///////////////////////////
 class Platform {
     static type = "cocos2dx";
-    static native;
+    static native = false;
 
     static stage;
     static width;
     static height;
 
     static start(engine, root, background) {
+        flower.system.platform = Platform.type;
+        flower.system.native = Platform.native;
         var paramString = window.location.search;
         while (paramString.charAt(0) == "?") {
             paramString = paramString.slice(1, paramString.length);
@@ -297,6 +318,7 @@ class Platform {
 
     static release(name, object) {
         object.release();
+        return;
         var pools = Platform.pools;
         if (!pools[name]) {
             pools[name] = [];
@@ -9910,12 +9932,18 @@ class VByteArray {
         return val;
     }
 
+    clear() {
+        this.bytes.length = 0;
+        this.position = 0;
+        this.length = 0;
+    }
+
     get bytesAvailable() {
         return this.length - this.position;
     }
 
     get data() {
-        return this.bytes;
+        return this.bytes.concat();
     }
 
     toString() {
