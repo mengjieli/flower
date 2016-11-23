@@ -2912,7 +2912,7 @@ var black = {};
             key: "__onKeyDown",
             value: function __onKeyDown(e) {
                 var p = this.$RichText;
-                console.log(e.keyCode);
+                //console.log(e.keyCode);
                 if (e.keyCode == 229) {
                     if (!p[304]) {
                         p[304] = true;
@@ -2920,6 +2920,7 @@ var black = {};
                         p[311] = p[301];
                         p[312] = p[302];
                         p[313] = p[1];
+                        p[323] = p[3];
                     }
                     var str = this.__input.$getNativeText();
                     if (p[305] == "") {
@@ -2928,6 +2929,7 @@ var black = {};
                         }
                     }
                     p[1] = p[313];
+                    p[3] = p[323];
                     p[301] = p[311];
                     p[302] = p[312];
                     if (flower.StringDo.replaceString(p[306], "'", "") == str || str.charAt(0) != p[305]) {
@@ -2979,12 +2981,10 @@ var black = {};
         }, {
             key: "__inputText",
             value: function __inputText(text) {
-                //console.log("输入文字:", text);
-                var p = this.$RichText;
-                this.$setHtmlText(p[1].slice(0, p[302]) + this.__changeText(text) + p[1].slice(p[302], p[1].length), true);
-                p[301] += text.length;
-                p[302] += this.__changeText(text).length;
-                //console.log("输入完后:", p[1].slice(0, p[302]), "\n", p[1].slice(p[302], p[1].length));
+                if (text.length > 1) {
+                    console.log("");
+                }
+                this.__inputHtmlText(this.__changeText(text));
             }
 
             //输入字符
@@ -2993,9 +2993,10 @@ var black = {};
             key: "__inputHtmlText",
             value: function __inputHtmlText(text) {
                 var p = this.$RichText;
-                this.$setHtmlText(p[1].slice(0, p[302]) + text + p[1].slice(p[302], p[1].length), true);
-                p[301] += this.__getHtmlInputLength(text);
-                p[302] += text.length;
+                var chars = p[3];
+                this.htmlText = p[1].slice(0, p[302]) + text + p[1].slice(p[302], p[1].length);
+                p[301] += p[3] - chars;
+                this.$moveCaretIndex();
             }
 
             /**
@@ -3007,14 +3008,119 @@ var black = {};
             key: "$deleteCaretChar",
             value: function $deleteCaretChar() {
                 var p = this.$RichText;
-                var htmlIndex = p[302];
+                var lines = p[2];
+                var pos = p[301];
+                if (pos == 0) {
+                    return;
+                }
+                var findLine;
+                if (pos > p[3]) {
+                    pos = p[3];
+                }
+                for (var i = 0; i < lines.length; i++) {
+                    if (pos > lines[i].charIndex && pos <= lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
+                        findLine = lines[i];
+                        break;
+                    }
+                }
+                if (!findLine) {
+                    return;
+                }
                 p[301]--;
+                pos -= findLine.charIndex;
+                if (pos == findLine.chars && findLine.index != lines.length - 1) {
+                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findLine.htmlText.length) + p[1].slice(findLine.htmlTextIndex + findLine.htmlText.length + findLine.endHtmlText.length, p[1].length);
+                    this.$moveCaretIndex();
+                    return;
+                }
+                var findSubline;
+                for (var i = 0; i < findLine.sublines.length; i++) {
+                    if (pos > findLine.sublines[i].charIndex && pos <= findLine.sublines[i].charIndex + findLine.sublines[i].chars) {
+                        findSubline = findLine.sublines[i];
+                        break;
+                    }
+                }
+                pos -= findSubline.charIndex;
+                var findDisplay;
+                for (var i = 0; i < findSubline.displays.length; i++) {
+                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
+                        findDisplay = findSubline.displays[i];
+                        break;
+                    }
+                }
+                pos -= findDisplay.charIndex;
+                if (findDisplay.type == 0) {
+                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.textStart + pos - 1) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.textStart + pos, p[1].length);
+                } else {
+                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.htmlText.length, p[1].length);
+                }
                 this.$moveCaretIndex();
-                this.htmlText = p[1].slice(0, p[302]) + p[1].slice(htmlIndex, p[1].length);
             }
         }, {
             key: "$moveCaretIndex",
-            value: function $moveCaretIndex() {}
+            value: function $moveCaretIndex() {
+                var p = this.$RichText;
+                var lines = p[2];
+                var pos = p[301];
+                var focus = p[5];
+                focus.x = 0;
+                focus.y = 0;
+                p[302] = 0;
+                var findLine;
+                for (var i = 0; i < lines.length; i++) {
+                    if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
+                        findLine = lines[i];
+                        break;
+                    }
+                }
+                if (!findLine) {
+                    return;
+                }
+                focus.x = findLine.x;
+                focus.y = findLine.y;
+                focus.height = findLine.height;
+                pos -= findLine.charIndex;
+                p[302] = findLine.htmlTextIndex;
+                var findSubline;
+                for (var i = 0; i < findLine.sublines.length; i++) {
+                    if (pos >= findLine.sublines[i].charIndex && pos < findLine.sublines[i].charIndex + findLine.sublines[i].chars || i == findLine.sublines.length - 1) {
+                        findSubline = findLine.sublines[i];
+                        break;
+                    }
+                }
+                if (!findSubline) {
+                    return;
+                }
+                focus.x += findSubline.x;
+                focus.y += findSubline.y;
+                focus.height = findSubline.height;
+                pos -= findSubline.charIndex;
+                p[302] += findSubline.htmlTextIndex;
+                var findDisplay;
+                for (var i = 0; i < findSubline.displays.length; i++) {
+                    if (pos >= findSubline.displays[i].charIndex && pos < findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
+                        findDisplay = findSubline.displays[i];
+                        break;
+                    }
+                }
+                if (!findDisplay) {
+                    return;
+                }
+                focus.x += findDisplay.x;
+                pos -= findDisplay.charIndex;
+                p[302] += findDisplay.htmlTextIndex;
+                if (findDisplay.type == 0) {
+                    var text = findDisplay.text;
+                    var size = findDisplay.font.size;
+                    focus.x += flower.$measureTextWidth(size, text.slice(0, pos));
+                    p[302] += findDisplay.textStart + text.slice(0, pos).length;
+                } else {
+                    if (pos) {
+                        focus.x += findDisplay.width;
+                        p[302]++;
+                    }
+                }
+            }
         }, {
             key: "__update",
             value: function __update(now, gap) {
@@ -3352,6 +3458,8 @@ var black = {};
                         decodeText = true;
                         if (char == "\n" || char == "\r") {
                             line.endHtmlText = char;
+                            lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
+                            lastText = lastText.slice(0, lastText.length - 1);
                         } else if (text.slice(i, i + "<br/>".length) == "<br/>") {
                             line.endHtmlText = "<br/>";
                             lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
@@ -3444,6 +3552,7 @@ var black = {};
         }, {
             key: "__decodeText",
             value: function __decodeText(line, font, text, htmlText, textStart) {
+                textStart = textStart == -1 ? 0 : textStart;
                 var p = this.$RichText;
                 if (!line.sublines.length) {
                     this.__addSubLine(line, font);
@@ -3721,7 +3830,7 @@ var black = {};
             value: function __getNewLine(lastLine, font) {
                 var line;
                 line = {
-                    index: 0,
+                    index: this.$RichText[2].length,
                     text: "",
                     htmlText: "",
                     endHtmlText: "",
@@ -3802,6 +3911,7 @@ var black = {};
                 if (p[6] == val) {
                     return;
                 }
+                p[6] = val;
                 this.$setHtmlText(val);
             }
         }, {
@@ -3831,12 +3941,19 @@ var black = {};
                     var char = val.charAt(i);
                     if (char == " ") {
                         val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
+                        i += 5;
                     } else if (char == "<") {
                         val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
+                        i += 3;
                     } else if (char == ">") {
                         val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
+                        i += 3;
                     } else if (char == "&") {
                         val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
+                        i += 4;
+                    } else if (char == "\n" || char == "\r") {
+                        //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
+                        //i += 4
                     }
                 }
                 return val;
