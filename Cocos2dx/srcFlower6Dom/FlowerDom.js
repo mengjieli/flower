@@ -24,7 +24,7 @@ var flower = {};
 (function(math){
 //////////////////////////File:flower/Flower.js///////////////////////////
 var DEBUG = true;
-var TIP = true;
+var TIP = false;
 var $language = "zh_CN";
 var NATIVE = true;
 /**
@@ -730,7 +730,7 @@ class PlatformTextField extends PlatformDisplayObject {
         em.style.left = "0px";
         em.style.top = "0px";
         em.style["font-style"] = "normal";
-        em.style["vertical-align"] = "bottom";
+        //em.style["vertical-align"] = "text-bottom";
         em.style["transform-origin"] = "left top";
         this.show = em;
     }
@@ -905,6 +905,7 @@ class PlatformTextInput extends PlatformDisplayObject {
         input.style["border"] = "none";
         input.style["font-style"] = "normal";
         input.style["transform-origin"] = "left top";
+        input.style["vertical-align"] = "bottom";
         this.show = input;
     }
 

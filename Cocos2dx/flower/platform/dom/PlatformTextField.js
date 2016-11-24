@@ -11,7 +11,7 @@ class PlatformTextField extends PlatformDisplayObject {
         em.style.left = "0px";
         em.style.top = "0px";
         em.style["font-style"] = "normal";
-        em.style["vertical-align"] = "bottom";
+        //em.style["vertical-align"] = "text-bottom";
         em.style["transform-origin"] = "left top";
         this.show = em;
     }

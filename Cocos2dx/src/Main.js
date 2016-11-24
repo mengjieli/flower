@@ -90,6 +90,8 @@ var Main = function () {
             //richText.text = "什么情况"
             //richText.htmlText = "我 说 <font color='#ff0000'>是</font>什     么";
             richText.htmlText = '我<img id="img1" src="res/closeDown.png"/>时间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>12<f:Group id="ui1" xmlns:f="flower"><f:Rect fillColor="0xff0000" width="100" height="100"/><f:Image source="res/closeDown.png"/><f:Label text="我去啊" fontSize="16" fontColor="0x00ff00" verticalCenter="0" horizontalCenter="0"/></f:Group>27';
+
+
             //console.log(richText.img1,richText.ui1);
             //setTimeout(function () {
             //    richText.htmlText = "123";

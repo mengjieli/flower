@@ -38,9 +38,11 @@ class RichText extends Group {
             304: false,//is 229
             305: "", //229 firstChar
             306: "", //last input text
+            307: 0, //line charIndex
             311: null,
             312: null,
-            313: null
+            313: null,
+            316: "",
         };
         this.addChild(this.$RichText[4]);
         this.addChild(this.$RichText[5]);
@@ -113,6 +115,7 @@ class RichText extends Group {
         p[300] = true;
         p[301] = info.charIndex;
         p[302] = info.htmlTextIndex;
+        p[307] = info.lineCharIndex;
         this.__input.text = "";
         this.__input.$startNativeInput();
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
@@ -134,7 +137,7 @@ class RichText extends Group {
 
     __onKeyDown(e) {
         var p = this.$RichText;
-        //console.log(e.keyCode);
+        console.log(e.keyCode);
         if (e.keyCode == 229) {
             if (!p[304]) {
                 p[304] = true;
@@ -144,17 +147,16 @@ class RichText extends Group {
                 p[313] = p[1];
                 p[323] = p[3];
             }
+            p[6] += "1";
             var str = this.__input.$getNativeText();
             if (p[305] == "") {
-                if (str.length) {
-                    p[305] = str.charAt(0);
-                }
+                p[305] = str.charAt(str.length - 1);
             }
             p[1] = p[313];
             p[3] = p[323];
             p[301] = p[311];
             p[302] = p[312];
-            if (flower.StringDo.replaceString(p[306], "'", "") == str || str.charAt(0) != p[305]) {
+            if (str.charAt(str.length - 1) != p[305] && str.charAt(str.length - 2) != p[305] && str.charAt(str.length - 3) != p[305]) {
                 this.__inputText(str);
                 this.__input.$setNativeText("");
                 this.$RichText[7] = false;
@@ -164,6 +166,7 @@ class RichText extends Group {
             } else {
                 this.__inputText(str);
                 p[306] = str;
+                p[305] = str.charAt(str.length - 1);
             }
         } else if (e.keyCode == 13) {
             this.__inputText("\n");
@@ -173,22 +176,24 @@ class RichText extends Group {
                     return;
                 }
                 p[301]--;
+                this.$moveCaretIndex();
             } else if (e.keyCode == 39) {
                 if (p[301] == p[3]) {
                     return;
                 }
                 p[301]++;
+                this.$moveCaretIndex();
             } else if (e.keyCode == 38) { //输入点上移一行
-
+                this.$moveCaretIndex(-1);
             } else if (e.keyCode == 40) { //输入点下移一行
-
+                this.$moveCaretIndex(1);
             } else if (e.keyCode == 8) {
                 if (p[301] == 0) {
                     return;
                 }
                 this.$deleteCaretChar();
+                this.$moveCaretIndex();
             }
-            this.$moveCaretIndex();
         } else {
             var str = this.__input.$getNativeText();
             if (str.length) {
@@ -200,9 +205,6 @@ class RichText extends Group {
 
     //输入字符
     __inputText(text) {
-        if(text.length > 1){
-            console.log("");
-        }
         this.__inputHtmlText(this.__changeText(text));
     }
 
@@ -273,7 +275,11 @@ class RichText extends Group {
         this.$moveCaretIndex();
     }
 
-    $moveCaretIndex() {
+    /**
+     * 把焦点移到其它行后，计算当前焦点的位置，当前位置插入的位置(htmlTextIndex)
+     * @param index 与当前行相差多少
+     */
+    $moveCaretIndex(lineIndex = 0) {
         var p = this.$RichText;
         var lines = p[2];
         var pos = p[301];
@@ -281,6 +287,10 @@ class RichText extends Group {
         focus.x = 0;
         focus.y = 0;
         p[302] = 0;
+        if (pos == 0) {
+            p[307] = 0;
+            return;
+        }
         var findLine;
         for (var i = 0; i < lines.length; i++) {
             if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
@@ -303,17 +313,77 @@ class RichText extends Group {
                 break;
             }
         }
-        if (!findSubline) {
+        //如果有行的移动，重新计算所在行
+        if (lineIndex) {
+            pos = p[307];
+            while (lineIndex) {
+                if (lineIndex > 0) {
+                    if (!findSubline || findSubline.index < findLine.sublines.length - 1) {
+                        findSubline = findLine.sublines[findSubline.index + 1];
+                    } else {
+                        if (findLine.index < lines.length - 1) {
+                            findLine = lines[findLine.index + 1];
+                            if (findLine.sublines.length) {
+                                findSubline = findLine.sublines[0];
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    lineIndex--;
+                } else {
+                    if (!findSubline || findSubline.index > 0) {
+                        findSubline = findLine.sublines[findSubline.index - 1];
+                    } else {
+                        if (findLine.index > 0) {
+                            findLine = lines[findLine.index - 1];
+                            if (findLine.sublines.length) {
+                                findSubline = findLine.sublines[0];
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    lineIndex++;
+                }
+            }
+            focus.x = findLine.x;
+            focus.y = findLine.y;
+            focus.height = findLine.height;
+            p[302] = findLine.htmlTextIndex;
+            p[301] = findLine.charIndex;
+            if (!findSubline) {
+                return;
+            } else {
+                focus.x += findSubline.x;
+                focus.y += findSubline.y;
+                focus.height = findSubline.height;
+                p[302] += findSubline.htmlTextIndex;
+                p[301] += pos < findSubline.chars ? pos : findSubline.chars;
+            }
+        } else {
+            if (!findSubline) {
+                p[307] = pos;
+                return;
+            } else {
+                focus.x += findSubline.x;
+                focus.y += findSubline.y;
+                focus.height = findSubline.height;
+                pos -= findSubline.charIndex;
+                p[302] += findSubline.htmlTextIndex;
+                p[307] = pos;
+            }
+        }
+        if (pos == 0) {
             return;
         }
-        focus.x += findSubline.x;
-        focus.y += findSubline.y;
-        focus.height = findSubline.height;
-        pos -= findSubline.charIndex;
-        p[302] += findSubline.htmlTextIndex;
         var findDisplay;
         for (var i = 0; i < findSubline.displays.length; i++) {
-            if (pos >= findSubline.displays[i].charIndex && pos < findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
+            if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
                 findDisplay = findSubline.displays[i];
                 break;
             }
@@ -369,7 +439,8 @@ class RichText extends Group {
             htmlTextIndex: 0,
             focusX: 0,
             focusY: 0,
-            focusHeight: p[10]
+            focusHeight: p[10],
+            lineCharIndex: 0
         };
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
@@ -426,6 +497,7 @@ class RichText extends Group {
         x -= findDisplay.x;
         if (findDisplay.type == 0) {
             res.htmlTextIndex += findDisplay.textStart;
+            res.lineCharIndex = findDisplay.charIndex;
             var text = findDisplay.text;
             var size = findDisplay.font.size;
             var width = 0;
@@ -440,6 +512,7 @@ class RichText extends Group {
                     res.charIndex++;
                     res.htmlTextIndex++;
                     res.focusX += charWidth;
+                    res.lineCharIndex++;
                 }
             }
         } else {
@@ -447,6 +520,9 @@ class RichText extends Group {
                 res.charIndex += findDisplay.chars;
                 res.htmlTextIndex += findDisplay.htmlText.length;
                 res.focusX += findDisplay.width;
+                res.lineCharIndex = findDisplay.charIndex + findDisplay.chars;
+            } else {
+                res.lineCharIndex = findDisplay.charIndex;
             }
         }
         return res;
@@ -673,6 +749,7 @@ class RichText extends Group {
                 } else if (text.slice(i, i + "<br/>".length) == "<br/>") {
                     line.endHtmlText = "<br/>";
                     lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
+                    last = -1;
                 }
             }
             if (decodeText) {
@@ -705,6 +782,7 @@ class RichText extends Group {
             p[3] += lines[i].chars;
         }
         p[100] = true;
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     __findFXML(text, start) {
