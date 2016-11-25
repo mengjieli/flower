@@ -1,6 +1,6 @@
 <f:Group percentWidth="100" percentHeight="100" xmlns:f="flower" xmlns:s="modules/software/module.json"
          xmlns:e="modules/gameEditor/module.json">
-    <s:Tab left="0" right="200" percentHeight="100">
+    <s:Tab left="0" width="250" percentHeight="100">
         <f:panels>
             <f:Array>
                 <e:ProjectView/>
@@ -12,7 +12,7 @@
             </f:Array>
         </f:panels>
     </s:Tab>
-    <e:ModuleView left="200" right="270" percentHeight="100">
+    <e:ModuleView left="250" right="270" percentHeight="100">
     </e:ModuleView>
     <e:AttributeEditor width="270" right="0" percentHeight="100"/>
 </f:Group>

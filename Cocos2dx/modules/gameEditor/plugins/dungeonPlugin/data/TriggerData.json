@@ -26,7 +26,7 @@
     "open": {
       "desc": "状态",
       "type": "bool",
-      "init": true,
+      "init": false,
       "enumList": [
         {
           "label": "开启",
@@ -60,7 +60,7 @@
     "startCondition": {
       "desc": "启动条件类型",
       "type": "int",
-      "init": 1,
+      "init": 5,
       "enumList": [
         {
           "label": "进入副本",

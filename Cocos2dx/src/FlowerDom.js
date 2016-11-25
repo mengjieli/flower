@@ -967,6 +967,9 @@ var flower = {};
             input.style["font-style"] = "normal";
             input.style["transform-origin"] = "left top";
             input.style["vertical-align"] = "bottom";
+            input.onpropertychange = function () {
+                console.log(arguments);
+            };
             _this3.show = input;
             return _this3;
         }
@@ -1603,46 +1606,40 @@ var flower = {};
         }, {
             key: "draw",
             value: function draw(points, fillColor, fillAlpha, lineWidth, lineColor, lineAlpha) {
-                if (points.length == 2) {
-                    var div = document.createElement("div");
-                    div.style.position = "absolute";
-                    div.style.left = points[0].x + "px";
-                    div.style.top = points[0].y + "px";
-                    var rotation = math.atan2(points[1].y - points[0].y, points[1].x - points[0].x);
-                    var len = math.sqrt((points[1].y - points[0].y) * (points[1].y - points[0].y) + (points[1].x - points[0].x) * (points[1].x - points[0].x));
-                    div.style.width = len + "px";
-                    div.style.height = "0px";
-                    div.style["-webkit-transform"] = "rotate(" + rotation * 180 / math.PI + "deg)";
-                    if (lineAlpha && lineWidth) {
-                        div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
-                    } else {
-                        div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
-                    }
-                    this.show.appendChild(div);
-                    this.elements.push(div);
-                } else if (points.length == 5) {
-                    var div = document.createElement("div");
-                    div.style.position = "absolute";
-                    div.style.left = points[0].x + "px";
-                    div.style.top = points[0].y + "px";
-                    div.style.width = points[1].x - points[0].x + (points[1].x > points[0].x ? -1 : 0) + "px";
-                    div.style.height = points[2].y - points[0].y + (points[2].y > points[0].y ? -1 : 0) + "px";
-                    div.style.backgroundColor = "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + fillAlpha + ")";
-                    if (lineAlpha && lineWidth) {
-                        div.style.border = lineWidth + "px solid " + "rgba(" + (lineColor >> 16) + "," + (lineColor >> 8 & 0xFF) + "," + (lineColor & 0xFF) + "," + lineAlpha + ")";
-                    } else {
-                        div.style.border = 1 + "px solid " + "rgba(" + (fillColor >> 16) + "," + (fillColor >> 8 & 0xFF) + "," + (fillColor & 0xFF) + "," + 0 + ")";
-                    }
-                    this.show.appendChild(div);
-                    this.elements.push(div);
+                if (points.length == 0) {
+                    this.show.innerHTML = "";
+                    return;
                 }
+                var pointStr = "";
+                var minX = 100000000;
+                var minY = 100000000;
+                var maxX = -100000000;
+                var maxY = -100000000;
+                for (var i = 0; i < points.length; i++) {
+                    if (points[i].x < minX) {
+                        minX = points[i].x;
+                    }
+                    if (points[i].x > maxX) {
+                        maxX = points[i].x;
+                    }
+                    if (points[i].y < minY) {
+                        minY = points[i].y;
+                    }
+                    if (points[i].y > maxY) {
+                        maxY = points[i].y;
+                    }
+                }
+                minX -= lineWidth;
+                minY -= lineWidth;
+                for (var i = 0; i < points.length; i++) {
+                    pointStr += points[i].x - minX + "," + (points[i].y - minY) + (i < points.length - 1 ? "," : "");
+                }
+                this.show.innerHTML = '<div style="position:absolute;left:' + minX + 'px;top:' + minY + 'px;"><svg style="position:absolute;left:0px;top:0px;" xmlns="http://www.w3.org/2000/svg" version="1.1" width="' + (maxX - minX + 2 + lineWidth) + '" height="' + (maxY - minY + 2 + lineWidth) + '">' + '<polygon points="' + pointStr + '" style="fill:#' + this.toColor16(fillColor >> 16) + this.toColor16(fillColor >> 8 & 0xFF) + this.toColor16(fillColor & 0xFF) + ";" + 'stroke:#' + this.toColor16(lineColor >> 16) + this.toColor16(lineColor >> 8 & 0xFF) + this.toColor16(lineColor & 0xFF) + ";" + 'fill-opacity:' + fillAlpha + ';' + 'stroke-opacity:' + lineAlpha + ';' + 'stroke-width:' + lineWidth + ';"/>' + '</svg></div>';
             }
         }, {
             key: "clear",
             value: function clear() {
-                while (this.elements.length) {
-                    this.show.removeChild(this.elements.pop());
-                }
+                this.show.innerHTML = "";
             }
         }, {
             key: "setAlpha",

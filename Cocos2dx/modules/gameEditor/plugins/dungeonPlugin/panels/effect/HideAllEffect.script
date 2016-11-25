@@ -1,0 +1,29 @@
+function setData(val) {
+    _super.prototype.setData.call(this, val);
+    var atrs = ["type"];
+    var dropDownList = {"type": true};
+    for (var i = 0; i < atrs.length; i++) {
+        var atr = atrs[i];
+        (function (atr) {
+            if (dropDownList[atr]) {
+                this[atr + "ComboBox"].value = this.data[atr];
+                this.data[atr].addListener(flower.Event.UPDATE, function (e) {
+                    this.save();
+                }, this);
+            } else {
+                this[atr + "Input"].value = this.data[atr];
+                this.data[atr].addListener(flower.Event.UPDATE, function (e) {
+                    this.save();
+                }, this);
+            }
+        }.bind(this))(atr);
+    }
+}
+
+function set save(func) {
+    this.__save = func;
+}
+
+function get save() {
+    return this.__save;
+}

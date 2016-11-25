@@ -21,7 +21,7 @@
     "ai":{
       "desc":"AI 类型",
       "type":"int",
-      "init": 0,
+      "init": 2,
       "enumList": [
         {
           "label": "反击",
@@ -34,6 +34,10 @@
         {
           "label": "5格巡视",
           "type": 2
+        },
+        {
+          "label": "10格巡视",
+          "type": 4
         },
         {
           "label": "无ai",

@@ -9,18 +9,73 @@ function init() {
 
 function flushDirection() {
     this.direction.removeAll();
-    this.addDirection("trigger", "root", "触发器", [{
-        "label": "添加触发器",
-        "click": function (target) {
-            var trigger = flower.DataManager.createData("dg.TriggerData");
-            var id = this.data.parser.itemId;
-            trigger.itemId.value = id;
-            trigger.name.value = "触发器" + id;
-            this.data.data.triggers.push(trigger);
-            this.data.parser.save();
-            this.addTriggerToDirection(trigger);
-        }.bind(this)
-    }]);
+    this.addDirection("trigger", "root", "触发器", [
+        {
+            "label": "添加触发器",
+            "click": function (target) {
+                var trigger = flower.DataManager.createData("dg.TriggerData");
+                var id = this.data.parser.itemId;
+                trigger.itemId.value = id;
+                trigger.name.value = "触发器" + id;
+                this.data.data.triggers.push(trigger);
+                this.data.parser.save();
+                this.addTriggerToDirection(trigger);
+            }.bind(this)
+        },
+        {
+            "label": "复制全部触发器",
+            "click": function (target) {
+                module.copyInfo = {
+                    type: "Triggers",
+                    data: this.data.data.triggers.value
+                }
+            }.bind(this)
+        },
+        {
+            "label": "粘贴触发器",
+            "isVisible": function (target) {
+                if (module.copyInfo && module.copyInfo.type == "Triggers") {
+                    return true;
+                }
+                return false;
+            },
+            "click": function (target) {
+                if (module.copyInfo && module.copyInfo.type == "Triggers") {
+                    var list = module.copyInfo.data;
+                    var trans = {};
+                    var tgs = [];
+                    for (var i = 0; i < list.length; i++) {
+                        var trigger = flower.DataManager.createData("dg.TriggerData");
+                        trigger.value = list[i];
+                        var id = this.data.parser.itemId;
+                        trans[trigger.itemId.value] = id;
+                        trigger.itemId.value = id;
+                        this.data.data.triggers.push(trigger);
+                        this.data.parser.save();
+                        tgs.push(trigger);
+                    }
+                    for (var i = 0; i < tgs.length; i++) {
+                        var trigger = tgs[i];
+                        for (var e = 0; e < trigger.effects.length; e++) {
+                            var effect = trigger.effects[e];
+                            if (effect.type.value == 4) {
+                                if (trans[effect.effectValue.triggerId.value]) {
+                                    effect.effectValue.triggerId.value = trans[effect.effectValue.triggerId.value];
+                                }
+                            }
+                            if (effect.type.value == 11) {
+                                if (trans[effect.effectValue.triggerId.value]) {
+                                    effect.effectValue.triggerId.value = trans[effect.effectValue.triggerId.value];
+                                }
+                            }
+                        }
+                    }
+                    this.flushDirection();
+                    this.expand("trigger");
+                }
+            }.bind(this)
+        }
+    ]);
     var triggerList = this.data.data.triggers;
     for (var i = 0; i < triggerList.length; i++) {
         var trigger = triggerList[i];
@@ -105,7 +160,6 @@ function addTriggerToDirection(trigger) {
                 return module.copyInfo && module.copyInfo.type == "Effect" ? true : false;
             },
             "click": function (target) {
-                flower.breakPoint();
                 var effect = flower.DataManager.createData("dg.TriggerEffectData");
                 effect.value = module.copyInfo.value;
                 effect.itemId.value = this.data.parser.itemId;
@@ -113,6 +167,16 @@ function addTriggerToDirection(trigger) {
                 trigger.effects.push(effect);
                 this.data.parser.save();
                 this.addEffectToDirection(trigger, effect);
+            }.bind(this)
+        },
+        {
+            "label": "复制触发器",
+            "click": function (target) {
+                var trigger = target.data;
+                module.copyInfo = {
+                    type: "Triggers",
+                    data: [trigger.value]
+                }
             }.bind(this)
         }
     ], trigger, trigger.color);
@@ -152,13 +216,13 @@ function addEffectToDirection(trigger, effect) {
             }.bind(this)
         },
         {
-            "label": "屏蔽触发器",
+            "label": "屏蔽效果",
             "click": function (target) {
                 target.data.effect.invalid = !target.data.effect.invalid.value;
             }.bind(this)
         },
         {
-            "label": "复制",
+            "label": "复制效果",
             "click": function (target) {
                 var effect = target.data.effect;
                 module.copyInfo = {

@@ -18,7 +18,7 @@
     "type": {
       "desc": "效果类型",
       "type": "int",
-      "init": 1,
+      "init": 4,
       "enumList": [
         {
           "label": "刷怪",
@@ -120,7 +120,7 @@
       "type": "*",
       "saveClass": true,
       "init": {
-        "__className": "dg.FlushMonsterEffect"
+        "__className": "dg.StartTriggerEffect"
       }
     },
     "hasPlay": {

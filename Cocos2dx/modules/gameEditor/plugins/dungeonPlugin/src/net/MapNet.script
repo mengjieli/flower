@@ -273,12 +273,34 @@ var MapNet = (function () {
         }
     }
 
-    MapNet.prototype.hideAll = function () {
-        this.data.objects.setItemsAttributeWith("mapType", 1, "visible", false);
+    MapNet.prototype.hideAll = function (type) {
+        if(type == 0) {
+            this.data.objects.setItemsAttributeWith("camp", 1, "visible", false);
+            this.data.objects.setItemsAttributeWith("camp", 2, "visible", false);
+            this.data.objects.setItemsAttributeWith("camp", 3, "visible", false);
+            this.data.objects.setItemsAttributeWith("camp", 4, "visible", false);
+        } else if(type == 1) {
+            this.data.objects.setItemsAttributeWith("camp", 1, "visible", false);
+            this.data.objects.setItemsAttributeWith("camp", 3, "visible", false);
+            this.data.objects.setItemsAttributeWith("camp", 4, "visible", false);
+        } else if(type == 2) {
+            this.data.objects.setItemsAttributeWith("camp", 2, "visible", false);
+        }
     }
 
-    MapNet.prototype.showAll = function () {
-        this.data.objects.setItemsAttributeWith("mapType", 1, "visible", true);
+    MapNet.prototype.showAll = function (type) {
+        if(type == 0) {
+            this.data.objects.setItemsAttributeWith("camp", 1, "visible", true);
+            this.data.objects.setItemsAttributeWith("camp", 2, "visible", true);
+            this.data.objects.setItemsAttributeWith("camp", 3, "visible", true);
+            this.data.objects.setItemsAttributeWith("camp", 4, "visible", true);
+        } else if(type == 1) {
+            this.data.objects.setItemsAttributeWith("camp", 1, "visible", true);
+            this.data.objects.setItemsAttributeWith("camp", 3, "visible", true);
+            this.data.objects.setItemsAttributeWith("camp", 4, "visible", true);
+        } else if(type == 2) {
+            this.data.objects.setItemsAttributeWith("camp", 2, "visible", true);
+        }
     }
 
     MapNet.prototype.hideGrid = function (points) {

@@ -113,9 +113,9 @@ var ExportCSVModel = (function () {
                 } else if (effect.type == 19) { //继续游戏 [0]
                     param += "[0]";
                 } else if (effect.type == 20) { //隐藏全部 [0]
-                    param += "[0]";
+                    param += "[" + val.type + "]";
                 } else if (effect.type == 21) { //显示全部 [0]
-                    param += "[0]";
+                    param += "[" + val.type + "]";
                 } else if (effect.type == 22) { //隐藏格子上对象 [[x,y],[x,y]...]
                     param += "[";
                     for (var bp = 0; bp < val.points.length; bp++) {

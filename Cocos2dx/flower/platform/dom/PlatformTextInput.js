@@ -19,6 +19,9 @@ class PlatformTextInput extends PlatformDisplayObject {
         input.style["font-style"] = "normal";
         input.style["transform-origin"] = "left top";
         input.style["vertical-align"] = "bottom";
+        input.onpropertychange = function() {
+            console.log(arguments);
+        }
         this.show = input;
     }
 

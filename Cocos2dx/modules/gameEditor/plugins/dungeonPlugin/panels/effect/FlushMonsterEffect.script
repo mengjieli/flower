@@ -9,7 +9,7 @@ function init() {
                         "type": "addMonster"
                     },
                     {
-                        "label": "删除全怪物",
+                        "label": "删除全部怪物",
                         "type": "removeAll"
                     }
                 ],
@@ -23,6 +23,12 @@ function menuFunction(target, item) {
     if (item.type == "addMonster") {
         var array = this.list.dataProvider;
         var monster = flower.DataManager.createData("dg.FlushMonsterEffectItem");
+        monster.bornCoord.x.addListener(flower.Event.UPDATE, function (e) {
+            monster.moveCoord.x = monster.bornCoord.x.value;
+        });
+        monster.bornCoord.y.addListener(flower.Event.UPDATE, function (e) {
+            monster.moveCoord.y = monster.bornCoord.y.value;
+        });
         var data = {
             "monster": monster,
         };
@@ -68,8 +74,13 @@ function menuFunction(target, item) {
         array.push(data);
         this.data.monsters.push(monster);
     } else if (item.type == "removeAll") {
-        this.list.dataProvider.removeAll();
-        this.data.monsters.removeAll();
+        software.Alert.show("确认全部删除?", {
+            sureCall: function () {
+                this.list.dataProvider.removeAll();
+                this.data.monsters.removeAll();
+            },
+            sureThis: this
+        });
     } else if (item.type == "delMonster") {
         this.list.dataProvider.removeItem(target);
         this.data.monsters.removeItem(target.monster);

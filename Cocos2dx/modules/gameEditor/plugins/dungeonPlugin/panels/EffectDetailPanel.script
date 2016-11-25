@@ -52,8 +52,8 @@ function init() {
         '<dg:RemoveBlockEffect/>' +
         '<f:Group/>' +
         '<f:Group/>' +
-        '<f:Group/>' +
-        '<f:Group/>' +
+        '<dg:HideAllEffect/>' +
+        '<dg:ShowAllEffect/>' +
         '<dg:HideGridEffect/>' +
         '<dg:ShowGridEffect/>' +
         '</f:ViewStack>';

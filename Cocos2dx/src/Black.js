@@ -2800,10 +2800,12 @@ var black = {};
                 13: false, //wordWrap
                 30: 0, //caretIndex
                 31: 0, //caretHtmlIndex
-                32: null }, _defineProperty(_this13$$RichText, "32", null), _defineProperty(_this13$$RichText, 33, null), _defineProperty(_this13$$RichText, 34, 0), _defineProperty(_this13$$RichText, 100, false), _defineProperty(_this13$$RichText, 101, {}), _defineProperty(_this13$$RichText, 102, {}), _defineProperty(_this13$$RichText, 200, 0), _defineProperty(_this13$$RichText, 201, false), _defineProperty(_this13$$RichText, 300, false), _defineProperty(_this13$$RichText, 301, 0), _defineProperty(_this13$$RichText, 302, 0), _defineProperty(_this13$$RichText, 303, 0), _defineProperty(_this13$$RichText, 304, false), _defineProperty(_this13$$RichText, 305, ""), _defineProperty(_this13$$RichText, 306, ""), _defineProperty(_this13$$RichText, 307, 0), _defineProperty(_this13$$RichText, 311, null), _defineProperty(_this13$$RichText, 312, null), _defineProperty(_this13$$RichText, 313, null), _defineProperty(_this13$$RichText, 316, ""), _this13$$RichText);
+                32: null }, _defineProperty(_this13$$RichText, "32", null), _defineProperty(_this13$$RichText, 33, null), _defineProperty(_this13$$RichText, 34, 0), _defineProperty(_this13$$RichText, 100, false), _defineProperty(_this13$$RichText, 101, {}), _defineProperty(_this13$$RichText, 102, {}), _defineProperty(_this13$$RichText, 200, 0), _defineProperty(_this13$$RichText, 201, false), _defineProperty(_this13$$RichText, 300, false), _defineProperty(_this13$$RichText, 301, 0), _defineProperty(_this13$$RichText, 302, 0), _defineProperty(_this13$$RichText, 303, 0), _defineProperty(_this13$$RichText, 304, false), _defineProperty(_this13$$RichText, 305, ""), _defineProperty(_this13$$RichText, 306, ""), _defineProperty(_this13$$RichText, 307, 0), _defineProperty(_this13$$RichText, 308, []), _defineProperty(_this13$$RichText, 311, null), _defineProperty(_this13$$RichText, 312, null), _defineProperty(_this13$$RichText, 313, null), _defineProperty(_this13$$RichText, 330, 0), _defineProperty(_this13$$RichText, 400, false), _defineProperty(_this13$$RichText, 401, []), _defineProperty(_this13$$RichText, 402, ""), _defineProperty(_this13$$RichText, 1000, 0x526da5), _defineProperty(_this13$$RichText, 1001, 0xffffff), _this13$$RichText);
+            //被选文字的颜色
             _this13.addChild(_this13.$RichText[4]);
             _this13.addChild(_this13.$RichText[5]);
             _this13.addListener(flower.TouchEvent.TOUCH_BEGIN, _this13.__onTouch, _this13);
+            _this13.addListener(flower.TouchEvent.TOUCH_MOVE, _this13.__onTouch, _this13);
             _this13.addListener(flower.Event.FOCUS_OUT, _this13.__stopInput, _this13);
             _this13.focusEnabled = true;
             _this13.__input = flower.Stage.getInstance().$input;
@@ -2817,6 +2819,7 @@ var black = {};
                 var p = this.$RichText;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
+                        this.__cancelSelect();
                         var doubleClick = false;
                         var tribleClick = false;
                         if (!p[201]) {
@@ -2841,6 +2844,17 @@ var black = {};
                             //单击
                             this.__click();
                         }
+                        p[330] = p[301];
+                        break;
+                    case flower.TouchEvent.TOUCH_MOVE:
+                        var charIndex = p[330];
+                        var info = this.__getClickPos();
+                        this.__cancelSelect();
+                        var htmlTextIndex1 = this.__getHtmlTextIndexByCharIndex(charIndex);
+                        var htmlTextIndex2 = this.__getHtmlTextIndexByCharIndex(info.charIndex);
+                        this.__selecteText(htmlTextIndex1 < htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2, p[1].slice(htmlTextIndex1 < htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2, htmlTextIndex1 > htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2));
+                        p[301] = info.charIndex;
+                        this.$moveCaretIndex();
                         break;
                 }
             }
@@ -2889,7 +2903,9 @@ var black = {};
                 p[301] = info.charIndex;
                 p[302] = info.htmlTextIndex;
                 p[307] = info.lineCharIndex;
+                p[308].length = 0;
                 this.__input.text = "";
+                this.__input.$setNativeText("");
                 this.__input.$startNativeInput();
                 this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
                 flower.EnterFrame.add(this.__update, this);
@@ -2912,73 +2928,12 @@ var black = {};
         }, {
             key: "__onKeyDown",
             value: function __onKeyDown(e) {
-                var p = this.$RichText;
-                console.log(e.keyCode);
-                if (e.keyCode == 229) {
-                    if (!p[304]) {
-                        p[304] = true;
-                        p[305] = "";
-                        p[311] = p[301];
-                        p[312] = p[302];
-                        p[313] = p[1];
-                        p[323] = p[3];
-                    }
-                    p[6] += "1";
-                    var str = this.__input.$getNativeText();
-                    if (p[305] == "") {
-                        p[305] = str.charAt(str.length - 1);
-                    }
-                    p[1] = p[313];
-                    p[3] = p[323];
-                    p[301] = p[311];
-                    p[302] = p[312];
-                    if (str.charAt(str.length - 1) != p[305] && str.charAt(str.length - 2) != p[305] && str.charAt(str.length - 3) != p[305]) {
-                        this.__inputText(str);
-                        this.__input.$setNativeText("");
-                        this.$RichText[7] = false;
-                        p[304] = false;
-                        p[305] == "";
-                        p[306] = "";
-                    } else {
-                        this.__inputText(str);
-                        p[306] = str;
-                        p[305] = str.charAt(str.length - 1);
-                    }
-                } else if (e.keyCode == 13) {
-                    this.__inputText("\n");
-                } else if (e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) {
-                    if (e.keyCode == 37) {
-                        if (p[301] == 0) {
-                            return;
-                        }
-                        p[301]--;
-                        this.$moveCaretIndex();
-                    } else if (e.keyCode == 39) {
-                        if (p[301] == p[3]) {
-                            return;
-                        }
-                        p[301]++;
-                        this.$moveCaretIndex();
-                    } else if (e.keyCode == 38) {
-                        //输入点上移一行
-                        this.$moveCaretIndex(-1);
-                    } else if (e.keyCode == 40) {
-                        //输入点下移一行
-                        this.$moveCaretIndex(1);
-                    } else if (e.keyCode == 8) {
-                        if (p[301] == 0) {
-                            return;
-                        }
-                        this.$deleteCaretChar();
-                        this.$moveCaretIndex();
-                    }
-                } else {
-                    var str = this.__input.$getNativeText();
-                    if (str.length) {
-                        this.__inputText(str);
-                        this.__input.$setNativeText("");
-                    }
-                }
+                this.__doKeyEvent(e);
+                //if (e.keyCode == 16) {
+                //    this.$RichText[308].push({keyCode: e.keyCode});
+                //} else {
+                //    this.__doKeyEvent(e);
+                //}
             }
 
             //输入字符
@@ -2986,7 +2941,13 @@ var black = {};
         }, {
             key: "__inputText",
             value: function __inputText(text) {
-                this.__inputHtmlText(this.__changeText(text));
+                var under = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+                var htmlText = this.__changeText(text);
+                if (under) {
+                    htmlText = "<u>" + htmlText + "</u>";
+                }
+                this.__inputHtmlText(htmlText);
             }
 
             //输入字符
@@ -3052,7 +3013,7 @@ var black = {};
                 }
                 pos -= findDisplay.charIndex;
                 if (findDisplay.type == 0) {
-                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.textStart + pos - 1) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.textStart + pos, p[1].length);
+                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex) + findDisplay.htmlText.slice(0, findDisplay.textStart) + this.__changeText(findDisplay.text.slice(0, pos - 1)) + this.__changeText(findDisplay.text.slice(pos, findDisplay.text.length)) + findDisplay.htmlText.slice(findDisplay.textEnd, findDisplay.htmlText.length) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.htmlText.length, p[1].length);
                 } else {
                     this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.htmlText.length, p[1].length);
                 }
@@ -3187,13 +3148,156 @@ var black = {};
                     var text = findDisplay.text;
                     var size = findDisplay.font.size;
                     focus.x += flower.$measureTextWidth(size, text.slice(0, pos));
-                    p[302] += findDisplay.textStart + text.slice(0, pos).length;
+                    p[302] += findDisplay.textStart + this.__changeText(text.slice(0, pos)).length;
                 } else {
                     if (pos) {
                         focus.x += findDisplay.width;
-                        p[302]++;
+                        p[302] += findDisplay.htmlText.length;
                     }
                 }
+            }
+        }, {
+            key: "__getHtmlTextIndexByCharIndex",
+            value: function __getHtmlTextIndexByCharIndex(pos) {
+                var p = this.$RichText;
+                var lines = p[2];
+                var htmlTextIndex = 0;
+                if (pos == 0) {
+                    return htmlTextIndex;
+                }
+                var findLine;
+                for (var i = 0; i < lines.length; i++) {
+                    if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
+                        findLine = lines[i];
+                        break;
+                    }
+                }
+                if (!findLine) {
+                    return htmlTextIndex;
+                }
+                pos -= findLine.charIndex;
+                htmlTextIndex = findLine.htmlTextIndex;
+                var findSubline;
+                for (var i = 0; i < findLine.sublines.length; i++) {
+                    if (pos >= findLine.sublines[i].charIndex && pos < findLine.sublines[i].charIndex + findLine.sublines[i].chars || i == findLine.sublines.length - 1) {
+                        findSubline = findLine.sublines[i];
+                        break;
+                    }
+                }
+                if (!findSubline) {
+                    return htmlTextIndex;
+                } else {
+                    pos -= findSubline.charIndex;
+                    htmlTextIndex += findSubline.htmlTextIndex;
+                }
+                if (pos == 0) {
+                    return htmlTextIndex;
+                }
+                var findDisplay;
+                for (var i = 0; i < findSubline.displays.length; i++) {
+                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
+                        findDisplay = findSubline.displays[i];
+                        break;
+                    }
+                }
+                if (!findDisplay) {
+                    return htmlTextIndex;
+                }
+                pos -= findDisplay.charIndex;
+                htmlTextIndex += findDisplay.htmlTextIndex;
+                if (findDisplay.type == 0) {
+                    var text = findDisplay.text;
+                    var size = findDisplay.font.size;
+                    htmlTextIndex += findDisplay.textStart + this.__changeText(text.slice(0, pos)).length;
+                } else {
+                    if (pos) {
+                        htmlTextIndex += findDisplay.htmlText.length;
+                    }
+                }
+                return htmlTextIndex;
+            }
+        }, {
+            key: "__getCharIndexByHtmlTextIndex",
+            value: function __getCharIndexByHtmlTextIndex(index) {
+                var p = this.$RichText;
+                var lines = p[2];
+                if (lines.length) {
+                    return 0;
+                }
+                for (var i = 0; i < lines.lengt; i++) {
+                    var line = lines[i];
+                    if (line.htmlTextIndex <= index && line.htmlTextIndex + line.htmlText.length + line.endHtmlText.length > index || i == lines.length - 1) {
+                        index -= line.htmlTextIndex;
+                        var sublines = line.sublines;
+                        if (sublines.length) {
+                            return line.charIndex;
+                        }
+                        for (var s = 0; s < sublines.length; s++) {
+                            var subline = sublines[s];
+                            if (subline.htmlTextIndex <= index && subline.htmlTextIndex + subline.htmlText.length || s == sublines.length - 1) {
+                                var displays = subline.displays;
+                                if (displays.length) {
+                                    return line.charIndex + subline.charIndex;
+                                }
+                                index -= subline.htmlTextIndex;
+                                for (var d = 0; d < displays.length; d++) {
+                                    var display = displays[d];
+                                    if (display.htmlTextIndex <= index && display.htmlTextIndex + display.htmlText.length || d == displays.length - 1) {
+                                        return line.charIndex + subline.charIndex + display.text.slice(0, this.__changeRealText(display.htmlText.slice(display.textStart, index)).length).length;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return 0;
+            }
+
+            /**
+             * 增加选中的段落
+             * @param htmlTextIndex
+             * @param htmlText
+             * @private
+             */
+
+        }, {
+            key: "__selecteText",
+            value: function __selecteText(htmlTextIndex, htmlText) {
+                if (htmlText.length == 0) {
+                    return;
+                }
+                var p = this.$RichText;
+                if (!p[400]) {
+                    p[400] = true;
+                    p[402] = p[1];
+                }
+                p[401].push({ index: htmlTextIndex, htmlText: htmlText });
+                var list = p[401];
+                var oldHtmlText = p[402];
+                var newHtmlText = "";
+                var last = 0;
+                for (var i = 0; i < list.length; i++) {
+                    var item = list[i];
+                    newHtmlText += oldHtmlText.slice(last, item.index) + "<s>" + item.htmlText + "</s>";
+                    last = item.index + item.htmlText.length;
+                    if (i == list.length - 1) {
+                        newHtmlText += oldHtmlText.slice(last, oldHtmlText.length);
+                    }
+                }
+                this.__setHtmlText(newHtmlText, false);
+            }
+        }, {
+            key: "__cancelSelect",
+            value: function __cancelSelect() {
+                var p = this.$RichText;
+                if (p[400]) {
+                    p[400] = false;
+                    this.__setHtmlText(p[402], false);
+                    var list = p[401].concat();
+                    p[401].length = 0;
+                    return list;
+                }
+                return null;
             }
         }, {
             key: "__update",
@@ -3204,6 +3308,79 @@ var black = {};
                     p[5].visible = true;
                 } else {
                     p[5].visible = false;
+                }
+                while (p[308].length) {
+                    this.__doKeyEvent(p[308].shift());
+                }
+            }
+        }, {
+            key: "__doKeyEvent",
+            value: function __doKeyEvent(e) {
+                var p = this.$RichText;
+                if (e.keyCode == 229) {
+                    if (!p[304]) {
+                        p[304] = true;
+                        p[305] = "";
+                        p[311] = p[301];
+                        p[312] = p[302];
+                        p[313] = p[1];
+                        p[323] = p[3];
+                    }
+                    p[6] += "1";
+                    var str = this.__input.$getNativeText();
+                    if (p[305] == "") {
+                        p[305] = str.charAt(str.length - 1);
+                    }
+                    p[1] = p[313];
+                    p[3] = p[323];
+                    p[301] = p[311];
+                    p[302] = p[312];
+                    if (e.keyCode == 16 || str != p[306].slice(0, str.length) && str.charAt(str.length - 1) != p[305] && str.charAt(str.length - 2) != p[305] && str.charAt(str.length - 3) != p[305]) {
+                        this.__inputText(str);
+                        this.__input.$setNativeText("");
+                        this.$RichText[7] = false;
+                        p[304] = false;
+                        p[305] == "";
+                        p[306] = "";
+                    } else {
+                        this.__inputText(str, true);
+                        p[306] = str;
+                        p[305] = str.charAt(str.length - 1);
+                    }
+                } else if (e.keyCode == 13) {
+                    this.__inputText("\n");
+                } else if (e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) {
+                    if (e.keyCode == 37) {
+                        if (p[301] == 0) {
+                            return;
+                        }
+                        p[301]--;
+                        this.$moveCaretIndex();
+                    } else if (e.keyCode == 39) {
+                        if (p[301] == p[3]) {
+                            return;
+                        }
+                        p[301]++;
+                        this.$moveCaretIndex();
+                    } else if (e.keyCode == 38) {
+                        //输入点上移一行
+                        this.$moveCaretIndex(-1);
+                    } else if (e.keyCode == 40) {
+                        //输入点下移一行
+                        this.$moveCaretIndex(1);
+                    } else if (e.keyCode == 8) {
+                        if (p[301] == 0) {
+                            return;
+                        }
+                        this.$deleteCaretChar();
+                        this.$moveCaretIndex();
+                    }
+                } else if (e.keyCode == 91 || e.keyCode == 17) {} else {
+                    var str = this.__input.$getNativeText();
+                    if (str.length) {
+                        this.__inputText(str);
+                        this.__input.$setNativeText("");
+                    }
                 }
             }
         }, {
@@ -3322,9 +3499,11 @@ var black = {};
         }, {
             key: "$setHtmlText",
             value: function $setHtmlText(text) {
+                var change = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+                var p = this.$RichText;
                 this.__resetCaches();
                 this.__clearOldDisplay();
-                var p = this.$RichText;
                 var ids = p[102];
                 for (var key in ids) {
                     delete ids[key];
@@ -3337,10 +3516,13 @@ var black = {};
                     size: p[10],
                     color: p[11],
                     under: false, //下划线
+                    underColor: p[11],
+                    select: false,
                     gap: p[12],
                     sizes: [],
                     colors: [],
                     unders: [],
+                    selects: [],
                     gaps: []
                 };
                 var line = this.__getNewLine(null, font);
@@ -3469,34 +3651,54 @@ var black = {};
                             }
                         } else {
                             if (end) {
-                                if (name == "font") {
+                                if (name == "font" || name == "u" || name == "s") {
                                     decodeText = true;
                                     font = flower.ObjectDo.clone(font);
-                                    font.size = font.sizes.pop();
-                                    font.color = font.colors.pop();
-                                    font.under = font.unders.pop();
-                                    font.gap = font.gaps.pop();
+                                    if (name == "font") {
+                                        font.size = font.sizes.pop();
+                                        font.color = font.colors.pop();
+                                        font.gap = font.gaps.pop();
+                                    } else if (name == "u") {
+                                        font.under = font.unders.pop();
+                                    } else if (name == "s") {
+                                        font.select = font.selects.pop();
+                                    }
                                 }
                             } else {
-                                if (name == "font") {
+                                if (name == "font" || name == "u" || name == "s") {
                                     nextHtmlText = text.slice(last, i + 1);
                                     lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - nextHtmlText.length);
                                     decodeText = true;
                                     font = flower.ObjectDo.clone(font);
-                                    font.sizes.push(font.size);
-                                    font.colors.push(font.color);
-                                    font.unders.push(font.under);
-                                    font.gaps.push(font.gap);
-                                    for (var a = 0; a < attributes.length; a++) {
-                                        if (attributes[a].name == "size") {
-                                            if (parseInt(attributes[a].value)) {
-                                                font.size = parseInt(attributes[a].value);
-                                            }
-                                        } else if (attributes[a].name == "color") {
-                                            if (attributes[a].value.charAt(0) == "#") {
-                                                font.color = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
+                                    if (name == "font") {
+                                        font.sizes.push(font.size);
+                                        font.colors.push(font.color);
+                                        font.gaps.push(font.gap);
+                                        for (var a = 0; a < attributes.length; a++) {
+                                            if (attributes[a].name == "size") {
+                                                if (parseInt(attributes[a].value)) {
+                                                    font.size = parseInt(attributes[a].value);
+                                                }
+                                            } else if (attributes[a].name == "color") {
+                                                if (attributes[a].value.charAt(0) == "#") {
+                                                    font.color = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
+                                                }
                                             }
                                         }
+                                    } else if (name == "u") {
+                                        font.unders.push(font.under);
+                                        font.under = true;
+                                        font.underColor = font.color;
+                                        for (var a = 0; a < attributes.length; a++) {
+                                            if (attributes[a].name == "color") {
+                                                if (attributes[a].value.charAt(0) == "#") {
+                                                    font.underColor = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
+                                                }
+                                            }
+                                        }
+                                    } else if (name == "s") {
+                                        font.selects.push(font.select);
+                                        font.select = true;
                                     }
                                 } else {
                                     var isfxml = false;
@@ -3536,6 +3738,9 @@ var black = {};
                     if (char == "\n" || char == "\r" || text.slice(i, i + "<br/>".length) == "<br/>") {
                         newLine = true;
                         decodeText = true;
+                        if (oldFont.select) {
+                            line.selectEnd = true;
+                        }
                         if (char == "\n" || char == "\r") {
                             line.endHtmlText = char;
                             lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
@@ -3547,15 +3752,15 @@ var black = {};
                         }
                     }
                     if (decodeText) {
-                        this.__decodeText(line, oldFont, lastText, lastHtmlText, lastTextStart);
+                        this.__decodeText(line, oldFont, this.__changeRealText(lastText), lastHtmlText, lastTextStart);
                         lastHtmlText = "";
                         lastText = "";
                         lastTextStart = -1;
                         if (single) {
                             if (addSingle.name == "img") {
-                                this.__decodeImage(line, addSingle.attributes, addSingle.htmlText);
+                                this.__decodeImage(line, addSingle.attributes, addSingle.htmlText, oldFont);
                             } else if (addSingle.name == "ui") {
-                                this.__decodeUI(line, addSingle.attributes, addSingle.htmlText);
+                                this.__decodeUI(line, addSingle.attributes, addSingle.htmlText, oldFont);
                             }
                         }
                         if (newLine) {
@@ -3576,7 +3781,9 @@ var black = {};
                     p[3] += lines[i].chars;
                 }
                 p[100] = true;
-                this.dispatchWith(flower.Event.CHANGE);
+                if (change) {
+                    this.dispatchWith(flower.Event.CHANGE);
+                }
             }
         }, {
             key: "__findFXML",
@@ -3652,6 +3859,7 @@ var black = {};
                         htmlText: htmlText,
                         htmlTextIndex: subline.htmlText.length,
                         textStart: textStart,
+                        textEnd: textStart + this.__changeText(text).length,
                         width: width,
                         height: font.size,
                         x: subline.positionX,
@@ -3681,7 +3889,7 @@ var black = {};
             }
         }, {
             key: "__decodeImage",
-            value: function __decodeImage(line, attributes, htmlText) {
+            value: function __decodeImage(line, attributes, htmlText, font) {
                 var p = this.$RichText;
                 var ids = p[102];
                 var id = "";
@@ -3754,6 +3962,7 @@ var black = {};
                 var item = {
                     type: 1,
                     display: image,
+                    font: font,
                     text: "",
                     htmlText: htmlText,
                     htmlTextIndex: subline.htmlText.length,
@@ -3786,7 +3995,7 @@ var black = {};
             }
         }, {
             key: "__decodeUI",
-            value: function __decodeUI(line, attributes, htmlText) {
+            value: function __decodeUI(line, attributes, htmlText, font) {
                 var p = this.$RichText;
                 var ids = p[102];
                 var id = "";
@@ -3843,6 +4052,7 @@ var black = {};
                 var item = {
                     type: 1,
                     display: ui,
+                    font: font,
                     text: "",
                     htmlText: htmlText,
                     htmlTextIndex: subline.htmlText.length,
@@ -3916,6 +4126,7 @@ var black = {};
                     text: "",
                     htmlText: "",
                     endHtmlText: "",
+                    selectEnd: false,
                     htmlTextIndex: 0,
                     width: 0,
                     height: font.size,
@@ -4083,15 +4294,46 @@ var black = {};
                                             if (!display) {
                                                 display = new flower.TextField(item.text);
                                                 display.fontSize = item.font.size;
-                                                display.fontColor = item.font.color;
+                                                display.fontColor = item.font.select ? p[1001] : item.font.color;
                                                 item.display = display;
                                             }
                                         }
+                                        if (item.font.under && item.width) {
+                                            if (!item.underDisplay) {
+                                                item.underDisplay = new flower.Rect();
+                                                item.underDisplay.fillColor = item.font.select ? p[1001] : item.font.underColor;
+                                                item.underDisplay.width = item.width;
+                                                item.underDisplay.height = 1;
+                                            }
+                                            item.underDisplay.x = line.x + subline.x + item.x;
+                                            item.underDisplay.y = line.y + subline.y + subline.height;
+                                            container.addChild(item.underDisplay);
+                                        }
+                                        if (item.font.select && item.width) {
+                                            if (!item.selectDisplay) {
+                                                item.selectDisplay = new flower.Rect();
+                                                item.selectDisplay.fillColor = p[1000];
+                                                item.selectDisplay.width = item.width;
+                                                item.selectDisplay.height = subline.height;
+                                            }
+                                            item.selectDisplay.x = line.x + subline.x + item.x;
+                                            item.selectDisplay.y = line.y + subline.y;
+                                            container.addChild(item.selectDisplay);
+                                        }
                                         container.addChild(item.display);
-                                        display.x = item.x;
+                                        display.x = line.x + subline.x + item.x;
                                         display.y = line.y + subline.y + subline.height - item.height;
                                     }
                                 }
+                            }
+                            if (line.selectEnd) {
+                                var rect = new flower.Rect();
+                                rect.fillColor = p[1000];
+                                rect.width = this.width - line.x - line.width;
+                                rect.height = line.height;
+                                rect.x = line.x + line.width;
+                                rect.y = line.y;
+                                container.addChild(rect);
                             }
                         }
                     }

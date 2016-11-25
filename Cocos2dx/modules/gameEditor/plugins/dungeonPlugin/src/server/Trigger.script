@@ -152,10 +152,10 @@ var Trigger = (function () {
                 this.dungeonData.settings.playerRunFlag.value = true;
                 break;
             case 20:
-                this.callObject.hideAll();
+                this.callObject.hideAll(value.type.value);
                 break;
             case 21:
-                this.callObject.showAll();
+                this.callObject.showAll(value.type.value);
                 break;
             case 22:
                 this.callObject.hideGrid(value.points.value);

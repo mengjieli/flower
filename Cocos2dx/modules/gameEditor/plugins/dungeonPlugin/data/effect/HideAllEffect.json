@@ -2,6 +2,24 @@
   "name": "dg.HideAllEffect",
   "desc": "隐藏全部",
   "members": {
-
+    "type": {
+      "desc": "部队类型",
+      "type": "int",
+      "init": 0,
+      "enumList": [
+        {
+          "label": "全部部队和怪物",
+          "type": 0
+        },
+        {
+          "label": "全部部队",
+          "type": 1
+        },
+        {
+          "label": "全部怪物",
+          "type": 2
+        }
+      ]
+    }
   }
 }

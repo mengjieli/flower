@@ -1,12 +1,63 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "">
+<html xmlns="" xml:lang="en">
 <head>
-    <title> CSS属性 </title>
-</head>
+    <title>SVG test</title>
+    <script type="text/javascript">
+        function init() {
+//            var svgLayer = document.createElement("svg");
+//            svgLayer.setAttribute("width","400px");
+//            svgLayer.setAttribute("height","400px");
+//            svgLayer.setAttribute("viewBox","0 0 400 400");
+//            svgLayer.setAttribute("version","1.1");
+//            svgLayer.setAttribute("xmlns","http://www.w3.org/2000/svg");
+//            document.getElementById('svgDiv').appendChild(svgLayer);
+            //id="svgLayer" width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            document.getElementById('svgDiv').innerHTML =
+                    '<div style="position:absolute;left:100px;top:100px;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" >'
+                    + '<polygon points="100,100,200,100,200,50,100,50" style="fill:#00ff00;fill-opacity:0.5;stroke-opacity:1;stroke:#ff0000;stroke-width:1;" />'
+                    + '</svg></div>';
 
-<body>
-    <div style="position: absolute;top: 0px;left: 0px;clip: rect(10px 100px 40px 0px);">
-        <img src="res/bg.jpg"/>
-    </div>
+
+//            var svgLayer = document.getElementById('svgLayer');
+//            var svgNS="http://www.w3.org/2000/svg";
+//            var nodeRect = document.createElementNS(svgNS,"rect");
+//            nodeRect.setAttribute("height",200);
+//            nodeRect.setAttribute("width",200);
+//            nodeRect.setAttribute("x",10);
+//            nodeRect.setAttribute("y",10);
+//            nodeRect.setAttribute("fill","#FFFFFF");
+//            nodeRect.setAttribute("stroke","#000000");
+//            nodeRect.setAttribute("onclick","graphClick(evt)");
+//
+//            var animateGraph =  document.createElementNS(svgNS,"animate");
+//            animateGraph.setAttribute("attributeType","XML");
+//            animateGraph.setAttribute("attributeName","x");
+//            animateGraph.setAttribute("from","50");
+//            animateGraph.setAttribute("to","400");
+//            animateGraph.setAttribute("dur","3s");
+//            animateGraph.setAttribute("begin","3s");
+//            animateGraph.setAttribute("repeatCount","indefinite");
+//
+//            nodeRect.appendChild(animateGraph);
+//
+//            var svgContext =nodeRect.outerHTML;
+//            svgLayer.innerHTML=svgContext;
+        }
+
+
+        function graphClick(evt) {
+            var target = evt.target;
+            target.setAttribute("fill", "#003C9D");
+        }
+    </script>
+</head>
+<body onload="init();">
+
+<div id="svgDiv">
+
+    <!--<svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg">-->
+
+    <!--</svg>-->
+</div>
 </body>
-</html>  
+</html>

@@ -1,10 +1,10 @@
 {
- "itemId": 28,
- "screenWidth": 600,
- "screenHeight": 600,
+ "itemId": 7,
+ "screenWidth": 480,
+ "screenHeight": 320,
  "triggers": [
   {
-   "itemId": 14,
+   "itemId": 2,
    "name": "触发器14",
    "count": 1,
    "open": true,
@@ -45,7 +45,7 @@
    "openFlag": true
   },
   {
-   "itemId": 19,
+   "itemId": 3,
    "name": "触发器19",
    "count": 1,
    "open": true,
@@ -83,7 +83,48 @@
    "openFlag": false
   },
   {
-   "itemId": 21,
+   "itemId": 4,
+   "name": "触发器14",
+   "count": 1,
+   "open": true,
+   "status": 0,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 15,
+     "name": "效果15",
+     "delay": 0,
+     "type": 11,
+     "invalid": true,
+     "effectValue": {
+      "dialogId": 1,
+      "param1": 0,
+      "param2": 0,
+      "param3": 0,
+      "param4": 0,
+      "triggerId": 19,
+      "__className": "dg.DialogEffect"
+     }
+    },
+    {
+     "itemId": 18,
+     "name": "效果18",
+     "delay": 0,
+     "type": 17,
+     "invalid": true,
+     "effectValue": {
+      "points": [
+      ],
+      "__className": "dg.RemoveBlockEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 5,
    "name": "触发器19",
    "count": 1,
    "open": true,
@@ -121,7 +162,48 @@
    "openFlag": false
   },
   {
-   "itemId": 22,
+   "itemId": 6,
+   "name": "触发器14",
+   "count": 1,
+   "open": true,
+   "status": 0,
+   "startCondition": 1,
+   "delay": 0,
+   "startValue": null,
+   "effects": [
+    {
+     "itemId": 15,
+     "name": "效果15",
+     "delay": 0,
+     "type": 11,
+     "invalid": true,
+     "effectValue": {
+      "dialogId": 1,
+      "param1": 0,
+      "param2": 0,
+      "param3": 0,
+      "param4": 0,
+      "triggerId": 19,
+      "__className": "dg.DialogEffect"
+     }
+    },
+    {
+     "itemId": 18,
+     "name": "效果18",
+     "delay": 0,
+     "type": 17,
+     "invalid": true,
+     "effectValue": {
+      "points": [
+      ],
+      "__className": "dg.RemoveBlockEffect"
+     }
+    }
+   ],
+   "openFlag": true
+  },
+  {
+   "itemId": 7,
    "name": "触发器19",
    "count": 1,
    "open": true,
@@ -150,107 +232,6 @@
          "y": 9
         },
         "ai": 0
-       }
-      ],
-      "__className": "dg.FlushMonsterEffect"
-     }
-    }
-   ],
-   "openFlag": false
-  },
-  {
-   "itemId": 23,
-   "name": "触发器19",
-   "count": 1,
-   "open": true,
-   "status": 0,
-   "startCondition": 1,
-   "delay": 0,
-   "startValue": null,
-   "effects": [
-    {
-     "itemId": 20,
-     "name": "效果20",
-     "delay": 0,
-     "type": 1,
-     "invalid": true,
-     "effectValue": {
-      "monsters": [
-       {
-        "id": 0,
-        "tag": 0,
-        "bornCoord": {
-         "x": 2,
-         "y": 9
-        },
-        "moveCoord": {
-         "x": 2,
-         "y": 9
-        },
-        "ai": 0
-       }
-      ],
-      "__className": "dg.FlushMonsterEffect"
-     }
-    }
-   ],
-   "openFlag": false
-  },
-  {
-   "itemId": 25,
-   "name": "触发器25",
-   "count": 1,
-   "open": true,
-   "status": 0,
-   "startCondition": 1,
-   "delay": 0,
-   "startValue": null,
-   "effects": [
-    {
-     "itemId": 26,
-     "name": "效果26",
-     "delay": 0,
-     "type": 4,
-     "invalid": true,
-     "effectValue": {
-      "operate": 1,
-      "triggerId": 0,
-      "__className": "dg.StartTriggerEffect"
-     }
-    }
-   ],
-   "openFlag": false
-  },
-  {
-   "itemId": 27,
-   "name": "触发器27",
-   "count": 1,
-   "open": false,
-   "status": 0,
-   "startCondition": 5,
-   "delay": 0,
-   "startValue": null,
-   "effects": [
-    {
-     "itemId": 28,
-     "name": "效果28",
-     "delay": 0,
-     "type": 1,
-     "invalid": true,
-     "effectValue": {
-      "monsters": [
-       {
-        "id": 0,
-        "tag": 0,
-        "bornCoord": {
-         "x": 5,
-         "y": 6
-        },
-        "moveCoord": {
-         "x": 1,
-         "y": 2
-        },
-        "ai": 2
        }
       ],
       "__className": "dg.FlushMonsterEffect"

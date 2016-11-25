@@ -59,6 +59,8 @@
     "./panels/effect/TransformEffect.xml",
     "./panels/effect/AddBlockEffect.xml",
     "./panels/effect/RemoveBlockEffect.xml",
+    "./panels/effect/HideAllEffect.xml",
+    "./panels/effect/ShowAllEffect.xml",
     "./panels/effect/HideGridEffect.xml",
     "./panels/effect/ShowGridEffect.xml",
     "./view/DungeonView.xml"
