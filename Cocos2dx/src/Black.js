@@ -2773,8 +2773,8 @@ var black = {};
 
     //////////////////////////File:extension/black/RichText.js///////////////////////////
 
-    var RichText = function (_Group) {
-        _inherits(RichText, _Group);
+    var RichText = function (_flower$Sprite2) {
+        _inherits(RichText, _flower$Sprite2);
 
         function RichText() {
             var _this13$$RichText;
@@ -2930,7 +2930,7 @@ var black = {};
         }, {
             key: "__onKeyDown",
             value: function __onKeyDown(e) {
-                this.__doKeyEvent(e);
+                new flower.CallLater(this.__doKeyEvent, this, [e]);
                 //if (e.keyCode == 16) {
                 //    this.$RichText[308].push({keyCode: e.keyCode});
                 //} else {
@@ -3438,12 +3438,12 @@ var black = {};
                         //输入点下移一行
                         this.$moveCaretIndex(1);
                     } else if (e.keyCode == 8) {
-                        if (p[301] == 0) {
-                            return;
-                        }
                         if (p[400]) {
                             this.__deleteSelect();
                         } else {
+                            if (p[301] == 0) {
+                                return;
+                            }
                             this.$deleteCaretChar();
                             this.$moveCaretIndex();
                         }
@@ -4509,15 +4509,15 @@ var black = {};
         }]);
 
         return RichText;
-    }(Group);
+    }(flower.Sprite);
 
     black.RichText = RichText;
     //////////////////////////End File:extension/black/RichText.js///////////////////////////
 
     //////////////////////////File:extension/black/UIParser.js///////////////////////////
 
-    var UIParser = function (_Group2) {
-        _inherits(UIParser, _Group2);
+    var UIParser = function (_Group) {
+        _inherits(UIParser, _Group);
 
         function UIParser() {
             var beforeScript = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
@@ -5457,8 +5457,8 @@ var black = {};
 
     //////////////////////////File:extension/black/ScrollBar.js///////////////////////////
 
-    var ScrollBar = function (_Group3) {
-        _inherits(ScrollBar, _Group3);
+    var ScrollBar = function (_Group2) {
+        _inherits(ScrollBar, _Group2);
 
         function ScrollBar() {
             _classCallCheck(this, ScrollBar);
@@ -5620,8 +5620,8 @@ var black = {};
 
     //////////////////////////File:extension/black/DataGroup.js///////////////////////////
 
-    var DataGroup = function (_Group4) {
-        _inherits(DataGroup, _Group4);
+    var DataGroup = function (_Group3) {
+        _inherits(DataGroup, _Group3);
 
         function DataGroup() {
             _classCallCheck(this, DataGroup);
@@ -6262,8 +6262,8 @@ var black = {};
 
     //////////////////////////File:extension/black/ItemRenderer.js///////////////////////////
 
-    var ItemRenderer = function (_Group5) {
-        _inherits(ItemRenderer, _Group5);
+    var ItemRenderer = function (_Group4) {
+        _inherits(ItemRenderer, _Group4);
 
         function ItemRenderer() {
             _classCallCheck(this, ItemRenderer);
@@ -7206,8 +7206,8 @@ var black = {};
 
     //////////////////////////File:extension/black/TileImage.js///////////////////////////
 
-    var TileImage = function (_Group6) {
-        _inherits(TileImage, _Group6);
+    var TileImage = function (_Group5) {
+        _inherits(TileImage, _Group5);
 
         function TileImage() {
             _classCallCheck(this, TileImage);
@@ -7428,8 +7428,8 @@ var black = {};
 
     //////////////////////////File:extension/black/Button.js///////////////////////////
 
-    var Button = function (_Group7) {
-        _inherits(Button, _Group7);
+    var Button = function (_Group6) {
+        _inherits(Button, _Group6);
 
         function Button() {
             _classCallCheck(this, Button);
@@ -7738,8 +7738,8 @@ var black = {};
 
     //////////////////////////File:extension/black/RadioButtonGroup.js///////////////////////////
 
-    var RadioButtonGroup = function (_Group8) {
-        _inherits(RadioButtonGroup, _Group8);
+    var RadioButtonGroup = function (_Group7) {
+        _inherits(RadioButtonGroup, _Group7);
 
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
@@ -8081,8 +8081,8 @@ var black = {};
 
     //////////////////////////File:extension/black/ViewStack.js///////////////////////////
 
-    var ViewStack = function (_Group9) {
-        _inherits(ViewStack, _Group9);
+    var ViewStack = function (_Group8) {
+        _inherits(ViewStack, _Group8);
 
         function ViewStack() {
             _classCallCheck(this, ViewStack);
@@ -8714,8 +8714,8 @@ var black = {};
 
     //////////////////////////File:extension/black/ComboBox.js///////////////////////////
 
-    var ComboBox = function (_Group10) {
-        _inherits(ComboBox, _Group10);
+    var ComboBox = function (_Group9) {
+        _inherits(ComboBox, _Group9);
 
         function ComboBox() {
             _classCallCheck(this, ComboBox);
@@ -9034,8 +9034,8 @@ var black = {};
 
     //////////////////////////File:extension/black/Panel.js///////////////////////////
 
-    var Panel = function (_Group11) {
-        _inherits(Panel, _Group11);
+    var Panel = function (_Group10) {
+        _inherits(Panel, _Group10);
 
         function Panel() {
             _classCallCheck(this, Panel);

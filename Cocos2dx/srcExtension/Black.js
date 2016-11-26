@@ -2481,7 +2481,7 @@ black.Group = Group;
 
 
 //////////////////////////File:extension/black/RichText.js///////////////////////////
-class RichText extends Group {
+class RichText extends flower.Sprite {
 
     __input;
 
@@ -2642,7 +2642,7 @@ class RichText extends Group {
     }
 
     __onKeyDown(e) {
-        this.__doKeyEvent(e);
+        new flower.CallLater(this.__doKeyEvent, this, [e]);
         //if (e.keyCode == 16) {
         //    this.$RichText[308].push({keyCode: e.keyCode});
         //} else {
@@ -3127,12 +3127,12 @@ class RichText extends Group {
             } else if (e.keyCode == 40) { //输入点下移一行
                 this.$moveCaretIndex(1);
             } else if (e.keyCode == 8) {
-                if (p[301] == 0) {
-                    return;
-                }
                 if (p[400]) {
                     this.__deleteSelect();
                 } else {
+                    if (p[301] == 0) {
+                        return;
+                    }
                     this.$deleteCaretChar();
                     this.$moveCaretIndex();
                 }
