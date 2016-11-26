@@ -2798,10 +2798,12 @@ var black = {};
                 11: 0, //fontColor
                 12: 1, //linegap
                 13: false, //wordWrap
+                14: new flower.Sprite(), //backgroundContainer
                 30: 0, //caretIndex
                 31: 0, //caretHtmlIndex
                 32: null }, _defineProperty(_this13$$RichText, "32", null), _defineProperty(_this13$$RichText, 33, null), _defineProperty(_this13$$RichText, 34, 0), _defineProperty(_this13$$RichText, 100, false), _defineProperty(_this13$$RichText, 101, {}), _defineProperty(_this13$$RichText, 102, {}), _defineProperty(_this13$$RichText, 200, 0), _defineProperty(_this13$$RichText, 201, false), _defineProperty(_this13$$RichText, 300, false), _defineProperty(_this13$$RichText, 301, 0), _defineProperty(_this13$$RichText, 302, 0), _defineProperty(_this13$$RichText, 303, 0), _defineProperty(_this13$$RichText, 304, false), _defineProperty(_this13$$RichText, 305, ""), _defineProperty(_this13$$RichText, 306, ""), _defineProperty(_this13$$RichText, 307, 0), _defineProperty(_this13$$RichText, 308, []), _defineProperty(_this13$$RichText, 311, null), _defineProperty(_this13$$RichText, 312, null), _defineProperty(_this13$$RichText, 313, null), _defineProperty(_this13$$RichText, 330, 0), _defineProperty(_this13$$RichText, 400, false), _defineProperty(_this13$$RichText, 401, []), _defineProperty(_this13$$RichText, 402, ""), _defineProperty(_this13$$RichText, 1000, 0x526da5), _defineProperty(_this13$$RichText, 1001, 0xffffff), _this13$$RichText);
             //被选文字的颜色
+            _this13.addChild(_this13.$RichText[14]);
             _this13.addChild(_this13.$RichText[4]);
             _this13.addChild(_this13.$RichText[5]);
             _this13.addListener(flower.TouchEvent.TOUCH_BEGIN, _this13.__onTouch, _this13);
@@ -2943,6 +2945,16 @@ var black = {};
             value: function __inputText(text) {
                 var under = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
+                var p = this.$RichText;
+                if (p[400]) {
+                    this.__deleteSelect();
+                    if (p[304]) {
+                        p[311] = p[301];
+                        p[312] = p[302];
+                        p[313] = p[1];
+                        p[323] = p[3];
+                    }
+                }
                 var htmlText = this.__changeText(text);
                 if (under) {
                     htmlText = "<u>" + htmlText + "</u>";
@@ -3300,6 +3312,63 @@ var black = {};
                 return null;
             }
         }, {
+            key: "__deleteSelect",
+            value: function __deleteSelect() {
+                var p = this.$RichText;
+                if (p[400]) {
+                    p[400] = false;
+                    //this.__setHtmlText(p[402], false);
+                    var list = p[401];
+                    var oldHtmlText = p[402];
+                    var newHtmlText = "";
+                    var last = 0;
+                    for (var i = 0; i < list.length; i++) {
+                        var item = list[i];
+                        newHtmlText += oldHtmlText.slice(last, item.index) + this.__deleteHtmlTextContent(item.htmlText);
+                        last = item.index + item.htmlText.length;
+                        if (i == list.length - 1) {
+                            newHtmlText += oldHtmlText.slice(last, oldHtmlText.length);
+                        }
+                    }
+                    list.length = 0;
+                    this.__setHtmlText(newHtmlText, false);
+                    this.$moveCaretIndex();
+                }
+            }
+        }, {
+            key: "__deleteHtmlTextContent",
+            value: function __deleteHtmlTextContent(text) {
+                var content = "";
+                var last = -1;
+                for (var i = 0; i < text.length; i++) {
+                    var char = text.charAt(i);
+                    if (char == "<") {
+                        last = i;
+                    } else if (char == ">") {
+                        if (last != -1) {
+                            var sign = "";
+                            var index = last + 1;
+                            if (text.charAt(index) == "/") {
+                                index++;
+                            }
+                            while (index < text.length) {
+                                var c = text.charAt(index);
+                                if (c == " " || c == ">") {
+                                    break;
+                                }
+                                sign += c;
+                                index++;
+                            }
+                            if (sign == "font" || sign == "u" || sign == "s") {
+                                content += text.slice(last, i + 1);
+                            }
+                            last = -1;
+                        }
+                    }
+                }
+                return content;
+            }
+        }, {
             key: "__update",
             value: function __update(now, gap) {
                 var p = this.$RichText;
@@ -3372,8 +3441,12 @@ var black = {};
                         if (p[301] == 0) {
                             return;
                         }
-                        this.$deleteCaretChar();
-                        this.$moveCaretIndex();
+                        if (p[400]) {
+                            this.__deleteSelect();
+                        } else {
+                            this.$deleteCaretChar();
+                            this.$moveCaretIndex();
+                        }
                     }
                 } else if (e.keyCode == 91 || e.keyCode == 17) {} else {
                     var str = this.__input.$getNativeText();
@@ -4278,7 +4351,9 @@ var black = {};
                     var lines = p[2];
                     var y = p[8];
                     var container = p[4];
+                    var bgcontainer = p[14];
                     container.removeAll();
+                    bgcontainer.removeAll();
                     var height = this.height;
                     for (var l = 0; l < lines.length; l++) {
                         var line = lines[l];
@@ -4318,7 +4393,7 @@ var black = {};
                                             }
                                             item.selectDisplay.x = line.x + subline.x + item.x;
                                             item.selectDisplay.y = line.y + subline.y;
-                                            container.addChild(item.selectDisplay);
+                                            bgcontainer.addChild(item.selectDisplay);
                                         }
                                         container.addChild(item.display);
                                         display.x = line.x + subline.x + item.x;
@@ -4333,7 +4408,7 @@ var black = {};
                                 rect.height = line.height;
                                 rect.x = line.x + line.width;
                                 rect.y = line.y;
-                                container.addChild(rect);
+                                bgcontainer.addChild(rect);
                             }
                         }
                     }

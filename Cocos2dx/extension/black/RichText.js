@@ -20,6 +20,7 @@ class RichText extends Group {
             11: 0, //fontColor
             12: 1, //linegap
             13: false,  //wordWrap
+            14: new flower.Sprite(), //backgroundContainer
             30: 0, //caretIndex
             31: 0, //caretHtmlIndex
             32: null,//caretLine
@@ -50,6 +51,7 @@ class RichText extends Group {
             1000: 0x526da5, //文字选中后的背景色
             1001: 0xffffff //被选文字的颜色
         };
+        this.addChild(this.$RichText[14]);
         this.addChild(this.$RichText[4]);
         this.addChild(this.$RichText[5]);
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
@@ -167,6 +169,16 @@ class RichText extends Group {
 
     //输入字符
     __inputText(text, under = false) {
+        var p = this.$RichText;
+        if (p[400]) {
+            this.__deleteSelect();
+            if (p[304]) {
+                p[311] = p[301];
+                p[312] = p[302];
+                p[313] = p[1];
+                p[323] = p[3];
+            }
+        }
         var htmlText = this.__changeText(text);
         if (under) {
             htmlText = "<u>" + htmlText + "</u>";
@@ -512,6 +524,61 @@ class RichText extends Group {
         return null;
     }
 
+    __deleteSelect() {
+        var p = this.$RichText;
+        if (p[400]) {
+            p[400] = false;
+            //this.__setHtmlText(p[402], false);
+            var list = p[401];
+            var oldHtmlText = p[402];
+            var newHtmlText = "";
+            var last = 0;
+            for (var i = 0; i < list.length; i++) {
+                var item = list[i];
+                newHtmlText += oldHtmlText.slice(last, item.index) + this.__deleteHtmlTextContent(item.htmlText);
+                last = item.index + item.htmlText.length;
+                if (i == list.length - 1) {
+                    newHtmlText += oldHtmlText.slice(last, oldHtmlText.length);
+                }
+            }
+            list.length = 0;
+            this.__setHtmlText(newHtmlText, false);
+            this.$moveCaretIndex();
+        }
+    }
+
+    __deleteHtmlTextContent(text) {
+        var content = "";
+        var last = -1;
+        for (var i = 0; i < text.length; i++) {
+            var char = text.charAt(i);
+            if (char == "<") {
+                last = i;
+            } else if (char == ">") {
+                if (last != -1) {
+                    var sign = "";
+                    var index = last + 1;
+                    if (text.charAt(index) == "/") {
+                        index++;
+                    }
+                    while (index < text.length) {
+                        var c = text.charAt(index);
+                        if (c == " " || c == ">") {
+                            break;
+                        }
+                        sign += c;
+                        index++;
+                    }
+                    if (sign == "font" || sign == "u" || sign == "s") {
+                        content += text.slice(last, i + 1);
+                    }
+                    last = -1;
+                }
+            }
+        }
+        return content;
+    }
+
     __update(now, gap) {
         var p = this.$RichText;
         p[303] += gap;
@@ -580,8 +647,12 @@ class RichText extends Group {
                 if (p[301] == 0) {
                     return;
                 }
-                this.$deleteCaretChar();
-                this.$moveCaretIndex();
+                if (p[400]) {
+                    this.__deleteSelect();
+                } else {
+                    this.$deleteCaretChar();
+                    this.$moveCaretIndex();
+                }
             }
         } else if (e.keyCode == 91 || e.keyCode == 17) {
 
@@ -942,7 +1013,7 @@ class RichText extends Group {
             if (char == "\n" || char == "\r" || text.slice(i, i + "<br/>".length) == "<br/>") {
                 newLine = true;
                 decodeText = true;
-                if(oldFont.select) {
+                if (oldFont.select) {
                     line.selectEnd = true;
                 }
                 if (char == "\n" || char == "\r") {
@@ -1464,7 +1535,9 @@ class RichText extends Group {
             var lines = p[2];
             var y = p[8];
             var container = p[4];
+            var bgcontainer = p[14];
             container.removeAll();
+            bgcontainer.removeAll();
             var height = this.height;
             for (var l = 0; l < lines.length; l++) {
                 var line = lines[l];
@@ -1504,7 +1577,7 @@ class RichText extends Group {
                                     }
                                     item.selectDisplay.x = line.x + subline.x + item.x;
                                     item.selectDisplay.y = line.y + subline.y;
-                                    container.addChild(item.selectDisplay);
+                                    bgcontainer.addChild(item.selectDisplay);
                                 }
                                 container.addChild(item.display);
                                 display.x = line.x + subline.x + item.x;
@@ -1519,7 +1592,7 @@ class RichText extends Group {
                         rect.height = line.height;
                         rect.x = line.x + line.width;
                         rect.y = line.y;
-                        container.addChild(rect);
+                        bgcontainer.addChild(rect);
                     }
                 }
             }

@@ -75,7 +75,7 @@ var Main = function () {
             //input.x = 300;
             //input.y = 250;
 
-            /*
+            ///*
             var rect = new flower.Rect();
             rect.width = 400;
             rect.height = 400;
