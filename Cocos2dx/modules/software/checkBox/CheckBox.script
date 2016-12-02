@@ -1,7 +1,0 @@
-function set label(val) {
-    this.labelTxt.text = val;
-}
-
-function get label() {
-    return this.labelTxt;
-}

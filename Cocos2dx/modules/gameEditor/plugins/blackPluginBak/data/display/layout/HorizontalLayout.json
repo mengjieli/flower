@@ -1,9 +1,0 @@
-{
-  "name": "uieditor.HorizontalLayout",
-  "extends": "uieditor.LinearLayout",
-  "init": {
-    "align": "horizontal"
-  },
-  "members": {
-  }
-}

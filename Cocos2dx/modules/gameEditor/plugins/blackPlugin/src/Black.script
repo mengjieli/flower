@@ -1,3 +1,0 @@
-function init() {
-    module.data = flower.DataManager.createData("ue.Black");
-}

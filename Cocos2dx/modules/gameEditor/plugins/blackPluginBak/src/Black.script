@@ -1,4 +1,0 @@
-var blackData = null;
-function initBlack() {
-    blackData = flower.DataManager.createData("uieditor.Black");
-}

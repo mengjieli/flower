@@ -1,9 +1,0 @@
-<s:TitlePanel percentWidth="100" percentHeight="100" class="SmallView" creationComplete="this.init();"
-              title="{data.name}" xmlns:f="flower"
-              xmlns:s="modules/software/module.json" xmlns:st="./../module.json">
-    <f:script src="./SmallView.script"/>
-    <f:ViewStack id="viewStack" percentWidth="100" percentHeight="100">
-        <st:PointToPosition/>
-        <st:QATest/>
-    </f:ViewStack>
-</s:TitlePanel>

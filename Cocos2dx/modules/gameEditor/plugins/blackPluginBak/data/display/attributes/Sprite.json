@@ -1,6 +1,0 @@
-{
-  "name": "uieditor.Sprite",
-  "extends": "uieditor.DisplayObject",
-  "members": {
-  }
-}

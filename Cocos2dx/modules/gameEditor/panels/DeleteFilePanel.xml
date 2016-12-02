@@ -1,7 +1,0 @@
-<s:Alert class="DeleteFilePanel" title="删除文件" width="300" height="200"
-         xmlns:f="flower" xmlns:s="modules/software/module.json">
-    <f:script src="./DeleteFilePanel.script"/>
-    <f:Group id="container" left="1" right="1" top="25" bottom="50">
-        <f:Label text="确定删除文件:{data.path}?" percentWidth="90" horizontalCenter="0" verticalCenter="0"/>
-    </f:Group>
-</s:Alert>

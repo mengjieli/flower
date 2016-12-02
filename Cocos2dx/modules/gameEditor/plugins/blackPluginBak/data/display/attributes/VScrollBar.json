@@ -1,6 +1,0 @@
-{
-  "name": "uieditor.VScrollBar",
-  "extends": "uieditor.ScrollBar",
-  "members": {
-  }
-}

@@ -1,9 +1,0 @@
-{
-  "name": "uieditor.ViewStack",
-  "extends": "uieditor.Group",
-  "members": {
-    "selectedItemChange":{
-      "type": "uieditor.AttributeString"
-    }
-  }
-}

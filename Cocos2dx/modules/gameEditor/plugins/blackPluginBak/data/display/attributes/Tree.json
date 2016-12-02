@@ -1,9 +1,0 @@
-{
-  "name": "uieditor.Tree",
-  "extends": "uieditor.DataGroup",
-  "members": {
-    "pathField": {
-      "type": "uieditor.AttributeString"
-    }
-  }
-}

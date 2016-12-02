@@ -1,8 +1,0 @@
-{
-  "name": "uieditor.Layout",
-  "members": {
-    "fixElementSize": {
-      "type": "bool"
-    }
-  }
-}

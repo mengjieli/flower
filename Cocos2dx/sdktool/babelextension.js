@@ -188,7 +188,6 @@ var list = [
     "ScrollPolicy",
 
     "Group",
-    "RichText",
     "UIParser",
     "ScrollBar",
     "VScrollBar",
@@ -197,7 +196,6 @@ var list = [
     "ItemRenderer",
     "Label",
     "Input",
-    "TextArea",
     "Rect",
     "Image",
     "TileImage",

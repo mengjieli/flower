@@ -1,5 +1,0 @@
-<f:Group class="TitlePanel" xmlns:f="flower">
-    <f:script src="./TitlePanel.script"/>
-    <f:Rect id="background" percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1"
-              fillColor="0xE7E7E7"/>
-</f:Group>

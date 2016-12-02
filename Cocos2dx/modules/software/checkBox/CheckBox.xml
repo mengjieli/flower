@@ -1,7 +1,0 @@
-<f:CheckBox class="CheckBox" xmlns:f="flower">
-    <f:script src="./CheckBox.script"/>
-    <f:Rect x="0" y="0" width="16" height="16" fillColor="0x7f7f7f"/>
-    <f:Rect x="4" y="4" width="8" height="8" visible.up="false" visible.down="true" fillColor="0xffffff"/>
-    <f:Rect x="0" y="0" width="16" height="16" fillAlpha="0" lineWidth="1" lineColor="0x353535"/>
-    <f:Label x="20" id="labelTxt" text="CheckBox" verticalCenter="0" fontSize="12" fontColor="0x252325"/>
-</f:CheckBox>

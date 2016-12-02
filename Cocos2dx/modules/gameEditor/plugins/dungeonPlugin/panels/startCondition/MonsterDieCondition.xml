@@ -1,9 +1,0 @@
-<f:Group class="MonsterDieCondition" percentWidth="100"
-         xmlns:f="flower" xmlns:s="modules/software/module.json"
-         xmlns:e="modules/gameEditor/module.json">
-    <f:script src="./MonsterDieCondition.script"/>
-    <f:Group horizontalCenter="0">
-        <f:Label horizontalCenter="-55" width="60" text="怪物tags" verticalCenter="0"/>
-        <s:Input id="input" horizontalCenter="30" width="100" verticalCenter="0" stopInput="this.inputOver();"/>
-    </f:Group>
-</f:Group>

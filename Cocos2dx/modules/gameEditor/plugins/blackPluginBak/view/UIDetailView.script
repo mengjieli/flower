@@ -1,4 +1,0 @@
-function setData(val) {
-    _super.prototype.setData.call(this, val);
-    this.propertyPanel.data = val;
-}

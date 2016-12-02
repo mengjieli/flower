@@ -1,6 +1,0 @@
-function $setWidth(val) {
-    _super.prototype.$setWidth.call(this, val);
-    if(this.list) {
-        this.list.width = val;
-    }
-}

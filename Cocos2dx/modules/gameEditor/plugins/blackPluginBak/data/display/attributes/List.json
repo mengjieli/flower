@@ -1,6 +1,0 @@
-{
-  "name": "uieditor.List",
-  "extends": "uieditor.ListBase",
-  "members": {
-  }
-}

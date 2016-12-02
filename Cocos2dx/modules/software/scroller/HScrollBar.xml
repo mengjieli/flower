@@ -1,4 +1,0 @@
-<f:HScrollBar class="HScrollBar" percentWidth="100" height="10" bottom="0" xmlns:f="flower">
-    <f:Rect fillColor="0x888888" fillAlpha="0.5" percentWidth="100" percentHeight="100"/>
-    <f:Rect fillColor="0x555555"  fillAlpha="0.5" id="thumb" percentHeight="100"/>
-</f:HScrollBar>

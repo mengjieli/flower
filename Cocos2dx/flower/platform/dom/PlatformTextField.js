@@ -36,43 +36,44 @@ class PlatformTextField extends PlatformDisplayObject {
         if (text == "") {
             txt.innerHTML = "";
         }
-        for (var i = 0; i < text.length; i++) {
-            //取一行文字进行处理
-            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
-                var str = text.slice(start, i);
-                $mesureTxt.innerHTML = str;
-                var lineWidth = $mesureTxt.offsetWidth;
-                var findEnd = i;
-                var changeLine = false;
-                //如果这一行的文字宽大于设定宽
-                while (!autoSize && width && lineWidth > width) {
-                    changeLine = true;
-                    findEnd--;
-                    $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    lineWidth = $mesureTxt.offsetWidth;
-                }
-                if (wordWrap && changeLine) {
-                    i = findEnd;
-                    txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                } else {
-                    txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                }
-                //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.offsetHeight > height) {
-                    txt.innerHTML = (txtText);
-                    break;
-                } else {
-                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    if (wordWrap && changeLine) {
-                        txtText += "\n";
-                    }
-                }
-                start = i;
-                if (multiline == false) {
-                    break;
-                }
-            }
-        }
+        txt.innerHTML = text;
+        //for (var i = 0; i < text.length; i++) {
+        //    //取一行文字进行处理
+        //    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+        //        var str = text.slice(start, i);
+        //        $mesureTxt.innerHTML = str;
+        //        var lineWidth = $mesureTxt.offsetWidth;
+        //        var findEnd = i;
+        //        var changeLine = false;
+        //        //如果这一行的文字宽大于设定宽
+        //        while (!autoSize && width && lineWidth > width) {
+        //            changeLine = true;
+        //            findEnd--;
+        //            $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            lineWidth = $mesureTxt.offsetWidth;
+        //        }
+        //        if (wordWrap && changeLine) {
+        //            i = findEnd;
+        //            txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        } else {
+        //            txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        }
+        //        //如果文字的高度已经大于设定的高，回退一次
+        //        if (!autoSize && height && txt.offsetHeight > height) {
+        //            txt.innerHTML = (txtText);
+        //            break;
+        //        } else {
+        //            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            if (wordWrap && changeLine) {
+        //                txtText += "\n";
+        //            }
+        //        }
+        //        start = i;
+        //        if (multiline == false) {
+        //            break;
+        //        }
+        //    }
+        //}
 
         $mesureTxt.innerHTML = txt.innerHTML;
         txt.style.width = $mesureTxt.offsetWidth + "px";

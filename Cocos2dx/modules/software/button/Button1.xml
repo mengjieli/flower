@@ -1,6 +1,0 @@
-<f:Button class="Button1" width="40" height="30" xmlns:f="flower">
-    <f:script src="./Button.script"/>
-    <f:Rect percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor.up="0xE7E7E7"
-            fillColor.down="0xb3b3b3"/>
-    <f:Label id="labelTxt" text="确定" horizontalCenter="0" verticalCenter="0"/>
-</f:Button>

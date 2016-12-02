@@ -6,8 +6,6 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
@@ -2771,1749 +2769,6 @@ var black = {};
     black.Group = Group;
     //////////////////////////End File:extension/black/Group.js///////////////////////////
 
-    //////////////////////////File:extension/black/RichText.js///////////////////////////
-
-    var RichText = function (_flower$Sprite2) {
-        _inherits(RichText, _flower$Sprite2);
-
-        function RichText() {
-            var _this13$$RichText;
-
-            _classCallCheck(this, RichText);
-
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(RichText).call(this));
-
-            _this13.$RichText = (_this13$$RichText = {
-                0: "", //text
-                1: "", //htmlText formatHtmlText
-                2: [], //lines
-                3: 0, //inputLength
-                4: new flower.Sprite(), //textContainer
-                5: _this13.__getDefaultFocus(), //focus
-                6: "", //setHtmlText
-                7: 0, //chars
-                8: 0, //posY
-                9: 0.5, //shineGap
-                10: 12, //fontSize
-                11: 0, //fontColor
-                12: 1, //linegap
-                13: false, //wordWrap
-                14: new flower.Sprite(), //backgroundContainer
-                30: 0, //caretIndex
-                31: 0, //caretHtmlIndex
-                32: null }, _defineProperty(_this13$$RichText, "32", null), _defineProperty(_this13$$RichText, 33, null), _defineProperty(_this13$$RichText, 34, 0), _defineProperty(_this13$$RichText, 100, false), _defineProperty(_this13$$RichText, 101, {}), _defineProperty(_this13$$RichText, 102, {}), _defineProperty(_this13$$RichText, 200, 0), _defineProperty(_this13$$RichText, 201, false), _defineProperty(_this13$$RichText, 300, false), _defineProperty(_this13$$RichText, 301, 0), _defineProperty(_this13$$RichText, 302, 0), _defineProperty(_this13$$RichText, 303, 0), _defineProperty(_this13$$RichText, 304, false), _defineProperty(_this13$$RichText, 305, ""), _defineProperty(_this13$$RichText, 306, ""), _defineProperty(_this13$$RichText, 307, 0), _defineProperty(_this13$$RichText, 308, []), _defineProperty(_this13$$RichText, 311, null), _defineProperty(_this13$$RichText, 312, null), _defineProperty(_this13$$RichText, 313, null), _defineProperty(_this13$$RichText, 330, 0), _defineProperty(_this13$$RichText, 400, false), _defineProperty(_this13$$RichText, 401, []), _defineProperty(_this13$$RichText, 402, ""), _defineProperty(_this13$$RichText, 1000, 0x526da5), _defineProperty(_this13$$RichText, 1001, 0xffffff), _this13$$RichText);
-            //被选文字的颜色
-            _this13.addChild(_this13.$RichText[14]);
-            _this13.addChild(_this13.$RichText[4]);
-            _this13.addChild(_this13.$RichText[5]);
-            _this13.addListener(flower.TouchEvent.TOUCH_BEGIN, _this13.__onTouch, _this13);
-            _this13.addListener(flower.TouchEvent.TOUCH_MOVE, _this13.__onTouch, _this13);
-            _this13.addListener(flower.Event.FOCUS_OUT, _this13.__stopInput, _this13);
-            _this13.focusEnabled = true;
-            _this13.__input = flower.Stage.getInstance().$input;
-            flower.EnterFrame.add(_this13.$update, _this13);
-            return _this13;
-        }
-
-        _createClass(RichText, [{
-            key: "__onTouch",
-            value: function __onTouch(e) {
-                var p = this.$RichText;
-                switch (e.type) {
-                    case flower.TouchEvent.TOUCH_BEGIN:
-                        this.__cancelSelect();
-                        var doubleClick = false;
-                        var tribleClick = false;
-                        if (!p[201]) {
-                            if (flower.CoreTime.currentTime - p[200] < 200) {
-                                doubleClick = true;
-                            }
-                        } else {
-                            if (flower.CoreTime.currentTime - p[200] < 200) {
-                                doubleClick = true;
-                                tribleClick = true;
-                            }
-                        }
-                        p[200] = flower.CoreTime.currentTime;
-                        p[201] = doubleClick;
-                        if (tribleClick) {
-                            //三击
-                            this.__tribleClick();
-                        } else if (doubleClick) {
-                            //双击
-                            this.__doubleClick();
-                        } else {
-                            //单击
-                            this.__click();
-                        }
-                        p[330] = p[301];
-                        break;
-                    case flower.TouchEvent.TOUCH_MOVE:
-                        var charIndex = p[330];
-                        var info = this.__getClickPos();
-                        this.__cancelSelect();
-                        var htmlTextIndex1 = this.__getHtmlTextIndexByCharIndex(charIndex);
-                        var htmlTextIndex2 = this.__getHtmlTextIndexByCharIndex(info.charIndex);
-                        this.__selecteText(htmlTextIndex1 < htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2, p[1].slice(htmlTextIndex1 < htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2, htmlTextIndex1 > htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2));
-                        p[301] = info.charIndex;
-                        this.$moveCaretIndex();
-                        break;
-                }
-            }
-
-            /**
-             * 连续三次点击
-             * @private
-             */
-
-        }, {
-            key: "__tribleClick",
-            value: function __tribleClick() {
-                console.log("三击");
-            }
-
-            /**
-             * 连续两次点击
-             * @private
-             */
-
-        }, {
-            key: "__doubleClick",
-            value: function __doubleClick() {
-                console.log("双击");
-            }
-
-            /**
-             * 点击
-             * @private
-             */
-
-        }, {
-            key: "__click",
-            value: function __click() {
-                this.__startInput(this.__getClickPos());
-            }
-        }, {
-            key: "__startInput",
-            value: function __startInput(info) {
-                var p = this.$RichText;
-                if (p[300]) {
-                    return;
-                }
-                //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
-                p[300] = true;
-                p[301] = info.charIndex;
-                p[302] = info.htmlTextIndex;
-                p[307] = info.lineCharIndex;
-                p[308].length = 0;
-                this.__input.text = "";
-                this.__input.$setNativeText("");
-                this.__input.$startNativeInput();
-                this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
-                flower.EnterFrame.add(this.__update, this);
-                this.__showFocus(info);
-            }
-        }, {
-            key: "__stopInput",
-            value: function __stopInput() {
-                this.$RichText[300] = false;
-                this.__input.$stopNativeInput();
-                this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
-                flower.EnterFrame.remove(this.__update, this);
-                this.__hideFocus();
-            }
-        }, {
-            key: "__hideFocus",
-            value: function __hideFocus() {
-                this.$RichText[5].visible = false;
-            }
-        }, {
-            key: "__onKeyDown",
-            value: function __onKeyDown(e) {
-                new flower.CallLater(this.__doKeyEvent, this, [e]);
-                //if (e.keyCode == 16) {
-                //    this.$RichText[308].push({keyCode: e.keyCode});
-                //} else {
-                //    this.__doKeyEvent(e);
-                //}
-            }
-
-            //输入字符
-
-        }, {
-            key: "__inputText",
-            value: function __inputText(text) {
-                var under = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
-                var p = this.$RichText;
-                if (p[400]) {
-                    this.__deleteSelect();
-                    if (p[304]) {
-                        p[311] = p[301];
-                        p[312] = p[302];
-                        p[313] = p[1];
-                        p[323] = p[3];
-                    }
-                }
-                var htmlText = this.__changeText(text);
-                if (under) {
-                    htmlText = "<u>" + htmlText + "</u>";
-                }
-                this.__inputHtmlText(htmlText);
-            }
-
-            //输入字符
-
-        }, {
-            key: "__inputHtmlText",
-            value: function __inputHtmlText(text) {
-                var p = this.$RichText;
-                var chars = p[3];
-                this.htmlText = p[1].slice(0, p[302]) + text + p[1].slice(p[302], p[1].length);
-                p[301] += p[3] - chars;
-                this.$moveCaretIndex();
-            }
-
-            /**
-             * 从输入点开始删除一个字符
-             * @param num
-             */
-
-        }, {
-            key: "$deleteCaretChar",
-            value: function $deleteCaretChar() {
-                var p = this.$RichText;
-                var lines = p[2];
-                var pos = p[301];
-                if (pos == 0) {
-                    return;
-                }
-                var findLine;
-                if (pos > p[3]) {
-                    pos = p[3];
-                }
-                for (var i = 0; i < lines.length; i++) {
-                    if (pos > lines[i].charIndex && pos <= lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
-                        findLine = lines[i];
-                        break;
-                    }
-                }
-                if (!findLine) {
-                    return;
-                }
-                p[301]--;
-                pos -= findLine.charIndex;
-                if (pos == findLine.chars && findLine.index != lines.length - 1) {
-                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findLine.htmlText.length) + p[1].slice(findLine.htmlTextIndex + findLine.htmlText.length + findLine.endHtmlText.length, p[1].length);
-                    this.$moveCaretIndex();
-                    return;
-                }
-                var findSubline;
-                for (var i = 0; i < findLine.sublines.length; i++) {
-                    if (pos > findLine.sublines[i].charIndex && pos <= findLine.sublines[i].charIndex + findLine.sublines[i].chars) {
-                        findSubline = findLine.sublines[i];
-                        break;
-                    }
-                }
-                pos -= findSubline.charIndex;
-                var findDisplay;
-                for (var i = 0; i < findSubline.displays.length; i++) {
-                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
-                        findDisplay = findSubline.displays[i];
-                        break;
-                    }
-                }
-                pos -= findDisplay.charIndex;
-                if (findDisplay.type == 0) {
-                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex) + findDisplay.htmlText.slice(0, findDisplay.textStart) + this.__changeText(findDisplay.text.slice(0, pos - 1)) + this.__changeText(findDisplay.text.slice(pos, findDisplay.text.length)) + findDisplay.htmlText.slice(findDisplay.textEnd, findDisplay.htmlText.length) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.htmlText.length, p[1].length);
-                } else {
-                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.htmlText.length, p[1].length);
-                }
-                this.$moveCaretIndex();
-            }
-
-            /**
-             * 把焦点移到其它行后，计算当前焦点的位置，当前位置插入的位置(htmlTextIndex)
-             * @param index 与当前行相差多少
-             */
-
-        }, {
-            key: "$moveCaretIndex",
-            value: function $moveCaretIndex() {
-                var lineIndex = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-
-                var p = this.$RichText;
-                var lines = p[2];
-                var pos = p[301];
-                var focus = p[5];
-                focus.x = 0;
-                focus.y = 0;
-                p[302] = 0;
-                if (pos == 0) {
-                    p[307] = 0;
-                    return;
-                }
-                var findLine;
-                for (var i = 0; i < lines.length; i++) {
-                    if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
-                        findLine = lines[i];
-                        break;
-                    }
-                }
-                if (!findLine) {
-                    return;
-                }
-                focus.x = findLine.x;
-                focus.y = findLine.y;
-                focus.height = findLine.height;
-                pos -= findLine.charIndex;
-                p[302] = findLine.htmlTextIndex;
-                var findSubline;
-                for (var i = 0; i < findLine.sublines.length; i++) {
-                    if (pos >= findLine.sublines[i].charIndex && pos < findLine.sublines[i].charIndex + findLine.sublines[i].chars || i == findLine.sublines.length - 1) {
-                        findSubline = findLine.sublines[i];
-                        break;
-                    }
-                }
-                //如果有行的移动，重新计算所在行
-                if (lineIndex) {
-                    pos = p[307];
-                    while (lineIndex) {
-                        if (lineIndex > 0) {
-                            if (!findSubline || findSubline.index < findLine.sublines.length - 1) {
-                                findSubline = findLine.sublines[findSubline.index + 1];
-                            } else {
-                                if (findLine.index < lines.length - 1) {
-                                    findLine = lines[findLine.index + 1];
-                                    if (findLine.sublines.length) {
-                                        findSubline = findLine.sublines[0];
-                                    } else {
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
-                            }
-                            lineIndex--;
-                        } else {
-                            if (!findSubline || findSubline.index > 0) {
-                                findSubline = findLine.sublines[findSubline.index - 1];
-                            } else {
-                                if (findLine.index > 0) {
-                                    findLine = lines[findLine.index - 1];
-                                    if (findLine.sublines.length) {
-                                        findSubline = findLine.sublines[0];
-                                    } else {
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
-                            }
-                            lineIndex++;
-                        }
-                    }
-                    focus.x = findLine.x;
-                    focus.y = findLine.y;
-                    focus.height = findLine.height;
-                    p[302] = findLine.htmlTextIndex;
-                    p[301] = findLine.charIndex;
-                    if (!findSubline) {
-                        return;
-                    } else {
-                        focus.x += findSubline.x;
-                        focus.y += findSubline.y;
-                        focus.height = findSubline.height;
-                        p[302] += findSubline.htmlTextIndex;
-                        p[301] += pos < findSubline.chars ? pos : findSubline.chars;
-                    }
-                } else {
-                    if (!findSubline) {
-                        p[307] = pos;
-                        return;
-                    } else {
-                        focus.x += findSubline.x;
-                        focus.y += findSubline.y;
-                        focus.height = findSubline.height;
-                        pos -= findSubline.charIndex;
-                        p[302] += findSubline.htmlTextIndex;
-                        p[307] = pos;
-                    }
-                }
-                if (pos == 0) {
-                    return;
-                }
-                var findDisplay;
-                for (var i = 0; i < findSubline.displays.length; i++) {
-                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
-                        findDisplay = findSubline.displays[i];
-                        break;
-                    }
-                }
-                if (!findDisplay) {
-                    return;
-                }
-                focus.x += findDisplay.x;
-                pos -= findDisplay.charIndex;
-                p[302] += findDisplay.htmlTextIndex;
-                if (findDisplay.type == 0) {
-                    var text = findDisplay.text;
-                    var size = findDisplay.font.size;
-                    focus.x += flower.$measureTextWidth(size, text.slice(0, pos));
-                    p[302] += findDisplay.textStart + this.__changeText(text.slice(0, pos)).length;
-                } else {
-                    if (pos) {
-                        focus.x += findDisplay.width;
-                        p[302] += findDisplay.htmlText.length;
-                    }
-                }
-            }
-        }, {
-            key: "__getHtmlTextIndexByCharIndex",
-            value: function __getHtmlTextIndexByCharIndex(pos) {
-                var p = this.$RichText;
-                var lines = p[2];
-                var htmlTextIndex = 0;
-                if (pos == 0) {
-                    return htmlTextIndex;
-                }
-                var findLine;
-                for (var i = 0; i < lines.length; i++) {
-                    if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
-                        findLine = lines[i];
-                        break;
-                    }
-                }
-                if (!findLine) {
-                    return htmlTextIndex;
-                }
-                pos -= findLine.charIndex;
-                htmlTextIndex = findLine.htmlTextIndex;
-                var findSubline;
-                for (var i = 0; i < findLine.sublines.length; i++) {
-                    if (pos >= findLine.sublines[i].charIndex && pos < findLine.sublines[i].charIndex + findLine.sublines[i].chars || i == findLine.sublines.length - 1) {
-                        findSubline = findLine.sublines[i];
-                        break;
-                    }
-                }
-                if (!findSubline) {
-                    return htmlTextIndex;
-                } else {
-                    pos -= findSubline.charIndex;
-                    htmlTextIndex += findSubline.htmlTextIndex;
-                }
-                if (pos == 0) {
-                    return htmlTextIndex;
-                }
-                var findDisplay;
-                for (var i = 0; i < findSubline.displays.length; i++) {
-                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
-                        findDisplay = findSubline.displays[i];
-                        break;
-                    }
-                }
-                if (!findDisplay) {
-                    return htmlTextIndex;
-                }
-                pos -= findDisplay.charIndex;
-                htmlTextIndex += findDisplay.htmlTextIndex;
-                if (findDisplay.type == 0) {
-                    var text = findDisplay.text;
-                    var size = findDisplay.font.size;
-                    htmlTextIndex += findDisplay.textStart + this.__changeText(text.slice(0, pos)).length;
-                } else {
-                    if (pos) {
-                        htmlTextIndex += findDisplay.htmlText.length;
-                    }
-                }
-                return htmlTextIndex;
-            }
-        }, {
-            key: "__getCharIndexByHtmlTextIndex",
-            value: function __getCharIndexByHtmlTextIndex(index) {
-                var p = this.$RichText;
-                var lines = p[2];
-                if (lines.length) {
-                    return 0;
-                }
-                for (var i = 0; i < lines.lengt; i++) {
-                    var line = lines[i];
-                    if (line.htmlTextIndex <= index && line.htmlTextIndex + line.htmlText.length + line.endHtmlText.length > index || i == lines.length - 1) {
-                        index -= line.htmlTextIndex;
-                        var sublines = line.sublines;
-                        if (sublines.length) {
-                            return line.charIndex;
-                        }
-                        for (var s = 0; s < sublines.length; s++) {
-                            var subline = sublines[s];
-                            if (subline.htmlTextIndex <= index && subline.htmlTextIndex + subline.htmlText.length || s == sublines.length - 1) {
-                                var displays = subline.displays;
-                                if (displays.length) {
-                                    return line.charIndex + subline.charIndex;
-                                }
-                                index -= subline.htmlTextIndex;
-                                for (var d = 0; d < displays.length; d++) {
-                                    var display = displays[d];
-                                    if (display.htmlTextIndex <= index && display.htmlTextIndex + display.htmlText.length || d == displays.length - 1) {
-                                        return line.charIndex + subline.charIndex + display.text.slice(0, this.__changeRealText(display.htmlText.slice(display.textStart, index)).length).length;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                return 0;
-            }
-
-            /**
-             * 增加选中的段落
-             * @param htmlTextIndex
-             * @param htmlText
-             * @private
-             */
-
-        }, {
-            key: "__selecteText",
-            value: function __selecteText(htmlTextIndex, htmlText) {
-                if (htmlText.length == 0) {
-                    return;
-                }
-                var p = this.$RichText;
-                if (!p[400]) {
-                    p[400] = true;
-                    p[402] = p[1];
-                }
-                p[401].push({ index: htmlTextIndex, htmlText: htmlText });
-                var list = p[401];
-                var oldHtmlText = p[402];
-                var newHtmlText = "";
-                var last = 0;
-                for (var i = 0; i < list.length; i++) {
-                    var item = list[i];
-                    newHtmlText += oldHtmlText.slice(last, item.index) + "<s>" + item.htmlText + "</s>";
-                    last = item.index + item.htmlText.length;
-                    if (i == list.length - 1) {
-                        newHtmlText += oldHtmlText.slice(last, oldHtmlText.length);
-                    }
-                }
-                this.__setHtmlText(newHtmlText, false);
-            }
-        }, {
-            key: "__cancelSelect",
-            value: function __cancelSelect() {
-                var p = this.$RichText;
-                if (p[400]) {
-                    p[400] = false;
-                    this.__setHtmlText(p[402], false);
-                    var list = p[401].concat();
-                    p[401].length = 0;
-                    return list;
-                }
-                return null;
-            }
-        }, {
-            key: "__deleteSelect",
-            value: function __deleteSelect() {
-                var p = this.$RichText;
-                if (p[400]) {
-                    p[400] = false;
-                    //this.__setHtmlText(p[402], false);
-                    var list = p[401];
-                    var oldHtmlText = p[402];
-                    var newHtmlText = "";
-                    var last = 0;
-                    for (var i = 0; i < list.length; i++) {
-                        var item = list[i];
-                        newHtmlText += oldHtmlText.slice(last, item.index) + this.__deleteHtmlTextContent(item.htmlText);
-                        last = item.index + item.htmlText.length;
-                        if (i == list.length - 1) {
-                            newHtmlText += oldHtmlText.slice(last, oldHtmlText.length);
-                        }
-                    }
-                    list.length = 0;
-                    this.__setHtmlText(newHtmlText, false);
-                    this.$moveCaretIndex();
-                }
-            }
-        }, {
-            key: "__deleteHtmlTextContent",
-            value: function __deleteHtmlTextContent(text) {
-                var content = "";
-                var last = -1;
-                for (var i = 0; i < text.length; i++) {
-                    var char = text.charAt(i);
-                    if (char == "<") {
-                        last = i;
-                    } else if (char == ">") {
-                        if (last != -1) {
-                            var sign = "";
-                            var index = last + 1;
-                            if (text.charAt(index) == "/") {
-                                index++;
-                            }
-                            while (index < text.length) {
-                                var c = text.charAt(index);
-                                if (c == " " || c == ">") {
-                                    break;
-                                }
-                                sign += c;
-                                index++;
-                            }
-                            if (sign == "font" || sign == "u" || sign == "s") {
-                                content += text.slice(last, i + 1);
-                            }
-                            last = -1;
-                        }
-                    }
-                }
-                return content;
-            }
-        }, {
-            key: "__update",
-            value: function __update(now, gap) {
-                var p = this.$RichText;
-                p[303] += gap;
-                if (p[303] < p[9] * 1000 || Math.floor(p[303] / (p[9] * 1000)) % 2 == 0) {
-                    p[5].visible = true;
-                } else {
-                    p[5].visible = false;
-                }
-                while (p[308].length) {
-                    this.__doKeyEvent(p[308].shift());
-                }
-            }
-        }, {
-            key: "__doKeyEvent",
-            value: function __doKeyEvent(e) {
-                var p = this.$RichText;
-                if (e.keyCode == 229) {
-                    if (!p[304]) {
-                        p[304] = true;
-                        p[305] = "";
-                        p[311] = p[301];
-                        p[312] = p[302];
-                        p[313] = p[1];
-                        p[323] = p[3];
-                    }
-                    p[6] += "1";
-                    var str = this.__input.$getNativeText();
-                    if (p[305] == "") {
-                        p[305] = str.charAt(str.length - 1);
-                    }
-                    p[1] = p[313];
-                    p[3] = p[323];
-                    p[301] = p[311];
-                    p[302] = p[312];
-                    if (e.keyCode == 16 || str != p[306].slice(0, str.length) && str.charAt(str.length - 1) != p[305] && str.charAt(str.length - 2) != p[305] && str.charAt(str.length - 3) != p[305]) {
-                        this.__inputText(str);
-                        this.__input.$setNativeText("");
-                        this.$RichText[7] = false;
-                        p[304] = false;
-                        p[305] == "";
-                        p[306] = "";
-                    } else {
-                        this.__inputText(str, true);
-                        p[306] = str;
-                        p[305] = str.charAt(str.length - 1);
-                    }
-                } else if (e.keyCode == 13) {
-                    this.__inputText("\n");
-                } else if (e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) {
-                    if (e.keyCode == 37) {
-                        if (p[301] == 0) {
-                            return;
-                        }
-                        p[301]--;
-                        this.$moveCaretIndex();
-                    } else if (e.keyCode == 39) {
-                        if (p[301] == p[3]) {
-                            return;
-                        }
-                        p[301]++;
-                        this.$moveCaretIndex();
-                    } else if (e.keyCode == 38) {
-                        //输入点上移一行
-                        this.$moveCaretIndex(-1);
-                    } else if (e.keyCode == 40) {
-                        //输入点下移一行
-                        this.$moveCaretIndex(1);
-                    } else if (e.keyCode == 8) {
-                        if (p[400]) {
-                            this.__deleteSelect();
-                        } else {
-                            if (p[301] == 0) {
-                                return;
-                            }
-                            this.$deleteCaretChar();
-                            this.$moveCaretIndex();
-                        }
-                    }
-                } else if (e.keyCode == 91 || e.keyCode == 17) {} else {
-                    var str = this.__input.$getNativeText();
-                    if (str.length) {
-                        this.__inputText(str);
-                        this.__input.$setNativeText("");
-                    }
-                }
-            }
-        }, {
-            key: "__showFocus",
-            value: function __showFocus(info) {
-                var p = this.$RichText;
-                p[5].visible = true;
-                p[5].x = info.focusX;
-                p[5].y = info.focusY;
-                p[5].height = info.focusHeight;
-            }
-        }, {
-            key: "__getClickPos",
-            value: function __getClickPos() {
-                var p = this.$RichText;
-                var x = this.lastTouchX;
-                var y = this.lastTouchY + p[8];
-                var lines = p[2];
-                var findLine;
-                var res = {
-                    line: null,
-                    subline: null,
-                    display: null,
-                    charIndex: 0,
-                    htmlTextIndex: 0,
-                    focusX: 0,
-                    focusY: 0,
-                    focusHeight: p[10],
-                    lineCharIndex: 0
-                };
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i];
-                    if (line.y <= y && line.y + line.height > y || i == lines.length - 1) {
-                        findLine = line;
-                        break;
-                    }
-                }
-                if (!findLine) {
-                    return res;
-                }
-                res.line = findLine;
-                res.charIndex = line.charIndex;
-                res.htmlTextIndex = line.htmlTextIndex;
-                res.focusX = line.x;
-                res.focusY = line.y;
-                res.focusHeight = line.height;
-                x -= line.x;
-                y -= line.y;
-                var findSubline;
-                for (var i = 0; i < findLine.sublines.length; i++) {
-                    var subline = findLine.sublines[i];
-                    if (subline.y <= y && subline.y + subline.height > y || i == findLine.sublines.length - 1) {
-                        findSubline = subline;
-                        break;
-                    }
-                }
-                if (!findSubline) {
-                    return res;
-                }
-                res.subline = findSubline;
-                res.charIndex += findSubline.charIndex;
-                res.htmlTextIndex += findSubline.htmlTextIndex;
-                res.focusX += findSubline.x;
-                res.focusY += findSubline.y;
-                res.focusHeight = findSubline.height;
-                x -= subline.x;
-                y -= subline.y;
-                var findDisplay;
-                for (var i = 0; i < findSubline.displays.length; i++) {
-                    var display = findSubline.displays[i];
-                    if (x >= display.x && x < display.x + display.width || i == findSubline.displays.length - 1) {
-                        findDisplay = display;
-                        break;
-                    }
-                }
-                if (!findDisplay) {
-                    return;
-                }
-                res.display = findDisplay;
-                res.charIndex += findDisplay.charIndex;
-                res.htmlTextIndex += findDisplay.htmlTextIndex;
-                res.focusX += findDisplay.x;
-                x -= findDisplay.x;
-                if (findDisplay.type == 0) {
-                    res.htmlTextIndex += findDisplay.textStart;
-                    res.lineCharIndex = findDisplay.charIndex;
-                    var text = findDisplay.text;
-                    var size = findDisplay.font.size;
-                    var width = 0;
-                    for (var i = 1; i <= text.length; i++) {
-                        var textWidth = flower.$measureTextWidth(size, text.slice(0, i));
-                        var charWidth = textWidth - width;
-                        width = textWidth;
-                        if (x <= charWidth * 0.5) {
-                            break;
-                        } else {
-                            x -= charWidth;
-                            res.charIndex++;
-                            res.htmlTextIndex++;
-                            res.focusX += charWidth;
-                            res.lineCharIndex++;
-                        }
-                    }
-                } else {
-                    if (x > findDisplay.width * 0.5) {
-                        res.charIndex += findDisplay.chars;
-                        res.htmlTextIndex += findDisplay.htmlText.length;
-                        res.focusX += findDisplay.width;
-                        res.lineCharIndex = findDisplay.charIndex + findDisplay.chars;
-                    } else {
-                        res.lineCharIndex = findDisplay.charIndex;
-                    }
-                }
-                return res;
-            }
-        }, {
-            key: "$setHtmlText",
-            value: function $setHtmlText(text) {
-                var change = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
-                var p = this.$RichText;
-                this.__resetCaches();
-                this.__clearOldDisplay();
-                var ids = p[102];
-                for (var key in ids) {
-                    delete ids[key];
-                    delete this[key];
-                }
-                var container = p[4];
-                var lines = p[2];
-                lines.length = 0;
-                var font = {
-                    size: p[10],
-                    color: p[11],
-                    under: false, //下划线
-                    underColor: p[11],
-                    select: false,
-                    gap: p[12],
-                    sizes: [],
-                    colors: [],
-                    unders: [],
-                    selects: [],
-                    gaps: []
-                };
-                var line = this.__getNewLine(null, font);
-                lines.push(line);
-                var last = -1; //上一个 <
-                var lastText = "";
-                var lastHtmlText = "";
-                var lastTextStart = -1;
-                for (var i = 0, len = text.length; i < len; i++) {
-                    var char = text.charAt(i);
-                    var decodeText = false;
-                    var addSingle = null;
-                    var oldFont = font;
-                    var nextHtmlText = "";
-                    var single = false;
-                    lastHtmlText += char;
-                    if (char == "<") {
-                        last = i;
-                    } else if (char == ">") {
-                        //分析<...>标签里的内容
-                        var sign = text.slice(last + 1, i);
-                        var end = false;
-                        if (sign.charAt(sign.length - 1) == "/") {
-                            sign = sign.slice(0, sign.length - 1);
-                            single = true;
-                        }
-                        var s = 0;
-                        if (sign.charAt(0) == "/") {
-                            end = true;
-                            s++;
-                        }
-                        var name = "";
-                        //获取标签名称
-                        for (; s < sign.length; s++) {
-                            char = sign.charAt(s);
-                            if (char == " ") {
-                                break;
-                            } else {
-                                name += char;
-                            }
-                        }
-                        //分析属性
-                        var attributes = [];
-                        while (s < sign.length) {
-                            //跳过空格
-                            while (sign.charAt(s) == " " && s < sign.length) {
-                                s++;
-                            }
-                            if (s == sign.length) {
-                                break;
-                            }
-                            //获取属性名称
-                            var pos = s;
-                            while (sign.charAt(s) != "=" && sign.charAt(s) != " " && s < sign.length) {
-                                s++;
-                            }
-                            if (s == sign.length) {
-                                break;
-                            }
-                            var attributeName = sign.slice(pos, s);
-                            //跳过空格
-                            while (sign.charAt(s) == " " && s < sign.length) {
-                                s++;
-                            }
-                            if (s == sign.length) {
-                                break;
-                            }
-                            if (sign.charAt(s) == "=") {
-                                s++;
-                            } else {
-                                break;
-                            }
-                            //跳过空格
-                            while (sign.charAt(s) == " " && s < sign.length) {
-                                s++;
-                            }
-                            if (s == sign.length) {
-                                break;
-                            }
-                            //获取引号
-                            var begin = sign.charAt(s);
-                            if (begin == "\"" || begin == "'") {
-                                s++;
-                            } else {
-                                break;
-                            }
-                            //获取内容
-                            var pos = s;
-                            while (sign.charAt(s) != begin && s < sign.length) {
-                                s++;
-                            }
-                            if (s == sign.length) {
-                                break;
-                            }
-                            var attributeContent = sign.slice(pos, s);
-                            s++; //跳过引号
-                            attributes.push({
-                                name: attributeName,
-                                value: attributeContent
-                            });
-                        }
-                        if (single) {
-                            //如果是单个内容，比如<img.../>
-                            addSingle = {
-                                name: name,
-                                attributes: attributes
-                            };
-                            if (name == "img") {
-                                decodeText = true;
-                                addSingle.htmlText = text.slice(last, i + 1);
-                                lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - addSingle.htmlText.length);
-                            } else {
-                                var isfxml = false;
-                                for (var a = 0; a < attributes.length; a++) {
-                                    if (attributes[a].name == "xmlns:f" && attributes[a].value == "flower") {
-                                        isfxml = true;
-                                        break;
-                                    }
-                                }
-                                if (isfxml) {
-                                    decodeText = true;
-                                    addSingle.name = "ui";
-                                    addSingle.htmlText = text.slice(last, i + 1);
-                                    lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - addSingle.htmlText.length);
-                                }
-                            }
-                        } else {
-                            if (end) {
-                                if (name == "font" || name == "u" || name == "s") {
-                                    decodeText = true;
-                                    font = flower.ObjectDo.clone(font);
-                                    if (name == "font") {
-                                        font.size = font.sizes.pop();
-                                        font.color = font.colors.pop();
-                                        font.gap = font.gaps.pop();
-                                    } else if (name == "u") {
-                                        font.under = font.unders.pop();
-                                    } else if (name == "s") {
-                                        font.select = font.selects.pop();
-                                    }
-                                }
-                            } else {
-                                if (name == "font" || name == "u" || name == "s") {
-                                    nextHtmlText = text.slice(last, i + 1);
-                                    lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - nextHtmlText.length);
-                                    decodeText = true;
-                                    font = flower.ObjectDo.clone(font);
-                                    if (name == "font") {
-                                        font.sizes.push(font.size);
-                                        font.colors.push(font.color);
-                                        font.gaps.push(font.gap);
-                                        for (var a = 0; a < attributes.length; a++) {
-                                            if (attributes[a].name == "size") {
-                                                if (parseInt(attributes[a].value)) {
-                                                    font.size = parseInt(attributes[a].value);
-                                                }
-                                            } else if (attributes[a].name == "color") {
-                                                if (attributes[a].value.charAt(0) == "#") {
-                                                    font.color = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
-                                                }
-                                            }
-                                        }
-                                    } else if (name == "u") {
-                                        font.unders.push(font.under);
-                                        font.under = true;
-                                        font.underColor = font.color;
-                                        for (var a = 0; a < attributes.length; a++) {
-                                            if (attributes[a].name == "color") {
-                                                if (attributes[a].value.charAt(0) == "#") {
-                                                    font.underColor = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
-                                                }
-                                            }
-                                        }
-                                    } else if (name == "s") {
-                                        font.selects.push(font.select);
-                                        font.select = true;
-                                    }
-                                } else {
-                                    var isfxml = false;
-                                    for (var a = 0; a < attributes.length; a++) {
-                                        if (attributes[a].name == "xmlns:f" && attributes[a].value == "flower") {
-                                            isfxml = true;
-                                            break;
-                                        }
-                                    }
-                                    if (isfxml) {
-                                        single = true;
-                                        addSingle = {
-                                            name: "ui",
-                                            attributes: attributes
-                                        };
-                                        i = this.__findFXML(text, last);
-                                        addSingle.htmlText = text.slice(last, i + 1);
-                                        decodeText = true;
-                                        lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - addSingle.htmlText.length);
-                                    }
-                                }
-                            }
-                        }
-                        last = -1;
-                    } else {
-                        if (last == -1) {
-                            lastText += char;
-                            if (lastTextStart == -1) {
-                                lastTextStart = lastHtmlText.length - 1;
-                            }
-                        }
-                    }
-                    if (i == len - 1) {
-                        decodeText = true;
-                    }
-                    var newLine = false;
-                    if (char == "\n" || char == "\r" || text.slice(i, i + "<br/>".length) == "<br/>") {
-                        newLine = true;
-                        decodeText = true;
-                        if (oldFont.select) {
-                            line.selectEnd = true;
-                        }
-                        if (char == "\n" || char == "\r") {
-                            line.endHtmlText = char;
-                            lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
-                            lastText = lastText.slice(0, lastText.length - 1);
-                        } else if (text.slice(i, i + "<br/>".length) == "<br/>") {
-                            line.endHtmlText = "<br/>";
-                            lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
-                            last = -1;
-                        }
-                    }
-                    if (decodeText) {
-                        this.__decodeText(line, oldFont, this.__changeRealText(lastText), lastHtmlText, lastTextStart);
-                        lastHtmlText = "";
-                        lastText = "";
-                        lastTextStart = -1;
-                        if (single) {
-                            if (addSingle.name == "img") {
-                                this.__decodeImage(line, addSingle.attributes, addSingle.htmlText, oldFont);
-                            } else if (addSingle.name == "ui") {
-                                this.__decodeUI(line, addSingle.attributes, addSingle.htmlText, oldFont);
-                            }
-                        }
-                        if (newLine) {
-                            line.chars++;
-                            line = this.__getNewLine(line, font);
-                            lines.push(line);
-                        }
-                    }
-                    if (newLine && text.slice(i, i + "<br/>".length) == "<br/>") {
-                        i += "<br/>".length - 1;
-                    }
-                    lastHtmlText += nextHtmlText;
-                }
-                p[1] = "";
-                p[3] = 0;
-                for (var i = 0; i < lines.length; i++) {
-                    p[1] += lines[i].htmlText + lines[i].endHtmlText;
-                    p[3] += lines[i].chars;
-                }
-                p[100] = true;
-                if (change) {
-                    this.dispatchWith(flower.Event.CHANGE);
-                }
-            }
-        }, {
-            key: "__findFXML",
-            value: function __findFXML(text, start) {
-                var name = "";
-                var len = text.length;
-                for (var i = start + 1; i < len; i++) {
-                    if (text.charAt(i) == " " || text.charAt(i) == ">" || text.charAt(i) == "/") {
-                        name = text.slice(start + 1, i);
-                        break;
-                    }
-                }
-                var flag = 1;
-                var num1 = name.length + 1;
-                var num2 = name.length + 2;
-                var sign1 = "<" + name;
-                var sign2 = "</" + name;
-                for (var i = start + 1 + name.length; i < len; i++) {
-                    if (text.slice(i, i + num1) == sign1) {
-                        flag++;
-                    }
-                    if (text.slice(i, i + num2) == sign2) {
-                        flag--;
-                        if (flag == 0) {
-                            for (; i < len; i++) {
-                                if (text.charAt(i) == ">") {
-                                    break;
-                                }
-                            }
-                            return i;
-                        }
-                    }
-                }
-                return start;
-            }
-        }, {
-            key: "__clearOldDisplay",
-            value: function __clearOldDisplay() {
-                var p = this.$RichText;
-                var lines = p[2];
-                for (var l = 0; l < lines.length; l++) {
-                    var line = lines[l];
-                    for (var s = 0; s < line.sublines.length; s++) {
-                        var subline = line.sublines[s];
-                        var displays = subline.displays;
-                        for (var d = 0; d < displays.length; d++) {
-                            var item = displays[d];
-                            if (item.type == 0 && item.display) {
-                                item.display.dispose();
-                            }
-                        }
-                    }
-                }
-            }
-        }, {
-            key: "__decodeText",
-            value: function __decodeText(line, font, text, htmlText, textStart) {
-                textStart = textStart == -1 ? 0 : textStart;
-                var p = this.$RichText;
-                if (!line.sublines.length) {
-                    this.__addSubLine(line, font);
-                }
-                var subline = line.sublines[line.sublines.length - 1];
-                var width = flower.$measureTextWidth(font.size, text);
-                if (p[13]) {
-                    var max = this.width;
-                } else {
-                    var item = {
-                        type: 0,
-                        display: null,
-                        font: font,
-                        text: text,
-                        htmlText: htmlText,
-                        htmlTextIndex: subline.htmlText.length,
-                        textStart: textStart,
-                        textEnd: textStart + this.__changeText(text).length,
-                        width: width,
-                        height: font.size,
-                        x: subline.positionX,
-                        charIndex: subline.chars,
-                        chars: text.length,
-                        subline: subline
-                    };
-                    subline.chars += item.chars;
-                    line.chars += item.chars;
-                    if (item.height + subline.gap > subline.height) {
-                        var oldHeight = subline.height;
-                        subline.height = item.height + subline.gap;
-                        line.height += subline.height - oldHeight;
-                        line.positionY += subline.height - oldHeight;
-                    }
-                    subline.width += item.width;
-                    if (subline.width > line.width) {
-                        line.width = subline.width;
-                    }
-                    subline.text += item.text;
-                    line.text += item.text;
-                    subline.htmlText += item.htmlText;
-                    line.htmlText += item.htmlText;
-                    subline.positionX += item.width;
-                    subline.displays.push(item);
-                }
-            }
-        }, {
-            key: "__decodeImage",
-            value: function __decodeImage(line, attributes, htmlText, font) {
-                var p = this.$RichText;
-                var ids = p[102];
-                var id = "";
-                for (var i = 0; i < attributes.length; i++) {
-                    if (attributes[i].name == "id") {
-                        id = attributes[i].value;
-                    }
-                }
-                var caches = p[101];
-                if (!line.sublines.length) {
-                    this.__addSubLine(line, font);
-                }
-                var subline = line.sublines[line.sublines.length - 1];
-                var image;
-                var cache;
-                if (!caches[htmlText]) {
-                    caches[htmlText] = [];
-                }
-                if (caches[htmlText].length) {
-                    for (var i = 0; i < caches[htmlText].length; i++) {
-                        if (caches[htmlText][i].use == false) {
-                            image = caches[htmlText][i].display;
-                            caches[htmlText][i].use = true;
-                            cache = caches[htmlText][i];
-                        }
-                    }
-                }
-                if (!image) {
-                    var url = "";
-                    for (var i = 0; i < attributes.length; i++) {
-                        if (attributes[i].name == "src") {
-                            url = attributes[i].value;
-                        }
-                    }
-                    image = new flower.Bitmap();
-                    if (url != "") {
-                        var loader = new flower.URLLoader(url);
-                        loader.load();
-                        loader.addListener(flower.Event.COMPLETE, function (e) {
-                            if (image.isDispose) {
-                                return;
-                            }
-                            image.texture = e.data;
-                            cache.width = image.width;
-                            cache.height = image.height;
-                            this.$setHtmlText(p[1]);
-                        }, this);
-                    }
-                    cache = {
-                        use: true,
-                        display: image,
-                        loader: loader
-                    };
-                    caches[htmlText].push(cache);
-                }
-                if (id != "") {
-                    ids[id] = image;
-                    if (!this[id]) {
-                        this[id] = image;
-                    }
-                }
-                if (p[13]) {
-                    if (subline.width + image.width > this.width) {
-                        this.__addSubLine(line, font);
-                        subline = line.sublines[line.sublines.length - 1];
-                    }
-                }
-                cache.width = image.width;
-                cache.height = image.height;
-                var item = {
-                    type: 1,
-                    display: image,
-                    font: font,
-                    text: "",
-                    htmlText: htmlText,
-                    htmlTextIndex: subline.htmlText.length,
-                    textStart: 0,
-                    width: image.width,
-                    height: image.height,
-                    x: subline.positionX,
-                    charIndex: subline.chars,
-                    chars: 1,
-                    subline: subline
-                };
-                subline.chars += item.chars;
-                line.chars += item.chars;
-                if (item.height + subline.gap > subline.height) {
-                    var oldHeight = subline.height;
-                    subline.height = item.height + subline.gap;
-                    line.height += subline.height - oldHeight;
-                    line.positionY += subline.height - oldHeight;
-                }
-                subline.width += item.width;
-                if (subline.width > line.width) {
-                    line.width = subline.width;
-                }
-                subline.text += item.text;
-                line.text += item.text;
-                subline.htmlText += item.htmlText;
-                line.htmlText += item.htmlText;
-                subline.positionX += item.width;
-                subline.displays.push(item);
-            }
-        }, {
-            key: "__decodeUI",
-            value: function __decodeUI(line, attributes, htmlText, font) {
-                var p = this.$RichText;
-                var ids = p[102];
-                var id = "";
-                for (var i = 0; i < attributes.length; i++) {
-                    if (attributes[i].name == "id") {
-                        id = attributes[i].value;
-                    }
-                }
-                var caches = p[101];
-                if (!line.sublines.length) {
-                    this.__addSubLine(line, font);
-                }
-                var subline = line.sublines[line.sublines.length - 1];
-                var ui;
-                var cache;
-                if (!caches[htmlText]) {
-                    caches[htmlText] = [];
-                }
-                if (caches[htmlText].length) {
-                    for (var i = 0; i < caches[htmlText].length; i++) {
-                        if (caches[htmlText][i].use == false) {
-                            ui = caches[htmlText][i].display;
-                            caches[htmlText][i].use = true;
-                            cache = caches[htmlText];
-                            break;
-                        }
-                    }
-                }
-                if (!ui) {
-                    ui = new flower.UIParser();
-                    ui.percentWidth = null;
-                    ui.percentHeight = null;
-                    ui.parseUI(htmlText);
-                    cache = {
-                        use: true,
-                        display: ui
-                    };
-                    caches[htmlText].push(cache);
-                }
-                if (id != "") {
-                    ids[id] = ui;
-                    if (!this[id]) {
-                        this[id] = ui;
-                    }
-                }
-                if (p[13]) {
-                    if (subline.width + ui.width > this.width) {
-                        this.__addSubLine(line, font);
-                        subline = line.sublines[line.sublines.length - 1];
-                    }
-                }
-                cache.width = ui.width;
-                cache.height = ui.height;
-                var item = {
-                    type: 1,
-                    display: ui,
-                    font: font,
-                    text: "",
-                    htmlText: htmlText,
-                    htmlTextIndex: subline.htmlText.length,
-                    textStart: 0,
-                    width: ui.width,
-                    height: ui.height,
-                    x: subline.positionX,
-                    charIndex: subline.chars,
-                    chars: 1,
-                    subline: subline
-                };
-                subline.chars += item.chars;
-                line.chars += item.chars;
-                if (item.height + subline.gap > subline.height) {
-                    var oldHeight = subline.height;
-                    subline.height = item.height + subline.gap;
-                    line.height += subline.height - oldHeight;
-                    line.positionY += subline.height - oldHeight;
-                }
-                subline.width += item.width;
-                if (subline.width > line.width) {
-                    line.width = subline.width;
-                }
-                subline.text += item.text;
-                line.text += item.text;
-                subline.htmlText += item.htmlText;
-                line.htmlText += item.htmlText;
-                subline.positionX += item.width;
-                subline.displays.push(item);
-            }
-        }, {
-            key: "__resetCaches",
-            value: function __resetCaches() {
-                var caches = this.$RichText[101];
-                for (var key in caches) {
-                    var list = caches[key];
-                    for (var i = 0; i < list.length; i++) {
-                        list[i].use = false;
-                    }
-                }
-            }
-        }, {
-            key: "__clearCaches",
-            value: function __clearCaches() {
-                var caches = this.$RichText[101];
-                for (var key in caches) {
-                    var list = caches[key];
-                    while (list.length) {
-                        if (list[list.length - 1].use == false) {
-                            var item = list.pop();
-                            item.display.dispose();
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                var keys = flower.ObjectDo.keys(caches);
-                for (var i = 0; i < keys.length; i++) {
-                    var key = keys[i];
-                    if (caches[key].length == 0) {
-                        delete caches[key];
-                    }
-                }
-            }
-        }, {
-            key: "__getNewLine",
-            value: function __getNewLine(lastLine, font) {
-                var line;
-                line = {
-                    index: this.$RichText[2].length,
-                    text: "",
-                    htmlText: "",
-                    endHtmlText: "",
-                    selectEnd: false,
-                    htmlTextIndex: 0,
-                    width: 0,
-                    height: font.size,
-                    x: 0,
-                    y: 0,
-                    charIndex: 0,
-                    chars: 0,
-                    sublines: [],
-                    positionY: 0
-                };
-                if (lastLine) {
-                    line.y = lastLine.y + lastLine.height;
-                    line.htmlTextIndex = lastLine.htmlTextIndex + lastLine.htmlText.length + lastLine.endHtmlText.length;
-                    line.charIndex = lastLine.charIndex + lastLine.chars;
-                    line.height = font.size + font.gap;
-                }
-                return line;
-            }
-        }, {
-            key: "__addSubLine",
-            value: function __addSubLine(line, font) {
-                var subline = {
-                    index: line.sublines.length,
-                    text: "",
-                    htmlText: "",
-                    htmlTextIndex: line.htmlText.length,
-                    width: 0,
-                    gap: line.index == 0 && line.sublines.length == 0 ? 0 : font.gap,
-                    height: font.size + (line.index == 0 && line.sublines.length == 0 ? 0 : font.gap),
-                    x: 0,
-                    y: line.positionY,
-                    charIndex: line.chars,
-                    chars: 0,
-                    displays: [],
-                    line: line,
-                    positionX: 0
-                };
-                line.sublines.push(subline);
-                line.positionY += subline.height;
-            }
-        }, {
-            key: "__getDefaultFocus",
-            value: function __getDefaultFocus() {
-                var rect = new flower.Rect();
-                rect.fillColor = 0;
-                rect.width = 2;
-                rect.height = 12;
-                rect.visible = false;
-                return rect;
-            }
-        }, {
-            key: "__setFontSize",
-            value: function __setFontSize(val) {
-                val = +val || 0;
-                var p = this.$RichText;
-                if (val == p[10]) {
-                    return;
-                }
-                p[10] = val;
-            }
-        }, {
-            key: "__setFontColor",
-            value: function __setFontColor(val) {
-                val = +val || 0;
-                var p = this.$RichText;
-                if (val == p[11]) {
-                    return;
-                }
-                p[11] = val;
-            }
-        }, {
-            key: "__setHtmlText",
-            value: function __setHtmlText(val) {
-                var p = this.$RichText;
-                if (p[6] == val) {
-                    return;
-                }
-                p[6] = val;
-                this.$setHtmlText(val);
-            }
-        }, {
-            key: "__setText",
-            value: function __setText(val) {
-                var val = this.__changeText(val);
-                this.__setHtmlText(val);
-            }
-        }, {
-            key: "__setWordWrap",
-            value: function __setWordWrap(val) {
-                if (val == "false") {
-                    val = false;
-                }
-                val = !!val;
-                var p = this.$RichText;
-                if (p[13] == val) {
-                    return;
-                }
-                p[13] = val;
-                this.$setHtmlText(p[1]);
-            }
-        }, {
-            key: "__changeText",
-            value: function __changeText(val) {
-                for (var i = 0; i < val.length; i++) {
-                    var char = val.charAt(i);
-                    if (char == " ") {
-                        val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
-                        i += 5;
-                    } else if (char == "<") {
-                        val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
-                        i += 3;
-                    } else if (char == ">") {
-                        val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
-                        i += 3;
-                    } else if (char == "&") {
-                        val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
-                        i += 4;
-                    } else if (char == "\n" || char == "\r") {
-                        //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
-                        //i += 4
-                    }
-                }
-                return val;
-            }
-        }, {
-            key: "__changeRealText",
-            value: function __changeRealText(val) {
-                for (var i = 0; i < val.length; i++) {
-                    if (val.slice(i, i + 5) == "&amp;") {
-                        val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
-                    } else if (val.slice(i, i + 6) == "&nbsp;") {
-                        val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
-                    } else if (val.slice(i, i + 4) == "&lt;") {
-                        val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
-                    } else if (val.slice(i, i + 4) == "&gt;") {
-                        val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
-                    } else if (val.slice(i, i + 5) == "<br/>") {
-                        val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
-                    }
-                }
-                return val;
-            }
-        }, {
-            key: "$onFrameEnd",
-            value: function $onFrameEnd() {
-                var p = this.$RichText;
-                if (p[100]) {
-                    p[100] = false;
-                    var lines = p[2];
-                    var y = p[8];
-                    var container = p[4];
-                    var bgcontainer = p[14];
-                    container.removeAll();
-                    bgcontainer.removeAll();
-                    var height = this.height;
-                    for (var l = 0; l < lines.length; l++) {
-                        var line = lines[l];
-                        if (line.y <= y + height && line.y + line.height < y + height) {
-                            for (var s = 0; s < line.sublines.length; s++) {
-                                var subline = line.sublines[s];
-                                if (subline.y <= y + height && subline.y + subline.height < y + height) {
-                                    var displays = subline.displays;
-                                    for (var d = 0; d < displays.length; d++) {
-                                        var item = displays[d];
-                                        var display = item.display;
-                                        if (item.type == 0) {
-                                            if (!display) {
-                                                display = new flower.TextField(item.text);
-                                                display.fontSize = item.font.size;
-                                                display.fontColor = item.font.select ? p[1001] : item.font.color;
-                                                item.display = display;
-                                            }
-                                        }
-                                        if (item.font.under && item.width) {
-                                            if (!item.underDisplay) {
-                                                item.underDisplay = new flower.Rect();
-                                                item.underDisplay.fillColor = item.font.select ? p[1001] : item.font.underColor;
-                                                item.underDisplay.width = item.width;
-                                                item.underDisplay.height = 1;
-                                            }
-                                            item.underDisplay.x = line.x + subline.x + item.x;
-                                            item.underDisplay.y = line.y + subline.y + subline.height;
-                                            container.addChild(item.underDisplay);
-                                        }
-                                        if (item.font.select && item.width) {
-                                            if (!item.selectDisplay) {
-                                                item.selectDisplay = new flower.Rect();
-                                                item.selectDisplay.fillColor = p[1000];
-                                                item.selectDisplay.width = item.width;
-                                                item.selectDisplay.height = subline.height;
-                                            }
-                                            item.selectDisplay.x = line.x + subline.x + item.x;
-                                            item.selectDisplay.y = line.y + subline.y;
-                                            bgcontainer.addChild(item.selectDisplay);
-                                        }
-                                        container.addChild(item.display);
-                                        display.x = line.x + subline.x + item.x;
-                                        display.y = line.y + subline.y + subline.height - item.height;
-                                    }
-                                }
-                            }
-                            if (line.selectEnd) {
-                                var rect = new flower.Rect();
-                                rect.fillColor = p[1000];
-                                rect.width = this.width - line.x - line.width;
-                                rect.height = line.height;
-                                rect.x = line.x + line.width;
-                                rect.y = line.y;
-                                bgcontainer.addChild(rect);
-                            }
-                        }
-                    }
-                    this.__clearCaches();
-                }
-                _get(Object.getPrototypeOf(RichText.prototype), "$onFrameEnd", this).call(this);
-            }
-        }, {
-            key: "$update",
-            value: function $update() {
-                var p = this.$RichText;
-                var caches = p[101];
-                var flag = false;
-                for (var key in caches) {
-                    var list = caches[key];
-                    for (var i = 0; i < list.length; i++) {
-                        var item = list[i];
-                        if (item.width != item.display.width || item.height != item.display.height) {
-                            flag = true;
-                            item.width = item.display.width;
-                            item.height = item.display.height;
-                        }
-                    }
-                }
-                if (flag) {
-                    this.$setHtmlText(p[1]);
-                }
-            }
-        }, {
-            key: "$getMouseTarget",
-            value: function $getMouseTarget(touchX, touchY, multiply) {
-                if (this.touchEnabled == false || this.visible == false) return null;
-                if (multiply == true && this.multiplyTouchEnabled == false) return null;
-                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, flower.Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
-                var p = this.$DisplayObject;
-                p[10] = touchX;
-                p[11] = touchY;
-                if (touchX >= 0 && touchX < this.width && touchY >= 0 && touchY < this.height) {
-                    return this;
-                }
-                return null;
-            }
-        }, {
-            key: "dispose",
-            value: function dispose() {
-                this.__resetCaches();
-                this.__clearCaches();
-                flower.EnterFrame.remove(this.$update, this);
-                _get(Object.getPrototypeOf(RichText.prototype), "dispose", this).call(this);
-            }
-        }, {
-            key: "fontSize",
-            get: function get() {
-                return this.$RichText[10];
-            },
-            set: function set(val) {
-                this.__setFontSize(val);
-            }
-        }, {
-            key: "fontColor",
-            get: function get() {
-                return this.$RichText[11];
-            },
-            set: function set(val) {
-                this.__setFontColor(val);
-            }
-        }, {
-            key: "htmlText",
-            get: function get() {
-                return this.$RichText[1];
-            },
-            set: function set(val) {
-                this.__setHtmlText(val);
-            }
-        }, {
-            key: "text",
-            get: function get() {
-                return this.$RichText[0];
-            },
-            set: function set(val) {
-                this.__setText(val);
-            }
-        }, {
-            key: "wordWrap",
-            get: function get() {
-                return this.$RichText[13];
-            },
-            set: function set(val) {
-                this.__setWordWrap(val);
-            }
-        }, {
-            key: "displays",
-            get: function get() {
-                return this.$RichText[102];
-            }
-        }]);
-
-        return RichText;
-    }(flower.Sprite);
-
-    black.RichText = RichText;
-    //////////////////////////End File:extension/black/RichText.js///////////////////////////
-
     //////////////////////////File:extension/black/UIParser.js///////////////////////////
 
     var UIParser = function (_Group) {
@@ -4524,16 +2779,16 @@ var black = {};
 
             _classCallCheck(this, UIParser);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
-            _this14.defaultClassName = "";
-            _this14.moduleName = "local";
-            _this14.namespaces = {};
+            _this13.defaultClassName = "";
+            _this13.moduleName = "local";
+            _this13.namespaces = {};
 
-            _this14._beforeScript = beforeScript;
-            _this14.classes = flower.UIParser.classes;
-            _this14.percentWidth = _this14.percentHeight = 100;
-            return _this14;
+            _this13._beforeScript = beforeScript;
+            _this13.classes = flower.UIParser.classes;
+            _this13.percentWidth = _this13.percentHeight = 100;
+            return _this13;
         }
 
         _createClass(UIParser, [{
@@ -5402,10 +3657,8 @@ var black = {};
 
             "Label": "flower.Label",
             "Input": "flower.Input",
-            "TextArea": "flower.TextArea",
             "Image": "flower.Image",
             "Group": "flower.Group",
-            "RichText": "flower.RichText",
             "ScrollBar": "flower.ScrollBar",
             "HScrollBar": "flower.HScrollBar",
             "VScrollBar": "flower.VScrollBar",
@@ -5463,9 +3716,9 @@ var black = {};
         function ScrollBar() {
             _classCallCheck(this, ScrollBar);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollBar).call(this));
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollBar).call(this));
 
-            _this15.$ScrollerBar = {
+            _this14.$ScrollerBar = {
                 0: null, //viewport
                 1: true, //autoVisibility
                 2: null, //thumb
@@ -5479,7 +3732,7 @@ var black = {};
                 10: 0, //viewportHeight
                 20: null //horizontal:true vertical:false
             };
-            return _this15;
+            return _this14;
         }
 
         _createClass(ScrollBar, [{
@@ -5586,10 +3839,10 @@ var black = {};
         function VScrollBar() {
             _classCallCheck(this, VScrollBar);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(VScrollBar).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(VScrollBar).call(this));
 
-            _this16.$ScrollerBar[20] = false;
-            return _this16;
+            _this15.$ScrollerBar[20] = false;
+            return _this15;
         }
 
         return VScrollBar;
@@ -5606,10 +3859,10 @@ var black = {};
         function HScrollBar() {
             _classCallCheck(this, HScrollBar);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(HScrollBar).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(HScrollBar).call(this));
 
-            _this17.$ScrollerBar[20] = true;
-            return _this17;
+            _this16.$ScrollerBar[20] = true;
+            return _this16;
         }
 
         return HScrollBar;
@@ -5626,9 +3879,9 @@ var black = {};
         function DataGroup() {
             _classCallCheck(this, DataGroup);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
 
-            _this18.$DataGroup = {
+            _this17.$DataGroup = {
                 0: null, //data
                 1: null, //itemRenderer
                 2: null, //items
@@ -5647,8 +3900,8 @@ var black = {};
                 15: 0, //touchTime
                 16: null };
             //touchItemData
-            _this18.addListener(flower.TouchEvent.TOUCH_RELEASE, _this18.__onTouchItem, _this18);
-            return _this18;
+            _this17.addListener(flower.TouchEvent.TOUCH_RELEASE, _this17.__onTouchItem, _this17);
+            return _this17;
         }
 
         _createClass(DataGroup, [{
@@ -6268,12 +4521,12 @@ var black = {};
         function ItemRenderer() {
             _classCallCheck(this, ItemRenderer);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
 
-            _this19._selected = false;
+            _this18._selected = false;
 
-            _this19.absoluteState = true;
-            return _this19;
+            _this18.absoluteState = true;
+            return _this18;
         }
 
         _createClass(ItemRenderer, [{
@@ -6374,10 +4627,10 @@ var black = {};
 
             _classCallCheck(this, Label);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
 
-            _this20.$initUIComponent();
-            return _this20;
+            _this19.$initUIComponent();
+            return _this19;
         }
 
         _createClass(Label, [{
@@ -6499,12 +4752,12 @@ var black = {};
 
             _classCallCheck(this, Input);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Input).call(this, text));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Input).call(this, text));
 
-            _this21.$initUIComponent();
-            _this21.$input = {
+            _this20.$initUIComponent();
+            _this20.$input = {
                 0: null };
-            return _this21;
+            return _this20;
         }
 
         _createClass(Input, [{
@@ -6654,178 +4907,6 @@ var black = {};
     UIComponent.registerEvent(Input, 1141, "stopInput", flower.Event.STOP_INPUT);
     //////////////////////////End File:extension/black/Input.js///////////////////////////
 
-    //////////////////////////File:extension/black/TextArea.js///////////////////////////
-
-    var TextArea = function (_flower$TextInput2) {
-        _inherits(TextArea, _flower$TextInput2);
-
-        function TextArea() {
-            var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
-
-            _classCallCheck(this, TextArea);
-
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextArea).call(this, text));
-
-            _this22.$initUIComponent();
-            _this22.$input = {
-                0: null };
-            return _this22;
-        }
-
-        _createClass(TextArea, [{
-            key: "$initNativeShow",
-            //value
-            value: function $initNativeShow() {
-                var textArea = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-
-                _get(Object.getPrototypeOf(TextArea.prototype), "$initNativeShow", this).call(this, true);
-            }
-        }, {
-            key: "$addFlags",
-            value: function $addFlags(flags) {
-                if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
-                    this.__flags |= 0x1000;
-                }
-                this.__flags |= flags;
-            }
-
-            /**
-             * 验证 UI 属性
-             */
-
-        }, {
-            key: "$validateUIComponent",
-            value: function $validateUIComponent(parent) {
-                this.$removeFlags(0x1000);
-                //开始验证属性
-                //console.log("验证 ui 属性");
-                var p = this.$UIComponent;
-                if (this.$hasFlags(0x0001)) {
-                    this.$getContentBounds();
-                }
-                parent = parent || this.parent;
-                //if (this instanceof flower.Panel) {
-                //    console.log("验证 ui 属性",flower.EnterFrame.frame);
-                //}
-                if (p[0] != null && p[1] == null && p[2] != null) {
-                    this.width = (p[2] - p[0]) * 2;
-                    this.x = p[0];
-                } else if (p[0] == null && p[1] != null && p[2] != null) {
-                    this.width = (p[1] - p[2]) * 2;
-                    this.x = 2 * p[2] - p[1];
-                } else if (p[0] != null && p[1] != null) {
-                    this.width = parent.width - p[1] - p[0];
-                    this.x = p[0];
-                } else {
-                    if (p[0] != null) {
-                        this.x = p[0];
-                    }
-                    if (p[1] != null) {
-                        this.x = parent.width - p[1] - this.width;
-                    }
-                    if (p[2] != null) {
-                        this.x = (parent.width - this.width) * 0.5 + p[2];
-                    }
-                    if (p[6]) {
-                        this.width = parent.width * p[6] / 100;
-                    }
-                }
-                if (p[3] != null && p[4] == null && p[5] != null) {
-                    this.height = (p[5] - p[3]) * 2;
-                    this.y = p[3];
-                } else if (p[3] == null && p[4] != null && p[5] != null) {
-                    this.height = (p[4] - p[5]) * 2;
-                    this.y = 2 * p[5] - p[4];
-                } else if (p[3] != null && p[4] != null) {
-                    this.height = parent.height - p[4] - p[3];
-                    this.y = p[3];
-                } else {
-                    if (p[3] != null) {
-                        this.y = p[3];
-                    }
-                    if (p[4] != null) {
-                        this.y = parent.height - p[4] - this.height;
-                    }
-                    if (p[5] != null) {
-                        this.y = (parent.height - this.height) * 0.5 + p[5];
-                    }
-                    if (p[7]) {
-                        this.height = parent.height * p[7] / 100;
-                    }
-                }
-            }
-        }, {
-            key: "$setText",
-            value: function $setText(val) {
-                _get(Object.getPrototypeOf(TextArea.prototype), "$setText", this).call(this, val);
-                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].value = this.text;
-                    if (this.text != this.$input[0].value + "") {
-                        this.__valueChange();
-                    }
-                }
-            }
-        }, {
-            key: "__valueChange",
-            value: function __valueChange() {
-                if (this.$input[0] != null) {
-                    this.text = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
-                }
-            }
-        }, {
-            key: "__onValueChange",
-            value: function __onValueChange(e) {
-                this.__valueChange();
-            }
-
-            //$onFrameEnd() {
-            //    //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-            //    //    this.$validateUIComponent();
-            //    //}
-            //    super.$onFrameEnd();
-            //}
-
-        }, {
-            key: "dispose",
-            value: function dispose() {
-                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
-                }
-                this.removeAllBindProperty();
-                this.$UIComponent[11].dispose();
-                _get(Object.getPrototypeOf(TextArea.prototype), "dispose", this).call(this);
-            }
-        }, {
-            key: "value",
-            set: function set(val) {
-                if (this.$input[0] == val) {
-                    return;
-                }
-                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
-                }
-                this.$input[0] = val;
-                if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
-                }
-                this.__valueChange();
-            },
-            get: function get() {
-                return this.$input[0];
-            }
-        }]);
-
-        return TextArea;
-    }(flower.TextInput);
-
-    UIComponent.register(TextArea);
-    TextArea.prototype.__UIComponent = true;
-    black.TextArea = TextArea;
-
-    UIComponent.registerEvent(TextArea, 1140, "startInput", flower.Event.START_INPUT);
-    UIComponent.registerEvent(TextArea, 1141, "stopInput", flower.Event.STOP_INPUT);
-    //////////////////////////End File:extension/black/TextArea.js///////////////////////////
-
     //////////////////////////File:extension/black/Rect.js///////////////////////////
 
     var Rect = function (_flower$Shape) {
@@ -6834,14 +4915,14 @@ var black = {};
         function Rect() {
             _classCallCheck(this, Rect);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Rect).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Rect).call(this));
 
-            _this23.$Rect = {
+            _this21.$Rect = {
                 0: 0, //width
                 1: 0 };
             //height
-            _this23.$initUIComponent();
-            return _this23;
+            _this21.$initUIComponent();
+            return _this21;
         }
 
         _createClass(Rect, [{
@@ -7042,11 +5123,11 @@ var black = {};
 
             _classCallCheck(this, Image);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
 
-            _this24.$initUIComponent();
-            _this24.source = source;
-            return _this24;
+            _this22.$initUIComponent();
+            _this22.source = source;
+            return _this22;
         }
 
         _createClass(Image, [{
@@ -7234,13 +5315,13 @@ var black = {};
         function MaskUI(data) {
             _classCallCheck(this, MaskUI);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
 
             if (data != null) {
-                _this26._data = data;
+                _this24._data = data;
             }
-            _this26.$initUIComponent();
-            return _this26;
+            _this24.$initUIComponent();
+            return _this24;
         }
 
         _createClass(MaskUI, [{
@@ -7434,20 +5515,20 @@ var black = {};
         function Button() {
             _classCallCheck(this, Button);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-            _this27._enabled = true;
+            _this25._enabled = true;
 
-            _this27.absoluteState = true;
-            _this27.currentState = "up";
+            _this25.absoluteState = true;
+            _this25.currentState = "up";
 
-            _this27.addListener(flower.TouchEvent.TOUCH_BEGIN, _this27.__onTouch, _this27);
-            _this27.addListener(flower.TouchEvent.TOUCH_END, _this27.__onTouch, _this27);
-            _this27.addListener(flower.TouchEvent.TOUCH_RELEASE, _this27.__onTouch, _this27);
-            _this27.addListener(flower.MouseEvent.MOUSE_OVER, _this27.__onMouse, _this27);
-            _this27.addListener(flower.MouseEvent.MOUSE_OUT, _this27.__onMouse, _this27);
-            _this27.addListener(flower.Event.REMOVED, _this27.__onRemoved, _this27);
-            return _this27;
+            _this25.addListener(flower.TouchEvent.TOUCH_BEGIN, _this25.__onTouch, _this25);
+            _this25.addListener(flower.TouchEvent.TOUCH_END, _this25.__onTouch, _this25);
+            _this25.addListener(flower.TouchEvent.TOUCH_RELEASE, _this25.__onTouch, _this25);
+            _this25.addListener(flower.MouseEvent.MOUSE_OVER, _this25.__onMouse, _this25);
+            _this25.addListener(flower.MouseEvent.MOUSE_OUT, _this25.__onMouse, _this25);
+            _this25.addListener(flower.Event.REMOVED, _this25.__onRemoved, _this25);
+            return _this25;
         }
 
         _createClass(Button, [{
@@ -7539,12 +5620,12 @@ var black = {};
         function ToggleButton() {
             _classCallCheck(this, ToggleButton);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-            _this28.$ToggleButton = {
+            _this26.$ToggleButton = {
                 0: false, //
                 1: null };
-            return _this28;
+            return _this26;
         }
 
         _createClass(ToggleButton, [{
@@ -7744,17 +5825,17 @@ var black = {};
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
 
-            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
 
-            _this31._buttons = [];
-            _this31._enabled = true;
+            _this29._buttons = [];
+            _this29._enabled = true;
 
             if (groupName == null || groupName == "") {
-                groupName = "group" + _this31.id;
+                groupName = "group" + _this29.id;
             }
-            _this31._groupName = groupName;
-            RadioButtonGroup.groups.push(_this31);
-            return _this31;
+            _this29._groupName = groupName;
+            RadioButtonGroup.groups.push(_this29);
+            return _this29;
         }
 
         _createClass(RadioButtonGroup, [{
@@ -7918,12 +5999,12 @@ var black = {};
         function ListBase() {
             _classCallCheck(this, ListBase);
 
-            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
 
-            _this33.requireSelection = true;
-            _this33.itemSelectedEnabled = true;
-            _this33.itemClickedEnabled = true;
-            return _this33;
+            _this31.requireSelection = true;
+            _this31.itemSelectedEnabled = true;
+            _this31.itemClickedEnabled = true;
+            return _this31;
         }
 
         return ListBase;
@@ -7940,10 +6021,10 @@ var black = {};
         function List() {
             _classCallCheck(this, List);
 
-            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
 
-            _this34.layout = new VerticalLayout();
-            return _this34;
+            _this32.layout = new VerticalLayout();
+            return _this32;
         }
 
         return List;
@@ -7960,17 +6041,17 @@ var black = {};
         function TabBar() {
             _classCallCheck(this, TabBar);
 
-            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
 
-            _this35.$TabBar = {
+            _this33.$TabBar = {
                 0: false, //more
                 1: null, //moreButton
                 2: null, //moreData
                 3: null };
             //moreList
-            _this35.layout = new HorizontalLayout();
-            _this35.layout.fixElementSize = false;
-            return _this35;
+            _this33.layout = new HorizontalLayout();
+            _this33.layout.fixElementSize = false;
+            return _this33;
         }
 
         _createClass(TabBar, [{
@@ -8087,11 +6168,11 @@ var black = {};
         function ViewStack() {
             _classCallCheck(this, ViewStack);
 
-            var _this36 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
 
-            _this36._items = [];
-            _this36._selectedIndex = -1;
-            return _this36;
+            _this34._items = [];
+            _this34._selectedIndex = -1;
+            return _this34;
         }
 
         _createClass(ViewStack, [{
@@ -8294,9 +6375,9 @@ var black = {};
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this37 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this37.$Scroller = {
+            _this35.$Scroller = {
                 0: null, //viewport
                 1: flower.Size.create(0, 0), //viewSize
                 2: 0, //startX
@@ -8317,17 +6398,17 @@ var black = {};
                 52: 0, //contentWidth
                 53: 0 };
             //contentHeight
-            _this37.addListener(flower.TouchEvent.TOUCH_BEGIN, _this37.__onTouchScroller, _this37);
-            _this37.addListener(flower.TouchEvent.TOUCH_MOVE, _this37.__onTouchScroller, _this37);
-            _this37.addListener(flower.TouchEvent.TOUCH_END, _this37.__onTouchScroller, _this37);
-            _this37.addListener(flower.TouchEvent.TOUCH_RELEASE, _this37.__onTouchScroller, _this37);
-            _this37.width = _this37.height = 100;
+            _this35.addListener(flower.TouchEvent.TOUCH_BEGIN, _this35.__onTouchScroller, _this35);
+            _this35.addListener(flower.TouchEvent.TOUCH_MOVE, _this35.__onTouchScroller, _this35);
+            _this35.addListener(flower.TouchEvent.TOUCH_END, _this35.__onTouchScroller, _this35);
+            _this35.addListener(flower.TouchEvent.TOUCH_RELEASE, _this35.__onTouchScroller, _this35);
+            _this35.width = _this35.height = 100;
             //var bg = new Rect();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this37;
+            return _this35;
         }
 
         _createClass(Scroller, [{
@@ -8720,9 +6801,9 @@ var black = {};
         function ComboBox() {
             _classCallCheck(this, ComboBox);
 
-            var _this38 = _possibleConstructorReturn(this, Object.getPrototypeOf(ComboBox).call(this));
+            var _this36 = _possibleConstructorReturn(this, Object.getPrototypeOf(ComboBox).call(this));
 
-            _this38.$comboBox = {
+            _this36.$comboBox = {
                 0: null, //label
                 1: null, //button
                 2: null, //list
@@ -8734,7 +6815,7 @@ var black = {};
                 8: null, //selectedItem
                 9: false //inSettingValue
             };
-            return _this38;
+            return _this36;
         }
 
         _createClass(ComboBox, [{
@@ -9040,16 +7121,16 @@ var black = {};
         function Panel() {
             _classCallCheck(this, Panel);
 
-            var _this39 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
+            var _this37 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
 
-            _this39.$Panel = {
+            _this37.$Panel = {
                 0: "", //title
                 1: null, //titleLabel
                 2: null, //closeButton
                 3: PanelScaleMode.NO_SCALE, //scaleMode
                 4: null, //iconImage
                 5: "" };
-            return _this39;
+            return _this37;
         }
 
         _createClass(Panel, [{
@@ -9280,14 +7361,14 @@ var black = {};
         function Alert() {
             _classCallCheck(this, Alert);
 
-            var _this40 = _possibleConstructorReturn(this, Object.getPrototypeOf(Alert).call(this));
+            var _this38 = _possibleConstructorReturn(this, Object.getPrototypeOf(Alert).call(this));
 
-            _this40.$Alert = {
+            _this38.$Alert = {
                 0: null, //confirmButton
                 1: null, //cancelButton
                 2: null, //contentLabel
                 3: "" };
-            return _this40;
+            return _this38;
         }
 
         _createClass(Alert, [{
@@ -9402,20 +7483,20 @@ var black = {};
         function Tree() {
             _classCallCheck(this, Tree);
 
-            var _this41 = _possibleConstructorReturn(this, Object.getPrototypeOf(Tree).call(this));
+            var _this39 = _possibleConstructorReturn(this, Object.getPrototypeOf(Tree).call(this));
 
-            _this41.$Tree = {
+            _this39.$Tree = {
                 0: null, //dataProvider
                 1: new flower.ArrayValue(), //dataGroupDataProvider;
                 2: {}, //openCloseTable
                 3: "path" //pathField
             };
-            _this41.requireSelection = true;
-            _this41.itemSelectedEnabled = true;
-            _this41.itemClickedEnabled = true;
-            _this41.layout = new VerticalLayout();
-            _get(Object.getPrototypeOf(Tree.prototype), "$setDataProvider", _this41).call(_this41, _this41.$Tree[1]);
-            return _this41;
+            _this39.requireSelection = true;
+            _this39.itemSelectedEnabled = true;
+            _this39.itemClickedEnabled = true;
+            _this39.layout = new VerticalLayout();
+            _get(Object.getPrototypeOf(Tree.prototype), "$setDataProvider", _this39).call(_this39, _this39.$Tree[1]);
+            return _this39;
         }
 
         _createClass(Tree, [{
@@ -9619,15 +7700,15 @@ var black = {};
 
             _classCallCheck(this, Module);
 
-            var _this42 = _possibleConstructorReturn(this, Object.getPrototypeOf(Module).call(this));
+            var _this40 = _possibleConstructorReturn(this, Object.getPrototypeOf(Module).call(this));
 
-            Module.instance = _this42;
-            _this42.__url = url;
-            _this42.__beforeScript = beforeScript;
-            _this42.__direction = flower.Path.getPathDirection(url);
-            _this42.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
-            _this42.__progress = flower.DataManager.getInstance().createData("ProgressData");
-            return _this42;
+            Module.instance = _this40;
+            _this40.__url = url;
+            _this40.__beforeScript = beforeScript;
+            _this40.__direction = flower.Path.getPathDirection(url);
+            _this40.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
+            _this40.__progress = flower.DataManager.getInstance().createData("ProgressData");
+            return _this40;
         }
 
         _createClass(Module, [{

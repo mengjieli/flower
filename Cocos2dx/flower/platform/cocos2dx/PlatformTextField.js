@@ -33,43 +33,44 @@ class PlatformTextField extends PlatformDisplayObject {
         if (text == "") {
             txt.setString("");
         }
-        for (var i = 0; i < text.length; i++) {
-            //取一行文字进行处理
-            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
-                var str = text.slice(start, i);
-                $mesureTxt.setString(str);
-                var lineWidth = $mesureTxt.getContentSize().width;
-                var findEnd = i;
-                var changeLine = false;
-                //如果这一行的文字宽大于设定宽
-                while (!autoSize && width && lineWidth > width) {
-                    changeLine = true;
-                    findEnd--;
-                    $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                    lineWidth = $mesureTxt.getContentSize().width;
-                }
-                if (wordWrap && changeLine) {
-                    i = findEnd;
-                    txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                } else {
-                    txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                }
-                //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
-                    txt.setString(txtText);
-                    break;
-                } else {
-                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    if (wordWrap && changeLine) {
-                        txtText += "\n";
-                    }
-                }
-                start = i;
-                if (multiline == false) {
-                    break;
-                }
-            }
-        }
+        txt.setString(text);
+        //for (var i = 0; i < text.length; i++) {
+        //    //取一行文字进行处理
+        //    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+        //        var str = text.slice(start, i);
+        //        $mesureTxt.setString(str);
+        //        var lineWidth = $mesureTxt.getContentSize().width;
+        //        var findEnd = i;
+        //        var changeLine = false;
+        //        //如果这一行的文字宽大于设定宽
+        //        while (!autoSize && width && lineWidth > width) {
+        //            changeLine = true;
+        //            findEnd--;
+        //            $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //            lineWidth = $mesureTxt.getContentSize().width;
+        //        }
+        //        if (wordWrap && changeLine) {
+        //            i = findEnd;
+        //            txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        } else {
+        //            txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        }
+        //        //如果文字的高度已经大于设定的高，回退一次
+        //        if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
+        //            txt.setString(txtText);
+        //            break;
+        //        } else {
+        //            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            if (wordWrap && changeLine) {
+        //                txtText += "\n";
+        //            }
+        //        }
+        //        start = i;
+        //        if (multiline == false) {
+        //            break;
+        //        }
+        //    }
+        //}
         $mesureTxt.setString(txt.getString());
         return $mesureTxt.getContentSize();
     }

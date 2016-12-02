@@ -1,9 +1,0 @@
-{
-  "name": "uieditor.VerticalLayout",
-  "extends": "uieditor.LinearLayout",
-  "init": {
-    "align": "vertical"
-  },
-  "members": {
-  }
-}

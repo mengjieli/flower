@@ -1,7 +1,0 @@
-<s:TitlePanel percentWidth="100" percentHeight="100" creationComplete="this.init();" xmlns:f="flower"
-              xmlns:s="modules/software/module.json">
-    <f:script src="./ProjectView.script"/>
-    <s:ScrollerTree id="tree" data="editor.ProjectData" dataProvider="{data.direction}" percentWidth="100"
-                    percentHeight="100"
-                    viewport="software:LabelTree"/>
-</s:TitlePanel>

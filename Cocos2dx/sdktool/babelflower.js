@@ -212,6 +212,7 @@ var list = [
     "Sprite",
     "Mask",
     "Bitmap",
+    "$TextField",
     "TextField",
     "TextInput",
     "Shape",

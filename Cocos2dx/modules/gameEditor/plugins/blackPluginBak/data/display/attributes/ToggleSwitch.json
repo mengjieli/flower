@@ -1,6 +1,0 @@
-{
-  "name": "uieditor.ToggleSwitch",
-  "extends": "uieditor.ToggleButton",
-  "members": {
-  }
-}

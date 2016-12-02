@@ -1,3 +1,0 @@
-<s:Tab class="ModuleView" creationComplete="this.init();" xmlns:f="flower" xmlns:s="modules/software/module.json">
-    <f:script src="./ModuleView.script"/>
-</s:Tab>

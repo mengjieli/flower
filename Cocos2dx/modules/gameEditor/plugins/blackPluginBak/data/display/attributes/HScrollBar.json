@@ -1,6 +1,0 @@
-{
-  "name": "uieditor.HScrollBar",
-  "extends": "uieditor.ScrollBar",
-  "members": {
-  }
-}
