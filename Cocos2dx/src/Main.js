@@ -86,7 +86,7 @@ var Main = function () {
             flower.Stage.getInstance().addChild(rect);
             var richText = new flower.TextField();
             richText.width = 450;
-            //richText.height = 160;
+            richText.height = 400;
             richText.fontColor = 0x00ff00;
             richText.fontSize = 16;
             richText.algin = "center";

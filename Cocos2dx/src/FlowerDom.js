@@ -5313,7 +5313,7 @@ var flower = {};
                 9: 0.5, //shineGap
                 10: 12, //fontSize
                 11: 0, //fontColor
-                12: 1, //linegap
+                12: 3, //linegap
                 13: false, //wordWrap
                 14: new flower.Sprite(), //backgroundContainer
                 15: 0, //textContainerMaskWidth
@@ -5571,10 +5571,6 @@ var flower = {};
                 focus.x = 0;
                 focus.y = 0;
                 p[302] = 0;
-                if (pos == 0) {
-                    p[307] = 0;
-                    return;
-                }
                 var findLine;
                 for (var i = 0; i < lines.length; i++) {
                     if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
@@ -6046,7 +6042,7 @@ var flower = {};
                 var findDisplay;
                 for (var i = 0; i < findSubline.displays.length; i++) {
                     var display = findSubline.displays[i];
-                    if (x >= display.x && x < display.x + display.width || i == findSubline.displays.length - 1) {
+                    if (x < display.x + display.width || i == findSubline.displays.length - 1) {
                         findDisplay = display;
                         break;
                     }
@@ -6386,6 +6382,16 @@ var flower = {};
                     this.dispatchWith(flower.Event.CHANGE);
                 }
                 this.$invalidateContentBounds();
+                for (var i = 0; i < lines.length; i++) {
+                    for (var s = 0; s < lines[i].sublines.length; s++) {
+                        var subline = lines[i].sublines[s];
+                        if (p[21] == "center") {
+                            subline.x = (this.width - subline.width) * .5;
+                        } else if (p[21] == "right") {
+                            subline.x = this.width - subline.width;
+                        }
+                    }
+                }
             }
         }, {
             key: "__findFXML",
@@ -6889,11 +6895,6 @@ var flower = {};
                         //if (!setHeight || line.y <= y + height && line.y + line.height < y + height) {
                         for (var s = 0; s < line.sublines.length; s++) {
                             var subline = line.sublines[s];
-                            if (p[21] == "center") {
-                                subline.x = (this.width - subline.width) * .5;
-                            } else if (p[21] == "right") {
-                                subline.x = this.width - subline.width;
-                            }
                             //if (!setHeight || subline.y <= y + height && subline.y + subline.height < y + height) {
                             var displays = subline.displays;
                             for (var d = 0; d < displays.length; d++) {
@@ -6942,7 +6943,6 @@ var flower = {};
                             rect.height = line.height;
                             rect.x = line.x + line.width;
                             rect.y = line.y;
-                            bgcontainer.addChild(rect);
                         }
                         //}
                     }
@@ -6953,7 +6953,7 @@ var flower = {};
                     p[16] = this.height;
                     this.__shape.clear();
                     this.__shape.drawRect(0, 0, this.width, this.height);
-                    flower.trace(this.width, this.height);
+                    this.$moveCaretIndex();
                 }
 
                 //Sprite
