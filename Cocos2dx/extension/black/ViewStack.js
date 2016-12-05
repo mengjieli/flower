@@ -18,7 +18,7 @@ class ViewStack extends Group {
             }
         }
         this._items.push(display);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
@@ -37,7 +37,7 @@ class ViewStack extends Group {
             }
         }
         this._items.splice(i, 0, display);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
@@ -52,7 +52,7 @@ class ViewStack extends Group {
                 this._items.splice(i, 1);
                 if (display == this._selectedItem) {
                     this._setSelectedIndex(0);
-                    this.dispatchWith(flower.Event.UPDATE);
+                    this.dispatchWith(flower.Event.CHANGE);
                     this.dispatchWith(flower.Event.REMOVED, display);
                 }
                 return display;
@@ -72,7 +72,7 @@ class ViewStack extends Group {
             this._selectedItem = this._items[0];
             this._selectedIndex = 0;
             super.removeChild(display);
-            this.dispatchWith(flower.Event.UPDATE);
+            this.dispatchWith(flower.Event.CHANGE);
             this.dispatchWith(flower.Event.REMOVED, display);
         } else {
             flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
@@ -96,7 +96,7 @@ class ViewStack extends Group {
             if (this._items[i] == display) {
                 this._items.splice(i, 1);
                 this._items.splice(index, 0, display);
-                this.dispatchWith(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
                 return display;
             }
         }
@@ -105,7 +105,7 @@ class ViewStack extends Group {
 
     sortChild(key, opt = 0) {
         super.sortChild(key, opt);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     _setSelectedIndex(val) {
@@ -121,7 +121,7 @@ class ViewStack extends Group {
             super.addChildAt(this._selectedItem, this.numChildren);
         }
         this.dispatchWith(flower.Event.CHANGE, this._selectedItem);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     get length() {

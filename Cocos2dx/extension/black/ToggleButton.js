@@ -93,11 +93,11 @@ class ToggleButton extends Button {
             return;
         }
         if (p[1] && p[1] instanceof flower.Value) {
-            p[1].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            p[1].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         p[1] = val;
         if (p[1] && p[1] instanceof flower.Value) {
-            p[1].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+            p[1].addListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.__valueChange();
     }

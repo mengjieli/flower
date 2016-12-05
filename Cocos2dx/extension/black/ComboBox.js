@@ -205,13 +205,13 @@ class ComboBox extends Group {
             return;
         }
         if (p[7] && p[7] instanceof flower.Value) {
-            p[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+            p[7].removeListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
         }
         p[7] = val;
         if (p[7]) {
             p[9] = true;
             if (p[7] instanceof flower.Value) {
-                p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                p[7].addListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
                 this.dataProvider = new flower.ArrayValue(p[7].enumList);
             }
             p[9] = false;

@@ -2026,7 +2026,6 @@ class Event {
     static CLOSE = "close";
     static CHANGE = "change";
     static ERROR = "error";
-    static UPDATE = "update";
     static FOCUS_IN = "focus_in";
     static FOCUS_OUT = "focus_out";
     static CONFIRM = "confirm";
@@ -4449,12 +4448,22 @@ class $TextField extends DisplayObject {
 
 
 //////////////////////////File:flower/display/TextField.js///////////////////////////
-class TextField extends flower.Mask {
+class TextField extends flower.DisplayObject {
 
     __input;
+    __shape;
+    __children;
+    __childrenBounds;
 
-    constructor() {
+
+    constructor(text) {
         super();
+
+        this.$Sprite = {
+            0: new flower.Rectangle() //childrenBounds
+        }
+        this.$initContainer();
+        DebugInfo.displayInfo.sprite++;
 
         this.$TextField = {
             0: "", //text
@@ -4462,24 +4471,32 @@ class TextField extends flower.Mask {
             2: [], //lines
             3: 0,  //inputLength
             4: new flower.Sprite(), //textContainer
-            5: this.__getDefaultFocus(), //focus
+            5: null,//this.__getDefaultFocus(), //focus
             6: "", //setHtmlText
             7: 0, //chars
-            8: 0, //posY
             9: 0.5, //shineGap
             10: 12,//fontSize
             11: 0, //fontColor
-            12: 1, //linegap
+            12: 4, //leading
             13: false,  //wordWrap
-            14: new flower.Sprite(), //backgroundContainer
+            14: null,//new flower.Sprite(), //backgroundContainer
             15: 0, //textContainerMaskWidth
             16: 0, //textContainerMaskHeight
+            17: 0, //contentWidth
+            18: 0, //contentHeight
+            21: "left", //algin
+            22: false, //input
+            23: true, //selectable
+            24: true, //multiline
+            29: 2, //lineStart
             30: 0, //caretIndex
             31: 0, //caretHtmlIndex
             32: null,//caretLine
             32: null,//caretDisplayLine
             33: null,//caretDisplay
             34: 0, //caretDisplayIndex
+            50: 0, //posX
+            51: 0, //posY
             100: false,//updateFlag
             101: {}, //DisplayCaches
             102: {}, //ids
@@ -4497,6 +4514,8 @@ class TextField extends flower.Mask {
             311: null,
             312: null,
             313: null,
+            350: 0,
+            351: 0,
             330: 0,//touchDown charIndex
             400: false, //是否在选中状态
             401: [], //selectedHtmlText 被选中的段落
@@ -4504,19 +4523,51 @@ class TextField extends flower.Mask {
             1000: 0x526da5, //文字选中后的背景色
             1001: 0xffffff //被选文字的颜色
         };
-        this.addChild(this.$TextField[14]);
+        this.$TextField[4].x = this.$TextField[29];
         this.addChild(this.$TextField[4]);
-        this.addChild(this.$TextField[5]);
+        //this.addChild(this.$TextField[5]);
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
         this.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouch, this);
         this.addListener(flower.Event.FOCUS_OUT, this.__stopInput, this);
         this.focusEnabled = true;
         this.__input = flower.Stage.getInstance().$input;
         flower.EnterFrame.add(this.$update, this);
+
+        if(text && text != "") {
+            this.text = text;
+        }
+    }
+
+    __createBackgroundContainer() {
+        var p = this.$TextField;
+        if (p[14] == null) {
+            p[14] = new flower.Sprite();
+            var index = this.getChildIndex(p[4]);
+            this.addChildAt(p[14], (index - 1) < 0 ? 0 : index - 1);
+            if (p[21] == "right") {
+                p[14].x = -p[29];
+            } else if (p[21] == "center") {
+                p[14].x = 0;
+            } else {
+                p[14].x = p[29];
+            }
+        }
+    }
+
+    __crateFocus() {
+        var p = this.$TextField;
+        if (!p[5]) {
+            var index = this.getChildIndex(p[4]);
+            p[5] = this.__getDefaultFocus();
+            this.addChildAt(p[5], index + 1);
+        }
     }
 
     __onTouch(e) {
         var p = this.$TextField;
+        if (!p[23]) {
+            return;
+        }
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
                 this.__cancelSelect();
@@ -4586,17 +4637,22 @@ class TextField extends flower.Mask {
             return;
         }
         //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
-        p[300] = true;
-        p[301] = info.charIndex;
-        p[302] = info.htmlTextIndex;
-        p[307] = info.lineCharIndex;
-        p[308].length = 0;
-        this.__input.text = "";
-        this.__input.$setNativeText("");
-        this.__input.$startNativeInput();
+        if (this.input) {
+            if (!p[5]) {
+                this.__crateFocus();
+            }
+            p[300] = true;
+            p[301] = info.charIndex;
+            p[302] = info.htmlTextIndex;
+            p[307] = info.lineCharIndex;
+            p[308].length = 0;
+            this.__input.text = "";
+            this.__input.$setNativeText("");
+            this.__input.$startNativeInput();
+            flower.EnterFrame.add(this.__update, this);
+            this.__showFocus(info);
+        }
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
-        flower.EnterFrame.add(this.__update, this);
-        this.__showFocus(info);
     }
 
     __stopInput() {
@@ -4608,7 +4664,9 @@ class TextField extends flower.Mask {
     }
 
     __hideFocus() {
-        this.$TextField[5].visible = false;
+        if (this.$TextField[5]) {
+            this.$TextField[5].visible = false;
+        }
     }
 
     __onKeyDown(e) {
@@ -4687,6 +4745,9 @@ class TextField extends flower.Mask {
                 break;
             }
         }
+        if (!findSubline) {
+            return;
+        }
         pos -= findSubline.charIndex;
         var findDisplay;
         for (var i = 0; i < findSubline.displays.length; i++) {
@@ -4714,16 +4775,53 @@ class TextField extends flower.Mask {
      */
     $moveCaretIndex(lineIndex = 0) {
         var p = this.$TextField;
+        this.__moveCareIndex(lineIndex);
+        var focus = p[5];
+        if (focus) {
+            if (p[21] == "right") {
+                focus.x -= p[29];
+            } else if (p[21] == "center") {
+
+            } else {
+                focus.x += p[29];
+            }
+            if (focus.x + p[50] < p[29]) {
+                p[50] = p[29] - focus.x;
+                p[100] = true;
+            }
+            if (focus.x + focus.width > this.width - p[29]) {
+                p[50] = this.width - p[29] - (focus.x + focus.width);
+                p[100] = true;
+            }
+            if (focus.y + p[51] < 0) {
+                p[51] = -focus.y;
+                p[100] = true;
+            }
+            if (focus.y + focus.height > this.height) {
+                p[51] = this.height - (focus.y + focus.height);
+                p[100] = true;
+            }
+            focus.x += p[50];
+            focus.y += p[51];
+        }
+    }
+
+    __moveCareIndex(lineIndex = 0) {
+        var p = this.$TextField;
         var lines = p[2];
         var pos = p[301];
         var focus = p[5];
-        focus.x = 0;
-        focus.y = 0;
-        p[302] = 0;
-        if (pos == 0) {
-            p[307] = 0;
-            return;
+        if (focus) {
+            focus.x = 0;
+            focus.y = 0;
+            focus.height = p[10] + p[12] * 0.5;
+            if (p[21] == "center") {
+                focus.x = (this.width) * .5;
+            } else if (p[21] == "right") {
+                focus.x = this.width;
+            }
         }
+        p[302] = 0;
         var findLine;
         for (var i = 0; i < lines.length; i++) {
             if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
@@ -4734,9 +4832,11 @@ class TextField extends flower.Mask {
         if (!findLine) {
             return;
         }
-        focus.x = findLine.x;
-        focus.y = findLine.y;
-        focus.height = findLine.height;
+        if (focus) {
+            focus.x = findLine.x;
+            focus.y = findLine.y;
+            focus.height = findLine.height;
+        }
         pos -= findLine.charIndex;
         p[302] = findLine.htmlTextIndex;
         var findSubline;
@@ -4784,28 +4884,33 @@ class TextField extends flower.Mask {
                     lineIndex++;
                 }
             }
-            focus.x = findLine.x;
-            focus.y = findLine.y;
-            focus.height = findLine.height;
+            if (focus) {
+                focus.x = findLine.x;
+                focus.y = findLine.y;
+                focus.height = findLine.height;
+            }
             p[302] = findLine.htmlTextIndex;
             p[301] = findLine.charIndex;
             if (!findSubline) {
                 return;
             } else {
-                focus.x += findSubline.x;
-                focus.y += findSubline.y;
-                focus.height = findSubline.height;
+                if (focus) {
+                    focus.x += findSubline.x;
+                    focus.y += findSubline.y;
+                    focus.height = findSubline.height;
+                }
                 p[302] += findSubline.htmlTextIndex;
                 p[301] += pos < findSubline.chars ? pos : findSubline.chars;
             }
         } else {
             if (!findSubline) {
-                p[307] = pos;
                 return;
             } else {
-                focus.x += findSubline.x;
-                focus.y += findSubline.y;
-                focus.height = findSubline.height;
+                if (focus) {
+                    focus.x += findSubline.x;
+                    focus.y += findSubline.y;
+                    focus.height = findSubline.height;
+                }
                 pos -= findSubline.charIndex;
                 p[302] += findSubline.htmlTextIndex;
                 p[307] = pos;
@@ -4824,17 +4929,23 @@ class TextField extends flower.Mask {
         if (!findDisplay) {
             return;
         }
-        focus.x += findDisplay.x;
+        if (focus) {
+            focus.x += findDisplay.x;
+        }
         pos -= findDisplay.charIndex;
         p[302] += findDisplay.htmlTextIndex;
         if (findDisplay.type == 0) {
             var text = findDisplay.text;
             var size = findDisplay.font.size;
-            focus.x += flower.$measureTextWidth(size, text.slice(0, pos));
+            if (focus) {
+                focus.x += flower.$measureTextWidth(size, text.slice(0, pos));
+            }
             p[302] += findDisplay.textStart + this.__changeText(text.slice(0, pos)).length;
         } else {
             if (pos) {
-                focus.x += findDisplay.width;
+                if (focus) {
+                    focus.x += findDisplay.width;
+                }
                 p[302] += findDisplay.htmlText.length;
             }
         }
@@ -5047,7 +5158,7 @@ class TextField extends flower.Mask {
 
     __doKeyEvent(e) {
         var p = this.$TextField;
-        if (e.keyCode == 229) {
+        if (e.keyCode == 229 && this.input) {
             if (!p[304]) {
                 p[304] = true;
                 p[305] = "";
@@ -5055,6 +5166,8 @@ class TextField extends flower.Mask {
                 p[312] = p[302];
                 p[313] = p[1];
                 p[323] = p[3];
+                p[350] = p[50];
+                p[351] = p[51];
             }
             p[6] += "1";
             var str = this.__input.$getNativeText();
@@ -5065,6 +5178,8 @@ class TextField extends flower.Mask {
             p[3] = p[323];
             p[301] = p[311];
             p[302] = p[312];
+            p[50] = p[350];
+            p[51] = p[351];
             if (e.keyCode == 16 || str != p[306].slice(0, str.length) && str.charAt(str.length - 1) != p[305] && str.charAt(str.length - 2) != p[305] && str.charAt(str.length - 3) != p[305]) {
                 this.__inputText(str);
                 this.__input.$setNativeText("");
@@ -5077,9 +5192,12 @@ class TextField extends flower.Mask {
                 p[306] = str;
                 p[305] = str.charAt(str.length - 1);
             }
-        } else if (e.keyCode == 13) {
-            this.__inputText("\n");
-        } else if (e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) {
+        } else if (e.keyCode == 13 && this.input) {
+            if(p[24]) {
+                this.__inputText("\n");
+            } else {
+            }
+        } else if ((e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) && this.input) {
             if (e.keyCode == 37) {
                 if (p[301] == 0) {
                     return;
@@ -5109,7 +5227,7 @@ class TextField extends flower.Mask {
             }
         } else if (e.keyCode == 91 || e.keyCode == 17) {
 
-        } else {
+        } else if (this.input) {
             var str = this.__input.$getNativeText();
             if (str.length) {
                 this.__inputText(str);
@@ -5120,16 +5238,54 @@ class TextField extends flower.Mask {
 
     __showFocus(info) {
         var p = this.$TextField;
-        p[5].visible = true;
+        if (this.input) {
+            p[5].visible = true;
+        } else {
+            p[5].visible = false;
+        }
         p[5].x = info.focusX;
+        if (p[21] == "right") {
+            p[5].x -= p[29];
+        } else if (p[21] == "center") {
+
+        } else {
+            p[5].x += p[29];
+        }
         p[5].y = info.focusY;
         p[5].height = info.focusHeight;
+        if (p[5].x + p[50] < p[29]) {
+            p[50] = p[29] - p[5].x;
+            p[100] = true;
+        }
+        if (p[5].x + p[5].width > this.width - p[29]) {
+            p[50] = this.width - p[29] - (p[5].x + p[5].width);
+            p[100] = true;
+        }
+        if (p[5].y + p[51] < 0) {
+            p[51] = -p[5].y;
+            p[100] = true;
+        }
+        if (p[5].y + p[5].height > this.height) {
+            p[51] = this.height - (p[5].y + p[5].height);
+            p[100] = true;
+        }
+        p[5].x += p[50];
+        p[5].y += p[51];
     }
 
     __getClickPos() {
         var p = this.$TextField;
         var x = this.lastTouchX;
-        var y = this.lastTouchY + p[8];
+        var y = this.lastTouchY;
+        if (p[21] == "right") {
+            x += p[29];
+        } else if (p[21] == "center") {
+
+        } else {
+            x -= p[29];
+        }
+        x -= p[50];
+        y -= p[51];
         var lines = p[2];
         var findLine;
         var res = {
@@ -5140,9 +5296,16 @@ class TextField extends flower.Mask {
             htmlTextIndex: 0,
             focusX: 0,
             focusY: 0,
-            focusHeight: p[10],
+            focusHeight: p[10] + p[12] * 0.5,
             lineCharIndex: 0
         };
+        if (p[21] == "center") {
+            res.focusX = this.width * .5;
+        } else if (p[21] == "right") {
+            res.focusX = this.width;
+        } else {
+            res.focusX = 0;
+        }
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
             if (line.y <= y && line.y + line.height > y || i == lines.length - 1) {
@@ -5170,6 +5333,11 @@ class TextField extends flower.Mask {
             }
         }
         if (!findSubline) {
+            if (p[21] == "center") {
+                res.focusX = (this.width - line.width) * .5;
+            } else if (p[21] == "right") {
+                res.focusX = this.width;
+            }
             return res;
         }
         res.subline = findSubline;
@@ -5183,13 +5351,13 @@ class TextField extends flower.Mask {
         var findDisplay;
         for (var i = 0; i < findSubline.displays.length; i++) {
             var display = findSubline.displays[i];
-            if (x >= display.x && x < display.x + display.width || i == findSubline.displays.length - 1) {
+            if (x < display.x + display.width || i == findSubline.displays.length - 1) {
                 findDisplay = display;
                 break;
             }
         }
         if (!findDisplay) {
-            return;
+            return res;
         }
         res.display = findDisplay;
         res.charIndex += findDisplay.charIndex;
@@ -5229,7 +5397,7 @@ class TextField extends flower.Mask {
         return res;
     }
 
-    $setHtmlText(text, change = true) {
+    $setHtmlText(text) {
         var p = this.$TextField;
         this.__resetCaches();
         this.__clearOldDisplay();
@@ -5459,25 +5627,30 @@ class TextField extends flower.Mask {
                     }
                 }
             }
-            if (i == len - 1) {
-                decodeText = true;
-            }
             var newLine = false;
             if (char == "\n" || char == "\r" || text.slice(i, i + "<br/>".length) == "<br/>") {
-                newLine = true;
+                if (p[24]) {
+                    newLine = true;
+                    decodeText = true;
+                    if (oldFont.select) {
+                        line.selectEnd = true;
+                    }
+                    if (char == "\n" || char == "\r") {
+                        line.endHtmlText = char;
+                        lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
+                        lastText = lastText.slice(0, lastText.length - 1);
+                    } else if (text.slice(i, i + "<br/>".length) == "<br/>") {
+                        line.endHtmlText = "<br/>";
+                        lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
+                        last = -1;
+                    }
+                } else {
+                    text = text.slice(0, i);
+                    len = text.length;
+                }
+            }
+            if (i == len - 1) {
                 decodeText = true;
-                if (oldFont.select) {
-                    line.selectEnd = true;
-                }
-                if (char == "\n" || char == "\r") {
-                    line.endHtmlText = char;
-                    lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
-                    lastText = lastText.slice(0, lastText.length - 1);
-                } else if (text.slice(i, i + "<br/>".length) == "<br/>") {
-                    line.endHtmlText = "<br/>";
-                    lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
-                    last = -1;
-                }
             }
             if (decodeText) {
                 this.__decodeText(line, oldFont, this.__changeRealText(lastText), lastHtmlText, lastTextStart);
@@ -5502,14 +5675,35 @@ class TextField extends flower.Mask {
             }
             lastHtmlText += nextHtmlText;
         }
+        var oldText = p[0];
+        p[0] = "";
         p[1] = "";
         p[3] = 0;
+        var maxWidth = 0;
+        var maxHeight = 0;
         for (var i = 0; i < lines.length; i++) {
             p[1] += lines[i].htmlText + lines[i].endHtmlText;
             p[3] += lines[i].chars;
+            maxWidth = lines[i].width > maxWidth ? lines[i].width : maxWidth;
+            maxHeight += lines[i].height;
+            p[0] += lines[i].text + (i < lines.length - 1 ? "\n" : "");
         }
+        maxWidth += p[29] * 2;
+        p[17] = maxWidth;
+        p[18] = maxHeight;
         p[100] = true;
-        if (change) {
+        this.$invalidateContentBounds();
+        for (var i = 0; i < lines.length; i++) {
+            for (var s = 0; s < lines[i].sublines.length; s++) {
+                var subline = lines[i].sublines[s];
+                if (p[21] == "center") {
+                    subline.x = (this.width - subline.width) * .5;
+                } else if (p[21] == "right") {
+                    subline.x = (this.width - subline.width);
+                }
+            }
+        }
+        if (oldText != p[0]) {
             this.dispatchWith(flower.Event.CHANGE);
         }
     }
@@ -5571,11 +5765,36 @@ class TextField extends flower.Mask {
         if (!line.sublines.length) {
             this.__addSubLine(line, font);
         }
-        var subline = line.sublines[line.sublines.length - 1];
-        var width = flower.$measureTextWidth(font.size, text);
-        if (p[13]) {
-            //var max = this.width;
-        } else {
+        var nextText = "";
+        var nextHtmlText = "";
+        var nextTextStart = 0;
+        while (text.length) {
+            nextText = "";
+            nextHtmlText = "";
+            nextTextStart = 0;
+            var subline = line.sublines[line.sublines.length - 1];
+            var width = flower.$measureTextWidth(font.size, text);
+            if (p[13] && this.$DisplayObject[3] != null) {
+                if (subline.width + width + p[29] * 2 > this.width) {
+                    for (var t = text.length; t >= 0; t--) {
+                        width = flower.$measureTextWidth(font.size, text.slice(0, t));
+                        if (subline.width + width + p[29] * 2 <= this.width) {
+                            if (t == 0) {
+                                this.__addSubLine(line, font);
+                                subline = line.sublines[line.sublines.length - 1];
+                                t = text.length + 1;
+                            } else {
+                                nextText = text.slice(t, text.length);
+                                nextHtmlText = htmlText.slice(textStart + t, htmlText.length);
+                                nextTextStart = 0;
+                                text = text.slice(0, t);
+                                htmlText = htmlText.slice(0, textStart + t);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             var item = {
                 type: 0,
                 display: null,
@@ -5610,6 +5829,14 @@ class TextField extends flower.Mask {
             line.htmlText += item.htmlText;
             subline.positionX += item.width;
             subline.displays.push(item);
+
+            text = nextText;
+            htmlText = nextHtmlText;
+            textStart = nextTextStart;
+            if (text.length) {
+                this.__addSubLine(line, font);
+                subline = line.sublines[line.sublines.length - 1];
+            }
         }
     }
 
@@ -5675,11 +5902,11 @@ class TextField extends flower.Mask {
                 this[id] = image;
             }
         }
-        if (p[13]) {
-            //if (this.$DisplayObject[3] != null && subline.width + image.width > this.width) {
-            //    this.__addSubLine(line, font);
-            //    subline = line.sublines[line.sublines.length - 1];
-            //}
+        if (p[13] && this.$DisplayObject[3] != null) {
+            if (subline.width + image.width + p[29] * 2 > this.width) {
+                this.__addSubLine(line, font);
+                subline = line.sublines[line.sublines.length - 1];
+            }
         }
         cache.width = image.width;
         cache.height = image.height;
@@ -5764,11 +5991,11 @@ class TextField extends flower.Mask {
                 this[id] = ui;
             }
         }
-        if (p[13]) {
-            //if (this.$DisplayObject[3] != null && subline.width + ui.width > this.width) {
-            //    this.__addSubLine(line, font);
-            //    subline = line.sublines[line.sublines.length - 1];
-            //}
+        if (p[13] && this.$DisplayObject[3] != null) {
+            if (subline.width + ui.width + p[29] * 2 > this.width) {
+                this.__addSubLine(line, font);
+                subline = line.sublines[line.sublines.length - 1];
+            }
         }
         cache.width = ui.width;
         cache.height = ui.height;
@@ -5848,8 +6075,8 @@ class TextField extends flower.Mask {
             endHtmlText: "",
             selectEnd: false,
             htmlTextIndex: 0,
-            width: 0,
-            height: font.size,
+            width: 4,
+            height: font.size + font.gap,
             x: 0,
             y: 0,
             charIndex: 0,
@@ -5861,7 +6088,6 @@ class TextField extends flower.Mask {
             line.y = lastLine.y + lastLine.height;
             line.htmlTextIndex = lastLine.htmlTextIndex + lastLine.htmlText.length + lastLine.endHtmlText.length;
             line.charIndex = lastLine.charIndex + lastLine.chars;
-            line.height = font.size + font.gap;
         }
         return line;
     }
@@ -5872,9 +6098,9 @@ class TextField extends flower.Mask {
             text: "",
             htmlText: "",
             htmlTextIndex: line.htmlText.length,
-            width: 0,
-            gap: (line.index == 0 && line.sublines.length == 0 ? 0 : font.gap),
-            height: font.size + (line.index == 0 && line.sublines.length == 0 ? 0 : font.gap),
+            width: 4,
+            gap: font.gap,
+            height: font.size + font.gap,
             x: 0,
             y: line.positionY,
             charIndex: line.chars,
@@ -5885,6 +6111,9 @@ class TextField extends flower.Mask {
         };
         line.sublines.push(subline);
         line.positionY += subline.height;
+        if (subline.y + subline.height > line.height) {
+            line.height = subline.y + subline.height;
+        }
     }
 
     __getDefaultFocus() {
@@ -5897,21 +6126,23 @@ class TextField extends flower.Mask {
     }
 
     __setFontSize(val) {
-        val = +val || 0;
+        val = +val & ~0;
         var p = this.$TextField;
         if (val == p[10]) {
             return;
         }
         p[10] = val;
+        this.$setHtmlText(p[1]);
     }
 
     __setFontColor(val) {
-        val = +val || 0;
+        val = +val & ~0;
         var p = this.$TextField;
         if (val == p[11]) {
             return;
         }
         p[11] = val;
+        this.$setHtmlText(p[1]);
     }
 
     __setHtmlText(val) {
@@ -5924,6 +6155,7 @@ class TextField extends flower.Mask {
     }
 
     __setText(val) {
+        val += "";
         var val = this.__changeText(val);
         this.__setHtmlText(val);
     }
@@ -5986,67 +6218,73 @@ class TextField extends flower.Mask {
         if (p[100]) {
             p[100] = false;
             var lines = p[2];
-            var y = p[8];
+            var x = p[50];
+            var y = p[51];
             var container = p[4];
             var bgcontainer = p[14];
             container.removeAll();
-            bgcontainer.removeAll();
+            if (bgcontainer) {
+                bgcontainer.removeAll();
+            }
             var height = this.height;
             for (var l = 0; l < lines.length; l++) {
                 var line = lines[l];
                 //if (!setHeight || line.y <= y + height && line.y + line.height < y + height) {
-                    for (var s = 0; s < line.sublines.length; s++) {
-                        var subline = line.sublines[s];
-                        //if (!setHeight || subline.y <= y + height && subline.y + subline.height < y + height) {
-                            var displays = subline.displays;
-                            for (var d = 0; d < displays.length; d++) {
-                                var item = displays[d];
-                                var display = item.display;
-                                if (item.type == 0) {
-                                    if (!display) {
-                                        display = new $TextField(item.text);
-                                        display.fontSize = item.font.size;
-                                        display.fontColor = item.font.select ? p[1001] : item.font.color;
-                                        item.display = display;
-                                    }
-                                }
-                                if (item.font.under && item.width) {
-                                    if (!item.underDisplay) {
-                                        item.underDisplay = new flower.Rect();
-                                        item.underDisplay.fillColor = item.font.select ? p[1001] : item.font.underColor;
-                                        item.underDisplay.width = item.width;
-                                        item.underDisplay.height = 1;
-                                    }
-                                    item.underDisplay.x = line.x + subline.x + item.x;
-                                    item.underDisplay.y = line.y + subline.y + subline.height;
-                                    container.addChild(item.underDisplay);
-                                }
-                                if (item.font.select && item.width) {
-                                    if (!item.selectDisplay) {
-                                        item.selectDisplay = new flower.Rect();
-                                        item.selectDisplay.fillColor = p[1000];
-                                        item.selectDisplay.width = item.width;
-                                        item.selectDisplay.height = subline.height;
-                                    }
-                                    item.selectDisplay.x = line.x + subline.x + item.x;
-                                    item.selectDisplay.y = line.y + subline.y;
-                                    bgcontainer.addChild(item.selectDisplay);
-                                }
-                                container.addChild(item.display);
-                                display.x = line.x + subline.x + item.x;
-                                display.y = line.y + subline.y + subline.height - item.height;
+                for (var s = 0; s < line.sublines.length; s++) {
+                    var subline = line.sublines[s];
+                    //if (!setHeight || subline.y <= y + height && subline.y + subline.height < y + height) {
+                    var displays = subline.displays;
+                    for (var d = 0; d < displays.length; d++) {
+                        var item = displays[d];
+                        var display = item.display;
+                        if (item.type == 0) {
+                            if (!display) {
+                                display = new $TextField(item.text);
+                                display.fontSize = item.font.size;
+                                display.fontColor = item.font.select ? p[1001] : item.font.color;
+                                item.display = display;
                             }
-                        //}
+                        }
+                        if (item.font.under && item.width) {
+                            if (!item.underDisplay) {
+                                item.underDisplay = new flower.Rect();
+                                item.underDisplay.fillColor = item.font.select ? p[1001] : item.font.underColor;
+                                item.underDisplay.width = item.width;
+                                item.underDisplay.height = 1;
+                            }
+                            item.underDisplay.x = x + line.x + subline.x + item.x;
+                            item.underDisplay.y = y + line.y + subline.y + subline.height;
+                            container.addChild(item.underDisplay);
+                        }
+                        if (item.font.select && item.width) {
+                            if (!item.selectDisplay) {
+                                item.selectDisplay = new flower.Rect();
+                                item.selectDisplay.fillColor = p[1000];
+                                item.selectDisplay.width = item.width;
+                                item.selectDisplay.height = subline.height;
+                            }
+                            item.selectDisplay.x = x + line.x + subline.x + item.x;
+                            item.selectDisplay.y = y + line.y + subline.y;
+                            if (!bgcontainer) {
+                                this.__createBackgroundContainer();
+                                bgcontainer = p[14];
+                            }
+                            bgcontainer.addChild(item.selectDisplay);
+                        }
+                        container.addChild(item.display);
+                        display.x = x + line.x + subline.x + item.x;
+                        display.y = y + line.y + subline.y + subline.height - item.height - (subline.gap * 0.5);
                     }
-                    if (line.selectEnd) {
-                        var rect = new flower.Rect();
-                        rect.fillColor = p[1000];
-                        rect.width = this.width - line.x - line.width;
-                        rect.height = line.height;
-                        rect.x = line.x + line.width;
-                        rect.y = line.y;
-                        bgcontainer.addChild(rect);
-                    }
+                    //}
+                }
+                if (line.selectEnd) {
+                    var rect = new flower.Rect();
+                    rect.fillColor = p[1000];
+                    rect.width = this.width - line.x - line.width;
+                    rect.height = line.height;
+                    rect.x = x + line.x + line.width;
+                    rect.y = y + line.y;
+                }
                 //}
             }
             this.__clearCaches();
@@ -6054,11 +6292,36 @@ class TextField extends flower.Mask {
         if (p[15] != this.width || p[16] != this.height) {
             p[15] = this.width;
             p[16] = this.height;
-            this.shape.clear();
-            this.shape.drawRect(0, 0, this.width, this.height);
-            flower.trace(this.width,this.height)
+            this.__shape.clear();
+            this.__shape.drawRect(p[29], 0, this.width - p[29] * 2, this.height + 2);
+            this.$moveCaretIndex();
         }
-        super.$onFrameEnd();
+
+        //Sprite
+        var children = this.__children;
+        /**
+         * 子对象序列改变
+         */
+        if (this.$hasFlags(0x0100)) {
+            if (!this.$nativeShow) {
+                $warn(1002, this.name);
+                return;
+            }
+            this.$nativeShow.resetChildIndex(children);
+            this.$removeFlags(0x0100);
+        }
+        for (var i = 0, len = children.length; i < len; i++) {
+            if (children[i].visible) {
+                children[i].$onFrameEnd();
+            }
+        }
+        //super.$onFrameEnd();
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.sprite++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     $update() {
@@ -6081,28 +6344,260 @@ class TextField extends flower.Mask {
         }
     }
 
+    $initContainer() {
+        this.__children = [];
+        this.$nativeShow = Platform.create("Mask");
+        this.__shape = this.$createShape();
+        this.$nativeShow.setShape(this.__shape.$nativeShow, this.__shape);
+    }
+
+    $createShape() {
+        return new Shape();
+    }
+
+    $addFlagsDown(flags) {
+        if (this.$hasFlags(flags)) {
+            return;
+        }
+        this.$addFlags(flags);
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$addFlagsDown(flags);
+        }
+    }
+
+    $removeFlagsDown(flags) {
+        if (!this.$hasFlags(flags)) {
+            return;
+        }
+        this.$removeFlags(flags);
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$removeFlagsDown(flags);
+        }
+    }
+
+    addChild(child) {
+        this.addChildAt(child, this.__children.length);
+        return child;
+    }
+
+    addChildAt(child, index) {
+        var children = this.__children;
+        if (index < 0 || index > children.length) {
+            return child;
+        }
+        if (child.parent == this) {
+            this.setChildIndex(child, index);
+        } else {
+            if (child.parent) {
+                child.parent.$removeChild(child);
+            }
+            if (!this.$nativeShow) {
+                $warn(1002, this.name);
+                return null;
+            }
+            this.$nativeShow.addChild(child.$nativeShow);
+            children.splice(index, 0, child);
+            child.$setStage(this.stage);
+            child.$setParent(this);
+            if (child.parent == this) {
+                child.$dispatchAddedToStageEvent();
+                this.$invalidateContentBounds();
+                this.$addFlags(0x0100);
+            }
+        }
+        return child;
+    }
+
+    $setStage(stage) {
+        super.$setStage(stage);
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$setStage(this.stage);
+        }
+    }
+
+    $dispatchAddedToStageEvent() {
+        super.$dispatchAddedToStageEvent();
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$dispatchAddedToStageEvent();
+        }
+    }
+
+    $dispatchRemovedFromStageEvent() {
+        super.$dispatchRemovedFromStageEvent();
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$dispatchRemovedFromStageEvent();
+        }
+    }
+
+    $removeChild(child) {
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            if (children[i] == child) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                this.$nativeShow.removeChild(child.$nativeShow);
+                children.splice(i, 1);
+                this.$invalidateContentBounds();
+                this.$addFlags(0x0100);
+                return child;
+            }
+        }
+        return null;
+    }
+
+    removeChild(child) {
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            if (children[i] == child) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                this.$nativeShow.removeChild(child.$nativeShow);
+                children.splice(i, 1);
+                child.$setStage(null);
+                child.$setParent(null);
+                child.$dispatchRemovedFromStageEvent();
+                this.$invalidateContentBounds();
+                this.$addFlags(0x0100);
+                return child;
+            }
+        }
+        return null;
+    }
+
+    removeChildAt(index) {
+        var children = this.__children;
+        if (index < 0 || index >= children.length) {
+            return;
+        }
+        return this.removeChild(children[index]);
+    }
+
+    setChildIndex(child, index) {
+        var childIndex = this.getChildIndex(child);
+        if (childIndex == index || childIndex < 0) {
+            return null;
+        }
+        var children = this.__children;
+        children.splice(childIndex, 1);
+        children.splice(index, 0, child);
+        this.$addFlags(0x0100);
+        return child;
+    }
+
+    getChildIndex(child) {
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            if (child == children[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    getChildAt(index) {
+        index = index & ~0;
+        if (index < 0 || index > this.__children.length - 1) {
+            $error(1007, "getChildAt", index, this.__children.length);
+            return null;
+        }
+        return this.__children[index];
+    }
+
+    removeAll() {
+        while (this.numChildren) {
+            this.removeChildAt(0);
+        }
+    }
+
+    $changeAllFilters() {
+        super.$changeAllFilters();
+        var children = this.__children;
+        for (var i = 0, len = children.length; i < len; i++) {
+            children[i].$setParentFilters(this.$getAllFilters());
+        }
+    }
+
+    /**
+     * 测量子对象的区域
+     * @param rect
+     */
+    $measureContentBounds(rect) {
+        rect.x = 0;
+        rect.y = 0;
+        rect.width = this.$TextField[17];
+        rect.height = this.$TextField[18];
+        var childrenBounds = this.$Sprite[0];
+        childrenBounds.x = rect.x;
+        childrenBounds.y = rect.y;
+        childrenBounds.width = rect.width;
+        childrenBounds.height = rect.height;
+    }
+
     $getMouseTarget(touchX, touchY, multiply) {
         if (this.touchEnabled == false || this.visible == false)
             return null;
         if (multiply == true && this.multiplyTouchEnabled == false)
             return null;
-        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, flower.Point.$TempPoint);
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
         touchX = math.floor(point.x);
         touchY = math.floor(point.y);
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
-        if (touchX >= 0 && touchX < this.width && touchY >= 0 && touchY < this.height) {
+        var bounds = this.__shape.$getContentBounds();
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+            var target;
+            var childs = this.__children;
+            var len = childs.length;
+            for (var i = len - 1; i >= 0; i--) {
+                if (childs[i].touchEnabled && (multiply == false || (multiply == true && childs[i].multiplyTouchEnabled == true))) {
+                    target = childs[i].$getMouseTarget(touchX, touchY, multiply);
+                    if (target) {
+                        break;
+                    }
+                }
+            }
             return this;
         }
         return null;
+    }
+
+    $releaseContainer() {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        Platform.release("Mask", this.$nativeShow);
+        this.$nativeShow = null;
     }
 
     dispose() {
         this.__resetCaches();
         this.__clearCaches();
         flower.EnterFrame.remove(this.$update, this);
+
+        //Sprite
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        DebugInfo.displayInfo.sprite--;
+        var children = this.__children;
+        while (children.length) {
+            var child = children[children.length - 1];
+            child.dispose();
+        }
         super.dispose();
+        this.$releaseContainer();
     }
 
     get fontSize() {
@@ -6149,47 +6644,94 @@ class TextField extends flower.Mask {
         return this.$TextField[102];
     }
 
-
-    /**
-     * 测量子对象的区域
-     * @param rect
-     */
-    $measureContentBounds(rect) {
+    set algin(val) {
         var p = this.$TextField;
-        var minX = 0;
-        var minY = 0;
-        var maxX = 0;
-        var maxY = 0;
-        var children = this.__children;
-        for (var i = 0, len = children.length; i < len; i++) {
-            if (!children[i].visible) {
-                continue;
-            }
-            if(children[i] != p[4]) {
-                continue;
-            }
-            var bounds = children[i].$getBounds(true);
-            if (i == 0) {
-                maxX = bounds.x + bounds.width;
-                maxY = bounds.y + bounds.height;
+        if (p[21] == val) {
+            return;
+        }
+        p[21] = val;
+        if (p[4]) {
+            if (p[21] == "right") {
+                p[4].x = -p[29];
+            } else if (p[21] == "center") {
+                p[4].x = 0;
             } else {
-                if (bounds.x + bounds.width > maxX) {
-                    maxX = bounds.x + bounds.width;
-                }
-                if (bounds.y + bounds.height > maxY) {
-                    maxY = bounds.y + bounds.height;
-                }
+                p[4].x = p[29];
             }
         }
-        rect.x = minX;
-        rect.y = minY;
-        rect.width = maxX - minX;
-        rect.height = maxY - minY;
-        var childrenBounds = this.$Sprite[0];
-        childrenBounds.x = rect.x;
-        childrenBounds.y = rect.y;
-        childrenBounds.width = rect.width;
-        childrenBounds.height = rect.height;
+        if (p[14]) {
+            if (p[21] == "right") {
+                p[14].x = -p[29];
+            } else if (p[21] == "center") {
+                p[14].x = 0;
+            } else {
+                p[14].x = p[29];
+            }
+        }
+        this.$setHtmlText(p[1]);
+    }
+
+    get algin() {
+        return this.$TextField[21];
+    }
+
+    set leading(val) {
+        val = +val & ~0;
+        var p = this.$TextField;
+        if (p[12] == val) {
+            return;
+        }
+        p[12] = val;
+        this.$setHtmlText(p[1]);
+    }
+
+    get leading() {
+        return this.$TextField[12];
+    }
+
+    set input(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if (val == this.$TextField[22]) {
+            return;
+        }
+        this.$TextField[22] = val;
+    }
+
+    get input() {
+        return this.$TextField[22];
+    }
+
+    set selectable(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if (val == this.$TextField[23]) {
+            return;
+        }
+        this.$TextField[23] = val;
+    }
+
+    get selectable() {
+        return this.$TextField[23];
+    }
+
+    set multiline(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if (val == this.$TextField[24]) {
+            return;
+        }
+        this.$TextField[24] = val;
+    }
+
+    get multiline() {
+        return this.$TextField[24];
     }
 }
 
@@ -6198,8 +6740,8 @@ flower.TextField = TextField;
 
 
 
-//////////////////////////File:flower/display/TextInput.js///////////////////////////
-class TextInput extends DisplayObject {
+//////////////////////////File:flower/display/$TextInput.js///////////////////////////
+class $TextInput extends DisplayObject {
 
     $TextField;
 
@@ -6495,9 +7037,7 @@ class TextInput extends DisplayObject {
         this.$nativeShow = null;
     }
 }
-
-flower.TextInput = TextInput;
-//////////////////////////End File:flower/display/TextInput.js///////////////////////////
+//////////////////////////End File:flower/display/$TextInput.js///////////////////////////
 
 
 
@@ -6800,7 +7340,7 @@ class Stage extends Sprite {
         this.$inputSprite = new Sprite();
         this.addChild(this.$inputSprite);
         this.$inputSprite.touchEnabled = false;
-        this.$input = new flower.TextInput();
+        this.$input = new $TextInput();
         this.$input.x = -100;
         this.$input.y = -100;
         this.$input.width = 10;

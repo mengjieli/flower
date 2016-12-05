@@ -26,7 +26,9 @@ class PlatformMask extends PlatformSprite {
         if (width != this.shapeWidth || height != this.shapeHeight || x != this.shapeX || y != this.shapeY) {
             this.shapeWidth = width;
             this.shapeHeight = height;
-            this.show.style.clip = "rect(" + x + "px," + width + "px," + height + "px," + y + "px)";
+            this.shapeX = x;
+            this.shapeY = y;
+            this.show.style.clip = "rect(" + y + "px," + (x + width) + "px," + (y + height) + "px," + x + "px)";
         }
     }
 

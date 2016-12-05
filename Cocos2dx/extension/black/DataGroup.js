@@ -415,7 +415,7 @@ class DataGroup extends Group {
             return false;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+            p[0].removeListener(flower.Event.CHANGE, this.__onDataUpdate, this);
         }
         this.removeAll();
         p[2] = null;
@@ -425,7 +425,7 @@ class DataGroup extends Group {
             if (!p[9]) {
                 this._canSelecteItem();
             }
-            p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+            p[0].addListener(flower.Event.CHANGE, this.__onDataUpdate, this);
         }
         this.selectedItem = null;
         if (p[10] && p[0].length) {

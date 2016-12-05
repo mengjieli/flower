@@ -36,7 +36,31 @@ var Main = function () {
         value: function ready() {
             flower.URLLoader.urlHead = "http://localhost:12000/";
 
-            console.log("flower ready!");
+            var fxml = ''
+                + '<f:Scroller scrollable="false" x="50" y="50" width="200" height="150" scrollPolicyH="on" scrollPolicyV="on" xmlns:f="flower">'
+
+                    +'<f:HScrollBar autoVisibility="false" percentWidth="100" height="10" bottom="0" >'
+                        +'<f:Rect fillColor="0x888888" fillAlpha="0.5" percentWidth="100" percentHeight="100"/>'
+                        +'<f:thumb>'
+                            +'<f:Rect fillColor="0x555555"  fillAlpha="0.5" id="thumb" percentHeight="100"/>'
+                        +'</f:thumb>'
+                    +'</f:HScrollBar>'
+
+                    +'<f:VScrollBar autoVisibility="false" percentHeight="100" width="10" right="0">'
+                        + '<f:Rect fillColor="0x888888" fillAlpha="0.5" percentWidth="100" percentHeight="100"/>'
+                        +'<f:thumb>'
+                            + '<f:Rect fillColor="0x555555"  fillAlpha="0.5" id="thumb" percentWidth="100"/>'
+                        +'</f:thumb>'
+                    +'</f:VScrollBar>'
+
+                    + '<f:Input text="测试2121io120210io2109ww902102w21212121"/>'
+
+                + '</f:Scroller>';
+
+            var parser = new flower.UIParser();
+            parser.parseUI(fxml);
+            flower.Stage.getInstance().addChild(parser);
+
 
             //var module = new flower.Module("modules/software/module.json");
             //module.load();
@@ -77,61 +101,55 @@ var Main = function () {
             //input.x = 300;
             //input.y = 250;
 
-            ///*
-            var rect = new flower.Rect();
-            rect.width = 450;
-            rect.height = 400;
-            rect.fillColor = 0x888888;
-            rect.fillAlpha = 1;
-            flower.Stage.getInstance().addChild(rect);
-            var richText = new flower.TextField();
-            richText.width = 450;
-            richText.height = 400;
-            richText.fontColor = 0x00ff00;
-            richText.fontSize = 16;
-            richText.algin = "center";
-            richText.text = "1 2";
-            //richText.htmlText = "我 说 <font color='#ff0000'>是</font>什 <img id='img1' src='res/closeDown.png'/>    么";
 
-            richText.htmlText = '<u>我<img id="img1" src="res/closeDown.png"/>时</u>间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>12<f:Group id="ui1" xmlns:f="flower"><f:Rect fillColor="0xff0000" width="100" height="100"/><f:Image source="res/closeDown.png"/><f:Label text="我去啊" fontSize="16" fontColor="0x00ff00" verticalCenter="0" horizontalCenter="0"/></f:Group>27';
+            /*
+             var rect = new flower.Rect();
+             rect.x = 50;
+             rect.y = 50;
+             rect.width = 450;
+             rect.height = 400;
+             rect.fillColor = 0x888888;
+             rect.fillAlpha = 1;
+             flower.Stage.getInstance().addChild(rect);
+             var richText = new flower.Input();
+             richText.x = 50;
+             richText.y = 50;
+             //richText.multiline = true;
+             //richText.width = 100;
+             //richText.height = 16;
+             //richText.selectable = false;
+             //richText.input = true;
+             //richText.wordWrap = true;
+             //richText.leading = 20;
+             //richText.fontColor = 0x00ff00;
+             //richText.fontSize = 16;
+             //richText.algin = "right";
+             //richText.text = "e你在说什么呢小朋友啊就是";
+             //richText.htmlText = "我说文字就<img id='img1' src='res/closeDown.png'/>    么";
 
-            //richText.htmlText = "<u>1<s></u>2</s>";
+             richText.htmlText = '<u>我<img id="img1" src="res/closeDown.png"/>时</u>间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>12<f:Group id="ui1" xmlns:f="flower"><f:Rect fillColor="0xff0000" width="100" height="100"/><f:Image source="res/closeDown.png"/><f:Label text="我去啊" fontSize="16" fontColor="0x00ff00" verticalCenter="0" horizontalCenter="0"/></f:Group>27';
 
-            //console.log(richText.img1,richText.ui1);
-            //setTimeout(function () {
-            //    richText.htmlText = "123";
-            //    setTimeout(function () {
-            //        richText.htmlText = '我<img src="res/closeDown.png"/>时间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>1227555';
-            //    }, 500);
-            //}, 5000);
-            flower.Stage.getInstance().addChild(richText);
+             //richText.htmlText = "<u>1<s></u>2</s>";
+
+             //console.log(richText.img1,richText.ui1);
+             //setTimeout(function () {
+             //    richText.htmlText = "123";
+             //    setTimeout(function () {
+             //        richText.htmlText = '我<img src="res/closeDown.png"/>时间<font color="#0000ff" size="30">:<font color="#ff0000" size="25">20<br/><br/><font color="#00ffff"><font size="16">我</font></font></font>11</font>1227555';
+             //    }, 500);
+             //}, 5000);
+             flower.Stage.getInstance().addChild(richText);
 
 
-            //console.log(flower.StringDo.split("aaawqqw\rb21oiop21\ncsa,las;<br/>dsasa;asl;", ["\r", "\n", "<br/>"]));
+             //console.log(flower.StringDo.split("aaawqqw\rb21oiop21\ncsa,las;<br/>dsasa;asl;", ["\r", "\n", "<br/>"]));
 
-            return;//*/
+             return;//*/
 
 
             //var ui = new flower.UIParser();
             //ui.parseUIAsync("res/Test3.xml");
             //flower.Stage.getInstance().addChild(ui);
             //return;
-
-            var preloading = new PreLoading();
-            preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
-        }
-    }, {
-        key: "loadThemeComplete",
-        value: function loadThemeComplete(e) {
-            e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
-            var stage = flower.Stage.getInstance();
-            stage.backgroundColor = 0;
-
-            var ui = new flower.UIParser();
-            ui.parseUIAsync("modules/gameEditor/EditorMain.xml");
-            //ui.parseUIAsync("modules/dungeonEditor/Main.xml");
-            stage.addChild(ui);
-
         }
     }]);
 

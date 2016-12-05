@@ -554,7 +554,7 @@ class ArrayValue extends Value {
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.ADDED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     addItemAt(item, index) {
@@ -567,7 +567,7 @@ class ArrayValue extends Value {
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.ADDED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     shift() {
@@ -578,7 +578,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -598,7 +598,7 @@ class ArrayValue extends Value {
             for (i = 0; i < args.length; i++) {
                 this.dispatchWith(flower.Event.ADDED, args[i]);
             }
-            this.dispatchWith(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
         else {
             list = this.list.splice(startIndex, delCount);
@@ -607,7 +607,7 @@ class ArrayValue extends Value {
             for (i = 0; i < list.length; i++) {
                 this.dispatchWith(flower.Event.REMOVED, list[i]);
             }
-            this.dispatchWith(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
         return list;
     }
@@ -626,7 +626,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -640,7 +640,7 @@ class ArrayValue extends Value {
             this._lengthValue.value = this._length;
             this.dispatchWith(flower.Event.REMOVED, item);
         }
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     removeItem(item) {
@@ -650,7 +650,7 @@ class ArrayValue extends Value {
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }
@@ -667,7 +667,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -708,7 +708,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -855,7 +855,7 @@ class ArrayValue extends Value {
 
     sort() {
         this.list.sort.apply(this.list, arguments);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     setItemIndex(item, index) {
@@ -865,7 +865,7 @@ class ArrayValue extends Value {
         }
         this.list.splice(itemIndex, 1);
         this.list.splice(index, 0, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     getItemAt(index) {
@@ -1005,7 +1005,7 @@ class ArrayValue extends Value {
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
             }
-            this.dispatchWith(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
     }
 
@@ -1059,7 +1059,7 @@ class BooleanValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWith(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $setEnumList(val) {
@@ -1107,7 +1107,7 @@ class IntValue extends Value {
                 this.__valueCheck.push(str.charCodeAt(i));
             }
         }
-        this.dispatchWith(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $getValue() {
@@ -1184,7 +1184,7 @@ class NumberValue extends Value {
                 this.__valueCheck.push(str.charCodeAt(i));
             }
         }
-        this.dispatchWith(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $getValue() {
@@ -1426,7 +1426,7 @@ class StringValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWith(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $setEnumList(val) {
@@ -1481,7 +1481,7 @@ class UIntValue extends Value {
                 this.__valueCheck.push(str.charCodeAt(i));
             }
         }
-        this.dispatchWith(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $getValue() {
@@ -3407,7 +3407,9 @@ class ScrollBar extends Group {
             8: 0,  //viewportContentHeight
             9: 0, //viewportWidth
             10: 0, //viewportHeight
-            20: null //horizontal:true vertical:false
+            20: null, //horizontal:true vertical:false
+            50: 0, //touchStartPosition
+            51: 0, //touchStartThumbPosition
         };
     }
 
@@ -3422,15 +3424,20 @@ class ScrollBar extends Group {
                     p[7] = viewport.contentWidth;
                     p[9] = viewport.width;
                     if (p[2]) {
-                        p[2].width = this.width * p[9] / p[7];
-                        var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
-                        if (x < 0) {
-                            x = 0;
+                        if (p[7] < p[9]) {
+                            p[2].width = this.width;
+                            p[2].x = 0;
+                        } else {
+                            p[2].width = this.width * p[9] / p[7];
+                            var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
+                            if (x < 0) {
+                                x = 0;
+                            }
+                            if (x + p[2].width > this.width) {
+                                x = this.width - p[2].width;
+                            }
+                            p[2].x = x;
                         }
-                        if (x + p[2].width > this.width) {
-                            x = this.width - p[2].width;
-                        }
-                        p[2].x = x;
                     }
                 }
             }
@@ -3441,15 +3448,20 @@ class ScrollBar extends Group {
                     p[8] = viewport.contentHeight;
                     p[10] = viewport.height;
                     if (p[2]) {
-                        p[2].height = this.height * p[10] / p[8];
-                        var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
-                        if (y < 0) {
-                            y = 0;
+                        if (p[8] < p[10]) {
+                            p[2].height = this.height;
+                            p[2].y = 0;
+                        } else {
+                            p[2].height = this.height * p[10] / p[8];
+                            var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
+                            if (y < 0) {
+                                y = 0;
+                            }
+                            if (y + p[2].height > this.height) {
+                                y = this.height - p[2].height;
+                            }
+                            p[2].y = y;
                         }
-                        if (y + p[2].height > this.height) {
-                            y = this.height - p[2].height;
-                        }
-                        p[2].y = y;
                     }
                 }
             }
@@ -3457,6 +3469,53 @@ class ScrollBar extends Group {
         super.$onFrameEnd();
     }
 
+    __onTouchThumb(e) {
+        var p = this.$ScrollerBar;
+        switch (e.type) {
+            case flower.TouchEvent.TOUCH_BEGIN:
+                if (p[20]) {
+                    p[50] = e.touchX;
+                    p[51] = p[2].x;
+                } else {
+                    p[50] = e.touchY;
+                    p[51] = p[2].y;
+                }
+                break;
+            case flower.TouchEvent.TOUCH_MOVE:
+                if (p[20]) {
+                    if(p[7] < p[9]) {
+                        return;
+                    }
+                    var x = p[51] - p[50] + e.touchX;
+                    if (x < 0) {
+                        x = 0;
+                    }
+                    if (x + p[2].width > this.width) {
+                        x = this.width - p[2].width;
+                    }
+                    //p[2].x = x;
+                    if (p[0]) {
+                        p[0].x = -x * (p[7] - p[9]) / (this.width - p[2].width) + p[5];
+                    }
+                } else {
+                    if(p[8] < p[10]) {
+                        return;
+                    }
+                    var y = p[51] - p[50] + e.touchY;
+                    if (y < 0) {
+                        y = 0;
+                    }
+                    if (y + p[2].height > this.height) {
+                        y = this.height - p[2].height;
+                    }
+                    //p[2].y = y;
+                    if (p[0]) {
+                        p[0].y = -y * (p[8] - p[10]) / (this.height - p[2].height) + p[6];
+                    }
+                }
+                break;
+        }
+    }
 
     set viewport(val) {
         var p = this.$ScrollerBar;
@@ -3475,11 +3534,17 @@ class ScrollBar extends Group {
         if (p[2] == val) {
             return;
         }
+        if (p[2]) {
+            p[2].removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+            p[2].removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
+        }
         p[2] = val;
         if (p[2]) {
             if (p[2].parent != this) {
                 this.addChild(p[2]);
             }
+            p[2].addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+            p[2].addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
         }
     }
 
@@ -3951,7 +4016,7 @@ class DataGroup extends Group {
             return false;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+            p[0].removeListener(flower.Event.CHANGE, this.__onDataUpdate, this);
         }
         this.removeAll();
         p[2] = null;
@@ -3961,7 +4026,7 @@ class DataGroup extends Group {
             if (!p[9]) {
                 this._canSelecteItem();
             }
-            p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+            p[0].addListener(flower.Event.CHANGE, this.__onDataUpdate, this);
         }
         this.selectedItem = null;
         if (p[10] && p[0].length) {
@@ -4251,6 +4316,7 @@ class Label extends flower.TextField {
     constructor(text = "") {
         super(text);
         this.$initUIComponent();
+        this.selectable = false;
     }
 
     $addFlags(flags) {
@@ -4327,11 +4393,11 @@ class Label extends flower.TextField {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
         }
-        //super.$onFrameEnd();
+        super.$onFrameEnd();
         if (this.$hasFlags(0x0800)) {
             this.$getContentBounds();
+            super.$onFrameEnd();
         }
-        //super.$onFrameEnd();
         flower.DebugInfo.frameInfo.display++;
         flower.DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
@@ -4355,7 +4421,7 @@ black.Label = Label;
 
 
 //////////////////////////File:extension/black/Input.js///////////////////////////
-class Input extends flower.TextInput {
+class Input extends flower.TextField {
 
     constructor(text = "") {
         super(text);
@@ -4363,6 +4429,17 @@ class Input extends flower.TextInput {
         this.$input = {
             0: null, //value
         }
+        this.$IViewPort = {
+            0: 0,    //contentStartX
+            1: 0,    //contentStartY
+            2: 0,    //contentEndX
+            3: 0,    //contentEndY
+            4: null, //scrollH
+            5: null, //scrollV
+            6: null, //viewer
+        }
+        this.input = true;
+        this.addListener(flower.Event.CHANGE, this.__onTextChange, this);
     }
 
     $addFlags(flags) {
@@ -4435,8 +4512,7 @@ class Input extends flower.TextInput {
         }
     }
 
-    $setText(val) {
-        super.$setText(val);
+    __onTextChange(e) {
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
             this.$input[0].value = this.text;
             if (this.text != this.$input[0].value + "") {
@@ -4462,13 +4538,76 @@ class Input extends flower.TextInput {
     //    super.$onFrameEnd();
     //}
 
+
+    $setHtmlText(text) {
+        super.$setHtmlText.call(this, text);
+        var p = this.$TextField;
+        this.$IViewPort[2] = p[17];
+        this.$IViewPort[3] = p[18];
+    }
+
     dispose() {
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.removeAllBindProperty();
         this.$UIComponent[11].dispose();
         super.dispose();
+    }
+
+    $getX() {
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            return p[50];
+        } else {
+            return super.$getX.call(this);
+        }
+    }
+
+    $setX(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            if (p[50] == val) {
+                return;
+            }
+            p[50] = val;
+            p[100] = true;
+        } else {
+            super.$setX.call(this, val);
+        }
+    }
+
+    $getY() {
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            return p[51];
+        } else {
+            return super.$getY.call(this);
+        }
+    }
+
+    $setY(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            if (p[51] == val) {
+                return;
+            }
+            p[51] = val;
+            p[100] = true;
+        } else {
+            super.$setY.call(this, val);
+        }
+    }
+
+    set viewer(val) {
+        if (this.$IViewPort[6] == val) {
+            return;
+        }
+        this.$IViewPort[6] = val;
+        var p = this.$TextField;
+        p[100] = true;
     }
 
     set value(val) {
@@ -4476,17 +4615,64 @@ class Input extends flower.TextInput {
             return;
         }
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.$input[0] = val;
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].addListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.__valueChange();
     }
 
     get value() {
         return this.$input[0];
+    }
+
+    $getContentWidth() {
+        return this.$IViewPort[2] - this.$IViewPort[0];
+    }
+
+    $getContentHeight() {
+        return this.$IViewPort[3] - this.$IViewPort[1];
+    }
+
+    get contentWidth() {
+        return this.$getContentWidth();
+    }
+
+    get contentHeight() {
+        return this.$getContentHeight();
+    }
+
+    get scrollH() {
+        return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+    }
+
+    set scrollH(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[4] == val) {
+            return;
+        }
+        this.$IViewPort[4] = val;
+    }
+
+    get scrollV() {
+        return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+    }
+
+    set scrollV(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[5] == val) {
+            return;
+        }
+        this.$IViewPort[5] = val;
+        var p = this.$TextField;
+        p[51] = val;
+        p[100] = true;
     }
 }
 
@@ -5231,11 +5417,11 @@ class ToggleButton extends Button {
             return;
         }
         if (p[1] && p[1] instanceof flower.Value) {
-            p[1].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            p[1].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         p[1] = val;
         if (p[1] && p[1] instanceof flower.Value) {
-            p[1].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+            p[1].addListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.__valueChange();
     }
@@ -5635,7 +5821,7 @@ class ViewStack extends Group {
             }
         }
         this._items.push(display);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
@@ -5654,7 +5840,7 @@ class ViewStack extends Group {
             }
         }
         this._items.splice(i, 0, display);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
@@ -5669,7 +5855,7 @@ class ViewStack extends Group {
                 this._items.splice(i, 1);
                 if (display == this._selectedItem) {
                     this._setSelectedIndex(0);
-                    this.dispatchWith(flower.Event.UPDATE);
+                    this.dispatchWith(flower.Event.CHANGE);
                     this.dispatchWith(flower.Event.REMOVED, display);
                 }
                 return display;
@@ -5689,7 +5875,7 @@ class ViewStack extends Group {
             this._selectedItem = this._items[0];
             this._selectedIndex = 0;
             super.removeChild(display);
-            this.dispatchWith(flower.Event.UPDATE);
+            this.dispatchWith(flower.Event.CHANGE);
             this.dispatchWith(flower.Event.REMOVED, display);
         } else {
             flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
@@ -5713,7 +5899,7 @@ class ViewStack extends Group {
             if (this._items[i] == display) {
                 this._items.splice(i, 1);
                 this._items.splice(index, 0, display);
-                this.dispatchWith(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
                 return display;
             }
         }
@@ -5722,7 +5908,7 @@ class ViewStack extends Group {
 
     sortChild(key, opt = 0) {
         super.sortChild(key, opt);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     _setSelectedIndex(val) {
@@ -5738,7 +5924,7 @@ class ViewStack extends Group {
             super.addChildAt(this._selectedItem, this.numChildren);
         }
         this.dispatchWith(flower.Event.CHANGE, this._selectedItem);
-        this.dispatchWith(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     get length() {
@@ -5824,6 +6010,7 @@ class Scroller extends MaskUI {
             14: false, //isDraging
             15: false, //dragH
             16: false, //dragV
+            20: true, //scrollable
             52: 0,//contentWidth
             53: 0,//contentHeight
         }
@@ -5871,7 +6058,7 @@ class Scroller extends MaskUI {
 
     __onTouchScroller(e) {
         var p = this.$Scroller;
-        if (!p[0]) {
+        if (!p[0] || !p[20]) {
             return;
         }
         var x = this.lastTouchX;
@@ -6192,6 +6379,21 @@ class Scroller extends MaskUI {
     get scrollOut() {
         return this.$Scroller[7];
     }
+
+    set scrollable(val) {
+        if(val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if(val == this.$Scroller[20]) {
+            return;
+        }
+        this.$Scroller[20] = val;
+    }
+
+    get scrollable() {
+        return this.$Scroller[20];
+    }
 }
 
 black.Scroller = Scroller;
@@ -6407,13 +6609,13 @@ class ComboBox extends Group {
             return;
         }
         if (p[7] && p[7] instanceof flower.Value) {
-            p[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+            p[7].removeListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
         }
         p[7] = val;
         if (p[7]) {
             p[9] = true;
             if (p[7] instanceof flower.Value) {
-                p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                p[7].addListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
                 this.dataProvider = new flower.ArrayValue(p[7].enumList);
             }
             p[9] = false;
@@ -6879,12 +7081,12 @@ class Tree extends DataGroup {
             return;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].removeListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
             p[0].removeListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
         }
         p[0] = val;
         if (p[0]) {
-            p[0].addListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].addListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
             p[0].addListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
         }
         this.__onTreeDataUpdate(null);
@@ -6893,7 +7095,7 @@ class Tree extends DataGroup {
     __onRemovedTreeDataUpdate(e) {
         var item = e.data;
         if (item.open && item.open instanceof flower.EventDispatcher) {
-            item.open.removeListener(flower.Event.UPDATE, this.__onOpenItem, this);
+            item.open.removeListener(flower.Event.CHANGE, this.__onOpenItem, this);
         }
     }
 
@@ -6944,7 +7146,7 @@ class Tree extends DataGroup {
                     if (item.open != null) {
                         if (item.open instanceof flower.Value) {
                             openURL[url].open = !!item.open.value;
-                            item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                            item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
                         } else {
                             openURL[url].open = !!item.open;
                         }
@@ -7012,7 +7214,7 @@ class Tree extends DataGroup {
                 }
             } else {
                 item.open = new BooleanValue(openURL[url].open);
-                item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
             }
         }
         parentData.push(item);

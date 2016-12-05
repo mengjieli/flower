@@ -47,7 +47,6 @@ class Event {
     static CLOSE = "close";
     static CHANGE = "change";
     static ERROR = "error";
-    static UPDATE = "update";
     static FOCUS_IN = "focus_in";
     static FOCUS_OUT = "focus_out";
     static CONFIRM = "confirm";

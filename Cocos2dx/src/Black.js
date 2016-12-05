@@ -604,7 +604,7 @@ var black = {};
                 this._length = this._length + 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.ADDED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "addItemAt",
@@ -618,7 +618,7 @@ var black = {};
                 this._length = this._length + 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.ADDED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "shift",
@@ -630,7 +630,7 @@ var black = {};
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
@@ -658,7 +658,7 @@ var black = {};
                     for (i = 0; i < args.length; i++) {
                         this.dispatchWith(flower.Event.ADDED, args[i]);
                     }
-                    this.dispatchWith(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.CHANGE, this);
                 } else {
                     list = this.list.splice(startIndex, delCount);
                     this._length = this._length - delCount;
@@ -666,7 +666,7 @@ var black = {};
                     for (i = 0; i < list.length; i++) {
                         this.dispatchWith(flower.Event.REMOVED, list[i]);
                     }
-                    this.dispatchWith(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.CHANGE, this);
                 }
                 return list;
             }
@@ -687,7 +687,7 @@ var black = {};
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
@@ -702,7 +702,7 @@ var black = {};
                     this._lengthValue.value = this._length;
                     this.dispatchWith(flower.Event.REMOVED, item);
                 }
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "removeItem",
@@ -713,7 +713,7 @@ var black = {};
                         this._length = this._length - 1;
                         this._lengthValue.value = this._length;
                         this.dispatchWith(flower.Event.REMOVED, item);
-                        this.dispatchWith(flower.Event.UPDATE, this);
+                        this.dispatchWith(flower.Event.CHANGE, this);
                         return item;
                     }
                 }
@@ -731,7 +731,7 @@ var black = {};
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
@@ -775,7 +775,7 @@ var black = {};
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
@@ -943,7 +943,7 @@ var black = {};
             key: "sort",
             value: function sort() {
                 this.list.sort.apply(this.list, arguments);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "setItemIndex",
@@ -954,7 +954,7 @@ var black = {};
                 }
                 this.list.splice(itemIndex, 1);
                 this.list.splice(index, 0, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "getItemAt",
@@ -1104,7 +1104,7 @@ var black = {};
                         this._lengthValue.value = this._length;
                         this.dispatchWith(flower.Event.REMOVED, item);
                     }
-                    this.dispatchWith(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.CHANGE, this);
                 }
             }
         }, {
@@ -1170,7 +1170,7 @@ var black = {};
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWith(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.CHANGE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1232,7 +1232,7 @@ var black = {};
                         this.__valueCheck.push(str.charCodeAt(i));
                     }
                 }
-                this.dispatchWith(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.CHANGE, this, val);
             }
         }, {
             key: "$getValue",
@@ -1324,7 +1324,7 @@ var black = {};
                         this.__valueCheck.push(str.charCodeAt(i));
                     }
                 }
-                this.dispatchWith(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.CHANGE, this, val);
             }
         }, {
             key: "$getValue",
@@ -1611,7 +1611,7 @@ var black = {};
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWith(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.CHANGE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1680,7 +1680,7 @@ var black = {};
                         this.__valueCheck.push(str.charCodeAt(i));
                     }
                 }
-                this.dispatchWith(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.CHANGE, this, val);
             }
         }, {
             key: "$getValue",
@@ -3730,13 +3730,15 @@ var black = {};
                 8: 0, //viewportContentHeight
                 9: 0, //viewportWidth
                 10: 0, //viewportHeight
-                20: null //horizontal:true vertical:false
-            };
+                20: null, //horizontal:true vertical:false
+                50: 0, //touchStartPosition
+                51: 0 };
             return _this14;
         }
 
         _createClass(ScrollBar, [{
             key: "$onFrameEnd",
+            //touchStartThumbPosition
             value: function $onFrameEnd() {
                 var p = this.$ScrollerBar;
                 if (p[0] && p[20] != null) {
@@ -3748,15 +3750,20 @@ var black = {};
                             p[7] = viewport.contentWidth;
                             p[9] = viewport.width;
                             if (p[2]) {
-                                p[2].width = this.width * p[9] / p[7];
-                                var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
-                                if (x < 0) {
-                                    x = 0;
+                                if (p[7] < p[9]) {
+                                    p[2].width = this.width;
+                                    p[2].x = 0;
+                                } else {
+                                    p[2].width = this.width * p[9] / p[7];
+                                    var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
+                                    if (x < 0) {
+                                        x = 0;
+                                    }
+                                    if (x + p[2].width > this.width) {
+                                        x = this.width - p[2].width;
+                                    }
+                                    p[2].x = x;
                                 }
-                                if (x + p[2].width > this.width) {
-                                    x = this.width - p[2].width;
-                                }
-                                p[2].x = x;
                             }
                         }
                     }
@@ -3767,20 +3774,74 @@ var black = {};
                             p[8] = viewport.contentHeight;
                             p[10] = viewport.height;
                             if (p[2]) {
-                                p[2].height = this.height * p[10] / p[8];
-                                var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
-                                if (y < 0) {
-                                    y = 0;
+                                if (p[8] < p[10]) {
+                                    p[2].height = this.height;
+                                    p[2].y = 0;
+                                } else {
+                                    p[2].height = this.height * p[10] / p[8];
+                                    var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
+                                    if (y < 0) {
+                                        y = 0;
+                                    }
+                                    if (y + p[2].height > this.height) {
+                                        y = this.height - p[2].height;
+                                    }
+                                    p[2].y = y;
                                 }
-                                if (y + p[2].height > this.height) {
-                                    y = this.height - p[2].height;
-                                }
-                                p[2].y = y;
                             }
                         }
                     }
                 }
                 _get(Object.getPrototypeOf(ScrollBar.prototype), "$onFrameEnd", this).call(this);
+            }
+        }, {
+            key: "__onTouchThumb",
+            value: function __onTouchThumb(e) {
+                var p = this.$ScrollerBar;
+                switch (e.type) {
+                    case flower.TouchEvent.TOUCH_BEGIN:
+                        if (p[20]) {
+                            p[50] = e.touchX;
+                            p[51] = p[2].x;
+                        } else {
+                            p[50] = e.touchY;
+                            p[51] = p[2].y;
+                        }
+                        break;
+                    case flower.TouchEvent.TOUCH_MOVE:
+                        if (p[20]) {
+                            if (p[7] < p[9]) {
+                                return;
+                            }
+                            var x = p[51] - p[50] + e.touchX;
+                            if (x < 0) {
+                                x = 0;
+                            }
+                            if (x + p[2].width > this.width) {
+                                x = this.width - p[2].width;
+                            }
+                            //p[2].x = x;
+                            if (p[0]) {
+                                p[0].x = -x * (p[7] - p[9]) / (this.width - p[2].width) + p[5];
+                            }
+                        } else {
+                            if (p[8] < p[10]) {
+                                return;
+                            }
+                            var y = p[51] - p[50] + e.touchY;
+                            if (y < 0) {
+                                y = 0;
+                            }
+                            if (y + p[2].height > this.height) {
+                                y = this.height - p[2].height;
+                            }
+                            //p[2].y = y;
+                            if (p[0]) {
+                                p[0].y = -y * (p[8] - p[10]) / (this.height - p[2].height) + p[6];
+                            }
+                        }
+                        break;
+                }
             }
         }, {
             key: "viewport",
@@ -3801,11 +3862,17 @@ var black = {};
                 if (p[2] == val) {
                     return;
                 }
+                if (p[2]) {
+                    p[2].removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+                    p[2].removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
+                }
                 p[2] = val;
                 if (p[2]) {
                     if (p[2].parent != this) {
                         this.addChild(p[2]);
                     }
+                    p[2].addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+                    p[2].addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
                 }
             },
             get: function get() {
@@ -4310,7 +4377,7 @@ var black = {};
                     return false;
                 }
                 if (p[0]) {
-                    p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+                    p[0].removeListener(flower.Event.CHANGE, this.__onDataUpdate, this);
                 }
                 this.removeAll();
                 p[2] = null;
@@ -4320,7 +4387,7 @@ var black = {};
                     if (!p[9]) {
                         this._canSelecteItem();
                     }
-                    p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+                    p[0].addListener(flower.Event.CHANGE, this.__onDataUpdate, this);
                 }
                 this.selectedItem = null;
                 if (p[10] && p[0].length) {
@@ -4630,6 +4697,7 @@ var black = {};
             var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
 
             _this19.$initUIComponent();
+            _this19.selectable = false;
             return _this19;
         }
 
@@ -4713,11 +4781,11 @@ var black = {};
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
                 }
-                //super.$onFrameEnd();
+                _get(Object.getPrototypeOf(Label.prototype), "$onFrameEnd", this).call(this);
                 if (this.$hasFlags(0x0800)) {
                     this.$getContentBounds();
+                    _get(Object.getPrototypeOf(Label.prototype), "$onFrameEnd", this).call(this);
                 }
-                //super.$onFrameEnd();
                 flower.DebugInfo.frameInfo.display++;
                 flower.DebugInfo.frameInfo.text++;
                 var p = this.$DisplayObject;
@@ -4744,8 +4812,8 @@ var black = {};
 
     //////////////////////////File:extension/black/Input.js///////////////////////////
 
-    var Input = function (_flower$TextInput) {
-        _inherits(Input, _flower$TextInput);
+    var Input = function (_flower$TextField2) {
+        _inherits(Input, _flower$TextField2);
 
         function Input() {
             var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
@@ -4757,12 +4825,23 @@ var black = {};
             _this20.$initUIComponent();
             _this20.$input = {
                 0: null };
+            //value
+            _this20.$IViewPort = {
+                0: 0, //contentStartX
+                1: 0, //contentStartY
+                2: 0, //contentEndX
+                3: 0, //contentEndY
+                4: null, //scrollH
+                5: null, //scrollV
+                6: null };
+            //viewer
+            _this20.input = true;
+            _this20.addListener(flower.Event.CHANGE, _this20.__onTextChange, _this20);
             return _this20;
         }
 
         _createClass(Input, [{
             key: "$addFlags",
-            //value
             value: function $addFlags(flags) {
                 if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
                     this.__flags |= 0x1000;
@@ -4836,9 +4915,8 @@ var black = {};
                 }
             }
         }, {
-            key: "$setText",
-            value: function $setText(val) {
-                _get(Object.getPrototypeOf(Input.prototype), "$setText", this).call(this, val);
+            key: "__onTextChange",
+            value: function __onTextChange(e) {
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
                     this.$input[0].value = this.text;
                     if (this.text != this.$input[0].value + "") {
@@ -4867,14 +4945,92 @@ var black = {};
             //}
 
         }, {
+            key: "$setHtmlText",
+            value: function $setHtmlText(text) {
+                _get(Object.getPrototypeOf(Input.prototype), "$setHtmlText", this).call(this, text);
+                var p = this.$TextField;
+                this.$IViewPort[2] = p[17];
+                this.$IViewPort[3] = p[18];
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Input.prototype), "dispose", this).call(this);
+            }
+        }, {
+            key: "$getX",
+            value: function $getX() {
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    return p[50];
+                } else {
+                    return _get(Object.getPrototypeOf(Input.prototype), "$getX", this).call(this);
+                }
+            }
+        }, {
+            key: "$setX",
+            value: function $setX(val) {
+                val = +val || 0;
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    if (p[50] == val) {
+                        return;
+                    }
+                    p[50] = val;
+                    p[100] = true;
+                } else {
+                    _get(Object.getPrototypeOf(Input.prototype), "$setX", this).call(this, val);
+                }
+            }
+        }, {
+            key: "$getY",
+            value: function $getY() {
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    return p[51];
+                } else {
+                    return _get(Object.getPrototypeOf(Input.prototype), "$getY", this).call(this);
+                }
+            }
+        }, {
+            key: "$setY",
+            value: function $setY(val) {
+                val = +val || 0;
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    if (p[51] == val) {
+                        return;
+                    }
+                    p[51] = val;
+                    p[100] = true;
+                } else {
+                    _get(Object.getPrototypeOf(Input.prototype), "$setY", this).call(this, val);
+                }
+            }
+        }, {
+            key: "$getContentWidth",
+            value: function $getContentWidth() {
+                return this.$IViewPort[2] - this.$IViewPort[0];
+            }
+        }, {
+            key: "$getContentHeight",
+            value: function $getContentHeight() {
+                return this.$IViewPort[3] - this.$IViewPort[1];
+            }
+        }, {
+            key: "viewer",
+            set: function set(val) {
+                if (this.$IViewPort[6] == val) {
+                    return;
+                }
+                this.$IViewPort[6] = val;
+                var p = this.$TextField;
+                p[100] = true;
             }
         }, {
             key: "value",
@@ -4883,21 +5039,62 @@ var black = {};
                     return;
                 }
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 this.$input[0] = val;
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    this.$input[0].addListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 this.__valueChange();
             },
             get: function get() {
                 return this.$input[0];
             }
+        }, {
+            key: "contentWidth",
+            get: function get() {
+                return this.$getContentWidth();
+            }
+        }, {
+            key: "contentHeight",
+            get: function get() {
+                return this.$getContentHeight();
+            }
+        }, {
+            key: "scrollH",
+            get: function get() {
+                return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+            },
+            set: function set(val) {
+                if (val != null) {
+                    val = +val;
+                }
+                if (this.$IViewPort[4] == val) {
+                    return;
+                }
+                this.$IViewPort[4] = val;
+            }
+        }, {
+            key: "scrollV",
+            get: function get() {
+                return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+            },
+            set: function set(val) {
+                if (val != null) {
+                    val = +val;
+                }
+                if (this.$IViewPort[5] == val) {
+                    return;
+                }
+                this.$IViewPort[5] = val;
+                var p = this.$TextField;
+                p[51] = val;
+                p[100] = true;
+            }
         }]);
 
         return Input;
-    }(flower.TextInput);
+    }(flower.TextField);
 
     UIComponent.register(Input);
     Input.prototype.__UIComponent = true;
@@ -5720,11 +5917,11 @@ var black = {};
                     return;
                 }
                 if (p[1] && p[1] instanceof flower.Value) {
-                    p[1].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    p[1].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 p[1] = val;
                 if (p[1] && p[1] instanceof flower.Value) {
-                    p[1].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    p[1].addListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 this.__valueChange();
             },
@@ -6187,7 +6384,7 @@ var black = {};
                     }
                 }
                 this._items.push(display);
-                this.dispatchWith(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
@@ -6207,7 +6404,7 @@ var black = {};
                     }
                 }
                 this._items.splice(i, 0, display);
-                this.dispatchWith(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
@@ -6223,7 +6420,7 @@ var black = {};
                         this._items.splice(i, 1);
                         if (display == this._selectedItem) {
                             this._setSelectedIndex(0);
-                            this.dispatchWith(flower.Event.UPDATE);
+                            this.dispatchWith(flower.Event.CHANGE);
                             this.dispatchWith(flower.Event.REMOVED, display);
                         }
                         return display;
@@ -6245,7 +6442,7 @@ var black = {};
                     this._selectedItem = this._items[0];
                     this._selectedIndex = 0;
                     _get(Object.getPrototypeOf(ViewStack.prototype), "removeChild", this).call(this, display);
-                    this.dispatchWith(flower.Event.UPDATE);
+                    this.dispatchWith(flower.Event.CHANGE);
                     this.dispatchWith(flower.Event.REMOVED, display);
                 } else {
                     flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
@@ -6271,7 +6468,7 @@ var black = {};
                     if (this._items[i] == display) {
                         this._items.splice(i, 1);
                         this._items.splice(index, 0, display);
-                        this.dispatchWith(flower.Event.UPDATE);
+                        this.dispatchWith(flower.Event.CHANGE);
                         return display;
                     }
                 }
@@ -6283,7 +6480,7 @@ var black = {};
                 var opt = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
                 _get(Object.getPrototypeOf(ViewStack.prototype), "sortChild", this).call(this, key, opt);
-                this.dispatchWith(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "_setSelectedIndex",
@@ -6300,7 +6497,7 @@ var black = {};
                     _get(Object.getPrototypeOf(ViewStack.prototype), "addChildAt", this).call(this, this._selectedItem, this.numChildren);
                 }
                 this.dispatchWith(flower.Event.CHANGE, this._selectedItem);
-                this.dispatchWith(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "getItemAt",
@@ -6395,6 +6592,7 @@ var black = {};
                 14: false, //isDraging
                 15: false, //dragH
                 16: false, //dragV
+                20: true, //scrollable
                 52: 0, //contentWidth
                 53: 0 };
             //contentHeight
@@ -6447,7 +6645,7 @@ var black = {};
             key: "__onTouchScroller",
             value: function __onTouchScroller(e) {
                 var p = this.$Scroller;
-                if (!p[0]) {
+                if (!p[0] || !p[20]) {
                     return;
                 }
                 var x = this.lastTouchX;
@@ -6785,6 +6983,21 @@ var black = {};
             get: function get() {
                 return this.$Scroller[7];
             }
+        }, {
+            key: "scrollable",
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.$Scroller[20]) {
+                    return;
+                }
+                this.$Scroller[20] = val;
+            },
+            get: function get() {
+                return this.$Scroller[20];
+            }
         }]);
 
         return Scroller;
@@ -7010,13 +7223,13 @@ var black = {};
                     return;
                 }
                 if (p[7] && p[7] instanceof flower.Value) {
-                    p[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                    p[7].removeListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
                 }
                 p[7] = val;
                 if (p[7]) {
                     p[9] = true;
                     if (p[7] instanceof flower.Value) {
-                        p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                        p[7].addListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
                         this.dataProvider = new flower.ArrayValue(p[7].enumList);
                     }
                     p[9] = false;
@@ -7512,12 +7725,12 @@ var black = {};
                     return;
                 }
                 if (p[0]) {
-                    p[0].removeListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+                    p[0].removeListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
                     p[0].removeListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
                 }
                 p[0] = val;
                 if (p[0]) {
-                    p[0].addListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+                    p[0].addListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
                     p[0].addListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
                 }
                 this.__onTreeDataUpdate(null);
@@ -7527,7 +7740,7 @@ var black = {};
             value: function __onRemovedTreeDataUpdate(e) {
                 var item = e.data;
                 if (item.open && item.open instanceof flower.EventDispatcher) {
-                    item.open.removeListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                    item.open.removeListener(flower.Event.CHANGE, this.__onOpenItem, this);
                 }
             }
         }, {
@@ -7579,7 +7792,7 @@ var black = {};
                             if (item.open != null) {
                                 if (item.open instanceof flower.Value) {
                                     openURL[url].open = !!item.open.value;
-                                    item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                                    item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
                                 } else {
                                     openURL[url].open = !!item.open;
                                 }
@@ -7647,7 +7860,7 @@ var black = {};
                         }
                     } else {
                         item.open = new BooleanValue(openURL[url].open);
-                        item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                        item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
                     }
                 }
                 parentData.push(item);

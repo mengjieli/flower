@@ -14,7 +14,9 @@ class ScrollBar extends Group {
             8: 0,  //viewportContentHeight
             9: 0, //viewportWidth
             10: 0, //viewportHeight
-            20: null //horizontal:true vertical:false
+            20: null, //horizontal:true vertical:false
+            50: 0, //touchStartPosition
+            51: 0, //touchStartThumbPosition
         };
     }
 
@@ -29,15 +31,20 @@ class ScrollBar extends Group {
                     p[7] = viewport.contentWidth;
                     p[9] = viewport.width;
                     if (p[2]) {
-                        p[2].width = this.width * p[9] / p[7];
-                        var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
-                        if (x < 0) {
-                            x = 0;
+                        if (p[7] < p[9]) {
+                            p[2].width = this.width;
+                            p[2].x = 0;
+                        } else {
+                            p[2].width = this.width * p[9] / p[7];
+                            var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
+                            if (x < 0) {
+                                x = 0;
+                            }
+                            if (x + p[2].width > this.width) {
+                                x = this.width - p[2].width;
+                            }
+                            p[2].x = x;
                         }
-                        if (x + p[2].width > this.width) {
-                            x = this.width - p[2].width;
-                        }
-                        p[2].x = x;
                     }
                 }
             }
@@ -48,15 +55,20 @@ class ScrollBar extends Group {
                     p[8] = viewport.contentHeight;
                     p[10] = viewport.height;
                     if (p[2]) {
-                        p[2].height = this.height * p[10] / p[8];
-                        var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
-                        if (y < 0) {
-                            y = 0;
+                        if (p[8] < p[10]) {
+                            p[2].height = this.height;
+                            p[2].y = 0;
+                        } else {
+                            p[2].height = this.height * p[10] / p[8];
+                            var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
+                            if (y < 0) {
+                                y = 0;
+                            }
+                            if (y + p[2].height > this.height) {
+                                y = this.height - p[2].height;
+                            }
+                            p[2].y = y;
                         }
-                        if (y + p[2].height > this.height) {
-                            y = this.height - p[2].height;
-                        }
-                        p[2].y = y;
                     }
                 }
             }
@@ -64,6 +76,53 @@ class ScrollBar extends Group {
         super.$onFrameEnd();
     }
 
+    __onTouchThumb(e) {
+        var p = this.$ScrollerBar;
+        switch (e.type) {
+            case flower.TouchEvent.TOUCH_BEGIN:
+                if (p[20]) {
+                    p[50] = e.touchX;
+                    p[51] = p[2].x;
+                } else {
+                    p[50] = e.touchY;
+                    p[51] = p[2].y;
+                }
+                break;
+            case flower.TouchEvent.TOUCH_MOVE:
+                if (p[20]) {
+                    if(p[7] < p[9]) {
+                        return;
+                    }
+                    var x = p[51] - p[50] + e.touchX;
+                    if (x < 0) {
+                        x = 0;
+                    }
+                    if (x + p[2].width > this.width) {
+                        x = this.width - p[2].width;
+                    }
+                    //p[2].x = x;
+                    if (p[0]) {
+                        p[0].x = -x * (p[7] - p[9]) / (this.width - p[2].width) + p[5];
+                    }
+                } else {
+                    if(p[8] < p[10]) {
+                        return;
+                    }
+                    var y = p[51] - p[50] + e.touchY;
+                    if (y < 0) {
+                        y = 0;
+                    }
+                    if (y + p[2].height > this.height) {
+                        y = this.height - p[2].height;
+                    }
+                    //p[2].y = y;
+                    if (p[0]) {
+                        p[0].y = -y * (p[8] - p[10]) / (this.height - p[2].height) + p[6];
+                    }
+                }
+                break;
+        }
+    }
 
     set viewport(val) {
         var p = this.$ScrollerBar;
@@ -82,11 +141,17 @@ class ScrollBar extends Group {
         if (p[2] == val) {
             return;
         }
+        if (p[2]) {
+            p[2].removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+            p[2].removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
+        }
         p[2] = val;
         if (p[2]) {
             if (p[2].parent != this) {
                 this.addChild(p[2]);
             }
+            p[2].addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+            p[2].addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
         }
     }
 

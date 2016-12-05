@@ -1242,7 +1242,7 @@ var $root = eval("this");
             key: "$reset",
             value: function $reset() {
                 for (var i = 0; i < this.list.length; i++) {
-                    this.list[i].removeListener(flower.Event.UPDATE, this.update, this);
+                    this.list[i].removeListener(flower.Event.CHANGE, this.update, this);
                 }
                 this.__bind(this.thisObj, this.checks.concat(), this.property, this.content);
             }
@@ -1319,7 +1319,7 @@ var $root = eval("this");
                     }
                 }
                 for (i = 0; i < this.list.length; i++) {
-                    this.list[i].addListener(flower.Event.UPDATE, this.update, this);
+                    this.list[i].addListener(flower.Event.CHANGE, this.update, this);
                 }
                 this.update();
             }
@@ -1358,7 +1358,7 @@ var $root = eval("this");
             key: "dispose",
             value: function dispose() {
                 for (var i = 0; i < this.list.length; i++) {
-                    this.list[i].removeListener(flower.Event.UPDATE, this.update, this);
+                    this.list[i].removeListener(flower.Event.CHANGE, this.update, this);
                 }
             }
         }], [{

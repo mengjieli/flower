@@ -28,7 +28,7 @@ class Binding {
 
     $reset() {
         for (var i = 0; i < this.list.length; i++) {
-            this.list[i].removeListener(flower.Event.UPDATE, this.update, this);
+            this.list[i].removeListener(flower.Event.CHANGE, this.update, this);
         }
         this.__bind(this.thisObj, this.checks.concat(), this.property, this.content);
     }
@@ -105,7 +105,7 @@ class Binding {
             }
         }
         for (i = 0; i < this.list.length; i++) {
-            this.list[i].addListener(flower.Event.UPDATE, this.update, this);
+            this.list[i].addListener(flower.Event.CHANGE, this.update, this);
         }
         this.update();
     }
@@ -141,7 +141,7 @@ class Binding {
 
     dispose() {
         for (var i = 0; i < this.list.length; i++) {
-            this.list[i].removeListener(flower.Event.UPDATE, this.update, this);
+            this.list[i].removeListener(flower.Event.CHANGE, this.update, this);
         }
     }
 

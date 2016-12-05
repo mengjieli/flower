@@ -19,7 +19,7 @@ class Stage extends Sprite {
         this.$inputSprite = new Sprite();
         this.addChild(this.$inputSprite);
         this.$inputSprite.touchEnabled = false;
-        this.$input = new flower.TextInput();
+        this.$input = new $TextInput();
         this.$input.x = -100;
         this.$input.y = -100;
         this.$input.width = 10;

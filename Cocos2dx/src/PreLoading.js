@@ -34,7 +34,7 @@ var PreLoading = function (_flower$EventDispatch) {
         value: function loadNextModule() {
             if (this.index < this.modules.length) {
                 this.module = this.modules[this.index];
-                this.module.progress.percent.addListener(flower.Event.UPDATE, this.onUpdate, this);
+                this.module.progress.percent.addListener(flower.Event.CHANGE, this.onUpdate, this);
                 this.module.load();
             } else {
                 this.dispose();

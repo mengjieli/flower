@@ -29,7 +29,7 @@ class ArrayValue extends Value {
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.ADDED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     addItemAt(item, index) {
@@ -42,7 +42,7 @@ class ArrayValue extends Value {
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.ADDED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     shift() {
@@ -53,7 +53,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -73,7 +73,7 @@ class ArrayValue extends Value {
             for (i = 0; i < args.length; i++) {
                 this.dispatchWith(flower.Event.ADDED, args[i]);
             }
-            this.dispatchWith(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
         else {
             list = this.list.splice(startIndex, delCount);
@@ -82,7 +82,7 @@ class ArrayValue extends Value {
             for (i = 0; i < list.length; i++) {
                 this.dispatchWith(flower.Event.REMOVED, list[i]);
             }
-            this.dispatchWith(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
         return list;
     }
@@ -101,7 +101,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -115,7 +115,7 @@ class ArrayValue extends Value {
             this._lengthValue.value = this._length;
             this.dispatchWith(flower.Event.REMOVED, item);
         }
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     removeItem(item) {
@@ -125,7 +125,7 @@ class ArrayValue extends Value {
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
-                this.dispatchWith(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }
@@ -142,7 +142,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -183,7 +183,7 @@ class ArrayValue extends Value {
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
         this.dispatchWith(flower.Event.REMOVED, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -330,7 +330,7 @@ class ArrayValue extends Value {
 
     sort() {
         this.list.sort.apply(this.list, arguments);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     setItemIndex(item, index) {
@@ -340,7 +340,7 @@ class ArrayValue extends Value {
         }
         this.list.splice(itemIndex, 1);
         this.list.splice(index, 0, item);
-        this.dispatchWith(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     getItemAt(index) {
@@ -480,7 +480,7 @@ class ArrayValue extends Value {
                 this._lengthValue.value = this._length;
                 this.dispatchWith(flower.Event.REMOVED, item);
             }
-            this.dispatchWith(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
     }
 

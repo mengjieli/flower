@@ -1,4 +1,4 @@
-class TextInput extends DisplayObject {
+class $TextInput extends DisplayObject {
 
     $TextField;
 
@@ -294,5 +294,3 @@ class TextInput extends DisplayObject {
         this.$nativeShow = null;
     }
 }
-
-exports.TextInput = TextInput;

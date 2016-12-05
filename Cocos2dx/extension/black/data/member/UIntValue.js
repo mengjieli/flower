@@ -28,7 +28,7 @@ class UIntValue extends Value {
                 this.__valueCheck.push(str.charCodeAt(i));
             }
         }
-        this.dispatchWith(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $getValue() {

@@ -3,6 +3,7 @@ class Label extends flower.TextField {
     constructor(text = "") {
         super(text);
         this.$initUIComponent();
+        this.selectable = false;
     }
 
     $addFlags(flags) {
@@ -79,11 +80,11 @@ class Label extends flower.TextField {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
         }
-        //super.$onFrameEnd();
+        super.$onFrameEnd();
         if (this.$hasFlags(0x0800)) {
             this.$getContentBounds();
+            super.$onFrameEnd();
         }
-        //super.$onFrameEnd();
         flower.DebugInfo.frameInfo.display++;
         flower.DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;

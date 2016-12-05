@@ -21,6 +21,7 @@ class Scroller extends MaskUI {
             14: false, //isDraging
             15: false, //dragH
             16: false, //dragV
+            20: true, //scrollable
             52: 0,//contentWidth
             53: 0,//contentHeight
         }
@@ -68,7 +69,7 @@ class Scroller extends MaskUI {
 
     __onTouchScroller(e) {
         var p = this.$Scroller;
-        if (!p[0]) {
+        if (!p[0] || !p[20]) {
             return;
         }
         var x = this.lastTouchX;
@@ -388,6 +389,21 @@ class Scroller extends MaskUI {
 
     get scrollOut() {
         return this.$Scroller[7];
+    }
+
+    set scrollable(val) {
+        if(val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if(val == this.$Scroller[20]) {
+            return;
+        }
+        this.$Scroller[20] = val;
+    }
+
+    get scrollable() {
+        return this.$Scroller[20];
     }
 }
 

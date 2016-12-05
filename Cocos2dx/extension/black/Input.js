@@ -1,4 +1,4 @@
-class Input extends flower.TextInput {
+class Input extends flower.TextField {
 
     constructor(text = "") {
         super(text);
@@ -6,6 +6,17 @@ class Input extends flower.TextInput {
         this.$input = {
             0: null, //value
         }
+        this.$IViewPort = {
+            0: 0,    //contentStartX
+            1: 0,    //contentStartY
+            2: 0,    //contentEndX
+            3: 0,    //contentEndY
+            4: null, //scrollH
+            5: null, //scrollV
+            6: null, //viewer
+        }
+        this.input = true;
+        this.addListener(flower.Event.CHANGE, this.__onTextChange, this);
     }
 
     $addFlags(flags) {
@@ -78,8 +89,7 @@ class Input extends flower.TextInput {
         }
     }
 
-    $setText(val) {
-        super.$setText(val);
+    __onTextChange(e) {
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
             this.$input[0].value = this.text;
             if (this.text != this.$input[0].value + "") {
@@ -105,13 +115,76 @@ class Input extends flower.TextInput {
     //    super.$onFrameEnd();
     //}
 
+
+    $setHtmlText(text) {
+        super.$setHtmlText.call(this, text);
+        var p = this.$TextField;
+        this.$IViewPort[2] = p[17];
+        this.$IViewPort[3] = p[18];
+    }
+
     dispose() {
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.removeAllBindProperty();
         this.$UIComponent[11].dispose();
         super.dispose();
+    }
+
+    $getX() {
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            return p[50];
+        } else {
+            return super.$getX.call(this);
+        }
+    }
+
+    $setX(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            if (p[50] == val) {
+                return;
+            }
+            p[50] = val;
+            p[100] = true;
+        } else {
+            super.$setX.call(this, val);
+        }
+    }
+
+    $getY() {
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            return p[51];
+        } else {
+            return super.$getY.call(this);
+        }
+    }
+
+    $setY(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            if (p[51] == val) {
+                return;
+            }
+            p[51] = val;
+            p[100] = true;
+        } else {
+            super.$setY.call(this, val);
+        }
+    }
+
+    set viewer(val) {
+        if (this.$IViewPort[6] == val) {
+            return;
+        }
+        this.$IViewPort[6] = val;
+        var p = this.$TextField;
+        p[100] = true;
     }
 
     set value(val) {
@@ -119,17 +192,64 @@ class Input extends flower.TextInput {
             return;
         }
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.$input[0] = val;
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].addListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.__valueChange();
     }
 
     get value() {
         return this.$input[0];
+    }
+
+    $getContentWidth() {
+        return this.$IViewPort[2] - this.$IViewPort[0];
+    }
+
+    $getContentHeight() {
+        return this.$IViewPort[3] - this.$IViewPort[1];
+    }
+
+    get contentWidth() {
+        return this.$getContentWidth();
+    }
+
+    get contentHeight() {
+        return this.$getContentHeight();
+    }
+
+    get scrollH() {
+        return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+    }
+
+    set scrollH(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[4] == val) {
+            return;
+        }
+        this.$IViewPort[4] = val;
+    }
+
+    get scrollV() {
+        return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+    }
+
+    set scrollV(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[5] == val) {
+            return;
+        }
+        this.$IViewPort[5] = val;
+        var p = this.$TextField;
+        p[51] = val;
+        p[100] = true;
     }
 }
 

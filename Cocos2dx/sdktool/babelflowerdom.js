@@ -215,7 +215,7 @@ var list = [
     "Bitmap",
     "$TextField",
     "TextField",
-    "TextInput",
+    "$TextInput",
     "Shape",
     "Stage",
 
