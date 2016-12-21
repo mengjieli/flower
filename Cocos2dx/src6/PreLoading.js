@@ -11,8 +11,8 @@ class PreLoading extends flower.EventDispatcher {
 
         this.progress = new flower.NumberValue();
         this.modules = [
-            new flower.Module("modules/software/module.json"),
-            new flower.Module("modules/gameEditor/module.json"),
+            new flower.Module("res/software/module.json"),
+            //new flower.Module("modules/gameEditor/module.json"),
             //new flower.Module("modules/dungeonEditor/module.json")
         ];
         this.progressBar = (new flower.UIParser()).parseUI(`

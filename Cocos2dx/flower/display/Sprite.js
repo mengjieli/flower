@@ -244,6 +244,7 @@ class Sprite extends DisplayObject {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var target;
         var childs = this.__children;
         var len = childs.length;

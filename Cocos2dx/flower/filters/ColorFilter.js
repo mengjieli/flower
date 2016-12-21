@@ -3,7 +3,7 @@ class ColorFilter extends Filter {
     __s = 0;
     __l = 0;
 
-    constructor(h = 0, s = -100, l = 0) {
+    constructor(h = 0, s = 0, l = 0) {
         super(1);
         this.h = h;
         this.s = s;
@@ -19,6 +19,7 @@ class ColorFilter extends Filter {
     }
 
     set h(val) {
+        val = +val || 0;
         val += 180;
         if (val < 0) {
             val = 360 - (-val) % 360;
@@ -34,6 +35,7 @@ class ColorFilter extends Filter {
     }
 
     set s(val) {
+        val = +val || 0;
         if (val > 100) {
             val = 100;
         } else if (val < -100) {
@@ -47,6 +49,7 @@ class ColorFilter extends Filter {
     }
 
     set l(val) {
+        val = +val || 0;
         if (val > 100) {
             val = 100;
         } else if (val < -100) {

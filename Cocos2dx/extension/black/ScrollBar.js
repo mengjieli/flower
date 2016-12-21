@@ -81,19 +81,19 @@ class ScrollBar extends Group {
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
                 if (p[20]) {
-                    p[50] = e.touchX;
+                    p[50] = e.stageX;
                     p[51] = p[2].x;
                 } else {
-                    p[50] = e.touchY;
+                    p[50] = e.stageY;
                     p[51] = p[2].y;
                 }
                 break;
             case flower.TouchEvent.TOUCH_MOVE:
                 if (p[20]) {
-                    if(p[7] < p[9]) {
+                    if (p[7] < p[9]) {
                         return;
                     }
-                    var x = p[51] - p[50] + e.touchX;
+                    var x = p[51] - p[50] + e.stageX;
                     if (x < 0) {
                         x = 0;
                     }
@@ -105,10 +105,10 @@ class ScrollBar extends Group {
                         p[0].x = -x * (p[7] - p[9]) / (this.width - p[2].width) + p[5];
                     }
                 } else {
-                    if(p[8] < p[10]) {
+                    if (p[8] < p[10]) {
                         return;
                     }
-                    var y = p[51] - p[50] + e.touchY;
+                    var y = p[51] - p[50] + e.stageY;
                     if (y < 0) {
                         y = 0;
                     }

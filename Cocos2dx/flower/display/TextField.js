@@ -9,6 +9,9 @@ class TextField extends flower.DisplayObject {
     constructor(text) {
         super();
 
+        this.__changeText = TextField.changeText;
+        this.__changeRealText = TextField.changeRealText;
+
         this.$Sprite = {
             0: new flower.Rectangle() //childrenBounds
         }
@@ -39,6 +42,7 @@ class TextField extends flower.DisplayObject {
             23: true, //selectable
             24: true, //multiline
             25: false, //enterend
+            26: true, //inputtingChange
             29: 2, //lineStart
             30: 0, //caretIndex
             31: 0, //caretHtmlIndex
@@ -84,7 +88,7 @@ class TextField extends flower.DisplayObject {
         this.__input = flower.Stage.getInstance().$input;
         flower.EnterFrame.add(this.$update, this);
 
-        if(text && text != "") {
+        if (text && text != "") {
             this.text = text;
         }
     }
@@ -204,6 +208,7 @@ class TextField extends flower.DisplayObject {
             this.__showFocus(info);
         }
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
+        this.dispatchWith(flower.Event.START_INPUT,null,true);
     }
 
     __stopInput() {
@@ -212,6 +217,7 @@ class TextField extends flower.DisplayObject {
         this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.remove(this.__update, this);
         this.__hideFocus();
+        this.dispatchWith(flower.Event.STOP_INPUT,null,true);
     }
 
     __hideFocus() {
@@ -742,11 +748,12 @@ class TextField extends flower.DisplayObject {
                 p[305] = str.charAt(str.length - 1);
             }
         } else if (e.keyCode == 13 && this.input) {
-            if(p[24]) {
+            if (p[24]) {
                 this.__inputText("\n");
             } else {
-                if(p[25]) {
+                if (p[25]) {
                     this.__stopInput();
+                } else {
                 }
             }
         } else if ((e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) && this.input) {
@@ -827,8 +834,8 @@ class TextField extends flower.DisplayObject {
 
     __getClickPos() {
         var p = this.$TextField;
-        var x = this.lastTouchX;
-        var y = this.lastTouchY;
+        var x = this.mouseX;
+        var y = this.mouseY;
         if (p[21] == "right") {
             x += p[29];
         } else if (p[21] == "center") {
@@ -1257,7 +1264,7 @@ class TextField extends flower.DisplayObject {
         }
         this.$moveCaretIndex();
         if (oldText != p[0]) {
-            this.dispatchWith(flower.Event.CHANGE);
+            this.dispatchWith(flower.Event.CHANGE,null,true);
         }
     }
 
@@ -1726,46 +1733,6 @@ class TextField extends flower.DisplayObject {
         this.$setHtmlText(p[1]);
     }
 
-    __changeText(val) {
-        for (var i = 0; i < val.length; i++) {
-            var char = val.charAt(i);
-            if (char == " ") {
-                val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
-                i += 5
-            } else if (char == "<") {
-                val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
-                i += 3
-            } else if (char == ">") {
-                val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
-                i += 3
-            } else if (char == "&") {
-                val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
-                i += 4
-            } else if (char == "\n" || char == "\r") {
-                //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
-                //i += 4
-            }
-        }
-        return val;
-    }
-
-    __changeRealText(val) {
-        for (var i = 0; i < val.length; i++) {
-            if (val.slice(i, i + 5) == "&amp;") {
-                val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
-            } else if (val.slice(i, i + 6) == "&nbsp;") {
-                val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
-            } else if (val.slice(i, i + 4) == "&lt;") {
-                val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
-            } else if (val.slice(i, i + 4) == "&gt;") {
-                val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
-            } else if (val.slice(i, i + 5) == "<br/>") {
-                val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
-            }
-        }
-        return val;
-    }
-
     $onFrameEnd() {
         var p = this.$TextField;
         if (p[100]) {
@@ -2106,6 +2073,7 @@ class TextField extends flower.DisplayObject {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var bounds = this.__shape.$getContentBounds();
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             var target;
@@ -2300,6 +2268,46 @@ class TextField extends flower.DisplayObject {
 
     get enterStop() {
         return this.$TextField[25];
+    }
+
+    static changeText(val) {
+        for (var i = 0; i < val.length; i++) {
+            var char = val.charAt(i);
+            if (char == " ") {
+                val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
+                i += 5
+            } else if (char == "<") {
+                val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
+                i += 3
+            } else if (char == ">") {
+                val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
+                i += 3
+            } else if (char == "&") {
+                val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
+                i += 4
+            } else if (char == "\n" || char == "\r") {
+                //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
+                //i += 4
+            }
+        }
+        return val;
+    }
+
+    static changeRealText(val) {
+        for (var i = 0; i < val.length; i++) {
+            if (val.slice(i, i + 5) == "&amp;") {
+                val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
+            } else if (val.slice(i, i + 6) == "&nbsp;") {
+                val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
+            } else if (val.slice(i, i + 4) == "&lt;") {
+                val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
+            } else if (val.slice(i, i + 4) == "&gt;") {
+                val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
+            } else if (val.slice(i, i + 5) == "<br/>") {
+                val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
+            }
+        }
+        return val;
     }
 }
 

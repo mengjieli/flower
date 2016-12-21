@@ -603,7 +603,7 @@ var black = {};
                 this.list.push(item);
                 this._length = this._length + 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.ADDED, item);
+                this.dispatchWith(flower.Event.ADD, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
@@ -617,7 +617,7 @@ var black = {};
                 this.list.splice(index, 0, item);
                 this._length = this._length + 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.ADDED, item);
+                this.dispatchWith(flower.Event.ADD, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
@@ -629,7 +629,7 @@ var black = {};
                 var item = this.list.shift();
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
@@ -656,7 +656,7 @@ var black = {};
                     this._length = this._length + 1;
                     this._lengthValue.value = this._length;
                     for (i = 0; i < args.length; i++) {
-                        this.dispatchWith(flower.Event.ADDED, args[i]);
+                        this.dispatchWith(flower.Event.ADD, args[i]);
                     }
                     this.dispatchWith(flower.Event.CHANGE, this);
                 } else {
@@ -664,7 +664,7 @@ var black = {};
                     this._length = this._length - delCount;
                     this._lengthValue.value = this._length;
                     for (i = 0; i < list.length; i++) {
-                        this.dispatchWith(flower.Event.REMOVED, list[i]);
+                        this.dispatchWith(flower.Event.REMOVE, list[i]);
                     }
                     this.dispatchWith(flower.Event.CHANGE, this);
                 }
@@ -686,7 +686,7 @@ var black = {};
                 var item = this.list.pop();
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
@@ -700,7 +700,7 @@ var black = {};
                     var item = this.list.pop();
                     this._length = this._length - 1;
                     this._lengthValue.value = this._length;
-                    this.dispatchWith(flower.Event.REMOVED, item);
+                    this.dispatchWith(flower.Event.REMOVE, item);
                 }
                 this.dispatchWith(flower.Event.CHANGE, this);
             }
@@ -712,7 +712,7 @@ var black = {};
                         this.list.splice(i, 1);
                         this._length = this._length - 1;
                         this._lengthValue.value = this._length;
-                        this.dispatchWith(flower.Event.REMOVED, item);
+                        this.dispatchWith(flower.Event.REMOVE, item);
                         this.dispatchWith(flower.Event.CHANGE, this);
                         return item;
                     }
@@ -730,7 +730,7 @@ var black = {};
                 var item = this.list.splice(index, 1)[0];
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
@@ -774,7 +774,7 @@ var black = {};
                 }
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
@@ -1102,7 +1102,7 @@ var black = {};
                         var item = this.list.pop();
                         this._length = this._length - 1;
                         this._lengthValue.value = this._length;
-                        this.dispatchWith(flower.Event.REMOVED, item);
+                        this.dispatchWith(flower.Event.REMOVE, item);
                     }
                     this.dispatchWith(flower.Event.CHANGE, this);
                 }
@@ -3801,10 +3801,10 @@ var black = {};
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
                         if (p[20]) {
-                            p[50] = e.touchX;
+                            p[50] = e.stageX;
                             p[51] = p[2].x;
                         } else {
-                            p[50] = e.touchY;
+                            p[50] = e.stageY;
                             p[51] = p[2].y;
                         }
                         break;
@@ -3813,7 +3813,7 @@ var black = {};
                             if (p[7] < p[9]) {
                                 return;
                             }
-                            var x = p[51] - p[50] + e.touchX;
+                            var x = p[51] - p[50] + e.stageX;
                             if (x < 0) {
                                 x = 0;
                             }
@@ -3828,7 +3828,7 @@ var black = {};
                             if (p[8] < p[10]) {
                                 return;
                             }
-                            var y = p[51] - p[50] + e.touchY;
+                            var y = p[51] - p[50] + e.stageY;
                             if (y < 0) {
                                 y = 0;
                             }
@@ -4836,7 +4836,7 @@ var black = {};
                 6: null };
             //viewer
             _this20.input = true;
-            _this20.addListener(flower.Event.CHANGE, _this20.__onTextChange, _this20);
+            _this20.addListener(flower.Event.STOP_INPUT, _this20.__onTextChange, _this20);
             return _this20;
         }
 
@@ -6648,8 +6648,8 @@ var black = {};
                 if (!p[0] || !p[20]) {
                     return;
                 }
-                var x = this.lastTouchX;
-                var y = this.lastTouchY;
+                var x = this.mouseX;
+                var y = this.mouseY;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
                         if (p[8]) {

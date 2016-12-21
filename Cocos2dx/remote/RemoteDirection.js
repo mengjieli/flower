@@ -1,4 +1,4 @@
-class RemoteDirection {
+class RemoteDirection extends flower.EventDispatcher {
 
     __path;
     __autoUpdate;
@@ -7,11 +7,12 @@ class RemoteDirection {
     __updateRemote;
 
     constructor(path, autoUpdate = true) {
+        super();
         this.__path = path;
         this.__autoUpdate = autoUpdate;
         this.__list = new flower.ArrayValue();
         if (this.__path && this.__autoUpdate) {
-            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
+            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path, this.__autoUpdate);
         }
     }
 
@@ -34,6 +35,7 @@ class RemoteDirection {
                 list.push(fileList[i]);
             }
         }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     dispose() {

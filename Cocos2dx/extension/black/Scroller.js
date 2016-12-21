@@ -72,8 +72,8 @@ class Scroller extends MaskUI {
         if (!p[0] || !p[20]) {
             return;
         }
-        var x = this.lastTouchX;
-        var y = this.lastTouchY;
+        var x = this.mouseX;
+        var y = this.mouseY;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
                 if (p[8]) {

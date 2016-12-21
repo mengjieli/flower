@@ -308,18 +308,23 @@ var remote = {};
 
     //////////////////////////File:remote/RemoteDirection.js///////////////////////////
 
-    var RemoteDirection = function () {
+    var RemoteDirection = function (_flower$EventDispatch) {
+        _inherits(RemoteDirection, _flower$EventDispatch);
+
         function RemoteDirection(path) {
             var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
             _classCallCheck(this, RemoteDirection);
 
-            this.__path = path;
-            this.__autoUpdate = autoUpdate;
-            this.__list = new flower.ArrayValue();
-            if (this.__path && this.__autoUpdate) {
-                new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(RemoteDirection).call(this));
+
+            _this3.__path = path;
+            _this3.__autoUpdate = autoUpdate;
+            _this3.__list = new flower.ArrayValue();
+            if (_this3.__path && _this3.__autoUpdate) {
+                new ReadDirectionListRemote(_this3.__updateDirectionList, _this3, _this3.__path, _this3.__autoUpdate);
             }
+            return _this3;
         }
 
         _createClass(RemoteDirection, [{
@@ -345,6 +350,7 @@ var remote = {};
                         list.push(fileList[i]);
                     }
                 }
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "dispose",
@@ -390,7 +396,7 @@ var remote = {};
         }]);
 
         return RemoteDirection;
-    }();
+    }(flower.EventDispatcher);
 
     remote.RemoteDirection = RemoteDirection;
     //////////////////////////End File:remote/RemoteDirection.js///////////////////////////
@@ -410,19 +416,19 @@ var remote = {};
         function IsDirectionExistRemote(back, thisObj, path) {
             _classCallCheck(this, IsDirectionExistRemote);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(IsDirectionExistRemote).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(IsDirectionExistRemote).call(this));
 
-            _this3.__back = back;
-            _this3.__thisObj = thisObj;
+            _this4.__back = back;
+            _this4.__thisObj = thisObj;
 
             var msg = new flower.VByteArray();
             msg.writeUInt(20);
-            msg.writeUInt(_this3.remoteClientId);
+            msg.writeUInt(_this4.remoteClientId);
             msg.writeUInt(100);
-            msg.writeUInt(_this3.id);
+            msg.writeUInt(_this4.id);
             msg.writeUTF(path);
-            _this3.send(msg);
-            return _this3;
+            _this4.send(msg);
+            return _this4;
         }
 
         _createClass(IsDirectionExistRemote, [{
@@ -447,21 +453,25 @@ var remote = {};
         _inherits(ReadDirectionListRemote, _Remote2);
 
         function ReadDirectionListRemote(back, thisObj, path) {
+            var autoUpdate = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+
             _classCallCheck(this, ReadDirectionListRemote);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(ReadDirectionListRemote).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(ReadDirectionListRemote).call(this));
 
-            _this4.__back = back;
-            _this4.__thisObj = thisObj;
+            _this5.__back = back;
+            _this5.__thisObj = thisObj;
 
             var msg = new flower.VByteArray();
             msg.writeUInt(20);
-            msg.writeUInt(_this4.remoteClientId);
+            msg.writeUInt(_this5.remoteClientId);
             msg.writeUInt(102);
-            msg.writeUInt(_this4.id);
+            msg.writeUInt(_this5.id);
             msg.writeUTF(path);
-            _this4.send(msg);
-            return _this4;
+            msg.writeUTF(autoUpdate);
+            _this5.send(msg);
+            _this5.autoUpdate = autoUpdate;
+            return _this5;
         }
 
         _createClass(ReadDirectionListRemote, [{
@@ -482,8 +492,10 @@ var remote = {};
                 if (this.__back) {
                     this.__back.call(this.__thisObj, list);
                 }
-                this.__back = this.__thisObj = null;
-                this.dispose();
+                if (!this.autoUpdate) {
+                    this.__back = this.__thisObj = null;
+                    this.dispose();
+                }
             }
         }]);
 
@@ -500,20 +512,20 @@ var remote = {};
         function SaveFileRemote(back, thisObj, path, data, type, width, height) {
             _classCallCheck(this, SaveFileRemote);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(SaveFileRemote).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(SaveFileRemote).call(this));
 
-            _this5.__back = back;
-            _this5.__thisObj = thisObj;
+            _this6.__back = back;
+            _this6.__thisObj = thisObj;
             if (typeof data == "string") {
                 var msg = new flower.VByteArray();
                 msg.writeUInt(20);
-                msg.writeUInt(_this5.remoteClientId);
+                msg.writeUInt(_this6.remoteClientId);
                 msg.writeUInt(104);
-                msg.writeUInt(_this5.id);
+                msg.writeUInt(_this6.id);
                 msg.writeUTF(path);
                 msg.writeUTF(type);
                 msg.writeUTF(data);
-                _this5.send(msg);
+                _this6.send(msg);
             } else {
                 var len = data.length;
                 var i = 0;
@@ -521,9 +533,9 @@ var remote = {};
                 while (i < len) {
                     var msg = new flower.VByteArray();
                     msg.writeUInt(20);
-                    msg.writeUInt(_this5.remoteClientId);
+                    msg.writeUInt(_this6.remoteClientId);
                     msg.writeUInt(104);
-                    msg.writeUInt(_this5.id);
+                    msg.writeUInt(_this6.id);
                     msg.writeUTF(path);
                     msg.writeUTF(type);
                     msg.writeUInt(index);
@@ -537,11 +549,11 @@ var remote = {};
                         i++;
                         count++;
                     }
-                    _this5.send(msg);
+                    _this6.send(msg);
                     index++;
                 }
             }
-            return _this5;
+            return _this6;
         }
 
         _createClass(SaveFileRemote, [{
@@ -571,19 +583,19 @@ var remote = {};
         function DeleteFileRemote(back, thisObj, path) {
             _classCallCheck(this, DeleteFileRemote);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(DeleteFileRemote).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(DeleteFileRemote).call(this));
 
-            _this6.__back = back;
-            _this6.__thisObj = thisObj;
+            _this7.__back = back;
+            _this7.__thisObj = thisObj;
 
             var msg = new flower.VByteArray();
             msg.writeUInt(20);
-            msg.writeUInt(_this6.remoteClientId);
+            msg.writeUInt(_this7.remoteClientId);
             msg.writeUInt(106);
-            msg.writeUInt(_this6.id);
+            msg.writeUInt(_this7.id);
             msg.writeUTF(path);
-            _this6.send(msg);
-            return _this6;
+            _this7.send(msg);
+            return _this7;
         }
 
         _createClass(DeleteFileRemote, [{

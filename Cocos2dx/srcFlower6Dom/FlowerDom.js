@@ -171,6 +171,16 @@ function breakPoint(name) {
     trace("breakPoint:", name);
 }
 
+function dispose() {
+    flower.EnterFrame.$dispose();
+    flower.CallLater.$dispose();
+    flower.DelayCall.$dispose();
+    flower.Stage.$dispose();
+    TextureManager.getInstance().$dispose();
+    hasStart = false;
+}
+
+
 flower.start = start;
 flower.getLanguage = $getLanguage;
 flower.trace = trace;
@@ -186,6 +196,7 @@ flower.sys = {
 }
 flower.params = params;
 flower.system = {}
+flower.dispose = dispose;
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -199,6 +210,10 @@ class Platform {
     static stage;
     static width;
     static height;
+    static mouseX;
+    static mouseY;
+    static engine;
+    static touchDown = false;
 
     static start(engine, root, background) {
         flower.system.platform = Platform.type;
@@ -207,6 +222,7 @@ class Platform {
         while (paramString.charAt(0) == "?") {
             paramString = paramString.slice(1, paramString.length);
         }
+        Platform.engine = engine;
         var params = {};
         var array = paramString.split("&");
         for (var i = 0; i < array.length; i++) {
@@ -232,14 +248,17 @@ class Platform {
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
         document.body.onkeydown = function (e) {
-            setTimeout(function(){
+            if(e.keyCode == 9) {
+                e.preventDefault();
+            }
+            setTimeout(function () {
                 engine.$onKeyDown(e.which);
-            },0);
+            }, 0);
         }
         document.body.onkeyup = function (e) {
-            setTimeout(function(){
+            setTimeout(function () {
                 engine.$onKeyUp(e.which);
-            },0);
+            }, 0);
         }
         div.appendChild(engine.$background.$nativeShow.show);
         div.appendChild(root.show);
@@ -248,15 +267,24 @@ class Platform {
         mask.onmousedown = function (e) {
             if (e.button == 2) return;
             touchDown = true;
+            Platform.touchDown = true;
             engine.$addTouchEvent("begin", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmouseup = function (e) {
             if (e.button == 2) return;
             touchDown = false;
+            Platform.touchDown = false;
             engine.$addTouchEvent("end", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmousemove = function (e) {
             if (e.button == 2) return;
+            if (e.buttons == 0 && touchDown) {
+                touchDown = false;
+                Platform.touchDown = false;
+                engine.$addTouchEvent("end", 0, math.floor(e.clientX), math.floor(e.clientY));
+            }
+            Platform.mouseX = math.floor(e.clientX);
+            Platform.mouseY = math.floor(e.clientY);
             engine.$addMouseMoveEvent(math.floor(e.clientX), math.floor(e.clientY));
             if (touchDown) {
                 engine.$addTouchEvent("move", 0, math.floor(e.clientX), math.floor(e.clientY));
@@ -283,7 +311,11 @@ class Platform {
         Platform.lastTime = now;
         if (PlatformURLLoader.loadingList.length) {
             var item = PlatformURLLoader.loadingList.shift();
-            item[0].apply(null,item.slice(1,item.length));
+            item[0].apply(null, item.slice(1, item.length));
+        }
+        Platform.engine.$addMouseMoveEvent(Platform.mouseX, Platform.mouseY);
+        if (Platform.touchDown) {
+            Platform.engine.$addTouchEvent("move", 0, Platform.mouseX, Platform.mouseY);
         }
         requestAnimationFrame.call(window, Platform._run);
     }
@@ -2334,6 +2366,8 @@ class Event {
     static COMPLETE = "complete";
     static ADDED = "added";
     static REMOVED = "removed";
+    static ADD = "add";
+    static REMOVE = "remove";
     static ADDED_TO_STAGE = "added_to_stage";
     static REMOVED_FROM_STAGE = "removed_from_stage";
     static CONNECT = "connect";
@@ -2403,14 +2437,14 @@ class TouchEvent extends Event {
 
     get touchX() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchX;
+            return this.currentTarget.mouseX;
         }
         return this.$touchX;
     }
 
     get touchY() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchY;
+            return this.currentTarget.mouseY;
         }
         return this.$touchY;
     }
@@ -2453,14 +2487,14 @@ class MouseEvent extends Event {
 
     get mouseX() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchX;
+            return this.currentTarget.mouseX;
         }
         return this.$touchX;
     }
 
     get mouseY() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchY;
+            return this.currentTarget.mouseY;
         }
         return this.$touchY;
     }
@@ -3302,13 +3336,19 @@ class DisplayObject extends EventDispatcher {
             12: new Matrix(), //matrix
             13: new Matrix(), //reverseMatrix
             14: 0, //radian
+            15: false, //simpleMode
             20: id, //id
             21: true, //dispatchEventToParent
+            22: 0, //lastTouchFrame
             50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
         }
         DebugInfo.displayInfo.display++;
+    }
+
+    $setSimpleMode() {
+        this.$DisplayObject[15] = true;
     }
 
     /**
@@ -3378,7 +3418,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setX(val);
-        this.$invalidateReverseMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateReverseMatrix();
+        }
     }
 
     $getY() {
@@ -3397,7 +3439,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setY(val);
-        this.$invalidateReverseMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateReverseMatrix();
+        }
     }
 
     $setScaleX(val) {
@@ -3412,7 +3456,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setScaleX(val);
-        this.$invalidateMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateMatrix();
+        }
     }
 
     $getScaleX() {
@@ -3432,7 +3478,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setScaleY(val);
-        this.$invalidateMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateMatrix();
+        }
     }
 
     $getScaleY() {
@@ -3458,7 +3506,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setRotation(val);
-        this.$invalidateMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateMatrix();
+        }
     }
 
     $getMatrix() {
@@ -3533,7 +3583,9 @@ class DisplayObject extends EventDispatcher {
             }
         }
         p[3] = val;
-        this.$invalidatePosition();
+        if (!p[15]) {
+            this.$invalidatePosition();
+        }
         return true;
     }
 
@@ -3556,7 +3608,9 @@ class DisplayObject extends EventDispatcher {
             }
         }
         p[4] = val;
-        this.$invalidatePosition();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidatePosition();
+        }
         return true;
     }
 
@@ -3619,14 +3673,20 @@ class DisplayObject extends EventDispatcher {
         var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
         if (this.__parentAlpha != parentAlpha) {
             this.__parentAlpha = parentAlpha;
-            this.$addFlagsDown(0x0002);
+            if (!this.$DisplayObject[15]) {
+                this.$addFlagsDown(0x0002);
+            }
         }
         if (this.__parent) {
             this.$setParentFilters(this.__parent.$getAllFilters());
-            this.dispatchWith(Event.ADDED);
+            if (!this.$DisplayObject[15]) {
+                this.dispatchWith(Event.ADDED);
+            }
         } else {
             this.$setParentFilters(null);
-            this.dispatchWith(Event.REMOVED);
+            if (!this.$DisplayObject[15]) {
+                this.dispatchWith(Event.REMOVED);
+            }
         }
     }
 
@@ -3635,14 +3695,18 @@ class DisplayObject extends EventDispatcher {
     }
 
     $dispatchAddedToStageEvent() {
-        if (this.__stage) {
-            this.dispatchWith(Event.ADDED_TO_STAGE);
+        if (!this.$DisplayObject[15]) {
+            if (this.__stage) {
+                this.dispatchWith(Event.ADDED_TO_STAGE);
+            }
         }
     }
 
     $dispatchRemovedFromStageEvent() {
-        if (!this.__stage) {
-            this.dispatchWith(Event.REMOVED_FROM_STAGE);
+        if (!this.$DisplayObject[15]) {
+            if (!this.__stage) {
+                this.dispatchWith(Event.REMOVED_FROM_STAGE);
+            }
         }
     }
 
@@ -3749,11 +3813,30 @@ class DisplayObject extends EventDispatcher {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var bounds = this.$getContentBounds();
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
             return this;
         }
         return null;
+    }
+
+    /**
+     * 测量鼠标位置
+     */
+    $measureMousePosition() {
+        var p = this.$DisplayObject;
+        if (p[22] != flower.EnterFrame.frame && this.parent) {
+            this.parent.$measureMousePosition();
+            var mouseX = this.parent.mouseX;
+            var mouseY = this.parent.mouseY;
+            var point = this.$getReverseMatrix().transformPoint(mouseX, mouseY, Point.$TempPoint);
+            mouseX = math.floor(point.x);
+            mouseY = math.floor(point.y);
+            p[10] = mouseX;
+            p[11] = mouseY;
+            p[22] = flower.EnterFrame.frame;
+        }
     }
 
     $onFrameEnd() {
@@ -3819,8 +3902,8 @@ class DisplayObject extends EventDispatcher {
     }
 
     dispose() {
-        if (this.parent) {
-            this.parent.removeChild(this);
+        if (this.__parent) {
+            this.__parent.removeChild(this);
         }
         DebugInfo.displayInfo.display--;
         super.dispose();
@@ -3937,13 +4020,19 @@ class DisplayObject extends EventDispatcher {
         this.$setMultiplyTouchEnabled(val);
     }
 
-    get lastTouchX() {
+    get mouseX() {
         var p = this.$DisplayObject;
+        if (p[22] != flower.EnterFrame.frame) {
+            this.$measureMousePosition();
+        }
         return p[10];
     }
 
-    get lastTouchY() {
+    get mouseY() {
         var p = this.$DisplayObject;
+        if (p[22] != flower.EnterFrame.frame) {
+            this.$measureMousePosition();
+        }
         return p[11];
     }
 
@@ -4232,6 +4321,7 @@ class Sprite extends DisplayObject {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var target;
         var childs = this.__children;
         var len = childs.length;
@@ -4773,6 +4863,9 @@ class TextField extends flower.DisplayObject {
     constructor(text) {
         super();
 
+        this.__changeText = TextField.changeText;
+        this.__changeRealText = TextField.changeRealText;
+
         this.$Sprite = {
             0: new flower.Rectangle() //childrenBounds
         }
@@ -4803,6 +4896,7 @@ class TextField extends flower.DisplayObject {
             23: true, //selectable
             24: true, //multiline
             25: false, //enterend
+            26: true, //inputtingChange
             29: 2, //lineStart
             30: 0, //caretIndex
             31: 0, //caretHtmlIndex
@@ -4848,7 +4942,7 @@ class TextField extends flower.DisplayObject {
         this.__input = flower.Stage.getInstance().$input;
         flower.EnterFrame.add(this.$update, this);
 
-        if(text && text != "") {
+        if (text && text != "") {
             this.text = text;
         }
     }
@@ -4968,6 +5062,7 @@ class TextField extends flower.DisplayObject {
             this.__showFocus(info);
         }
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
+        this.dispatchWith(flower.Event.START_INPUT,null,true);
     }
 
     __stopInput() {
@@ -4976,6 +5071,7 @@ class TextField extends flower.DisplayObject {
         this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.remove(this.__update, this);
         this.__hideFocus();
+        this.dispatchWith(flower.Event.STOP_INPUT,null,true);
     }
 
     __hideFocus() {
@@ -5506,11 +5602,12 @@ class TextField extends flower.DisplayObject {
                 p[305] = str.charAt(str.length - 1);
             }
         } else if (e.keyCode == 13 && this.input) {
-            if(p[24]) {
+            if (p[24]) {
                 this.__inputText("\n");
             } else {
-                if(p[25]) {
+                if (p[25]) {
                     this.__stopInput();
+                } else {
                 }
             }
         } else if ((e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) && this.input) {
@@ -5591,8 +5688,8 @@ class TextField extends flower.DisplayObject {
 
     __getClickPos() {
         var p = this.$TextField;
-        var x = this.lastTouchX;
-        var y = this.lastTouchY;
+        var x = this.mouseX;
+        var y = this.mouseY;
         if (p[21] == "right") {
             x += p[29];
         } else if (p[21] == "center") {
@@ -6021,7 +6118,7 @@ class TextField extends flower.DisplayObject {
         }
         this.$moveCaretIndex();
         if (oldText != p[0]) {
-            this.dispatchWith(flower.Event.CHANGE);
+            this.dispatchWith(flower.Event.CHANGE,null,true);
         }
     }
 
@@ -6490,46 +6587,6 @@ class TextField extends flower.DisplayObject {
         this.$setHtmlText(p[1]);
     }
 
-    __changeText(val) {
-        for (var i = 0; i < val.length; i++) {
-            var char = val.charAt(i);
-            if (char == " ") {
-                val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
-                i += 5
-            } else if (char == "<") {
-                val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
-                i += 3
-            } else if (char == ">") {
-                val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
-                i += 3
-            } else if (char == "&") {
-                val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
-                i += 4
-            } else if (char == "\n" || char == "\r") {
-                //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
-                //i += 4
-            }
-        }
-        return val;
-    }
-
-    __changeRealText(val) {
-        for (var i = 0; i < val.length; i++) {
-            if (val.slice(i, i + 5) == "&amp;") {
-                val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
-            } else if (val.slice(i, i + 6) == "&nbsp;") {
-                val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
-            } else if (val.slice(i, i + 4) == "&lt;") {
-                val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
-            } else if (val.slice(i, i + 4) == "&gt;") {
-                val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
-            } else if (val.slice(i, i + 5) == "<br/>") {
-                val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
-            }
-        }
-        return val;
-    }
-
     $onFrameEnd() {
         var p = this.$TextField;
         if (p[100]) {
@@ -6870,6 +6927,7 @@ class TextField extends flower.DisplayObject {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var bounds = this.__shape.$getContentBounds();
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             var target;
@@ -7064,6 +7122,46 @@ class TextField extends flower.DisplayObject {
 
     get enterStop() {
         return this.$TextField[25];
+    }
+
+    static changeText(val) {
+        for (var i = 0; i < val.length; i++) {
+            var char = val.charAt(i);
+            if (char == " ") {
+                val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
+                i += 5
+            } else if (char == "<") {
+                val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
+                i += 3
+            } else if (char == ">") {
+                val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
+                i += 3
+            } else if (char == "&") {
+                val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
+                i += 4
+            } else if (char == "\n" || char == "\r") {
+                //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
+                //i += 4
+            }
+        }
+        return val;
+    }
+
+    static changeRealText(val) {
+        for (var i = 0; i < val.length; i++) {
+            if (val.slice(i, i + 5) == "&amp;") {
+                val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
+            } else if (val.slice(i, i + 6) == "&nbsp;") {
+                val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
+            } else if (val.slice(i, i + 4) == "&lt;") {
+                val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
+            } else if (val.slice(i, i + 4) == "&gt;") {
+                val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
+            } else if (val.slice(i, i + 5) == "<br/>") {
+                val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
+            }
+        }
+        return val;
     }
 }
 
@@ -7822,8 +7920,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -7839,8 +7937,8 @@ class Stage extends Sprite {
         event.$stageX = x;
         event.$stageY = y;
         event.$target = target;
-        event.$touchX = target.lastTouchX;
-        event.$touchY = target.lastTouchY;
+        event.$touchX = target.mouseX;
+        event.$touchY = target.mouseY;
         target.dispatch(event);
     }
 
@@ -7873,8 +7971,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = list[i].lastTouchX;
-                    event.$touchY = list[i].lastTouchY;
+                    event.$touchX = list[i].mouseX;
+                    event.$touchY = list[i].mouseY;
                     list[i].dispatch(event);
                 }
             }
@@ -7891,8 +7989,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = this.__dragOverList[j].lastTouchX;
-                    event.$touchY = this.__dragOverList[j].lastTouchY;
+                    event.$touchX = this.__dragOverList[j].mouseX;
+                    event.$touchY = this.__dragOverList[j].mouseY;
                     this.__dragOverList[j].dispatch(event);
                 }
             }
@@ -7918,8 +8016,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = list[i].lastTouchX;
-                    event.$touchY = list[i].lastTouchY;
+                    event.$touchX = list[i].mouseX;
+                    event.$touchY = list[i].mouseY;
                     list[i].dispatch(event);
                 }
             }
@@ -7936,8 +8034,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = this.__mouseOverList[j].lastTouchX;
-                    event.$touchY = this.__mouseOverList[j].lastTouchY;
+                    event.$touchX = this.__mouseOverList[j].mouseX;
+                    event.$touchY = this.__mouseOverList[j].mouseY;
                     this.__mouseOverList[j].dispatch(event);
                 }
             }
@@ -7947,8 +8045,8 @@ class Stage extends Sprite {
                 event.$stageX = x;
                 event.$stageY = y;
                 event.$target = target;
-                event.$touchX = target.lastTouchX;
-                event.$touchY = target.lastTouchY;
+                event.$touchX = target.mouseX;
+                event.$touchY = target.mouseY;
                 target.dispatch(event);
             }
         }
@@ -7985,8 +8083,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -8019,8 +8117,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         } else {
             target = mouse.target;
@@ -8029,8 +8127,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -8222,10 +8320,222 @@ class Stage extends Sprite {
     static getShortcut() {
         return Platform.getShortcut();
     }
+
+    static $dispose() {
+        //Stage.getInstance().removeAll();
+        Stage.stages = [];
+    }
 }
 
 flower.Stage = Stage;
 //////////////////////////End File:flower/display/Stage.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/Particle.js///////////////////////////
+class Particle extends flower.Sprite {
+
+    __config;
+    __particles;
+    __cycles;
+    __texture;
+
+    constructor(config) {
+        super();
+        this.__particles = [];
+        this.__cycles = [];
+        if (typeof config == "string") {
+            var loader = new flower.URLLoader(config);
+            loader.load();
+            loader.addListener(flower.Event.COMPLETE, this.__loadConfigComplete, this);
+        } else {
+            this.setConfig(config);
+        }
+        flower.EnterFrame.add(this.__update, this);
+    }
+
+    __loadConfigComplete(e) {
+        this.setConfig(e.data);
+    }
+
+    setConfig(config) {
+        this.__config = config;
+        //{
+        //    "name": "粒子特效",
+        //    "image": "",
+        //    "mode": 0,
+        //    "life": 0,
+        //    "lifev": 0,
+        //    "max": 0,
+        //    "gx": 0,
+        //    "gy": 0
+        //}
+        this.__texture = null;
+        if (this.loader) {
+            this.loader.dispose();
+            this.loader = null;
+        }
+        var loader = new flower.URLLoader(config.image);
+        loader.load();
+        loader.addListener(flower.Event.COMPLETE, this.__loadTextureComplete, this);
+        this.loader = loader;
+        while (this.__cycles.length) {
+            this.__cycles.pop().image.dispose();
+        }
+        this.__lastCount = 0;
+    }
+
+    __loadTextureComplete(e) {
+        this.loader = null;
+        this.__texture = e.data;
+    }
+
+    __update(time, gap) {
+        if (!this.__texture) {
+            return;
+        }
+        gap = gap/1000;
+        var cfg = this.__config;
+        var particles = this.__particles;
+        var cycles = this.__cycles;
+
+        for (var i = 0; i < particles.length; i++) {
+            var particle = particles[i];
+            if (particle.life <= 0) {
+                particles.splice(i, 1);
+                i--;
+                cycles.push(particle);
+                //particle.image.parent.removeChild(particle.image);
+                particle.image.visible = false;
+            }
+        }
+
+        for (var i = 0; i < particles.length; i++) {
+            var particle = particles[i];
+            particle.life -= gap;
+            particle.vx += cfg.gx * gap;
+            particle.vy += cfg.gy * gap;
+            particle.x += particle.vx * gap;
+            particle.y += particle.vy * gap;
+            particle.scale += particle.scaleV * gap;
+            particle.rotation += particle.rotationV * gap;
+            if (particle.oldX != ~~particle.x) {
+                particle.oldX = ~~particle.x;
+                particle.image.$nativeShow.setX(particle.oldX);
+            }
+            if (particle.oldY != ~~particle.y) {
+                particle.oldY = ~~particle.y;
+                particle.image.$nativeShow.setY(particle.oldY);
+            }
+            if (particle.oldScale != ~~particle.scale) {
+                particle.oldScale = ~~particle.scale;
+                particle.image.$nativeShow.setScaleX(particle.oldScale / 100);
+                particle.image.$nativeShow.setScaleY(particle.oldScale / 100);
+            }
+            if (particle.oldRotation != ~~particle.rotation) {
+                particle.oldRotation = ~~particle.rotation;
+                particle.image.rotation = particle.oldRotation;
+            }
+        }
+
+        var count = cfg.max * gap / cfg.life + this.__lastCount;
+        this.__lastCount = count - ~~count;
+        count = ~~count;
+        if (particles.length + count > cfg.max) {
+            count = cfg.max - particles.length;
+        }
+        for (var i = 0; i < count; i++) {
+            var item;
+            var scale = (cfg.initSize + cfg.initSizeV * math.random());
+            var endScale = (cfg.endSize + cfg.endSizeV * math.random());
+            var rotation = cfg.initRotation - cfg.initRotationV + 2 * cfg.initRotationV * math.random();
+            var endRotation = cfg.endRotation - cfg.endRotationV + 2 * cfg.endRotationV * math.random();
+            var life = cfg.life - cfg.lifev + 2 * math.random() * cfg.lifev;
+            if (cycles.length) {
+                item = cycles.pop();
+                item.life = life;
+                item.vx = 0;
+                item.vy = 0;
+                item.scale = scale;
+                item.scaleV = (endScale - scale) / life;
+                item.rotation = rotation;
+                item.rotationV = (endRotation - rotation) / life;
+                item.image.visible = true;
+            } else {
+                item = {
+                    image: new flower.Bitmap(this.__texture),
+                    mode: cfg.mode,
+                    life: life,
+                    x: 0,
+                    y: 0,
+                    vx: 0,
+                    vy: 0,
+                    scale: scale,
+                    scaleV: (endScale - scale) / life,
+                    rotation: rotation,
+                    rotationV: (endRotation - rotation) / life,
+                    oldX: 0,
+                    oldY: 0,
+                    oldScale: 1,
+                    oldRotation: 0
+                }
+                item.image.$setSimpleMode();
+                this.addChild(item.image);
+            }
+            item.x = -cfg.xv + cfg.xv * 2 * math.random();
+            item.y = -cfg.yv + cfg.yv * 2 * math.random();
+            if (item.oldX != ~~item.x) {
+                item.oldX = ~~item.x;
+                item.image.$nativeShow.setX(item.oldX);
+            }
+            if (item.oldY != ~~item.y) {
+                item.oldY = ~~item.y;
+                item.image.$nativeShow.setY(item.oldY);
+            }
+            if (item.oldScale != ~~item.scale) {
+                item.oldScale = ~~item.scale;
+                item.image.$nativeShow.setScaleX(item.oldScale / 100);
+                item.image.$nativeShow.setScaleY(item.oldScale / 100);
+            }
+            if (item.oldRotation != ~~item.rotation) {
+                item.oldRotation = ~~item.rotation;
+                item.image.rotation = item.oldRotation;
+            }
+            particles.push(item);
+        }
+    }
+
+    $getMouseTarget(touchX, touchY, multiply) {
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
+        var bounds = this.$getContentBounds();
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+            return this;
+        }
+        return null;
+    }
+
+    $onFrameEnd() {
+        this.$removeFlags(0x0100);
+        super.$onFrameEnd();
+    }
+
+    dispose() {
+        flower.EnterFrame.remove(this.__update, this);
+        while (this.__cycles.length) {
+            this.__cycles.pop().image.dispose();
+        }
+        super.dispose();
+    }
+}
+
+flower.Particle = Particle;
+//////////////////////////End File:flower/display/Particle.js///////////////////////////
 
 
 
@@ -8771,6 +9081,10 @@ class TextureManager {
                 }
             }
         }
+    }
+
+    $dispose() {
+        this.list = [];
     }
 
 
@@ -11440,6 +11754,11 @@ class EnterFrame {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
     }
+
+    static $dispose() {
+        EnterFrame.enterFrames = [];
+        EnterFrame.waitAdd = [];
+    }
 }
 
 flower.EnterFrame = EnterFrame;
@@ -11492,6 +11811,11 @@ class CallLater {
         }
     }
 
+    static $dispose() {
+        flower.CallLater._list = [];
+        flower.CallLater._next = [];
+    }
+
 }
 
 flower.CallLater = CallLater;
@@ -11506,12 +11830,13 @@ class DelayCall {
     _thisObj;
     _data;
 
-    constructor(time, func, thisObj, args = null) {
+    constructor(time, count, func, thisObj, ...args) {
         this._func = func;
         this._thisObj = thisObj;
         this._data = args || [];
         this._time = time;
         this._start = flower.CoreTime.currentTime;
+        this._count = count || 1000000000;
         this.$complete = false;
         DelayCall._next.push(this);
     }
@@ -11519,10 +11844,15 @@ class DelayCall {
     $update() {
         if (!this.$complete && flower.CoreTime.currentTime - this._start > this._time) {
             this._func.apply(this._thisObj, this._data);
-            this._func = null;
-            this._thisObj = null;
-            this._data = null;
-            this.$complete = true;
+            this._count--;
+            if (!this.$complete && this._count > 0) {
+                this._start = flower.CoreTime.currentTime;
+            } else {
+                this._func = null;
+                this._thisObj = null;
+                this._data = null;
+                this.$complete = true;
+            }
         }
     }
 
@@ -11535,6 +11865,8 @@ class DelayCall {
     static _next = [];
 
     static $run() {
+        DelayCall._list = DelayCall._list.concat(DelayCall._next);
+        DelayCall._next.length = 0;
         var list = DelayCall._list;
         for (var i = 0; i < list.length; i++) {
             list[i].$update();
@@ -11545,7 +11877,10 @@ class DelayCall {
                 i--;
             }
         }
-        DelayCall._list = DelayCall._list.concat(DelayCall._next);
+    }
+
+    static $dispose() {
+        DelayCall._list.length = 0;
         DelayCall._next.length = 0;
     }
 

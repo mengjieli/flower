@@ -11,14 +11,14 @@ class MouseEvent extends Event {
 
     get mouseX() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchX;
+            return this.currentTarget.mouseX;
         }
         return this.$touchX;
     }
 
     get mouseY() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchY;
+            return this.currentTarget.mouseY;
         }
         return this.$touchY;
     }

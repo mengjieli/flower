@@ -171,6 +171,16 @@ function breakPoint(name) {
     trace("breakPoint:", name);
 }
 
+function dispose() {
+    flower.EnterFrame.$dispose();
+    flower.CallLater.$dispose();
+    flower.DelayCall.$dispose();
+    flower.Stage.$dispose();
+    TextureManager.getInstance().$dispose();
+    hasStart = false;
+}
+
+
 flower.start = start;
 flower.getLanguage = $getLanguage;
 flower.trace = trace;
@@ -186,6 +196,7 @@ flower.sys = {
 }
 flower.params = params;
 flower.system = {}
+flower.dispose = dispose;
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -207,7 +218,6 @@ class Platform {
         var scene = cc.Scene.extend({
             ctor: function () {
                 this._super();
-                this.scheduleUpdate();
                 //注册鼠标事件
                 cc.eventManager.addListener({
                     event: cc.EventListener.TOUCH_ONE_BY_ONE,
@@ -299,6 +309,7 @@ class Platform {
         } else {
             trace("KEYBOARD Not supported");
         }
+        Platform.stage.scheduleUpdate();
     }
 
 
@@ -1059,6 +1070,7 @@ class PlatformBitmap extends PlatformDisplayObject {
                 this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
             }
         }
+        //this.show.setBlendFunc(gl.ONE, gl.ONE);
     }
 
 
@@ -2020,6 +2032,8 @@ class Event {
     static COMPLETE = "complete";
     static ADDED = "added";
     static REMOVED = "removed";
+    static ADD = "add";
+    static REMOVE = "remove";
     static ADDED_TO_STAGE = "added_to_stage";
     static REMOVED_FROM_STAGE = "removed_from_stage";
     static CONNECT = "connect";
@@ -2089,14 +2103,14 @@ class TouchEvent extends Event {
 
     get touchX() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchX;
+            return this.currentTarget.mouseX;
         }
         return this.$touchX;
     }
 
     get touchY() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchY;
+            return this.currentTarget.mouseY;
         }
         return this.$touchY;
     }
@@ -2139,14 +2153,14 @@ class MouseEvent extends Event {
 
     get mouseX() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchX;
+            return this.currentTarget.mouseX;
         }
         return this.$touchX;
     }
 
     get mouseY() {
         if (this.currentTarget) {
-            return this.currentTarget.lastTouchY;
+            return this.currentTarget.mouseY;
         }
         return this.$touchY;
     }
@@ -2313,7 +2327,7 @@ class ColorFilter extends Filter {
     __s = 0;
     __l = 0;
 
-    constructor(h = 0, s = -100, l = 0) {
+    constructor(h = 0, s = 0, l = 0) {
         super(1);
         this.h = h;
         this.s = s;
@@ -2329,6 +2343,7 @@ class ColorFilter extends Filter {
     }
 
     set h(val) {
+        val = +val || 0;
         val += 180;
         if (val < 0) {
             val = 360 - (-val) % 360;
@@ -2344,6 +2359,7 @@ class ColorFilter extends Filter {
     }
 
     set s(val) {
+        val = +val || 0;
         if (val > 100) {
             val = 100;
         } else if (val < -100) {
@@ -2357,6 +2373,7 @@ class ColorFilter extends Filter {
     }
 
     set l(val) {
+        val = +val || 0;
         if (val > 100) {
             val = 100;
         } else if (val < -100) {
@@ -2462,6 +2479,57 @@ class BlurFilter extends Filter {
 
 flower.BlurFilter = BlurFilter;
 //////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
+
+
+
+//////////////////////////File:flower/filters/DyeingFilter.js///////////////////////////
+/**
+ * 收集原有的 r,g,b 计算和，再根据 r,g,b 的比值重新分配 r,g,b
+ */
+class DyeingFilter extends Filter {
+    __r = 0;
+    __g = 0;
+    __b = 0;
+
+    constructor(r = 0.0, g = 0.0, b = 0.0) {
+        super(3);
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
+
+    $getParams() {
+        var sum = this.__r + this.__g + this.__b;
+        return [this.__r / sum, this.__g / sum, this.__b / sum];
+    }
+
+    get r() {
+        return this.__r;
+    }
+
+    set r(val) {
+        this.__r = +val || 0;
+    }
+
+    get g() {
+        return this.__g;
+    }
+
+    set g(val) {
+        this.__g = +val || 0;
+    }
+
+    get b() {
+        return this.__b;
+    }
+
+    set b(val) {
+        this.__b = +val || 0;
+    }
+}
+
+flower.DyeingFilter = DyeingFilter;
+//////////////////////////End File:flower/filters/DyeingFilter.js///////////////////////////
 
 
 
@@ -2988,13 +3056,19 @@ class DisplayObject extends EventDispatcher {
             12: new Matrix(), //matrix
             13: new Matrix(), //reverseMatrix
             14: 0, //radian
+            15: false, //simpleMode
             20: id, //id
             21: true, //dispatchEventToParent
+            22: 0, //lastTouchFrame
             50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
         }
         DebugInfo.displayInfo.display++;
+    }
+
+    $setSimpleMode() {
+        this.$DisplayObject[15] = true;
     }
 
     /**
@@ -3064,7 +3138,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setX(val);
-        this.$invalidateReverseMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateReverseMatrix();
+        }
     }
 
     $getY() {
@@ -3083,7 +3159,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setY(val);
-        this.$invalidateReverseMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateReverseMatrix();
+        }
     }
 
     $setScaleX(val) {
@@ -3098,7 +3176,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setScaleX(val);
-        this.$invalidateMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateMatrix();
+        }
     }
 
     $getScaleX() {
@@ -3118,7 +3198,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setScaleY(val);
-        this.$invalidateMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateMatrix();
+        }
     }
 
     $getScaleY() {
@@ -3144,7 +3226,9 @@ class DisplayObject extends EventDispatcher {
             return;
         }
         this.$nativeShow.setRotation(val);
-        this.$invalidateMatrix();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidateMatrix();
+        }
     }
 
     $getMatrix() {
@@ -3219,7 +3303,9 @@ class DisplayObject extends EventDispatcher {
             }
         }
         p[3] = val;
-        this.$invalidatePosition();
+        if (!p[15]) {
+            this.$invalidatePosition();
+        }
         return true;
     }
 
@@ -3242,7 +3328,9 @@ class DisplayObject extends EventDispatcher {
             }
         }
         p[4] = val;
-        this.$invalidatePosition();
+        if (!this.$DisplayObject[15]) {
+            this.$invalidatePosition();
+        }
         return true;
     }
 
@@ -3305,14 +3393,20 @@ class DisplayObject extends EventDispatcher {
         var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
         if (this.__parentAlpha != parentAlpha) {
             this.__parentAlpha = parentAlpha;
-            this.$addFlagsDown(0x0002);
+            if (!this.$DisplayObject[15]) {
+                this.$addFlagsDown(0x0002);
+            }
         }
         if (this.__parent) {
             this.$setParentFilters(this.__parent.$getAllFilters());
-            this.dispatchWith(Event.ADDED);
+            if (!this.$DisplayObject[15]) {
+                this.dispatchWith(Event.ADDED);
+            }
         } else {
             this.$setParentFilters(null);
-            this.dispatchWith(Event.REMOVED);
+            if (!this.$DisplayObject[15]) {
+                this.dispatchWith(Event.REMOVED);
+            }
         }
     }
 
@@ -3321,14 +3415,18 @@ class DisplayObject extends EventDispatcher {
     }
 
     $dispatchAddedToStageEvent() {
-        if (this.__stage) {
-            this.dispatchWith(Event.ADDED_TO_STAGE);
+        if (!this.$DisplayObject[15]) {
+            if (this.__stage) {
+                this.dispatchWith(Event.ADDED_TO_STAGE);
+            }
         }
     }
 
     $dispatchRemovedFromStageEvent() {
-        if (!this.__stage) {
-            this.dispatchWith(Event.REMOVED_FROM_STAGE);
+        if (!this.$DisplayObject[15]) {
+            if (!this.__stage) {
+                this.dispatchWith(Event.REMOVED_FROM_STAGE);
+            }
         }
     }
 
@@ -3435,11 +3533,30 @@ class DisplayObject extends EventDispatcher {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var bounds = this.$getContentBounds();
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
             return this;
         }
         return null;
+    }
+
+    /**
+     * 测量鼠标位置
+     */
+    $measureMousePosition() {
+        var p = this.$DisplayObject;
+        if (p[22] != flower.EnterFrame.frame && this.parent) {
+            this.parent.$measureMousePosition();
+            var mouseX = this.parent.mouseX;
+            var mouseY = this.parent.mouseY;
+            var point = this.$getReverseMatrix().transformPoint(mouseX, mouseY, Point.$TempPoint);
+            mouseX = math.floor(point.x);
+            mouseY = math.floor(point.y);
+            p[10] = mouseX;
+            p[11] = mouseY;
+            p[22] = flower.EnterFrame.frame;
+        }
     }
 
     $onFrameEnd() {
@@ -3505,8 +3622,8 @@ class DisplayObject extends EventDispatcher {
     }
 
     dispose() {
-        if (this.parent) {
-            this.parent.removeChild(this);
+        if (this.__parent) {
+            this.__parent.removeChild(this);
         }
         DebugInfo.displayInfo.display--;
         super.dispose();
@@ -3623,13 +3740,19 @@ class DisplayObject extends EventDispatcher {
         this.$setMultiplyTouchEnabled(val);
     }
 
-    get lastTouchX() {
+    get mouseX() {
         var p = this.$DisplayObject;
+        if (p[22] != flower.EnterFrame.frame) {
+            this.$measureMousePosition();
+        }
         return p[10];
     }
 
-    get lastTouchY() {
+    get mouseY() {
         var p = this.$DisplayObject;
+        if (p[22] != flower.EnterFrame.frame) {
+            this.$measureMousePosition();
+        }
         return p[11];
     }
 
@@ -3918,6 +4041,7 @@ class Sprite extends DisplayObject {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var target;
         var childs = this.__children;
         var len = childs.length;
@@ -4459,6 +4583,9 @@ class TextField extends flower.DisplayObject {
     constructor(text) {
         super();
 
+        this.__changeText = TextField.changeText;
+        this.__changeRealText = TextField.changeRealText;
+
         this.$Sprite = {
             0: new flower.Rectangle() //childrenBounds
         }
@@ -4488,6 +4615,8 @@ class TextField extends flower.DisplayObject {
             22: false, //input
             23: true, //selectable
             24: true, //multiline
+            25: false, //enterend
+            26: true, //inputtingChange
             29: 2, //lineStart
             30: 0, //caretIndex
             31: 0, //caretHtmlIndex
@@ -4533,7 +4662,7 @@ class TextField extends flower.DisplayObject {
         this.__input = flower.Stage.getInstance().$input;
         flower.EnterFrame.add(this.$update, this);
 
-        if(text && text != "") {
+        if (text && text != "") {
             this.text = text;
         }
     }
@@ -4653,6 +4782,7 @@ class TextField extends flower.DisplayObject {
             this.__showFocus(info);
         }
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
+        this.dispatchWith(flower.Event.START_INPUT,null,true);
     }
 
     __stopInput() {
@@ -4661,6 +4791,7 @@ class TextField extends flower.DisplayObject {
         this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.remove(this.__update, this);
         this.__hideFocus();
+        this.dispatchWith(flower.Event.STOP_INPUT,null,true);
     }
 
     __hideFocus() {
@@ -4735,7 +4866,6 @@ class TextField extends flower.DisplayObject {
         if (pos == findLine.chars && findLine.index != lines.length - 1) {
             this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findLine.htmlText.length)
                 + p[1].slice(findLine.htmlTextIndex + findLine.htmlText.length + findLine.endHtmlText.length, p[1].length);
-            this.$moveCaretIndex();
             return;
         }
         var findSubline;
@@ -5107,7 +5237,6 @@ class TextField extends flower.DisplayObject {
             }
             list.length = 0;
             this.__setHtmlText(newHtmlText, false);
-            this.$moveCaretIndex();
         }
     }
 
@@ -5193,9 +5322,13 @@ class TextField extends flower.DisplayObject {
                 p[305] = str.charAt(str.length - 1);
             }
         } else if (e.keyCode == 13 && this.input) {
-            if(p[24]) {
+            if (p[24]) {
                 this.__inputText("\n");
             } else {
+                if (p[25]) {
+                    this.__stopInput();
+                } else {
+                }
             }
         } else if ((e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) && this.input) {
             if (e.keyCode == 37) {
@@ -5275,8 +5408,8 @@ class TextField extends flower.DisplayObject {
 
     __getClickPos() {
         var p = this.$TextField;
-        var x = this.lastTouchX;
-        var y = this.lastTouchY;
+        var x = this.mouseX;
+        var y = this.mouseY;
         if (p[21] == "right") {
             x += p[29];
         } else if (p[21] == "center") {
@@ -5703,8 +5836,9 @@ class TextField extends flower.DisplayObject {
                 }
             }
         }
+        this.$moveCaretIndex();
         if (oldText != p[0]) {
-            this.dispatchWith(flower.Event.CHANGE);
+            this.dispatchWith(flower.Event.CHANGE,null,true);
         }
     }
 
@@ -6173,46 +6307,6 @@ class TextField extends flower.DisplayObject {
         this.$setHtmlText(p[1]);
     }
 
-    __changeText(val) {
-        for (var i = 0; i < val.length; i++) {
-            var char = val.charAt(i);
-            if (char == " ") {
-                val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
-                i += 5
-            } else if (char == "<") {
-                val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
-                i += 3
-            } else if (char == ">") {
-                val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
-                i += 3
-            } else if (char == "&") {
-                val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
-                i += 4
-            } else if (char == "\n" || char == "\r") {
-                //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
-                //i += 4
-            }
-        }
-        return val;
-    }
-
-    __changeRealText(val) {
-        for (var i = 0; i < val.length; i++) {
-            if (val.slice(i, i + 5) == "&amp;") {
-                val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
-            } else if (val.slice(i, i + 6) == "&nbsp;") {
-                val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
-            } else if (val.slice(i, i + 4) == "&lt;") {
-                val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
-            } else if (val.slice(i, i + 4) == "&gt;") {
-                val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
-            } else if (val.slice(i, i + 5) == "<br/>") {
-                val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
-            }
-        }
-        return val;
-    }
-
     $onFrameEnd() {
         var p = this.$TextField;
         if (p[100]) {
@@ -6553,6 +6647,7 @@ class TextField extends flower.DisplayObject {
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var bounds = this.__shape.$getContentBounds();
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             var target;
@@ -6732,6 +6827,61 @@ class TextField extends flower.DisplayObject {
 
     get multiline() {
         return this.$TextField[24];
+    }
+
+    set enterStop(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if (val == this.$TextField[25]) {
+            return;
+        }
+        this.$TextField[25] = val;
+    }
+
+    get enterStop() {
+        return this.$TextField[25];
+    }
+
+    static changeText(val) {
+        for (var i = 0; i < val.length; i++) {
+            var char = val.charAt(i);
+            if (char == " ") {
+                val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
+                i += 5
+            } else if (char == "<") {
+                val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
+                i += 3
+            } else if (char == ">") {
+                val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
+                i += 3
+            } else if (char == "&") {
+                val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
+                i += 4
+            } else if (char == "\n" || char == "\r") {
+                //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
+                //i += 4
+            }
+        }
+        return val;
+    }
+
+    static changeRealText(val) {
+        for (var i = 0; i < val.length; i++) {
+            if (val.slice(i, i + 5) == "&amp;") {
+                val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
+            } else if (val.slice(i, i + 6) == "&nbsp;") {
+                val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
+            } else if (val.slice(i, i + 4) == "&lt;") {
+                val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
+            } else if (val.slice(i, i + 4) == "&gt;") {
+                val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
+            } else if (val.slice(i, i + 5) == "<br/>") {
+                val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
+            }
+        }
+        return val;
     }
 }
 
@@ -7490,8 +7640,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -7507,8 +7657,8 @@ class Stage extends Sprite {
         event.$stageX = x;
         event.$stageY = y;
         event.$target = target;
-        event.$touchX = target.lastTouchX;
-        event.$touchY = target.lastTouchY;
+        event.$touchX = target.mouseX;
+        event.$touchY = target.mouseY;
         target.dispatch(event);
     }
 
@@ -7541,8 +7691,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = list[i].lastTouchX;
-                    event.$touchY = list[i].lastTouchY;
+                    event.$touchX = list[i].mouseX;
+                    event.$touchY = list[i].mouseY;
                     list[i].dispatch(event);
                 }
             }
@@ -7559,8 +7709,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = this.__dragOverList[j].lastTouchX;
-                    event.$touchY = this.__dragOverList[j].lastTouchY;
+                    event.$touchX = this.__dragOverList[j].mouseX;
+                    event.$touchY = this.__dragOverList[j].mouseY;
                     this.__dragOverList[j].dispatch(event);
                 }
             }
@@ -7586,8 +7736,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = list[i].lastTouchX;
-                    event.$touchY = list[i].lastTouchY;
+                    event.$touchX = list[i].mouseX;
+                    event.$touchY = list[i].mouseY;
                     list[i].dispatch(event);
                 }
             }
@@ -7604,8 +7754,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = this.__mouseOverList[j].lastTouchX;
-                    event.$touchY = this.__mouseOverList[j].lastTouchY;
+                    event.$touchX = this.__mouseOverList[j].mouseX;
+                    event.$touchY = this.__mouseOverList[j].mouseY;
                     this.__mouseOverList[j].dispatch(event);
                 }
             }
@@ -7615,8 +7765,8 @@ class Stage extends Sprite {
                 event.$stageX = x;
                 event.$stageY = y;
                 event.$target = target;
-                event.$touchX = target.lastTouchX;
-                event.$touchY = target.lastTouchY;
+                event.$touchX = target.mouseX;
+                event.$touchY = target.mouseY;
                 target.dispatch(event);
             }
         }
@@ -7653,8 +7803,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -7687,8 +7837,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         } else {
             target = mouse.target;
@@ -7697,8 +7847,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -7890,10 +8040,286 @@ class Stage extends Sprite {
     static getShortcut() {
         return Platform.getShortcut();
     }
+
+    static $dispose() {
+        //Stage.getInstance().removeAll();
+        Stage.stages = [];
+    }
 }
 
 flower.Stage = Stage;
 //////////////////////////End File:flower/display/Stage.js///////////////////////////
+
+
+
+//////////////////////////File:flower/display/Particle.js///////////////////////////
+class Particle extends flower.Sprite {
+
+    __config;
+    __particles;
+    __cycles;
+    __texture;
+
+    constructor(config) {
+        super();
+        this.__particles = [];
+        this.__cycles = [];
+        if (typeof config == "string") {
+            var loader = new flower.URLLoader(config);
+            loader.load();
+            loader.addListener(flower.Event.COMPLETE, this.__loadConfigComplete, this);
+        } else {
+            this.setConfig(config);
+        }
+        flower.EnterFrame.add(this.__update, this);
+    }
+
+    __loadConfigComplete(e) {
+        this.setConfig(e.data);
+    }
+
+    setConfig(config) {
+        this.__config = config;
+        //{
+        //    "name": "粒子特效",
+        //    "image": "",
+        //    "mode": 0,
+        //    "life": 0,
+        //    "lifev": 0,
+        //    "max": 0,
+        //    "gx": 0,
+        //    "gy": 0
+        //}
+        this.__texture = null;
+        if (this.loader) {
+            this.loader.dispose();
+            this.loader = null;
+        }
+        var loader = new flower.URLLoader(config.image);
+        loader.load();
+        loader.addListener(flower.Event.COMPLETE, this.__loadTextureComplete, this);
+        this.loader = loader;
+        while (this.__cycles.length) {
+            this.__cycles.pop().image.dispose();
+        }
+        this.__lastCount = 0;
+    }
+
+    __loadTextureComplete(e) {
+        this.loader = null;
+        this.__texture = e.data;
+    }
+
+    __update(time, gap) {
+        if (!this.__texture) {
+            return;
+        }
+        gap = gap / 1000;
+        var cfg = this.__config;
+        var particles = this.__particles;
+        var cycles = this.__cycles;
+
+        for (var i = 0; i < particles.length; i++) {
+            var particle = particles[i];
+            if (particle.life <= 0) {
+                particles.splice(i, 1);
+                i--;
+                cycles.push(particle);
+                //particle.image.parent.removeChild(particle.image);
+                particle.image.visible = false;
+            }
+        }
+
+        for (var i = 0; i < particles.length; i++) {
+            var particle = particles[i];
+            particle.life -= gap;
+            particle.vx += cfg.gx * gap;
+            particle.vy += -cfg.gy * gap;
+            particle.x += particle.vx * gap;
+            particle.y += particle.vy * gap;
+            particle.scale += particle.scaleV * gap;
+            particle.rotation += particle.rotationV * gap;
+            particle.alpha += particle.alphaV * gap;
+            particle.red += particle.redV * gap;
+            particle.green += particle.greenV * gap;
+            particle.blue += particle.blueV * gap;
+            if (particle.oldX != ~~particle.x) {
+                particle.oldX = ~~particle.x;
+                particle.image.$nativeShow.setX(particle.oldX);
+            }
+            if (particle.oldY != ~~particle.y) {
+                particle.oldY = ~~particle.y;
+                particle.image.$nativeShow.setY(particle.oldY);
+            }
+            if (particle.oldScale != ~~particle.scale) {
+                particle.oldScale = ~~particle.scale;
+                particle.image.$nativeShow.setScaleX((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+                particle.image.$nativeShow.setScaleY((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+            }
+            if (particle.oldAlpha != ~~particle.alpha) {
+                particle.oldAlpha = ~~particle.alpha;
+                particle.image.alpha = particle.oldAlpha / 255;
+            }
+            if (particle.oldRed != ~~particle.red || particle.oldGreen != ~~particle.green || particle.oldBlue != ~~particle.blue) {
+                particle.oldRed = ~~particle.red;
+                particle.oldGreen = ~~particle.green;
+                particle.oldBlue = ~~particle.blue;
+                particle.filters[0].r = particle.oldRed;
+                particle.filters[0].g = particle.oldGreen;
+                particle.filters[0].b = particle.oldBlue;
+                particle.image.filters = particle.filters;
+            }
+            if (particle.oldRotation != ~~particle.rotation) {
+                particle.oldRotation = ~~particle.rotation;
+                particle.image.rotation = particle.oldRotation;
+            }
+        }
+
+        var count = cfg.max * gap / cfg.life + this.__lastCount;
+        this.__lastCount = count - ~~count;
+        count = ~~count;
+        if (particles.length + count > cfg.max) {
+            count = cfg.max - particles.length;
+        }
+        for (var i = 0; i < count; i++) {
+            var item;
+            var scale = cfg.initSize - cfg.initSizeV + 2 * cfg.initSizeV * math.random();
+            var endScale = cfg.endSize - cfg.endSizeV + 2 * cfg.endSizeV * math.random();
+            var alpha = cfg.initAlpha - cfg.initAlphaV + 2 * cfg.initAlphaV * math.random();
+            var endAlpha = cfg.endAlpha - cfg.endAlphaV + 2 * cfg.endAlphaV * math.random();
+            var red = cfg.initRed - cfg.initRedV + 2 * cfg.initRedV * math.random();
+            var endRed = cfg.endRed - cfg.endRedV + 2 * cfg.endRedV * math.random();
+            var green = cfg.initGreen - cfg.initGreenV + 2 * cfg.initGreenV * math.random();
+            var endGreen = cfg.endGreen - cfg.endGreenV + 2 * cfg.endGreenV * math.random();
+            var blue = cfg.initBlue - cfg.initBlueV + 2 * cfg.initBlueV * math.random();
+            var endBlue = cfg.endBlue - cfg.endBlueV + 2 * cfg.endBlueV * math.random();
+            var rotation = cfg.initRotation - cfg.initRotationV + 2 * cfg.initRotationV * math.random();
+            var endRotation = cfg.endRotation - cfg.endRotationV + 2 * cfg.endRotationV * math.random();
+            var shootSpeed = cfg.shootSpeed - cfg.shootSpeedV + 2 * math.random() * cfg.shootSpeedV;
+            var shootRotation = cfg.shootRotation - cfg.shootRotationV + 2 * math.random() * cfg.shootRotationV;
+            shootRotation = shootRotation * math.PI / 180;
+            var vx = math.cos(shootRotation) * shootSpeed;
+            var vy = -math.sin(shootRotation) * shootSpeed;
+            var life = cfg.life - cfg.lifev + 2 * math.random() * cfg.lifev;
+            if (cycles.length) {
+                item = cycles.pop();
+                item.life = life;
+                item.vx = vx;
+                item.vy = vy;
+                item.scale = scale;
+                item.scaleV = (endScale - scale) / life;
+                item.alpha = alpha;
+                item.alphaV = (endAlpha - alpha) / life;
+                item.red = red;
+                item.redV = (endRed - red) / life;
+                item.green = green;
+                item.greenV = (endGreen - green) / life;
+                item.blue = blue;
+                item.blueV = (endBlue - blue) / life;
+                item.rotation = rotation;
+                item.rotationV = (endRotation - rotation) / life;
+                item.image.visible = true;
+            } else {
+                item = {
+                    image: new flower.Bitmap(this.__texture),
+                    mode: cfg.mode,
+                    life: life,
+                    x: 0,
+                    y: 0,
+                    vx: vx,
+                    vy: vy,
+                    scale: scale,
+                    scaleV: (endScale - scale) / life,
+                    alpha: alpha,
+                    alphaV: (endAlpha - alpha) / life,
+                    red: red,
+                    redV: (endRed - red) / life,
+                    green: green,
+                    greenV: (endGreen - green) / life,
+                    blue: blue,
+                    blueV: (endBlue - blue) / life,
+                    rotation: rotation,
+                    rotationV: (endRotation - rotation) / life,
+                    oldX: 0,
+                    oldY: 0,
+                    oldScale: 1,
+                    oldAlpha: 1,
+                    oldRotation: 0,
+                    oldRed: 0,
+                    oldGreen: 0,
+                    oldBlue: 0,
+                    filters: [new flower.DyeingFilter()]
+                }
+                item.image.$setSimpleMode();
+                this.addChild(item.image);
+            }
+            item.x = -cfg.xv + cfg.xv * 2 * math.random();
+            item.y = -cfg.yv + cfg.yv * 2 * math.random();
+            if (item.oldX != ~~item.x) {
+                item.oldX = ~~item.x;
+                item.image.$nativeShow.setX(item.oldX);
+            }
+            if (item.oldY != ~~item.y) {
+                item.oldY = ~~item.y;
+                item.image.$nativeShow.setY(item.oldY);
+            }
+            if (item.oldScale != ~~item.scale) {
+                item.oldScale = ~~item.scale;
+                item.image.$nativeShow.setScaleX(item.oldScale / 100);
+                item.image.$nativeShow.setScaleY(item.oldScale / 100);
+            }
+            if (item.oldAlpha != ~~item.alpha) {
+                item.oldAlpha = ~~item.alpha;
+                item.image.alpha = item.oldAlpha / 255;
+            }
+            if (item.oldRed != ~~item.red || item.oldGreen != ~~item.green || item.oldBlue != ~~item.blue) {
+                item.oldRed = ~~item.red;
+                item.oldGreen = ~~item.green;
+                item.oldBlue = ~~item.blue;
+                item.filters[0].r = item.oldRed;
+                item.filters[0].g = item.oldGreen;
+                item.filters[0].b = item.oldBlue;
+                item.image.filters = item.filters;
+            }
+            if (item.oldRotation != ~~item.rotation) {
+                item.oldRotation = ~~item.rotation;
+                item.image.rotation = item.oldRotation;
+            }
+            particles.push(item);
+        }
+    }
+
+    $getMouseTarget(touchX, touchY, multiply) {
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
+        var bounds = this.$getContentBounds();
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+            return this;
+        }
+        return null;
+    }
+
+    $onFrameEnd() {
+        this.$removeFlags(0x0100);
+        super.$onFrameEnd();
+    }
+
+    dispose() {
+        flower.EnterFrame.remove(this.__update, this);
+        while (this.__cycles.length) {
+            this.__cycles.pop().image.dispose();
+        }
+        super.dispose();
+    }
+}
+
+flower.Particle = Particle;
+//////////////////////////End File:flower/display/Particle.js///////////////////////////
 
 
 
@@ -8439,6 +8865,10 @@ class TextureManager {
                 }
             }
         }
+    }
+
+    $dispose() {
+        this.list = [];
     }
 
 
@@ -11108,6 +11538,11 @@ class EnterFrame {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
     }
+
+    static $dispose() {
+        EnterFrame.enterFrames = [];
+        EnterFrame.waitAdd = [];
+    }
 }
 
 flower.EnterFrame = EnterFrame;
@@ -11160,6 +11595,11 @@ class CallLater {
         }
     }
 
+    static $dispose() {
+        flower.CallLater._list = [];
+        flower.CallLater._next = [];
+    }
+
 }
 
 flower.CallLater = CallLater;
@@ -11174,12 +11614,13 @@ class DelayCall {
     _thisObj;
     _data;
 
-    constructor(time, func, thisObj, args = null) {
+    constructor(time, count, func, thisObj, ...args) {
         this._func = func;
         this._thisObj = thisObj;
         this._data = args || [];
         this._time = time;
         this._start = flower.CoreTime.currentTime;
+        this._count = count || 1000000000;
         this.$complete = false;
         DelayCall._next.push(this);
     }
@@ -11187,10 +11628,15 @@ class DelayCall {
     $update() {
         if (!this.$complete && flower.CoreTime.currentTime - this._start > this._time) {
             this._func.apply(this._thisObj, this._data);
-            this._func = null;
-            this._thisObj = null;
-            this._data = null;
-            this.$complete = true;
+            this._count--;
+            if (!this.$complete && this._count > 0) {
+                this._start = flower.CoreTime.currentTime;
+            } else {
+                this._func = null;
+                this._thisObj = null;
+                this._data = null;
+                this.$complete = true;
+            }
         }
     }
 
@@ -11203,6 +11649,8 @@ class DelayCall {
     static _next = [];
 
     static $run() {
+        DelayCall._list = DelayCall._list.concat(DelayCall._next);
+        DelayCall._next.length = 0;
         var list = DelayCall._list;
         for (var i = 0; i < list.length; i++) {
             list[i].$update();
@@ -11213,7 +11661,10 @@ class DelayCall {
                 i--;
             }
         }
-        DelayCall._list = DelayCall._list.concat(DelayCall._next);
+    }
+
+    static $dispose() {
+        DelayCall._list.length = 0;
         DelayCall._next.length = 0;
     }
 

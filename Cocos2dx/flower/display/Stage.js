@@ -169,8 +169,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -186,8 +186,8 @@ class Stage extends Sprite {
         event.$stageX = x;
         event.$stageY = y;
         event.$target = target;
-        event.$touchX = target.lastTouchX;
-        event.$touchY = target.lastTouchY;
+        event.$touchX = target.mouseX;
+        event.$touchY = target.mouseY;
         target.dispatch(event);
     }
 
@@ -220,8 +220,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = list[i].lastTouchX;
-                    event.$touchY = list[i].lastTouchY;
+                    event.$touchX = list[i].mouseX;
+                    event.$touchY = list[i].mouseY;
                     list[i].dispatch(event);
                 }
             }
@@ -238,8 +238,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = this.__dragOverList[j].lastTouchX;
-                    event.$touchY = this.__dragOverList[j].lastTouchY;
+                    event.$touchX = this.__dragOverList[j].mouseX;
+                    event.$touchY = this.__dragOverList[j].mouseY;
                     this.__dragOverList[j].dispatch(event);
                 }
             }
@@ -265,8 +265,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = list[i].lastTouchX;
-                    event.$touchY = list[i].lastTouchY;
+                    event.$touchX = list[i].mouseX;
+                    event.$touchY = list[i].mouseY;
                     list[i].dispatch(event);
                 }
             }
@@ -283,8 +283,8 @@ class Stage extends Sprite {
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = this.__mouseOverList[j].lastTouchX;
-                    event.$touchY = this.__mouseOverList[j].lastTouchY;
+                    event.$touchX = this.__mouseOverList[j].mouseX;
+                    event.$touchY = this.__mouseOverList[j].mouseY;
                     this.__mouseOverList[j].dispatch(event);
                 }
             }
@@ -294,8 +294,8 @@ class Stage extends Sprite {
                 event.$stageX = x;
                 event.$stageY = y;
                 event.$target = target;
-                event.$touchX = target.lastTouchX;
-                event.$touchY = target.lastTouchY;
+                event.$touchX = target.mouseX;
+                event.$touchY = target.mouseY;
                 target.dispatch(event);
             }
         }
@@ -332,8 +332,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -366,8 +366,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         } else {
             target = mouse.target;
@@ -376,8 +376,8 @@ class Stage extends Sprite {
             event.$stageX = x;
             event.$stageY = y;
             event.$target = target;
-            event.$touchX = target.lastTouchX;
-            event.$touchY = target.lastTouchY;
+            event.$touchX = target.mouseX;
+            event.$touchY = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -568,6 +568,11 @@ class Stage extends Sprite {
 
     static getShortcut() {
         return Platform.getShortcut();
+    }
+
+    static $dispose() {
+        //Stage.getInstance().removeAll();
+        Stage.stages = [];
     }
 }
 

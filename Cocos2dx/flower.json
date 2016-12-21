@@ -1,1 +1,118 @@
-{"name":"派克帝国","direction":{"module":{"name":"模块","plugin":"Black","list":["res/module/MainUI.xml"]},"data":{"name":"数据结构","plugin":"Data","list":["res/data/Paik.json"]},"language":{"name":"语言配置","plugin":"Language","list":["res/language/zh_CN.json"]},"imagePacker":{"name":"图片打包","plugin":"ImagePacker","list":[]},"test":{"name":"自动测试","plugin":"AutoTest","list":[]},"test/item":{"name":"测试项","plugin":"AutoTest","list":[]},"test/case":{"name":"测试用例","plugin":"AutoTest","list":[]},"test/running":{"name":"正在运行的测试","plugin":"RunningTest","list":[]},"bug":{"name":"Bug 统计","plugin":"BugStatistics","list":[]},"tools":{"name":"工具","list":[]},"tools/dungeon":{"name":"副本编辑器","plugin":"Dungeon","list":["res/tools/dungeon/Level1.json","res/tools/dungeon/Dungeon1_1.json","res/tools/dungeon/dungeon_trigger_1_4.json","res/tools/dungeon/dungeon_trigger_1_5.json","res/tools/dungeon/dungeon_trigger_1_6.json","res/tools/dungeon/dungeon_trigger_2_1.json","res/tools/dungeon/dungeon_trigger_2_2.json","res/tools/dungeon/dungeon_trigger_2_3.json","res/tools/dungeon/dungeon_trigger_2_4.json","res/tools/dungeon/dungeon_trigger_2_5.json","res/tools/dungeon/dungeon_trigger_2_6.json","res/tools/dungeon/陷阱.json","res/tools/dungeon/传送点.json","res/tools/dungeon/李孟杰测试.json","res/tools/dungeon/解锁dian.json","res/tools/dungeon/传送门.json","res/tools/dungeon/dungeon_trigger_1_1.json","res/tools/dungeon/dungeon_trigger_1_2.json","res/tools/dungeon/dungeon_trigger_1_3.json","res/tools/dungeon/test.json","res/tools/dungeon/aaa.json"]},"tools/map":{"name":"地图编辑器","plugin":"Map","list":[]},"tools/testSameImage":{"name":"测试重复图片","plugin":"SameImage","list":["res/tools/testSameImage/Root.json","res/tools/testSameImage/Res.json","res/tools/testSameImage/UI.json","res/tools/testSameImage/Map.json"]},"tools/textureCheck":{"name":"纹理检测","plugin":"TextureCheck","list":["res/tools/textureCheck/Server.json","res/tools/textureCheck/Local.json"]},"tools/smallTool":{"name":"小工具","plugin":"SmallTool","list":["res/tools/smallTool/PointToPosition.json","res/tools/smallTool/QA服压力测试.json"]}}}
+{
+  "name": "派克帝国",
+  "direction": {
+    "module": {
+      "name": "模块",
+      "plugin": "Black",
+      "list": [
+        "res/module/MainUI.xml"
+      ]
+    },
+    "data": {
+      "name": "数据结构",
+      "plugin": "Data",
+      "list": [
+        "res/data/Paik.json"
+      ]
+    },
+    "language": {
+      "name": "语言配置",
+      "plugin": "Language",
+      "list": [
+        "res/language/zh_CN.json"
+      ]
+    },
+    "imagePacker": {
+      "name": "图片打包",
+      "plugin": "ImagePacker",
+      "list": []
+    },
+    "test": {
+      "name": "自动测试",
+      "plugin": "AutoTest",
+      "list": []
+    },
+    "test/item": {
+      "name": "测试项",
+      "plugin": "AutoTest",
+      "list": []
+    },
+    "test/case": {
+      "name": "测试用例",
+      "plugin": "AutoTest",
+      "list": []
+    },
+    "test/running": {
+      "name": "正在运行的测试",
+      "plugin": "RunningTest",
+      "list": []
+    },
+    "bug": {
+      "name": "Bug 统计",
+      "plugin": "BugStatistics",
+      "list": []
+    },
+    "tools": {
+      "name": "工具",
+      "list": []
+    },
+    "tools/dungeon": {
+      "name": "副本编辑器",
+      "plugin": "Dungeon",
+      "list": [
+        "res/tools/dungeon/Level1.json",
+        "res/tools/dungeon/Dungeon1_1.json",
+        "res/tools/dungeon/dungeon_trigger_1_4.json",
+        "res/tools/dungeon/dungeon_trigger_1_5.json",
+        "res/tools/dungeon/dungeon_trigger_1_6.json",
+        "res/tools/dungeon/dungeon_trigger_2_1.json",
+        "res/tools/dungeon/dungeon_trigger_2_2.json",
+        "res/tools/dungeon/dungeon_trigger_2_3.json",
+        "res/tools/dungeon/dungeon_trigger_2_4.json",
+        "res/tools/dungeon/dungeon_trigger_2_5.json",
+        "res/tools/dungeon/dungeon_trigger_2_6.json",
+        "res/tools/dungeon/陷阱.json",
+        "res/tools/dungeon/传送点.json",
+        "res/tools/dungeon/李孟杰测试.json",
+        "res/tools/dungeon/解锁dian.json",
+        "res/tools/dungeon/传送门.json",
+        "res/tools/dungeon/dungeon_trigger_1_1.json",
+        "res/tools/dungeon/dungeon_trigger_1_2.json",
+        "res/tools/dungeon/dungeon_trigger_1_3.json",
+        "res/tools/dungeon/test.json",
+        "res/tools/dungeon/aaa.json"
+      ]
+    },
+    "tools/map": {
+      "name": "地图编辑器",
+      "plugin": "Map",
+      "list": []
+    },
+    "tools/testSameImage": {
+      "name": "测试重复图片",
+      "plugin": "SameImage",
+      "list": [
+        "res/tools/testSameImage/Root.json",
+        "res/tools/testSameImage/Res.json",
+        "res/tools/testSameImage/UI.json",
+        "res/tools/testSameImage/Map.json"
+      ]
+    },
+    "tools/textureCheck": {
+      "name": "纹理检测",
+      "plugin": "TextureCheck",
+      "list": [
+        "res/tools/textureCheck/Server.json",
+        "res/tools/textureCheck/Local.json"
+      ]
+    },
+    "tools/smallTool": {
+      "name": "小工具",
+      "plugin": "SmallTool",
+      "list": [
+        "res/tools/smallTool/PointToPosition.json",
+        "res/tools/smallTool/QA服压力测试.json"
+      ]
+    }
+  }
+}

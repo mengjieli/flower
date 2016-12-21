@@ -200,6 +200,7 @@ var list = [
     "ColorFilter",
     "StrokeFilter",
     "BlurFilter",
+    "DyeingFilter",
 
     "Matrix",
     "Point",
@@ -217,6 +218,7 @@ var list = [
     "$TextInput",
     "Shape",
     "Stage",
+    "Particle",
 
     "DragManager",
     "MenuManager",

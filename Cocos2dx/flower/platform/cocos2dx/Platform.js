@@ -13,7 +13,6 @@ class Platform {
         var scene = cc.Scene.extend({
             ctor: function () {
                 this._super();
-                this.scheduleUpdate();
                 //注册鼠标事件
                 cc.eventManager.addListener({
                     event: cc.EventListener.TOUCH_ONE_BY_ONE,
@@ -105,6 +104,7 @@ class Platform {
         } else {
             trace("KEYBOARD Not supported");
         }
+        Platform.stage.scheduleUpdate();
     }
 
 

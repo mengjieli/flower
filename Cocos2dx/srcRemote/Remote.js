@@ -330,7 +330,7 @@ remote.RemoteFile = RemoteFile;
 
 
 //////////////////////////File:remote/RemoteDirection.js///////////////////////////
-class RemoteDirection {
+class RemoteDirection extends flower.EventDispatcher {
 
     __path;
     __autoUpdate;
@@ -339,11 +339,12 @@ class RemoteDirection {
     __updateRemote;
 
     constructor(path, autoUpdate = true) {
+        super();
         this.__path = path;
         this.__autoUpdate = autoUpdate;
         this.__list = new flower.ArrayValue();
         if (this.__path && this.__autoUpdate) {
-            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
+            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path, this.__autoUpdate);
         }
     }
 
@@ -366,6 +367,7 @@ class RemoteDirection {
                 list.push(fileList[i]);
             }
         }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     dispose() {
@@ -463,7 +465,7 @@ class ReadDirectionListRemote extends Remote {
     __back;
     __thisObj;
 
-    constructor(back, thisObj, path) {
+    constructor(back, thisObj, path, autoUpdate = false) {
         super();
         this.__back = back;
         this.__thisObj = thisObj;
@@ -474,7 +476,9 @@ class ReadDirectionListRemote extends Remote {
         msg.writeUInt(102);
         msg.writeUInt(this.id);
         msg.writeUTF(path);
+        msg.writeUTF(autoUpdate);
         this.send(msg);
+        this.autoUpdate = autoUpdate;
     }
 
     receive(cmd, msg) {
@@ -493,8 +497,10 @@ class ReadDirectionListRemote extends Remote {
         if (this.__back) {
             this.__back.call(this.__thisObj, list);
         }
-        this.__back = this.__thisObj = null;
-        this.dispose();
+        if (!this.autoUpdate) {
+            this.__back = this.__thisObj = null;
+            this.dispose();
+        }
     }
 }
 //////////////////////////End File:remote/remotes/ReadDirectionListRemote.js///////////////////////////

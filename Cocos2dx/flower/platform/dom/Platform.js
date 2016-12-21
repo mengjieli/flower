@@ -5,6 +5,10 @@ class Platform {
     static stage;
     static width;
     static height;
+    static mouseX;
+    static mouseY;
+    static engine;
+    static touchDown = false;
 
     static start(engine, root, background) {
         flower.system.platform = Platform.type;
@@ -13,6 +17,7 @@ class Platform {
         while (paramString.charAt(0) == "?") {
             paramString = paramString.slice(1, paramString.length);
         }
+        Platform.engine = engine;
         var params = {};
         var array = paramString.split("&");
         for (var i = 0; i < array.length; i++) {
@@ -38,14 +43,17 @@ class Platform {
         mask.style.height = document.documentElement.clientHeight + "px";
         document.body.appendChild(mask);
         document.body.onkeydown = function (e) {
-            setTimeout(function(){
+            if(e.keyCode == 9) {
+                e.preventDefault();
+            }
+            setTimeout(function () {
                 engine.$onKeyDown(e.which);
-            },0);
+            }, 0);
         }
         document.body.onkeyup = function (e) {
-            setTimeout(function(){
+            setTimeout(function () {
                 engine.$onKeyUp(e.which);
-            },0);
+            }, 0);
         }
         div.appendChild(engine.$background.$nativeShow.show);
         div.appendChild(root.show);
@@ -54,15 +62,24 @@ class Platform {
         mask.onmousedown = function (e) {
             if (e.button == 2) return;
             touchDown = true;
+            Platform.touchDown = true;
             engine.$addTouchEvent("begin", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmouseup = function (e) {
             if (e.button == 2) return;
             touchDown = false;
+            Platform.touchDown = false;
             engine.$addTouchEvent("end", 0, math.floor(e.clientX), math.floor(e.clientY));
         }
         mask.onmousemove = function (e) {
             if (e.button == 2) return;
+            if (e.buttons == 0 && touchDown) {
+                touchDown = false;
+                Platform.touchDown = false;
+                engine.$addTouchEvent("end", 0, math.floor(e.clientX), math.floor(e.clientY));
+            }
+            Platform.mouseX = math.floor(e.clientX);
+            Platform.mouseY = math.floor(e.clientY);
             engine.$addMouseMoveEvent(math.floor(e.clientX), math.floor(e.clientY));
             if (touchDown) {
                 engine.$addTouchEvent("move", 0, math.floor(e.clientX), math.floor(e.clientY));
@@ -89,7 +106,11 @@ class Platform {
         Platform.lastTime = now;
         if (PlatformURLLoader.loadingList.length) {
             var item = PlatformURLLoader.loadingList.shift();
-            item[0].apply(null,item.slice(1,item.length));
+            item[0].apply(null, item.slice(1, item.length));
+        }
+        Platform.engine.$addMouseMoveEvent(Platform.mouseX, Platform.mouseY);
+        if (Platform.touchDown) {
+            Platform.engine.$addTouchEvent("move", 0, Platform.mouseX, Platform.mouseY);
         }
         requestAnimationFrame.call(window, Platform._run);
     }

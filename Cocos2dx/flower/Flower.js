@@ -146,6 +146,16 @@ function breakPoint(name) {
     trace("breakPoint:", name);
 }
 
+function dispose() {
+    flower.EnterFrame.$dispose();
+    flower.CallLater.$dispose();
+    flower.DelayCall.$dispose();
+    flower.Stage.$dispose();
+    TextureManager.getInstance().$dispose();
+    hasStart = false;
+}
+
+
 exports.start = start;
 exports.getLanguage = $getLanguage;
 exports.trace = trace;
@@ -161,4 +171,5 @@ exports.sys = {
 }
 exports.params = params;
 exports.system = {}
+exports.dispose = dispose;
 $root.trace = trace;

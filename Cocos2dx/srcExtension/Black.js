@@ -553,7 +553,7 @@ class ArrayValue extends Value {
         this.list.push(item);
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.ADD, item);
         this.dispatchWith(flower.Event.CHANGE, this);
     }
 
@@ -566,7 +566,7 @@ class ArrayValue extends Value {
         this.list.splice(index, 0, item);
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.ADD, item);
         this.dispatchWith(flower.Event.CHANGE, this);
     }
 
@@ -577,7 +577,7 @@ class ArrayValue extends Value {
         var item = this.list.shift();
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -596,7 +596,7 @@ class ArrayValue extends Value {
             this._length = this._length + 1;
             this._lengthValue.value = this._length;
             for (i = 0; i < args.length; i++) {
-                this.dispatchWith(flower.Event.ADDED, args[i]);
+                this.dispatchWith(flower.Event.ADD, args[i]);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
         }
@@ -605,7 +605,7 @@ class ArrayValue extends Value {
             this._length = this._length - delCount;
             this._lengthValue.value = this._length;
             for (i = 0; i < list.length; i++) {
-                this.dispatchWith(flower.Event.REMOVED, list[i]);
+                this.dispatchWith(flower.Event.REMOVE, list[i]);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
         }
@@ -625,7 +625,7 @@ class ArrayValue extends Value {
         var item = this.list.pop();
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -638,7 +638,7 @@ class ArrayValue extends Value {
             var item = this.list.pop();
             this._length = this._length - 1;
             this._lengthValue.value = this._length;
-            this.dispatchWith(flower.Event.REMOVED, item);
+            this.dispatchWith(flower.Event.REMOVE, item);
         }
         this.dispatchWith(flower.Event.CHANGE, this);
     }
@@ -649,7 +649,7 @@ class ArrayValue extends Value {
                 this.list.splice(i, 1);
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
@@ -666,7 +666,7 @@ class ArrayValue extends Value {
         var item = this.list.splice(index, 1)[0];
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -707,7 +707,7 @@ class ArrayValue extends Value {
         }
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -1003,7 +1003,7 @@ class ArrayValue extends Value {
                 var item = this.list.pop();
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
         }
@@ -3474,19 +3474,19 @@ class ScrollBar extends Group {
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
                 if (p[20]) {
-                    p[50] = e.touchX;
+                    p[50] = e.stageX;
                     p[51] = p[2].x;
                 } else {
-                    p[50] = e.touchY;
+                    p[50] = e.stageY;
                     p[51] = p[2].y;
                 }
                 break;
             case flower.TouchEvent.TOUCH_MOVE:
                 if (p[20]) {
-                    if(p[7] < p[9]) {
+                    if (p[7] < p[9]) {
                         return;
                     }
-                    var x = p[51] - p[50] + e.touchX;
+                    var x = p[51] - p[50] + e.stageX;
                     if (x < 0) {
                         x = 0;
                     }
@@ -3498,10 +3498,10 @@ class ScrollBar extends Group {
                         p[0].x = -x * (p[7] - p[9]) / (this.width - p[2].width) + p[5];
                     }
                 } else {
-                    if(p[8] < p[10]) {
+                    if (p[8] < p[10]) {
                         return;
                     }
-                    var y = p[51] - p[50] + e.touchY;
+                    var y = p[51] - p[50] + e.stageY;
                     if (y < 0) {
                         y = 0;
                     }
@@ -4439,7 +4439,7 @@ class Input extends flower.TextField {
             6: null, //viewer
         }
         this.input = true;
-        this.addListener(flower.Event.CHANGE, this.__onTextChange, this);
+        this.addListener(flower.Event.STOP_INPUT, this.__onTextChange, this);
     }
 
     $addFlags(flags) {
@@ -6061,8 +6061,8 @@ class Scroller extends MaskUI {
         if (!p[0] || !p[20]) {
             return;
         }
-        var x = this.lastTouchX;
-        var y = this.lastTouchY;
+        var x = this.mouseX;
+        var y = this.mouseY;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
                 if (p[8]) {

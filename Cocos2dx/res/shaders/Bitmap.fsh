@@ -43,6 +43,7 @@ vec4 getColorBeforeBlur(float posx,float posy);
 vec4 getColor(float posx,float posy);
 vec4 filter(vec4 color,float posx,float posy);
 vec4 filter100(vec4 color,float posx,float posy);
+vec4 dyeingFilter(vec4 color,float colorR,float colorG,float colorB);
 vec4 colorFilter(vec4 color,float colorH,float colorS,float colorL);
 vec4 strokeFilter(float strokeWidth,float r,float g,float b,float posx,float posy, vec4 color);
 vec4 blurFilter(vec4 color,float posx,float posy,float blurX,float blurY);
@@ -132,6 +133,9 @@ vec4 filter(vec4 color,float posx,float posy) {
         } else if(filterType == 2.0) {
             color = strokeFilter(params[0],params[1],params[2],params[3],posx,posy,color);
             pindex++;
+        } else if(filterType == 3.0) {
+            color = dyeingFilter(color,params[0],params[1],params[2]);
+            pindex++;
         }
     }
     return color;
@@ -157,6 +161,14 @@ vec4 filter100(vec4 color,float posx,float posy) {
             pindex++;
         }
     }
+    return color;
+}
+
+vec4 dyeingFilter(vec4 color,float colorR,float colorG,float colorB) {
+    float sum = (color[0] + color[1] + color[2])/3.0;
+    color[0] = sum==0.0?color[0]:colorR*sum;
+    color[1] = sum==0.0?color[0]:colorG*sum;
+    color[2] = sum==0.0?color[0]:colorB*sum;
     return color;
 }
 

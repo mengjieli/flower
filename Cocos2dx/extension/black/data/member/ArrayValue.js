@@ -1,9 +1,9 @@
 /**
  *
  * @Event
- * Event.ADDED item
- * Event.REMOVED item
- * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
+ * Event.ADD item
+ * Event.REMOV item
+ * Event.CHANGE ArrayValue 所有更新都会触发，包括排序
  */
 class ArrayValue extends Value {
 
@@ -28,7 +28,7 @@ class ArrayValue extends Value {
         this.list.push(item);
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.ADD, item);
         this.dispatchWith(flower.Event.CHANGE, this);
     }
 
@@ -41,7 +41,7 @@ class ArrayValue extends Value {
         this.list.splice(index, 0, item);
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.ADDED, item);
+        this.dispatchWith(flower.Event.ADD, item);
         this.dispatchWith(flower.Event.CHANGE, this);
     }
 
@@ -52,7 +52,7 @@ class ArrayValue extends Value {
         var item = this.list.shift();
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -71,7 +71,7 @@ class ArrayValue extends Value {
             this._length = this._length + 1;
             this._lengthValue.value = this._length;
             for (i = 0; i < args.length; i++) {
-                this.dispatchWith(flower.Event.ADDED, args[i]);
+                this.dispatchWith(flower.Event.ADD, args[i]);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
         }
@@ -80,7 +80,7 @@ class ArrayValue extends Value {
             this._length = this._length - delCount;
             this._lengthValue.value = this._length;
             for (i = 0; i < list.length; i++) {
-                this.dispatchWith(flower.Event.REMOVED, list[i]);
+                this.dispatchWith(flower.Event.REMOVE, list[i]);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
         }
@@ -100,7 +100,7 @@ class ArrayValue extends Value {
         var item = this.list.pop();
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -113,7 +113,7 @@ class ArrayValue extends Value {
             var item = this.list.pop();
             this._length = this._length - 1;
             this._lengthValue.value = this._length;
-            this.dispatchWith(flower.Event.REMOVED, item);
+            this.dispatchWith(flower.Event.REMOVE, item);
         }
         this.dispatchWith(flower.Event.CHANGE, this);
     }
@@ -124,7 +124,7 @@ class ArrayValue extends Value {
                 this.list.splice(i, 1);
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
@@ -141,7 +141,7 @@ class ArrayValue extends Value {
         var item = this.list.splice(index, 1)[0];
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -182,7 +182,7 @@ class ArrayValue extends Value {
         }
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
-        this.dispatchWith(flower.Event.REMOVED, item);
+        this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
@@ -478,7 +478,7 @@ class ArrayValue extends Value {
                 var item = this.list.pop();
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
-                this.dispatchWith(flower.Event.REMOVED, item);
+                this.dispatchWith(flower.Event.REMOVE, item);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
         }

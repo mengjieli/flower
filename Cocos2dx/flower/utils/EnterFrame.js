@@ -47,6 +47,11 @@ class EnterFrame {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
     }
+
+    static $dispose() {
+        EnterFrame.enterFrames = [];
+        EnterFrame.waitAdd = [];
+    }
 }
 
 exports.EnterFrame = EnterFrame;

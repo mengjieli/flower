@@ -1,0 +1,3 @@
+<s:TextArea width="600" height="400" creationComplete="this.init();" xmlns:f="flower" xmlns:s="./software/module.json">
+    <f:script src="./JSONTextArea.script"/>
+</s:TextArea>

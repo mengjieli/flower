@@ -67,6 +67,10 @@ class TextureManager {
         }
     }
 
+    $dispose() {
+        this.list = [];
+    }
+
 
     static instance;
 

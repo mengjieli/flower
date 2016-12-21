@@ -40,6 +40,7 @@ class PlatformBitmap extends PlatformDisplayObject {
                 this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
             }
         }
+        //this.show.setBlendFunc(gl.ONE, gl.ONE);
     }
 
 

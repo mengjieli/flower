@@ -41,6 +41,8 @@ class Event {
     static COMPLETE = "complete";
     static ADDED = "added";
     static REMOVED = "removed";
+    static ADD = "add";
+    static REMOVE = "remove";
     static ADDED_TO_STAGE = "added_to_stage";
     static REMOVED_FROM_STAGE = "removed_from_stage";
     static CONNECT = "connect";

@@ -16,7 +16,7 @@ class Input extends flower.TextField {
             6: null, //viewer
         }
         this.input = true;
-        this.addListener(flower.Event.CHANGE, this.__onTextChange, this);
+        this.addListener(flower.Event.STOP_INPUT, this.__onTextChange, this);
     }
 
     $addFlags(flags) {
