@@ -441,6 +441,7 @@ class PlatformDisplayObject {
     __height = 0;
     __programmer = null;
     __filters = null;
+    __alpha = 1;
 
     /**
      * 0x0001 scale9Grid
@@ -511,6 +512,7 @@ class PlatformDisplayObject {
     }
 
     setAlpha(val) {
+        this.__alpha = val;
         this.show.setOpacity(val * 255);
     }
 
@@ -689,6 +691,7 @@ class PlatformDisplayObject {
         this.__rotation = 0;
         this.__width = 0;
         this.__height = 0;
+        this.__alpha = 1;
         this.__programmer = null;
         this.__programmerFlag = 0;
         if (this.__programmer) {
@@ -1060,6 +1063,7 @@ class PlatformBitmap extends PlatformDisplayObject {
         this.__textureScaleX = texture.scaleX;
         this.__textureScaleY = texture.scaleY;
         this.show.setAnchorPoint(0, 1);
+        this.setAlpha(this.__alpha);
         this.setX(this.__x);
         this.setY(this.__y);
         this.setScaleX(this.__scaleX);
@@ -1101,11 +1105,20 @@ class PlatformBitmap extends PlatformDisplayObject {
             return;
         }
         if (scale9Grid) {
+            var texture = this.__texture;
+            var source = texture.source;
+            var copyx = scale9Grid.x;
+            var copyy = scale9Grid.y;
+            if (source) {
+                scale9Grid.x -= texture.offX;
+                scale9Grid.y -= texture.offY;
+            }
+
             this.addProgrammerFlag(0x0001);
-            var width = this.__texture.width;
-            var height = this.__texture.height;
-            var setWidth = this.__texture.width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
-            var setHeight = this.__texture.height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+            var width = this.__texture.textureWidth;
+            var height = this.__texture.textureHeight;
+            var setWidth = width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / width : 1);
+            var setHeight = height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / height : 1);
 
             //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
             //width /= this.__textureScaleX;
@@ -1156,6 +1169,8 @@ class PlatformBitmap extends PlatformDisplayObject {
                 programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
                 programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
             }
+            scale9Grid.x = copyx;
+            scale9Grid.y = copyy;
         } else {
             this.removeProgrammerFlag(0x0001);
             if (this.__programmer) {
@@ -1171,6 +1186,13 @@ class PlatformBitmap extends PlatformDisplayObject {
                     programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                 }
             }
+        }
+    }
+
+    setSourceSize(val) {
+        if (this.__texture) {
+            this.setScaleX(this.__scaleX);
+            this.setScaleY(this.__scaleY);
         }
     }
 
@@ -1192,7 +1214,11 @@ class PlatformBitmap extends PlatformDisplayObject {
             this.show.setScaleX(val * this.__textureScaleX);
         }
         if (this.__texture && this.__texture.offX) {
-            this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+            if(this.__settingWidth) {
+                this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX* this.__settingWidth / this.__texture.width);
+            } else {
+                this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+            }
         }
         this.setScale9Grid(this.__scale9Grid);
     }
@@ -1205,7 +1231,11 @@ class PlatformBitmap extends PlatformDisplayObject {
             this.show.setScaleY(val * this.__textureScaleY);
         }
         if (this.__texture && this.__texture.offY) {
-            this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+            if (this.__settingHeight) {
+                this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY * this.__settingHeight / this.__texture.height);
+            } else {
+                this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+            }
         }
         this.setScale9Grid(this.__scale9Grid);
     }
@@ -2923,6 +2953,8 @@ class Rectangle {
         }
         return rect;
     }
+
+    static $TempRectangle = new Rectangle();
 }
 
 flower.Rectangle = Rectangle;
@@ -3541,7 +3573,7 @@ class DisplayObject extends EventDispatcher {
         p[11] = touchY;
         p[22] = flower.EnterFrame.frame;
         var bounds = this.$getContentBounds();
-        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             return this;
         }
         return null;
@@ -4207,6 +4239,7 @@ class Bitmap extends DisplayObject {
         this.texture = texture;
         this.$Bitmap = {
             0: null,    //scale9Grid
+            1: true    //touchSpace
         }
         Stage.bitmapCount++;
     }
@@ -4268,13 +4301,42 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $getMouseTarget(touchX, touchY, multiply) {
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
+        var bounds;
+        if (this.$Bitmap[1]) {
+            bounds = this.$getContentBounds();
+        } else {
+            bounds = Rectangle.$TempRectangle;
+            if (this.__texture) {
+                bounds.x = this.__texture.offX;
+                bounds.y = this.__texture.offY;
+                bounds.width = this.__texture.textureWidth;
+                bounds.height = this.__texture.textureHeight;
+            } else {
+                bounds.x = 0;
+                bounds.y = 0;
+                var p = this.$DisplayObject;
+                bounds.width = p[3] ? p[3] : 0;
+                bounds.height = p[4] ? p[4] : 0;
+            }
+        }
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+            return this;
+        }
+        return null;
+    }
+
     $measureContentBounds(rect) {
         if (this.__texture) {
-            rect.x = this.__texture.offX;
-            rect.y = this.__texture.offY;
-            var p = this.$DisplayObject;
-            rect.width = p[3] || this.__texture.width;
-            rect.height = p[4] || this.__texture.height;
+            rect.width = this.__texture.width;
+            rect.height = this.__texture.height;
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
@@ -4301,6 +4363,18 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $setTouchSpace(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        var p = this.$Bitmap;
+        if (p[1] == val) {
+            return;
+        }
+        p[1] = val;
+    }
+
     get texture() {
         return this.__texture;
     }
@@ -4316,6 +4390,14 @@ class Bitmap extends DisplayObject {
 
     set scale9Grid(val) {
         this.$setScale9Grid(val);
+    }
+
+    get touchSpace() {
+        return this.$Bitmap[1];
+    }
+
+    set touchSpace(val) {
+        this.$setTouchSpace(val);
     }
 
     dispose() {
@@ -8634,6 +8716,8 @@ class Texture {
     __url;
     __nativeURL;
     __use = false;
+    __sourceWidth;
+    __sourceHeight;
     $nativeTexture;
     $count;
     $parentTexture;
@@ -8644,7 +8728,7 @@ class Texture {
      */
     __dispatcher = UPDATE_RESOURCE ? new EventDispatcher() : null;
 
-    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
+    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight, sourceWidth, sourceHeight) {
         this.$nativeTexture = nativeTexture;
         this.__url = url;
         this.__nativeURL = nativeURL;
@@ -8653,6 +8737,8 @@ class Texture {
         this.__height = +h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
+        this.__sourceWidth = sourceWidth;
+        this.__sourceHeight = sourceHeight;
     }
 
     $update(nativeTexture, w, h, settingWidth, settingHeight) {
@@ -8666,8 +8752,8 @@ class Texture {
         }
     }
 
-    createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+    createSubTexture(url, startX, startY, width, height, sourceWidth, sourceHeight, offX = 0, offY = 0, rotation = false) {
+        var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth, sourceHeight);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -8737,10 +8823,26 @@ class Texture {
     }
 
     get width() {
-        return this.__settingWidth || this.__width;
+        return this.__sourceWidth || this.__width;
     }
 
     get height() {
+        return this.__sourceHeight || this.__height;
+    }
+
+    get width() {
+        return this.__sourceWidth || this.__width;
+    }
+
+    get height() {
+        return this.__sourceHeight || this.__height;
+    }
+
+    get textureWidth() {
+        return this.__settingWidth || this.__width;
+    }
+
+    get textureHeight() {
         return this.__settingHeight || this.__height;
     }
 
@@ -8761,11 +8863,11 @@ class Texture {
     }
 
     get scaleX() {
-        return this.width / this.__width;
+        return this.textureWidth / this.__width;
     }
 
     get scaleY() {
-        return this.height / this.__height;
+        return this.textureHeight / this.__height;
     }
 
     get count() {
@@ -9723,7 +9825,7 @@ class PlistFrame {
             }
         }
         this._moveX = this._offX + (this._sourceWidth - this._width) / 2;
-        this._moveY = this._offY + (this._sourceHeight - this._height) / 2;
+        this._moveY = -this._offY + (this._sourceHeight - this._height) / 2;
     }
 
     get name() {
@@ -9736,7 +9838,7 @@ class PlistFrame {
 
     get texture() {
         if (!this._texture) {
-            this._texture = this._plist.texture.createSubTexture(this._x, this._y, this._width, this._height, this._moveX, this._moveY, this._rotation);
+            this._texture = this._plist.texture.createSubTexture(this._name, this._x, this._y, this._width, this._height, this._sourceWidth, this._sourceHeight, this._moveX, this._moveY, this._rotation);
         }
         return this._texture;
     }

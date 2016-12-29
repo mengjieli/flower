@@ -11,6 +11,8 @@ class Texture {
     __url;
     __nativeURL;
     __use = false;
+    __sourceWidth;
+    __sourceHeight;
     $nativeTexture;
     $count;
     $parentTexture;
@@ -21,7 +23,7 @@ class Texture {
      */
     __dispatcher = UPDATE_RESOURCE ? new EventDispatcher() : null;
 
-    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
+    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight, sourceWidth, sourceHeight) {
         this.$nativeTexture = nativeTexture;
         this.__url = url;
         this.__nativeURL = nativeURL;
@@ -30,6 +32,8 @@ class Texture {
         this.__height = +h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
+        this.__sourceWidth = sourceWidth;
+        this.__sourceHeight = sourceHeight;
     }
 
     $update(nativeTexture, w, h, settingWidth, settingHeight) {
@@ -43,8 +47,8 @@ class Texture {
         }
     }
 
-    createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+    createSubTexture(url, startX, startY, width, height, sourceWidth, sourceHeight, offX = 0, offY = 0, rotation = false) {
+        var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth, sourceHeight);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -114,10 +118,26 @@ class Texture {
     }
 
     get width() {
-        return this.__settingWidth || this.__width;
+        return this.__sourceWidth || this.__width;
     }
 
     get height() {
+        return this.__sourceHeight || this.__height;
+    }
+
+    get width() {
+        return this.__sourceWidth || this.__width;
+    }
+
+    get height() {
+        return this.__sourceHeight || this.__height;
+    }
+
+    get textureWidth() {
+        return this.__settingWidth || this.__width;
+    }
+
+    get textureHeight() {
         return this.__settingHeight || this.__height;
     }
 
@@ -138,11 +158,11 @@ class Texture {
     }
 
     get scaleX() {
-        return this.width / this.__width;
+        return this.textureWidth / this.__width;
     }
 
     get scaleY() {
-        return this.height / this.__height;
+        return this.textureHeight / this.__height;
     }
 
     get count() {

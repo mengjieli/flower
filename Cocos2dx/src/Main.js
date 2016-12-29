@@ -34,8 +34,65 @@ var Main = function () {
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
-            flower.URLLoader.urlHead = "http://localhost:12000/";
+            var stage = flower.Stage.getInstance();
+            var sp = new flower.Sprite();
+            stage.addChild(sp);
+            //sp.scaleX = 1.5;
+            //sp.scaleY = 1.5;
 
+            var rect = new flower.Rect();
+            rect.width = 300;
+            rect.height = 150;
+            rect.x = rect.y = 200;
+            sp.addChild(rect);
+            //rect.scaleX = rect.scaleY = 1.5;
+            //
+            var image2 = new flower.Image("res/font.png");
+            image2.x = image2.y = 200;
+            image2.alpha = 0.3;
+            sp.addChild(image2);
+            image2.scale9Grid = "170,75,114,49";
+            image2.width = 600;
+            image2.height = 300;
+            //image2.scaleX = image2.scaleY = 2;
+            //image2.rotation = 30;
+            //return;
+            //
+            //var image2 = new flower.Image("res/font.png");
+            //image2.x = image2.y = 200;
+            //image2.alpha = 0.3;
+            //image2.scale9Grid = "170,75,114,49";
+            //image2.width = 300;
+            //image2.height = 150;
+            //sp.addChild(image2);
+            //image2.scaleX = image2.scaleY = 1.5;
+
+            var image = new flower.Image("font.png#PLIST#res/pkg.plist");
+            image.x = image.y = 200;
+            image.scale9Grid = "170,75,114,49";
+            image.width = 600;
+            image.height = 300;
+            sp.addChild(image);
+            //image.rotation = 30;
+            //image.scaleX = image.scaleY = 1.5;
+            image.addListener(flower.MouseEvent.MOUSE_OVER,function(e){
+                trace("over");
+                image.alpha = 0.5;
+            })
+            image.addListener(flower.MouseEvent.MOUSE_OUT,function(e){
+                image.alpha = 1;
+                trace("out");
+            })
+            image.addListener(flower.Event.COMPLETE,function(){
+                trace("加载完成",image.width,image.height,image.scaleX,image.scaleY)
+            })
+            //image.touchSpace = false;
+            //image.scaleX = 2;
+            //flower.Tween.to(image,2,{rotation:360})
+
+
+            return;
+            flower.URLLoader.urlHead = "http://localhost:12000/";
 
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);

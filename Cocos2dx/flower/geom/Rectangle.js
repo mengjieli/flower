@@ -140,6 +140,8 @@ class Rectangle {
         }
         return rect;
     }
+
+    static $TempRectangle = new Rectangle();
 }
 
 exports.Rectangle = Rectangle;

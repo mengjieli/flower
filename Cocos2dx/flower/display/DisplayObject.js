@@ -540,7 +540,7 @@ class DisplayObject extends EventDispatcher {
         p[11] = touchY;
         p[22] = flower.EnterFrame.frame;
         var bounds = this.$getContentBounds();
-        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             return this;
         }
         return null;

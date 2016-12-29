@@ -9,6 +9,7 @@ class Bitmap extends DisplayObject {
         this.texture = texture;
         this.$Bitmap = {
             0: null,    //scale9Grid
+            1: true    //touchSpace
         }
         Stage.bitmapCount++;
     }
@@ -70,13 +71,42 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $getMouseTarget(touchX, touchY, multiply) {
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
+        var bounds;
+        if (this.$Bitmap[1]) {
+            bounds = this.$getContentBounds();
+        } else {
+            bounds = Rectangle.$TempRectangle;
+            if (this.__texture) {
+                bounds.x = this.__texture.offX;
+                bounds.y = this.__texture.offY;
+                bounds.width = this.__texture.textureWidth;
+                bounds.height = this.__texture.textureHeight;
+            } else {
+                bounds.x = 0;
+                bounds.y = 0;
+                var p = this.$DisplayObject;
+                bounds.width = p[3] ? p[3] : 0;
+                bounds.height = p[4] ? p[4] : 0;
+            }
+        }
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+            return this;
+        }
+        return null;
+    }
+
     $measureContentBounds(rect) {
         if (this.__texture) {
-            rect.x = this.__texture.offX;
-            rect.y = this.__texture.offY;
-            var p = this.$DisplayObject;
-            rect.width = p[3] || this.__texture.width;
-            rect.height = p[4] || this.__texture.height;
+            rect.width = this.__texture.width;
+            rect.height = this.__texture.height;
         } else {
             rect.x = rect.y = rect.width = rect.height = 0;
         }
@@ -103,6 +133,18 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $setTouchSpace(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        var p = this.$Bitmap;
+        if (p[1] == val) {
+            return;
+        }
+        p[1] = val;
+    }
+
     get texture() {
         return this.__texture;
     }
@@ -118,6 +160,14 @@ class Bitmap extends DisplayObject {
 
     set scale9Grid(val) {
         this.$setScale9Grid(val);
+    }
+
+    get touchSpace() {
+        return this.$Bitmap[1];
+    }
+
+    set touchSpace(val) {
+        this.$setTouchSpace(val);
     }
 
     dispose() {

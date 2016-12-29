@@ -27,6 +27,7 @@ class PlatformBitmap extends PlatformDisplayObject {
         this.__textureScaleX = texture.scaleX;
         this.__textureScaleY = texture.scaleY;
         this.show.setAnchorPoint(0, 1);
+        this.setAlpha(this.__alpha);
         this.setX(this.__x);
         this.setY(this.__y);
         this.setScaleX(this.__scaleX);
@@ -68,11 +69,20 @@ class PlatformBitmap extends PlatformDisplayObject {
             return;
         }
         if (scale9Grid) {
+            var texture = this.__texture;
+            var source = texture.source;
+            var copyx = scale9Grid.x;
+            var copyy = scale9Grid.y;
+            if (source) {
+                scale9Grid.x -= texture.offX;
+                scale9Grid.y -= texture.offY;
+            }
+
             this.addProgrammerFlag(0x0001);
-            var width = this.__texture.width;
-            var height = this.__texture.height;
-            var setWidth = this.__texture.width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
-            var setHeight = this.__texture.height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+            var width = this.__texture.textureWidth;
+            var height = this.__texture.textureHeight;
+            var setWidth = width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / width : 1);
+            var setHeight = height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / height : 1);
 
             //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
             //width /= this.__textureScaleX;
@@ -123,6 +133,8 @@ class PlatformBitmap extends PlatformDisplayObject {
                 programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
                 programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
             }
+            scale9Grid.x = copyx;
+            scale9Grid.y = copyy;
         } else {
             this.removeProgrammerFlag(0x0001);
             if (this.__programmer) {
@@ -138,6 +150,13 @@ class PlatformBitmap extends PlatformDisplayObject {
                     programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                 }
             }
+        }
+    }
+
+    setSourceSize(val) {
+        if (this.__texture) {
+            this.setScaleX(this.__scaleX);
+            this.setScaleY(this.__scaleY);
         }
     }
 
@@ -159,7 +178,11 @@ class PlatformBitmap extends PlatformDisplayObject {
             this.show.setScaleX(val * this.__textureScaleX);
         }
         if (this.__texture && this.__texture.offX) {
-            this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+            if(this.__settingWidth) {
+                this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX* this.__settingWidth / this.__texture.width);
+            } else {
+                this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
+            }
         }
         this.setScale9Grid(this.__scale9Grid);
     }
@@ -172,7 +195,11 @@ class PlatformBitmap extends PlatformDisplayObject {
             this.show.setScaleY(val * this.__textureScaleY);
         }
         if (this.__texture && this.__texture.offY) {
-            this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+            if (this.__settingHeight) {
+                this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY * this.__settingHeight / this.__texture.height);
+            } else {
+                this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
+            }
         }
         this.setScale9Grid(this.__scale9Grid);
     }
