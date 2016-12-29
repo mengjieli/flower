@@ -36,8 +36,16 @@ class EnterFrame {
 
     static $update(now, gap) {
         flower.EnterFrame.frame++;
+        var st = (new Date()).getTime();
+        var et;
         flower.CallLater.$run();
+        et = (new Date()).getTime();
+        flower.debugInfo.CallLater += et - st;
+        st = et;
         flower.DelayCall.$run();
+        et = (new Date()).getTime();
+        flower.debugInfo.DelayCall += et - st;
+        st = et;
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
             flower.EnterFrame.waitAdd = [];
@@ -46,6 +54,8 @@ class EnterFrame {
         for (var i = 0; i < copy.length; i++) {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
+        et = (new Date()).getTime();
+        flower.debugInfo.EnterFrame += et - st;
     }
 
     static $dispose() {

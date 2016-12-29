@@ -54,9 +54,9 @@ class VBWebSocket extends WebSocket {
                     }
                 }
                 for (i = 0; i < removeList.length; i++) {
-                    for (f = 0; f < this.zbacks[cmd].length; f++) {
-                        if (this.zbacks[cmd][f].id == removeList[i]) {
-                            this.zbacks[cmd].splice(f, 1);
+                    for (f = 0; f < this.zbacks[backCmd].length; f++) {
+                        if (this.zbacks[backCmd][f].id == removeList[i]) {
+                            this.zbacks[backCmd].splice(f, 1);
                             break;
                         }
                     }
@@ -166,7 +166,7 @@ class VBWebSocket extends WebSocket {
         this.zbacks[cmd].push({func: back, thisObj: thisObj, id: VBWebSocket.id++});
     }
 
-    removeZeroe(cmd, back, thisObj) {
+    removeZero(cmd, back, thisObj) {
         var list = this.zbacks[cmd];
         if (list) {
             for (var i = 0; i < list.length; i++) {

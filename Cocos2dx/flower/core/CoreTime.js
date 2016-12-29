@@ -8,9 +8,12 @@ class CoreTime {
         CoreTime.lastTimeGap = gap;
         CoreTime.currentTime += gap;
         EnterFrame.$update(CoreTime.currentTime, gap);
-        if(CoreTime.$playEnterFrame) {
+        var st = (new Date()).getTime();
+        if (CoreTime.$playEnterFrame) {
             Stage.$onFrameEnd();
         }
+        var et = (new Date()).getTime();
+        flower.debugInfo.onFrameEnd += et - st;
         TextureManager.getInstance().$check();
     }
 

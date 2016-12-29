@@ -204,6 +204,8 @@ var flower = {};
         hasStart = false;
     }
 
+    var debugInfo = {};
+
     flower.start = start;
     flower.getLanguage = $getLanguage;
     flower.trace = trace;
@@ -217,6 +219,7 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
+    flower.debugInfo = debugInfo;
     flower.params = params;
     flower.system = {};
     flower.dispose = dispose;
@@ -1891,9 +1894,12 @@ var flower = {};
                 CoreTime.lastTimeGap = gap;
                 CoreTime.currentTime += gap;
                 EnterFrame.$update(CoreTime.currentTime, gap);
+                var st = new Date().getTime();
                 if (CoreTime.$playEnterFrame) {
                     Stage.$onFrameEnd();
                 }
+                var et = new Date().getTime();
+                flower.debugInfo.onFrameEnd += et - st;
                 TextureManager.getInstance().$check();
             }
         }, {
@@ -10213,9 +10219,9 @@ var flower = {};
                             }
                         }
                         for (i = 0; i < removeList.length; i++) {
-                            for (f = 0; f < this.zbacks[cmd].length; f++) {
-                                if (this.zbacks[cmd][f].id == removeList[i]) {
-                                    this.zbacks[cmd].splice(f, 1);
+                            for (f = 0; f < this.zbacks[backCmd].length; f++) {
+                                if (this.zbacks[backCmd][f].id == removeList[i]) {
+                                    this.zbacks[backCmd].splice(f, 1);
                                     break;
                                 }
                             }
@@ -10332,8 +10338,8 @@ var flower = {};
                 this.zbacks[cmd].push({ func: back, thisObj: thisObj, id: VBWebSocket.id++ });
             }
         }, {
-            key: "removeZeroe",
-            value: function removeZeroe(cmd, back, thisObj) {
+            key: "removeZero",
+            value: function removeZero(cmd, back, thisObj) {
                 var list = this.zbacks[cmd];
                 if (list) {
                     for (var i = 0; i < list.length; i++) {
@@ -12500,8 +12506,16 @@ var flower = {};
             key: "$update",
             value: function $update(now, gap) {
                 flower.EnterFrame.frame++;
+                var st = new Date().getTime();
+                var et;
                 flower.CallLater.$run();
+                et = new Date().getTime();
+                flower.debugInfo.CallLater += et - st;
+                st = et;
                 flower.DelayCall.$run();
+                et = new Date().getTime();
+                flower.debugInfo.DelayCall += et - st;
+                st = et;
                 if (flower.EnterFrame.waitAdd.length) {
                     flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
                     flower.EnterFrame.waitAdd = [];
@@ -12510,6 +12524,8 @@ var flower = {};
                 for (var i = 0; i < copy.length; i++) {
                     copy[i].call.apply(copy[i].owner, [now, gap]);
                 }
+                et = new Date().getTime();
+                flower.debugInfo.EnterFrame += et - st;
             }
         }, {
             key: "$dispose",

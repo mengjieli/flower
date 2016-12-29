@@ -149,7 +149,7 @@ class ObjectValue extends Value {
     }
 
     get membersKey() {
-        return Object.keys(this.value);
+        return Object.keys(this.__value);
     }
 
     dispose() {

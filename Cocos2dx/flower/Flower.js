@@ -155,6 +155,8 @@ function dispose() {
     hasStart = false;
 }
 
+var debugInfo = {};
+
 
 exports.start = start;
 exports.getLanguage = $getLanguage;
@@ -169,6 +171,7 @@ exports.sys = {
     $error: $error,
     getLanguage: getLanguage,
 }
+exports.debugInfo = debugInfo;
 exports.params = params;
 exports.system = {}
 exports.dispose = dispose;
