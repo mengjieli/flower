@@ -47,14 +47,14 @@ var Main = function () {
             sp.addChild(rect);
             rect.scaleX = rect.scaleY = 2;
             //
-            var image2 = new flower.Image("res/font.png");
-            image2.x = image2.y = 200;
-            image2.alpha = 1;
-            image2.touchEnabled = false;
-            stage.addChild(image2);
-            image2.scale9Grid = "170,75,114,49";
-            image2.width = 600;
-            image2.height = 300;
+            //var image2 = new flower.Image("res/font.png");
+            //image2.x = image2.y = 200;
+            //image2.alpha = 1;
+            //image2.touchEnabled = false;
+            //stage.addChild(image2);
+            //image2.scale9Grid = "170,75,114,49";
+            //image2.width = 600;
+            //image2.height = 300;
 
 
             //image2.scaleX = image2.scaleY = 2;
@@ -117,3 +117,5 @@ var Main = function () {
 
     return Main;
 }();
+
+

@@ -85,8 +85,10 @@ class PlatformBitmap extends PlatformDisplayObject {
             var setWidth = this.__texture.textureWidth * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
             var setHeight = this.__texture.textureHeight * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
 
-            var scaleX = this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
-            var scaleY = this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+            //var scaleX = this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
+            //var scaleY = this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+            var scaleX = this.__scaleX * this.__textureScaleX * (this.__settingWidth ? (this.__settingWidth - (this.__texture.width - this.__texture.textureWidth)) / this.__texture.textureWidth : 1);
+            var scaleY = this.__scaleY * this.__textureScaleY * (this.__settingHeight ? (this.__settingHeight - (this.__texture.height - this.__texture.textureHeight)) / this.__texture.textureHeight : 1);
             var left = scale9Grid.x / width;
             var top = scale9Grid.y / height;
             var right = (scale9Grid.x + scale9Grid.width) / width;
@@ -105,25 +107,40 @@ class PlatformBitmap extends PlatformDisplayObject {
                 programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 1);
             }
             if (Platform.native) {
-                programmer.setUniformFloat("left", left);
-                programmer.setUniformFloat("top", top);
-                programmer.setUniformFloat("tleft", tleft);
-                programmer.setUniformFloat("ttop", ttop);
-                programmer.setUniformFloat("tright", tright);
-                programmer.setUniformFloat("tbottom", tbottom);
-                programmer.setUniformFloat("scaleGapX", scaleGapX);
-                programmer.setUniformFloat("scaleGapY", scaleGapY);
-                programmer.setUniformFloat("scaleX", scaleX);
-                programmer.setUniformFloat("scaleY", scaleY);
-                programmer.setUniformFloat("width", this.__width);
-                programmer.setUniformFloat("height", this.__height);
+                if(source && this.__texture.sourceRotation) {
+                    programmer.setUniformFloat("top", left);
+                    programmer.setUniformFloat("left", top);
+                    programmer.setUniformFloat("ttop", tleft);
+                    programmer.setUniformFloat("tleft", ttop);
+                    programmer.setUniformFloat("tbottom", tright);
+                    programmer.setUniformFloat("tright", tbottom);
+                    programmer.setUniformFloat("scaleGapY", scaleGapX);
+                    programmer.setUniformFloat("scaleGapX", scaleGapY);
+                    programmer.setUniformFloat("scaleY", scaleX);
+                    programmer.setUniformFloat("scaleX", scaleY);
+                    programmer.setUniformFloat("height", this.__width);
+                    programmer.setUniformFloat("width", this.__height);
+                } else {
+                    programmer.setUniformFloat("left", left);
+                    programmer.setUniformFloat("top", top);
+                    programmer.setUniformFloat("tleft", tleft);
+                    programmer.setUniformFloat("ttop", ttop);
+                    programmer.setUniformFloat("tright", tright);
+                    programmer.setUniformFloat("tbottom", tbottom);
+                    programmer.setUniformFloat("scaleGapX", scaleGapX);
+                    programmer.setUniformFloat("scaleGapY", scaleGapY);
+                    programmer.setUniformFloat("scaleX", scaleX);
+                    programmer.setUniformFloat("scaleY", scaleY);
+                    programmer.setUniformFloat("width", this.__width);
+                    programmer.setUniformFloat("height", this.__height);
+                }
                 if (source) {
                     programmer.setUniformInt("plist", 1);
                     programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
                     programmer.setUniformFloat("plistStartX", source.x / this.__texture.$parentTexture.width);
-                    programmer.setUniformFloat("plistEndX", (source.x + source.width) / this.__texture.$parentTexture.width);
+                    programmer.setUniformFloat("plistEndX", (source.x + (this.__texture.sourceRotation ? source.height : source.width)) / (this.__texture.sourceRotation ? this.__texture.$parentTexture.height : this.__texture.$parentTexture.width));
                     programmer.setUniformFloat("plistStartY", source.y / this.__texture.$parentTexture.height);
-                    programmer.setUniformFloat("plistEndY", (source.y + source.height) / this.__texture.$parentTexture.height);
+                    programmer.setUniformFloat("plistEndY", (source.y + (this.__texture.sourceRotation ? source.width : source.height)) / (this.__texture.sourceRotation ? this.__texture.$parentTexture.width : this.__texture.$parentTexture.height));
                 } else {
                     programmer.setUniformInt("plist", 0);
                 }

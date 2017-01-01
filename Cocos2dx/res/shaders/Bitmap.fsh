@@ -73,109 +73,40 @@ vec4 getColorBeforeBlur(float posx,float posy) {
 vec4 getColor(float posx,float posy) {
     if(scale9 > 0) {
         if(plist == 1) {
-            if(plistRot == 1) {
-                //182,316},{138,92
-                /*if(posx >= 182.0 / 512.0 && posx < (182.0 + 92.0) / 512.0 &&
-                   posy >= 316.0 / 512.0 && posy < (316.0 + 138.0) / 512.0) {
-                        return vec4(0.0,1.0,0.0,1.0);
-                   }
-                   return vec4(0.0,0.0,1.0,1.0);*/
-
-                posx = (posx - plistStartX) / (plistEndX - plistStartX);
-                posy = (posy - plistStartY) / (plistEndY - plistStartY);
-                if(posx < tleft && posy < ttop) {
-                    posx = posx*scaleX;
-                    posy = posy*scaleY;
-                } else if(posx < tright && posy < ttop) {
-                    posx = left + (posx - tleft)*scaleGapX;
-                    posy = posy*scaleY;
-                } else if(posy < ttop) {
-                    posx = 1.0 - (1.0 - posx)*scaleX;
-                    posy = posy*scaleY;
-                } else if(posx < tleft && posy < tbottom) {
-                    posx = posx*scaleX;
-                    posy = top + (posy - ttop)*scaleGapY;
-                } else if(posx < tright && posy < tbottom){
-                    posx = left + (posx - tleft)*scaleGapX;
-                    posy = top + (posy - ttop)*scaleGapY;
-                } else if(posy < tbottom) {
-                    posx = 1.0 - (1.0 - posx)*scaleX;
-                    posy = top + (posy - ttop)*scaleGapY;
-                } else if(posx < tleft) {
-                    posx = posx*scaleX;
-                    posy = 1.0 - (1.0 - posy)*scaleY;
-                } else if(posx < tright){
-                    posx = left + (posx - tleft)*scaleGapX;
-                    posy = 1.0 - (1.0 - posy)*scaleY;
-                } else {
-                    posx = 1.0 - (1.0 - posx)*scaleX;
-                    posy = 1.0 - (1.0 - posy)*scaleY;
-                }
-                posx = posx * (plistEndX - plistStartX) + plistStartX;
-                posy = posy * (plistEndY - plistStartY) + plistStartY;
-            } else {
-                posx = (posx - plistStartX) / (plistEndX - plistStartX);
-                posy = (posy - plistStartY) / (plistEndY - plistStartY);
-                if(posx < tleft && posy < ttop) {
-                    posx = posx*scaleX;
-                    posy = posy*scaleY;
-                } else if(posx < tright && posy < ttop) {
-                    posx = left + (posx - tleft)*scaleGapX;
-                    posy = posy*scaleY;
-                } else if(posy < ttop) {
-                    posx = 1.0 - (1.0 - posx)*scaleX;
-                    posy = posy*scaleY;
-                } else if(posx < tleft && posy < tbottom) {
-                    posx = posx*scaleX;
-                    posy = top + (posy - ttop)*scaleGapY;
-                } else if(posx < tright && posy < tbottom){
-                    posx = left + (posx - tleft)*scaleGapX;
-                    posy = top + (posy - ttop)*scaleGapY;
-                } else if(posy < tbottom) {
-                    posx = 1.0 - (1.0 - posx)*scaleX;
-                    posy = top + (posy - ttop)*scaleGapY;
-                } else if(posx < tleft) {
-                    posx = posx*scaleX;
-                    posy = 1.0 - (1.0 - posy)*scaleY;
-                } else if(posx < tright){
-                    posx = left + (posx - tleft)*scaleGapX;
-                    posy = 1.0 - (1.0 - posy)*scaleY;
-                } else {
-                    posx = 1.0 - (1.0 - posx)*scaleX;
-                    posy = 1.0 - (1.0 - posy)*scaleY;
-                }
-                posx = posx * (plistEndX - plistStartX) + plistStartX;
-                posy = posy * (plistEndY - plistStartY) + plistStartY;
-            }
+            posx = (posx - plistStartX) / (plistEndX - plistStartX);
+            posy = (posy - plistStartY) / (plistEndY - plistStartY);
+        }
+        if(posx < tleft && posy < ttop) {
+            posx = posx*scaleX;
+            posy = posy*scaleY;
+        } else if(posx < tright && posy < ttop) {
+            posx = left + (posx - tleft)*scaleGapX;
+            posy = posy*scaleY;
+        } else if(posy < ttop) {
+            posx = 1.0 - (1.0 - posx)*scaleX;
+            posy = posy*scaleY;
+        } else if(posx < tleft && posy < tbottom) {
+            posx = posx*scaleX;
+            posy = top + (posy - ttop)*scaleGapY;
+        } else if(posx < tright && posy < tbottom){
+            posx = left + (posx - tleft)*scaleGapX;
+            posy = top + (posy - ttop)*scaleGapY;
+        } else if(posy < tbottom) {
+            posx = 1.0 - (1.0 - posx)*scaleX;
+            posy = top + (posy - ttop)*scaleGapY;
+        } else if(posx < tleft) {
+            posx = posx*scaleX;
+            posy = 1.0 - (1.0 - posy)*scaleY;
+        } else if(posx < tright){
+            posx = left + (posx - tleft)*scaleGapX;
+            posy = 1.0 - (1.0 - posy)*scaleY;
         } else {
-            if(posx < tleft && posy < ttop) {
-                posx = posx*scaleX;
-                posy = posy*scaleY;
-            } else if(posx < tright && posy < ttop) {
-                posx = left + (posx - tleft)*scaleGapX;
-                posy = posy*scaleY;
-            } else if(posy < ttop) {
-                posx = 1.0 - (1.0 - posx)*scaleX;
-                posy = posy*scaleY;
-            } else if(posx < tleft && posy < tbottom) {
-                posx = posx*scaleX;
-                posy = top + (posy - ttop)*scaleGapY;
-            } else if(posx < tright && posy < tbottom){
-                posx = left + (posx - tleft)*scaleGapX;
-                posy = top + (posy - ttop)*scaleGapY;
-            } else if(posy < tbottom) {
-                posx = 1.0 - (1.0 - posx)*scaleX;
-                posy = top + (posy - ttop)*scaleGapY;
-            } else if(posx < tleft) {
-                posx = posx*scaleX;
-                posy = 1.0 - (1.0 - posy)*scaleY;
-            } else if(posx < tright){
-                posx = left + (posx - tleft)*scaleGapX;
-                posy = 1.0 - (1.0 - posy)*scaleY;
-            } else {
-                posx = 1.0 - (1.0 - posx)*scaleX;
-                posy = 1.0 - (1.0 - posy)*scaleY;
-            }
+            posx = 1.0 - (1.0 - posx)*scaleX;
+            posy = 1.0 - (1.0 - posy)*scaleY;
+        }
+        if(plist == 1) {
+            posx = posx * (plistEndX - plistStartX) + plistStartX;
+            posy = posy * (plistEndY - plistStartY) + plistStartY;
         }
     }
     return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));
