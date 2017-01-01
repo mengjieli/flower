@@ -1200,7 +1200,6 @@ var flower = {};
                     if (source) {
                         scale9Grid.x -= texture.offX;
                         scale9Grid.y -= texture.offY;
-                        trace("off??",texture.offX,texture.offY)
                     }
 
                     this.addProgrammerFlag(0x0001);
@@ -1209,17 +1208,10 @@ var flower = {};
                     var setWidth = this.__texture.textureWidth * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
                     var setHeight = this.__texture.textureHeight * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
 
-                    trace(this.__texture.url,width,height,setWidth,setHeight,flower.ObjectDo.toString(scale9Grid));
-
-                    //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
-                    //width /= this.__textureScaleX;
-                    //height /= this.__textureScaleY;
-                    //scale9Grid.x /= this.__textureScaleX;
-                    //scale9Grid.y /= this.__textureScaleY;
-                    //scale9Grid.width /= this.__textureScaleX;
-                    //scale9Grid.height /= this.__textureScaleY;
-                    var scaleX = this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
-                    var scaleY = this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+                    var scaleX = this.__scaleX * this.__textureScaleX * (this.__settingWidth ? (this.__settingWidth - (this.__texture.width - this.__texture.textureWidth)) / this.__texture.textureWidth:1);
+                    var scaleY = this.__scaleY * this.__textureScaleY * (this.__settingHeight? (this.__settingHeight - (this.__texture.height - this.__texture.textureHeight)) / this.__texture.textureHeight:1);
+                    //var scaleX = this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
+                    //var scaleY = this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
                     var left = scale9Grid.x / width;
                     var top = scale9Grid.y / height;
                     var right = (scale9Grid.x + scale9Grid.width) / width;
@@ -1230,7 +1222,6 @@ var flower = {};
                     var tbottom = 1.0 - (1.0 - bottom) / scaleY;
                     var scaleGapX = (right - left) / (tright - tleft);
                     var scaleGapY = (bottom - top) / (tbottom - ttop);
-                    trace("??",scaleX,scaleY,left,top,right,bottom,tleft,ttop,tright,tbottom,scaleGapX,scaleGapY)
                     var programmer = this.__programmer.$nativeProgrammer;
                     if (Platform.native) {
                         programmer.setUniformInt("scale9", 1);
@@ -1251,6 +1242,23 @@ var flower = {};
                         programmer.setUniformFloat("scaleY", scaleY);
                         programmer.setUniformFloat("width", this.__width);
                         programmer.setUniformFloat("height", this.__height);
+                        trace("sclaeX",scaleX,"scaleY",scaleY)
+                        if (source) {
+                            programmer.setUniformInt("plist", 1);
+                            programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
+                            programmer.setUniformFloat("plistStartX", source.x / this.__texture.$parentTexture.width);
+                            programmer.setUniformFloat("plistEndX", (source.x + source.width) / this.__texture.$parentTexture.width);
+                            programmer.setUniformFloat("plistStartY", source.y / this.__texture.$parentTexture.height);
+                            programmer.setUniformFloat("plistEndY", (source.y + source.height) / this.__texture.$parentTexture.height);
+                            //trace("!!!!:", this.__texture.$parentTexture.width, this.__texture.$parentTexture.height, flower.ObjectDo.toString(source));
+                            //trace("plistRot:", this.__texture.sourceRotation ? 1 : 0);
+                            //trace("plistStartX", source.x / this.__texture.$parentTexture.width);
+                            //trace("plistEndX", (source.x + source.width) / this.__texture.$parentTexture.width);
+                            //trace("plistStartY", source.y / this.__texture.$parentTexture.height);
+                            //trace("plistEndY", (source.y + source.height) / this.__texture.$parentTexture.height);
+                        } else {
+                            programmer.setUniformInt("plist", 0);
+                        }
                     } else {
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
@@ -1309,17 +1317,12 @@ var flower = {};
             value: function setScaleX(val) {
                 this.__scaleX = val;
                 if (this.__texture && this.__settingWidth != null) {
-                    trace("scaleX",val * this.__textureScaleX * this.__settingWidth / this.__texture.width)
-                    this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+                    this.show.setScaleX(val * this.__textureScaleX * (this.__settingWidth - (this.__texture.width - this.__texture.textureWidth)) / this.__texture.textureWidth);
                 } else {
                     this.show.setScaleX(val * this.__textureScaleX);
                 }
                 if (this.__texture && this.__texture.offX) {
-                    if (this.__settingWidth) {
-                        this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX * this.__settingWidth / this.__texture.width);
-                    } else {
-                        this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
-                    }
+                    this.show.setPositionX(this.__x + this.__texture.offX * this.__scaleX);
                 }
                 this.setScale9Grid(this.__scale9Grid);
             }
@@ -1328,16 +1331,12 @@ var flower = {};
             value: function setScaleY(val) {
                 this.__scaleY = val;
                 if (this.__texture && this.__settingHeight != null) {
-                    this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+                    this.show.setScaleY(val * this.__textureScaleY * (this.__settingHeight - (this.__texture.height - this.__texture.textureHeight)) / this.__texture.textureHeight);
                 } else {
                     this.show.setScaleY(val * this.__textureScaleY);
                 }
                 if (this.__texture && this.__texture.offY) {
-                    if (this.__settingHeight) {
-                        this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY * this.__settingHeight / this.__texture.height);
-                    } else {
-                        this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
-                    }
+                    this.show.setPositionY(-this.__y - this.__texture.offY * this.__scaleY);
                 }
                 this.setScale9Grid(this.__scale9Grid);
             }

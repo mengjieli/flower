@@ -19,6 +19,12 @@ uniform float scaleGapX;
 uniform float scaleGapY;
 uniform float scaleX;
 uniform float scaleY;
+uniform int plist;
+uniform int plistRot;
+uniform float plistStartX;
+uniform float plistEndX;
+uniform float plistStartY;
+uniform float plistEndY;
 
 
 uniform vec4 filters1;
@@ -41,6 +47,7 @@ uniform vec4 filtersParams103;
 
 vec4 getColorBeforeBlur(float posx,float posy);
 vec4 getColor(float posx,float posy);
+vec4 getColor222(float posx,float posy);
 vec4 filter(vec4 color,float posx,float posy);
 vec4 filter100(vec4 color,float posx,float posy);
 vec4 dyeingFilter(vec4 color,float colorR,float colorG,float colorB);
@@ -65,6 +72,127 @@ vec4 getColorBeforeBlur(float posx,float posy) {
 
 vec4 getColor(float posx,float posy) {
     if(scale9 > 0) {
+        if(plist == 1) {
+            if(plistRot == 1) {
+                //182,316},{138,92
+                /*if(posx >= 182.0 / 512.0 && posx < (182.0 + 92.0) / 512.0 &&
+                   posy >= 316.0 / 512.0 && posy < (316.0 + 138.0) / 512.0) {
+                        return vec4(0.0,1.0,0.0,1.0);
+                   }
+                   return vec4(0.0,0.0,1.0,1.0);*/
+
+                posx = (posx - plistStartX) / (plistEndX - plistStartX);
+                posy = (posy - plistStartY) / (plistEndY - plistStartY);
+                if(posx < tleft && posy < ttop) {
+                    posx = posx*scaleX;
+                    posy = posy*scaleY;
+                } else if(posx < tright && posy < ttop) {
+                    posx = left + (posx - tleft)*scaleGapX;
+                    posy = posy*scaleY;
+                } else if(posy < ttop) {
+                    posx = 1.0 - (1.0 - posx)*scaleX;
+                    posy = posy*scaleY;
+                } else if(posx < tleft && posy < tbottom) {
+                    posx = posx*scaleX;
+                    posy = top + (posy - ttop)*scaleGapY;
+                } else if(posx < tright && posy < tbottom){
+                    posx = left + (posx - tleft)*scaleGapX;
+                    posy = top + (posy - ttop)*scaleGapY;
+                } else if(posy < tbottom) {
+                    posx = 1.0 - (1.0 - posx)*scaleX;
+                    posy = top + (posy - ttop)*scaleGapY;
+                } else if(posx < tleft) {
+                    posx = posx*scaleX;
+                    posy = 1.0 - (1.0 - posy)*scaleY;
+                } else if(posx < tright){
+                    posx = left + (posx - tleft)*scaleGapX;
+                    posy = 1.0 - (1.0 - posy)*scaleY;
+                } else {
+                    posx = 1.0 - (1.0 - posx)*scaleX;
+                    posy = 1.0 - (1.0 - posy)*scaleY;
+                }
+                posx = posx * (plistEndX - plistStartX) + plistStartX;
+                posy = posy * (plistEndY - plistStartY) + plistStartY;
+            } else {
+                posx = (posx - plistStartX) / (plistEndX - plistStartX);
+                posy = (posy - plistStartY) / (plistEndY - plistStartY);
+                if(posx < tleft && posy < ttop) {
+                    posx = posx*scaleX;
+                    posy = posy*scaleY;
+                } else if(posx < tright && posy < ttop) {
+                    posx = left + (posx - tleft)*scaleGapX;
+                    posy = posy*scaleY;
+                } else if(posy < ttop) {
+                    posx = 1.0 - (1.0 - posx)*scaleX;
+                    posy = posy*scaleY;
+                } else if(posx < tleft && posy < tbottom) {
+                    posx = posx*scaleX;
+                    posy = top + (posy - ttop)*scaleGapY;
+                } else if(posx < tright && posy < tbottom){
+                    posx = left + (posx - tleft)*scaleGapX;
+                    posy = top + (posy - ttop)*scaleGapY;
+                } else if(posy < tbottom) {
+                    posx = 1.0 - (1.0 - posx)*scaleX;
+                    posy = top + (posy - ttop)*scaleGapY;
+                } else if(posx < tleft) {
+                    posx = posx*scaleX;
+                    posy = 1.0 - (1.0 - posy)*scaleY;
+                } else if(posx < tright){
+                    posx = left + (posx - tleft)*scaleGapX;
+                    posy = 1.0 - (1.0 - posy)*scaleY;
+                } else {
+                    posx = 1.0 - (1.0 - posx)*scaleX;
+                    posy = 1.0 - (1.0 - posy)*scaleY;
+                }
+                posx = posx * (plistEndX - plistStartX) + plistStartX;
+                posy = posy * (plistEndY - plistStartY) + plistStartY;
+            }
+        } else {
+            if(posx < tleft && posy < ttop) {
+                posx = posx*scaleX;
+                posy = posy*scaleY;
+            } else if(posx < tright && posy < ttop) {
+                posx = left + (posx - tleft)*scaleGapX;
+                posy = posy*scaleY;
+            } else if(posy < ttop) {
+                posx = 1.0 - (1.0 - posx)*scaleX;
+                posy = posy*scaleY;
+            } else if(posx < tleft && posy < tbottom) {
+                posx = posx*scaleX;
+                posy = top + (posy - ttop)*scaleGapY;
+            } else if(posx < tright && posy < tbottom){
+                posx = left + (posx - tleft)*scaleGapX;
+                posy = top + (posy - ttop)*scaleGapY;
+            } else if(posy < tbottom) {
+                posx = 1.0 - (1.0 - posx)*scaleX;
+                posy = top + (posy - ttop)*scaleGapY;
+            } else if(posx < tleft) {
+                posx = posx*scaleX;
+                posy = 1.0 - (1.0 - posy)*scaleY;
+            } else if(posx < tright){
+                posx = left + (posx - tleft)*scaleGapX;
+                posy = 1.0 - (1.0 - posy)*scaleY;
+            } else {
+                posx = 1.0 - (1.0 - posx)*scaleX;
+                posy = 1.0 - (1.0 - posy)*scaleY;
+            }
+        }
+    }
+    return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));
+}
+
+
+vec4 getColor222(float posx,float posy) {
+    if(scale9 > 0) {
+        if(plist == 1) {
+            if(plistRot == 1) {
+                posy = (posx - plistStartX) / (plistEndX - plistStartX);
+                posx = (posy - plistStartY) / (plistEndY - plistStartY);
+            } else {
+                posx = (posx - plistStartX) / (plistEndX - plistStartX);
+                posy = (posy - plistStartY) / (plistEndY - plistStartY);
+            }
+        }
         if(posx < tleft && posy < ttop) {
             posx = posx*scaleX;
             posy = posy*scaleY;
@@ -92,6 +220,15 @@ vec4 getColor(float posx,float posy) {
         } else {
             posx = 1.0 - (1.0 - posx)*scaleX;
             posy = 1.0 - (1.0 - posy)*scaleY;
+        }
+        if(plist == 1) {
+            if(plistRot == 1) {
+                posy = posx * (plistEndX - plistStartX) + plistStartX;
+                posx = posy * (plistEndY - plistStartY) + plistStartY;
+            } else {
+                posx = posx * (plistEndX - plistStartX) + plistStartX;
+                posy = posy * (plistEndY - plistStartY) + plistStartY;
+            }
         }
     }
     return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));
