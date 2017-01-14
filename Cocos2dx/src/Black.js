@@ -514,6 +514,7 @@ var black = {};
             _this.__old = null;
             _this.__value = null;
             _this.__checkDistort = null;
+            _this.__list = null;
 
             _this.__checkDistort = checkDistort == null ? Value.Default_Check_Distort : checkDistort;
             return _this;
@@ -532,6 +533,22 @@ var black = {};
             key: "$getValue",
             value: function $getValue() {
                 return this.__value;
+            }
+        }, {
+            key: "push",
+            value: function push(val) {
+                if (!this.__list) {
+                    this.__list = [];
+                }
+                this.__list.push(val);
+            }
+        }, {
+            key: "pop",
+            value: function pop() {
+                if (this.__list) {
+                    return this.__list.pop();
+                }
+                return null;
             }
         }, {
             key: "value",
@@ -567,9 +584,9 @@ var black = {};
     /**
      *
      * @Event
-     * Event.ADDED item
-     * Event.REMOVED item
-     * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
+     * Event.ADD item
+     * Event.REMOV item
+     * Event.CHANGE ArrayValue 所有更新都会触发，包括排序
      */
 
     var ArrayValue = function (_Value) {
@@ -588,6 +605,8 @@ var black = {};
             _this2._rangeMaxKey = "";
             _this2._selectedItem = null;
             _this2._itemType = null;
+            _this2._subs = null;
+            _this2.$sub = false;
 
             _this2._itemType = itemType;
             _this2.list = init || [];
@@ -603,6 +622,10 @@ var black = {};
                 this.list.push(item);
                 this._length = this._length + 1;
                 this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubPush(item);
+                    this.__addItemChange(item);
+                }
                 this.dispatchWith(flower.Event.ADD, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
             }
@@ -617,6 +640,10 @@ var black = {};
                 this.list.splice(index, 0, item);
                 this._length = this._length + 1;
                 this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubAddItemAt(item, index);
+                    this.__addItemChange(item);
+                }
                 this.dispatchWith(flower.Event.ADD, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
             }
@@ -629,6 +656,10 @@ var black = {};
                 var item = this.list.shift();
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
                 this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
@@ -656,6 +687,10 @@ var black = {};
                     this._length = this._length + 1;
                     this._lengthValue.value = this._length;
                     for (i = 0; i < args.length; i++) {
+                        if (this._subs) {
+                            this.__checkSubAddItemAt(args[i], startIndex + i);
+                            this.__addItemChange(args[i]);
+                        }
                         this.dispatchWith(flower.Event.ADD, args[i]);
                     }
                     this.dispatchWith(flower.Event.CHANGE, this);
@@ -664,6 +699,10 @@ var black = {};
                     this._length = this._length - delCount;
                     this._lengthValue.value = this._length;
                     for (i = 0; i < list.length; i++) {
+                        if (this._subs) {
+                            this.__checkSubRemoveItem(list[i]);
+                            this.__removeItemChange(list[i]);
+                        }
                         this.dispatchWith(flower.Event.REMOVE, list[i]);
                     }
                     this.dispatchWith(flower.Event.CHANGE, this);
@@ -686,6 +725,10 @@ var black = {};
                 var item = this.list.pop();
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
                 this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
@@ -696,10 +739,16 @@ var black = {};
                 if (!this.list.length) {
                     return;
                 }
+                if (this._subs) {
+                    this.__subRemoveAll();
+                }
                 while (this.list.length) {
                     var item = this.list.pop();
                     this._length = this._length - 1;
                     this._lengthValue.value = this._length;
+                    if (this._subs) {
+                        this.__removeItemChange(item);
+                    }
                     this.dispatchWith(flower.Event.REMOVE, item);
                 }
                 this.dispatchWith(flower.Event.CHANGE, this);
@@ -712,6 +761,10 @@ var black = {};
                         this.list.splice(i, 1);
                         this._length = this._length - 1;
                         this._lengthValue.value = this._length;
+                        if (this._subs) {
+                            this.__checkSubRemoveItem(item);
+                            this.__removeItemChange(item);
+                        }
                         this.dispatchWith(flower.Event.REMOVE, item);
                         this.dispatchWith(flower.Event.CHANGE, this);
                         return item;
@@ -730,6 +783,10 @@ var black = {};
                 var item = this.list.splice(index, 1)[0];
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
                 this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
@@ -774,6 +831,10 @@ var black = {};
                 }
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
                 this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
@@ -1017,6 +1078,240 @@ var black = {};
                 return list;
             }
         }, {
+            key: "createSubArrayValue",
+            value: function createSubArrayValue() {
+                for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                    args[_key3] = arguments[_key3];
+                }
+
+                if (!this._subs) {
+                    this._subs = [];
+                }
+                var init = [];
+                var list = this.list;
+                for (var i = 0; i < list.length; i++) {
+                    var item = this.list[i];
+                    var flag = true;
+                    for (var a = 0; a < arguments.length; a++, a++) {
+                        if (item instanceof Value) {
+                            if (item[arguments[a]].value != arguments[a + 1]) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[arguments[a]] != arguments[a + 1]) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        init.push(item);
+                    }
+                }
+                var sub = new ArrayValue(init, this._itemType);
+                sub.$sub = true;
+                this._subs.push([sub, arguments]);
+                this.__addAllItemChange();
+                return sub;
+            }
+        }, {
+            key: "linkSubArrayValue",
+            value: function linkSubArrayValue(sub) {
+                if (!this._subs) {
+                    this._subs = [];
+                }
+                sub.$sub = true;
+                sub.removeAll();
+
+                for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+                    args[_key4 - 1] = arguments[_key4];
+                }
+
+                this._subs.push([sub, args]);
+                var list = this.list;
+                for (var i = 0; i < list.length; i++) {
+                    var item = this.list[i];
+                    var flag = true;
+                    for (var a = 1; a < args.length; a++, a++) {
+                        if (item instanceof Value) {
+                            if (item[args[a]].value != args[a + 1]) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[args[a]] != args[a + 1]) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        sub.push(item);
+                    }
+                }
+                this.__addAllItemChange();
+            }
+        }, {
+            key: "__addAllItemChange",
+            value: function __addAllItemChange() {
+                var list = this.list;
+                var subs = this._subs;
+                for (var i = 0; i < list.length; i++) {
+                    var item = this.list[i];
+                    for (var s = 0; s < subs.length; s++) {
+                        var args = subs[s][1];
+                        for (var a = 0; a < args.length; a++, a++) {
+                            var key = args[a];
+                            if (item[key] instanceof Value) {
+                                item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            key: "__addItemChange",
+            value: function __addItemChange(item) {
+                var subs = this._subs;
+                for (var s = 0; s < subs.length; s++) {
+                    var args = subs[s][1];
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        if (item[key] instanceof Value) {
+                            item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                        }
+                    }
+                }
+            }
+        }, {
+            key: "__removeItemChange",
+            value: function __removeItemChange(item) {
+                var keys = item.membersKey;
+                for (var i = 0; i < keys.length; i++) {
+                    if (item[keys[i]] instanceof flower.Value) {
+                        item[keys[i]].removeListener(flower.Event.CHANGE, this.__onItemChange, this);
+                    }
+                }
+            }
+        }, {
+            key: "__onItemChange",
+            value: function __onItemChange(e, item) {
+                var subs = this._subs;
+                for (var s = 0; s < subs.length; s++) {
+                    var sub = subs[s][0];
+                    var args = subs[s][1];
+                    var oldIndex = sub.getItemIndex(item);
+                    var flag = true;
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        var value = args[a + 1];
+                        if (item[key] instanceof Value) {
+                            if (item[key].value != value) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[key] != value) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (oldIndex == -1 && flag) {
+                        var index = this.getItemIndex(item);
+                        var ind = -1;
+                        for (var f = index - 1; f >= 0; f++) {
+                            ind = sub.getItemIndex(this.list[f]);
+                            if (ind != -1) {
+                                ind++;
+                                break;
+                            }
+                        }
+                        if (ind == -1) {
+                            ind = 0;
+                        }
+                        sub.addItemAt(item, ind);
+                    } else if (oldIndex != -1 && !flag) {
+                        sub.removeItem(item);
+                    }
+                }
+            }
+        }, {
+            key: "__checkSubPush",
+            value: function __checkSubPush(item) {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    var args = this._subs[s][1];
+                    var flag = true;
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        var value = args[a + 1];
+                        if (item[key] instanceof Value) {
+                            if (item[key].value != value) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[key] != value) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        sub.push(item);
+                    }
+                }
+            }
+        }, {
+            key: "__checkSubAddItemAt",
+            value: function __checkSubAddItemAt(item, index) {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    var args = this._subs[s][1];
+                    var flag = true;
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        var value = args[a + 1];
+                        if (item[key] instanceof Value) {
+                            if (item[key].value != value) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[key] != value) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        var ind = -1;
+                        for (var f = index - 1; f >= 0; f++) {
+                            ind = sub.getItemIndex(this.list[f]);
+                            if (ind != -1) {
+                                ind++;
+                                break;
+                            }
+                        }
+                        if (ind == -1) {
+                            ind = 0;
+                        }
+                        sub.addItemAt(item, ind);
+                    }
+                }
+            }
+        }, {
+            key: "__checkSubRemoveItem",
+            value: function __checkSubRemoveItem(item) {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    var ind = sub.getItemIndex(item);
+                    if (ind != -1) {
+                        sub.removeItemAt(ind);
+                    }
+                }
+            }
+        }, {
+            key: "__subRemoveAll",
+            value: function __subRemoveAll() {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    sub.removeAll();
+                }
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 var list = this.list;
@@ -1025,6 +1320,14 @@ var black = {};
                     if (value instanceof Value) {
                         value.dispose();
                     }
+                }
+                if (this._subs) {
+                    while (this._subs) {
+                        var sub = this._subs.pop()[0];
+                        sub.removeAll();
+                        sub.dispose();
+                    }
+                    this._subs = null;
                 }
                 _get(Object.getPrototypeOf(ArrayValue.prototype), "dispose", this).call(this);
             }
@@ -1574,7 +1877,7 @@ var black = {};
         }, {
             key: "membersKey",
             get: function get() {
-                return Object.keys(this.value);
+                return Object.keys(this.__value);
             }
         }]);
 
@@ -1866,6 +2169,7 @@ var black = {};
                 var defineMember = "";
                 var members = config.members;
                 var bindContent = "";
+                var subContent = "";
                 if (members) {
                     var member;
                     for (var key in members) {
@@ -1904,6 +2208,16 @@ var black = {};
                         if (member.bind) {
                             bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n";
                         }
+                        if (member.sub) {
+                            subContent += "\t\tthis." + member.sub.source + ".linkSubArrayValue(this." + key + ",";
+                            if (typeof member.sub.type == "string") {
+                                subContent += "\"" + member.sub.type + "\"," + (typeof member.sub.value == "string" ? "\"" + member.sub.value + "\"" : member.sub.value) + ");\n";
+                            } else {
+                                for (var s = 0; s < member.sub.type.length; s++) {
+                                    subContent += "\"" + member.sub.type[s] + "\"," + (typeof member.sub.value[s] == "string" ? "\"" + member.sub.value[s] + "\"" : member.sub.value[s]) + (s < member.sub.type.length - 1 ? "," : ");\n");
+                                }
+                            }
+                        }
                         defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
                         defineMember += "\t\tget: function () {\n";
                         defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
@@ -1921,6 +2235,7 @@ var black = {};
                 }
                 content += "\t\tif(init) this.value = init;\n";
                 content += bindContent;
+                content += subContent;
                 content += "\t}\n\n" + defineMember + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
                 content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + config.name + "\");\n";
                 if (config.exports) {
@@ -8015,7 +8330,7 @@ var black = {};
                 if (this.hasListener(flower.Event.ERROR)) {
                     this.dispatch(e);
                 } else {
-                    $error(e.data);
+                    flower.$error(e.data);
                 }
             }
         }, {

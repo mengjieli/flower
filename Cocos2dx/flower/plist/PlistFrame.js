@@ -75,3 +75,5 @@ class PlistFrame {
         this._texture = null;
     }
 }
+
+exports.PlistFrame = PlistFrame;

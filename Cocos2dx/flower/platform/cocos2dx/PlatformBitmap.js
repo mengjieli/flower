@@ -136,7 +136,7 @@ class PlatformBitmap extends PlatformDisplayObject {
                 }
                 if (source) {
                     programmer.setUniformInt("plist", 1);
-                    programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
+                    //programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
                     programmer.setUniformFloat("plistStartX", source.x / this.__texture.$parentTexture.width);
                     programmer.setUniformFloat("plistEndX", (source.x + (this.__texture.sourceRotation ? source.height : source.width)) / (this.__texture.sourceRotation ? this.__texture.$parentTexture.height : this.__texture.$parentTexture.width));
                     programmer.setUniformFloat("plistStartY", source.y / this.__texture.$parentTexture.height);

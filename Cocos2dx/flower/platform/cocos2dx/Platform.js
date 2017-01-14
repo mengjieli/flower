@@ -33,11 +33,11 @@ class Platform {
                 cc.eventManager.addListener({
                     event: cc.EventListener.MOUSE,
                     onMouseMove: function (e) {
-                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                     }.bind(this),
-                    onMouseDown:function(e) {
-                        if(e.getButton() == 1) {
-                            engine.$addRightClickEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                    onMouseDown: function (e) {
+                        if (e.getButton() == 1) {
+                            engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                         }
                     }
                 }, this);
@@ -75,11 +75,11 @@ class Platform {
             cc.eventManager.addListener({
                 event: cc.EventListener.MOUSE,
                 onMouseMove: function (e) {
-                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x),  - math.floor(e.getLocation().y));
+                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                 },
-                onMouseDown:function(e) {
-                    if(e.getButton() == 1) {
-                        engine.$addRightClickEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                onMouseDown: function (e) {
+                    if (e.getButton() == 1) {
+                        engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                     }
                 }
             }, cc.director.getRunningScene());
@@ -117,10 +117,7 @@ class Platform {
         var now = (new Date()).getTime();
         Platform._runBack(now - Platform.lastTime);
         Platform.lastTime = now;
-        if (PlatformURLLoader.loadingList.length) {
-            var item = PlatformURLLoader.loadingList.shift();
-            item[0].apply(null, item.slice(1, item.length));
-        }
+        PlatformURLLoader.run();
     }
 
     static pools = {};

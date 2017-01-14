@@ -57,10 +57,14 @@ var flower = {};
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc, nativeStage, touchShow) {
+    function start(completeFunc, nativeStage, touchShow, params) {
         if (hasStart) {
             if (completeFunc) completeFunc();
             return;
+        }
+        if (params && params.TIP) {
+            TIP = params.TIP;
+            flower.sys.TIP = params.TIP;
         }
         hasStart = false;
         Platform._runBack = CoreTime.$run;
@@ -204,6 +208,8 @@ var flower = {};
         hasStart = false;
     }
 
+    var debugInfo = {};
+
     flower.start = start;
     flower.getLanguage = $getLanguage;
     flower.trace = trace;
@@ -217,6 +223,7 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
+    flower.debugInfo = debugInfo;
     flower.params = params;
     flower.system = {};
     flower.dispose = dispose;
@@ -2234,9 +2241,12 @@ var flower = {};
                 CoreTime.lastTimeGap = gap;
                 CoreTime.currentTime += gap;
                 EnterFrame.$update(CoreTime.currentTime, gap);
+                var st = new Date().getTime();
                 if (CoreTime.$playEnterFrame) {
                     Stage.$onFrameEnd();
                 }
+                var et = new Date().getTime();
+                flower.debugInfo.onFrameEnd += et - st;
                 TextureManager.getInstance().$check();
             }
         }, {
@@ -2314,6 +2324,8 @@ var flower = {};
     locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docsWebSite + "docs/class/{1}.md?f{2}";
     locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
     locale_strings[1030] = "目标显示对象不在同一个显示列表中";
+    locale_strings[1100] = "监听事件类型不能为空";
+    locale_strings[1101] = "监听事件回调函数不能为空";
     locale_strings[2001] = "[loadText] {0}";
     locale_strings[2002] = "[loadTexture] {0}";
     locale_strings[2003] = "[加载失败] {0}";
@@ -2399,6 +2411,12 @@ var flower = {};
                 if (DEBUG) {
                     if (this.__hasDispose) {
                         $error(1002);
+                    }
+                    if (type == null) {
+                        $error(1100);
+                    }
+                    if (listener == null) {
+                        $error(1101);
                     }
                 }
                 var values = this.__EventDispatcher;
@@ -2949,7 +2967,7 @@ var flower = {};
 
         function ColorFilter() {
             var h = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-            var s = arguments.length <= 1 || arguments[1] === undefined ? -100 : arguments[1];
+            var s = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
             var l = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
             _classCallCheck(this, ColorFilter);
@@ -2977,6 +2995,7 @@ var flower = {};
                 return this.__h;
             },
             set: function set(val) {
+                val = +val || 0;
                 val += 180;
                 if (val < 0) {
                     val = 360 - -val % 360;
@@ -2992,6 +3011,7 @@ var flower = {};
                 return this.__s;
             },
             set: function set(val) {
+                val = +val || 0;
                 if (val > 100) {
                     val = 100;
                 } else if (val < -100) {
@@ -3005,6 +3025,7 @@ var flower = {};
                 return this.__l;
             },
             set: function set(val) {
+                val = +val || 0;
                 if (val > 100) {
                     val = 100;
                 } else if (val < -100) {
@@ -3138,6 +3159,71 @@ var flower = {};
 
     flower.BlurFilter = BlurFilter;
     //////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
+
+    //////////////////////////File:flower/filters/DyeingFilter.js///////////////////////////
+    /**
+     * 收集原有的 r,g,b 计算和，再根据 r,g,b 的比值重新分配 r,g,b
+     */
+
+    var DyeingFilter = function (_Filter4) {
+        _inherits(DyeingFilter, _Filter4);
+
+        function DyeingFilter() {
+            var r = arguments.length <= 0 || arguments[0] === undefined ? 0.0 : arguments[0];
+            var g = arguments.length <= 1 || arguments[1] === undefined ? 0.0 : arguments[1];
+            var b = arguments.length <= 2 || arguments[2] === undefined ? 0.0 : arguments[2];
+
+            _classCallCheck(this, DyeingFilter);
+
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(DyeingFilter).call(this, 3));
+
+            _this15.__r = 0;
+            _this15.__g = 0;
+            _this15.__b = 0;
+
+            _this15.r = r;
+            _this15.g = g;
+            _this15.b = b;
+            return _this15;
+        }
+
+        _createClass(DyeingFilter, [{
+            key: "$getParams",
+            value: function $getParams() {
+                var sum = this.__r + this.__g + this.__b;
+                return [this.__r / sum, this.__g / sum, this.__b / sum];
+            }
+        }, {
+            key: "r",
+            get: function get() {
+                return this.__r;
+            },
+            set: function set(val) {
+                this.__r = +val || 0;
+            }
+        }, {
+            key: "g",
+            get: function get() {
+                return this.__g;
+            },
+            set: function set(val) {
+                this.__g = +val || 0;
+            }
+        }, {
+            key: "b",
+            get: function get() {
+                return this.__b;
+            },
+            set: function set(val) {
+                this.__b = +val || 0;
+            }
+        }]);
+
+        return DyeingFilter;
+    }(Filter);
+
+    flower.DyeingFilter = DyeingFilter;
+    //////////////////////////End File:flower/filters/DyeingFilter.js///////////////////////////
 
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
 
@@ -3562,6 +3648,7 @@ var flower = {};
     }();
 
     Rectangle.rectanglePool = [];
+    Rectangle.$TempRectangle = new Rectangle();
 
 
     flower.Rectangle = Rectangle;
@@ -3672,16 +3759,16 @@ var flower = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this15.__flags = 0;
-            _this15.__alpha = 1;
-            _this15.__parentAlpha = 1;
-            _this15.__concatAlpha = 1;
-            _this15.__visible = true;
+            _this16.__flags = 0;
+            _this16.__alpha = 1;
+            _this16.__parentAlpha = 1;
+            _this16.__concatAlpha = 1;
+            _this16.__visible = true;
 
             var id = DisplayObject.id++;
-            _this15.$DisplayObject = {
+            _this16.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -3706,7 +3793,7 @@ var flower = {};
                 61: [] };
             //parentFilters
             DebugInfo.displayInfo.display++;
-            return _this15;
+            return _this16;
         }
 
         /**
@@ -4247,7 +4334,7 @@ var flower = {};
                 p[11] = touchY;
                 p[22] = flower.EnterFrame.frame;
                 var bounds = this.$getContentBounds();
-                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
                     return this;
                 }
                 return null;
@@ -4537,14 +4624,14 @@ var flower = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this16.$Sprite = {
+            _this17.$Sprite = {
                 0: new flower.Rectangle() //childrenBounds
             };
-            _this16.$initContainer();
+            _this17.$initContainer();
             DebugInfo.displayInfo.sprite++;
-            return _this16;
+            return _this17;
         }
 
         _createClass(Sprite, [{
@@ -4968,15 +5055,16 @@ var flower = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this18.$nativeShow = Platform.create("Bitmap");
-            _this18.texture = texture;
-            _this18.$Bitmap = {
-                0: null };
-            //scale9Grid
+            _this19.$nativeShow = Platform.create("Bitmap");
+            _this19.texture = texture;
+            _this19.$Bitmap = {
+                0: null, //scale9Grid
+                1: true //touchSpace
+            };
             Stage.bitmapCount++;
-            return _this18;
+            return _this19;
         }
 
         _createClass(Bitmap, [{
@@ -5005,7 +5093,7 @@ var flower = {};
                     this.$nativeShow.setTexture(Texture.$blank);
                 }
                 if (this.__texture && this.__texture.dispatcher) {
-                    this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+                    this.__texture.dispatcher.addListener(Event.CHANGE, this.$updateTexture, this);
                 }
                 this.$invalidateContentBounds();
                 return true;
@@ -5040,16 +5128,42 @@ var flower = {};
                 return true;
             }
         }, {
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(touchX, touchY, multiply) {
+                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
+                var p = this.$DisplayObject;
+                p[10] = touchX;
+                p[11] = touchY;
+                p[22] = flower.EnterFrame.frame;
+                var bounds;
+                bounds = Rectangle.$TempRectangle;
+                if (this.$Bitmap[1] || !this.__texture) {
+                    bounds.x = 0;
+                    bounds.y = 0;
+                    bounds.width = this.width;
+                    bounds.height = this.height;
+                } else {
+                    bounds.x = this.__texture.offX;
+                    bounds.y = this.__texture.offY;
+                    bounds.width = this.width - this.__texture.offX;
+                    bounds.height = this.height - this.__texture.offY;
+                }
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+                    return this;
+                }
+                return null;
+            }
+        }, {
             key: "$measureContentBounds",
             value: function $measureContentBounds(rect) {
+                rect.x = rect.y = 0;
                 if (this.__texture) {
-                    rect.x = this.__texture.offX;
-                    rect.y = this.__texture.offY;
-                    var p = this.$DisplayObject;
-                    rect.width = p[3] || this.__texture.width;
-                    rect.height = p[4] || this.__texture.height;
+                    rect.width = this.__texture.width;
+                    rect.height = this.__texture.height;
                 } else {
-                    rect.x = rect.y = rect.width = rect.height = 0;
+                    rect.width = rect.height = 0;
                 }
             }
         }, {
@@ -5073,6 +5187,19 @@ var flower = {};
                 }
                 this.$nativeShow.setScale9Grid(val);
                 return true;
+            }
+        }, {
+            key: "$setTouchSpace",
+            value: function $setTouchSpace(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                var p = this.$Bitmap;
+                if (p[1] == val) {
+                    return;
+                }
+                p[1] = val;
             }
         }, {
             key: "dispose",
@@ -5104,6 +5231,14 @@ var flower = {};
             set: function set(val) {
                 this.$setScale9Grid(val);
             }
+        }, {
+            key: "touchSpace",
+            get: function get() {
+                return this.$Bitmap[1];
+            },
+            set: function set(val) {
+                this.$setTouchSpace(val);
+            }
         }]);
 
         return Bitmap;
@@ -5122,10 +5257,10 @@ var flower = {};
 
             _classCallCheck(this, $TextField);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf($TextField).call(this));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf($TextField).call(this));
 
-            _this19.$nativeShow = Platform.create("TextField");
-            _this19.$TextField = {
+            _this20.$nativeShow = Platform.create("TextField");
+            _this20.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -5134,10 +5269,10 @@ var flower = {};
                 5: true //autoSize
             };
             if (text != "") {
-                _this19.text = text;
+                _this20.text = text;
             }
             DebugInfo.displayInfo.text++;
-            return _this19;
+            return _this20;
         }
 
         _createClass($TextField, [{
@@ -5379,22 +5514,22 @@ var flower = {};
         _inherits(TextField, _flower$DisplayObject);
 
         function TextField(text) {
-            var _this20$$TextField;
+            var _this21$$TextField;
 
             _classCallCheck(this, TextField);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
 
-            _this20.__changeText = TextField.changeText;
-            _this20.__changeRealText = TextField.changeRealText;
+            _this21.__changeText = TextField.changeText;
+            _this21.__changeRealText = TextField.changeRealText;
 
-            _this20.$Sprite = {
+            _this21.$Sprite = {
                 0: new flower.Rectangle() //childrenBounds
             };
-            _this20.$initContainer();
+            _this21.$initContainer();
             DebugInfo.displayInfo.sprite++;
 
-            _this20.$TextField = (_this20$$TextField = {
+            _this21.$TextField = (_this21$$TextField = {
                 0: "", //text
                 1: "", //htmlText formatHtmlText
                 2: [], //lines
@@ -5422,22 +5557,22 @@ var flower = {};
                 29: 2, //lineStart
                 30: 0, //caretIndex
                 31: 0, //caretHtmlIndex
-                32: null }, _defineProperty(_this20$$TextField, "32", null), _defineProperty(_this20$$TextField, 33, null), _defineProperty(_this20$$TextField, 34, 0), _defineProperty(_this20$$TextField, 50, 0), _defineProperty(_this20$$TextField, 51, 0), _defineProperty(_this20$$TextField, 100, false), _defineProperty(_this20$$TextField, 101, {}), _defineProperty(_this20$$TextField, 102, {}), _defineProperty(_this20$$TextField, 200, 0), _defineProperty(_this20$$TextField, 201, false), _defineProperty(_this20$$TextField, 300, false), _defineProperty(_this20$$TextField, 301, 0), _defineProperty(_this20$$TextField, 302, 0), _defineProperty(_this20$$TextField, 303, 0), _defineProperty(_this20$$TextField, 304, false), _defineProperty(_this20$$TextField, 305, ""), _defineProperty(_this20$$TextField, 306, ""), _defineProperty(_this20$$TextField, 307, 0), _defineProperty(_this20$$TextField, 308, []), _defineProperty(_this20$$TextField, 311, null), _defineProperty(_this20$$TextField, 312, null), _defineProperty(_this20$$TextField, 313, null), _defineProperty(_this20$$TextField, 350, 0), _defineProperty(_this20$$TextField, 351, 0), _defineProperty(_this20$$TextField, 330, 0), _defineProperty(_this20$$TextField, 400, false), _defineProperty(_this20$$TextField, 401, []), _defineProperty(_this20$$TextField, 402, ""), _defineProperty(_this20$$TextField, 1000, 0x526da5), _defineProperty(_this20$$TextField, 1001, 0xffffff), _this20$$TextField);
+                32: null }, _defineProperty(_this21$$TextField, "32", null), _defineProperty(_this21$$TextField, 33, null), _defineProperty(_this21$$TextField, 34, 0), _defineProperty(_this21$$TextField, 50, 0), _defineProperty(_this21$$TextField, 51, 0), _defineProperty(_this21$$TextField, 100, false), _defineProperty(_this21$$TextField, 101, {}), _defineProperty(_this21$$TextField, 102, {}), _defineProperty(_this21$$TextField, 200, 0), _defineProperty(_this21$$TextField, 201, false), _defineProperty(_this21$$TextField, 300, false), _defineProperty(_this21$$TextField, 301, 0), _defineProperty(_this21$$TextField, 302, 0), _defineProperty(_this21$$TextField, 303, 0), _defineProperty(_this21$$TextField, 304, false), _defineProperty(_this21$$TextField, 305, ""), _defineProperty(_this21$$TextField, 306, ""), _defineProperty(_this21$$TextField, 307, 0), _defineProperty(_this21$$TextField, 308, []), _defineProperty(_this21$$TextField, 311, null), _defineProperty(_this21$$TextField, 312, null), _defineProperty(_this21$$TextField, 313, null), _defineProperty(_this21$$TextField, 350, 0), _defineProperty(_this21$$TextField, 351, 0), _defineProperty(_this21$$TextField, 330, 0), _defineProperty(_this21$$TextField, 400, false), _defineProperty(_this21$$TextField, 401, []), _defineProperty(_this21$$TextField, 402, ""), _defineProperty(_this21$$TextField, 1000, 0x526da5), _defineProperty(_this21$$TextField, 1001, 0xffffff), _this21$$TextField);
             //被选文字的颜色
-            _this20.$TextField[4].x = _this20.$TextField[29];
-            _this20.addChild(_this20.$TextField[4]);
+            _this21.$TextField[4].x = _this21.$TextField[29];
+            _this21.addChild(_this21.$TextField[4]);
             //this.addChild(this.$TextField[5]);
-            _this20.addListener(flower.TouchEvent.TOUCH_BEGIN, _this20.__onTouch, _this20);
-            _this20.addListener(flower.TouchEvent.TOUCH_MOVE, _this20.__onTouch, _this20);
-            _this20.addListener(flower.Event.FOCUS_OUT, _this20.__stopInput, _this20);
-            _this20.focusEnabled = true;
-            _this20.__input = flower.Stage.getInstance().$input;
-            flower.EnterFrame.add(_this20.$update, _this20);
+            _this21.addListener(flower.TouchEvent.TOUCH_BEGIN, _this21.__onTouch, _this21);
+            _this21.addListener(flower.TouchEvent.TOUCH_MOVE, _this21.__onTouch, _this21);
+            _this21.addListener(flower.Event.FOCUS_OUT, _this21.__stopInput, _this21);
+            _this21.focusEnabled = true;
+            _this21.__input = flower.Stage.getInstance().$input;
+            flower.EnterFrame.add(_this21.$update, _this21);
 
             if (text && text != "") {
-                _this20.text = text;
+                _this21.text = text;
             }
-            return _this20;
+            return _this21;
         }
 
         _createClass(TextField, [{
@@ -5555,7 +5690,6 @@ var flower = {};
                 if (p[300]) {
                     return;
                 }
-                //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
                 if (this.input) {
                     if (!p[5]) {
                         this.__crateFocus();
@@ -7756,9 +7890,9 @@ var flower = {};
 
             _classCallCheck(this, $TextInput);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf($TextInput).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf($TextInput).call(this));
 
-            _this21.$TextField = {
+            _this22.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
@@ -7768,18 +7902,18 @@ var flower = {};
                 6: false, //multiline
                 7: false };
             //wordWrap
-            _this21.$initNativeShow();
-            _this21.addListener(Event.FOCUS_IN, _this21.$onFocusIn, _this21);
-            _this21.addListener(Event.FOCUS_OUT, _this21.$onFocusOut, _this21);
-            _this21.addListener(KeyboardEvent.KEY_DOWN, _this21.$keyDown, _this21);
+            _this22.$initNativeShow();
+            _this22.addListener(Event.FOCUS_IN, _this22.$onFocusIn, _this22);
+            _this22.addListener(Event.FOCUS_OUT, _this22.$onFocusOut, _this22);
+            _this22.addListener(KeyboardEvent.KEY_DOWN, _this22.$keyDown, _this22);
             if (text != "") {
-                _this21.text = text;
+                _this22.text = text;
             }
-            _this21.width = 100;
-            _this21.height = 21;
-            _this21.focusEnabled = true;
-            _this21.$nativeShow.setChangeBack(_this21.$onTextChange, _this21);
-            return _this21;
+            _this22.width = 100;
+            _this22.height = 21;
+            _this22.focusEnabled = true;
+            _this22.$nativeShow.setChangeBack(_this22.$onTextChange, _this22);
+            return _this22;
         }
 
         _createClass($TextInput, [{
@@ -8089,10 +8223,10 @@ var flower = {};
         function Shape() {
             _classCallCheck(this, Shape);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
 
-            _this22.$nativeShow = Platform.create("Shape");
-            _this22.$Shape = {
+            _this23.$nativeShow = Platform.create("Shape");
+            _this23.$Shape = {
                 0: 0xffffff, //fillColor
                 1: 1, //fillAlpha
                 2: 0, //lineWidth
@@ -8104,15 +8238,20 @@ var flower = {};
                 8: null, //maxY
                 9: [] //record
             };
-            _this22.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            _this23.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
             DebugInfo.displayInfo.shape++;
-            return _this22;
+            return _this23;
         }
 
         _createClass(Shape, [{
             key: "drawRect",
             value: function drawRect(x, y, width, height) {
                 this.$drawPolygon([{ x: x, y: y }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }]);
+            }
+        }, {
+            key: "drawLine",
+            value: function drawLine(startX, startY, endX, endY) {
+                this.$drawPolygon([{ x: startX, y: startY }, { x: endX, y: endY }]);
             }
         }, {
             key: "clear",
@@ -8378,52 +8517,52 @@ var flower = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this23.__mouseX = 0;
-            _this23.__mouseY = 0;
-            _this23.__nativeMouseMoveEvent = [];
-            _this23.__nativeRightClickEvent = [];
-            _this23.__nativeTouchEvent = [];
-            _this23.__mouseOverList = [_this23];
-            _this23.__dragOverList = [_this23];
-            _this23.__touchList = [];
-            _this23.__lastMouseX = -1;
-            _this23.__lastMouseY = -1;
-            _this23.__lastRightX = -1;
-            _this23.__lastRightY = -1;
-            _this23.__focus = null;
-            _this23.__touchTarget = null;
-            _this23.$keyEvents = [];
+            _this24.__mouseX = 0;
+            _this24.__mouseY = 0;
+            _this24.__nativeMouseMoveEvent = [];
+            _this24.__nativeRightClickEvent = [];
+            _this24.__nativeTouchEvent = [];
+            _this24.__mouseOverList = [_this24];
+            _this24.__dragOverList = [_this24];
+            _this24.__touchList = [];
+            _this24.__lastMouseX = -1;
+            _this24.__lastMouseY = -1;
+            _this24.__lastRightX = -1;
+            _this24.__lastRightY = -1;
+            _this24.__focus = null;
+            _this24.__touchTarget = null;
+            _this24.$keyEvents = [];
 
-            _this23.__stage = _this23;
-            Stage.stages.push(_this23);
+            _this24.__stage = _this24;
+            Stage.stages.push(_this24);
 
-            _this23.$inputSprite = new Sprite();
-            _this23.addChild(_this23.$inputSprite);
-            _this23.$inputSprite.touchEnabled = false;
-            _this23.$input = new $TextInput();
-            _this23.$input.x = -100;
-            _this23.$input.y = -100;
-            _this23.$input.width = 10;
-            _this23.$inputSprite.addChild(_this23.$input);
+            _this24.$inputSprite = new Sprite();
+            _this24.addChild(_this24.$inputSprite);
+            _this24.$inputSprite.touchEnabled = false;
+            _this24.$input = new $TextInput();
+            _this24.$input.x = -100;
+            _this24.$input.y = -100;
+            _this24.$input.width = 10;
+            _this24.$inputSprite.addChild(_this24.$input);
             var rect = new flower.Shape();
             rect.drawRect(0, 0, 50, 20);
             rect.alpha = 0.01;
-            _this23.$inputSprite.addChild(rect);
-            _this23.$background = new Shape();
-            _this23.__forntLayer = new Sprite();
-            _this23.addChild(_this23.__forntLayer);
-            _this23.$debugSprite = new Sprite();
-            _this23.__forntLayer.addChild(_this23.$debugSprite);
-            _this23.$pop = PopManager.getInstance();
-            _this23.__forntLayer.addChild(_this23.$pop);
-            _this23.$menu = MenuManager.getInstance();
-            _this23.__forntLayer.addChild(_this23.$menu);
-            _this23.$drag = DragManager.getInstance();
-            _this23.__forntLayer.addChild(_this23.$drag);
-            _this23.backgroundColor = 0;
-            return _this23;
+            _this24.$inputSprite.addChild(rect);
+            _this24.$background = new Shape();
+            _this24.__forntLayer = new Sprite();
+            _this24.addChild(_this24.__forntLayer);
+            _this24.$debugSprite = new Sprite();
+            _this24.__forntLayer.addChild(_this24.$debugSprite);
+            _this24.$pop = PopManager.getInstance();
+            _this24.__forntLayer.addChild(_this24.$pop);
+            _this24.$menu = MenuManager.getInstance();
+            _this24.__forntLayer.addChild(_this24.$menu);
+            _this24.$drag = DragManager.getInstance();
+            _this24.__forntLayer.addChild(_this24.$drag);
+            _this24.backgroundColor = 0;
+            return _this24;
         }
 
         _createClass(Stage, [{
@@ -8993,19 +9132,19 @@ var flower = {};
         function Particle(config) {
             _classCallCheck(this, Particle);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(Particle).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(Particle).call(this));
 
-            _this24.__particles = [];
-            _this24.__cycles = [];
+            _this25.__particles = [];
+            _this25.__cycles = [];
             if (typeof config == "string") {
                 var loader = new flower.URLLoader(config);
                 loader.load();
-                loader.addListener(flower.Event.COMPLETE, _this24.__loadConfigComplete, _this24);
+                loader.addListener(flower.Event.COMPLETE, _this25.__loadConfigComplete, _this25);
             } else {
-                _this24.setConfig(config);
+                _this25.setConfig(config);
             }
-            flower.EnterFrame.add(_this24.__update, _this24);
-            return _this24;
+            flower.EnterFrame.add(_this25.__update, _this25);
+            return _this25;
         }
 
         _createClass(Particle, [{
@@ -9073,11 +9212,15 @@ var flower = {};
                     var particle = particles[i];
                     particle.life -= gap;
                     particle.vx += cfg.gx * gap;
-                    particle.vy += cfg.gy * gap;
+                    particle.vy += -cfg.gy * gap;
                     particle.x += particle.vx * gap;
                     particle.y += particle.vy * gap;
                     particle.scale += particle.scaleV * gap;
                     particle.rotation += particle.rotationV * gap;
+                    particle.alpha += particle.alphaV * gap;
+                    particle.red += particle.redV * gap;
+                    particle.green += particle.greenV * gap;
+                    particle.blue += particle.blueV * gap;
                     if (particle.oldX != ~ ~particle.x) {
                         particle.oldX = ~ ~particle.x;
                         particle.image.$nativeShow.setX(particle.oldX);
@@ -9088,8 +9231,21 @@ var flower = {};
                     }
                     if (particle.oldScale != ~ ~particle.scale) {
                         particle.oldScale = ~ ~particle.scale;
-                        particle.image.$nativeShow.setScaleX(particle.oldScale / 100);
-                        particle.image.$nativeShow.setScaleY(particle.oldScale / 100);
+                        particle.image.$nativeShow.setScaleX((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+                        particle.image.$nativeShow.setScaleY((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+                    }
+                    if (particle.oldAlpha != ~ ~particle.alpha) {
+                        particle.oldAlpha = ~ ~particle.alpha;
+                        particle.image.alpha = particle.oldAlpha / 255;
+                    }
+                    if (particle.oldRed != ~ ~particle.red || particle.oldGreen != ~ ~particle.green || particle.oldBlue != ~ ~particle.blue) {
+                        particle.oldRed = ~ ~particle.red;
+                        particle.oldGreen = ~ ~particle.green;
+                        particle.oldBlue = ~ ~particle.blue;
+                        particle.filters[0].r = particle.oldRed;
+                        particle.filters[0].g = particle.oldGreen;
+                        particle.filters[0].b = particle.oldBlue;
+                        particle.image.filters = particle.filters;
                     }
                     if (particle.oldRotation != ~ ~particle.rotation) {
                         particle.oldRotation = ~ ~particle.rotation;
@@ -9105,18 +9261,39 @@ var flower = {};
                 }
                 for (var i = 0; i < count; i++) {
                     var item;
-                    var scale = cfg.initSize + cfg.initSizeV * math.random();
-                    var endScale = cfg.endSize + cfg.endSizeV * math.random();
+                    var scale = cfg.initSize - cfg.initSizeV + 2 * cfg.initSizeV * math.random();
+                    var endScale = cfg.endSize - cfg.endSizeV + 2 * cfg.endSizeV * math.random();
+                    var alpha = cfg.initAlpha - cfg.initAlphaV + 2 * cfg.initAlphaV * math.random();
+                    var endAlpha = cfg.endAlpha - cfg.endAlphaV + 2 * cfg.endAlphaV * math.random();
+                    var red = cfg.initRed - cfg.initRedV + 2 * cfg.initRedV * math.random();
+                    var endRed = cfg.endRed - cfg.endRedV + 2 * cfg.endRedV * math.random();
+                    var green = cfg.initGreen - cfg.initGreenV + 2 * cfg.initGreenV * math.random();
+                    var endGreen = cfg.endGreen - cfg.endGreenV + 2 * cfg.endGreenV * math.random();
+                    var blue = cfg.initBlue - cfg.initBlueV + 2 * cfg.initBlueV * math.random();
+                    var endBlue = cfg.endBlue - cfg.endBlueV + 2 * cfg.endBlueV * math.random();
                     var rotation = cfg.initRotation - cfg.initRotationV + 2 * cfg.initRotationV * math.random();
                     var endRotation = cfg.endRotation - cfg.endRotationV + 2 * cfg.endRotationV * math.random();
+                    var shootSpeed = cfg.shootSpeed - cfg.shootSpeedV + 2 * math.random() * cfg.shootSpeedV;
+                    var shootRotation = cfg.shootRotation - cfg.shootRotationV + 2 * math.random() * cfg.shootRotationV;
+                    shootRotation = shootRotation * math.PI / 180;
+                    var vx = math.cos(shootRotation) * shootSpeed;
+                    var vy = -math.sin(shootRotation) * shootSpeed;
                     var life = cfg.life - cfg.lifev + 2 * math.random() * cfg.lifev;
                     if (cycles.length) {
                         item = cycles.pop();
                         item.life = life;
-                        item.vx = 0;
-                        item.vy = 0;
+                        item.vx = vx;
+                        item.vy = vy;
                         item.scale = scale;
                         item.scaleV = (endScale - scale) / life;
+                        item.alpha = alpha;
+                        item.alphaV = (endAlpha - alpha) / life;
+                        item.red = red;
+                        item.redV = (endRed - red) / life;
+                        item.green = green;
+                        item.greenV = (endGreen - green) / life;
+                        item.blue = blue;
+                        item.blueV = (endBlue - blue) / life;
                         item.rotation = rotation;
                         item.rotationV = (endRotation - rotation) / life;
                         item.image.visible = true;
@@ -9127,16 +9304,29 @@ var flower = {};
                             life: life,
                             x: 0,
                             y: 0,
-                            vx: 0,
-                            vy: 0,
+                            vx: vx,
+                            vy: vy,
                             scale: scale,
                             scaleV: (endScale - scale) / life,
+                            alpha: alpha,
+                            alphaV: (endAlpha - alpha) / life,
+                            red: red,
+                            redV: (endRed - red) / life,
+                            green: green,
+                            greenV: (endGreen - green) / life,
+                            blue: blue,
+                            blueV: (endBlue - blue) / life,
                             rotation: rotation,
                             rotationV: (endRotation - rotation) / life,
                             oldX: 0,
                             oldY: 0,
                             oldScale: 1,
-                            oldRotation: 0
+                            oldAlpha: 1,
+                            oldRotation: 0,
+                            oldRed: 0,
+                            oldGreen: 0,
+                            oldBlue: 0,
+                            filters: [new flower.DyeingFilter()]
                         };
                         item.image.$setSimpleMode();
                         this.addChild(item.image);
@@ -9155,6 +9345,19 @@ var flower = {};
                         item.oldScale = ~ ~item.scale;
                         item.image.$nativeShow.setScaleX(item.oldScale / 100);
                         item.image.$nativeShow.setScaleY(item.oldScale / 100);
+                    }
+                    if (item.oldAlpha != ~ ~item.alpha) {
+                        item.oldAlpha = ~ ~item.alpha;
+                        item.image.alpha = item.oldAlpha / 255;
+                    }
+                    if (item.oldRed != ~ ~item.red || item.oldGreen != ~ ~item.green || item.oldBlue != ~ ~item.blue) {
+                        item.oldRed = ~ ~item.red;
+                        item.oldGreen = ~ ~item.green;
+                        item.oldBlue = ~ ~item.blue;
+                        item.filters[0].r = item.oldRed;
+                        item.filters[0].g = item.oldGreen;
+                        item.filters[0].b = item.oldBlue;
+                        item.image.filters = item.filters;
                     }
                     if (item.oldRotation != ~ ~item.rotation) {
                         item.oldRotation = ~ ~item.rotation;
@@ -9210,12 +9413,12 @@ var flower = {};
         function DragManager() {
             _classCallCheck(this, DragManager);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
 
-            _this25.__isDragging = false;
+            _this26.__isDragging = false;
 
-            _this25.touchEnabled = false;
-            return _this25;
+            _this26.touchEnabled = false;
+            return _this26;
         }
 
         _createClass(DragManager, [{
@@ -9321,10 +9524,10 @@ var flower = {};
         function MenuManager() {
             _classCallCheck(this, MenuManager);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
 
-            _this26.__addFrame = 0;
-            return _this26;
+            _this27.__addFrame = 0;
+            return _this27;
         }
 
         _createClass(MenuManager, [{
@@ -9426,10 +9629,10 @@ var flower = {};
         function PopManager() {
             _classCallCheck(this, PopManager);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
 
-            _this27.__panels = [];
-            return _this27;
+            _this28.__panels = [];
+            return _this28;
         }
 
         _createClass(PopManager, [{
@@ -9532,7 +9735,7 @@ var flower = {};
     //////////////////////////File:flower/texture/Texture.js///////////////////////////
 
     var Texture = function () {
-        function Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
+        function Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight, sourceWidth, sourceHeight) {
             _classCallCheck(this, Texture);
 
             this.__offX = 0;
@@ -9549,6 +9752,8 @@ var flower = {};
             this.__height = +h;
             this.__settingWidth = settingWidth;
             this.__settingHeight = settingHeight;
+            this.__sourceWidth = sourceWidth;
+            this.__sourceHeight = sourceHeight;
         }
 
         /**
@@ -9571,12 +9776,14 @@ var flower = {};
             }
         }, {
             key: "createSubTexture",
-            value: function createSubTexture(startX, startY, width, height) {
-                var offX = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
-                var offY = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
-                var rotation = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
+            value: function createSubTexture(url, startX, startY, width, height) {
+                var sourceWidth = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
+                var sourceHeight = arguments.length <= 6 || arguments[6] === undefined ? 0 : arguments[6];
+                var offX = arguments.length <= 7 || arguments[7] === undefined ? 0 : arguments[7];
+                var offY = arguments.length <= 8 || arguments[8] === undefined ? 0 : arguments[8];
+                var rotation = arguments.length <= 9 || arguments[9] === undefined ? false : arguments[9];
 
-                var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+                var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth || this.width, sourceHeight || this.height);
                 sub.$parentTexture = this.$parentTexture || this;
                 var rect = flower.Rectangle.create();
                 rect.x = startX;
@@ -9605,8 +9812,8 @@ var flower = {};
         }, {
             key: "$addCount",
             value: function $addCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.$addCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.$addCount();
                 } else {
                     this.$count++;
                 }
@@ -9614,8 +9821,8 @@ var flower = {};
         }, {
             key: "$delCount",
             value: function $delCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.$delCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.$delCount();
                 } else {
                     this.$count--;
                     if (this.$count < 0) {
@@ -9624,10 +9831,62 @@ var flower = {};
                 }
             }
         }, {
+            key: "$setSplitInfo",
+            value: function $setSplitInfo(data) {
+                var content = data;
+                var xml = XMLElement.parse(content);
+                xml = xml.list[0];
+                var reslist;
+                var attributes;
+                for (var i = 0; i < xml.list.length; i++) {
+                    if (xml.list[i].name == "key") {
+                        if (xml.list[i].value == "frames") {
+                            reslist = xml.list[i + 1];
+                        } else if (xml.list[i].value == "metadata") {
+                            attributes = xml.list[i + 1];
+                        }
+                        i++;
+                    }
+                }
+                this.__splits = [];
+                var frameFrame;
+                var frame;
+                var maxw = 0;
+                var maxh = 0;
+                for (i = 0; i < reslist.list.length; i++) {
+                    if (reslist.list[i].name == "key") {
+                        frame = new PlistFrame(reslist.list[i].value);
+                        frame.decode(reslist.list[i + 1]);
+                        var name = frame.name;
+                        var posx = ~ ~name.split("_")[0];
+                        var posy = ~ ~name.split(".")[0].split("_")[1];
+                        var item = {
+                            x: posx,
+                            y: posy,
+                            textureX: frame._x,
+                            textureY: frame._y,
+                            textureWidth: frame._width,
+                            textureHeight: frame._height,
+                            offX: frame._moveX,
+                            offY: frame._moveY,
+                            sourceWidth: frame._sourceWidth,
+                            sourceHeight: frame._sourceHeight,
+                            rotation: frame._rotation
+                        };
+                        maxw = posx + item.sourceWidth > maxw ? posx + item.sourceWidth : maxw;
+                        maxh = posy + item.sourceHeight > maxh ? posy + item.sourceHeight : maxh;
+                        i++;
+                    }
+                }
+                this.__sourceWidth = maxw;
+                this.__sourceHeight = maxh;
+                trace("原本大小：", maxw, maxh, "现在大小:", this.width, this.height);
+            }
+        }, {
             key: "getCount",
             value: function getCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.getCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.getCount();
                 } else {
                     return this.$count;
                 }
@@ -9671,10 +9930,20 @@ var flower = {};
         }, {
             key: "width",
             get: function get() {
-                return this.__settingWidth || this.__width;
+                return this.__sourceWidth || this.__width;
             }
         }, {
             key: "height",
+            get: function get() {
+                return this.__sourceHeight || this.__height;
+            }
+        }, {
+            key: "textureWidth",
+            get: function get() {
+                return this.__settingWidth || this.__width;
+            }
+        }, {
+            key: "textureHeight",
             get: function get() {
                 return this.__settingHeight || this.__height;
             }
@@ -9701,12 +9970,12 @@ var flower = {};
         }, {
             key: "scaleX",
             get: function get() {
-                return this.width / this.__width;
+                return this.textureWidth / this.__width;
             }
         }, {
             key: "scaleY",
             get: function get() {
-                return this.height / this.__height;
+                return this.textureHeight / this.__height;
             }
         }, {
             key: "count",
@@ -9840,16 +10109,16 @@ var flower = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this28._createRes = false;
-            _this28._isLoading = false;
-            _this28._selfDispose = false;
+            _this29._createRes = false;
+            _this29._isLoading = false;
+            _this29._selfDispose = false;
 
-            _this28.$setResource(res);
-            _this28._language = LANGUAGE;
-            _this28._scale = SCALE ? SCALE : null;
-            return _this28;
+            _this29.$setResource(res);
+            _this29._language = LANGUAGE;
+            _this29._scale = SCALE ? SCALE : null;
+            return _this29;
         }
 
         _createClass(URLLoader, [{
@@ -9965,7 +10234,22 @@ var flower = {};
                     this._data = texture;
                     texture.$addCount();
                 }
-                new CallLater(this.loadComplete, this);
+                if (this._loadInfo.splitURL) {
+                    var res = ResItem.create(this._loadInfo.splitURL);
+                    res.__type = ResType.TEXT;
+                    var loader = new flower.URLLoader(res);
+                    loader.addListener(flower.Event.COMPLETE, this.loadTextureSplitComplete, this);
+                    loader.addListener(flower.Event.ERROR, this.loadError, this);
+                    loader.load();
+                } else {
+                    new CallLater(this.loadComplete, this);
+                }
+            }
+        }, {
+            key: "loadTextureSplitComplete",
+            value: function loadTextureSplitComplete(e) {
+                this._data.$setSplitInfo(e.data);
+                this.loadComplete();
             }
         }, {
             key: "setTextureByLink",
@@ -10197,12 +10481,12 @@ var flower = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this29.__list = list;
-            _this29.__dataList = [];
-            _this29.__index = 0;
-            return _this29;
+            _this30.__list = list;
+            _this30.__dataList = [];
+            _this30.__index = 0;
+            return _this30;
         }
 
         _createClass(URLLoaderList, [{
@@ -10284,10 +10568,10 @@ var flower = {};
         function WebSocket() {
             _classCallCheck(this, WebSocket);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
 
-            _this30._isConnect = false;
-            return _this30;
+            _this31._isConnect = false;
+            return _this31;
         }
 
         _createClass(WebSocket, [{
@@ -10374,18 +10658,18 @@ var flower = {};
 
             _classCallCheck(this, VBWebSocket);
 
-            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
 
-            _this31.remotes = {};
-            _this31.backs = {};
-            _this31.zbacks = {};
+            _this32.remotes = {};
+            _this32.backs = {};
+            _this32.zbacks = {};
 
-            _this31._remote = remote;
-            _this31.remotes = {};
-            _this31.backs = {};
-            _this31.zbacks = {};
-            _this31.errorCodeType = errorCodeType;
-            return _this31;
+            _this32._remote = remote;
+            _this32.remotes = {};
+            _this32.backs = {};
+            _this32.zbacks = {};
+            _this32.errorCodeType = errorCodeType;
+            return _this32;
         }
 
         _createClass(VBWebSocket, [{
@@ -10424,9 +10708,9 @@ var flower = {};
                             }
                         }
                         for (i = 0; i < removeList.length; i++) {
-                            for (f = 0; f < this.zbacks[cmd].length; f++) {
-                                if (this.zbacks[cmd][f].id == removeList[i]) {
-                                    this.zbacks[cmd].splice(f, 1);
+                            for (f = 0; f < this.zbacks[backCmd].length; f++) {
+                                if (this.zbacks[backCmd][f].id == removeList[i]) {
+                                    this.zbacks[backCmd].splice(f, 1);
                                     break;
                                 }
                             }
@@ -10543,8 +10827,8 @@ var flower = {};
                 this.zbacks[cmd].push({ func: back, thisObj: thisObj, id: VBWebSocket.id++ });
             }
         }, {
-            key: "removeZeroe",
-            value: function removeZeroe(cmd, back, thisObj) {
+            key: "removeZero",
+            value: function removeZero(cmd, back, thisObj) {
                 var list = this.zbacks[cmd];
                 if (list) {
                     for (var i = 0; i < list.length; i++) {
@@ -10730,7 +11014,7 @@ var flower = {};
                     }
                 }
                 this._moveX = this._offX + (this._sourceWidth - this._width) / 2;
-                this._moveY = this._offY + (this._sourceHeight - this._height) / 2;
+                this._moveY = -this._offY + (this._sourceHeight - this._height) / 2;
             }
         }, {
             key: "$setPlist",
@@ -10751,7 +11035,7 @@ var flower = {};
             key: "texture",
             get: function get() {
                 if (!this._texture) {
-                    this._texture = this._plist.texture.createSubTexture(this._x, this._y, this._width, this._height, this._moveX, this._moveY, this._rotation);
+                    this._texture = this._plist.texture.createSubTexture(this._name, this._x, this._y, this._width, this._height, this._sourceWidth, this._sourceHeight, this._moveX, this._moveY, this._rotation);
                 }
                 return this._texture;
             }
@@ -10759,10 +11043,11 @@ var flower = {};
 
         return PlistFrame;
     }();
+
+    flower.PlistFrame = PlistFrame;
     //////////////////////////End File:flower/plist/PlistFrame.js///////////////////////////
 
     //////////////////////////File:flower/plist/PlistLoader.js///////////////////////////
-
 
     var PlistLoader = function (_EventDispatcher4) {
         _inherits(PlistLoader, _EventDispatcher4);
@@ -10770,14 +11055,14 @@ var flower = {};
         function PlistLoader(url, nativeURL) {
             _classCallCheck(this, PlistLoader);
 
-            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
+            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
 
-            _this32.disposeFlag = false;
+            _this33.disposeFlag = false;
 
-            _this32._url = url;
-            _this32._nativeURL = nativeURL;
-            _this32.__load();
-            return _this32;
+            _this33._url = url;
+            _this33._nativeURL = nativeURL;
+            _this33.__load();
+            return _this33;
         }
 
         _createClass(PlistLoader, [{
@@ -11104,7 +11389,27 @@ var flower = {};
             key: "addURL",
             value: function addURL(url) {
                 var info = ResItemInfo.create();
-                var array = url.split("/");
+
+                var plist = null;
+                var splitURL = null;
+                var array = url.split("#PLIST#");
+                if (array.length == 2) {
+                    url = array[0];
+                    plist = array[1];
+                }
+                array = url.split("#SPLIT#");
+                if (array.length == 2) {
+                    url = array[0];
+                    splitURL = array[1];
+                }
+                if (plist && !splitURL) {
+                    array = plist.split("#SPLIT#");
+                    if (array.length == 2) {
+                        plist = array[0];
+                        splitURL = array[1];
+                    }
+                }
+                array = url.split("/");
                 var last = array.pop();
                 var nameArray = last.split(".");
                 var name = "";
@@ -11136,16 +11441,20 @@ var flower = {};
                     }
                 }
                 info.url = url;
+                info.plist = plist;
                 info.settingWidth = settingWidth;
                 info.settingHeight = settingHeight;
                 info.scale = scale || 1;
                 info.language = language;
+                info.update = false;
+                info.splitURL = splitURL;
                 this.__loadList.push(info);
             }
         }, {
             key: "addInfo",
             value: function addInfo(url, plist, settingWidth, settingHeight, scale, language) {
                 var update = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
+                var splitURL = arguments.length <= 7 || arguments[7] === undefined ? null : arguments[7];
 
                 var info = ResItemInfo.create();
                 info.url = url;
@@ -11155,6 +11464,7 @@ var flower = {};
                 info.scale = scale || 1;
                 info.language = language;
                 info.update = update;
+                info.splitURL = splitURL;
                 this.__loadList.push(info);
                 return info;
             }
@@ -11197,10 +11507,23 @@ var flower = {};
             key: "create",
             value: function create(url) {
                 var plist = null;
+                var splitURL = null;
                 var array = url.split("#PLIST#");
                 if (array.length == 2) {
                     url = array[0];
                     plist = array[1];
+                }
+                array = url.split("#SPLIT#");
+                if (array.length == 2) {
+                    url = array[0];
+                    splitURL = array[1];
+                }
+                if (plist && !splitURL) {
+                    array = plist.split("#SPLIT#");
+                    if (array.length == 2) {
+                        plist = array[0];
+                        splitURL = array[1];
+                    }
                 }
                 array = url.split("/");
                 var last = array.pop();
@@ -11247,7 +11570,7 @@ var flower = {};
                 } else {
                     res = new ResItem(useURL, ResType.getType(end));
                 }
-                res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
+                res.addInfo(url, plist, settingWidth, settingHeight, scale, language, false, splitURL);
                 return res;
             }
         }, {
@@ -11285,6 +11608,11 @@ var flower = {};
 
         /**
          * plist 地址
+         */
+
+
+        /**
+         * 拼接信息配置地址
          */
 
 
@@ -12711,8 +13039,16 @@ var flower = {};
             key: "$update",
             value: function $update(now, gap) {
                 flower.EnterFrame.frame++;
+                var st = new Date().getTime();
+                var et;
                 flower.CallLater.$run();
+                et = new Date().getTime();
+                flower.debugInfo.CallLater += et - st;
+                st = et;
                 flower.DelayCall.$run();
+                et = new Date().getTime();
+                flower.debugInfo.DelayCall += et - st;
+                st = et;
                 if (flower.EnterFrame.waitAdd.length) {
                     flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
                     flower.EnterFrame.waitAdd = [];
@@ -12721,6 +13057,8 @@ var flower = {};
                 for (var i = 0; i < copy.length; i++) {
                     copy[i].call.apply(copy[i].owner, [now, gap]);
                 }
+                et = new Date().getTime();
+                flower.debugInfo.EnterFrame += et - st;
             }
         }, {
             key: "$dispose",
@@ -13758,12 +14096,12 @@ var flower = {};
         function XMLElement() {
             _classCallCheck(this, XMLElement);
 
-            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
+            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
 
-            _this33.namespaces = [];
-            _this33.attributes = [];
-            _this33.elements = _this33.list = [];
-            return _this33;
+            _this34.namespaces = [];
+            _this34.attributes = [];
+            _this34.elements = _this34.list = [];
+            return _this34;
         }
 
         _createClass(XMLElement, [{

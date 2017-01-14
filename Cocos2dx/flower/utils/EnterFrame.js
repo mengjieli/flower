@@ -33,6 +33,8 @@ class EnterFrame {
 
     static frame = 0;
     static updateFactor = 1;
+    static __lastFPSTime = 0;
+    static __lastFPSFrame = 0;
 
     static $update(now, gap) {
         flower.EnterFrame.frame++;
@@ -40,11 +42,11 @@ class EnterFrame {
         var et;
         flower.CallLater.$run();
         et = (new Date()).getTime();
-        flower.debugInfo.CallLater += et - st;
+        DebugInfo.cpu.callLater += et - st;
         st = et;
         flower.DelayCall.$run();
         et = (new Date()).getTime();
-        flower.debugInfo.DelayCall += et - st;
+        DebugInfo.cpu.delayCall += et - st;
         st = et;
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
@@ -55,7 +57,12 @@ class EnterFrame {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
         et = (new Date()).getTime();
-        flower.debugInfo.EnterFrame += et - st;
+        DebugInfo.cpu.enterFrame += et - st;
+        if (now - EnterFrame.__lastFPSTime > 500) {
+            DebugInfo.cpu.fps = ~~((EnterFrame.frame - EnterFrame.__lastFPSFrame) * 500 / (now - EnterFrame.__lastFPSTime));
+            EnterFrame.__lastFPSTime = now;
+            EnterFrame.__lastFPSFrame = EnterFrame.frame;
+        }
     }
 
     static $dispose() {

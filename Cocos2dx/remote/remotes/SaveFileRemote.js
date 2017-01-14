@@ -17,7 +17,7 @@ class SaveFileRemote extends Remote {
             msg.writeUTF(type);
             msg.writeUTF(data);
             this.send(msg);
-        } else {
+        } else if(type == "png") {
             var len = data.length;
             var i = 0;
             var index = 0;

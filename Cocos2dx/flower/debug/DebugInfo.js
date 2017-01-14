@@ -18,6 +18,8 @@ class DebugInfo {
      */
     static displayInfo = new DisplayInfo();
 
+    static cpu = new CpuInfo();
+
     /**
      * 帧遍历显示对象统计
      * @param texture

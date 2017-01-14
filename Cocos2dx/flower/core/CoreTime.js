@@ -13,7 +13,7 @@ class CoreTime {
             Stage.$onFrameEnd();
         }
         var et = (new Date()).getTime();
-        flower.debugInfo.onFrameEnd += et - st;
+        DebugInfo.cpu.onFrameEnd += et - st;
         TextureManager.getInstance().$check();
     }
 

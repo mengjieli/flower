@@ -30,6 +30,12 @@ class Shape extends DisplayObject {
             {x: x, y: y}]);
     }
 
+    drawLine(startX, startY, endX, endY) {
+        this.$drawPolygon([
+            {x: startX, y: startY},
+            {x: endX, y: endY}]);
+    }
+
     clear() {
         if (!this.$nativeShow) {
             $warn(1002, this.name);

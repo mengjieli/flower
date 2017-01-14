@@ -20,10 +20,14 @@ var hasStart = false;
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, nativeStage, touchShow) {
+function start(completeFunc, nativeStage, touchShow, params) {
     if (hasStart) {
         if (completeFunc) completeFunc();
         return;
+    }
+    if (params && params.TIP) {
+        TIP = params.TIP;
+        exports.sys.TIP = params.TIP;
     }
     hasStart = false;
     Platform._runBack = CoreTime.$run;
@@ -155,8 +159,6 @@ function dispose() {
     hasStart = false;
 }
 
-var debugInfo = {};
-
 
 exports.start = start;
 exports.getLanguage = $getLanguage;
@@ -171,7 +173,6 @@ exports.sys = {
     $error: $error,
     getLanguage: getLanguage,
 }
-exports.debugInfo = debugInfo;
 exports.params = params;
 exports.system = {}
 exports.dispose = dispose;

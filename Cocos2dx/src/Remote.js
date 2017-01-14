@@ -289,6 +289,11 @@ var remote = {};
                 new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
             }
         }, {
+            key: "readImageData",
+            value: function readImageData(back, thisObj) {
+                new ReadImageDataRemote(back, thisObj, this.__path);
+            }
+        }, {
             key: "isExist",
             value: function isExist(back, thisObj) {
                 new IsDirectionExistRemote(back, thisObj, this.__path);
@@ -526,7 +531,7 @@ var remote = {};
                 msg.writeUTF(type);
                 msg.writeUTF(data);
                 _this6.send(msg);
-            } else {
+            } else if (type == "png") {
                 var len = data.length;
                 var i = 0;
                 var index = 0;
@@ -612,6 +617,53 @@ var remote = {};
         return DeleteFileRemote;
     }(Remote);
     //////////////////////////End File:remote/remotes/DeleteFileRemote.js///////////////////////////
+
+    //////////////////////////File:remote/remotes/ReadImageDataRemote.js///////////////////////////
+
+
+    var ReadImageDataRemote = function (_Remote5) {
+        _inherits(ReadImageDataRemote, _Remote5);
+
+        function ReadImageDataRemote(back, thisObj, path) {
+            _classCallCheck(this, ReadImageDataRemote);
+
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ReadImageDataRemote).call(this));
+
+            _this8.__back = back;
+            _this8.__thisObj = thisObj;
+
+            var msg = new flower.VByteArray();
+            msg.writeUInt(20);
+            msg.writeUInt(_this8.remoteClientId);
+            msg.writeUInt(110);
+            msg.writeUInt(_this8.id);
+            msg.writeUTF(path);
+            _this8.send(msg);
+            return _this8;
+        }
+
+        _createClass(ReadImageDataRemote, [{
+            key: "receive",
+            value: function receive(cmd, msg) {
+                var list = [];
+                var width = msg.readUInt();
+                var height = msg.readUInt();
+                var colors = [];
+                for (var y = 0; y < height; y++) {
+                    colors[y] = [];
+                    for (var x = 0; x < width; x++) {
+                        colors[y].push(msg.readInt());
+                    }
+                }
+                if (this.__back) {
+                    this.__back.call(this.__thisObj, colors);
+                }
+            }
+        }]);
+
+        return ReadImageDataRemote;
+    }(Remote);
+    //////////////////////////End File:remote/remotes/ReadImageDataRemote.js///////////////////////////
 })();
 for (var key in remote) {
     flower[key] = remote[key];

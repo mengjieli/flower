@@ -16,7 +16,7 @@ class TextField extends flower.DisplayObject {
             0: new flower.Rectangle() //childrenBounds
         }
         this.$initContainer();
-        DebugInfo.displayInfo.sprite++;
+        DebugInfo.displayInfo.text++;
 
         this.$TextField = {
             0: "", //text
@@ -191,7 +191,6 @@ class TextField extends flower.DisplayObject {
         if (p[300]) {
             return;
         }
-        //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
         if (this.input) {
             if (!p[5]) {
                 this.__crateFocus();
@@ -1696,7 +1695,7 @@ class TextField extends flower.DisplayObject {
     }
 
     __setFontColor(val) {
-        val = +val & ~0;
+        val = ~~val;
         var p = this.$TextField;
         if (val == p[11]) {
             return;
@@ -1837,7 +1836,7 @@ class TextField extends flower.DisplayObject {
         }
         //super.$onFrameEnd();
         DebugInfo.frameInfo.display++;
-        DebugInfo.frameInfo.sprite++;
+        DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -2111,7 +2110,7 @@ class TextField extends flower.DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        DebugInfo.displayInfo.sprite--;
+        DebugInfo.displayInfo.text--;
         var children = this.__children;
         while (children.length) {
             var child = children[children.length - 1];

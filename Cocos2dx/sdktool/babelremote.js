@@ -170,7 +170,8 @@ var list = [
     "IsDirectionExistRemote",
     "ReadDirectionListRemote",
     "SaveFileRemote",
-    "DeleteFileRemote"
+    "DeleteFileRemote",
+    "ReadImageDataRemote"
 ];
 var fileContent = "";
 fileContent += "var remote = {};\n";

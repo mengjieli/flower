@@ -45,10 +45,14 @@ var hasStart = false;
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, nativeStage, touchShow) {
+function start(completeFunc, nativeStage, touchShow, params) {
     if (hasStart) {
         if (completeFunc) completeFunc();
         return;
+    }
+    if (params && params.TIP) {
+        TIP = params.TIP;
+        flower.sys.TIP = params.TIP;
     }
     hasStart = false;
     Platform._runBack = CoreTime.$run;
@@ -180,8 +184,6 @@ function dispose() {
     hasStart = false;
 }
 
-var debugInfo = {};
-
 
 flower.start = start;
 flower.getLanguage = $getLanguage;
@@ -196,7 +198,6 @@ flower.sys = {
     $error: $error,
     getLanguage: getLanguage,
 }
-flower.debugInfo = debugInfo;
 flower.params = params;
 flower.system = {}
 flower.dispose = dispose;
@@ -241,11 +242,11 @@ class Platform {
                 cc.eventManager.addListener({
                     event: cc.EventListener.MOUSE,
                     onMouseMove: function (e) {
-                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                     }.bind(this),
-                    onMouseDown:function(e) {
-                        if(e.getButton() == 1) {
-                            engine.$addRightClickEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                    onMouseDown: function (e) {
+                        if (e.getButton() == 1) {
+                            engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                         }
                     }
                 }, this);
@@ -283,11 +284,11 @@ class Platform {
             cc.eventManager.addListener({
                 event: cc.EventListener.MOUSE,
                 onMouseMove: function (e) {
-                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x),  - math.floor(e.getLocation().y));
+                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                 },
-                onMouseDown:function(e) {
-                    if(e.getButton() == 1) {
-                        engine.$addRightClickEvent(math.floor(e.getLocation().x), - math.floor(e.getLocation().y));
+                onMouseDown: function (e) {
+                    if (e.getButton() == 1) {
+                        engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
                     }
                 }
             }, cc.director.getRunningScene());
@@ -325,10 +326,7 @@ class Platform {
         var now = (new Date()).getTime();
         Platform._runBack(now - Platform.lastTime);
         Platform.lastTime = now;
-        if (PlatformURLLoader.loadingList.length) {
-            var item = PlatformURLLoader.loadingList.shift();
-            item[0].apply(null, item.slice(1, item.length));
-        }
+        PlatformURLLoader.run();
     }
 
     static pools = {};
@@ -1172,7 +1170,7 @@ class PlatformBitmap extends PlatformDisplayObject {
                 }
                 if (source) {
                     programmer.setUniformInt("plist", 1);
-                    programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
+                    //programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
                     programmer.setUniformFloat("plistStartX", source.x / this.__texture.$parentTexture.width);
                     programmer.setUniformFloat("plistEndX", (source.x + (this.__texture.sourceRotation ? source.height : source.width)) / (this.__texture.sourceRotation ? this.__texture.$parentTexture.height : this.__texture.$parentTexture.width));
                     programmer.setUniformFloat("plistStartY", source.y / this.__texture.$parentTexture.height);
@@ -1286,17 +1284,26 @@ class PlatformShape extends PlatformDisplayObject {
         for (var i = 0; i < points.length; i++) {
             points[i].y = -points[i].y;
         }
-        shape.drawPoly(points, {
-            r: fillColor >> 16,
-            g: fillColor >> 8 & 0xFF,
-            b: fillColor & 0xFF,
-            a: fillAlpha * 255
-        }, lineWidth, {
-            r: lineColor >> 16,
-            g: lineColor >> 8 & 0xFF,
-            b: lineColor & 0xFF,
-            a: lineAlpha * 255
-        });
+        if (points.length == 2) {
+            shape.drawSegment(points[0], points[1], lineWidth, {
+                r: lineColor >> 16,
+                g: lineColor >> 8 & 0xFF,
+                b: lineColor & 0xFF,
+                a: lineAlpha * 255
+            });
+        } else {
+            shape.drawPoly(points, {
+                r: fillColor >> 16,
+                g: fillColor >> 8 & 0xFF,
+                b: fillColor & 0xFF,
+                a: fillAlpha * 255
+            }, lineWidth, {
+                r: lineColor >> 16,
+                g: lineColor >> 8 & 0xFF,
+                b: lineColor & 0xFF,
+                a: lineAlpha * 255
+            });
+        }
         for (var i = 0; i < points.length; i++) {
             points[i].y = -points[i].y;
         }
@@ -1372,6 +1379,11 @@ class PlatformTexture {
 class PlatformURLLoader {
 
     static isLoading = false;
+    static loadingFrame;
+    static loadingFunc;
+    static loadingArgs;
+    static loadingId = 0;
+    static checkFrame;
     static loadingList = [];
 
     static loadText(url, back, errorBack, thisObj, method, params, contentType) {
@@ -1379,11 +1391,21 @@ class PlatformURLLoader {
             PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj, method, params, contentType]);
             return;
         }
-        PlatformURLLoader.isLoading = true;
         if (TIP) {
             $tip(2001, url);
         }
+        PlatformURLLoader.isLoading = true;
+        PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadText;
+        PlatformURLLoader.loadingArgs = arguments;
+        PlatformURLLoader.loadingFunc.apply(null, arguments);
+    }
+
+    static realLoadText(url, back, errorBack, thisObj, method, params, contentType) {
+        PlatformURLLoader.loadingFrame = Platform.frame;
+        PlatformURLLoader.loadingId++;
+        var id = PlatformURLLoader.loadingId;
         if (url.slice(0, "http://".length) == "http://") {
+            PlatformURLLoader.checkFrame = Platform.frame + 120;
             var pstr = "?";
             for (var key in params) {
                 pstr += key + "=" + params[key] + "&";
@@ -1411,6 +1433,9 @@ class PlatformURLLoader {
                 xhr.open("HEAD", url, true);
             }
             xhr.onloadend = function () {
+                if (id != PlatformURLLoader.loadingId) {
+                    return;
+                }
                 if (xhr.status != 200) {
                     errorBack.call(thisObj);
                 } else {
@@ -1421,19 +1446,28 @@ class PlatformURLLoader {
                     }
                 }
                 PlatformURLLoader.isLoading = false;
+                PlatformURLLoader.loadingId++;
             };
             xhr.send();
         } else {
+            PlatformURLLoader.checkFrame = Platform.frame + 3;
             var res;
             var end = url.split(".")[url.split(".").length - 1];
             if (end != "plist" && end != "xml" && end != "json") {
                 res = cc.loader.getRes(url);
             }
             if (res) {
+                if (id != PlatformURLLoader.loadingId) {
+                    return;
+                }
                 back.call(thisObj, res);
                 PlatformURLLoader.isLoading = false;
+                PlatformURLLoader.loadingId++;
             } else {
                 cc.loader.loadTxt(url, function (error, data) {
+                    if (id != PlatformURLLoader.loadingId) {
+                        return;
+                    }
                     if (error) {
                         errorBack.call(thisObj);
                     }
@@ -1447,21 +1481,40 @@ class PlatformURLLoader {
                         back.call(thisObj, data);
                     }
                     PlatformURLLoader.isLoading = false;
+                    PlatformURLLoader.loadingId++;
                 });
             }
         }
     }
 
-    static loadTexture(url, back, errorBack, thisObj,params) {
+    static loadTexture(url, back, errorBack, thisObj, params) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj,params]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj, params]);
             return;
         }
-        PlatformURLLoader.isLoading = true;
         if (TIP) {
             $tip(2002, url);
         }
+        PlatformURLLoader.isLoading = true;
+        PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadTexture;
+        PlatformURLLoader.loadingArgs = arguments;
+        PlatformURLLoader.loadingFunc.apply(null, arguments);
+
+    }
+
+    static realLoadTexture(url, back, errorBack, thisObj, params) {
+        PlatformURLLoader.loadingFrame = Platform.frame;
+        if (url.slice(0, "http://".length) == "http://") {
+            PlatformURLLoader.checkFrame = Platform.frame + 120;
+        } else {
+            PlatformURLLoader.checkFrame = Platform.frame + 3;
+        }
+        PlatformURLLoader.loadingId++;
+        var id = PlatformURLLoader.loadingId;
         cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
+            if (id != PlatformURLLoader.loadingId) {
+                return;
+            }
             if (err) {
                 errorBack.call(thisObj);
             }
@@ -1485,7 +1538,22 @@ class PlatformURLLoader {
                 //}
             }
             PlatformURLLoader.isLoading = false;
+            PlatformURLLoader.loadingId++;
         });
+    }
+
+    static run() {
+        if (PlatformURLLoader.isLoading == false) {
+            if (PlatformURLLoader.loadingList.length) {
+                var item = PlatformURLLoader.loadingList.shift();
+                item[0].apply(null, item.slice(1, item.length));
+            }
+        } else {
+            if (Platform.frame >= PlatformURLLoader.checkFrame) {
+                console.log("Try load again: " + PlatformURLLoader.loadingArgs[0]);
+                PlatformURLLoader.loadingFunc.apply(null, PlatformURLLoader.loadingArgs);
+            }
+        }
     }
 }
 //////////////////////////End File:flower/platform/cocos2dx/PlatformURLLoader.js///////////////////////////
@@ -1674,6 +1742,18 @@ class DisplayInfo {
 
 
 
+//////////////////////////File:flower/debug/CpuInfo.js///////////////////////////
+class CpuInfo {
+    enterFrame = 0;
+    delayCall = 0;
+    callLater = 0;
+    frameEnd = 0;
+    fps = 0;
+}
+//////////////////////////End File:flower/debug/CpuInfo.js///////////////////////////
+
+
+
 //////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
 class FrameInfo {
     display = 0;
@@ -1734,6 +1814,8 @@ class DebugInfo {
      */
     static displayInfo = new DisplayInfo();
 
+    static cpu = new CpuInfo();
+
     /**
      * 帧遍历显示对象统计
      * @param texture
@@ -1777,7 +1859,7 @@ class CoreTime {
             Stage.$onFrameEnd();
         }
         var et = (new Date()).getTime();
-        flower.debugInfo.onFrameEnd += et - st;
+        DebugInfo.cpu.onFrameEnd += et - st;
         TextureManager.getInstance().$check();
     }
 
@@ -1846,6 +1928,8 @@ locale_strings[1007] = "{0} 超出索引: {1}，索引范围为 0 ~ {2}";
 locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docsWebSite + "docs/class/{1}.md?f{2}";
 locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
 locale_strings[1030] = "目标显示对象不在同一个显示列表中";
+locale_strings[1100] = "监听事件类型不能为空";
+locale_strings[1101] = "监听事件回调函数不能为空";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
 locale_strings[2003] = "[加载失败] {0}";
@@ -1892,8 +1976,8 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    once(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, true);
+    once(type, listener, thisObject, priority = 0, args = null) {
+        this.__addListener(type, listener, thisObject, priority, true, args);
     }
 
     /**
@@ -1903,8 +1987,8 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    addListener(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, false);
+    addListener(type, listener, thisObject, priority = 0, args = null) {
+        this.__addListener(type, listener, thisObject, priority, false, args);
     }
 
     /**
@@ -1916,10 +2000,16 @@ class EventDispatcher {
      * @param once
      * @private
      */
-    __addListener(type, listener, thisObject, priority, once) {
+    __addListener(type, listener, thisObject, priority, once, args) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
+            }
+            if (type == null) {
+                $error(1100);
+            }
+            if (listener == null) {
+                $error(1101);
             }
         }
         var values = this.__EventDispatcher;
@@ -1930,11 +2020,25 @@ class EventDispatcher {
         }
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
-            if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
+            var agrsame = item.args == args ? true : false;
+            if (!agrsame && item.args && args) {
+                var arg1 = item.args.length ? item.args : [item.args];
+                var arg2 = args.length ? args : [args];
+                if (arg1.length == arg2.length) {
+                    agrsame = true;
+                    for (var a = 0; a < arg1.length; a++) {
+                        if(arg1[a] != arg2[a]) {
+                            agrsame = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
                 return false;
             }
         }
-        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false});
+        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args});
     }
 
     removeListener(type, listener, thisObject) {
@@ -2007,12 +2111,16 @@ class EventDispatcher {
                     event.$target = this;
                 }
                 event.$currentTarget = this;
+                var args = [event];
+                if (list[i].args) {
+                    args = args.concat(list[i].args);
+                }
                 if (list[i].once) {
                     list[i].listener = null;
                     list[i].thisObject = null;
                     list[i].del = true;
                 }
-                listener.call(thisObj, event);
+                listener.apply(thisObj, args);
             }
         }
         for (i = 0; i < list.length; i++) {
@@ -4258,7 +4366,7 @@ class Bitmap extends DisplayObject {
             0: null,    //scale9Grid
             1: true    //touchSpace
         }
-        Stage.bitmapCount++;
+        DebugInfo.displayInfo.bitmap++;
     }
 
     $setTexture(val) {
@@ -4286,7 +4394,7 @@ class Bitmap extends DisplayObject {
             this.$nativeShow.setTexture(Texture.$blank);
         }
         if (this.__texture && this.__texture.dispatcher) {
-            this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+            this.__texture.dispatcher.addListener(Event.CHANGE, this.$updateTexture, this);
         }
         this.$invalidateContentBounds();
         return true;
@@ -4327,22 +4435,17 @@ class Bitmap extends DisplayObject {
         p[11] = touchY;
         p[22] = flower.EnterFrame.frame;
         var bounds;
-        if (this.$Bitmap[1]) {
-            bounds = this.$getContentBounds();
+        bounds = Rectangle.$TempRectangle;
+        if (this.$Bitmap[1] || !this.__texture) {
+            bounds.x = 0;
+            bounds.y = 0;
+            bounds.width = this.width;
+            bounds.height = this.height;
         } else {
-            bounds = Rectangle.$TempRectangle;
-            if (this.__texture) {
-                bounds.x = this.__texture.offX;
-                bounds.y = this.__texture.offY;
-                bounds.width = this.__texture.textureWidth;
-                bounds.height = this.__texture.textureHeight;
-            } else {
-                bounds.x = 0;
-                bounds.y = 0;
-                var p = this.$DisplayObject;
-                bounds.width = p[3] ? p[3] : 0;
-                bounds.height = p[4] ? p[4] : 0;
-            }
+            bounds.x = this.__texture.offX;
+            bounds.y = this.__texture.offY;
+            bounds.width = this.width - this.__texture.offX;
+            bounds.height = this.height - this.__texture.offY;
         }
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             return this;
@@ -4351,11 +4454,12 @@ class Bitmap extends DisplayObject {
     }
 
     $measureContentBounds(rect) {
+        rect.x = rect.y = 0;
         if (this.__texture) {
             rect.width = this.__texture.width;
             rect.height = this.__texture.height;
         } else {
-            rect.x = rect.y = rect.width = rect.height = 0;
+            rect.width = rect.height = 0;
         }
     }
 
@@ -4422,7 +4526,7 @@ class Bitmap extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        Stage.bitmapCount--;
+        DebugInfo.displayInfo.bitmap--;
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);
@@ -4454,7 +4558,7 @@ class $TextField extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
-        DebugInfo.displayInfo.text++;
+        //DebugInfo.displayInfo.text++;
     }
 
     $checkSettingSize(rect) {
@@ -4653,8 +4757,8 @@ class $TextField extends DisplayObject {
             this.$getContentBounds();
         }
         //super.$onFrameEnd();
-        DebugInfo.frameInfo.display++;
-        DebugInfo.frameInfo.text++;
+        //DebugInfo.frameInfo.display++;
+        //DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4666,7 +4770,7 @@ class $TextField extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        DebugInfo.displayInfo.text--;
+        //DebugInfo.displayInfo.text--;
         super.dispose();
         Platform.release("TextField", this.$nativeShow);
         this.$nativeShow = null;
@@ -4695,7 +4799,7 @@ class TextField extends flower.DisplayObject {
             0: new flower.Rectangle() //childrenBounds
         }
         this.$initContainer();
-        DebugInfo.displayInfo.sprite++;
+        DebugInfo.displayInfo.text++;
 
         this.$TextField = {
             0: "", //text
@@ -4870,7 +4974,6 @@ class TextField extends flower.DisplayObject {
         if (p[300]) {
             return;
         }
-        //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
         if (this.input) {
             if (!p[5]) {
                 this.__crateFocus();
@@ -6375,7 +6478,7 @@ class TextField extends flower.DisplayObject {
     }
 
     __setFontColor(val) {
-        val = +val & ~0;
+        val = ~~val;
         var p = this.$TextField;
         if (val == p[11]) {
             return;
@@ -6516,7 +6619,7 @@ class TextField extends flower.DisplayObject {
         }
         //super.$onFrameEnd();
         DebugInfo.frameInfo.display++;
-        DebugInfo.frameInfo.sprite++;
+        DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -6790,7 +6893,7 @@ class TextField extends flower.DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        DebugInfo.displayInfo.sprite--;
+        DebugInfo.displayInfo.text--;
         var children = this.__children;
         while (children.length) {
             var child = children[children.length - 1];
@@ -7327,6 +7430,12 @@ class Shape extends DisplayObject {
             {x: x + width, y: y + height},
             {x: x, y: y + height},
             {x: x, y: y}]);
+    }
+
+    drawLine(startX, startY, endX, endY) {
+        this.$drawPolygon([
+            {x: startX, y: startY},
+            {x: endX, y: endY}]);
     }
 
     clear() {
@@ -8735,6 +8844,7 @@ class Texture {
     __use = false;
     __sourceWidth;
     __sourceHeight;
+    __splits;
     $nativeTexture;
     $count;
     $parentTexture;
@@ -8769,8 +8879,8 @@ class Texture {
         }
     }
 
-    createSubTexture(url, startX, startY, width, height, sourceWidth, sourceHeight, offX = 0, offY = 0, rotation = false) {
-        var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth, sourceHeight);
+    createSubTexture(url, startX, startY, width, height, sourceWidth = 0, sourceHeight = 0, offX = 0, offY = 0, rotation = false) {
+        var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth || this.width, sourceHeight || this.height);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -8797,16 +8907,16 @@ class Texture {
     }
 
     $addCount() {
-        if (this._parentTexture) {
-            this._parentTexture.$addCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.$addCount();
         } else {
             this.$count++;
         }
     }
 
     $delCount() {
-        if (this._parentTexture) {
-            this._parentTexture.$delCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.$delCount();
         } else {
             this.$count--;
             if (this.$count < 0) {
@@ -8815,9 +8925,62 @@ class Texture {
         }
     }
 
+    $setSplitInfo(data) {
+        var content = data;
+        var xml = XMLElement.parse(content);
+        xml = xml.list[0];
+        var reslist;
+        var attributes;
+        for (var i = 0; i < xml.list.length; i++) {
+            if (xml.list[i].name == "key") {
+                if (xml.list[i].value == "frames") {
+                    reslist = xml.list[i + 1];
+                }
+                else if (xml.list[i].value == "metadata") {
+                    attributes = xml.list[i + 1];
+                }
+                i++;
+            }
+        }
+        this.__splits = [];
+        var frameFrame;
+        var frame;
+        var maxw = 0;
+        var maxh = 0;
+        for (i = 0; i < reslist.list.length; i++) {
+            if (reslist.list[i].name == "key") {
+                frame = new PlistFrame(reslist.list[i].value);
+                frame.decode(reslist.list[i + 1]);
+                var name = frame.name;
+                var posx = ~~name.split("_")[0];
+                var posy = ~~name.split(".")[0].split("_")[1];
+                var item = {
+                    x: posx,
+                    y: posy,
+                    textureX: frame._x,
+                    textureY: frame._y,
+                    textureWidth: frame._width,
+                    textureHeight: frame._height,
+                    offX: frame._moveX,
+                    offY: frame._moveY,
+                    sourceWidth: frame._sourceWidth,
+                    sourceHeight: frame._sourceHeight,
+                    rotation: frame._rotation
+                }
+                maxw = posx + item.sourceWidth > maxw ? posx + item.sourceWidth : maxw;
+                maxh = posy + item.sourceHeight > maxh ? posy + item.sourceHeight : maxh;
+                i++;
+            }
+        }
+        this.__sourceWidth = maxw;
+        this.__sourceHeight = maxh;
+        trace("原本大小：", maxw, maxh, "现在大小:", this.width, this.height)
+
+    }
+
     getCount() {
-        if (this._parentTexture) {
-            this._parentTexture.getCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.getCount();
         } else {
             return this.$count;
         }
@@ -9147,13 +9310,13 @@ class URLLoader extends EventDispatcher {
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
+                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
             }
         }
     }
 
-    __concatURLHead(head,url) {
-        if(url.slice(0,7) == "http://") {
+    __concatURLHead(head, url) {
+        if (url.slice(0, 7) == "http://") {
             return url;
         }
         return head + url;
@@ -9162,6 +9325,7 @@ class URLLoader extends EventDispatcher {
     onLoadTexturePlistComplete(e) {
         var plist = e.data;
         this._data = plist.getFrameTexture(this.url);
+        this._data.$addCount();
         this.loadComplete();
     }
 
@@ -9178,7 +9342,21 @@ class URLLoader extends EventDispatcher {
             this._data = texture;
             texture.$addCount();
         }
-        new CallLater(this.loadComplete, this);
+        if (this._loadInfo.splitURL) {
+            var res = ResItem.create(this._loadInfo.splitURL);
+            res.__type = ResType.TEXT;
+            var loader = new flower.URLLoader(res);
+            loader.addListener(flower.Event.COMPLETE, this.loadTextureSplitComplete, this);
+            loader.addListener(flower.Event.ERROR, this.loadError, this);
+            loader.load();
+        } else {
+            new CallLater(this.loadComplete, this);
+        }
+    }
+
+    loadTextureSplitComplete(e) {
+        this._data.$setSplitInfo(e.data);
+        this.loadComplete();
     }
 
     setTextureByLink(texture) {
@@ -9215,7 +9393,7 @@ class URLLoader extends EventDispatcher {
         for (var key in this._params) {
             params[key] = this._params;
         }
-        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
+        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {
@@ -9275,10 +9453,12 @@ class URLLoader extends EventDispatcher {
         }
         if (this.isDispose) {
             if (this._data && this._type == ResType.IMAGE) {
-                if(this._recordUse) {
+                if (this._recordUse) {
                     this._data.$use = true;
                 }
-                this._data.$delCount();
+                //if (!this._loadInfo.plist) {
+                    this._data.$delCount();
+                //}
                 this._data = null;
             }
             return;
@@ -9318,7 +9498,9 @@ class URLLoader extends EventDispatcher {
             return;
         }
         if (this._data && this._type == ResType.IMAGE) {
-            this._data.$delCount();
+            //if (!this._loadInfo.plist) {
+                this._data.$delCount();
+            //}
             this._data = null;
         }
         if (this._createRes && this._res) {
@@ -9864,6 +10046,8 @@ class PlistFrame {
         this._texture = null;
     }
 }
+
+flower.PlistFrame = PlistFrame;
 //////////////////////////End File:flower/plist/PlistFrame.js///////////////////////////
 
 
@@ -10175,7 +10359,27 @@ class ResItem {
 
     addURL(url) {
         var info = ResItemInfo.create();
-        var array = url.split("/");
+
+        var plist = null;
+        var splitURL = null;
+        var array = url.split("#PLIST#");
+        if (array.length == 2) {
+            url = array[0];
+            plist = array[1];
+        }
+        array = url.split("#SPLIT#");
+        if (array.length == 2) {
+            url = array[0];
+            splitURL = array[1];
+        }
+        if (plist && !splitURL) {
+            array = plist.split("#SPLIT#");
+            if (array.length == 2) {
+                plist = array[0];
+                splitURL = array[1];
+            }
+        }
+        array = url.split("/");
         var last = array.pop();
         var nameArray = last.split(".");
         var name = "";
@@ -10207,14 +10411,17 @@ class ResItem {
             }
         }
         info.url = url;
+        info.plist = plist;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
         info.scale = scale || 1;
         info.language = language;
+        info.update = false;
+        info.splitURL = splitURL;
         this.__loadList.push(info);
     }
 
-    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false) {
+    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false, splitURL = null) {
         var info = ResItemInfo.create();
         info.url = url;
         info.plist = plist;
@@ -10223,6 +10430,7 @@ class ResItem {
         info.scale = scale || 1;
         info.language = language;
         info.update = update;
+        info.splitURL = splitURL;
         this.__loadList.push(info);
         return info;
     }
@@ -10263,10 +10471,23 @@ class ResItem {
 
     static create(url) {
         var plist = null;
+        var splitURL = null;
         var array = url.split("#PLIST#");
         if (array.length == 2) {
             url = array[0];
             plist = array[1];
+        }
+        array = url.split("#SPLIT#");
+        if (array.length == 2) {
+            url = array[0];
+            splitURL = array[1];
+        }
+        if (plist && !splitURL) {
+            array = plist.split("#SPLIT#");
+            if (array.length == 2) {
+                plist = array[0];
+                splitURL = array[1];
+            }
         }
         array = url.split("/");
         var last = array.pop();
@@ -10313,7 +10534,7 @@ class ResItem {
         } else {
             res = new ResItem(useURL, ResType.getType(end));
         }
-        res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
+        res.addInfo(url, plist, settingWidth, settingHeight, scale, language, false, splitURL);
         return res;
     }
 
@@ -10342,6 +10563,11 @@ class ResItemInfo {
      * plist 地址
      */
     plist;
+
+    /**
+     * 拼接信息配置地址
+     */
+    splitURL;
 
     /**
      * 预设的宽
@@ -11649,6 +11875,8 @@ class EnterFrame {
 
     static frame = 0;
     static updateFactor = 1;
+    static __lastFPSTime = 0;
+    static __lastFPSFrame = 0;
 
     static $update(now, gap) {
         flower.EnterFrame.frame++;
@@ -11656,11 +11884,11 @@ class EnterFrame {
         var et;
         flower.CallLater.$run();
         et = (new Date()).getTime();
-        flower.debugInfo.CallLater += et - st;
+        DebugInfo.cpu.callLater += et - st;
         st = et;
         flower.DelayCall.$run();
         et = (new Date()).getTime();
-        flower.debugInfo.DelayCall += et - st;
+        DebugInfo.cpu.delayCall += et - st;
         st = et;
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
@@ -11671,7 +11899,12 @@ class EnterFrame {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
         et = (new Date()).getTime();
-        flower.debugInfo.EnterFrame += et - st;
+        DebugInfo.cpu.enterFrame += et - st;
+        if (now - EnterFrame.__lastFPSTime > 500) {
+            DebugInfo.cpu.fps = ~~((EnterFrame.frame - EnterFrame.__lastFPSFrame) * 500 / (now - EnterFrame.__lastFPSTime));
+            EnterFrame.__lastFPSTime = now;
+            EnterFrame.__lastFPSFrame = EnterFrame.frame;
+        }
     }
 
     static $dispose() {
@@ -12256,6 +12489,31 @@ class StringDo {
             }
         }
         return list;
+    }
+
+    static intTo16(num) {
+        var str = "";
+        while (num) {
+            var n = num & 0xF;
+            num = num >> 4;
+            if (n < 10) {
+                str = n + str;
+            } else if (n == 10) {
+                str = "a" + str;
+            } else if (n == 11) {
+                str = "b" + str;
+            } else if (n == 12) {
+                str = "c" + str;
+            } else if (n == 13) {
+                str = "d" + str;
+            } else if (n == 14) {
+                str = "e" + str;
+            } else if (n == 15) {
+                str = "f" + str;
+            }
+        }
+        str = "0x" + str;
+        return str;
     }
 }
 

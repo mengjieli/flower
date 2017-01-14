@@ -315,7 +315,11 @@ class RemoteFile {
         new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
     }
 
-    isExist( back, thisObj) {
+    readImageData(back, thisObj) {
+        new ReadImageDataRemote(back, thisObj, this.__path);
+    }
+
+    isExist(back, thisObj) {
         new IsDirectionExistRemote(back, thisObj, this.__path);
     }
 
@@ -527,7 +531,7 @@ class SaveFileRemote extends Remote {
             msg.writeUTF(type);
             msg.writeUTF(data);
             this.send(msg);
-        } else {
+        } else if(type == "png") {
             var len = data.length;
             var i = 0;
             var index = 0;
@@ -600,6 +604,46 @@ class DeleteFileRemote extends Remote {
     }
 }
 //////////////////////////End File:remote/remotes/DeleteFileRemote.js///////////////////////////
+
+
+
+//////////////////////////File:remote/remotes/ReadImageDataRemote.js///////////////////////////
+class ReadImageDataRemote extends Remote {
+
+    __back;
+    __thisObj;
+
+    constructor(back, thisObj, path) {
+        super();
+        this.__back = back;
+        this.__thisObj = thisObj;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(20);
+        msg.writeUInt(this.remoteClientId);
+        msg.writeUInt(110);
+        msg.writeUInt(this.id);
+        msg.writeUTF(path);
+        this.send(msg);
+    }
+
+    receive(cmd, msg) {
+        var list = [];
+        var width = msg.readUInt();
+        var height = msg.readUInt();
+        var colors = [];
+        for (var y = 0; y < height; y++) {
+            colors[y] = [];
+            for (var x = 0; x < width; x++) {
+                colors[y].push(msg.readInt());
+            }
+        }
+        if (this.__back) {
+            this.__back.call(this.__thisObj, colors);
+        }
+    }
+}
+//////////////////////////End File:remote/remotes/ReadImageDataRemote.js///////////////////////////
 
 
 

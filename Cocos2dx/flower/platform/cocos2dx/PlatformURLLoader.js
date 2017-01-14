@@ -1,6 +1,11 @@
 class PlatformURLLoader {
 
     static isLoading = false;
+    static loadingFrame;
+    static loadingFunc;
+    static loadingArgs;
+    static loadingId = 0;
+    static checkFrame;
     static loadingList = [];
 
     static loadText(url, back, errorBack, thisObj, method, params, contentType) {
@@ -8,11 +13,21 @@ class PlatformURLLoader {
             PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj, method, params, contentType]);
             return;
         }
-        PlatformURLLoader.isLoading = true;
         if (TIP) {
             $tip(2001, url);
         }
+        PlatformURLLoader.isLoading = true;
+        PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadText;
+        PlatformURLLoader.loadingArgs = arguments;
+        PlatformURLLoader.loadingFunc.apply(null, arguments);
+    }
+
+    static realLoadText(url, back, errorBack, thisObj, method, params, contentType) {
+        PlatformURLLoader.loadingFrame = Platform.frame;
+        PlatformURLLoader.loadingId++;
+        var id = PlatformURLLoader.loadingId;
         if (url.slice(0, "http://".length) == "http://") {
+            PlatformURLLoader.checkFrame = Platform.frame + 120;
             var pstr = "?";
             for (var key in params) {
                 pstr += key + "=" + params[key] + "&";
@@ -40,6 +55,9 @@ class PlatformURLLoader {
                 xhr.open("HEAD", url, true);
             }
             xhr.onloadend = function () {
+                if (id != PlatformURLLoader.loadingId) {
+                    return;
+                }
                 if (xhr.status != 200) {
                     errorBack.call(thisObj);
                 } else {
@@ -50,19 +68,28 @@ class PlatformURLLoader {
                     }
                 }
                 PlatformURLLoader.isLoading = false;
+                PlatformURLLoader.loadingId++;
             };
             xhr.send();
         } else {
+            PlatformURLLoader.checkFrame = Platform.frame + 3;
             var res;
             var end = url.split(".")[url.split(".").length - 1];
             if (end != "plist" && end != "xml" && end != "json") {
                 res = cc.loader.getRes(url);
             }
             if (res) {
+                if (id != PlatformURLLoader.loadingId) {
+                    return;
+                }
                 back.call(thisObj, res);
                 PlatformURLLoader.isLoading = false;
+                PlatformURLLoader.loadingId++;
             } else {
                 cc.loader.loadTxt(url, function (error, data) {
+                    if (id != PlatformURLLoader.loadingId) {
+                        return;
+                    }
                     if (error) {
                         errorBack.call(thisObj);
                     }
@@ -76,21 +103,40 @@ class PlatformURLLoader {
                         back.call(thisObj, data);
                     }
                     PlatformURLLoader.isLoading = false;
+                    PlatformURLLoader.loadingId++;
                 });
             }
         }
     }
 
-    static loadTexture(url, back, errorBack, thisObj,params) {
+    static loadTexture(url, back, errorBack, thisObj, params) {
         if (PlatformURLLoader.isLoading) {
-            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj,params]);
+            PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj, params]);
             return;
         }
-        PlatformURLLoader.isLoading = true;
         if (TIP) {
             $tip(2002, url);
         }
+        PlatformURLLoader.isLoading = true;
+        PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadTexture;
+        PlatformURLLoader.loadingArgs = arguments;
+        PlatformURLLoader.loadingFunc.apply(null, arguments);
+
+    }
+
+    static realLoadTexture(url, back, errorBack, thisObj, params) {
+        PlatformURLLoader.loadingFrame = Platform.frame;
+        if (url.slice(0, "http://".length) == "http://") {
+            PlatformURLLoader.checkFrame = Platform.frame + 120;
+        } else {
+            PlatformURLLoader.checkFrame = Platform.frame + 3;
+        }
+        PlatformURLLoader.loadingId++;
+        var id = PlatformURLLoader.loadingId;
         cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
+            if (id != PlatformURLLoader.loadingId) {
+                return;
+            }
             if (err) {
                 errorBack.call(thisObj);
             }
@@ -114,6 +160,21 @@ class PlatformURLLoader {
                 //}
             }
             PlatformURLLoader.isLoading = false;
+            PlatformURLLoader.loadingId++;
         });
+    }
+
+    static run() {
+        if (PlatformURLLoader.isLoading == false) {
+            if (PlatformURLLoader.loadingList.length) {
+                var item = PlatformURLLoader.loadingList.shift();
+                item[0].apply(null, item.slice(1, item.length));
+            }
+        } else {
+            if (Platform.frame >= PlatformURLLoader.checkFrame) {
+                console.log("Try load again: " + PlatformURLLoader.loadingArgs[0]);
+                PlatformURLLoader.loadingFunc.apply(null, PlatformURLLoader.loadingArgs);
+            }
+        }
     }
 }

@@ -57,10 +57,14 @@ var flower = {};
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc, nativeStage, touchShow) {
+    function start(completeFunc, nativeStage, touchShow, params) {
         if (hasStart) {
             if (completeFunc) completeFunc();
             return;
+        }
+        if (params && params.TIP) {
+            TIP = params.TIP;
+            flower.sys.TIP = params.TIP;
         }
         hasStart = false;
         Platform._runBack = CoreTime.$run;
@@ -204,8 +208,6 @@ var flower = {};
         hasStart = false;
     }
 
-    var debugInfo = {};
-
     flower.start = start;
     flower.getLanguage = $getLanguage;
     flower.trace = trace;
@@ -219,7 +221,6 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
-    flower.debugInfo = debugInfo;
     flower.params = params;
     flower.system = {};
     flower.dispose = dispose;
@@ -345,10 +346,7 @@ var flower = {};
                 var now = new Date().getTime();
                 Platform._runBack(now - Platform.lastTime);
                 Platform.lastTime = now;
-                if (PlatformURLLoader.loadingList.length) {
-                    var item = PlatformURLLoader.loadingList.shift();
-                    item[0].apply(null, item.slice(1, item.length));
-                }
+                PlatformURLLoader.run();
             }
         }, {
             key: "create",
@@ -1260,7 +1258,7 @@ var flower = {};
                         }
                         if (source) {
                             programmer.setUniformInt("plist", 1);
-                            programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
+                            //programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
                             programmer.setUniformFloat("plistStartX", source.x / this.__texture.$parentTexture.width);
                             programmer.setUniformFloat("plistEndX", (source.x + (this.__texture.sourceRotation ? source.height : source.width)) / (this.__texture.sourceRotation ? this.__texture.$parentTexture.height : this.__texture.$parentTexture.width));
                             programmer.setUniformFloat("plistStartY", source.y / this.__texture.$parentTexture.height);
@@ -1391,17 +1389,26 @@ var flower = {};
                 for (var i = 0; i < points.length; i++) {
                     points[i].y = -points[i].y;
                 }
-                shape.drawPoly(points, {
-                    r: fillColor >> 16,
-                    g: fillColor >> 8 & 0xFF,
-                    b: fillColor & 0xFF,
-                    a: fillAlpha * 255
-                }, lineWidth, {
-                    r: lineColor >> 16,
-                    g: lineColor >> 8 & 0xFF,
-                    b: lineColor & 0xFF,
-                    a: lineAlpha * 255
-                });
+                if (points.length == 2) {
+                    shape.drawSegment(points[0], points[1], lineWidth, {
+                        r: lineColor >> 16,
+                        g: lineColor >> 8 & 0xFF,
+                        b: lineColor & 0xFF,
+                        a: lineAlpha * 255
+                    });
+                } else {
+                    shape.drawPoly(points, {
+                        r: fillColor >> 16,
+                        g: fillColor >> 8 & 0xFF,
+                        b: fillColor & 0xFF,
+                        a: fillAlpha * 255
+                    }, lineWidth, {
+                        r: lineColor >> 16,
+                        g: lineColor >> 8 & 0xFF,
+                        b: lineColor & 0xFF,
+                        a: lineAlpha * 255
+                    });
+                }
                 for (var i = 0; i < points.length; i++) {
                     points[i].y = -points[i].y;
                 }
@@ -1501,11 +1508,22 @@ var flower = {};
                     PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj, method, params, contentType]);
                     return;
                 }
-                PlatformURLLoader.isLoading = true;
                 if (TIP) {
                     $tip(2001, url);
                 }
+                PlatformURLLoader.isLoading = true;
+                PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadText;
+                PlatformURLLoader.loadingArgs = arguments;
+                PlatformURLLoader.loadingFunc.apply(null, arguments);
+            }
+        }, {
+            key: "realLoadText",
+            value: function realLoadText(url, back, errorBack, thisObj, method, params, contentType) {
+                PlatformURLLoader.loadingFrame = Platform.frame;
+                PlatformURLLoader.loadingId++;
+                var id = PlatformURLLoader.loadingId;
                 if (url.slice(0, "http://".length) == "http://") {
+                    PlatformURLLoader.checkFrame = Platform.frame + 120;
                     var pstr = "?";
                     for (var key in params) {
                         pstr += key + "=" + params[key] + "&";
@@ -1533,6 +1551,9 @@ var flower = {};
                         xhr.open("HEAD", url, true);
                     }
                     xhr.onloadend = function () {
+                        if (id != PlatformURLLoader.loadingId) {
+                            return;
+                        }
                         if (xhr.status != 200) {
                             errorBack.call(thisObj);
                         } else {
@@ -1543,19 +1564,28 @@ var flower = {};
                             }
                         }
                         PlatformURLLoader.isLoading = false;
+                        PlatformURLLoader.loadingId++;
                     };
                     xhr.send();
                 } else {
+                    PlatformURLLoader.checkFrame = Platform.frame + 3;
                     var res;
                     var end = url.split(".")[url.split(".").length - 1];
                     if (end != "plist" && end != "xml" && end != "json") {
                         res = cc.loader.getRes(url);
                     }
                     if (res) {
+                        if (id != PlatformURLLoader.loadingId) {
+                            return;
+                        }
                         back.call(thisObj, res);
                         PlatformURLLoader.isLoading = false;
+                        PlatformURLLoader.loadingId++;
                     } else {
                         cc.loader.loadTxt(url, function (error, data) {
+                            if (id != PlatformURLLoader.loadingId) {
+                                return;
+                            }
                             if (error) {
                                 errorBack.call(thisObj);
                             } else {
@@ -1568,6 +1598,7 @@ var flower = {};
                                 back.call(thisObj, data);
                             }
                             PlatformURLLoader.isLoading = false;
+                            PlatformURLLoader.loadingId++;
                         });
                     }
                 }
@@ -1579,11 +1610,29 @@ var flower = {};
                     PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj, params]);
                     return;
                 }
-                PlatformURLLoader.isLoading = true;
                 if (TIP) {
                     $tip(2002, url);
                 }
+                PlatformURLLoader.isLoading = true;
+                PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadTexture;
+                PlatformURLLoader.loadingArgs = arguments;
+                PlatformURLLoader.loadingFunc.apply(null, arguments);
+            }
+        }, {
+            key: "realLoadTexture",
+            value: function realLoadTexture(url, back, errorBack, thisObj, params) {
+                PlatformURLLoader.loadingFrame = Platform.frame;
+                if (url.slice(0, "http://".length) == "http://") {
+                    PlatformURLLoader.checkFrame = Platform.frame + 120;
+                } else {
+                    PlatformURLLoader.checkFrame = Platform.frame + 3;
+                }
+                PlatformURLLoader.loadingId++;
+                var id = PlatformURLLoader.loadingId;
                 cc.loader.loadImg(url, { isCrossOrigin: true }, function (err, img) {
+                    if (id != PlatformURLLoader.loadingId) {
+                        return;
+                    }
                     if (err) {
                         errorBack.call(thisObj);
                     } else {
@@ -1606,7 +1655,23 @@ var flower = {};
                         //}
                     }
                     PlatformURLLoader.isLoading = false;
+                    PlatformURLLoader.loadingId++;
                 });
+            }
+        }, {
+            key: "run",
+            value: function run() {
+                if (PlatformURLLoader.isLoading == false) {
+                    if (PlatformURLLoader.loadingList.length) {
+                        var item = PlatformURLLoader.loadingList.shift();
+                        item[0].apply(null, item.slice(1, item.length));
+                    }
+                } else {
+                    if (Platform.frame >= PlatformURLLoader.checkFrame) {
+                        console.log("Try load again: " + PlatformURLLoader.loadingArgs[0]);
+                        PlatformURLLoader.loadingFunc.apply(null, PlatformURLLoader.loadingArgs);
+                    }
+                }
             }
         }]);
 
@@ -1618,6 +1683,7 @@ var flower = {};
 
 
     PlatformURLLoader.isLoading = false;
+    PlatformURLLoader.loadingId = 0;
     PlatformURLLoader.loadingList = [];
 
     var PlatformProgram = function () {
@@ -1821,6 +1887,20 @@ var flower = {};
 
     //////////////////////////End File:flower/debug/DisplayInfo.js///////////////////////////
 
+    //////////////////////////File:flower/debug/CpuInfo.js///////////////////////////
+
+
+    var CpuInfo = function CpuInfo() {
+        _classCallCheck(this, CpuInfo);
+
+        this.enterFrame = 0;
+        this.delayCall = 0;
+        this.callLater = 0;
+        this.frameEnd = 0;
+        this.fps = 0;
+    };
+    //////////////////////////End File:flower/debug/CpuInfo.js///////////////////////////
+
     //////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
 
 
@@ -1883,12 +1963,7 @@ var flower = {};
 
 
             /**
-             * 显示对象统计
-             */
-
-            /**
-             * 所有纹理纹理信息
-             * @type {Array}
+             * native显示对象统计
              */
             value: function addTexture(texture) {
                 DebugInfo.textures.push(texture);
@@ -1901,7 +1976,12 @@ var flower = {};
 
 
             /**
-             * native显示对象统计
+             * 显示对象统计
+             */
+
+            /**
+             * 所有纹理纹理信息
+             * @type {Array}
              */
 
         }, {
@@ -1923,6 +2003,7 @@ var flower = {};
     DebugInfo.textures = [];
     DebugInfo.nativeDisplayInfo = new NativeDisplayInfo();
     DebugInfo.displayInfo = new DisplayInfo();
+    DebugInfo.cpu = new CpuInfo();
     DebugInfo.frameInfo = new FrameInfo();
 
 
@@ -1947,7 +2028,7 @@ var flower = {};
                     Stage.$onFrameEnd();
                 }
                 var et = new Date().getTime();
-                flower.debugInfo.onFrameEnd += et - st;
+                DebugInfo.cpu.onFrameEnd += et - st;
                 TextureManager.getInstance().$check();
             }
         }, {
@@ -2025,6 +2106,8 @@ var flower = {};
     locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docsWebSite + "docs/class/{1}.md?f{2}";
     locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
     locale_strings[1030] = "目标显示对象不在同一个显示列表中";
+    locale_strings[1100] = "监听事件类型不能为空";
+    locale_strings[1101] = "监听事件回调函数不能为空";
     locale_strings[2001] = "[loadText] {0}";
     locale_strings[2002] = "[loadTexture] {0}";
     locale_strings[2003] = "[加载失败] {0}";
@@ -2074,8 +2157,9 @@ var flower = {};
             key: "once",
             value: function once(type, listener, thisObject) {
                 var priority = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var args = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
-                this.__addListener(type, listener, thisObject, priority, true);
+                this.__addListener(type, listener, thisObject, priority, true, args);
             }
 
             /**
@@ -2090,8 +2174,9 @@ var flower = {};
             key: "addListener",
             value: function addListener(type, listener, thisObject) {
                 var priority = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var args = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
-                this.__addListener(type, listener, thisObject, priority, false);
+                this.__addListener(type, listener, thisObject, priority, false, args);
             }
 
             /**
@@ -2106,10 +2191,16 @@ var flower = {};
 
         }, {
             key: "__addListener",
-            value: function __addListener(type, listener, thisObject, priority, once) {
+            value: function __addListener(type, listener, thisObject, priority, once, args) {
                 if (DEBUG) {
                     if (this.__hasDispose) {
                         $error(1002);
+                    }
+                    if (type == null) {
+                        $error(1100);
+                    }
+                    if (listener == null) {
+                        $error(1101);
                     }
                 }
                 var values = this.__EventDispatcher;
@@ -2120,11 +2211,25 @@ var flower = {};
                 }
                 for (var i = 0, len = list.length; i < len; i++) {
                     var item = list[i];
-                    if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
+                    var agrsame = item.args == args ? true : false;
+                    if (!agrsame && item.args && args) {
+                        var arg1 = item.args.length ? item.args : [item.args];
+                        var arg2 = args.length ? args : [args];
+                        if (arg1.length == arg2.length) {
+                            agrsame = true;
+                            for (var a = 0; a < arg1.length; a++) {
+                                if (arg1[a] != arg2[a]) {
+                                    agrsame = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
                         return false;
                     }
                 }
-                list.push({ "listener": listener, "thisObject": thisObject, "once": once, "del": false });
+                list.push({ "listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args });
             }
         }, {
             key: "removeListener",
@@ -2201,12 +2306,16 @@ var flower = {};
                             event.$target = this;
                         }
                         event.$currentTarget = this;
+                        var args = [event];
+                        if (list[i].args) {
+                            args = args.concat(list[i].args);
+                        }
                         if (list[i].once) {
                             list[i].listener = null;
                             list[i].thisObject = null;
                             list[i].del = true;
                         }
-                        listener.call(thisObj, event);
+                        listener.apply(thisObj, args);
                     }
                 }
                 for (i = 0; i < list.length; i++) {
@@ -4756,7 +4865,7 @@ var flower = {};
                 0: null, //scale9Grid
                 1: true //touchSpace
             };
-            Stage.bitmapCount++;
+            DebugInfo.displayInfo.bitmap++;
             return _this18;
         }
 
@@ -4786,7 +4895,7 @@ var flower = {};
                     this.$nativeShow.setTexture(Texture.$blank);
                 }
                 if (this.__texture && this.__texture.dispatcher) {
-                    this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+                    this.__texture.dispatcher.addListener(Event.CHANGE, this.$updateTexture, this);
                 }
                 this.$invalidateContentBounds();
                 return true;
@@ -4831,22 +4940,17 @@ var flower = {};
                 p[11] = touchY;
                 p[22] = flower.EnterFrame.frame;
                 var bounds;
-                if (this.$Bitmap[1]) {
-                    bounds = this.$getContentBounds();
+                bounds = Rectangle.$TempRectangle;
+                if (this.$Bitmap[1] || !this.__texture) {
+                    bounds.x = 0;
+                    bounds.y = 0;
+                    bounds.width = this.width;
+                    bounds.height = this.height;
                 } else {
-                    bounds = Rectangle.$TempRectangle;
-                    if (this.__texture) {
-                        bounds.x = this.__texture.offX;
-                        bounds.y = this.__texture.offY;
-                        bounds.width = this.__texture.textureWidth;
-                        bounds.height = this.__texture.textureHeight;
-                    } else {
-                        bounds.x = 0;
-                        bounds.y = 0;
-                        var p = this.$DisplayObject;
-                        bounds.width = p[3] ? p[3] : 0;
-                        bounds.height = p[4] ? p[4] : 0;
-                    }
+                    bounds.x = this.__texture.offX;
+                    bounds.y = this.__texture.offY;
+                    bounds.width = this.width - this.__texture.offX;
+                    bounds.height = this.height - this.__texture.offY;
                 }
                 if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
                     return this;
@@ -4856,11 +4960,12 @@ var flower = {};
         }, {
             key: "$measureContentBounds",
             value: function $measureContentBounds(rect) {
+                rect.x = rect.y = 0;
                 if (this.__texture) {
                     rect.width = this.__texture.width;
                     rect.height = this.__texture.height;
                 } else {
-                    rect.x = rect.y = rect.width = rect.height = 0;
+                    rect.width = rect.height = 0;
                 }
             }
         }, {
@@ -4905,7 +5010,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                Stage.bitmapCount--;
+                DebugInfo.displayInfo.bitmap--;
                 this.texture = null;
                 _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
                 Platform.release("Bitmap", this.$nativeShow);
@@ -4968,7 +5073,7 @@ var flower = {};
             if (text != "") {
                 _this19.text = text;
             }
-            DebugInfo.displayInfo.text++;
+            //DebugInfo.displayInfo.text++;
             return _this19;
         }
 
@@ -5125,8 +5230,8 @@ var flower = {};
                     this.$getContentBounds();
                 }
                 //super.$onFrameEnd();
-                DebugInfo.frameInfo.display++;
-                DebugInfo.frameInfo.text++;
+                //DebugInfo.frameInfo.display++;
+                //DebugInfo.frameInfo.text++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5139,7 +5244,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                DebugInfo.displayInfo.text--;
+                //DebugInfo.displayInfo.text--;
                 _get(Object.getPrototypeOf($TextField.prototype), "dispose", this).call(this);
                 Platform.release("TextField", this.$nativeShow);
                 this.$nativeShow = null;
@@ -5224,7 +5329,7 @@ var flower = {};
                 0: new flower.Rectangle() //childrenBounds
             };
             _this20.$initContainer();
-            DebugInfo.displayInfo.sprite++;
+            DebugInfo.displayInfo.text++;
 
             _this20.$TextField = (_this20$$TextField = {
                 0: "", //text
@@ -5387,7 +5492,6 @@ var flower = {};
                 if (p[300]) {
                     return;
                 }
-                //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
                 if (this.input) {
                     if (!p[5]) {
                         this.__crateFocus();
@@ -6928,7 +7032,7 @@ var flower = {};
         }, {
             key: "__setFontColor",
             value: function __setFontColor(val) {
-                val = +val & ~0;
+                val = ~ ~val;
                 var p = this.$TextField;
                 if (val == p[11]) {
                     return;
@@ -7073,7 +7177,7 @@ var flower = {};
                 }
                 //super.$onFrameEnd();
                 DebugInfo.frameInfo.display++;
-                DebugInfo.frameInfo.sprite++;
+                DebugInfo.frameInfo.text++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -7369,7 +7473,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                DebugInfo.displayInfo.sprite--;
+                DebugInfo.displayInfo.text--;
                 var children = this.__children;
                 while (children.length) {
                     var child = children[children.length - 1];
@@ -7945,6 +8049,11 @@ var flower = {};
             key: "drawRect",
             value: function drawRect(x, y, width, height) {
                 this.$drawPolygon([{ x: x, y: y }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }]);
+            }
+        }, {
+            key: "drawLine",
+            value: function drawLine(startX, startY, endX, endY) {
+                this.$drawPolygon([{ x: startX, y: startY }, { x: endX, y: endY }]);
             }
         }, {
             key: "clear",
@@ -9469,12 +9578,14 @@ var flower = {};
             }
         }, {
             key: "createSubTexture",
-            value: function createSubTexture(url, startX, startY, width, height, sourceWidth, sourceHeight) {
+            value: function createSubTexture(url, startX, startY, width, height) {
+                var sourceWidth = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
+                var sourceHeight = arguments.length <= 6 || arguments[6] === undefined ? 0 : arguments[6];
                 var offX = arguments.length <= 7 || arguments[7] === undefined ? 0 : arguments[7];
                 var offY = arguments.length <= 8 || arguments[8] === undefined ? 0 : arguments[8];
                 var rotation = arguments.length <= 9 || arguments[9] === undefined ? false : arguments[9];
 
-                var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth, sourceHeight);
+                var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth || this.width, sourceHeight || this.height);
                 sub.$parentTexture = this.$parentTexture || this;
                 var rect = flower.Rectangle.create();
                 rect.x = startX;
@@ -9503,8 +9614,8 @@ var flower = {};
         }, {
             key: "$addCount",
             value: function $addCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.$addCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.$addCount();
                 } else {
                     this.$count++;
                 }
@@ -9512,8 +9623,8 @@ var flower = {};
         }, {
             key: "$delCount",
             value: function $delCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.$delCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.$delCount();
                 } else {
                     this.$count--;
                     if (this.$count < 0) {
@@ -9522,10 +9633,62 @@ var flower = {};
                 }
             }
         }, {
+            key: "$setSplitInfo",
+            value: function $setSplitInfo(data) {
+                var content = data;
+                var xml = XMLElement.parse(content);
+                xml = xml.list[0];
+                var reslist;
+                var attributes;
+                for (var i = 0; i < xml.list.length; i++) {
+                    if (xml.list[i].name == "key") {
+                        if (xml.list[i].value == "frames") {
+                            reslist = xml.list[i + 1];
+                        } else if (xml.list[i].value == "metadata") {
+                            attributes = xml.list[i + 1];
+                        }
+                        i++;
+                    }
+                }
+                this.__splits = [];
+                var frameFrame;
+                var frame;
+                var maxw = 0;
+                var maxh = 0;
+                for (i = 0; i < reslist.list.length; i++) {
+                    if (reslist.list[i].name == "key") {
+                        frame = new PlistFrame(reslist.list[i].value);
+                        frame.decode(reslist.list[i + 1]);
+                        var name = frame.name;
+                        var posx = ~ ~name.split("_")[0];
+                        var posy = ~ ~name.split(".")[0].split("_")[1];
+                        var item = {
+                            x: posx,
+                            y: posy,
+                            textureX: frame._x,
+                            textureY: frame._y,
+                            textureWidth: frame._width,
+                            textureHeight: frame._height,
+                            offX: frame._moveX,
+                            offY: frame._moveY,
+                            sourceWidth: frame._sourceWidth,
+                            sourceHeight: frame._sourceHeight,
+                            rotation: frame._rotation
+                        };
+                        maxw = posx + item.sourceWidth > maxw ? posx + item.sourceWidth : maxw;
+                        maxh = posy + item.sourceHeight > maxh ? posy + item.sourceHeight : maxh;
+                        i++;
+                    }
+                }
+                this.__sourceWidth = maxw;
+                this.__sourceHeight = maxh;
+                trace("原本大小：", maxw, maxh, "现在大小:", this.width, this.height);
+            }
+        }, {
             key: "getCount",
             value: function getCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.getCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.getCount();
                 } else {
                     return this.$count;
                 }
@@ -9856,6 +10019,7 @@ var flower = {};
             value: function onLoadTexturePlistComplete(e) {
                 var plist = e.data;
                 this._data = plist.getFrameTexture(this.url);
+                this._data.$addCount();
                 this.loadComplete();
             }
         }, {
@@ -9873,7 +10037,22 @@ var flower = {};
                     this._data = texture;
                     texture.$addCount();
                 }
-                new CallLater(this.loadComplete, this);
+                if (this._loadInfo.splitURL) {
+                    var res = ResItem.create(this._loadInfo.splitURL);
+                    res.__type = ResType.TEXT;
+                    var loader = new flower.URLLoader(res);
+                    loader.addListener(flower.Event.COMPLETE, this.loadTextureSplitComplete, this);
+                    loader.addListener(flower.Event.ERROR, this.loadError, this);
+                    loader.load();
+                } else {
+                    new CallLater(this.loadComplete, this);
+                }
+            }
+        }, {
+            key: "loadTextureSplitComplete",
+            value: function loadTextureSplitComplete(e) {
+                this._data.$setSplitInfo(e.data);
+                this.loadComplete();
             }
         }, {
             key: "setTextureByLink",
@@ -9978,7 +10157,9 @@ var flower = {};
                         if (this._recordUse) {
                             this._data.$use = true;
                         }
+                        //if (!this._loadInfo.plist) {
                         this._data.$delCount();
+                        //}
                         this._data = null;
                     }
                     return;
@@ -10020,7 +10201,9 @@ var flower = {};
                     return;
                 }
                 if (this._data && this._type == ResType.IMAGE) {
+                    //if (!this._loadInfo.plist) {
                     this._data.$delCount();
+                    //}
                     this._data = null;
                 }
                 if (this._createRes && this._res) {
@@ -10667,10 +10850,11 @@ var flower = {};
 
         return PlistFrame;
     }();
+
+    flower.PlistFrame = PlistFrame;
     //////////////////////////End File:flower/plist/PlistFrame.js///////////////////////////
 
     //////////////////////////File:flower/plist/PlistLoader.js///////////////////////////
-
 
     var PlistLoader = function (_EventDispatcher4) {
         _inherits(PlistLoader, _EventDispatcher4);
@@ -11012,7 +11196,27 @@ var flower = {};
             key: "addURL",
             value: function addURL(url) {
                 var info = ResItemInfo.create();
-                var array = url.split("/");
+
+                var plist = null;
+                var splitURL = null;
+                var array = url.split("#PLIST#");
+                if (array.length == 2) {
+                    url = array[0];
+                    plist = array[1];
+                }
+                array = url.split("#SPLIT#");
+                if (array.length == 2) {
+                    url = array[0];
+                    splitURL = array[1];
+                }
+                if (plist && !splitURL) {
+                    array = plist.split("#SPLIT#");
+                    if (array.length == 2) {
+                        plist = array[0];
+                        splitURL = array[1];
+                    }
+                }
+                array = url.split("/");
                 var last = array.pop();
                 var nameArray = last.split(".");
                 var name = "";
@@ -11044,16 +11248,20 @@ var flower = {};
                     }
                 }
                 info.url = url;
+                info.plist = plist;
                 info.settingWidth = settingWidth;
                 info.settingHeight = settingHeight;
                 info.scale = scale || 1;
                 info.language = language;
+                info.update = false;
+                info.splitURL = splitURL;
                 this.__loadList.push(info);
             }
         }, {
             key: "addInfo",
             value: function addInfo(url, plist, settingWidth, settingHeight, scale, language) {
                 var update = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
+                var splitURL = arguments.length <= 7 || arguments[7] === undefined ? null : arguments[7];
 
                 var info = ResItemInfo.create();
                 info.url = url;
@@ -11063,6 +11271,7 @@ var flower = {};
                 info.scale = scale || 1;
                 info.language = language;
                 info.update = update;
+                info.splitURL = splitURL;
                 this.__loadList.push(info);
                 return info;
             }
@@ -11105,10 +11314,23 @@ var flower = {};
             key: "create",
             value: function create(url) {
                 var plist = null;
+                var splitURL = null;
                 var array = url.split("#PLIST#");
                 if (array.length == 2) {
                     url = array[0];
                     plist = array[1];
+                }
+                array = url.split("#SPLIT#");
+                if (array.length == 2) {
+                    url = array[0];
+                    splitURL = array[1];
+                }
+                if (plist && !splitURL) {
+                    array = plist.split("#SPLIT#");
+                    if (array.length == 2) {
+                        plist = array[0];
+                        splitURL = array[1];
+                    }
                 }
                 array = url.split("/");
                 var last = array.pop();
@@ -11155,7 +11377,7 @@ var flower = {};
                 } else {
                     res = new ResItem(useURL, ResType.getType(end));
                 }
-                res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
+                res.addInfo(url, plist, settingWidth, settingHeight, scale, language, false, splitURL);
                 return res;
             }
         }, {
@@ -11193,6 +11415,11 @@ var flower = {};
 
         /**
          * plist 地址
+         */
+
+
+        /**
+         * 拼接信息配置地址
          */
 
 
@@ -12623,11 +12850,11 @@ var flower = {};
                 var et;
                 flower.CallLater.$run();
                 et = new Date().getTime();
-                flower.debugInfo.CallLater += et - st;
+                DebugInfo.cpu.callLater += et - st;
                 st = et;
                 flower.DelayCall.$run();
                 et = new Date().getTime();
-                flower.debugInfo.DelayCall += et - st;
+                DebugInfo.cpu.delayCall += et - st;
                 st = et;
                 if (flower.EnterFrame.waitAdd.length) {
                     flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
@@ -12638,7 +12865,12 @@ var flower = {};
                     copy[i].call.apply(copy[i].owner, [now, gap]);
                 }
                 et = new Date().getTime();
-                flower.debugInfo.EnterFrame += et - st;
+                DebugInfo.cpu.enterFrame += et - st;
+                if (now - EnterFrame.__lastFPSTime > 500) {
+                    DebugInfo.cpu.fps = ~ ~((EnterFrame.frame - EnterFrame.__lastFPSFrame) * 500 / (now - EnterFrame.__lastFPSTime));
+                    EnterFrame.__lastFPSTime = now;
+                    EnterFrame.__lastFPSFrame = EnterFrame.frame;
+                }
             }
         }, {
             key: "$dispose",
@@ -12655,6 +12887,8 @@ var flower = {};
     EnterFrame.waitAdd = [];
     EnterFrame.frame = 0;
     EnterFrame.updateFactor = 1;
+    EnterFrame.__lastFPSTime = 0;
+    EnterFrame.__lastFPSFrame = 0;
 
 
     flower.EnterFrame = EnterFrame;
@@ -13275,6 +13509,32 @@ var flower = {};
                     }
                 }
                 return list;
+            }
+        }, {
+            key: "intTo16",
+            value: function intTo16(num) {
+                var str = "";
+                while (num) {
+                    var n = num & 0xF;
+                    num = num >> 4;
+                    if (n < 10) {
+                        str = n + str;
+                    } else if (n == 10) {
+                        str = "a" + str;
+                    } else if (n == 11) {
+                        str = "b" + str;
+                    } else if (n == 12) {
+                        str = "c" + str;
+                    } else if (n == 13) {
+                        str = "d" + str;
+                    } else if (n == 14) {
+                        str = "e" + str;
+                    } else if (n == 15) {
+                        str = "f" + str;
+                    }
+                }
+                str = "0x" + str;
+                return str;
             }
         }]);
 

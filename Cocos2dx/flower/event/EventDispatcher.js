@@ -33,8 +33,8 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    once(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, true);
+    once(type, listener, thisObject, priority = 0, args = null) {
+        this.__addListener(type, listener, thisObject, priority, true, args);
     }
 
     /**
@@ -44,8 +44,8 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    addListener(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, false);
+    addListener(type, listener, thisObject, priority = 0, args = null) {
+        this.__addListener(type, listener, thisObject, priority, false, args);
     }
 
     /**
@@ -57,10 +57,16 @@ class EventDispatcher {
      * @param once
      * @private
      */
-    __addListener(type, listener, thisObject, priority, once) {
+    __addListener(type, listener, thisObject, priority, once, args) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
+            }
+            if (type == null) {
+                $error(1100);
+            }
+            if (listener == null) {
+                $error(1101);
             }
         }
         var values = this.__EventDispatcher;
@@ -71,11 +77,25 @@ class EventDispatcher {
         }
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
-            if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
+            var agrsame = item.args == args ? true : false;
+            if (!agrsame && item.args && args) {
+                var arg1 = item.args.length ? item.args : [item.args];
+                var arg2 = args.length ? args : [args];
+                if (arg1.length == arg2.length) {
+                    agrsame = true;
+                    for (var a = 0; a < arg1.length; a++) {
+                        if(arg1[a] != arg2[a]) {
+                            agrsame = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
                 return false;
             }
         }
-        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false});
+        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args});
     }
 
     removeListener(type, listener, thisObject) {
@@ -148,12 +168,16 @@ class EventDispatcher {
                     event.$target = this;
                 }
                 event.$currentTarget = this;
+                var args = [event];
+                if (list[i].args) {
+                    args = args.concat(list[i].args);
+                }
                 if (list[i].once) {
                     list[i].listener = null;
                     list[i].thisObject = null;
                     list[i].del = true;
                 }
-                listener.call(thisObj, event);
+                listener.apply(thisObj, args);
             }
         }
         for (i = 0; i < list.length; i++) {

@@ -20,12 +20,48 @@ uniform float scaleGapY;
 uniform float scaleX;
 uniform float scaleY;
 uniform int plist;
-uniform int plistRot;
 uniform float plistStartX;
 uniform float plistEndX;
 uniform float plistStartY;
 uniform float plistEndY;
 
+uniform int split;
+uniform vec4 split1;
+uniform vec4 splitSource1;
+uniform vec4 splitOff1;
+uniform vec4 split2;
+uniform vec4 splitSource2;
+uniform vec4 splitOff2;
+uniform vec4 split3;
+uniform vec4 splitSource3;
+uniform vec4 splitOff3;
+uniform vec4 split4;
+uniform vec4 splitSource4;
+uniform vec4 splitOff4;
+uniform vec4 split5;
+uniform vec4 splitSource5;
+uniform vec4 splitOff5;
+uniform vec4 split6;
+uniform vec4 splitSource6;
+uniform vec4 splitOff6;
+uniform vec4 split7;
+uniform vec4 splitSource7;
+uniform vec4 splitOff7;
+uniform vec4 split8;
+uniform vec4 splitSource8;
+uniform vec4 splitOff8;
+uniform vec4 split9;
+uniform vec4 splitSource9;
+uniform vec4 splitOff9;
+uniform vec4 split10;
+uniform vec4 splitSource10;
+uniform vec4 splitOff10;
+uniform vec4 split11;
+uniform vec4 splitSource11;
+uniform vec4 splitOff11;
+uniform vec4 split12;
+uniform vec4 splitSource12;
+uniform vec4 splitOff12;
 
 uniform vec4 filters1;
 uniform vec4 filters2;
@@ -47,7 +83,6 @@ uniform vec4 filtersParams103;
 
 vec4 getColorBeforeBlur(float posx,float posy);
 vec4 getColor(float posx,float posy);
-vec4 getColor222(float posx,float posy);
 vec4 filter(vec4 color,float posx,float posy);
 vec4 filter100(vec4 color,float posx,float posy);
 vec4 dyeingFilter(vec4 color,float colorR,float colorG,float colorB);
@@ -104,65 +139,27 @@ vec4 getColor(float posx,float posy) {
             posx = 1.0 - (1.0 - posx)*scaleX;
             posy = 1.0 - (1.0 - posy)*scaleY;
         }
+        if(split) {
+            vec2 point1 = changeToSplit(posx,posy);
+            posx = point1[0];
+            posy = point2[1];
+        }
         if(plist == 1) {
             posx = posx * (plistEndX - plistStartX) + plistStartX;
             posy = posy * (plistEndY - plistStartY) + plistStartY;
+        }
+    } else {
+        if(split) {
+            vec2 point1 = changeToSplit(posx,posy);
+            posx = point1[0];
+            posy = point2[1];
         }
     }
     return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));
 }
 
-
-vec4 getColor222(float posx,float posy) {
-    if(scale9 > 0) {
-        if(plist == 1) {
-            if(plistRot == 1) {
-                posy = (posx - plistStartX) / (plistEndX - plistStartX);
-                posx = (posy - plistStartY) / (plistEndY - plistStartY);
-            } else {
-                posx = (posx - plistStartX) / (plistEndX - plistStartX);
-                posy = (posy - plistStartY) / (plistEndY - plistStartY);
-            }
-        }
-        if(posx < tleft && posy < ttop) {
-            posx = posx*scaleX;
-            posy = posy*scaleY;
-        } else if(posx < tright && posy < ttop) {
-            posx = left + (posx - tleft)*scaleGapX;
-            posy = posy*scaleY;
-        } else if(posy < ttop) {
-            posx = 1.0 - (1.0 - posx)*scaleX;
-            posy = posy*scaleY;
-        } else if(posx < tleft && posy < tbottom) {
-            posx = posx*scaleX;
-            posy = top + (posy - ttop)*scaleGapY;
-        } else if(posx < tright && posy < tbottom){
-            posx = left + (posx - tleft)*scaleGapX;
-            posy = top + (posy - ttop)*scaleGapY;
-        } else if(posy < tbottom) {
-            posx = 1.0 - (1.0 - posx)*scaleX;
-            posy = top + (posy - ttop)*scaleGapY;
-        } else if(posx < tleft) {
-            posx = posx*scaleX;
-            posy = 1.0 - (1.0 - posy)*scaleY;
-        } else if(posx < tright){
-            posx = left + (posx - tleft)*scaleGapX;
-            posy = 1.0 - (1.0 - posy)*scaleY;
-        } else {
-            posx = 1.0 - (1.0 - posx)*scaleX;
-            posy = 1.0 - (1.0 - posy)*scaleY;
-        }
-        if(plist == 1) {
-            if(plistRot == 1) {
-                posy = posx * (plistEndX - plistStartX) + plistStartX;
-                posx = posy * (plistEndY - plistStartY) + plistStartY;
-            } else {
-                posx = posx * (plistEndX - plistStartX) + plistStartX;
-                posy = posy * (plistEndY - plistStartY) + plistStartY;
-            }
-        }
-    }
-    return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));
+vec2 changeToSplit(float posx,float posy) {
+    return vec2(posx,posy);
 }
 
 vec4 filter(vec4 color,float posx,float posy) {

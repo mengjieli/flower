@@ -179,6 +179,7 @@ var list = [
 
     "NativeDisplayInfo",
     "DisplayInfo",
+    "CpuInfo",
     "FrameInfo",
     "TextureInfo",
     "DebugInfo",

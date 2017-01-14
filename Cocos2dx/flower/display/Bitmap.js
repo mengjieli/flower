@@ -11,7 +11,7 @@ class Bitmap extends DisplayObject {
             0: null,    //scale9Grid
             1: true    //touchSpace
         }
-        Stage.bitmapCount++;
+        DebugInfo.displayInfo.bitmap++;
     }
 
     $setTexture(val) {
@@ -39,7 +39,7 @@ class Bitmap extends DisplayObject {
             this.$nativeShow.setTexture(Texture.$blank);
         }
         if (this.__texture && this.__texture.dispatcher) {
-            this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+            this.__texture.dispatcher.addListener(Event.CHANGE, this.$updateTexture, this);
         }
         this.$invalidateContentBounds();
         return true;
@@ -80,22 +80,17 @@ class Bitmap extends DisplayObject {
         p[11] = touchY;
         p[22] = flower.EnterFrame.frame;
         var bounds;
-        if (this.$Bitmap[1]) {
-            bounds = this.$getContentBounds();
+        bounds = Rectangle.$TempRectangle;
+        if (this.$Bitmap[1] || !this.__texture) {
+            bounds.x = 0;
+            bounds.y = 0;
+            bounds.width = this.width;
+            bounds.height = this.height;
         } else {
-            bounds = Rectangle.$TempRectangle;
-            if (this.__texture) {
-                bounds.x = this.__texture.offX;
-                bounds.y = this.__texture.offY;
-                bounds.width = this.__texture.textureWidth;
-                bounds.height = this.__texture.textureHeight;
-            } else {
-                bounds.x = 0;
-                bounds.y = 0;
-                var p = this.$DisplayObject;
-                bounds.width = p[3] ? p[3] : 0;
-                bounds.height = p[4] ? p[4] : 0;
-            }
+            bounds.x = this.__texture.offX;
+            bounds.y = this.__texture.offY;
+            bounds.width = this.width - this.__texture.offX;
+            bounds.height = this.height - this.__texture.offY;
         }
         if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             return this;
@@ -104,11 +99,12 @@ class Bitmap extends DisplayObject {
     }
 
     $measureContentBounds(rect) {
+        rect.x = rect.y = 0;
         if (this.__texture) {
             rect.width = this.__texture.width;
             rect.height = this.__texture.height;
         } else {
-            rect.x = rect.y = rect.width = rect.height = 0;
+            rect.width = rect.height = 0;
         }
     }
 
@@ -175,7 +171,7 @@ class Bitmap extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        Stage.bitmapCount--;
+        DebugInfo.displayInfo.bitmap--;
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);

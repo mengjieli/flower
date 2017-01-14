@@ -3,6 +3,7 @@ class Value extends flower.EventDispatcher {
     __old = null;
     __value = null;
     __checkDistort = null;
+    __list = null;
 
     constructor(checkDistort = null) {
         super();
@@ -19,6 +20,20 @@ class Value extends flower.EventDispatcher {
 
     $getValue() {
         return this.__value;
+    }
+
+    push(val) {
+        if (!this.__list) {
+            this.__list = [];
+        }
+        this.__list.push(val);
+    }
+
+    pop() {
+        if (this.__list) {
+            return this.__list.pop();
+        }
+        return null;
     }
 
     get value() {

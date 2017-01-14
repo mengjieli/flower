@@ -1,0 +1,157 @@
+function init() {
+    this.img.addListener(flower.TouchEvent.TOUCH_BEGIN, this.onTouch, this);
+    this.img.addListener(flower.TouchEvent.TOUCH_MOVE, this.onTouch, this);
+    this.img.addListener(flower.TouchEvent.TOUCH_END, this.onTouch, this);
+    this.img.addListener(flower.TouchEvent.TOUCH_RELEASE, this.onTouch, this);
+    this.img.addListener(flower.Event.COMPLETE, this.draw, this);
+
+    this.shape.lineWidth = 0.5;
+    this.shape.lineColor = 0xff0000;
+    this.shape.lineAlpha = 1;
+    this.shape.fillAlpha = 0;
+
+    this.line.lineWidth = 0.5;
+    this.line.lineColor = 0xff0000;
+    this.line.lineAlpha = 0.5;
+    this.line.fillAlpha = 0;
+
+    this.devices = [];
+    this.texture = null;
+
+    this.list = new flower.ArrayValue();
+    this.container.dataProvider = this.list;
+}
+
+function onTouch(e) {
+    switch (e.type) {
+        case flower.TouchEvent.TOUCH_BEGIN:
+            this.startX = e.touchX;
+            this.startY = e.touchY;
+            this.direction = "";
+            break;
+        case flower.TouchEvent.TOUCH_MOVE:
+            this.shape.clear();
+            var endX = e.touchX;
+            var endY = e.touchY;
+            if (Math.abs(endX - this.startX) > Math.abs(endY - this.startY)) {
+                this.shape.drawLine(0, this.startY, this.img.width, this.startY);
+                this.direction = "horizontal";
+            } else {
+                this.shape.drawLine(this.startX, 0, this.startX, this.img.height);
+                this.direction = "vertical";
+            }
+            break;
+        case flower.TouchEvent.TOUCH_END:
+            this.shape.clear();
+            if (this.direction == "") {
+                return;
+            }
+            this.devices.push({x: this.startX, y: this.startY, direction: this.direction});
+            this.draw();
+            break;
+        case flower.TouchEvent.TOUCH_RELEASE:
+            this.shape.clear();
+            break;
+    }
+}
+
+function draw() {
+    this.line.clear();
+    var xs = [0, this.img.width];
+    var ys = [0, this.img.height];
+    for (var i = 0; i < this.devices.length; i++) {
+        var item = this.devices[i];
+        if (item.direction == "horizontal") {
+            this.line.drawLine(0, item.y, this.img.width, item.y);
+            ys.push(item.y);
+        } else {
+            this.line.drawLine(item.x, 0, item.x, this.img.height);
+            xs.push(item.x);
+        }
+    }
+    this.list.length = 0;
+    if (this.texture) {
+        xs.sort(function (a, b) {
+            return a > b ? true : false
+        });
+        ys.sort(function (a, b) {
+            return a > b ? true : false;
+        });
+        for (var y = 0; y < ys.length - 1; y++) {
+            for (var x = 0; x < xs.length - 1; x++) {
+                var sub = this.texture.createSubTexture("", xs[x], ys[y], xs[x + 1] - xs[x], ys[y + 1] - ys[y], xs[x + 1] - xs[x], ys[y + 1] - ys[y]);
+                this.list.push(sub);
+            }
+        }
+
+    }
+}
+
+function loadPicture() {
+    var loader = new flower.URLLoader(this.input.text);
+    loader.addListener(flower.Event.COMPLETE, function (e) {
+        this.texture = e.data;
+        this.img.source = this.texture;
+        this.draw();
+    }, this);
+    loader.load();
+    this.devices = [];
+    this.draw();
+}
+
+function exportRes() {
+    var xs = [0, this.img.width];
+    var ys = [0, this.img.height];
+    for (var i = 0; i < this.devices.length; i++) {
+        var item = this.devices[i];
+        if (item.direction == "horizontal") {
+            ys.push(item.y);
+        } else {
+            xs.push(item.x);
+        }
+    }
+    if (this.texture) {
+        xs.sort(function (a, b) {
+            return a > b ? true : false
+        });
+        ys.sort(function (a, b) {
+            return a > b ? true : false;
+        });
+        var cfg = {};
+        for (var y = 0; y < ys.length - 1; y++) {
+            for (var x = 0; x < xs.length - 1; x++) {
+                //var sub = this.texture.createSubTexture("", xs[x], ys[y], xs[x + 1] - xs[x], ys[y + 1] - ys[y], xs[x + 1] - xs[x], ys[y + 1] - ys[y]);
+                //this.list.push(sub);
+            }
+        }
+        var file = new flower.RemoteFile("res/output.json");
+        file.saveText(JSON.stringify(cfg));
+
+        file = new flower.RemoteFile(this.input.text);
+        file.readImageData(function (colors) {
+            for (var y = 0; y < ys.length - 1; y++) {
+                for (var x = 0; x < xs.length - 1; x++) {
+                    var imageColors = [];
+                    var imageX = xs[x];
+                    var imageY = ys[y];
+                    var imageWidth = xs[x + 1] - xs[x];
+                    var imageHeight = ys[y + 1] - ys[y];
+                    trace("保存图像?", imageX, imageY, imageWidth, imageHeight,colors.length,colors[0].length)
+                    for (var iy = 0; iy < imageWidth; iy++) {
+                        for (var ix = 0; ix < imageHeight; ix++) {
+                            var color = colors[iy + imageY][ix + imageX];
+                            imageColors.push(color >>> 24);
+                            imageColors.push(color >>> 16 & 0xFF);
+                            imageColors.push(color >>> 8 & 0xFF);
+                            imageColors.push(color & 0xFF);
+                        }
+                    }
+                    var file = new flower.RemoteFile("res/" + imageX + "_" + imageY + ".png");
+                    trace("保存图像!", imageColors.length, imageWidth, imageHeight,imageWidth*imageHeight * 4)
+                    file.savePNG(imageColors, imageWidth, imageHeight);
+                    return;
+                }
+            }
+        });
+    }
+}

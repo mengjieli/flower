@@ -1,0 +1,58 @@
+{
+  "name": "TestData",
+  "members": {
+    "people": {
+      "type": "Array",
+      "typeValue": "PeopleData"
+    },
+    "men": {
+      "type": "Array",
+      "typeValue": "PeopleData",
+      "sub": {
+        "source": "people",
+        "type": "sex",
+        "value": "man"
+      }
+    },
+    "women": {
+      "type": "Array",
+      "typeValue": "PeopleData",
+      "sub": {
+        "source": "people",
+        "type": [
+          "sex"
+        ],
+        "value": [
+          "woman"
+        ]
+      }
+    },
+    "children": {
+      "type": "Array",
+      "typeValue": "PeopleData",
+      "sub": {
+        "source": "people",
+        "type": "ageType",
+        "value": "child"
+      }
+    },
+    "youngPeople": {
+      "type": "Array",
+      "typeValue": "PeopleData",
+      "sub": {
+        "source": "people",
+        "type": "ageType",
+        "value": "young"
+      }
+    },
+    "oldPeople": {
+      "type": "Array",
+      "typeValue": "PeopleData",
+      "sub": {
+        "source": "people",
+        "type": "ageType",
+        "value": "old"
+      }
+    }
+  }
+}

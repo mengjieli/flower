@@ -15,7 +15,6 @@ class Main {
     loadThemeComplete(e) {
         e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         var stage = flower.Stage.getInstance();
-
         var ui = new flower.UIParser();
         ui.parseUIAsync("res/JSONTextArea.xml");
         stage.addChild(ui);

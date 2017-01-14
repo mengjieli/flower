@@ -11,6 +11,11 @@ class ResItemInfo {
     plist;
 
     /**
+     * 拼接信息配置地址
+     */
+    splitURL;
+
+    /**
      * 预设的宽
      */
     settingWidth;

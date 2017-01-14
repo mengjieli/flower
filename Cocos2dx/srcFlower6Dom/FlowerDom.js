@@ -45,10 +45,14 @@ var hasStart = false;
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, nativeStage, touchShow) {
+function start(completeFunc, nativeStage, touchShow, params) {
     if (hasStart) {
         if (completeFunc) completeFunc();
         return;
+    }
+    if (params && params.TIP) {
+        TIP = params.TIP;
+        flower.sys.TIP = params.TIP;
     }
     hasStart = false;
     Platform._runBack = CoreTime.$run;
@@ -180,6 +184,8 @@ function dispose() {
     hasStart = false;
 }
 
+var debugInfo = {};
+
 
 flower.start = start;
 flower.getLanguage = $getLanguage;
@@ -194,6 +200,7 @@ flower.sys = {
     $error: $error,
     getLanguage: getLanguage,
 }
+flower.debugInfo = debugInfo;
 flower.params = params;
 flower.system = {}
 flower.dispose = dispose;
@@ -2056,9 +2063,12 @@ class CoreTime {
         CoreTime.lastTimeGap = gap;
         CoreTime.currentTime += gap;
         EnterFrame.$update(CoreTime.currentTime, gap);
-        if(CoreTime.$playEnterFrame) {
+        var st = (new Date()).getTime();
+        if (CoreTime.$playEnterFrame) {
             Stage.$onFrameEnd();
         }
+        var et = (new Date()).getTime();
+        flower.debugInfo.onFrameEnd += et - st;
         TextureManager.getInstance().$check();
     }
 
@@ -2127,6 +2137,8 @@ locale_strings[1007] = "{0} 超出索引: {1}，索引范围为 0 ~ {2}";
 locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docsWebSite + "docs/class/{1}.md?f{2}";
 locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
 locale_strings[1030] = "目标显示对象不在同一个显示列表中";
+locale_strings[1100] = "监听事件类型不能为空";
+locale_strings[1101] = "监听事件回调函数不能为空";
 locale_strings[2001] = "[loadText] {0}";
 locale_strings[2002] = "[loadTexture] {0}";
 locale_strings[2003] = "[加载失败] {0}";
@@ -2201,6 +2213,12 @@ class EventDispatcher {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
+            }
+            if(type == null) {
+                $error(1100);
+            }
+            if(listener == null) {
+                $error(1101);
             }
         }
         var values = this.__EventDispatcher;
@@ -2661,7 +2679,7 @@ class ColorFilter extends Filter {
     __s = 0;
     __l = 0;
 
-    constructor(h = 0, s = -100, l = 0) {
+    constructor(h = 0, s = 0, l = 0) {
         super(1);
         this.h = h;
         this.s = s;
@@ -2677,6 +2695,7 @@ class ColorFilter extends Filter {
     }
 
     set h(val) {
+        val = +val || 0;
         val += 180;
         if (val < 0) {
             val = 360 - (-val) % 360;
@@ -2692,6 +2711,7 @@ class ColorFilter extends Filter {
     }
 
     set s(val) {
+        val = +val || 0;
         if (val > 100) {
             val = 100;
         } else if (val < -100) {
@@ -2705,6 +2725,7 @@ class ColorFilter extends Filter {
     }
 
     set l(val) {
+        val = +val || 0;
         if (val > 100) {
             val = 100;
         } else if (val < -100) {
@@ -2810,6 +2831,57 @@ class BlurFilter extends Filter {
 
 flower.BlurFilter = BlurFilter;
 //////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
+
+
+
+//////////////////////////File:flower/filters/DyeingFilter.js///////////////////////////
+/**
+ * 收集原有的 r,g,b 计算和，再根据 r,g,b 的比值重新分配 r,g,b
+ */
+class DyeingFilter extends Filter {
+    __r = 0;
+    __g = 0;
+    __b = 0;
+
+    constructor(r = 0.0, g = 0.0, b = 0.0) {
+        super(3);
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
+
+    $getParams() {
+        var sum = this.__r + this.__g + this.__b;
+        return [this.__r / sum, this.__g / sum, this.__b / sum];
+    }
+
+    get r() {
+        return this.__r;
+    }
+
+    set r(val) {
+        this.__r = +val || 0;
+    }
+
+    get g() {
+        return this.__g;
+    }
+
+    set g(val) {
+        this.__g = +val || 0;
+    }
+
+    get b() {
+        return this.__b;
+    }
+
+    set b(val) {
+        this.__b = +val || 0;
+    }
+}
+
+flower.DyeingFilter = DyeingFilter;
+//////////////////////////End File:flower/filters/DyeingFilter.js///////////////////////////
 
 
 
@@ -3197,6 +3269,8 @@ class Rectangle {
         }
         return rect;
     }
+
+    static $TempRectangle = new Rectangle();
 }
 
 flower.Rectangle = Rectangle;
@@ -3815,7 +3889,7 @@ class DisplayObject extends EventDispatcher {
         p[11] = touchY;
         p[22] = flower.EnterFrame.frame;
         var bounds = this.$getContentBounds();
-        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
             return this;
         }
         return null;
@@ -4481,6 +4555,7 @@ class Bitmap extends DisplayObject {
         this.texture = texture;
         this.$Bitmap = {
             0: null,    //scale9Grid
+            1: true    //touchSpace
         }
         Stage.bitmapCount++;
     }
@@ -4510,7 +4585,7 @@ class Bitmap extends DisplayObject {
             this.$nativeShow.setTexture(Texture.$blank);
         }
         if (this.__texture && this.__texture.dispatcher) {
-            this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+            this.__texture.dispatcher.addListener(Event.CHANGE, this.$updateTexture, this);
         }
         this.$invalidateContentBounds();
         return true;
@@ -4542,15 +4617,40 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
-    $measureContentBounds(rect) {
-        if (this.__texture) {
-            rect.x = this.__texture.offX;
-            rect.y = this.__texture.offY;
-            var p = this.$DisplayObject;
-            rect.width = p[3] || this.__texture.width;
-            rect.height = p[4] || this.__texture.height;
+    $getMouseTarget(touchX, touchY, multiply) {
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
+        var bounds;
+        bounds = Rectangle.$TempRectangle;
+        if (this.$Bitmap[1] || !this.__texture) {
+            bounds.x = 0;
+            bounds.y = 0;
+            bounds.width = this.width;
+            bounds.height = this.height;
         } else {
-            rect.x = rect.y = rect.width = rect.height = 0;
+            bounds.x = this.__texture.offX;
+            bounds.y = this.__texture.offY;
+            bounds.width = this.width - this.__texture.offX;
+            bounds.height = this.height - this.__texture.offY;
+        }
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+            return this;
+        }
+        return null;
+    }
+
+    $measureContentBounds(rect) {
+        rect.x = rect.y = 0;
+        if (this.__texture) {
+            rect.width = this.__texture.width;
+            rect.height = this.__texture.height;
+        } else {
+            rect.width = rect.height = 0;
         }
     }
 
@@ -4575,6 +4675,18 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $setTouchSpace(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        var p = this.$Bitmap;
+        if (p[1] == val) {
+            return;
+        }
+        p[1] = val;
+    }
+
     get texture() {
         return this.__texture;
     }
@@ -4590,6 +4702,14 @@ class Bitmap extends DisplayObject {
 
     set scale9Grid(val) {
         this.$setScale9Grid(val);
+    }
+
+    get touchSpace() {
+        return this.$Bitmap[1];
+    }
+
+    set touchSpace(val) {
+        this.$setTouchSpace(val);
     }
 
     dispose() {
@@ -5045,7 +5165,6 @@ class TextField extends flower.DisplayObject {
         if (p[300]) {
             return;
         }
-        //console.log("开始输入:", p[1].slice(0, info.htmlTextIndex), "\n", p[1].slice(info.htmlTextIndex, p[1].length));
         if (this.input) {
             if (!p[5]) {
                 this.__crateFocus();
@@ -7504,6 +7623,12 @@ class Shape extends DisplayObject {
             {x: x, y: y}]);
     }
 
+    drawLine(startX, startY, endX, endY) {
+        this.$drawPolygon([
+            {x: startX, y: startY},
+            {x: endX, y: endY}]);
+    }
+
     clear() {
         if (!this.$nativeShow) {
             $warn(1002, this.name);
@@ -8394,7 +8519,7 @@ class Particle extends flower.Sprite {
         if (!this.__texture) {
             return;
         }
-        gap = gap/1000;
+        gap = gap / 1000;
         var cfg = this.__config;
         var particles = this.__particles;
         var cycles = this.__cycles;
@@ -8414,11 +8539,15 @@ class Particle extends flower.Sprite {
             var particle = particles[i];
             particle.life -= gap;
             particle.vx += cfg.gx * gap;
-            particle.vy += cfg.gy * gap;
+            particle.vy += -cfg.gy * gap;
             particle.x += particle.vx * gap;
             particle.y += particle.vy * gap;
             particle.scale += particle.scaleV * gap;
             particle.rotation += particle.rotationV * gap;
+            particle.alpha += particle.alphaV * gap;
+            particle.red += particle.redV * gap;
+            particle.green += particle.greenV * gap;
+            particle.blue += particle.blueV * gap;
             if (particle.oldX != ~~particle.x) {
                 particle.oldX = ~~particle.x;
                 particle.image.$nativeShow.setX(particle.oldX);
@@ -8429,8 +8558,21 @@ class Particle extends flower.Sprite {
             }
             if (particle.oldScale != ~~particle.scale) {
                 particle.oldScale = ~~particle.scale;
-                particle.image.$nativeShow.setScaleX(particle.oldScale / 100);
-                particle.image.$nativeShow.setScaleY(particle.oldScale / 100);
+                particle.image.$nativeShow.setScaleX((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+                particle.image.$nativeShow.setScaleY((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+            }
+            if (particle.oldAlpha != ~~particle.alpha) {
+                particle.oldAlpha = ~~particle.alpha;
+                particle.image.alpha = particle.oldAlpha / 255;
+            }
+            if (particle.oldRed != ~~particle.red || particle.oldGreen != ~~particle.green || particle.oldBlue != ~~particle.blue) {
+                particle.oldRed = ~~particle.red;
+                particle.oldGreen = ~~particle.green;
+                particle.oldBlue = ~~particle.blue;
+                particle.filters[0].r = particle.oldRed;
+                particle.filters[0].g = particle.oldGreen;
+                particle.filters[0].b = particle.oldBlue;
+                particle.image.filters = particle.filters;
             }
             if (particle.oldRotation != ~~particle.rotation) {
                 particle.oldRotation = ~~particle.rotation;
@@ -8446,18 +8588,39 @@ class Particle extends flower.Sprite {
         }
         for (var i = 0; i < count; i++) {
             var item;
-            var scale = (cfg.initSize + cfg.initSizeV * math.random());
-            var endScale = (cfg.endSize + cfg.endSizeV * math.random());
+            var scale = cfg.initSize - cfg.initSizeV + 2 * cfg.initSizeV * math.random();
+            var endScale = cfg.endSize - cfg.endSizeV + 2 * cfg.endSizeV * math.random();
+            var alpha = cfg.initAlpha - cfg.initAlphaV + 2 * cfg.initAlphaV * math.random();
+            var endAlpha = cfg.endAlpha - cfg.endAlphaV + 2 * cfg.endAlphaV * math.random();
+            var red = cfg.initRed - cfg.initRedV + 2 * cfg.initRedV * math.random();
+            var endRed = cfg.endRed - cfg.endRedV + 2 * cfg.endRedV * math.random();
+            var green = cfg.initGreen - cfg.initGreenV + 2 * cfg.initGreenV * math.random();
+            var endGreen = cfg.endGreen - cfg.endGreenV + 2 * cfg.endGreenV * math.random();
+            var blue = cfg.initBlue - cfg.initBlueV + 2 * cfg.initBlueV * math.random();
+            var endBlue = cfg.endBlue - cfg.endBlueV + 2 * cfg.endBlueV * math.random();
             var rotation = cfg.initRotation - cfg.initRotationV + 2 * cfg.initRotationV * math.random();
             var endRotation = cfg.endRotation - cfg.endRotationV + 2 * cfg.endRotationV * math.random();
+            var shootSpeed = cfg.shootSpeed - cfg.shootSpeedV + 2 * math.random() * cfg.shootSpeedV;
+            var shootRotation = cfg.shootRotation - cfg.shootRotationV + 2 * math.random() * cfg.shootRotationV;
+            shootRotation = shootRotation * math.PI / 180;
+            var vx = math.cos(shootRotation) * shootSpeed;
+            var vy = -math.sin(shootRotation) * shootSpeed;
             var life = cfg.life - cfg.lifev + 2 * math.random() * cfg.lifev;
             if (cycles.length) {
                 item = cycles.pop();
                 item.life = life;
-                item.vx = 0;
-                item.vy = 0;
+                item.vx = vx;
+                item.vy = vy;
                 item.scale = scale;
                 item.scaleV = (endScale - scale) / life;
+                item.alpha = alpha;
+                item.alphaV = (endAlpha - alpha) / life;
+                item.red = red;
+                item.redV = (endRed - red) / life;
+                item.green = green;
+                item.greenV = (endGreen - green) / life;
+                item.blue = blue;
+                item.blueV = (endBlue - blue) / life;
                 item.rotation = rotation;
                 item.rotationV = (endRotation - rotation) / life;
                 item.image.visible = true;
@@ -8468,16 +8631,29 @@ class Particle extends flower.Sprite {
                     life: life,
                     x: 0,
                     y: 0,
-                    vx: 0,
-                    vy: 0,
+                    vx: vx,
+                    vy: vy,
                     scale: scale,
                     scaleV: (endScale - scale) / life,
+                    alpha: alpha,
+                    alphaV: (endAlpha - alpha) / life,
+                    red: red,
+                    redV: (endRed - red) / life,
+                    green: green,
+                    greenV: (endGreen - green) / life,
+                    blue: blue,
+                    blueV: (endBlue - blue) / life,
                     rotation: rotation,
                     rotationV: (endRotation - rotation) / life,
                     oldX: 0,
                     oldY: 0,
                     oldScale: 1,
-                    oldRotation: 0
+                    oldAlpha: 1,
+                    oldRotation: 0,
+                    oldRed: 0,
+                    oldGreen: 0,
+                    oldBlue: 0,
+                    filters: [new flower.DyeingFilter()]
                 }
                 item.image.$setSimpleMode();
                 this.addChild(item.image);
@@ -8496,6 +8672,19 @@ class Particle extends flower.Sprite {
                 item.oldScale = ~~item.scale;
                 item.image.$nativeShow.setScaleX(item.oldScale / 100);
                 item.image.$nativeShow.setScaleY(item.oldScale / 100);
+            }
+            if (item.oldAlpha != ~~item.alpha) {
+                item.oldAlpha = ~~item.alpha;
+                item.image.alpha = item.oldAlpha / 255;
+            }
+            if (item.oldRed != ~~item.red || item.oldGreen != ~~item.green || item.oldBlue != ~~item.blue) {
+                item.oldRed = ~~item.red;
+                item.oldGreen = ~~item.green;
+                item.oldBlue = ~~item.blue;
+                item.filters[0].r = item.oldRed;
+                item.filters[0].g = item.oldGreen;
+                item.filters[0].b = item.oldBlue;
+                item.image.filters = item.filters;
             }
             if (item.oldRotation != ~~item.rotation) {
                 item.oldRotation = ~~item.rotation;
@@ -8844,6 +9033,9 @@ class Texture {
     __url;
     __nativeURL;
     __use = false;
+    __sourceWidth;
+    __sourceHeight;
+    __splits;
     $nativeTexture;
     $count;
     $parentTexture;
@@ -8854,7 +9046,7 @@ class Texture {
      */
     __dispatcher = UPDATE_RESOURCE ? new EventDispatcher() : null;
 
-    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
+    constructor(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight, sourceWidth, sourceHeight) {
         this.$nativeTexture = nativeTexture;
         this.__url = url;
         this.__nativeURL = nativeURL;
@@ -8863,6 +9055,8 @@ class Texture {
         this.__height = +h;
         this.__settingWidth = settingWidth;
         this.__settingHeight = settingHeight;
+        this.__sourceWidth = sourceWidth;
+        this.__sourceHeight = sourceHeight;
     }
 
     $update(nativeTexture, w, h, settingWidth, settingHeight) {
@@ -8876,8 +9070,8 @@ class Texture {
         }
     }
 
-    createSubTexture(startX, startY, width, height, offX = 0, offY = 0, rotation = false) {
-        var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+    createSubTexture(url, startX, startY, width, height, sourceWidth = 0, sourceHeight = 0, offX = 0, offY = 0, rotation = false) {
+        var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth || this.width, sourceHeight || this.height);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -8904,16 +9098,16 @@ class Texture {
     }
 
     $addCount() {
-        if (this._parentTexture) {
-            this._parentTexture.$addCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.$addCount();
         } else {
             this.$count++;
         }
     }
 
     $delCount() {
-        if (this._parentTexture) {
-            this._parentTexture.$delCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.$delCount();
         } else {
             this.$count--;
             if (this.$count < 0) {
@@ -8922,9 +9116,62 @@ class Texture {
         }
     }
 
+    $setSplitInfo(data) {
+        var content = data;
+        var xml = XMLElement.parse(content);
+        xml = xml.list[0];
+        var reslist;
+        var attributes;
+        for (var i = 0; i < xml.list.length; i++) {
+            if (xml.list[i].name == "key") {
+                if (xml.list[i].value == "frames") {
+                    reslist = xml.list[i + 1];
+                }
+                else if (xml.list[i].value == "metadata") {
+                    attributes = xml.list[i + 1];
+                }
+                i++;
+            }
+        }
+        this.__splits = [];
+        var frameFrame;
+        var frame;
+        var maxw = 0;
+        var maxh = 0;
+        for (i = 0; i < reslist.list.length; i++) {
+            if (reslist.list[i].name == "key") {
+                frame = new PlistFrame(reslist.list[i].value);
+                frame.decode(reslist.list[i + 1]);
+                var name = frame.name;
+                var posx = ~~name.split("_")[0];
+                var posy = ~~name.split(".")[0].split("_")[1];
+                var item = {
+                    x: posx,
+                    y: posy,
+                    textureX: frame._x,
+                    textureY: frame._y,
+                    textureWidth: frame._width,
+                    textureHeight: frame._height,
+                    offX: frame._moveX,
+                    offY: frame._moveY,
+                    sourceWidth: frame._sourceWidth,
+                    sourceHeight: frame._sourceHeight,
+                    rotation: frame._rotation
+                }
+                maxw = posx + item.sourceWidth > maxw ? posx + item.sourceWidth : maxw;
+                maxh = posy + item.sourceHeight > maxh ? posy + item.sourceHeight : maxh;
+                i++;
+            }
+        }
+        this.__sourceWidth = maxw;
+        this.__sourceHeight = maxh;
+        trace("原本大小：",maxw,maxh,"现在大小:",this.width,this.height)
+
+    }
+
     getCount() {
-        if (this._parentTexture) {
-            this._parentTexture.getCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.getCount();
         } else {
             return this.$count;
         }
@@ -8947,10 +9194,26 @@ class Texture {
     }
 
     get width() {
-        return this.__settingWidth || this.__width;
+        return this.__sourceWidth || this.__width;
     }
 
     get height() {
+        return this.__sourceHeight || this.__height;
+    }
+
+    get width() {
+        return this.__sourceWidth || this.__width;
+    }
+
+    get height() {
+        return this.__sourceHeight || this.__height;
+    }
+
+    get textureWidth() {
+        return this.__settingWidth || this.__width;
+    }
+
+    get textureHeight() {
         return this.__settingHeight || this.__height;
     }
 
@@ -8971,11 +9234,11 @@ class Texture {
     }
 
     get scaleX() {
-        return this.width / this.__width;
+        return this.textureWidth / this.__width;
     }
 
     get scaleY() {
-        return this.height / this.__height;
+        return this.textureHeight / this.__height;
     }
 
     get count() {
@@ -9238,13 +9501,13 @@ class URLLoader extends EventDispatcher {
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
+                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
             }
         }
     }
 
-    __concatURLHead(head,url) {
-        if(url.slice(0,7) == "http://") {
+    __concatURLHead(head, url) {
+        if (url.slice(0, 7) == "http://") {
             return url;
         }
         return head + url;
@@ -9269,7 +9532,21 @@ class URLLoader extends EventDispatcher {
             this._data = texture;
             texture.$addCount();
         }
-        new CallLater(this.loadComplete, this);
+        if (this._loadInfo.splitURL) {
+            var res = ResItem.create(this._loadInfo.splitURL);
+            res.__type = ResType.TEXT;
+            var loader = new flower.URLLoader(res);
+            loader.addListener(flower.Event.COMPLETE, this.loadTextureSplitComplete, this);
+            loader.addListener(flower.Event.ERROR, this.loadError, this);
+            loader.load();
+        } else {
+            new CallLater(this.loadComplete, this);
+        }
+    }
+
+    loadTextureSplitComplete(e) {
+        this._data.$setSplitInfo(e.data);
+        this.loadComplete();
     }
 
     setTextureByLink(texture) {
@@ -9306,7 +9583,7 @@ class URLLoader extends EventDispatcher {
         for (var key in this._params) {
             params[key] = this._params;
         }
-        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
+        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {
@@ -9366,7 +9643,7 @@ class URLLoader extends EventDispatcher {
         }
         if (this.isDispose) {
             if (this._data && this._type == ResType.IMAGE) {
-                if(this._recordUse) {
+                if (this._recordUse) {
                     this._data.$use = true;
                 }
                 this._data.$delCount();
@@ -9647,9 +9924,9 @@ class VBWebSocket extends WebSocket {
                     }
                 }
                 for (i = 0; i < removeList.length; i++) {
-                    for (f = 0; f < this.zbacks[cmd].length; f++) {
-                        if (this.zbacks[cmd][f].id == removeList[i]) {
-                            this.zbacks[cmd].splice(f, 1);
+                    for (f = 0; f < this.zbacks[backCmd].length; f++) {
+                        if (this.zbacks[backCmd][f].id == removeList[i]) {
+                            this.zbacks[backCmd].splice(f, 1);
                             break;
                         }
                     }
@@ -9759,7 +10036,7 @@ class VBWebSocket extends WebSocket {
         this.zbacks[cmd].push({func: back, thisObj: thisObj, id: VBWebSocket.id++});
     }
 
-    removeZeroe(cmd, back, thisObj) {
+    removeZero(cmd, back, thisObj) {
         var list = this.zbacks[cmd];
         if (list) {
             for (var i = 0; i < list.length; i++) {
@@ -9933,7 +10210,7 @@ class PlistFrame {
             }
         }
         this._moveX = this._offX + (this._sourceWidth - this._width) / 2;
-        this._moveY = this._offY + (this._sourceHeight - this._height) / 2;
+        this._moveY = -this._offY + (this._sourceHeight - this._height) / 2;
     }
 
     get name() {
@@ -9946,7 +10223,7 @@ class PlistFrame {
 
     get texture() {
         if (!this._texture) {
-            this._texture = this._plist.texture.createSubTexture(this._x, this._y, this._width, this._height, this._moveX, this._moveY, this._rotation);
+            this._texture = this._plist.texture.createSubTexture(this._name, this._x, this._y, this._width, this._height, this._sourceWidth, this._sourceHeight, this._moveX, this._moveY, this._rotation);
         }
         return this._texture;
     }
@@ -9955,6 +10232,8 @@ class PlistFrame {
         this._texture = null;
     }
 }
+
+flower.PlistFrame = PlistFrame;
 //////////////////////////End File:flower/plist/PlistFrame.js///////////////////////////
 
 
@@ -10266,7 +10545,27 @@ class ResItem {
 
     addURL(url) {
         var info = ResItemInfo.create();
-        var array = url.split("/");
+
+        var plist = null;
+        var splitURL = null;
+        var array = url.split("#PLIST#");
+        if (array.length == 2) {
+            url = array[0];
+            plist = array[1];
+        }
+        array = url.split("#SPLIT#");
+        if (array.length == 2) {
+            url = array[0];
+            splitURL = array[1];
+        }
+        if (plist && !splitURL) {
+            array = plist.split("#SPLIT#");
+            if (array.length == 2) {
+                plist = array[0];
+                splitURL = array[1];
+            }
+        }
+        array = url.split("/");
         var last = array.pop();
         var nameArray = last.split(".");
         var name = "";
@@ -10298,14 +10597,17 @@ class ResItem {
             }
         }
         info.url = url;
+        info.plist = plist;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
         info.scale = scale || 1;
         info.language = language;
+        info.update = false;
+        info.splitURL = splitURL;
         this.__loadList.push(info);
     }
 
-    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false) {
+    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false, splitURL = null) {
         var info = ResItemInfo.create();
         info.url = url;
         info.plist = plist;
@@ -10314,6 +10616,7 @@ class ResItem {
         info.scale = scale || 1;
         info.language = language;
         info.update = update;
+        info.splitURL = splitURL;
         this.__loadList.push(info);
         return info;
     }
@@ -10354,10 +10657,23 @@ class ResItem {
 
     static create(url) {
         var plist = null;
+        var splitURL = null;
         var array = url.split("#PLIST#");
         if (array.length == 2) {
             url = array[0];
             plist = array[1];
+        }
+        array = url.split("#SPLIT#");
+        if (array.length == 2) {
+            url = array[0];
+            splitURL = array[1];
+        }
+        if (plist && !splitURL) {
+            array = plist.split("#SPLIT#");
+            if (array.length == 2) {
+                plist = array[0];
+                splitURL = array[1];
+            }
         }
         array = url.split("/");
         var last = array.pop();
@@ -10404,7 +10720,7 @@ class ResItem {
         } else {
             res = new ResItem(useURL, ResType.getType(end));
         }
-        res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
+        res.addInfo(url, plist, settingWidth, settingHeight, scale, language, false, splitURL);
         return res;
     }
 
@@ -10433,6 +10749,11 @@ class ResItemInfo {
      * plist 地址
      */
     plist;
+
+    /**
+     * 拼接信息配置地址
+     */
+    splitURL;
 
     /**
      * 预设的宽
@@ -11743,8 +12064,16 @@ class EnterFrame {
 
     static $update(now, gap) {
         flower.EnterFrame.frame++;
+        var st = (new Date()).getTime();
+        var et;
         flower.CallLater.$run();
+        et = (new Date()).getTime();
+        flower.debugInfo.CallLater += et - st;
+        st = et;
         flower.DelayCall.$run();
+        et = (new Date()).getTime();
+        flower.debugInfo.DelayCall += et - st;
+        st = et;
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
             flower.EnterFrame.waitAdd = [];
@@ -11753,6 +12082,8 @@ class EnterFrame {
         for (var i = 0; i < copy.length; i++) {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
+        et = (new Date()).getTime();
+        flower.debugInfo.EnterFrame += et - st;
     }
 
     static $dispose() {

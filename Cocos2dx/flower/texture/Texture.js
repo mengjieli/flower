@@ -13,6 +13,7 @@ class Texture {
     __use = false;
     __sourceWidth;
     __sourceHeight;
+    __splits;
     $nativeTexture;
     $count;
     $parentTexture;
@@ -47,8 +48,8 @@ class Texture {
         }
     }
 
-    createSubTexture(url, startX, startY, width, height, sourceWidth, sourceHeight, offX = 0, offY = 0, rotation = false) {
-        var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth, sourceHeight);
+    createSubTexture(url, startX, startY, width, height, sourceWidth = 0, sourceHeight = 0, offX = 0, offY = 0, rotation = false) {
+        var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth || this.width, sourceHeight || this.height);
         sub.$parentTexture = this.$parentTexture || this;
         var rect = flower.Rectangle.create();
         rect.x = startX;
@@ -75,16 +76,16 @@ class Texture {
     }
 
     $addCount() {
-        if (this._parentTexture) {
-            this._parentTexture.$addCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.$addCount();
         } else {
             this.$count++;
         }
     }
 
     $delCount() {
-        if (this._parentTexture) {
-            this._parentTexture.$delCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.$delCount();
         } else {
             this.$count--;
             if (this.$count < 0) {
@@ -93,9 +94,62 @@ class Texture {
         }
     }
 
+    $setSplitInfo(data) {
+        var content = data;
+        var xml = XMLElement.parse(content);
+        xml = xml.list[0];
+        var reslist;
+        var attributes;
+        for (var i = 0; i < xml.list.length; i++) {
+            if (xml.list[i].name == "key") {
+                if (xml.list[i].value == "frames") {
+                    reslist = xml.list[i + 1];
+                }
+                else if (xml.list[i].value == "metadata") {
+                    attributes = xml.list[i + 1];
+                }
+                i++;
+            }
+        }
+        this.__splits = [];
+        var frameFrame;
+        var frame;
+        var maxw = 0;
+        var maxh = 0;
+        for (i = 0; i < reslist.list.length; i++) {
+            if (reslist.list[i].name == "key") {
+                frame = new PlistFrame(reslist.list[i].value);
+                frame.decode(reslist.list[i + 1]);
+                var name = frame.name;
+                var posx = ~~name.split("_")[0];
+                var posy = ~~name.split(".")[0].split("_")[1];
+                var item = {
+                    x: posx,
+                    y: posy,
+                    textureX: frame._x,
+                    textureY: frame._y,
+                    textureWidth: frame._width,
+                    textureHeight: frame._height,
+                    offX: frame._moveX,
+                    offY: frame._moveY,
+                    sourceWidth: frame._sourceWidth,
+                    sourceHeight: frame._sourceHeight,
+                    rotation: frame._rotation
+                }
+                maxw = posx + item.sourceWidth > maxw ? posx + item.sourceWidth : maxw;
+                maxh = posy + item.sourceHeight > maxh ? posy + item.sourceHeight : maxh;
+                i++;
+            }
+        }
+        this.__sourceWidth = maxw;
+        this.__sourceHeight = maxh;
+        trace("原本大小：", maxw, maxh, "现在大小:", this.width, this.height)
+
+    }
+
     getCount() {
-        if (this._parentTexture) {
-            this._parentTexture.getCount();
+        if (this.$parentTexture) {
+            this.$parentTexture.getCount();
         } else {
             return this.$count;
         }

@@ -134,13 +134,13 @@ class URLLoader extends EventDispatcher {
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
+                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
             }
         }
     }
 
-    __concatURLHead(head,url) {
-        if(url.slice(0,7) == "http://") {
+    __concatURLHead(head, url) {
+        if (url.slice(0, 7) == "http://") {
             return url;
         }
         return head + url;
@@ -149,6 +149,7 @@ class URLLoader extends EventDispatcher {
     onLoadTexturePlistComplete(e) {
         var plist = e.data;
         this._data = plist.getFrameTexture(this.url);
+        this._data.$addCount();
         this.loadComplete();
     }
 
@@ -165,7 +166,21 @@ class URLLoader extends EventDispatcher {
             this._data = texture;
             texture.$addCount();
         }
-        new CallLater(this.loadComplete, this);
+        if (this._loadInfo.splitURL) {
+            var res = ResItem.create(this._loadInfo.splitURL);
+            res.__type = ResType.TEXT;
+            var loader = new flower.URLLoader(res);
+            loader.addListener(flower.Event.COMPLETE, this.loadTextureSplitComplete, this);
+            loader.addListener(flower.Event.ERROR, this.loadError, this);
+            loader.load();
+        } else {
+            new CallLater(this.loadComplete, this);
+        }
+    }
+
+    loadTextureSplitComplete(e) {
+        this._data.$setSplitInfo(e.data);
+        this.loadComplete();
     }
 
     setTextureByLink(texture) {
@@ -202,7 +217,7 @@ class URLLoader extends EventDispatcher {
         for (var key in this._params) {
             params[key] = this._params;
         }
-        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead,this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
+        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {
@@ -262,10 +277,12 @@ class URLLoader extends EventDispatcher {
         }
         if (this.isDispose) {
             if (this._data && this._type == ResType.IMAGE) {
-                if(this._recordUse) {
+                if (this._recordUse) {
                     this._data.$use = true;
                 }
-                this._data.$delCount();
+                //if (!this._loadInfo.plist) {
+                    this._data.$delCount();
+                //}
                 this._data = null;
             }
             return;
@@ -305,7 +322,9 @@ class URLLoader extends EventDispatcher {
             return;
         }
         if (this._data && this._type == ResType.IMAGE) {
-            this._data.$delCount();
+            //if (!this._loadInfo.plist) {
+                this._data.$delCount();
+            //}
             this._data = null;
         }
         if (this._createRes && this._res) {

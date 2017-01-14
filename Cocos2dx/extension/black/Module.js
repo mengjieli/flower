@@ -107,7 +107,7 @@ class Module extends flower.EventDispatcher {
         if (this.hasListener(flower.Event.ERROR)) {
             this.dispatch(e);
         } else {
-            $error(e.data);
+            flower.$error(e.data);
         }
     }
 

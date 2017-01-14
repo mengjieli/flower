@@ -21,9 +21,10 @@ var PreLoading = function (_flower$EventDispatch) {
         _this.progress = new flower.NumberValue();
         _this.modules = [new flower.Module("res/software/module.json")];
 
+        //new flower.Module("res/textureTool/module.json")
         //new flower.Module("modules/gameEditor/module.json"),
         //new flower.Module("modules/dungeonEditor/module.json")
-        _this.progressBar = new flower.UIParser().parseUI("\n        <f:Group width=\"150\" height=\"20\" xmlns:f=\"flower\">\n            <f:Rect percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor=\"0xE7E7E7\"/>\n            <f:Rect percentWidth=\"{data*100}\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor=\"0x3d3d3d\"/>\n        </f:Group>\n        ", _this.progress);
+        _this.progressBar = new flower.UIParser().parseUI("\n            new flower.Module(\"res/software/module.json\"),\n        <f:Group width=\"150\" height=\"20\" xmlns:f=\"flower\">\n            <f:Rect percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor=\"0xE7E7E7\"/>\n            <f:Rect percentWidth=\"{data*100}\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor=\"0x3d3d3d\"/>\n        </f:Group>\n        ", _this.progress);
         flower.PopManager.pop(_this.progressBar, true, true);
         _this.index = 0;
         _this.loadNextModule();

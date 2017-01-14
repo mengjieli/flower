@@ -480,6 +480,7 @@ class Value extends flower.EventDispatcher {
     __old = null;
     __value = null;
     __checkDistort = null;
+    __list = null;
 
     constructor(checkDistort = null) {
         super();
@@ -496,6 +497,20 @@ class Value extends flower.EventDispatcher {
 
     $getValue() {
         return this.__value;
+    }
+
+    push(val) {
+        if (!this.__list) {
+            this.__list = [];
+        }
+        this.__list.push(val);
+    }
+
+    pop() {
+        if (this.__list) {
+            return this.__list.pop();
+        }
+        return null;
     }
 
     get value() {
@@ -526,9 +541,9 @@ black.Value = Value;
 /**
  *
  * @Event
- * Event.ADDED item
- * Event.REMOVED item
- * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
+ * Event.ADD item
+ * Event.REMOV item
+ * Event.CHANGE ArrayValue 所有更新都会触发，包括排序
  */
 class ArrayValue extends Value {
 
@@ -539,6 +554,8 @@ class ArrayValue extends Value {
     _rangeMaxKey = "";
     _selectedItem = null;
     _itemType = null;
+    _subs = null;
+    $sub = false;
 
     constructor(init = null, itemType = "*") {
         super();
@@ -553,6 +570,10 @@ class ArrayValue extends Value {
         this.list.push(item);
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubPush(item);
+            this.__addItemChange(item);
+        }
         this.dispatchWith(flower.Event.ADD, item);
         this.dispatchWith(flower.Event.CHANGE, this);
     }
@@ -566,6 +587,10 @@ class ArrayValue extends Value {
         this.list.splice(index, 0, item);
         this._length = this._length + 1;
         this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubAddItemAt(item, index);
+            this.__addItemChange(item);
+        }
         this.dispatchWith(flower.Event.ADD, item);
         this.dispatchWith(flower.Event.CHANGE, this);
     }
@@ -577,6 +602,10 @@ class ArrayValue extends Value {
         var item = this.list.shift();
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
         this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
@@ -596,6 +625,10 @@ class ArrayValue extends Value {
             this._length = this._length + 1;
             this._lengthValue.value = this._length;
             for (i = 0; i < args.length; i++) {
+                if (this._subs) {
+                    this.__checkSubAddItemAt(args[i], startIndex + i);
+                    this.__addItemChange(args[i]);
+                }
                 this.dispatchWith(flower.Event.ADD, args[i]);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
@@ -605,6 +638,10 @@ class ArrayValue extends Value {
             this._length = this._length - delCount;
             this._lengthValue.value = this._length;
             for (i = 0; i < list.length; i++) {
+                if (this._subs) {
+                    this.__checkSubRemoveItem(list[i]);
+                    this.__removeItemChange(list[i]);
+                }
                 this.dispatchWith(flower.Event.REMOVE, list[i]);
             }
             this.dispatchWith(flower.Event.CHANGE, this);
@@ -625,6 +662,10 @@ class ArrayValue extends Value {
         var item = this.list.pop();
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
         this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
@@ -634,10 +675,16 @@ class ArrayValue extends Value {
         if (!this.list.length) {
             return;
         }
+        if (this._subs) {
+            this.__subRemoveAll();
+        }
         while (this.list.length) {
             var item = this.list.pop();
             this._length = this._length - 1;
             this._lengthValue.value = this._length;
+            if (this._subs) {
+                this.__removeItemChange(item);
+            }
             this.dispatchWith(flower.Event.REMOVE, item);
         }
         this.dispatchWith(flower.Event.CHANGE, this);
@@ -649,6 +696,10 @@ class ArrayValue extends Value {
                 this.list.splice(i, 1);
                 this._length = this._length - 1;
                 this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
                 this.dispatchWith(flower.Event.REMOVE, item);
                 this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
@@ -666,6 +717,10 @@ class ArrayValue extends Value {
         var item = this.list.splice(index, 1)[0];
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
         this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
@@ -685,8 +740,7 @@ class ArrayValue extends Value {
                     break;
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
                 var val1 = this.list[i][key];
                 if (val1 instanceof Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
@@ -707,6 +761,10 @@ class ArrayValue extends Value {
         }
         this._length = this._length - 1;
         this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
         this.dispatchWith(flower.Event.REMOVE, item);
         this.dispatchWith(flower.Event.CHANGE, this);
         return item;
@@ -923,6 +981,222 @@ class ArrayValue extends Value {
         return list;
     }
 
+    createSubArrayValue(...args) {
+        if (!this._subs) {
+            this._subs = [];
+        }
+        var init = [];
+        var list = this.list;
+        for (var i = 0; i < list.length; i++) {
+            var item = this.list[i];
+            var flag = true;
+            for (var a = 0; a < arguments.length; a++, a++) {
+                if (item instanceof Value) {
+                    if (item[arguments[a]].value != arguments[a + 1]) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[arguments[a]] != arguments[a + 1]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                init.push(item);
+            }
+        }
+        var sub = new ArrayValue(init, this._itemType);
+        sub.$sub = true;
+        this._subs.push([sub, arguments]);
+        this.__addAllItemChange();
+        return sub;
+    }
+
+    linkSubArrayValue(sub, ...args) {
+        if (!this._subs) {
+            this._subs = [];
+        }
+        sub.$sub = true;
+        sub.removeAll();
+        this._subs.push([sub, args]);
+        var list = this.list;
+        for (var i = 0; i < list.length; i++) {
+            var item = this.list[i];
+            var flag = true;
+            for (var a = 1; a < args.length; a++, a++) {
+                if (item instanceof Value) {
+                    if (item[args[a]].value != args[a + 1]) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[args[a]] != args[a + 1]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                sub.push(item);
+            }
+        }
+        this.__addAllItemChange();
+    }
+
+    __addAllItemChange() {
+        var list = this.list;
+        var subs = this._subs;
+        for (var i = 0; i < list.length; i++) {
+            var item = this.list[i];
+            for (var s = 0; s < subs.length; s++) {
+                var args = subs[s][1];
+                for (var a = 0; a < args.length; a++, a++) {
+                    var key = args[a];
+                    if (item[key] instanceof Value) {
+                        item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                    }
+                }
+            }
+        }
+    }
+
+    __addItemChange(item) {
+        var subs = this._subs;
+        for (var s = 0; s < subs.length; s++) {
+            var args = subs[s][1];
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                if (item[key] instanceof Value) {
+                    item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                }
+            }
+        }
+    }
+
+    __removeItemChange(item) {
+        var keys = item.membersKey;
+        for (var i = 0; i < keys.length; i++) {
+            if(item[keys[i]] instanceof flower.Value) {
+                item[keys[i]].removeListener(flower.Event.CHANGE, this.__onItemChange, this);
+            }
+        }
+    }
+
+    __onItemChange(e, item) {
+        var subs = this._subs;
+        for (var s = 0; s < subs.length; s++) {
+            var sub = subs[s][0];
+            var args = subs[s][1];
+            var oldIndex = sub.getItemIndex(item);
+            var flag = true;
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                var value = args[a + 1];
+                if (item[key] instanceof Value) {
+                    if (item[key].value != value) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[key] != value) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (oldIndex == -1 && flag) {
+                var index = this.getItemIndex(item);
+                var ind = -1;
+                for (var f = index - 1; f >= 0; f++) {
+                    ind = sub.getItemIndex(this.list[f]);
+                    if (ind != -1) {
+                        ind++;
+                        break;
+                    }
+                }
+                if (ind == -1) {
+                    ind = 0;
+                }
+                sub.addItemAt(item, ind);
+            } else if (oldIndex != -1 && !flag) {
+                sub.removeItem(item);
+            }
+        }
+    }
+
+    __checkSubPush(item) {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            var args = this._subs[s][1];
+            var flag = true;
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                var value = args[a + 1];
+                if (item[key] instanceof Value) {
+                    if (item[key].value != value) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[key] != value) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                sub.push(item);
+            }
+        }
+    }
+
+    __checkSubAddItemAt(item, index) {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            var args = this._subs[s][1];
+            var flag = true;
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                var value = args[a + 1];
+                if (item[key] instanceof Value) {
+                    if (item[key].value != value) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[key] != value) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                var ind = -1;
+                for (var f = index - 1; f >= 0; f++) {
+                    ind = sub.getItemIndex(this.list[f]);
+                    if (ind != -1) {
+                        ind++;
+                        break;
+                    }
+                }
+                if (ind == -1) {
+                    ind = 0;
+                }
+                sub.addItemAt(item, ind);
+            }
+        }
+    }
+
+    __checkSubRemoveItem(item) {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            var ind = sub.getItemIndex(item);
+            if (ind != -1) {
+                sub.removeItemAt(ind);
+            }
+        }
+    }
+
+    __subRemoveAll() {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            sub.removeAll();
+        }
+    }
+
+
     dispose() {
         var list = this.list;
         for (var i = 0; i < list.length; i++) {
@@ -930,6 +1204,14 @@ class ArrayValue extends Value {
             if (value instanceof Value) {
                 value.dispose();
             }
+        }
+        if (this._subs) {
+            while (this._subs) {
+                var sub = this._subs.pop()[0];
+                sub.removeAll();
+                sub.dispose();
+            }
+            this._subs = null;
         }
         super.dispose();
     }
@@ -1389,7 +1671,7 @@ class ObjectValue extends Value {
     }
 
     get membersKey() {
-        return Object.keys(this.value);
+        return Object.keys(this.__value);
     }
 
     dispose() {
@@ -1548,7 +1830,7 @@ locale_strings[3201] = "没有找到对应的类 : {0}";
 
 //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
 class DataManager {
-    
+
     _defines = {};
     _root = {};
 
@@ -1663,6 +1945,7 @@ class DataManager {
         var defineMember = "";
         var members = config.members;
         var bindContent = "";
+        var subContent = "";
         if (members) {
             var member;
             for (var key in members) {
@@ -1701,6 +1984,16 @@ class DataManager {
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
                 }
+                if (member.sub) {
+                    subContent += "\t\tthis." + member.sub.source + ".linkSubArrayValue(this." + key + ",";
+                    if (typeof member.sub.type == "string") {
+                        subContent += "\"" + member.sub.type + "\"," + (typeof member.sub.value == "string" ? "\"" + member.sub.value + "\"" : member.sub.value) + ");\n";
+                    } else {
+                        for (var s = 0; s < member.sub.type.length; s++) {
+                            subContent += "\"" + member.sub.type[s] + "\"," + (typeof member.sub.value[s] == "string" ? "\"" + member.sub.value[s] + "\"" : member.sub.value[s]) + (s < member.sub.type.length - 1 ? "," : ");\n");
+                        }
+                    }
+                }
                 defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
                 defineMember += "\t\tget: function () {\n";
                 defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
@@ -1718,6 +2011,7 @@ class DataManager {
         }
         content += "\t\tif(init) this.value = init;\n";
         content += bindContent;
+        content += subContent;
         content += "\t}\n\n" +
             defineMember +
             "\treturn " + defineClass + ";\n" +
@@ -7365,7 +7659,7 @@ class Module extends flower.EventDispatcher {
         if (this.hasListener(flower.Event.ERROR)) {
             this.dispatch(e);
         } else {
-            $error(e.data);
+            flower.$error(e.data);
         }
     }
 

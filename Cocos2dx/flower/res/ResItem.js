@@ -25,7 +25,27 @@ class ResItem {
 
     addURL(url) {
         var info = ResItemInfo.create();
-        var array = url.split("/");
+
+        var plist = null;
+        var splitURL = null;
+        var array = url.split("#PLIST#");
+        if (array.length == 2) {
+            url = array[0];
+            plist = array[1];
+        }
+        array = url.split("#SPLIT#");
+        if (array.length == 2) {
+            url = array[0];
+            splitURL = array[1];
+        }
+        if (plist && !splitURL) {
+            array = plist.split("#SPLIT#");
+            if (array.length == 2) {
+                plist = array[0];
+                splitURL = array[1];
+            }
+        }
+        array = url.split("/");
         var last = array.pop();
         var nameArray = last.split(".");
         var name = "";
@@ -57,14 +77,17 @@ class ResItem {
             }
         }
         info.url = url;
+        info.plist = plist;
         info.settingWidth = settingWidth;
         info.settingHeight = settingHeight;
         info.scale = scale || 1;
         info.language = language;
+        info.update = false;
+        info.splitURL = splitURL;
         this.__loadList.push(info);
     }
 
-    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false) {
+    addInfo(url, plist, settingWidth, settingHeight, scale, language, update = false, splitURL = null) {
         var info = ResItemInfo.create();
         info.url = url;
         info.plist = plist;
@@ -73,6 +96,7 @@ class ResItem {
         info.scale = scale || 1;
         info.language = language;
         info.update = update;
+        info.splitURL = splitURL;
         this.__loadList.push(info);
         return info;
     }
@@ -113,10 +137,23 @@ class ResItem {
 
     static create(url) {
         var plist = null;
+        var splitURL = null;
         var array = url.split("#PLIST#");
         if (array.length == 2) {
             url = array[0];
             plist = array[1];
+        }
+        array = url.split("#SPLIT#");
+        if (array.length == 2) {
+            url = array[0];
+            splitURL = array[1];
+        }
+        if (plist && !splitURL) {
+            array = plist.split("#SPLIT#");
+            if (array.length == 2) {
+                plist = array[0];
+                splitURL = array[1];
+            }
         }
         array = url.split("/");
         var last = array.pop();
@@ -163,7 +200,7 @@ class ResItem {
         } else {
             res = new ResItem(useURL, ResType.getType(end));
         }
-        res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
+        res.addInfo(url, plist, settingWidth, settingHeight, scale, language, false, splitURL);
         return res;
     }
 

@@ -1,5 +1,5 @@
 class DataManager {
-    
+
     _defines = {};
     _root = {};
 
@@ -114,6 +114,7 @@ class DataManager {
         var defineMember = "";
         var members = config.members;
         var bindContent = "";
+        var subContent = "";
         if (members) {
             var member;
             for (var key in members) {
@@ -152,6 +153,16 @@ class DataManager {
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
                 }
+                if (member.sub) {
+                    subContent += "\t\tthis." + member.sub.source + ".linkSubArrayValue(this." + key + ",";
+                    if (typeof member.sub.type == "string") {
+                        subContent += "\"" + member.sub.type + "\"," + (typeof member.sub.value == "string" ? "\"" + member.sub.value + "\"" : member.sub.value) + ");\n";
+                    } else {
+                        for (var s = 0; s < member.sub.type.length; s++) {
+                            subContent += "\"" + member.sub.type[s] + "\"," + (typeof member.sub.value[s] == "string" ? "\"" + member.sub.value[s] + "\"" : member.sub.value[s]) + (s < member.sub.type.length - 1 ? "," : ");\n");
+                        }
+                    }
+                }
                 defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
                 defineMember += "\t\tget: function () {\n";
                 defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
@@ -169,6 +180,7 @@ class DataManager {
         }
         content += "\t\tif(init) this.value = init;\n";
         content += bindContent;
+        content += subContent;
         content += "\t}\n\n" +
             defineMember +
             "\treturn " + defineClass + ";\n" +

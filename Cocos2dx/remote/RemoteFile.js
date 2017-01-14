@@ -16,7 +16,11 @@ class RemoteFile {
         new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
     }
 
-    isExist( back, thisObj) {
+    readImageData(back, thisObj) {
+        new ReadImageDataRemote(back, thisObj, this.__path);
+    }
+
+    isExist(back, thisObj) {
         new IsDirectionExistRemote(back, thisObj, this.__path);
     }
 

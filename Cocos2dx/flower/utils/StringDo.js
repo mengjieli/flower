@@ -362,6 +362,31 @@ class StringDo {
         }
         return list;
     }
+
+    static intTo16(num) {
+        var str = "";
+        while (num) {
+            var n = num & 0xF;
+            num = num >> 4;
+            if (n < 10) {
+                str = n + str;
+            } else if (n == 10) {
+                str = "a" + str;
+            } else if (n == 11) {
+                str = "b" + str;
+            } else if (n == 12) {
+                str = "c" + str;
+            } else if (n == 13) {
+                str = "d" + str;
+            } else if (n == 14) {
+                str = "e" + str;
+            } else if (n == 15) {
+                str = "f" + str;
+            }
+        }
+        str = "0x" + str;
+        return str;
+    }
 }
 
 exports.StringDo = StringDo;
