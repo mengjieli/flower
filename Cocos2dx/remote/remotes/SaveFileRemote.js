@@ -8,16 +8,25 @@ class SaveFileRemote extends Remote {
         this.__back = back;
         this.__thisObj = thisObj;
         if (typeof data == "string") {
-            var msg = new flower.VByteArray();
-            msg.writeUInt(20);
-            msg.writeUInt(this.remoteClientId);
-            msg.writeUInt(104);
-            msg.writeUInt(this.id);
-            msg.writeUTF(path);
-            msg.writeUTF(type);
-            msg.writeUTF(data);
-            this.send(msg);
-        } else if(type == "png") {
+            var len = data.length;
+            var i = 0;
+            var index = 0;
+            while (i < len) {
+                var msg = new flower.VByteArray();
+                msg.writeUInt(20);
+                msg.writeUInt(this.remoteClientId);
+                msg.writeUInt(104);
+                msg.writeUInt(this.id);
+                msg.writeUTF(path);
+                msg.writeUTF(type);
+                msg.writeUInt(index);
+                msg.writeUInt(Math.ceil(len / 1024) - 1);
+                msg.writeUTF(data.slice(index * 1024, (index + 1) * 1024));
+                this.send(msg);
+                index++;
+                i += 1024;
+            }
+        } else if (type == "png") {
             var len = data.length;
             var i = 0;
             var index = 0;

@@ -326,6 +326,7 @@ var remote = {};
             _this3.__path = path;
             _this3.__autoUpdate = autoUpdate;
             _this3.__list = new flower.ArrayValue();
+            _this3.__pathList = [];
             if (_this3.__path && _this3.__autoUpdate) {
                 new ReadDirectionListRemote(_this3.__updateDirectionList, _this3, _this3.__path, _this3.__autoUpdate);
             }
@@ -346,20 +347,66 @@ var remote = {};
             key: "__updateDirectionList",
             value: function __updateDirectionList(fileList) {
                 var list = this.__list;
-                list.length = 0;
                 var clazz = this.__fileClass;
-                for (var i = 0, len = fileList.length; i < len; i++) {
-                    if (clazz) {
-                        list.push(new clazz(fileList[i]));
-                    } else {
-                        list.push(fileList[i]);
+                var last = 0;
+                if (this.__typeFilter) {
+                    for (var i = 0; i < fileList.length; i++) {
+                        if (fileList[i].isDirection) continue;
+                        var findType = false;
+                        for (var t = 0; t < this.__typeFilter.length; t++) {
+                            if (this.__typeFilter[t] == fileList[i].fileType) {
+                                findType = true;
+                                break;
+                            }
+                        }
+                        if (!findType) {
+                            fileList.splice(i, 1);
+                            i--;
+                        }
                     }
+                }
+                for (var i = 0, len = fileList.length; i < len; i++) {
+                    var find = false;
+                    var deleteEnd = this.__pathList.length;
+                    for (var f = last; f < this.__pathList.length; f++) {
+                        if (this.__pathList[f] == fileList[i].path) {
+                            find = true;
+                            deleteEnd = f;
+                            break;
+                        }
+                    }
+                    while (last < deleteEnd) {
+                        this.__pathList.splice(last, 1);
+                        list.removeItemAt(last);
+                        deleteEnd--;
+                    }
+                    last = deleteEnd + 1;
+                    if (!find) {
+                        this.__pathList.push(fileList[i].path);
+                        if (clazz) {
+                            list.push(new clazz(fileList[i]));
+                        } else {
+                            list.push(fileList[i]);
+                        }
+                    }
+                }
+                while (this.__pathList.length > fileList.length) {
+                    this.__pathList.splice(fileList.length, 1);
+                    list.removeItemAt(fileList.length);
                 }
                 this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "dispose",
             value: function dispose() {}
+        }, {
+            key: "typeFilter",
+            get: function get() {
+                return this.__typeFilter.concat();
+            },
+            set: function set(val) {
+                this.__typeFilter = val;
+            }
         }, {
             key: "list",
             get: function get() {
@@ -522,15 +569,24 @@ var remote = {};
             _this6.__back = back;
             _this6.__thisObj = thisObj;
             if (typeof data == "string") {
-                var msg = new flower.VByteArray();
-                msg.writeUInt(20);
-                msg.writeUInt(_this6.remoteClientId);
-                msg.writeUInt(104);
-                msg.writeUInt(_this6.id);
-                msg.writeUTF(path);
-                msg.writeUTF(type);
-                msg.writeUTF(data);
-                _this6.send(msg);
+                var len = data.length;
+                var i = 0;
+                var index = 0;
+                while (i < len) {
+                    var msg = new flower.VByteArray();
+                    msg.writeUInt(20);
+                    msg.writeUInt(_this6.remoteClientId);
+                    msg.writeUInt(104);
+                    msg.writeUInt(_this6.id);
+                    msg.writeUTF(path);
+                    msg.writeUTF(type);
+                    msg.writeUInt(index);
+                    msg.writeUInt(Math.ceil(len / 1024) - 1);
+                    msg.writeUTF(data.slice(index * 1024, (index + 1) * 1024));
+                    _this6.send(msg);
+                    index++;
+                    i += 1024;
+                }
             } else if (type == "png") {
                 var len = data.length;
                 var i = 0;

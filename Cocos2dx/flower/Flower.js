@@ -20,12 +20,13 @@ var hasStart = false;
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, nativeStage, touchShow, params) {
+function start(completeFunc, params) {
     if (hasStart) {
         if (completeFunc) completeFunc();
         return;
     }
-    if (params && params.TIP) {
+    params = params || {};
+    if (params.TIP) {
         TIP = params.TIP;
         exports.sys.TIP = params.TIP;
     }
@@ -35,23 +36,26 @@ function start(completeFunc, nativeStage, touchShow, params) {
         Platform.getReady(function () {
             var stage = new Stage();
             Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
-                start2(completeFunc, nativeStage, touchShow, stage);
+                start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
             });
         });
     } else {
         var stage = new Stage();
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
-        start2(completeFunc, nativeStage, touchShow, stage);
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, params.nativeStage, params.touchShow);
+        start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
     }
 }
 
-function start2(completeFunc, nativeStage, touchShow, stage) {
+function start2(completeFunc, nativeStage, touchShow, stage, params) {
     flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
         for (var key in cfg) {
             config[key] = cfg[key];
+        }
+        if (params.linkUser && cfg.remote) {
+            cfg.remote.linkUser = params.linkUser;
         }
         stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;

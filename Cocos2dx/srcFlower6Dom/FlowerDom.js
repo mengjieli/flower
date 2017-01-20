@@ -45,12 +45,13 @@ var hasStart = false;
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, nativeStage, touchShow, params) {
+function start(completeFunc, params) {
     if (hasStart) {
         if (completeFunc) completeFunc();
         return;
     }
-    if (params && params.TIP) {
+    params = params || {};
+    if (params.TIP) {
         TIP = params.TIP;
         flower.sys.TIP = params.TIP;
     }
@@ -60,23 +61,26 @@ function start(completeFunc, nativeStage, touchShow, params) {
         Platform.getReady(function () {
             var stage = new Stage();
             Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
-                start2(completeFunc, nativeStage, touchShow, stage);
+                start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
             });
         });
     } else {
         var stage = new Stage();
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
-        start2(completeFunc, nativeStage, touchShow, stage);
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, params.nativeStage, params.touchShow);
+        start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
     }
 }
 
-function start2(completeFunc, nativeStage, touchShow, stage) {
+function start2(completeFunc, nativeStage, touchShow, stage, params) {
     flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
         for (var key in cfg) {
             config[key] = cfg[key];
+        }
+        if (params.linkUser && cfg.remote) {
+            cfg.remote.linkUser = params.linkUser;
         }
         stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;
@@ -184,8 +188,6 @@ function dispose() {
     hasStart = false;
 }
 
-var debugInfo = {};
-
 
 flower.start = start;
 flower.getLanguage = $getLanguage;
@@ -200,7 +202,6 @@ flower.sys = {
     $error: $error,
     getLanguage: getLanguage,
 }
-flower.debugInfo = debugInfo;
 flower.params = params;
 flower.system = {}
 flower.dispose = dispose;
@@ -834,7 +835,7 @@ class PlatformTextField extends PlatformDisplayObject {
         //}
 
         $mesureTxt.innerHTML = txt.innerHTML;
-        txt.style.width = $mesureTxt.offsetWidth + "px";
+        txt.style.width = ($mesureTxt.offsetWidth + 4) + "px";
         return {
             width: $mesureTxt.offsetWidth,
             height: $mesureTxt.offsetHeight
@@ -1965,6 +1966,18 @@ class DisplayInfo {
 
 
 
+//////////////////////////File:flower/debug/CpuInfo.js///////////////////////////
+class CpuInfo {
+    enterFrame = 0;
+    delayCall = 0;
+    callLater = 0;
+    frameEnd = 0;
+    fps = 0;
+}
+//////////////////////////End File:flower/debug/CpuInfo.js///////////////////////////
+
+
+
 //////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
 class FrameInfo {
     display = 0;
@@ -2025,6 +2038,8 @@ class DebugInfo {
      */
     static displayInfo = new DisplayInfo();
 
+    static cpu = new CpuInfo();
+
     /**
      * 帧遍历显示对象统计
      * @param texture
@@ -2068,7 +2083,7 @@ class CoreTime {
             Stage.$onFrameEnd();
         }
         var et = (new Date()).getTime();
-        flower.debugInfo.onFrameEnd += et - st;
+        DebugInfo.cpu.onFrameEnd += et - st;
         TextureManager.getInstance().$check();
     }
 
@@ -2185,8 +2200,8 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    once(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, true);
+    once(type, listener, thisObject, priority = 0, args = null) {
+        this.__addListener(type, listener, thisObject, priority, true, args);
     }
 
     /**
@@ -2196,8 +2211,8 @@ class EventDispatcher {
      * @param thisObject
      * @param priority 监听事件的优先级，暂未实现
      */
-    addListener(type, listener, thisObject, priority = 0) {
-        this.__addListener(type, listener, thisObject, priority, false);
+    addListener(type, listener, thisObject, priority = 0, args = null) {
+        this.__addListener(type, listener, thisObject, priority, false, args);
     }
 
     /**
@@ -2209,15 +2224,15 @@ class EventDispatcher {
      * @param once
      * @private
      */
-    __addListener(type, listener, thisObject, priority, once) {
+    __addListener(type, listener, thisObject, priority, once, args) {
         if (DEBUG) {
             if (this.__hasDispose) {
                 $error(1002);
             }
-            if(type == null) {
+            if (type == null) {
                 $error(1100);
             }
-            if(listener == null) {
+            if (listener == null) {
                 $error(1101);
             }
         }
@@ -2229,11 +2244,25 @@ class EventDispatcher {
         }
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
-            if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
+            var agrsame = item.args == args ? true : false;
+            if (!agrsame && item.args && args) {
+                var arg1 = item.args.length ? item.args : [item.args];
+                var arg2 = args.length ? args : [args];
+                if (arg1.length == arg2.length) {
+                    agrsame = true;
+                    for (var a = 0; a < arg1.length; a++) {
+                        if(arg1[a] != arg2[a]) {
+                            agrsame = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
                 return false;
             }
         }
-        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false});
+        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args});
     }
 
     removeListener(type, listener, thisObject) {
@@ -2306,12 +2335,16 @@ class EventDispatcher {
                     event.$target = this;
                 }
                 event.$currentTarget = this;
+                var args = [event];
+                if (list[i].args) {
+                    args = args.concat(list[i].args);
+                }
                 if (list[i].once) {
                     list[i].listener = null;
                     list[i].thisObject = null;
                     list[i].del = true;
                 }
-                listener.call(thisObj, event);
+                listener.apply(thisObj, args);
             }
         }
         for (i = 0; i < list.length; i++) {
@@ -4557,7 +4590,7 @@ class Bitmap extends DisplayObject {
             0: null,    //scale9Grid
             1: true    //touchSpace
         }
-        Stage.bitmapCount++;
+        DebugInfo.displayInfo.bitmap++;
     }
 
     $setTexture(val) {
@@ -4717,7 +4750,7 @@ class Bitmap extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        Stage.bitmapCount--;
+        DebugInfo.displayInfo.bitmap--;
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);
@@ -4749,7 +4782,7 @@ class $TextField extends DisplayObject {
         if (text != "") {
             this.text = text;
         }
-        DebugInfo.displayInfo.text++;
+        //DebugInfo.displayInfo.text++;
     }
 
     $checkSettingSize(rect) {
@@ -4948,8 +4981,8 @@ class $TextField extends DisplayObject {
             this.$getContentBounds();
         }
         //super.$onFrameEnd();
-        DebugInfo.frameInfo.display++;
-        DebugInfo.frameInfo.text++;
+        //DebugInfo.frameInfo.display++;
+        //DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -4961,7 +4994,7 @@ class $TextField extends DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        DebugInfo.displayInfo.text--;
+        //DebugInfo.displayInfo.text--;
         super.dispose();
         Platform.release("TextField", this.$nativeShow);
         this.$nativeShow = null;
@@ -4990,7 +5023,7 @@ class TextField extends flower.DisplayObject {
             0: new flower.Rectangle() //childrenBounds
         }
         this.$initContainer();
-        DebugInfo.displayInfo.sprite++;
+        DebugInfo.displayInfo.text++;
 
         this.$TextField = {
             0: "", //text
@@ -6669,7 +6702,7 @@ class TextField extends flower.DisplayObject {
     }
 
     __setFontColor(val) {
-        val = +val & ~0;
+        val = ~~val;
         var p = this.$TextField;
         if (val == p[11]) {
             return;
@@ -6810,7 +6843,7 @@ class TextField extends flower.DisplayObject {
         }
         //super.$onFrameEnd();
         DebugInfo.frameInfo.display++;
-        DebugInfo.frameInfo.sprite++;
+        DebugInfo.frameInfo.text++;
         var p = this.$DisplayObject;
         if (this.$hasFlags(0x0002)) {
             this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -7084,7 +7117,7 @@ class TextField extends flower.DisplayObject {
             $warn(1002, this.name);
             return;
         }
-        DebugInfo.displayInfo.sprite--;
+        DebugInfo.displayInfo.text--;
         var children = this.__children;
         while (children.length) {
             var child = children[children.length - 1];
@@ -9165,7 +9198,7 @@ class Texture {
         }
         this.__sourceWidth = maxw;
         this.__sourceHeight = maxh;
-        trace("原本大小：",maxw,maxh,"现在大小:",this.width,this.height)
+        trace("原本大小：", maxw, maxh, "现在大小:", this.width, this.height)
 
     }
 
@@ -9516,6 +9549,7 @@ class URLLoader extends EventDispatcher {
     onLoadTexturePlistComplete(e) {
         var plist = e.data;
         this._data = plist.getFrameTexture(this.url);
+        this._data.$addCount();
         this.loadComplete();
     }
 
@@ -9646,7 +9680,9 @@ class URLLoader extends EventDispatcher {
                 if (this._recordUse) {
                     this._data.$use = true;
                 }
-                this._data.$delCount();
+                //if (!this._loadInfo.plist) {
+                    this._data.$delCount();
+                //}
                 this._data = null;
             }
             return;
@@ -9686,7 +9722,9 @@ class URLLoader extends EventDispatcher {
             return;
         }
         if (this._data && this._type == ResType.IMAGE) {
-            this._data.$delCount();
+            //if (!this._loadInfo.plist) {
+                this._data.$delCount();
+            //}
             this._data = null;
         }
         if (this._createRes && this._res) {
@@ -12061,6 +12099,8 @@ class EnterFrame {
 
     static frame = 0;
     static updateFactor = 1;
+    static __lastFPSTime = 0;
+    static __lastFPSFrame = 0;
 
     static $update(now, gap) {
         flower.EnterFrame.frame++;
@@ -12068,11 +12108,11 @@ class EnterFrame {
         var et;
         flower.CallLater.$run();
         et = (new Date()).getTime();
-        flower.debugInfo.CallLater += et - st;
+        DebugInfo.cpu.callLater += et - st;
         st = et;
         flower.DelayCall.$run();
         et = (new Date()).getTime();
-        flower.debugInfo.DelayCall += et - st;
+        DebugInfo.cpu.delayCall += et - st;
         st = et;
         if (flower.EnterFrame.waitAdd.length) {
             flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
@@ -12083,7 +12123,12 @@ class EnterFrame {
             copy[i].call.apply(copy[i].owner, [now, gap]);
         }
         et = (new Date()).getTime();
-        flower.debugInfo.EnterFrame += et - st;
+        DebugInfo.cpu.enterFrame += et - st;
+        if (now - EnterFrame.__lastFPSTime > 500) {
+            DebugInfo.cpu.fps = ~~((EnterFrame.frame - EnterFrame.__lastFPSFrame) * 500 / (now - EnterFrame.__lastFPSTime));
+            EnterFrame.__lastFPSTime = now;
+            EnterFrame.__lastFPSFrame = EnterFrame.frame;
+        }
     }
 
     static $dispose() {
@@ -12668,6 +12713,31 @@ class StringDo {
             }
         }
         return list;
+    }
+
+    static intTo16(num) {
+        var str = "";
+        while (num) {
+            var n = num & 0xF;
+            num = num >> 4;
+            if (n < 10) {
+                str = n + str;
+            } else if (n == 10) {
+                str = "a" + str;
+            } else if (n == 11) {
+                str = "b" + str;
+            } else if (n == 12) {
+                str = "c" + str;
+            } else if (n == 13) {
+                str = "d" + str;
+            } else if (n == 14) {
+                str = "e" + str;
+            } else if (n == 15) {
+                str = "f" + str;
+            }
+        }
+        str = "0x" + str;
+        return str;
     }
 }
 

@@ -76,7 +76,7 @@ class PlatformTextField extends PlatformDisplayObject {
         //}
 
         $mesureTxt.innerHTML = txt.innerHTML;
-        txt.style.width = $mesureTxt.offsetWidth + "px";
+        txt.style.width = ($mesureTxt.offsetWidth + 4) + "px";
         return {
             width: $mesureTxt.offsetWidth,
             height: $mesureTxt.offsetHeight

@@ -57,12 +57,13 @@ var flower = {};
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc, nativeStage, touchShow, params) {
+    function start(completeFunc, params) {
         if (hasStart) {
             if (completeFunc) completeFunc();
             return;
         }
-        if (params && params.TIP) {
+        params = params || {};
+        if (params.TIP) {
             TIP = params.TIP;
             flower.sys.TIP = params.TIP;
         }
@@ -72,23 +73,26 @@ var flower = {};
             Platform.getReady(function () {
                 var stage = new Stage();
                 Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
-                    start2(completeFunc, nativeStage, touchShow, stage);
+                    start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
                 });
             });
         } else {
             var stage = new Stage();
-            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
-            start2(completeFunc, nativeStage, touchShow, stage);
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, params.nativeStage, params.touchShow);
+            start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
         }
     }
 
-    function start2(completeFunc, nativeStage, touchShow, stage) {
+    function start2(completeFunc, nativeStage, touchShow, stage, params) {
         flower.sys.engineType = Platform.type;
         var loader = new URLLoader("res/flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
             var cfg = e.data;
             for (var key in cfg) {
                 config[key] = cfg[key];
+            }
+            if (params.linkUser && cfg.remote) {
+                cfg.remote.linkUser = params.linkUser;
             }
             stage.backgroundColor = cfg.backgroundColor || 0;
             SCALE = config.scale || 1;
@@ -208,8 +212,6 @@ var flower = {};
         hasStart = false;
     }
 
-    var debugInfo = {};
-
     flower.start = start;
     flower.getLanguage = $getLanguage;
     flower.trace = trace;
@@ -223,7 +225,6 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
-    flower.debugInfo = debugInfo;
     flower.params = params;
     flower.system = {};
     flower.dispose = dispose;
@@ -890,7 +891,7 @@ var flower = {};
                 //}
 
                 $mesureTxt.innerHTML = txt.innerHTML;
-                txt.style.width = $mesureTxt.offsetWidth + "px";
+                txt.style.width = $mesureTxt.offsetWidth + 4 + "px";
                 return {
                     width: $mesureTxt.offsetWidth,
                     height: $mesureTxt.offsetHeight
@@ -2120,6 +2121,20 @@ var flower = {};
 
     //////////////////////////End File:flower/debug/DisplayInfo.js///////////////////////////
 
+    //////////////////////////File:flower/debug/CpuInfo.js///////////////////////////
+
+
+    var CpuInfo = function CpuInfo() {
+        _classCallCheck(this, CpuInfo);
+
+        this.enterFrame = 0;
+        this.delayCall = 0;
+        this.callLater = 0;
+        this.frameEnd = 0;
+        this.fps = 0;
+    };
+    //////////////////////////End File:flower/debug/CpuInfo.js///////////////////////////
+
     //////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
 
 
@@ -2182,12 +2197,7 @@ var flower = {};
 
 
             /**
-             * 显示对象统计
-             */
-
-            /**
-             * 所有纹理纹理信息
-             * @type {Array}
+             * native显示对象统计
              */
             value: function addTexture(texture) {
                 DebugInfo.textures.push(texture);
@@ -2200,7 +2210,12 @@ var flower = {};
 
 
             /**
-             * native显示对象统计
+             * 显示对象统计
+             */
+
+            /**
+             * 所有纹理纹理信息
+             * @type {Array}
              */
 
         }, {
@@ -2222,6 +2237,7 @@ var flower = {};
     DebugInfo.textures = [];
     DebugInfo.nativeDisplayInfo = new NativeDisplayInfo();
     DebugInfo.displayInfo = new DisplayInfo();
+    DebugInfo.cpu = new CpuInfo();
     DebugInfo.frameInfo = new FrameInfo();
 
 
@@ -2246,7 +2262,7 @@ var flower = {};
                     Stage.$onFrameEnd();
                 }
                 var et = new Date().getTime();
-                flower.debugInfo.onFrameEnd += et - st;
+                DebugInfo.cpu.onFrameEnd += et - st;
                 TextureManager.getInstance().$check();
             }
         }, {
@@ -2375,8 +2391,9 @@ var flower = {};
             key: "once",
             value: function once(type, listener, thisObject) {
                 var priority = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var args = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
-                this.__addListener(type, listener, thisObject, priority, true);
+                this.__addListener(type, listener, thisObject, priority, true, args);
             }
 
             /**
@@ -2391,8 +2408,9 @@ var flower = {};
             key: "addListener",
             value: function addListener(type, listener, thisObject) {
                 var priority = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var args = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
-                this.__addListener(type, listener, thisObject, priority, false);
+                this.__addListener(type, listener, thisObject, priority, false, args);
             }
 
             /**
@@ -2407,7 +2425,7 @@ var flower = {};
 
         }, {
             key: "__addListener",
-            value: function __addListener(type, listener, thisObject, priority, once) {
+            value: function __addListener(type, listener, thisObject, priority, once, args) {
                 if (DEBUG) {
                     if (this.__hasDispose) {
                         $error(1002);
@@ -2427,11 +2445,25 @@ var flower = {};
                 }
                 for (var i = 0, len = list.length; i < len; i++) {
                     var item = list[i];
-                    if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
+                    var agrsame = item.args == args ? true : false;
+                    if (!agrsame && item.args && args) {
+                        var arg1 = item.args.length ? item.args : [item.args];
+                        var arg2 = args.length ? args : [args];
+                        if (arg1.length == arg2.length) {
+                            agrsame = true;
+                            for (var a = 0; a < arg1.length; a++) {
+                                if (arg1[a] != arg2[a]) {
+                                    agrsame = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
                         return false;
                     }
                 }
-                list.push({ "listener": listener, "thisObject": thisObject, "once": once, "del": false });
+                list.push({ "listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args });
             }
         }, {
             key: "removeListener",
@@ -2508,12 +2540,16 @@ var flower = {};
                             event.$target = this;
                         }
                         event.$currentTarget = this;
+                        var args = [event];
+                        if (list[i].args) {
+                            args = args.concat(list[i].args);
+                        }
                         if (list[i].once) {
                             list[i].listener = null;
                             list[i].thisObject = null;
                             list[i].del = true;
                         }
-                        listener.call(thisObj, event);
+                        listener.apply(thisObj, args);
                     }
                 }
                 for (i = 0; i < list.length; i++) {
@@ -5063,7 +5099,7 @@ var flower = {};
                 0: null, //scale9Grid
                 1: true //touchSpace
             };
-            Stage.bitmapCount++;
+            DebugInfo.displayInfo.bitmap++;
             return _this19;
         }
 
@@ -5208,7 +5244,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                Stage.bitmapCount--;
+                DebugInfo.displayInfo.bitmap--;
                 this.texture = null;
                 _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
                 Platform.release("Bitmap", this.$nativeShow);
@@ -5271,7 +5307,7 @@ var flower = {};
             if (text != "") {
                 _this20.text = text;
             }
-            DebugInfo.displayInfo.text++;
+            //DebugInfo.displayInfo.text++;
             return _this20;
         }
 
@@ -5428,8 +5464,8 @@ var flower = {};
                     this.$getContentBounds();
                 }
                 //super.$onFrameEnd();
-                DebugInfo.frameInfo.display++;
-                DebugInfo.frameInfo.text++;
+                //DebugInfo.frameInfo.display++;
+                //DebugInfo.frameInfo.text++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -5442,7 +5478,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                DebugInfo.displayInfo.text--;
+                //DebugInfo.displayInfo.text--;
                 _get(Object.getPrototypeOf($TextField.prototype), "dispose", this).call(this);
                 Platform.release("TextField", this.$nativeShow);
                 this.$nativeShow = null;
@@ -5527,7 +5563,7 @@ var flower = {};
                 0: new flower.Rectangle() //childrenBounds
             };
             _this21.$initContainer();
-            DebugInfo.displayInfo.sprite++;
+            DebugInfo.displayInfo.text++;
 
             _this21.$TextField = (_this21$$TextField = {
                 0: "", //text
@@ -7230,7 +7266,7 @@ var flower = {};
         }, {
             key: "__setFontColor",
             value: function __setFontColor(val) {
-                val = +val & ~0;
+                val = ~ ~val;
                 var p = this.$TextField;
                 if (val == p[11]) {
                     return;
@@ -7375,7 +7411,7 @@ var flower = {};
                 }
                 //super.$onFrameEnd();
                 DebugInfo.frameInfo.display++;
-                DebugInfo.frameInfo.sprite++;
+                DebugInfo.frameInfo.text++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -7671,7 +7707,7 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                DebugInfo.displayInfo.sprite--;
+                DebugInfo.displayInfo.text--;
                 var children = this.__children;
                 while (children.length) {
                     var child = children[children.length - 1];
@@ -10217,6 +10253,7 @@ var flower = {};
             value: function onLoadTexturePlistComplete(e) {
                 var plist = e.data;
                 this._data = plist.getFrameTexture(this.url);
+                this._data.$addCount();
                 this.loadComplete();
             }
         }, {
@@ -10354,7 +10391,9 @@ var flower = {};
                         if (this._recordUse) {
                             this._data.$use = true;
                         }
+                        //if (!this._loadInfo.plist) {
                         this._data.$delCount();
+                        //}
                         this._data = null;
                     }
                     return;
@@ -10396,7 +10435,9 @@ var flower = {};
                     return;
                 }
                 if (this._data && this._type == ResType.IMAGE) {
+                    //if (!this._loadInfo.plist) {
                     this._data.$delCount();
+                    //}
                     this._data = null;
                 }
                 if (this._createRes && this._res) {
@@ -13043,11 +13084,11 @@ var flower = {};
                 var et;
                 flower.CallLater.$run();
                 et = new Date().getTime();
-                flower.debugInfo.CallLater += et - st;
+                DebugInfo.cpu.callLater += et - st;
                 st = et;
                 flower.DelayCall.$run();
                 et = new Date().getTime();
-                flower.debugInfo.DelayCall += et - st;
+                DebugInfo.cpu.delayCall += et - st;
                 st = et;
                 if (flower.EnterFrame.waitAdd.length) {
                     flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
@@ -13058,7 +13099,12 @@ var flower = {};
                     copy[i].call.apply(copy[i].owner, [now, gap]);
                 }
                 et = new Date().getTime();
-                flower.debugInfo.EnterFrame += et - st;
+                DebugInfo.cpu.enterFrame += et - st;
+                if (now - EnterFrame.__lastFPSTime > 500) {
+                    DebugInfo.cpu.fps = ~ ~((EnterFrame.frame - EnterFrame.__lastFPSFrame) * 500 / (now - EnterFrame.__lastFPSTime));
+                    EnterFrame.__lastFPSTime = now;
+                    EnterFrame.__lastFPSFrame = EnterFrame.frame;
+                }
             }
         }, {
             key: "$dispose",
@@ -13075,6 +13121,8 @@ var flower = {};
     EnterFrame.waitAdd = [];
     EnterFrame.frame = 0;
     EnterFrame.updateFactor = 1;
+    EnterFrame.__lastFPSTime = 0;
+    EnterFrame.__lastFPSFrame = 0;
 
 
     flower.EnterFrame = EnterFrame;
@@ -13695,6 +13743,32 @@ var flower = {};
                     }
                 }
                 return list;
+            }
+        }, {
+            key: "intTo16",
+            value: function intTo16(num) {
+                var str = "";
+                while (num) {
+                    var n = num & 0xF;
+                    num = num >> 4;
+                    if (n < 10) {
+                        str = n + str;
+                    } else if (n == 10) {
+                        str = "a" + str;
+                    } else if (n == 11) {
+                        str = "b" + str;
+                    } else if (n == 12) {
+                        str = "c" + str;
+                    } else if (n == 13) {
+                        str = "d" + str;
+                    } else if (n == 14) {
+                        str = "e" + str;
+                    } else if (n == 15) {
+                        str = "f" + str;
+                    }
+                }
+                str = "0x" + str;
+                return str;
             }
         }]);
 

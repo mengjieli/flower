@@ -8,7 +8,6 @@ function onChange(e) {
 }
 
 function decodeJSON(text) {
-    console.log("change", text);
     var htmlText = "";
     var inSign = false;
     var colors = {
@@ -36,8 +35,13 @@ function decodeJSON(text) {
                 htmlText += '</font>';
                 break;
             }
-            var abc = "";
             i++;
+            //后面可以跟复数的空格和换行符
+            while (i < len && text.charAt(i) == " " || text.charAt(i) == "\r" || text.charAt(i) == "\n") {
+                htmlText += flower.TextField.changeText(text.charAt(i));
+                i++;
+            }
+            var abc = "";
             charCode = text.charCodeAt(i);
             if (charCode >= aCode && charCode <= zCode || charCode >= ACode && charCode <= ZCode || charCode == underCode) {
                 abc += text.charAt(i);
@@ -58,7 +62,7 @@ function decodeJSON(text) {
                 //htmlText += abc;
             } else {
                 if (!error) {
-                    htmlText += '<font color="#ff0000"><u>' + flower.TextField.changeText(String.fromCharCode(charCode)) + '</u></font>';
+                    htmlText += '<font color="#ff0000"><u color="#000000">' + flower.TextField.changeText(String.fromCharCode(charCode)) + '</u></font>';
                 } else {
                     htmlText += String.fromCharCode(charCode);
                 }
@@ -66,8 +70,7 @@ function decodeJSON(text) {
             htmlText += '</font>';
             //字母后面可以跟 : 或者字母 或者空格
             i++;
-        }
-        else {
+        } else {
             htmlText += char;
         }
     }

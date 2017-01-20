@@ -3259,7 +3259,7 @@ var black = {};
                     parser.moduleName = this.relationUI[this.relationIndex].namesapce;
                     parser.parseAsync(this.relationUI[this.relationIndex].url);
                     parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
-                    parser.addListener(flower.ERROR, this.relationLoadError, this);
+                    parser.addListener(flower.Event.ERROR, this.relationLoadError, this);
                 }
             }
         }, {
