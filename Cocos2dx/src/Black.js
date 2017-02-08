@@ -74,8 +74,8 @@ var black = {};
                         12: false, //absoluteState
                         13: this, //eventThis
                         14: null, //layout
-                        15: false };
-                    //flexbox 是否有弹性属性
+                        15: isContainer };
+                    //flexbox 弹性属性是否需要验证
                     UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
                     UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
                     UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
@@ -225,7 +225,9 @@ var black = {};
                         }
                     }
                     p[0] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -242,7 +244,9 @@ var black = {};
                         }
                     }
                     p[1] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -253,7 +257,9 @@ var black = {};
                         return false;
                     }
                     p[2] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -264,7 +270,9 @@ var black = {};
                         return false;
                     }
                     p[3] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -275,7 +283,9 @@ var black = {};
                         return false;
                     }
                     p[4] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -286,7 +296,9 @@ var black = {};
                         return false;
                     }
                     p[5] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -297,7 +309,9 @@ var black = {};
                         return false;
                     }
                     p[6] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -308,7 +322,9 @@ var black = {};
                         return false;
                     }
                     p[7] = val;
-                    p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
