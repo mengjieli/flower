@@ -85,7 +85,7 @@ class ExprAtr {
             }
         }
         this.needValue = commonInfo.needValue;
-        if (atr && atr instanceof flower.Value) {
+        if (atr && atr instanceof flower.Value && commonInfo.needValue) {
             this.value = atr;
             commonInfo.result.push(atr);
         }

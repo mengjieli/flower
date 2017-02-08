@@ -54,6 +54,7 @@ class UIComponent {
                 12: false,//absoluteState
                 13: this, //eventThis
                 14: null, //layout
+                15: false, //flexbox 是否有弹性属性
             };
             UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
             UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
@@ -201,6 +202,7 @@ class UIComponent {
                 }
             }
             p[0] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -217,6 +219,7 @@ class UIComponent {
                 }
             }
             p[1] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -227,6 +230,7 @@ class UIComponent {
                 return false;
             }
             p[2] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -237,6 +241,7 @@ class UIComponent {
                 return false;
             }
             p[3] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -247,6 +252,7 @@ class UIComponent {
                 return false;
             }
             p[4] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -257,6 +263,7 @@ class UIComponent {
                 return false;
             }
             p[5] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -267,6 +274,7 @@ class UIComponent {
                 return false;
             }
             p[6] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -277,6 +285,7 @@ class UIComponent {
                 return false;
             }
             p[7] = val;
+            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
             this.$invalidateContentBounds();
         }
 
@@ -1861,6 +1870,23 @@ class DataManager {
             }
         });
         this.addDefine({
+            "name": "RGB",
+            "members": {
+                "r": {"type": "uint"},
+                "g": {"type": "uint"},
+                "b": {"type": "uint"}
+            }
+        });
+        this.addDefine({
+            "name": "ARGB",
+            "members": {
+                "a": {"type": "uint"},
+                "r": {"type": "uint"},
+                "g": {"type": "uint"},
+                "b": {"type": "uint"}
+            }
+        });
+        this.addDefine({
             "name": "Rectangle",
             "members": {
                 "x": {"type": "int"},
@@ -1965,7 +1991,7 @@ class DataManager {
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
                         content += "\t\tthis.$setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "array" || member.type === "Array") {
-                        content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? JSON.stringify(member.init) : "null") + ",\"" + member.typeValue + "\"));\n";
                     } else if (member.type === "*") {
                         content += "\t\tthis.$setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                         content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
@@ -2037,7 +2063,7 @@ class DataManager {
                 sys.$error(3011, e, content);
             }
         } else {
-            eval(className);
+            eval(content);
         }
         item.id++;
         return this.getClass(config.name);
@@ -2536,10 +2562,10 @@ class Group extends flower.Sprite {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -2559,10 +2585,10 @@ class Group extends flower.Sprite {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -2581,7 +2607,7 @@ class Group extends flower.Sprite {
             var child;
             for (var i = 0, len = children.length; i < len; i++) {
                 child = children[i];
-                if (child.__UIComponent) {
+                if (child.__UIComponent && child.$UIComponent[15]) {
                     child.$validateUIComponent();
                 }
             }
@@ -4649,10 +4675,10 @@ class Label extends flower.TextField {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -4672,10 +4698,10 @@ class Label extends flower.TextField {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -4772,10 +4798,10 @@ class Input extends flower.TextField {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -4795,10 +4821,10 @@ class Input extends flower.TextField {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -5031,10 +5057,10 @@ class Rect extends flower.Shape {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -5054,10 +5080,10 @@ class Rect extends flower.Shape {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -5217,10 +5243,10 @@ class Image extends flower.Bitmap {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -5240,10 +5266,10 @@ class Image extends flower.Bitmap {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;

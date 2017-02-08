@@ -30,6 +30,23 @@ class DataManager {
             }
         });
         this.addDefine({
+            "name": "RGB",
+            "members": {
+                "r": {"type": "uint"},
+                "g": {"type": "uint"},
+                "b": {"type": "uint"}
+            }
+        });
+        this.addDefine({
+            "name": "ARGB",
+            "members": {
+                "a": {"type": "uint"},
+                "r": {"type": "uint"},
+                "g": {"type": "uint"},
+                "b": {"type": "uint"}
+            }
+        });
+        this.addDefine({
             "name": "Rectangle",
             "members": {
                 "x": {"type": "int"},
@@ -134,7 +151,7 @@ class DataManager {
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
                         content += "\t\tthis.$setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "array" || member.type === "Array") {
-                        content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? JSON.stringify(member.init) : "null") + ",\"" + member.typeValue + "\"));\n";
                     } else if (member.type === "*") {
                         content += "\t\tthis.$setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
                         content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
@@ -206,7 +223,7 @@ class DataManager {
                 sys.$error(3011, e, content);
             }
         } else {
-            eval(className);
+            eval(content);
         }
         item.id++;
         return this.getClass(config.name);

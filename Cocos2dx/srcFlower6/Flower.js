@@ -23,7 +23,7 @@ function __extends(d, b) {
 var flower = {};
 (function(math){
 //////////////////////////File:flower/Flower.js///////////////////////////
-var DEBUG = true;
+var DEBUG = false;
 var TIP = false;
 var $language = "zh_CN";
 var NATIVE = true;
@@ -45,12 +45,13 @@ var hasStart = false;
  * 启动引擎
  * @param language 使用的语言版本
  */
-function start(completeFunc, nativeStage, touchShow, params) {
+function start(completeFunc, params) {
     if (hasStart) {
         if (completeFunc) completeFunc();
         return;
     }
-    if (params && params.TIP) {
+    params = params || {};
+    if (params.TIP) {
         TIP = params.TIP;
         flower.sys.TIP = params.TIP;
     }
@@ -60,23 +61,26 @@ function start(completeFunc, nativeStage, touchShow, params) {
         Platform.getReady(function () {
             var stage = new Stage();
             Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
-                start2(completeFunc, nativeStage, touchShow, stage);
+                start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
             });
         });
     } else {
         var stage = new Stage();
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, nativeStage, touchShow);
-        start2(completeFunc, nativeStage, touchShow, stage);
+        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, params.nativeStage, params.touchShow);
+        start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
     }
 }
 
-function start2(completeFunc, nativeStage, touchShow, stage) {
+function start2(completeFunc, nativeStage, touchShow, stage, params) {
     flower.sys.engineType = Platform.type;
     var loader = new URLLoader("res/flower.json");
     loader.addListener(Event.COMPLETE, function (e) {
         var cfg = e.data;
         for (var key in cfg) {
             config[key] = cfg[key];
+        }
+        if (params.linkUser && cfg.remote) {
+            cfg.remote.linkUser = params.linkUser;
         }
         stage.backgroundColor = cfg.backgroundColor || 0;
         SCALE = config.scale || 1;
@@ -746,6 +750,7 @@ class PlatformSprite extends PlatformDisplayObject {
 class PlatformTextField extends PlatformDisplayObject {
 
     static $mesureTxt;
+    static $measures = {};
 
     show;
 
@@ -843,6 +848,21 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     static measureTextWidth(size, text) {
+        if(Platform.native) {
+            var $mesureTxt = PlatformTextField.$mesureTxt;
+            var sizes = PlatformTextField.$measures;
+            var width = 0;
+            for (var i = 0; i < text.length; i++) {
+                var char = text.charAt(i);
+                if (sizes[char] == null) {
+                    $mesureTxt.setFontSize(size);
+                    $mesureTxt.setString(char);
+                    sizes[char] = $mesureTxt.getContentSize().width;
+                }
+                width += sizes[char];
+            }
+            return width;
+        }
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.setFontSize(size);
         $mesureTxt.setString(text);
@@ -4990,7 +5010,7 @@ class TextField extends flower.DisplayObject {
             this.__showFocus(info);
         }
         this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
-        this.dispatchWith(flower.Event.START_INPUT,null,true);
+        this.dispatchWith(flower.Event.START_INPUT, null, true);
     }
 
     __stopInput() {
@@ -4999,7 +5019,7 @@ class TextField extends flower.DisplayObject {
         this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
         flower.EnterFrame.remove(this.__update, this);
         this.__hideFocus();
-        this.dispatchWith(flower.Event.STOP_INPUT,null,true);
+        this.dispatchWith(flower.Event.STOP_INPUT, null, true);
     }
 
     __hideFocus() {
@@ -6046,7 +6066,7 @@ class TextField extends flower.DisplayObject {
         }
         this.$moveCaretIndex();
         if (oldText != p[0]) {
-            this.dispatchWith(flower.Event.CHANGE,null,true);
+            this.dispatchWith(flower.Event.CHANGE, null, true);
         }
     }
 
@@ -6118,23 +6138,60 @@ class TextField extends flower.DisplayObject {
             var width = flower.$measureTextWidth(font.size, text);
             if (p[13] && this.$DisplayObject[3] != null) {
                 if (subline.width + width + p[29] * 2 > this.width) {
-                    for (var t = text.length; t >= 0; t--) {
-                        width = flower.$measureTextWidth(font.size, text.slice(0, t));
-                        if (subline.width + width + p[29] * 2 <= this.width) {
-                            if (t == 0) {
+                    var min = 0;
+                    var minValue = 0;
+                    var max = text.length;
+                    var maxValue = width;
+                    var widths = {};
+                    widths[text.length] = width;
+                    while (true) {
+                        var mid = ~~((min + max) / 2);
+                        var midValue = widths[mid];
+                        if (mid == min || mid == max) {
+                            if (subline.width + midValue + p[29] * 2 > this.width && mid) {
+                                mid--;
+                            }
+                            if (mid == 0) {
                                 this.__addSubLine(line, font);
                                 subline = line.sublines[line.sublines.length - 1];
-                                t = text.length + 1;
                             } else {
-                                nextText = text.slice(t, text.length);
-                                nextHtmlText = htmlText.slice(textStart + t, htmlText.length);
+                                nextText = text.slice(mid, text.length);
+                                nextHtmlText = htmlText.slice(textStart + mid, htmlText.length);
                                 nextTextStart = 0;
-                                text = text.slice(0, t);
-                                htmlText = htmlText.slice(0, textStart + t);
-                                break;
+                                text = text.slice(0, mid);
+                                htmlText = htmlText.slice(0, textStart + mid);
                             }
+                            break;
+                        }
+                        if (widths[mid] == null) {
+                            midValue = widths[mid] = flower.$measureTextWidth(font.size, text.slice(0, mid));
+                        }
+                        if (subline.width + midValue + p[29] * 2 > this.width) {
+                            max = mid;
+                            maxValue = midValue;
+                        } else {
+                            min = mid;
+                            minValue = midValue;
                         }
                     }
+
+                    //for (var t = text.length; t >= 0; t--) {
+                    //    width = flower.$measureTextWidth(font.size, text.slice(0, t));
+                    //    if (subline.width + width + p[29] * 2 <= this.width) {
+                    //        if (t == 0) {
+                    //            this.__addSubLine(line, font);
+                    //            subline = line.sublines[line.sublines.length - 1];
+                    //            t = text.length + 1;
+                    //        } else {
+                    //            nextText = text.slice(t, text.length);
+                    //            nextHtmlText = htmlText.slice(textStart + t, htmlText.length);
+                    //            nextTextStart = 0;
+                    //            text = text.slice(0, t);
+                    //            htmlText = htmlText.slice(0, textStart + t);
+                    //            break;
+                    //        }
+                    //    }
+                    //}
                 }
             }
             var item = {

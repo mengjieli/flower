@@ -55,10 +55,10 @@ class Input extends flower.TextField {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -78,10 +78,10 @@ class Input extends flower.TextField {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;

@@ -1,4 +1,4 @@
-var DEBUG = true;
+var DEBUG = false;
 var TIP = false;
 var $language = "zh_CN";
 var NATIVE = true;
