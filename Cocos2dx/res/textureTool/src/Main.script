@@ -1,0 +1,4 @@
+function start() {
+    var main = new module.Main();
+    flower.Stage.getInstance().addChild(main);
+}

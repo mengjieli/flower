@@ -8,7 +8,7 @@ class TestEvent extends TestBase {
                     this.getResult(e.type);
                 }, this);
                 setTimeout(function () {
-                    dispatcher.dispatchWidth("game");
+                    dispatcher.dispatchWith("game");
                 }, 1000);
             })
         );
@@ -25,7 +25,7 @@ class TestEvent extends TestBase {
                     this.getResult(true);
                 };
                 dispatcher.addListener("go", goListener, this);
-                dispatcher.dispatchWidth("end");
+                dispatcher.dispatchWith("end");
             })
         );
 
@@ -40,7 +40,7 @@ class TestEvent extends TestBase {
                     this.getResult(true);
                 };
                 dispatcher.addListener("end", endListener2, this);
-                dispatcher.dispatchWidth("end");
+                dispatcher.dispatchWith("end");
             })
         );
 
@@ -56,7 +56,7 @@ class TestEvent extends TestBase {
                     this.getResult(false);
                 };
                 dispatcher.addListener("end", endListener2, this);
-                dispatcher.dispatchWidth("end");
+                dispatcher.dispatchWith("end");
             })
         );
     }

@@ -11,6 +11,7 @@ class PlatformTextField extends PlatformDisplayObject {
         em.style.left = "0px";
         em.style.top = "0px";
         em.style["font-style"] = "normal";
+        //em.style["vertical-align"] = "text-bottom";
         em.style["transform-origin"] = "left top";
         this.show = em;
     }
@@ -20,6 +21,11 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
+        text = flower.StringDo.replaceString(text, "\n", "</br>");
+        text = flower.StringDo.replaceString(text, "\r", "</br>");
+        text = flower.StringDo.replaceString(text, " ", "&nbsp;");
+        text = flower.StringDo.replaceString(text, "<", "&lt;");
+        text = flower.StringDo.replaceString(text, ">", "&gt;");
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.style.fontSize = size + "px";
         var txt = this.show;
@@ -30,47 +36,47 @@ class PlatformTextField extends PlatformDisplayObject {
         if (text == "") {
             txt.innerHTML = "";
         }
-        for (var i = 0; i < text.length; i++) {
-            //取一行文字进行处理
-            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
-                var str = text.slice(start, i);
-                $mesureTxt.innerHTML = str;
-                var lineWidth = $mesureTxt.offsetWidth;
-                var findEnd = i;
-                var changeLine = false;
-                //如果这一行的文字宽大于设定宽
-                while (!autoSize && width && lineWidth > width) {
-                    changeLine = true;
-                    findEnd--;
-                    $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    lineWidth = $mesureTxt.offsetWidth;
-                }
-                if (wordWrap && changeLine) {
-                    i = findEnd;
-                    txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                } else {
-                    txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                }
-                //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.offsetHeight > height) {
-                    txt.innerHTML = (txtText);
-                    break;
-                } else {
-                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    if (wordWrap && changeLine) {
-                        txtText += "\n";
-                    }
-                }
-                start = i;
-                if (multiline == false) {
-                    break;
-                }
-            }
-        }
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\n","</br>");
-        txt.innerHTML = flower.StringDo.replaceString(txt.innerHTML,"\r","</br>");
+        txt.innerHTML = text;
+        //for (var i = 0; i < text.length; i++) {
+        //    //取一行文字进行处理
+        //    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+        //        var str = text.slice(start, i);
+        //        $mesureTxt.innerHTML = str;
+        //        var lineWidth = $mesureTxt.offsetWidth;
+        //        var findEnd = i;
+        //        var changeLine = false;
+        //        //如果这一行的文字宽大于设定宽
+        //        while (!autoSize && width && lineWidth > width) {
+        //            changeLine = true;
+        //            findEnd--;
+        //            $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            lineWidth = $mesureTxt.offsetWidth;
+        //        }
+        //        if (wordWrap && changeLine) {
+        //            i = findEnd;
+        //            txt.innerHTML = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        } else {
+        //            txt.innerHTML = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        }
+        //        //如果文字的高度已经大于设定的高，回退一次
+        //        if (!autoSize && height && txt.offsetHeight > height) {
+        //            txt.innerHTML = (txtText);
+        //            break;
+        //        } else {
+        //            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            if (wordWrap && changeLine) {
+        //                txtText += "\n";
+        //            }
+        //        }
+        //        start = i;
+        //        if (multiline == false) {
+        //            break;
+        //        }
+        //    }
+        //}
+
         $mesureTxt.innerHTML = txt.innerHTML;
-        txt.style.width = $mesureTxt.offsetWidth + "px";
+        txt.style.width = ($mesureTxt.offsetWidth + 4) + "px";
         return {
             width: $mesureTxt.offsetWidth,
             height: $mesureTxt.offsetHeight
@@ -91,7 +97,7 @@ class PlatformTextField extends PlatformDisplayObject {
 
     toColor16(color) {
         var abc;
-        var num = Math.floor(color / 16);
+        var num = math.floor(color / 16);
         abc = num + "";
         if (num == 15) {
             abc = "f";
@@ -135,6 +141,16 @@ class PlatformTextField extends PlatformDisplayObject {
         str += abc;
         return str;
     }
+
+    static measureTextWidth(size, text) {
+        text = flower.StringDo.replaceString(text, " ", "&nbsp;");
+        text = flower.StringDo.replaceString(text, "<", "&lt;");
+        text = flower.StringDo.replaceString(text, ">", "&gt;");
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.style.fontSize = size + "px";
+        $mesureTxt.innerHTML = text;
+        return $mesureTxt.offsetWidth;
+    }
 }
 
 var measureTxt = document.createElement("span");
@@ -144,3 +160,5 @@ document.body.appendChild(measureTxt);
 //measureTxt.style.width = "0px";
 PlatformTextField.$mesureTxt = measureTxt;
 //PlatformTextField.$mesureTxt.retain();
+
+flower.$measureTextWidth = PlatformTextField.measureTextWidth;

@@ -18,6 +18,7 @@ class Shape extends DisplayObject {
             9: []       //record
         };
         this.$nativeShow.draw([{x: 0, y: 0}, {x: 1, y: 0}], 0, 0, 0, 0, 0);
+        DebugInfo.displayInfo.shape++;
     }
 
     drawRect(x, y, width, height) {
@@ -27,6 +28,12 @@ class Shape extends DisplayObject {
             {x: x + width, y: y + height},
             {x: x, y: y + height},
             {x: x, y: y}]);
+    }
+
+    drawLine(startX, startY, endX, endY) {
+        this.$drawPolygon([
+            {x: startX, y: startY},
+            {x: endX, y: endY}]);
     }
 
     clear() {
@@ -247,10 +254,17 @@ class Shape extends DisplayObject {
 
     $onFrameEnd() {
         this.$redraw();
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.shape++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {
+        DebugInfo.displayInfo.shape--;
         if (!this.$nativeShow) {
             $warn(1002, this.name);
             return;

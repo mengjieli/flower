@@ -68,7 +68,7 @@ class Layout {
         this.flag = true;
     }
 
-    updateList(width, height, startIndex = 0) {
+    updateList(width, height, startIndex = 0, elementWidth = 0, elementHeight = 0) {
     }
 
     $clear() {
@@ -81,7 +81,7 @@ class Layout {
     }
 
     set fixElementSize(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         this._fixElementSize = !!val;

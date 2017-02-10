@@ -40,14 +40,13 @@ var remote = {};
             key: "__showConnectPanel",
             value: function __showConnectPanel() {
                 var content = "\n        <f:Panel width=\"350\" height=\"250\" scaleMode=\"no_scale\" xmlns:f=\"flower\">\n            <f:Rect id=\"background\" percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\"\n                      fillColor=\"0xE7E7E7\"/>\n            <f:Group left=\"1\" right=\"1\" height=\"24\" top=\"1\">\n                <f:Rect id=\"titleBar\" percentWidth=\"100\" percentHeight=\"100\" fillColor=\"0xc2c2c2\"\n                          touchBegin=\"this.startDrag();\"/>\n                <f:Image id=\"iconImage\"/>\n                <f:Label id=\"titleLabel\" y=\"3\" touchEnabled=\"false\" text=\"链接 Remote 服务器\" horizontalCenter=\"0\" fontSize=\"16\"\n                         fontColor=\"0x252325\"/>\n            </f:Group>\n            <f:Group id=\"container\" left=\"1\" right=\"1\" top=\"25\" bottom=\"50\">\n                <f:Label horizontalCenter=\"-60\" verticalCenter=\"-25\" text=\"服务器地址 : \"/>\n                <f:Rect horizontalCenter=\"40\" verticalCenter=\"-25\" width=\"120\" height=\"20\"/>\n                <f:Input id=\"serverInput\" horizontalCenter=\"40\" verticalCenter=\"-25\" text=\"192.168.1.159\" width=\"120\" fontColor=\"0xff6666\"/>\n                <f:Label x=\"10\" horizontalCenter=\"-60\"  verticalCenter=\"25\" text=\"服务器端口 : \"/>\n                <f:Rect horizontalCenter=\"40\" verticalCenter=\"25\" width=\"120\" height=\"20\"/>\n                <f:Input id=\"portInput\" horizontalCenter=\"40\" verticalCenter=\"25\" text=\"9900\" width=\"120\" fontColor=\"0xff6666\"/>\n            </f:Group>\n            <f:Group left=\"1\" right=\"1\" height=\"50\" bottom=\"0\">\n                <f:Button id=\"confirmButton\" horizontalCenter=\"0\" bottom=\"10\" width=\"60\" height=\"30\">\n                    <f:Rect percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor.up=\"0xE7E7E7\"\n                              fillColor.down=\"0xb3b3b3\"/>\n                    <f:Label text=\"确定\" horizontalCenter=\"0\" verticalCenter=\"0\"/>\n                </f:Button>\n            </f:Group>\n        </f:Panel>\n        ";
-                var ui = new flower.UIParser();
-                ui.parseUI(content);
-                ui.addListener(flower.Event.COMPLETE, this.__serverInputComplete, this);
+                var parser = new flower.UIParser();
+                var ui = parser.parseUI(content);
+                this.__serverInputComplete(ui);
             }
         }, {
             key: "__serverInputComplete",
-            value: function __serverInputComplete(e) {
-                var ui = e.data;
+            value: function __serverInputComplete(ui) {
                 if (this.__config) {
                     ui.serverInput.text = this.__config.server;
                     ui.portInput.text = this.__config.port;
@@ -117,14 +116,13 @@ var remote = {};
             key: "__showSelectClient",
             value: function __showSelectClient() {
                 var content = "\n        <f:Panel width=\"300\" height=\"400\" scaleMode=\"no_scale\" xmlns:f=\"flower\">\n            <f:Rect id=\"background\" percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\"\n                      fillColor=\"0xE7E7E7\"/>\n            <f:Group left=\"1\" right=\"1\" height=\"24\" top=\"1\">\n                <f:Rect id=\"titleBar\" percentWidth=\"100\" percentHeight=\"100\" fillColor=\"0xc2c2c2\"\n                          touchBegin=\"this.startDrag();\"/>\n                <f:Image id=\"iconImage\"/>\n                <f:Label id=\"titleLabel\" y=\"3\" touchEnabled=\"false\" text=\"选择本地资源服务器\" horizontalCenter=\"0\" fontSize=\"16\"\n                         fontColor=\"0x252325\"/>\n            </f:Group>\n            <f:Group id=\"container\" left=\"1\" right=\"1\" top=\"25\" bottom=\"50\">\n                <f:Group percentWidth=\"100\" percentHeight=\"100\">\n                    <f:Rect percentWidth=\"100\" percentHeight=\"100\" fillColor=\"0xffffff\" lineColor=\"0xcccccc\" lineWidth=\"1\"/>\n                    <f:Scroller left=\"5\" right=\"5\" top=\"5\" bottom=\"5\">\n                        <f:Rect percentWidth=\"100\" percentHeight=\"100\" fillColor=\"0xf6f4f0\"/>\n                        <f:List id=\"list\" percentWidth=\"100\" percentHeight=\"100\" selectTime=\"touch_end\" xmlns:f=\"flower\">\n                            <f:itemRenderer>\n                                <f:ItemRenderer percentWidth=\"100\" height=\"30\">\n                                    <f:Rect percentWidth=\"100\" percentHeight=\"100\" fillColor.down=\"0xd6d4d0\"\n                                              fillColor.selectedDown=\"0x64834e\" fillColor.selectedUp=\"0x96b97d\" visible.up=\"false\"\n                                              visible.down=\"true\" visible.selectedDown=\"true\"\n                                              visible.selectedUp=\"true\"/>\n                                    <f:Label text=\"id: {data.id}   name: {data.user}   ip: {data.ip}\" horizontalCenter=\"0\" verticalCenter=\"0\" fontColor=\"0x000000\"/>\n                                </f:ItemRenderer>\n                            </f:itemRenderer>\n                        </f:List>\n                    </f:Scroller>\n                </f:Group>\n            </f:Group>\n            <f:Group left=\"1\" right=\"1\" height=\"50\" bottom=\"0\">\n                <f:Button id=\"confirmButton\" horizontalCenter=\"0\" bottom=\"10\" width=\"60\" height=\"30\">\n                    <f:Rect percentWidth=\"100\" percentHeight=\"100\" lineColor=\"0x333333\" lineWidth=\"1\" fillColor.up=\"0xE7E7E7\"\n                              fillColor.down=\"0xb3b3b3\"/>\n                    <f:Label text=\"确定\" horizontalCenter=\"0\" verticalCenter=\"0\"/>\n                </f:Button>\n            </f:Group>\n        </f:Panel>\n        ";
-                var ui = new flower.UIParser();
-                ui.parseUI(content);
-                ui.addListener(flower.Event.COMPLETE, this.__clientChooseComplete, this);
+                var parser = new flower.UIParser();
+                var ui = parser.parseUI(content);
+                this.__clientChooseComplete(ui);
             }
         }, {
             key: "__clientChooseComplete",
-            value: function __clientChooseComplete(e) {
-                var ui = e.data;
+            value: function __clientChooseComplete(ui) {
                 flower.PopManager.pop(ui, true);
                 flower.Tween.to(ui, 0.3, {
                     x: (ui.parent.width - ui.width) / 2,
@@ -144,6 +142,9 @@ var remote = {};
                     ui.dispose();
                     if (list.selectedItem) {
                         _this.__client = list.selectedItem;
+                        if (_this.__config.useHttpServer) {
+                            flower.URLLoader.urlHead = "http://" + _this.__client.ip + ":" + _this.__client.httpServerPort + "/";
+                        }
                         if (_this.__readyBack) {
                             _this.__readyBack();
                             _this.__readyBack = null;
@@ -176,6 +177,21 @@ var remote = {};
                 this.__showConnectPanel();
             }
         }, {
+            key: "severIp",
+            get: function get() {
+                return this.__config.server;
+            }
+        }, {
+            key: "severPort",
+            get: function get() {
+                return this.__config.port;
+            }
+        }, {
+            key: "httpURL",
+            get: function get() {
+                return "http://" + this.__client.ip + ":" + this.__client.httpServerPort + "/";
+            }
+        }, {
             key: "remoteClientId",
             get: function get() {
                 return this.__client.id;
@@ -204,10 +220,12 @@ var remote = {};
     //////////////////////////File:remote/Remote.js///////////////////////////
 
     var Remote = function () {
-        function Remote() {
+        function Remote(back, thisObj) {
             _classCallCheck(this, Remote);
 
             this.__id = Remote.id++;
+            this.back = back;
+            this.thisObj = thisObj;
             RemoteServer.getInstance().registerRemote(this);
         }
 
@@ -218,7 +236,11 @@ var remote = {};
             }
         }, {
             key: "receive",
-            value: function receive(cmd, bytes) {}
+            value: function receive(cmd, bytes) {
+                if (this.back) {
+                    this.back.call(this.thisObj, cmd, bytes, this);
+                }
+            }
         }, {
             key: "dispose",
             value: function dispose() {
@@ -244,19 +266,19 @@ var remote = {};
     remote.Remote = Remote;
     //////////////////////////End File:remote/Remote.js///////////////////////////
 
-    //////////////////////////File:remote/File.js///////////////////////////
+    //////////////////////////File:remote/RemoteFile.js///////////////////////////
 
-    var File = function () {
-        function File(path) {
+    var RemoteFile = function () {
+        function RemoteFile(path) {
             var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-            _classCallCheck(this, File);
+            _classCallCheck(this, RemoteFile);
 
             this.__path = path;
             this.__autoUpdate = autoUpdate;
         }
 
-        _createClass(File, [{
+        _createClass(RemoteFile, [{
             key: "saveText",
             value: function saveText(text, back, thisObj) {
                 new SaveFileRemote(back, thisObj, this.__path, text, "text");
@@ -267,35 +289,51 @@ var remote = {};
                 new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
             }
         }, {
+            key: "readImageData",
+            value: function readImageData(back, thisObj) {
+                new ReadImageDataRemote(back, thisObj, this.__path);
+            }
+        }, {
+            key: "isExist",
+            value: function isExist(back, thisObj) {
+                new IsDirectionExistRemote(back, thisObj, this.__path);
+            }
+        }, {
             key: "delete",
             value: function _delete(back, thisObj) {
                 new DeleteFileRemote(back, thisObj, this.__path);
             }
         }]);
 
-        return File;
+        return RemoteFile;
     }();
 
-    remote.File = File;
-    //////////////////////////End File:remote/File.js///////////////////////////
+    remote.RemoteFile = RemoteFile;
+    //////////////////////////End File:remote/RemoteFile.js///////////////////////////
 
-    //////////////////////////File:remote/Direction.js///////////////////////////
+    //////////////////////////File:remote/RemoteDirection.js///////////////////////////
 
-    var Direction = function () {
-        function Direction(path) {
+    var RemoteDirection = function (_flower$EventDispatch) {
+        _inherits(RemoteDirection, _flower$EventDispatch);
+
+        function RemoteDirection(path) {
             var autoUpdate = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-            _classCallCheck(this, Direction);
+            _classCallCheck(this, RemoteDirection);
 
-            this.__path = path;
-            this.__autoUpdate = autoUpdate;
-            this.__list = new flower.ArrayValue();
-            if (this.__path && this.__autoUpdate) {
-                new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(RemoteDirection).call(this));
+
+            _this3.__path = path;
+            _this3.__autoUpdate = autoUpdate;
+            _this3.__list = new flower.ArrayValue();
+            _this3.__pathList = [];
+            if (_this3.__path && _this3.__autoUpdate) {
+                new ReadDirectionListRemote(_this3.__updateDirectionList, _this3, _this3.__path, _this3.__autoUpdate);
             }
+            return _this3;
         }
 
-        _createClass(Direction, [{
+        _createClass(RemoteDirection, [{
             key: "isExist",
             value: function isExist(back, thisObj) {
                 new IsDirectionExistRemote(back, thisObj, this.__path);
@@ -309,19 +347,66 @@ var remote = {};
             key: "__updateDirectionList",
             value: function __updateDirectionList(fileList) {
                 var list = this.__list;
-                list.length = 0;
                 var clazz = this.__fileClass;
-                for (var i = 0, len = fileList.length; i < len; i++) {
-                    if (clazz) {
-                        list.push(new clazz(fileList[i]));
-                    } else {
-                        list.push(fileList[i]);
+                var last = 0;
+                if (this.__typeFilter) {
+                    for (var i = 0; i < fileList.length; i++) {
+                        if (fileList[i].isDirection) continue;
+                        var findType = false;
+                        for (var t = 0; t < this.__typeFilter.length; t++) {
+                            if (this.__typeFilter[t] == fileList[i].fileType) {
+                                findType = true;
+                                break;
+                            }
+                        }
+                        if (!findType) {
+                            fileList.splice(i, 1);
+                            i--;
+                        }
                     }
                 }
+                for (var i = 0, len = fileList.length; i < len; i++) {
+                    var find = false;
+                    var deleteEnd = this.__pathList.length;
+                    for (var f = last; f < this.__pathList.length; f++) {
+                        if (this.__pathList[f] == fileList[i].path) {
+                            find = true;
+                            deleteEnd = f;
+                            break;
+                        }
+                    }
+                    while (last < deleteEnd) {
+                        this.__pathList.splice(last, 1);
+                        list.removeItemAt(last);
+                        deleteEnd--;
+                    }
+                    last = deleteEnd + 1;
+                    if (!find) {
+                        this.__pathList.push(fileList[i].path);
+                        if (clazz) {
+                            list.push(new clazz(fileList[i]));
+                        } else {
+                            list.push(fileList[i]);
+                        }
+                    }
+                }
+                while (this.__pathList.length > fileList.length) {
+                    this.__pathList.splice(fileList.length, 1);
+                    list.removeItemAt(fileList.length);
+                }
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "dispose",
             value: function dispose() {}
+        }, {
+            key: "typeFilter",
+            get: function get() {
+                return this.__typeFilter.concat();
+            },
+            set: function set(val) {
+                this.__typeFilter = val;
+            }
         }, {
             key: "list",
             get: function get() {
@@ -362,11 +447,11 @@ var remote = {};
             }
         }]);
 
-        return Direction;
-    }();
+        return RemoteDirection;
+    }(flower.EventDispatcher);
 
-    remote.Direction = Direction;
-    //////////////////////////End File:remote/Direction.js///////////////////////////
+    remote.RemoteDirection = RemoteDirection;
+    //////////////////////////End File:remote/RemoteDirection.js///////////////////////////
 
     //////////////////////////File:remote/language/zh_CN.js///////////////////////////
     var locale_strings = flower.sys.$locale_strings["zh_CN"];
@@ -383,19 +468,19 @@ var remote = {};
         function IsDirectionExistRemote(back, thisObj, path) {
             _classCallCheck(this, IsDirectionExistRemote);
 
-            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(IsDirectionExistRemote).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(IsDirectionExistRemote).call(this));
 
-            _this3.__back = back;
-            _this3.__thisObj = thisObj;
+            _this4.__back = back;
+            _this4.__thisObj = thisObj;
 
             var msg = new flower.VByteArray();
             msg.writeUInt(20);
-            msg.writeUInt(_this3.remoteClientId);
+            msg.writeUInt(_this4.remoteClientId);
             msg.writeUInt(100);
-            msg.writeUInt(_this3.id);
+            msg.writeUInt(_this4.id);
             msg.writeUTF(path);
-            _this3.send(msg);
-            return _this3;
+            _this4.send(msg);
+            return _this4;
         }
 
         _createClass(IsDirectionExistRemote, [{
@@ -405,6 +490,7 @@ var remote = {};
                     this.__back.call(this.__thisObj, msg.readBoolean());
                 }
                 this.__back = this.__thisObj = null;
+                this.dispose();
             }
         }]);
 
@@ -419,21 +505,25 @@ var remote = {};
         _inherits(ReadDirectionListRemote, _Remote2);
 
         function ReadDirectionListRemote(back, thisObj, path) {
+            var autoUpdate = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+
             _classCallCheck(this, ReadDirectionListRemote);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(ReadDirectionListRemote).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(ReadDirectionListRemote).call(this));
 
-            _this4.__back = back;
-            _this4.__thisObj = thisObj;
+            _this5.__back = back;
+            _this5.__thisObj = thisObj;
 
             var msg = new flower.VByteArray();
             msg.writeUInt(20);
-            msg.writeUInt(_this4.remoteClientId);
+            msg.writeUInt(_this5.remoteClientId);
             msg.writeUInt(102);
-            msg.writeUInt(_this4.id);
+            msg.writeUInt(_this5.id);
             msg.writeUTF(path);
-            _this4.send(msg);
-            return _this4;
+            msg.writeUTF(autoUpdate);
+            _this5.send(msg);
+            _this5.autoUpdate = autoUpdate;
+            return _this5;
         }
 
         _createClass(ReadDirectionListRemote, [{
@@ -454,7 +544,10 @@ var remote = {};
                 if (this.__back) {
                     this.__back.call(this.__thisObj, list);
                 }
-                this.__back = this.__thisObj = null;
+                if (!this.autoUpdate) {
+                    this.__back = this.__thisObj = null;
+                    this.dispose();
+                }
             }
         }]);
 
@@ -471,30 +564,39 @@ var remote = {};
         function SaveFileRemote(back, thisObj, path, data, type, width, height) {
             _classCallCheck(this, SaveFileRemote);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(SaveFileRemote).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(SaveFileRemote).call(this));
 
-            _this5.__back = back;
-            _this5.__thisObj = thisObj;
+            _this6.__back = back;
+            _this6.__thisObj = thisObj;
             if (typeof data == "string") {
-                var msg = new flower.VByteArray();
-                msg.writeUInt(20);
-                msg.writeUInt(_this5.remoteClientId);
-                msg.writeUInt(104);
-                msg.writeUInt(_this5.id);
-                msg.writeUTF(path);
-                msg.writeUTF(type);
-                msg.writeUTF(data);
-                _this5.send(msg);
-            } else {
                 var len = data.length;
                 var i = 0;
                 var index = 0;
                 while (i < len) {
                     var msg = new flower.VByteArray();
                     msg.writeUInt(20);
-                    msg.writeUInt(_this5.remoteClientId);
+                    msg.writeUInt(_this6.remoteClientId);
                     msg.writeUInt(104);
-                    msg.writeUInt(_this5.id);
+                    msg.writeUInt(_this6.id);
+                    msg.writeUTF(path);
+                    msg.writeUTF(type);
+                    msg.writeUInt(index);
+                    msg.writeUInt(Math.ceil(len / 1024) - 1);
+                    msg.writeUTF(data.slice(index * 1024, (index + 1) * 1024));
+                    _this6.send(msg);
+                    index++;
+                    i += 1024;
+                }
+            } else if (type == "png") {
+                var len = data.length;
+                var i = 0;
+                var index = 0;
+                while (i < len) {
+                    var msg = new flower.VByteArray();
+                    msg.writeUInt(20);
+                    msg.writeUInt(_this6.remoteClientId);
+                    msg.writeUInt(104);
+                    msg.writeUInt(_this6.id);
                     msg.writeUTF(path);
                     msg.writeUTF(type);
                     msg.writeUInt(index);
@@ -508,11 +610,11 @@ var remote = {};
                         i++;
                         count++;
                     }
-                    _this5.send(msg);
+                    _this6.send(msg);
                     index++;
                 }
             }
-            return _this5;
+            return _this6;
         }
 
         _createClass(SaveFileRemote, [{
@@ -525,6 +627,7 @@ var remote = {};
                     }
                     this.__back = this.__thisObj = null;
                 }
+                this.dispose();
             }
         }]);
 
@@ -541,19 +644,19 @@ var remote = {};
         function DeleteFileRemote(back, thisObj, path) {
             _classCallCheck(this, DeleteFileRemote);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(DeleteFileRemote).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(DeleteFileRemote).call(this));
 
-            _this6.__back = back;
-            _this6.__thisObj = thisObj;
+            _this7.__back = back;
+            _this7.__thisObj = thisObj;
 
             var msg = new flower.VByteArray();
             msg.writeUInt(20);
-            msg.writeUInt(_this6.remoteClientId);
+            msg.writeUInt(_this7.remoteClientId);
             msg.writeUInt(106);
-            msg.writeUInt(_this6.id);
+            msg.writeUInt(_this7.id);
             msg.writeUTF(path);
-            _this6.send(msg);
-            return _this6;
+            _this7.send(msg);
+            return _this7;
         }
 
         _createClass(DeleteFileRemote, [{
@@ -563,12 +666,60 @@ var remote = {};
                     this.__back.call(this.__thisObj);
                 }
                 this.__back = this.__thisObj = null;
+                this.dispose();
             }
         }]);
 
         return DeleteFileRemote;
     }(Remote);
     //////////////////////////End File:remote/remotes/DeleteFileRemote.js///////////////////////////
+
+    //////////////////////////File:remote/remotes/ReadImageDataRemote.js///////////////////////////
+
+
+    var ReadImageDataRemote = function (_Remote5) {
+        _inherits(ReadImageDataRemote, _Remote5);
+
+        function ReadImageDataRemote(back, thisObj, path) {
+            _classCallCheck(this, ReadImageDataRemote);
+
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ReadImageDataRemote).call(this));
+
+            _this8.__back = back;
+            _this8.__thisObj = thisObj;
+
+            var msg = new flower.VByteArray();
+            msg.writeUInt(20);
+            msg.writeUInt(_this8.remoteClientId);
+            msg.writeUInt(110);
+            msg.writeUInt(_this8.id);
+            msg.writeUTF(path);
+            _this8.send(msg);
+            return _this8;
+        }
+
+        _createClass(ReadImageDataRemote, [{
+            key: "receive",
+            value: function receive(cmd, msg) {
+                var list = [];
+                var width = msg.readUInt();
+                var height = msg.readUInt();
+                var colors = [];
+                for (var y = 0; y < height; y++) {
+                    colors[y] = [];
+                    for (var x = 0; x < width; x++) {
+                        colors[y].push(msg.readInt());
+                    }
+                }
+                if (this.__back) {
+                    this.__back.call(this.__thisObj, colors);
+                }
+            }
+        }]);
+
+        return ReadImageDataRemote;
+    }(Remote);
+    //////////////////////////End File:remote/remotes/ReadImageDataRemote.js///////////////////////////
 })();
 for (var key in remote) {
     flower[key] = remote[key];

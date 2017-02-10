@@ -2,8 +2,10 @@ class Remote {
 
     __id;
 
-    constructor() {
+    constructor(back, thisObj) {
         this.__id = Remote.id++;
+        this.back = back;
+        this.thisObj = thisObj;
         RemoteServer.getInstance().registerRemote(this);
     }
 
@@ -12,6 +14,9 @@ class Remote {
     }
 
     receive(cmd, bytes) {
+        if (this.back) {
+            this.back.call(this.thisObj, cmd, bytes, this);
+        }
     }
 
     dispose() {

@@ -34,8 +34,8 @@ class Matrix {
     }
 
     rotate(angle) {
-        var sin = Math.sin(angle);
-        var cos = Math.cos(angle);
+        var sin = math.sin(angle);
+        var cos = math.cos(angle);
         this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos,
             this.b * cos - this.d * sin, this.b * sin + this.d * cos,
             this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
@@ -62,8 +62,8 @@ class Matrix {
         var sin = 0;
         var cos = 1;
         if (rotation) {
-            sin = Math.sin(rotation);
-            cos = Math.cos(rotation);
+            sin = math.sin(rotation);
+            cos = math.cos(rotation);
         }
         this.a = cos * scaleX;
         this.b = sin * scaleY;
@@ -75,8 +75,8 @@ class Matrix {
         var sin = 0;
         var cos = 1;
         if (rotation) {
-            sin = Math.sin(rotation);
-            cos = Math.cos(rotation);
+            sin = math.sin(rotation);
+            cos = math.cos(rotation);
         }
         this.a = cos * scaleX;
         this.b = sin * scaleX;
@@ -116,8 +116,8 @@ class Matrix {
             x2 = x3;
             x3 = tmp;
         }
-        rect.x = Math.floor(x0 < x2 ? x0 : x2);
-        rect.width = Math.ceil((x1 > x3 ? x1 : x3) - rect.x);
+        rect.x = math.floor(x0 < x2 ? x0 : x2);
+        rect.width = math.ceil((x1 > x3 ? x1 : x3) - rect.x);
         if (y0 > y1) {
             tmp = y0;
             y0 = y1;
@@ -128,8 +128,8 @@ class Matrix {
             y2 = y3;
             y3 = tmp;
         }
-        rect.y = Math.floor(y0 < y2 ? y0 : y2);
-        rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+        rect.y = math.floor(y0 < y2 ? y0 : y2);
+        rect.height = math.ceil((y1 > y3 ? y1 : y3) - rect.y);
     }
 
     get deformation() {

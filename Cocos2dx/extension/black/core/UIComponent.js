@@ -8,7 +8,18 @@
  * 1020 touchBegin
  * 1021 touchEnd
  * 1022 touchRelease
+ * 1023 rightClick
  * 1100 click
+ * 1110 clickItem
+ * 1111 selectedItemChange DataGroup
+ * 1112 touchBeginItem
+ * 1130 confirm
+ * 1131 cancel
+ * 1300 loadComplete
+ * 1400 change  RadioButtonGroup
+ * 1401 change  RadioButton
+ * 1402 change ToggleButton
+ * 1500 selectedItemChange ViewStack
  */
 class UIComponent {
 
@@ -28,11 +39,12 @@ class UIComponent {
                 9: null, //uiHeight
                 10: {}, //binds
                 11: new StringValue(),//state
-                12: false, //absoluteState
+                12: false,//absoluteState
                 13: this, //eventThis
                 14: null, //layout
+                15: isContainer, //flexbox 弹性属性是否需要验证
             };
-            UIComponent.registerEvent(clazz, 1000, "creationComplete", UIEvent.CREATION_COMPLETE);
+            UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
             UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
             UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
             UIComponent.registerEvent(clazz, 1003, "remove", flower.Event.REMOVED);
@@ -178,6 +190,9 @@ class UIComponent {
                 }
             }
             p[0] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -194,6 +209,9 @@ class UIComponent {
                 }
             }
             p[1] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -204,6 +222,9 @@ class UIComponent {
                 return false;
             }
             p[2] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -214,6 +235,9 @@ class UIComponent {
                 return false;
             }
             p[3] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -224,6 +248,9 @@ class UIComponent {
                 return false;
             }
             p[4] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -234,6 +261,9 @@ class UIComponent {
                 return false;
             }
             p[5] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -244,6 +274,9 @@ class UIComponent {
                 return false;
             }
             p[6] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -254,45 +287,25 @@ class UIComponent {
                 return false;
             }
             p[7] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
-        //p.$getWidth = function () {
-        //    var p = this.$UIComponent;
-        //    if (p[0] != null && p[1] == null && p [2] != null) {
-        //        return (p[2] - p[0]) * 2;
-        //    }
-        //    else if (p[0] == null && p[1] != null && p[2] != null) {
-        //        return (p[1] - p[2]) * 2;
-        //    } else if (p[0] != null && p[1] != null) {
-        //        if (this.parent) {
-        //            return parent.width - p[1] - p[0];
-        //        }
-        //    } else {
-        //        if (p[6] && this.parent) {
-        //            this.width = parent.width * p[6] / 100;
-        //        }
-        //    }
-        //    return $root._get(Object.getPrototypeOf(p), "$getWidth", this).call(this);
-        //}
-        //
-        //p.$getHeight = function () {
-        //    var p = this.$UIComponent;
-        //    if (p[3] != null && p[4] == null && p [5] != null) {
-        //        return (p[5] - p[3]) * 2;
-        //    } else if (p[3] == null && p[4] != null && p[5] != null) {
-        //        return (p[4] - p[5]) * 2;
-        //    } else if (p[3] != null && p[4] != null) {
-        //        if (this.parent) {
-        //            return parent.height - p[4] - p[3];
-        //        }
-        //    } else {
-        //        if (p[7] && this.parent) {
-        //            return parent.height * p[7] / 100;
-        //        }
-        //    }
-        //    return $root._get(Object.getPrototypeOf(p), "$getHeight", this).call(this);
-        //}
+        p.$getBounds = function (fromParent = false) {
+            var rect = $root._get(Object.getPrototypeOf(p), "$getBounds", this).call(this, fromParent);
+            if (fromParent) {
+                var ui = this.$UIComponent;
+                if ((ui[0] == null || ui[1] == null) && ui[6] != null || (ui[0] != null && ui[1] != null)) {
+                    rect.width = 0;
+                }
+                if ((ui[3] == null || ui[4] == null) && ui[7] != null || (ui[3] != null && ui[4] != null)) {
+                    rect.height = 0;
+                }
+            }
+            return rect;
+        }
 
         Object.defineProperty(p, "left", {
             get: function () {

@@ -85,7 +85,7 @@ class URLLoader extends EventDispatcher {
             this.$setResource(res);
         }
         if (this._isLoading) {
-            dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+            dispatchWith(Event.ERROR, "URLLoader is loading, url:" + this.url);
             return;
         }
         this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
@@ -130,18 +130,26 @@ class URLLoader extends EventDispatcher {
                 loader.load();
             } else {
                 var params = {};
-                params.r = Math.random();
+                params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
+                PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
             }
         }
+    }
+
+    __concatURLHead(head, url) {
+        if (url.slice(0, 7) == "http://") {
+            return url;
+        }
+        return head + url;
     }
 
     onLoadTexturePlistComplete(e) {
         var plist = e.data;
         this._data = plist.getFrameTexture(this.url);
+        this._data.$addCount();
         this.loadComplete();
     }
 
@@ -158,7 +166,21 @@ class URLLoader extends EventDispatcher {
             this._data = texture;
             texture.$addCount();
         }
-        new CallLater(this.loadComplete, this);
+        if (this._loadInfo.splitURL) {
+            var res = ResItem.create(this._loadInfo.splitURL);
+            res.__type = ResType.TEXT;
+            var loader = new flower.URLLoader(res);
+            loader.addListener(flower.Event.COMPLETE, this.loadTextureSplitComplete, this);
+            loader.addListener(flower.Event.ERROR, this.loadError, this);
+            loader.load();
+        } else {
+            new CallLater(this.loadComplete, this);
+        }
+    }
+
+    loadTextureSplitComplete(e) {
+        this._data.$setSplitInfo(e.data);
+        this.loadComplete();
     }
 
     setTextureByLink(texture) {
@@ -191,11 +213,11 @@ class URLLoader extends EventDispatcher {
 
     loadText() {
         var params = {};
-        params.r = Math.random();
+        params.r = math.random();
         for (var key in this._params) {
             params[key] = this._params;
         }
-        PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
+        PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
     }
 
     loadTextComplete(content) {
@@ -253,7 +275,19 @@ class URLLoader extends EventDispatcher {
                 break;
             }
         }
-        this.dispatchWidth(Event.COMPLETE, this._data);
+        if (this.isDispose) {
+            if (this._data && this._type == ResType.IMAGE) {
+                if (this._recordUse) {
+                    this._data.$use = true;
+                }
+                //if (!this._loadInfo.plist) {
+                    this._data.$delCount();
+                //}
+                this._data = null;
+            }
+            return;
+        }
+        this.dispatchWith(Event.COMPLETE, this._data);
         this._selfDispose = true;
         this.dispose();
         this._selfDispose = false;
@@ -261,7 +295,7 @@ class URLLoader extends EventDispatcher {
 
     loadError(e) {
         if (this.hasListener(Event.ERROR)) {
-            this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
+            this.dispatchWith(Event.ERROR, getLanguage(2003, this._loadInfo.url));
             if (this._links) {
                 for (var i = 0; i < this._links.length; i++) {
                     this._links[i].loadError();
@@ -274,13 +308,23 @@ class URLLoader extends EventDispatcher {
         }
     }
 
+    $useImage() {
+        if (!this._data) {
+            this._recordUse = true;
+            return;
+        }
+        this._data.$use = true;
+    }
+
     dispose() {
         if (!this._selfDispose) {
             super.dispose();
             return;
         }
         if (this._data && this._type == ResType.IMAGE) {
-            this._data.$delCount();
+            //if (!this._loadInfo.plist) {
+                this._data.$delCount();
+            //}
             this._data = null;
         }
         if (this._createRes && this._res) {

@@ -7,7 +7,7 @@ class Main {
     }
 
     ready() {
-        trace("ready");
+        flower.URLLoader.urlHead = "http://localhost:12000/";
         var preloading = new PreLoading();
         preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
     }
@@ -15,11 +15,8 @@ class Main {
     loadThemeComplete(e) {
         e.currentTarget.removeListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         var stage = flower.Stage.getInstance();
-        stage.backgroundColor = 0;
-
         var ui = new flower.UIParser();
-        ui.parseUIAsync("modules/gameEditor/EditorMain.xml");
-        //ui.parseUIAsync("modules/dungeonEditor/Main.xml");
+        ui.parseUIAsync("res/JSONTextArea.xml");
         stage.addChild(ui);
     }
 }

@@ -69,7 +69,7 @@ class LinearLayout extends Layout {
         return size;
     }
 
-    updateList(width, height, startIndex = 0) {
+    updateList(width, height, startIndex = 0, elementWidth = 0, elementHeight = 0) {
         //flower.trace("update layout",flower.EnterFrame.frame);
         if (!this.flag) {
             return;
@@ -84,11 +84,13 @@ class LinearLayout extends Layout {
         var i;
         if (this._align == flower.Layout.VerticalAlign) {
             if (this._fixElementSize) {
-                var eh = list[0].height;
-                for (i = 0; i < len; i++) {
-                    list[i].y = (i + startIndex) * (eh + this._gap);
+                if (list.length) {
+                    elementHeight = elementHeight || list[0].height;
                 }
-                this._maxY = (len + startIndex) * (eh + this._gap);
+                for (i = 0; i < len; i++) {
+                    list[i].y = (i + startIndex) * (elementHeight + this._gap);
+                }
+                this._maxY = (len + startIndex) * (elementHeight + this._gap);
             }
             else {
                 var y = 0;
@@ -101,11 +103,13 @@ class LinearLayout extends Layout {
         }
         if (this._align == flower.Layout.HorizontalAlign) {
             if (this._fixElementSize) {
-                var ew = list[0].width;
-                for (i = 0; i < len; i++) {
-                    list[i].x = (i + startIndex) * (ew + this._gap);
+                if (list.length) {
+                    elementWidth = elementWidth || list[0].height;
                 }
-                this._maxX = (len + startIndex) * (ew + this._gap);
+                for (i = 0; i < len; i++) {
+                    list[i].x = (i + startIndex) * (elementWidth + this._gap);
+                }
+                this._maxX = (len + startIndex) * (elementWidth + this._gap);
             }
             else {
                 var x = 0;

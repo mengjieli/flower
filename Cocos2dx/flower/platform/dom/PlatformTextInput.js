@@ -14,8 +14,14 @@ class PlatformTextInput extends PlatformDisplayObject {
         input.style.position = "absolute";
         input.style.left = "0px";
         input.style.top = "0px";
+        input.style["background"] = "none";
+        input.style["border"] = "none";
         input.style["font-style"] = "normal";
         input.style["transform-origin"] = "left top";
+        input.style["vertical-align"] = "bottom";
+        input.onpropertychange = function() {
+            console.log(arguments);
+        }
         this.show = input;
     }
 
@@ -57,54 +63,58 @@ class PlatformTextInput extends PlatformDisplayObject {
         return this.show.value;
     }
 
+    setNativeText(val) {
+        this.show.value = val;
+    }
+
     changeText(text, width, height, size, wordWrap, multiline, autoSize) {
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.style.fontSize = size + "px";
         var txt = this.show;
         txt.style.fontSize = size + "px";
-        txt.value = "";
-        var txtText = "";
-        var start = 0;
-        if (text == "") {
-            txt.value = "";
-        }
-        for (var i = 0; i < text.length; i++) {
-            //取一行文字进行处理
-            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
-                var str = text.slice(start, i);
-                $mesureTxt.innerHTML = str;
-                var lineWidth = $mesureTxt.offsetWidth;
-                var findEnd = i;
-                var changeLine = false;
-                //如果这一行的文字宽大于设定宽
-                while (!autoSize && width && lineWidth > width) {
-                    changeLine = true;
-                    findEnd--;
-                    $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    lineWidth = $mesureTxt.offsetWidth;
-                }
-                if (wordWrap && changeLine) {
-                    i = findEnd;
-                    txt.value = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                } else {
-                    txt.value = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                }
-                //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.offsetHeight > height) {
-                    txt.value = (txtText);
-                    break;
-                } else {
-                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    if (wordWrap && changeLine) {
-                        txtText += "\n";
-                    }
-                }
-                start = i;
-                if (multiline == false) {
-                    break;
-                }
-            }
-        }
+        txt.value = text;
+        //var txtText = "";
+        //var start = 0;
+        //if (text == "") {
+        //    txt.value = "";
+        //}
+        //for (var i = 0; i < text.length; i++) {
+        //    //取一行文字进行处理
+        //    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+        //        var str = text.slice(start, i);
+        //        $mesureTxt.innerHTML = str;
+        //        var lineWidth = $mesureTxt.offsetWidth;
+        //        var findEnd = i;
+        //        var changeLine = false;
+        //        //如果这一行的文字宽大于设定宽
+        //        while (!autoSize && width && lineWidth > width) {
+        //            changeLine = true;
+        //            findEnd--;
+        //            $mesureTxt.innerHTML = text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            lineWidth = $mesureTxt.offsetWidth;
+        //        }
+        //        if (wordWrap && changeLine) {
+        //            i = findEnd;
+        //            txt.value = (txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        } else {
+        //            txt.value = (txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        }
+        //        //如果文字的高度已经大于设定的高，回退一次
+        //        if (!autoSize && height && txt.offsetHeight > height) {
+        //            txt.value = (txtText);
+        //            break;
+        //        } else {
+        //            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            if (wordWrap && changeLine) {
+        //                txtText += "\n";
+        //            }
+        //        }
+        //        start = i;
+        //        if (multiline == false) {
+        //            break;
+        //        }
+        //    }
+        //}
         txt.value = flower.StringDo.replaceString(txt.value, "\n", "</br>");
         txt.value = flower.StringDo.replaceString(txt.value, "\r", "</br>");
         $mesureTxt.innerHTML = txt.value;
@@ -139,7 +149,7 @@ class PlatformTextInput extends PlatformDisplayObject {
 
     toColor16(color) {
         var abc;
-        var num = Math.floor(color / 16);
+        var num = math.floor(color / 16);
         abc = num + "";
         if (num == 15) {
             abc = "f";

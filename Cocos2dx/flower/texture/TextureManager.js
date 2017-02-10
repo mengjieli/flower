@@ -28,7 +28,7 @@ class TextureManager {
         var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
         this.list.push(texture);
         if (DEBUG) {
-            DebugInfo.getInstance().addTexture(texture);
+            DebugInfo.addTexture(texture);
         }
         return texture;
     }
@@ -59,12 +59,16 @@ class TextureManager {
                 if (texture.dispose()) {
                     this.list.splice(i, 1);
                     if (DEBUG) {
-                        DebugInfo.getInstance().delTexture(texture);
+                        DebugInfo.delTexture(texture);
                     }
                     i--;
                 }
             }
         }
+    }
+
+    $dispose() {
+        this.list = [];
     }
 
 

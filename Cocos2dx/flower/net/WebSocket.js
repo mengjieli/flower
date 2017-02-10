@@ -8,7 +8,7 @@ class WebSocket extends flower.EventDispatcher {
         super();
     }
 
-    connect(ip, port) {
+    connect(ip, port, path = "") {
         if (this._localWebSocket) {
             this._localWebSocket.releaseWebSocket(this.localWebSocket);
         }
@@ -16,7 +16,7 @@ class WebSocket extends flower.EventDispatcher {
         this._ip = ip;
         this._port = port;
         this._localWebSocket = new PlatformWebSocket();
-        this._localWebSocket.bindWebSocket(ip, port, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
+        this._localWebSocket.bindWebSocket(ip, port, path, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
     }
 
     get ip() {
@@ -33,7 +33,7 @@ class WebSocket extends flower.EventDispatcher {
 
     onConnect() {
         this._isConnect = true;
-        this.dispatchWidth(flower.Event.CONNECT);
+        this.dispatchWith(flower.Event.CONNECT);
     }
 
     onReceiveMessage(type, data) {
@@ -48,11 +48,11 @@ class WebSocket extends flower.EventDispatcher {
     }
 
     onError() {
-        this.dispatchWidth(flower.Event.ERROR);
+        this.dispatchWith(flower.Event.ERROR);
     }
 
     onClose() {
-        this.dispatchWidth(flower.Event.CLOSE);
+        this.dispatchWith(flower.Event.CLOSE);
     }
 
     close() {

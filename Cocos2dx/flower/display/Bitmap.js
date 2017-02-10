@@ -9,7 +9,9 @@ class Bitmap extends DisplayObject {
         this.texture = texture;
         this.$Bitmap = {
             0: null,    //scale9Grid
+            1: true    //touchSpace
         }
+        DebugInfo.displayInfo.bitmap++;
     }
 
     $setTexture(val) {
@@ -37,7 +39,7 @@ class Bitmap extends DisplayObject {
             this.$nativeShow.setTexture(Texture.$blank);
         }
         if (this.__texture && this.__texture.dispatcher) {
-            this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+            this.__texture.dispatcher.addListener(Event.CHANGE, this.$updateTexture, this);
         }
         this.$invalidateContentBounds();
         return true;
@@ -69,15 +71,40 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
-    $measureContentBounds(rect) {
-        if (this.__texture) {
-            rect.x = this.__texture.offX;
-            rect.y = this.__texture.offY;
-            var p = this.$DisplayObject;
-            rect.width = p[3] || this.__texture.width;
-            rect.height = p[4] || this.__texture.height;
+    $getMouseTarget(touchX, touchY, multiply) {
+        var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
+        var p = this.$DisplayObject;
+        p[10] = touchX;
+        p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
+        var bounds;
+        bounds = Rectangle.$TempRectangle;
+        if (this.$Bitmap[1] || !this.__texture) {
+            bounds.x = 0;
+            bounds.y = 0;
+            bounds.width = this.width;
+            bounds.height = this.height;
         } else {
-            rect.x = rect.y = rect.width = rect.height = 0;
+            bounds.x = this.__texture.offX;
+            bounds.y = this.__texture.offY;
+            bounds.width = this.width - this.__texture.offX;
+            bounds.height = this.height - this.__texture.offY;
+        }
+        if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+            return this;
+        }
+        return null;
+    }
+
+    $measureContentBounds(rect) {
+        rect.x = rect.y = 0;
+        if (this.__texture) {
+            rect.width = this.__texture.width;
+            rect.height = this.__texture.height;
+        } else {
+            rect.width = rect.height = 0;
         }
     }
 
@@ -102,6 +129,18 @@ class Bitmap extends DisplayObject {
         return true;
     }
 
+    $setTouchSpace(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        var p = this.$Bitmap;
+        if (p[1] == val) {
+            return;
+        }
+        p[1] = val;
+    }
+
     get texture() {
         return this.__texture;
     }
@@ -119,11 +158,20 @@ class Bitmap extends DisplayObject {
         this.$setScale9Grid(val);
     }
 
+    get touchSpace() {
+        return this.$Bitmap[1];
+    }
+
+    set touchSpace(val) {
+        this.$setTouchSpace(val);
+    }
+
     dispose() {
         if (!this.$nativeShow) {
             $warn(1002, this.name);
             return;
         }
+        DebugInfo.displayInfo.bitmap--;
         this.texture = null;
         super.dispose();
         Platform.release("Bitmap", this.$nativeShow);

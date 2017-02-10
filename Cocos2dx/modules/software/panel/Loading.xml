@@ -1,6 +1,0 @@
-<f:Group class="Loading" width="150" height="20" xmlns:f="flower">
-    <f:script src="./Loading.script"/>
-    <f:Rect percentWidth="100" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor="0xE7E7E7"/>
-    <f:Rect percentWidth="{data.percent*100}" percentHeight="100" lineColor="0x333333" lineWidth="1" fillColor="0x3d3d3d"/>
-    <f:Label fontColor="0xffffff" y="25" text="{data.tip}" horizontalCenter="0"/>
-</f:Group>

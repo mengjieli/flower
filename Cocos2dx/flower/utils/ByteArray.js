@@ -1,7 +1,13 @@
 class ByteArray {
     
-    constructor(array) {
+    constructor() {
         this.big = false;
+        this.position = 0;
+        this.bytes = [];
+        this.length = 0;
+    }
+
+    readFromArray(array) {
         this.position = 0;
         if (array) {
             this.bytes = array;
@@ -120,7 +126,7 @@ class ByteArray {
     }
 
     writeUTFBytes(val) {
-        var arr = UTFChange.stringToBytes(val);
+        var arr = StringDo.stringToBytes(val);
         for (var i = 0; i < arr.length; i++) {
             this.bytes.splice(this.position, 0, arr[i]);
             this.position++;
@@ -206,13 +212,13 @@ class ByteArray {
 
     readUTF() {
         var len = this.readShort();
-        var val = UTFChange.numberToString(this.bytes.slice(this.position, this.position + len));
+        var val = StringDo.numberToString(this.bytes.slice(this.position, this.position + len));
         this.position += len;
         return val;
     }
 
     readUTFBytes(len) {
-        var val = UTFChange.numberToString(this.bytes.slice(this.position, this.position + len));
+        var val = StringDo.numberToString(this.bytes.slice(this.position, this.position + len));
         this.position += len;
         return val;
     }
@@ -221,8 +227,8 @@ class ByteArray {
         return this.length - this.position;
     }
 
-    getData() {
-        return this.bytes;
+    get data() {
+        return this.bytes.concat();
     }
 }
 

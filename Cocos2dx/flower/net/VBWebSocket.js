@@ -5,13 +5,15 @@ class VBWebSocket extends WebSocket {
     remotes = {};
     backs = {};
     zbacks = {};
+    errorCodeType;
 
-    constructor(remote = false) {
+    constructor(remote = false, errorCodeType = "uint") {
         super();
         this._remote = remote;
         this.remotes = {};
         this.backs = {};
         this.zbacks = {};
+        this.errorCodeType = errorCodeType;
     }
 
     get remote() {
@@ -38,18 +40,23 @@ class VBWebSocket extends WebSocket {
             var zbackList = this.zbacks[backCmd];
             if (zbackList) {
                 removeList = [];
-                var errorCode = bytes.readUInt();
+                var errorCode;
+                if (this.errorCodeType == "uint") {
+                    errorCode = bytes.readUInt();
+                } else if (this.errorCodeType == "int") {
+                    errorCode = bytes.readInt();
+                }
                 a = zbackList.concat();
                 for (i = 0; i < a.length; i++) {
-                    a[i].func.call(a[i].thisObj, backCmd, errorCode,bytes);
+                    a[i].func.call(a[i].thisObj, backCmd, errorCode, bytes);
                     if (a[i].once) {
                         removeList.push(a[i].id);
                     }
                 }
                 for (i = 0; i < removeList.length; i++) {
-                    for (f = 0; f < this.zbacks[cmd].length; f++) {
-                        if (this.zbacks[cmd][f].id == removeList[i]) {
-                            this.zbacks[cmd].splice(f, 1);
+                    for (f = 0; f < this.zbacks[backCmd].length; f++) {
+                        if (this.zbacks[backCmd][f].id == removeList[i]) {
+                            this.zbacks[backCmd].splice(f, 1);
                             break;
                         }
                     }
@@ -159,7 +166,7 @@ class VBWebSocket extends WebSocket {
         this.zbacks[cmd].push({func: back, thisObj: thisObj, id: VBWebSocket.id++});
     }
 
-    removeZeroe(cmd, back, thisObj) {
+    removeZero(cmd, back, thisObj) {
         var list = this.zbacks[cmd];
         if (list) {
             for (var i = 0; i < list.length; i++) {

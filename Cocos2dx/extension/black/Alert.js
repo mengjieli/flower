@@ -14,12 +14,12 @@ class Alert extends Panel {
     }
 
     $onConfirm(e) {
-        this.dispatchWidth(flower.Event.CONFIRM);
+        this.dispatchWith(flower.Event.CONFIRM);
         this.closePanel();
     }
 
     $onCancel(e) {
-        this.dispatchWidth(flower.Event.CANCEL);
+        this.dispatchWith(flower.Event.CANCEL);
         this.closePanel();
     }
 

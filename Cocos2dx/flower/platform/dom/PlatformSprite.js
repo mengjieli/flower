@@ -36,6 +36,11 @@ class PlatformSprite extends PlatformDisplayObject {
         }
     }
 
+
+    setAlpha(val) {
+
+    }
+
     resetChildIndex(children) {
         for (var i = 0, len = children.length; i < len; i++) {
             var show = children[i].$nativeShow.show;

@@ -1,0 +1,35 @@
+<f:Group class="Main" percentWidth="100" percentHeight="100" creationComplete="this.init();" xmlns:f="flower"
+         xmlns:s="res/software/module.json">
+    <f:script src="./Main.script"/>
+    <f:Rect fillColor="0xcccccc" percentWidth="100" percentHeight="100"/>
+    <f:Group y="40">
+        <f:Label text="资源路径" x="10"/>
+        <s:Input id="input" text="res/bl_02.png" x="70" width="200" height="20"/>
+        <s:Button1 x="300" label="载入" height="20" click="this.loadPicture();"/>
+        <f:Label text="输出路径" x="400"/>
+        <s:Input id="output" text="res/" x="470" width="200" height="20"/>
+        <s:Button1 x="700" label="导出" height="20" click="this.exportRes();"/>
+    </f:Group>
+    <f:Group top="70">
+        <f:Group x="5" y="5">
+            <f:Rect percentWidth="100" percentHeight="100" fillColor="0xaaaaaa"/>
+            <f:Image id="img"/>
+            <f:Shape id="line"/>
+            <f:Shape id="shape"/>
+        </f:Group>
+    </f:Group>
+    <f:Group top="70" left="500">
+        <f:Label text="预览" x="5" y="5"/>
+        <f:List id="container" y="30">
+            <f:layout>
+                <f:VerticalLayout fixElementSize="false" gap="5"/>
+            </f:layout>
+            <f:itemRenderer>
+                <f:ItemRenderer>
+                    <f:Rect percentWidth="100" percentHeight="100" fillColor="0xaaaaaa"/>
+                    <f:Image source="{data}"/>
+                </f:ItemRenderer>
+            </f:itemRenderer>
+        </f:List>
+    </f:Group>
+</f:Group>

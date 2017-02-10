@@ -50,13 +50,12 @@ class RemoteServer extends flower.VBWebSocket {
             </f:Group>
         </f:Panel>
         `;
-        var ui = new flower.UIParser();
-        ui.parseUI(content);
-        ui.addListener(flower.Event.COMPLETE, this.__serverInputComplete, this);
+        var parser = new flower.UIParser();
+        var ui = parser.parseUI(content);
+        this.__serverInputComplete(ui);
     }
 
-    __serverInputComplete(e) {
-        var ui = e.data;
+    __serverInputComplete(ui) {
         if (this.__config) {
             ui.serverInput.text = this.__config.server;
             ui.portInput.text = this.__config.port;
@@ -160,13 +159,12 @@ class RemoteServer extends flower.VBWebSocket {
             </f:Group>
         </f:Panel>
         `;
-        var ui = new flower.UIParser();
-        ui.parseUI(content);
-        ui.addListener(flower.Event.COMPLETE, this.__clientChooseComplete, this);
+        var parser = new flower.UIParser();
+        var ui = parser.parseUI(content);
+        this.__clientChooseComplete(ui)
     }
 
-    __clientChooseComplete(e) {
-        var ui = e.data;
+    __clientChooseComplete(ui) {
         flower.PopManager.pop(ui, true);
         flower.Tween.to(ui, 0.3, {
             x: (ui.parent.width - ui.width) / 2,
@@ -186,6 +184,9 @@ class RemoteServer extends flower.VBWebSocket {
             ui.dispose();
             if (list.selectedItem) {
                 _this.__client = list.selectedItem;
+                if (_this.__config.useHttpServer) {
+                    flower.URLLoader.urlHead = "http://" + _this.__client.ip + ":" + _this.__client.httpServerPort + "/";
+                }
                 if (_this.__readyBack) {
                     _this.__readyBack();
                     _this.__readyBack = null;
@@ -214,6 +215,18 @@ class RemoteServer extends flower.VBWebSocket {
     onClose() {
         super.onConnect();
         this.__showConnectPanel();
+    }
+
+    get severIp() {
+        return this.__config.server;
+    }
+
+    get severPort() {
+        return this.__config.port;
+    }
+
+    get httpURL() {
+        return "http://" + this.__client.ip + ":" + this.__client.httpServerPort + "/";
     }
 
     get remoteClientId() {

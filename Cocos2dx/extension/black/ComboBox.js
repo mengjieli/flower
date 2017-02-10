@@ -31,7 +31,7 @@ class ComboBox extends Group {
         if (p[9]) {
             return;
         }
-        p[8] = e.item;
+        p[8] = e.data;
         if (p[0]) {
             if (p[8] && p[8][p[4]]) {
                 p[0].text = p[8][p[4]];
@@ -120,8 +120,8 @@ class ComboBox extends Group {
         }
         if (p[2]) {
             p[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-            p[2].removeListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-            p[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+            p[2].removeListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            p[2].removeListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
         }
         p[2] = val;
         if (val) {
@@ -130,8 +130,8 @@ class ComboBox extends Group {
                 val.selectedItem = p[8];
             }
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-            val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-            val.addListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+            val.addListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            val.addListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
         }
     }
 
@@ -169,7 +169,11 @@ class ComboBox extends Group {
     }
 
     set labelField(val) {
-        this.$comboBox[4] = val;
+        var p = this.$comboBox;
+        if(p[4] == val) {
+            return;
+        }
+        p[4] = val;
         if (p[0]) {
             if (p[8] && p[8][p[4]]) {
                 p[0].text = p[8][p[4]];
@@ -201,16 +205,14 @@ class ComboBox extends Group {
             return;
         }
         if (p[7] && p[7] instanceof flower.Value) {
-            p[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+            p[7].removeListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
         }
         p[7] = val;
         if (p[7]) {
             p[9] = true;
             if (p[7] instanceof flower.Value) {
-                p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
-                if (p[7].enumList) {
-                    this.dataProvider = new flower.ArrayValue(p[7].enumList);
-                }
+                p[7].addListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
+                this.dataProvider = new flower.ArrayValue(p[7].enumList);
             }
             p[9] = false;
             this.__typeValueChange();

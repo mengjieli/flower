@@ -74,11 +74,11 @@ class Rectangle {
         var y0 = this.y;
         var x1 = clipRect.x;
         var y1 = clipRect.y;
-        var l = Math.max(x0, x1);
-        var r = Math.min(x0 + this.width, x1 + clipRect.width);
+        var l = math.max(x0, x1);
+        var r = math.min(x0 + this.width, x1 + clipRect.width);
         if (l <= r) {
-            var t = Math.max(y0, y1);
-            var b = Math.min(y0 + this.height, y1 + clipRect.height);
+            var t = math.max(y0, y1);
+            var b = math.min(y0 + this.height, y1 + clipRect.height);
             if (t <= b) {
                 this.setTo(l, t, r - l, b - t);
                 return this;
@@ -89,7 +89,7 @@ class Rectangle {
     }
 
     intersects(toIntersect) {
-        return Math.max(this.x, toIntersect.x) <= Math.min(this.right, toIntersect.right) && Math.max(this.y, toIntersect.y) <= Math.min(this.bottom, toIntersect.bottom);
+        return math.max(this.x, toIntersect.x) <= math.min(this.right, toIntersect.right) && math.max(this.y, toIntersect.y) <= math.min(this.bottom, toIntersect.bottom);
     }
 
     isEmpty() {
@@ -108,14 +108,14 @@ class Rectangle {
     }
 
     _getBaseWidth(angle) {
-        var u = Math.abs(Math.cos(angle));
-        var v = Math.abs(Math.sin(angle));
+        var u = math.abs(math.cos(angle));
+        var v = math.abs(math.sin(angle));
         return u * this.width + v * this.height;
     }
 
     _getBaseHeight(angle) {
-        var u = Math.abs(Math.cos(angle));
-        var v = Math.abs(Math.sin(angle));
+        var u = math.abs(math.cos(angle));
+        var v = math.abs(math.sin(angle));
         return v * this.width + u * this.height;
     }
 
@@ -140,6 +140,8 @@ class Rectangle {
         }
         return rect;
     }
+
+    static $TempRectangle = new Rectangle();
 }
 
 exports.Rectangle = Rectangle;

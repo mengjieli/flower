@@ -9,11 +9,17 @@ class MouseEvent extends Event {
         super(type, bubbles);
     }
 
-    get touchX() {
+    get mouseX() {
+        if (this.currentTarget) {
+            return this.currentTarget.mouseX;
+        }
         return this.$touchX;
     }
 
-    get touchY() {
+    get mouseY() {
+        if (this.currentTarget) {
+            return this.currentTarget.mouseY;
+        }
         return this.$touchY;
     }
 

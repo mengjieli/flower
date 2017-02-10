@@ -53,7 +53,7 @@ class PlistFrame {
             }
         }
         this._moveX = this._offX + (this._sourceWidth - this._width) / 2;
-        this._moveY = this._offY + (this._sourceHeight - this._height) / 2;
+        this._moveY = -this._offY + (this._sourceHeight - this._height) / 2;
     }
 
     get name() {
@@ -66,7 +66,7 @@ class PlistFrame {
 
     get texture() {
         if (!this._texture) {
-            this._texture = this._plist.texture.createSubTexture(this._x, this._y, this._width, this._height, this._moveX, this._moveY, this._rotation);
+            this._texture = this._plist.texture.createSubTexture(this._name, this._x, this._y, this._width, this._height, this._sourceWidth, this._sourceHeight, this._moveX, this._moveY, this._rotation);
         }
         return this._texture;
     }
@@ -75,3 +75,5 @@ class PlistFrame {
         this._texture = null;
     }
 }
+
+exports.PlistFrame = PlistFrame;

@@ -7,7 +7,7 @@ class Compiler {
         this._parser = new Parser();
     }
 
-    parserExpr(content, checks, objects, classes, result) {
+    parserExpr(content, checks, objects, classes, result, binding) {
         var scanner = new Scanner();
         var common = {
             "content": content,
@@ -18,7 +18,8 @@ class Compiler {
             "tokenValue": null,
             "scanner": this._scanner,
             "nodeStack": null,
-            bindList: []
+            "bindList": [],
+            "binding": binding
         };
         this._scanner.setCommonInfo(common);
         this._parser.setCommonInfo(common);
@@ -34,10 +35,10 @@ class Compiler {
 
     static ist;
 
-    static parserExpr(content, checks, objects, classes, result) {
+    static parserExpr(content, checks, objects, classes, result, binding) {
         if (!Compiler.ist) {
             Compiler.ist = new Compiler();
         }
-        return Compiler.ist.parserExpr(content, checks, objects, classes, result);
+        return Compiler.ist.parserExpr(content, checks, objects, classes, result, binding);
     }
 }

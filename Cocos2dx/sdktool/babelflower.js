@@ -177,8 +177,12 @@ var list = [
     "PlatformShaderType",
     "PlatformWebSocket",
 
-    "DebugInfo",
+    "NativeDisplayInfo",
+    "DisplayInfo",
+    "CpuInfo",
+    "FrameInfo",
     "TextureInfo",
+    "DebugInfo",
 
     "CoreTime",
 
@@ -197,6 +201,7 @@ var list = [
     "ColorFilter",
     "StrokeFilter",
     "BlurFilter",
+    "DyeingFilter",
 
     "Matrix",
     "Point",
@@ -209,10 +214,12 @@ var list = [
     "Sprite",
     "Mask",
     "Bitmap",
+    "$TextField",
     "TextField",
-    "TextInput",
+    "$TextInput",
     "Shape",
     "Stage",
+    "Particle",
 
     "DragManager",
     "MenuManager",
@@ -249,6 +256,7 @@ var list = [
 
     "EnterFrame",
     "CallLater",
+    "DelayCall",
     "ObjectDo",
     "StringDo",
     "VByteArray",
@@ -256,6 +264,7 @@ var list = [
     "XMLAttribute",
     "XMLElement",
     "XMLNameSpace",
+    "Math"
 ];
 var fileContent = "";
 fileContent += `
@@ -282,13 +291,13 @@ function __extends(d, b) {
 }
 var flower = {};
 `;
-fileContent += "(function(){\n";
+fileContent += "(function(math){\n";
 while (list.length) {
     var name = list.shift();
     file = files[i];
     for (var i = 0; i < files.length; i++) {
         var f = files[i];
-        if (f.url.slice(0, "flower/platform/dom/".length) == "flower/platform/dom/") continue;
+        if(f.url.slice(0, "flower/platform/".length) == "flower/platform/" && f.url.slice(0, "flower/platform/cocos2dx/".length) != "flower/platform/cocos2dx/") continue;
         if (f.name == name) {
             fileContent += "//////////////////////////File:" + files[i].url + "///////////////////////////\n";
             fileContent += files[i].readContent() + "\n";
@@ -296,7 +305,7 @@ while (list.length) {
         }
     }
 }
-fileContent += "})();\n";
+fileContent += "})(Math);\n";
 fileContent += "var trace = flower.trace;\n";
 fileContent = StringDo.replaceString(fileContent, "exports.", "flower.");
 //fileContent += "var flower = exports;\n";

@@ -19,7 +19,49 @@ uniform float scaleGapX;
 uniform float scaleGapY;
 uniform float scaleX;
 uniform float scaleY;
+uniform int plist;
+uniform float plistStartX;
+uniform float plistEndX;
+uniform float plistStartY;
+uniform float plistEndY;
 
+uniform int split;
+uniform vec4 split1;
+uniform vec4 splitSource1;
+uniform vec4 splitOff1;
+uniform vec4 split2;
+uniform vec4 splitSource2;
+uniform vec4 splitOff2;
+uniform vec4 split3;
+uniform vec4 splitSource3;
+uniform vec4 splitOff3;
+uniform vec4 split4;
+uniform vec4 splitSource4;
+uniform vec4 splitOff4;
+uniform vec4 split5;
+uniform vec4 splitSource5;
+uniform vec4 splitOff5;
+uniform vec4 split6;
+uniform vec4 splitSource6;
+uniform vec4 splitOff6;
+uniform vec4 split7;
+uniform vec4 splitSource7;
+uniform vec4 splitOff7;
+uniform vec4 split8;
+uniform vec4 splitSource8;
+uniform vec4 splitOff8;
+uniform vec4 split9;
+uniform vec4 splitSource9;
+uniform vec4 splitOff9;
+uniform vec4 split10;
+uniform vec4 splitSource10;
+uniform vec4 splitOff10;
+uniform vec4 split11;
+uniform vec4 splitSource11;
+uniform vec4 splitOff11;
+uniform vec4 split12;
+uniform vec4 splitSource12;
+uniform vec4 splitOff12;
 
 uniform vec4 filters1;
 uniform vec4 filters2;
@@ -43,6 +85,7 @@ vec4 getColorBeforeBlur(float posx,float posy);
 vec4 getColor(float posx,float posy);
 vec4 filter(vec4 color,float posx,float posy);
 vec4 filter100(vec4 color,float posx,float posy);
+vec4 dyeingFilter(vec4 color,float colorR,float colorG,float colorB);
 vec4 colorFilter(vec4 color,float colorH,float colorS,float colorL);
 vec4 strokeFilter(float strokeWidth,float r,float g,float b,float posx,float posy, vec4 color);
 vec4 blurFilter(vec4 color,float posx,float posy,float blurX,float blurY);
@@ -64,6 +107,10 @@ vec4 getColorBeforeBlur(float posx,float posy) {
 
 vec4 getColor(float posx,float posy) {
     if(scale9 > 0) {
+        if(plist == 1) {
+            posx = (posx - plistStartX) / (plistEndX - plistStartX);
+            posy = (posy - plistStartY) / (plistEndY - plistStartY);
+        }
         if(posx < tleft && posy < ttop) {
             posx = posx*scaleX;
             posy = posy*scaleY;
@@ -92,8 +139,27 @@ vec4 getColor(float posx,float posy) {
             posx = 1.0 - (1.0 - posx)*scaleX;
             posy = 1.0 - (1.0 - posy)*scaleY;
         }
+        if(split) {
+            vec2 point1 = changeToSplit(posx,posy);
+            posx = point1[0];
+            posy = point2[1];
+        }
+        if(plist == 1) {
+            posx = posx * (plistEndX - plistStartX) + plistStartX;
+            posy = posy * (plistEndY - plistStartY) + plistStartY;
+        }
+    } else {
+        if(split) {
+            vec2 point1 = changeToSplit(posx,posy);
+            posx = point1[0];
+            posy = point2[1];
+        }
     }
     return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));
+}
+
+vec2 changeToSplit(float posx,float posy) {
+    return vec2(posx,posy);
 }
 
 vec4 filter(vec4 color,float posx,float posy) {
@@ -132,6 +198,9 @@ vec4 filter(vec4 color,float posx,float posy) {
         } else if(filterType == 2.0) {
             color = strokeFilter(params[0],params[1],params[2],params[3],posx,posy,color);
             pindex++;
+        } else if(filterType == 3.0) {
+            color = dyeingFilter(color,params[0],params[1],params[2]);
+            pindex++;
         }
     }
     return color;
@@ -157,6 +226,14 @@ vec4 filter100(vec4 color,float posx,float posy) {
             pindex++;
         }
     }
+    return color;
+}
+
+vec4 dyeingFilter(vec4 color,float colorR,float colorG,float colorB) {
+    float sum = (color[0] + color[1] + color[2])/3.0;
+    color[0] = sum==0.0?color[0]:colorR*sum;
+    color[1] = sum==0.0?color[0]:colorG*sum;
+    color[2] = sum==0.0?color[0]:colorB*sum;
     return color;
 }
 

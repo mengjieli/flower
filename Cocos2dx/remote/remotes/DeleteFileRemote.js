@@ -22,5 +22,6 @@ class DeleteFileRemote extends Remote {
             this.__back.call(this.__thisObj);
         }
         this.__back = this.__thisObj = null;
+        this.dispose();
     }
 }

@@ -164,13 +164,14 @@ var files = file.readFilesWidthEnd("js");
 var list = [
     "RemoteServer",
     "Remote",
-    "File",
-    "Direction",
+    "RemoteFile",
+    "RemoteDirection",
     "zh_CN",
     "IsDirectionExistRemote",
     "ReadDirectionListRemote",
     "SaveFileRemote",
-    "DeleteFileRemote"
+    "DeleteFileRemote",
+    "ReadImageDataRemote"
 ];
 var fileContent = "";
 fileContent += "var remote = {};\n";

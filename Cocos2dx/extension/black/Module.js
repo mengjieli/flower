@@ -6,6 +6,9 @@ class Module extends flower.EventDispatcher {
     __url;
     __direction;
     __beforeScript;
+    __moduleKey;
+    __hasExecute;
+    __name;
 
     constructor(url, beforeScript = "") {
         super();
@@ -13,6 +16,7 @@ class Module extends flower.EventDispatcher {
         this.__url = url;
         this.__beforeScript = beforeScript;
         this.__direction = flower.Path.getPathDirection(url);
+        this.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
     }
 
@@ -27,8 +31,9 @@ class Module extends flower.EventDispatcher {
 
     __onLoadModuleComplete(e) {
         var cfg = e.data;
-        var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace, cfg.name);
+        this.config = cfg;
+        this.__name = cfg.name;
+        flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
         this.__list = [];
         var classes = cfg.classes;
         if (classes && Object.keys(classes).length) {
@@ -37,15 +42,21 @@ class Module extends flower.EventDispatcher {
                 if (url.slice(0, 2) == "./") {
                     url = this.__direction + url.slice(2, url.length);
                 }
-                flower.UIParser.setLocalUIURL(key, url, namespace);
+                flower.UIParser.setLocalUIURL(key, url, cfg.name);
             }
         }
         this.script = "";
         this.script += this.__beforeScript;
         this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
         this.__beforeScript += "var module = $root." + cfg.name + ";\n";
+        this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
-        //this.script += "var " + cfg.packageURL + " = module;\n\n";
+        this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
+        if (cfg.execute) {
+            this.__hasExecute = true;
+            this.script += "$root." + cfg.name + "__executeModule = function() {" + cfg.execute + "}\n";
+        }
+        flower.UIParser.setModuleBeforeScript(cfg.name, this.__beforeScript);
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
@@ -80,7 +91,7 @@ class Module extends flower.EventDispatcher {
                     url = this.__direction + url.slice(2, url.length);
                 }
                 var parser = new flower.UIParser(this.__beforeScript);
-                parser.localNameSpace = namespace;
+                parser.moduleName = cfg.name;
                 this.__list.push({
                     type: "ui",
                     ui: parser,
@@ -96,21 +107,41 @@ class Module extends flower.EventDispatcher {
         if (this.hasListener(flower.Event.ERROR)) {
             this.dispatch(e);
         } else {
-            $error(e.data);
+            flower.$error(e.data);
         }
     }
 
     __loadNext(e) {
         var item;
-        if (this.__index != 0) {
+        if (e && this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data);
+                if (e.data.script) {
+                    var data = e.data;
+                    var url = e.data.script;
+                    if (url.slice(0, 2) == "./") {
+                        url = flower.Path.getPathDirection(item.url) + url.slice(2, url.length);
+                    }
+                    var loader = new flower.URLLoader(url);
+                    loader.addListener(flower.Event.COMPLETE, function (ee) {
+                        data.script = ee.data;
+                        flower.DataManager.getInstance().addDefine(data, this.__moduleKey);
+                        this.__loadNext();
+                    }, this);
+                    loader.addListener(flower.Event.ERROR, this.__loadError, this);
+                    loader.load();
+                    return;
+                } else {
+                    flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                }
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                    trace("执行script:\n", this.script);
+                    //trace("执行script:\n", this.script);
+                    this.script += "flower.Module.$currentModule.data = module;";
+                    Module.$currentModule = this;
                     eval(this.script);
+                    Module.$currentModule = null;
                 }
             }
         }
@@ -120,7 +151,10 @@ class Module extends flower.EventDispatcher {
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;
         if (this.__index == this.__list.length) {
-            this.dispatchWidth(flower.Event.COMPLETE);
+            if (this.__hasExecute) {
+                $root[this.__name + "__executeModule"]();
+            }
+            this.dispatchWith(flower.Event.COMPLETE);
             return;
         }
         item = this.__list[this.__index];
@@ -139,9 +173,19 @@ class Module extends flower.EventDispatcher {
         this.__index++;
     }
 
+    get url() {
+        return this.__url;
+    }
+
     get progress() {
         return this.__progress;
     }
+
+    get name() {
+        return this.__name;
+    }
+
+    static $currentModule;
 }
 
 exports.Module = Module;

@@ -6,7 +6,6 @@ class Rect extends flower.Shape {
             0: 0, //width
             1: 0, //height
         };
-        this.drawRect = null;
         this.$initUIComponent();
     }
 
@@ -49,10 +48,10 @@ class Rect extends flower.Shape {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -72,10 +71,10 @@ class Rect extends flower.Shape {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -161,7 +160,15 @@ class Rect extends flower.Shape {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        this.$redraw();
+        //super.$onFrameEnd();
+        flower.DebugInfo.frameInfo.display++;
+        flower.DebugInfo.frameInfo.shape++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {

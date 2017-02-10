@@ -59,15 +59,16 @@ script.onload = function () {
         "src/Remote.js"
     ].concat(jsFiles);
     var i = 0;
-    var addScript = function() {
+    var addScript = function () {
         script = document.createElement("script");
         script.loadFlag = false;
         script.type = "text/javascript";
         script.src = jsFiles[i];
+
         script.onload = function () {
             script.loadFlag = true;
             i++;
-            if(i < jsFiles.length) {
+            if (i < jsFiles.length) {
                 addScript();
             } else {
                 new Main();

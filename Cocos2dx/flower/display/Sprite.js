@@ -1,10 +1,15 @@
 class Sprite extends DisplayObject {
 
     __children;
+    __childrenBounds;
 
     constructor() {
         super();
+        this.$Sprite = {
+            0: new flower.Rectangle() //childrenBounds
+        }
         this.$initContainer();
+        DebugInfo.displayInfo.sprite++;
     }
 
     $initContainer() {
@@ -169,7 +174,7 @@ class Sprite extends DisplayObject {
 
     getChildAt(index) {
         index = index & ~0;
-        if (index < 0 || index > this.__children.length) {
+        if (index < 0 || index > this.__children.length - 1) {
             $error(1007, "getChildAt", index, this.__children.length);
             return null;
         }
@@ -201,7 +206,10 @@ class Sprite extends DisplayObject {
         var maxY = 0;
         var children = this.__children;
         for (var i = 0, len = children.length; i < len; i++) {
-            var bounds = children[i].$getBounds();
+            if (!children[i].visible) {
+                continue;
+            }
+            var bounds = children[i].$getBounds(true);
             if (i == 0) {
                 maxX = bounds.x + bounds.width;
                 maxY = bounds.y + bounds.height;
@@ -213,24 +221,16 @@ class Sprite extends DisplayObject {
                     maxY = bounds.y + bounds.height;
                 }
             }
-            //var child = children[i];
-            //var bounds = children[i].$getBounds();
-            //if (i == 0) {
-            //    maxX = bounds.x + child.width;
-            //    maxY = bounds.y + child.height;
-            //} else {
-            //    if (bounds.x + child.width > maxX) {
-            //        maxX = bounds.x + child.width;
-            //    }
-            //    if (bounds.y + child.height > maxY) {
-            //        maxY = bounds.y + child.height;
-            //    }
-            //}
         }
         rect.x = minX;
         rect.y = minY;
         rect.width = maxX - minX;
         rect.height = maxY - minY;
+        var childrenBounds = this.$Sprite[0];
+        childrenBounds.x = rect.x;
+        childrenBounds.y = rect.y;
+        childrenBounds.width = rect.width;
+        childrenBounds.height = rect.height;
     }
 
     $getMouseTarget(touchX, touchY, multiply) {
@@ -239,11 +239,12 @@ class Sprite extends DisplayObject {
         if (multiply == true && this.multiplyTouchEnabled == false)
             return null;
         var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-        touchX = Math.floor(point.x);
-        touchY = Math.floor(point.y);
+        touchX = math.floor(point.x);
+        touchY = math.floor(point.y);
         var p = this.$DisplayObject;
         p[10] = touchX;
         p[11] = touchY;
+        p[22] = flower.EnterFrame.frame;
         var target;
         var childs = this.__children;
         var len = childs.length;
@@ -272,13 +273,25 @@ class Sprite extends DisplayObject {
             this.$removeFlags(0x0100);
         }
         for (var i = 0, len = children.length; i < len; i++) {
-            children[i].$onFrameEnd();
+            if (children[i].visible) {
+                children[i].$onFrameEnd();
+            }
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        DebugInfo.frameInfo.display++;
+        DebugInfo.frameInfo.sprite++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     get numChildren() {
         return this.__children.length;
+    }
+
+    get $childrenBounds() {
+        return this.$Sprite[0];
     }
 
     $releaseContainer() {
@@ -291,6 +304,11 @@ class Sprite extends DisplayObject {
     }
 
     dispose() {
+        if (!this.$nativeShow) {
+            $warn(1002, this.name);
+            return;
+        }
+        DebugInfo.displayInfo.sprite--;
         var children = this.__children;
         while (children.length) {
             var child = children[children.length - 1];

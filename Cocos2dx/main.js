@@ -51,15 +51,20 @@
  }
  *
  */
+if(cc.sys.isNative == false) {
+    var gameCanvas = document.getElementById("gameCanvas");
+    gameCanvas.width = document.documentElement.clientWidth;
+    gameCanvas.height = document.documentElement.clientHeight;
+}
 
 cc.game.onStart = function () {
 
     // Pass true to enable retina display, on Android disabled by default to improve performance
     //cc.view.enableRetina(cc.sys.os === cc.sys.OS_IOS ? true : false);
 
-    cc.view.enableRetina(false);
+    cc.view.enableRetina(true);
     // Adjust viewport meta
-    //cc.view.adjustViewPort(true);
+    cc.view.adjustViewPort(true);
 
     // Uncomment the following line to set a fixed orientation for your game
     // cc.view.setOrientation(cc.ORIENTATION_PORTRAIT);
@@ -84,7 +89,9 @@ cc.game.onStart = function () {
         ].concat(jsFiles);
         cc.loader.loadJs(jsFiles, function (err) {
             new Main();
+            //new TestNewTexture();
         });
     });
 };
 cc.game.run();
+//cc.Director.getInstance().setDisplayStats(true);

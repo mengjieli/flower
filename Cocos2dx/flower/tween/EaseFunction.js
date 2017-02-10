@@ -4,22 +4,22 @@ class EaseFunction {
     }
 
     static SineEaseIn(t) {
-        return Math.sin((t - 1) * Math.PI * .5) + 1;
+        return math.sin((t - 1) * math.PI * .5) + 1;
     }
 
     static SineEaseOut(t) {
-        return Math.sin(t * Math.PI * .5);
+        return math.sin(t * math.PI * .5);
     }
 
     static SineEaseInOut(t) {
-        return Math.sin((t - .5) * Math.PI) * .5 + .5;
+        return math.sin((t - .5) * math.PI) * .5 + .5;
     }
 
     static SineEaseOutIn(t) {
         if (t < 0.5) {
-            return Math.sin(t * Math.PI) * .5;
+            return math.sin(t * math.PI) * .5;
         }
-        return Math.sin((t - 1) * Math.PI) * .5 + 1;
+        return math.sin((t - 1) * math.PI) * .5 + 1;
     }
 
     static QuadEaseIn(t) {
@@ -112,44 +112,44 @@ class EaseFunction {
     }
 
     static ExpoEaseIn(t) {
-        return Math.pow(2, 10 * (t - 1));
+        return math.pow(2, 10 * (t - 1));
     }
 
     static ExpoEaseOut(t) {
-        return -Math.pow(2, -10 * t) + 1;
+        return -math.pow(2, -10 * t) + 1;
     }
 
     static ExpoEaseInOut(t) {
         if (t < .5) {
-            return Math.pow(2, 10 * (t * 2 - 1)) * .5;
+            return math.pow(2, 10 * (t * 2 - 1)) * .5;
         }
-        return -Math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
+        return -math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
     }
 
     static ExpoEaseOutIn(t) {
         if (t < .5) {
-            return -Math.pow(2, -20 * t) * .5 + .5;
+            return -math.pow(2, -20 * t) * .5 + .5;
         }
-        return Math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
+        return math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
     }
 
     static CircEaseIn(t) {
-        return 1 - Math.sqrt(1 - t * t);
+        return 1 - math.sqrt(1 - t * t);
     }
 
     static CircEaseOut(t) {
-        return Math.sqrt(1 - (1 - t) * (1 - t));
+        return math.sqrt(1 - (1 - t) * (1 - t));
     }
 
     static CircEaseInOut(t) {
         if (t < .5) {
-            return .5 - Math.sqrt(.25 - t * t);
+            return .5 - math.sqrt(.25 - t * t);
         }
-        return Math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
+        return math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
     }
 
     static CircEaseOutIn(t) {
-        var s = Math.sqrt(.25 - (.5 - t) * (.5 - t));
+        var s = math.sqrt(.25 - (.5 - t) * (.5 - t));
         if (t < .5) {
             return s;
         }
@@ -184,31 +184,31 @@ class EaseFunction {
     static ElasticEaseIn(t) {
         if (t == 0 || t == 1)
             return t;
-        return -(Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.075) * 2 * Math.PI / .3));
+        return -(math.pow(2, 10 * (t - 1)) * math.sin((t - 1.075) * 2 * math.PI / .3));
     }
 
     static ElasticEaseOut(t) {
         if (t == 0 || t == .5 || t == 1)
             return t;
-        return (Math.pow(2, 10 * -t) * Math.sin((-t - .075) * 2 * Math.PI / .3)) + 1;
+        return (math.pow(2, 10 * -t) * math.sin((-t - .075) * 2 * math.PI / .3)) + 1;
     }
 
     static ElasticEaseInOut(t) {
         if (t == 0 || t == .5 || t == 1)
             return t;
         if (t < .5) {
-            return -(Math.pow(2, 10 * t - 10) * Math.sin((t * 2 - 2.15) * Math.PI / .3));
+            return -(math.pow(2, 10 * t - 10) * math.sin((t * 2 - 2.15) * math.PI / .3));
         }
-        return (Math.pow(2, 10 - 20 * t) * Math.sin((-4 * t + 1.85) * Math.PI / .3)) * .5 + 1;
+        return (math.pow(2, 10 - 20 * t) * math.sin((-4 * t + 1.85) * math.PI / .3)) * .5 + 1;
     }
 
     static ElasticEaseOutIn(t) {
         if (t == 0 || t == .5 || t == 1)
             return t;
         if (t < .5) {
-            return (Math.pow(2, -20 * t) * Math.sin((-t * 4 - .15) * Math.PI / .3)) * .5 + .5;
+            return (math.pow(2, -20 * t) * math.sin((-t * 4 - .15) * math.PI / .3)) * .5 + .5;
         }
-        return -(Math.pow(2, 20 * (t - 1)) * Math.sin((t * 4 - 4.15) * Math.PI / .3)) * .5 + .5;
+        return -(math.pow(2, 20 * (t - 1)) * math.sin((t * 4 - 4.15) * math.PI / .3)) * .5 + .5;
     }
 
     static bounceEaseIn(t) {

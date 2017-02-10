@@ -13,13 +13,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var black = {};
-var $root = eval("this");
 (function () {
     //////////////////////////File:extension/black/core/Black.js///////////////////////////
     var sys = {};
-    for (var key in flower.sys) {
-        sys[key] = flower.sys[key];
-    }
+    flower.addStartBack(function () {
+        for (var key in flower.sys) {
+            sys[key] = flower.sys[key];
+        }
+    });
     //////////////////////////End File:extension/black/core/Black.js///////////////////////////
 
     //////////////////////////File:extension/black/core/UIComponent.js///////////////////////////
@@ -33,7 +34,18 @@ var $root = eval("this");
      * 1020 touchBegin
      * 1021 touchEnd
      * 1022 touchRelease
+     * 1023 rightClick
      * 1100 click
+     * 1110 clickItem
+     * 1111 selectedItemChange DataGroup
+     * 1112 touchBeginItem
+     * 1130 confirm
+     * 1131 cancel
+     * 1300 loadComplete
+     * 1400 change  RadioButtonGroup
+     * 1401 change  RadioButton
+     * 1402 change ToggleButton
+     * 1500 selectedItemChange ViewStack
      */
 
     var UIComponent = function () {
@@ -63,9 +75,10 @@ var $root = eval("this");
                         11: new StringValue(), //state
                         12: false, //absoluteState
                         13: this, //eventThis
-                        14: null };
-                    //layout
-                    UIComponent.registerEvent(clazz, 1000, "creationComplete", UIEvent.CREATION_COMPLETE);
+                        14: null, //layout
+                        15: isContainer };
+                    //flexbox 弹性属性是否需要验证
+                    UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
                     UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
                     UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
                     UIComponent.registerEvent(clazz, 1003, "remove", flower.Event.REMOVED);
@@ -214,6 +227,9 @@ var $root = eval("this");
                         }
                     }
                     p[0] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -230,6 +246,9 @@ var $root = eval("this");
                         }
                     }
                     p[1] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -240,6 +259,9 @@ var $root = eval("this");
                         return false;
                     }
                     p[2] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -250,6 +272,9 @@ var $root = eval("this");
                         return false;
                     }
                     p[3] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -260,6 +285,9 @@ var $root = eval("this");
                         return false;
                     }
                     p[4] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -270,6 +298,9 @@ var $root = eval("this");
                         return false;
                     }
                     p[5] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -280,6 +311,9 @@ var $root = eval("this");
                         return false;
                     }
                     p[6] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
@@ -290,45 +324,27 @@ var $root = eval("this");
                         return false;
                     }
                     p[7] = val;
+                    if (!isContainer) {
+                        p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+                    }
                     this.$invalidateContentBounds();
                 };
 
-                //p.$getWidth = function () {
-                //    var p = this.$UIComponent;
-                //    if (p[0] != null && p[1] == null && p [2] != null) {
-                //        return (p[2] - p[0]) * 2;
-                //    }
-                //    else if (p[0] == null && p[1] != null && p[2] != null) {
-                //        return (p[1] - p[2]) * 2;
-                //    } else if (p[0] != null && p[1] != null) {
-                //        if (this.parent) {
-                //            return parent.width - p[1] - p[0];
-                //        }
-                //    } else {
-                //        if (p[6] && this.parent) {
-                //            this.width = parent.width * p[6] / 100;
-                //        }
-                //    }
-                //    return $root._get(Object.getPrototypeOf(p), "$getWidth", this).call(this);
-                //}
-                //
-                //p.$getHeight = function () {
-                //    var p = this.$UIComponent;
-                //    if (p[3] != null && p[4] == null && p [5] != null) {
-                //        return (p[5] - p[3]) * 2;
-                //    } else if (p[3] == null && p[4] != null && p[5] != null) {
-                //        return (p[4] - p[5]) * 2;
-                //    } else if (p[3] != null && p[4] != null) {
-                //        if (this.parent) {
-                //            return parent.height - p[4] - p[3];
-                //        }
-                //    } else {
-                //        if (p[7] && this.parent) {
-                //            return parent.height * p[7] / 100;
-                //        }
-                //    }
-                //    return $root._get(Object.getPrototypeOf(p), "$getHeight", this).call(this);
-                //}
+                p.$getBounds = function () {
+                    var fromParent = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+                    var rect = $root._get(Object.getPrototypeOf(p), "$getBounds", this).call(this, fromParent);
+                    if (fromParent) {
+                        var ui = this.$UIComponent;
+                        if ((ui[0] == null || ui[1] == null) && ui[6] != null || ui[0] != null && ui[1] != null) {
+                            rect.width = 0;
+                        }
+                        if ((ui[3] == null || ui[4] == null) && ui[7] != null || ui[3] != null && ui[4] != null) {
+                            rect.height = 0;
+                        }
+                    }
+                    return rect;
+                };
 
                 Object.defineProperty(p, "left", {
                     get: function get() {
@@ -510,80 +526,25 @@ var $root = eval("this");
     black.UIComponent = UIComponent;
     //////////////////////////End File:extension/black/core/UIComponent.js///////////////////////////
 
-    //////////////////////////File:extension/black/events/UIEvent.js///////////////////////////
-
-    var UIEvent = function (_flower$Event) {
-        _inherits(UIEvent, _flower$Event);
-
-        function UIEvent(type) {
-            var bubbles = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
-            _classCallCheck(this, UIEvent);
-
-            return _possibleConstructorReturn(this, Object.getPrototypeOf(UIEvent).call(this, type, bubbles));
-        }
-
-        return UIEvent;
-    }(flower.Event);
-
-    UIEvent.CREATION_COMPLETE = "creation_complete";
-
-
-    black.UIEvent = UIEvent;
-    //////////////////////////End File:extension/black/events/UIEvent.js///////////////////////////
-
-    //////////////////////////File:extension/black/events/DataGroupEvent.js///////////////////////////
-
-    var DataGroupEvent = function (_flower$Event2) {
-        _inherits(DataGroupEvent, _flower$Event2);
-
-        function DataGroupEvent(type) {
-            var bubbles = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-            var item = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
-
-            _classCallCheck(this, DataGroupEvent);
-
-            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroupEvent).call(this, type, bubbles));
-
-            _this2.__item = item;
-            return _this2;
-        }
-
-        _createClass(DataGroupEvent, [{
-            key: "item",
-            get: function get() {
-                return this.__item;
-            }
-        }]);
-
-        return DataGroupEvent;
-    }(flower.Event);
-
-    DataGroupEvent.SELECTED_ITEM_CHANGE = "selected_item_change";
-    DataGroupEvent.CLICK_ITEM = "click_item";
-    DataGroupEvent.TOUCH_BEGIN_ITEM = "touch_begin_item";
-
-
-    black.DataGroupEvent = DataGroupEvent;
-    //////////////////////////End File:extension/black/events/DataGroupEvent.js///////////////////////////
-
     //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
 
     var Value = function (_flower$EventDispatch) {
         _inherits(Value, _flower$EventDispatch);
 
         function Value() {
-            var _Object$getPrototypeO;
-
-            var _temp, _this3, _ret;
+            var checkDistort = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
             _classCallCheck(this, Value);
 
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                args[_key] = arguments[_key];
-            }
+            var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Value).call(this));
 
-            return _ret = (_temp = (_this3 = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Value)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this3), _this3.__old = null, _this3.__value = null, _temp), _possibleConstructorReturn(_this3, _ret);
+            _this.__old = null;
+            _this.__value = null;
+            _this.__checkDistort = null;
+            _this.__list = null;
+
+            _this.__checkDistort = checkDistort == null ? Value.Default_Check_Distort : checkDistort;
+            return _this;
         }
 
         _createClass(Value, [{
@@ -596,8 +557,32 @@ var $root = eval("this");
                 this.__value = val;
             }
         }, {
+            key: "$getValue",
+            value: function $getValue() {
+                return this.__value;
+            }
+        }, {
+            key: "push",
+            value: function push(val) {
+                if (!this.__list) {
+                    this.__list = [];
+                }
+                this.__list.push(val);
+            }
+        }, {
+            key: "pop",
+            value: function pop() {
+                if (this.__list) {
+                    return this.__list.pop();
+                }
+                return null;
+            }
+        }, {
             key: "value",
             get: function get() {
+                if (this.__checkDistort) {
+                    return this.$getValue();
+                }
                 return this.__value;
             },
             set: function set(val) {
@@ -608,10 +593,16 @@ var $root = eval("this");
             get: function get() {
                 return this.__old;
             }
+
+            //Value 是否自动检测非法修改
+
         }]);
 
         return Value;
     }(flower.EventDispatcher);
+
+    Value.Default_Check_Distort = false;
+
 
     black.Value = Value;
     //////////////////////////End File:extension/black/data/member/Value.js///////////////////////////
@@ -620,9 +611,9 @@ var $root = eval("this");
     /**
      *
      * @Event
-     * Event.ADDED item
-     * Event.REMOVED item
-     * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
+     * Event.ADD item
+     * Event.REMOV item
+     * Event.CHANGE ArrayValue 所有更新都会触发，包括排序
      */
 
     var ArrayValue = function (_Value) {
@@ -634,19 +625,22 @@ var $root = eval("this");
 
             _classCallCheck(this, ArrayValue);
 
-            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
+            var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(ArrayValue).call(this));
 
-            _this4._key = "";
-            _this4._rangeMinKey = "";
-            _this4._rangeMaxKey = "";
-            _this4._selectedItem = null;
-            _this4._itemType = null;
+            _this2._key = "";
+            _this2._rangeMinKey = "";
+            _this2._rangeMaxKey = "";
+            _this2._selectedItem = null;
+            _this2._itemType = null;
+            _this2._subs = null;
+            _this2.$sub = false;
 
-            _this4._itemType = itemType;
-            _this4.list = init || [];
-            _this4._length = _this4.list.length;
-            _this4.__value = _this4;
-            return _this4;
+            _this2._itemType = itemType;
+            _this2.list = init || [];
+            _this2._length = _this2.list.length;
+            _this2.__value = _this2;
+            _this2._lengthValue = new flower.IntValue();
+            return _this2;
         }
 
         _createClass(ArrayValue, [{
@@ -654,8 +648,13 @@ var $root = eval("this");
             value: function push(item) {
                 this.list.push(item);
                 this._length = this._length + 1;
-                this.dispatchWidth(flower.Event.ADDED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubPush(item);
+                    this.__addItemChange(item);
+                }
+                this.dispatchWith(flower.Event.ADD, item);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "addItemAt",
@@ -667,8 +666,13 @@ var $root = eval("this");
                 }
                 this.list.splice(index, 0, item);
                 this._length = this._length + 1;
-                this.dispatchWidth(flower.Event.ADDED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubAddItemAt(item, index);
+                    this.__addItemChange(item);
+                }
+                this.dispatchWith(flower.Event.ADD, item);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "shift",
@@ -678,8 +682,13 @@ var $root = eval("this");
                 }
                 var item = this.list.shift();
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
+                this.dispatchWith(flower.Event.REMOVE, item);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
@@ -690,27 +699,42 @@ var $root = eval("this");
                 var i;
                 startIndex = +startIndex & ~0;
                 delCount = +delCount & ~0;
+                var list;
                 if (delCount <= 0) {
-                    for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-                        args[_key2 - 2] = arguments[_key2];
+                    list = [];
+
+                    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+                        args[_key - 2] = arguments[_key];
                     }
 
                     for (i = 0; i < args.length; i++) {
+                        list[i] = args[i];
                         this.list.splice(startIndex, 0, args[i]);
                     }
                     this._length = this._length + 1;
+                    this._lengthValue.value = this._length;
                     for (i = 0; i < args.length; i++) {
-                        this.dispatchWidth(flower.Event.ADDED, args[i]);
+                        if (this._subs) {
+                            this.__checkSubAddItemAt(args[i], startIndex + i);
+                            this.__addItemChange(args[i]);
+                        }
+                        this.dispatchWith(flower.Event.ADD, args[i]);
                     }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.CHANGE, this);
                 } else {
-                    var list = this.list.splice(startIndex, delCount);
+                    list = this.list.splice(startIndex, delCount);
                     this._length = this._length - delCount;
+                    this._lengthValue.value = this._length;
                     for (i = 0; i < list.length; i++) {
-                        this.dispatchWidth(flower.Event.REMOVED, list[i]);
+                        if (this._subs) {
+                            this.__checkSubRemoveItem(list[i]);
+                            this.__removeItemChange(list[i]);
+                        }
+                        this.dispatchWith(flower.Event.REMOVE, list[i]);
                     }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.CHANGE, this);
                 }
+                return list;
             }
         }, {
             key: "slice",
@@ -727,8 +751,13 @@ var $root = eval("this");
                 }
                 var item = this.list.pop();
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
+                this.dispatchWith(flower.Event.REMOVE, item);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
@@ -737,12 +766,19 @@ var $root = eval("this");
                 if (!this.list.length) {
                     return;
                 }
+                if (this._subs) {
+                    this.__subRemoveAll();
+                }
                 while (this.list.length) {
                     var item = this.list.pop();
                     this._length = this._length - 1;
-                    this.dispatchWidth(flower.Event.REMOVED, item);
+                    this._lengthValue.value = this._length;
+                    if (this._subs) {
+                        this.__removeItemChange(item);
+                    }
+                    this.dispatchWith(flower.Event.REMOVE, item);
                 }
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "removeItem",
@@ -751,8 +787,13 @@ var $root = eval("this");
                     if (this.list[i] == item) {
                         this.list.splice(i, 1);
                         this._length = this._length - 1;
-                        this.dispatchWidth(flower.Event.REMOVED, item);
-                        this.dispatchWidth(flower.Event.UPDATE, this);
+                        this._lengthValue.value = this._length;
+                        if (this._subs) {
+                            this.__checkSubRemoveItem(item);
+                            this.__removeItemChange(item);
+                        }
+                        this.dispatchWith(flower.Event.REMOVE, item);
+                        this.dispatchWith(flower.Event.CHANGE, this);
                         return item;
                     }
                 }
@@ -768,8 +809,13 @@ var $root = eval("this");
                 }
                 var item = this.list.splice(index, 1)[0];
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
+                this.dispatchWith(flower.Event.REMOVE, item);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
@@ -780,16 +826,28 @@ var $root = eval("this");
 
                 var item;
                 var i;
-                if (key2 != "") {
+                if (key2 == "") {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
+                        var val = this.list[i][key];
+                        if (val instanceof Value && !(val instanceof flower.ObjectValue) && !(val instanceof flower.ArrayValue)) {
+                            val = val.value;
+                        }
+                        if (val == value) {
                             item = this.list.splice(i, 1)[0];
                             break;
                         }
                     }
                 } else {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                        var val1 = this.list[i][key];
+                        if (val1 instanceof Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        var val2 = this.list[i][key2];
+                        if (val2 instanceof Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                            val2 = val2.value;
+                        }
+                        if (val == value && val2 == value2) {
                             item = this.list.splice(i, 1)[0];
                             break;
                         }
@@ -799,15 +857,20 @@ var $root = eval("this");
                     return;
                 }
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
+                this.dispatchWith(flower.Event.REMOVE, item);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }, {
             key: "getItemIndex",
             value: function getItemIndex(item) {
                 for (var i = 0, len = this.list.length; i < len; i++) {
-                    if (this.list[i] == item) {
+                    if (this.list[i] == item || !(item instanceof flower.Value) && this.list[i] instanceof Value && this.list[i].value == item) {
                         return i;
                     }
                 }
@@ -816,19 +879,43 @@ var $root = eval("this");
         }, {
             key: "getItemWith",
             value: function getItemWith(key, value) {
-                var key2 = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+                var key2 = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
                 var value2 = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
                 var i;
-                if (!key2) {
+                if (key2 == "") {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        if (val1 == value) {
                             return this.list[i];
                         }
                     }
                 } else {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        keys = key2.split(".");
+                        var val2 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val2 = val2[keys[k]];
+                        }
+                        if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                            val2 = val2.value;
+                        }
+                        if (val1 == value && val2 == value2) {
                             return this.list[i];
                         }
                     }
@@ -838,8 +925,8 @@ var $root = eval("this");
         }, {
             key: "getItemFunction",
             value: function getItemFunction(func, thisObj) {
-                for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
-                    args[_key3 - 2] = arguments[_key3];
+                for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+                    args[_key2 - 2] = arguments[_key2];
                 }
 
                 for (var i = 0; i < this.list.length; i++) {
@@ -860,15 +947,39 @@ var $root = eval("this");
 
                 var result = [];
                 var i;
-                if (key2 != "") {
+                if (key2 == "") {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        if (val1 == value) {
                             result.push(this.list[i]);
                         }
                     }
                 } else {
                     for (i = 0; i < this.list.length; i++) {
-                        if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                        var keys = key.split(".");
+                        var val1 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val1 = val1[keys[k]];
+                        }
+                        if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                            val1 = val1.value;
+                        }
+                        keys = key2.split(".");
+                        var val2 = this.list[i];
+                        for (var k = 0; k < keys.length; k++) {
+                            val2 = val2[keys[k]];
+                        }
+                        if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                            val2 = val2.value;
+                        }
+                        if (val1 == value && val2 == value2) {
                             result.push(this.list[i]);
                         }
                     }
@@ -882,7 +993,9 @@ var $root = eval("this");
                 var setValue = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
                 for (var i = 0; i < this.list.length; i++) {
-                    if (this.list[i][findKey] == findValue) {
+                    if (this.list[i][findKey] instanceof flower.Value && this.list[i][findKey].value == findValue) {
+                        this.list[i][setKey].value = setValue;
+                    } else if (this.list[i][findKey] == findValue) {
                         this.list[i][setKey] = setValue;
                     }
                 }
@@ -917,12 +1030,8 @@ var $root = eval("this");
         }, {
             key: "sort",
             value: function sort() {
-                var _arguments__ = [];
-                for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
-                    _arguments__ = arguments[argumentsLength];
-                }
-                this.list.sort.apply(this.list.sort, _arguments__);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.list.sort.apply(this.list, arguments);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "setItemIndex",
@@ -933,7 +1042,7 @@ var $root = eval("this");
                 }
                 this.list.splice(itemIndex, 1);
                 this.list.splice(index, 0, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this.dispatchWith(flower.Event.CHANGE, this);
             }
         }, {
             key: "getItemAt",
@@ -958,7 +1067,7 @@ var $root = eval("this");
                     return null;
                 }
                 for (var i = 0; i < this.list.length; i++) {
-                    if (this.list[i][this.key] == value) {
+                    if (this.list[i][this.key] instanceof Value && this.list[i][this.key].value == value || this.list[i][this.key] == value) {
                         return this.list[i];
                     }
                 }
@@ -996,6 +1105,247 @@ var $root = eval("this");
                 return list;
             }
         }, {
+            key: "createSubArrayValue",
+            value: function createSubArrayValue() {
+                for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                    args[_key3] = arguments[_key3];
+                }
+
+                if (!this._subs) {
+                    this._subs = [];
+                }
+                var init = [];
+                var list = this.list;
+                for (var i = 0; i < list.length; i++) {
+                    var item = this.list[i];
+                    var flag = true;
+                    for (var a = 0; a < arguments.length; a++, a++) {
+                        if (item instanceof Value) {
+                            if (item[arguments[a]].value != arguments[a + 1]) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[arguments[a]] != arguments[a + 1]) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        init.push(item);
+                    }
+                }
+                var sub = new ArrayValue(init, this._itemType);
+                sub.$sub = true;
+                this._subs.push([sub, arguments]);
+                this.__addAllItemChange();
+                return sub;
+            }
+
+            /**
+             * 绑定子集数组
+             * @param sub 需要绑定的子集数组对象
+             * @param args 绑定条件，按照 属性名称1,属性值1,属性名称2,属性值2,... 的顺序传入
+             */
+
+        }, {
+            key: "linkSubArrayValue",
+            value: function linkSubArrayValue(sub) {
+                if (!this._subs) {
+                    this._subs = [];
+                }
+                sub.$sub = true;
+                sub.removeAll();
+
+                for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+                    args[_key4 - 1] = arguments[_key4];
+                }
+
+                this._subs.push([sub, args]);
+                var list = this.list;
+                for (var i = 0; i < list.length; i++) {
+                    var item = this.list[i];
+                    var flag = true;
+                    for (var a = 1; a < args.length; a++, a++) {
+                        if (item instanceof Value) {
+                            if (item[args[a]].value != args[a + 1]) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[args[a]] != args[a + 1]) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        sub.push(item);
+                    }
+                }
+                this.__addAllItemChange();
+            }
+        }, {
+            key: "__addAllItemChange",
+            value: function __addAllItemChange() {
+                var list = this.list;
+                var subs = this._subs;
+                for (var i = 0; i < list.length; i++) {
+                    var item = this.list[i];
+                    for (var s = 0; s < subs.length; s++) {
+                        var args = subs[s][1];
+                        for (var a = 0; a < args.length; a++, a++) {
+                            var key = args[a];
+                            if (item[key] instanceof Value) {
+                                item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            key: "__addItemChange",
+            value: function __addItemChange(item) {
+                var subs = this._subs;
+                for (var s = 0; s < subs.length; s++) {
+                    var args = subs[s][1];
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        if (item[key] instanceof Value) {
+                            item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                        }
+                    }
+                }
+            }
+        }, {
+            key: "__removeItemChange",
+            value: function __removeItemChange(item) {
+                var keys = item.membersKey;
+                for (var i = 0; i < keys.length; i++) {
+                    if (item[keys[i]] instanceof flower.Value) {
+                        item[keys[i]].removeListener(flower.Event.CHANGE, this.__onItemChange, this);
+                    }
+                }
+            }
+        }, {
+            key: "__onItemChange",
+            value: function __onItemChange(e, item) {
+                var subs = this._subs;
+                for (var s = 0; s < subs.length; s++) {
+                    var sub = subs[s][0];
+                    var args = subs[s][1];
+                    var oldIndex = sub.getItemIndex(item);
+                    var flag = true;
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        var value = args[a + 1];
+                        if (item[key] instanceof Value) {
+                            if (item[key].value != value) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[key] != value) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (oldIndex == -1 && flag) {
+                        var index = this.getItemIndex(item);
+                        var ind = -1;
+                        for (var f = index - 1; f >= 0; f++) {
+                            ind = sub.getItemIndex(this.list[f]);
+                            if (ind != -1) {
+                                ind++;
+                                break;
+                            }
+                        }
+                        if (ind == -1) {
+                            ind = 0;
+                        }
+                        sub.addItemAt(item, ind);
+                    } else if (oldIndex != -1 && !flag) {
+                        sub.removeItem(item);
+                    }
+                }
+            }
+        }, {
+            key: "__checkSubPush",
+            value: function __checkSubPush(item) {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    var args = this._subs[s][1];
+                    var flag = true;
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        var value = args[a + 1];
+                        if (item[key] instanceof Value) {
+                            if (item[key].value != value) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[key] != value) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        sub.push(item);
+                    }
+                }
+            }
+        }, {
+            key: "__checkSubAddItemAt",
+            value: function __checkSubAddItemAt(item, index) {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    var args = this._subs[s][1];
+                    var flag = true;
+                    for (var a = 0; a < args.length; a++, a++) {
+                        var key = args[a];
+                        var value = args[a + 1];
+                        if (item[key] instanceof Value) {
+                            if (item[key].value != value) {
+                                flag = false;
+                                break;
+                            }
+                        } else if (item[key] != value) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        var ind = -1;
+                        for (var f = index - 1; f >= 0; f++) {
+                            ind = sub.getItemIndex(this.list[f]);
+                            if (ind != -1) {
+                                ind++;
+                                break;
+                            }
+                        }
+                        if (ind == -1) {
+                            ind = 0;
+                        }
+                        sub.addItemAt(item, ind);
+                    }
+                }
+            }
+        }, {
+            key: "__checkSubRemoveItem",
+            value: function __checkSubRemoveItem(item) {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    var ind = sub.getItemIndex(item);
+                    if (ind != -1) {
+                        sub.removeItemAt(ind);
+                    }
+                }
+            }
+        }, {
+            key: "__subRemoveAll",
+            value: function __subRemoveAll() {
+                for (var s = 0; s < this._subs.length; s++) {
+                    var sub = this._subs[s][0];
+                    sub.removeAll();
+                }
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 var list = this.list;
@@ -1004,6 +1354,14 @@ var $root = eval("this");
                     if (value instanceof Value) {
                         value.dispose();
                     }
+                }
+                if (this._subs) {
+                    while (this._subs) {
+                        var sub = this._subs.pop()[0];
+                        sub.removeAll();
+                        sub.dispose();
+                    }
+                    this._subs = null;
                 }
                 _get(Object.getPrototypeOf(ArrayValue.prototype), "dispose", this).call(this);
             }
@@ -1080,17 +1438,23 @@ var $root = eval("this");
                     while (this.list.length > val) {
                         var item = this.list.pop();
                         this._length = this._length - 1;
-                        this.dispatchWidth(flower.Event.REMOVED, item);
+                        this._lengthValue.value = this._length;
+                        this.dispatchWith(flower.Event.REMOVE, item);
                     }
-                    this.dispatchWidth(flower.Event.UPDATE, this);
+                    this.dispatchWith(flower.Event.CHANGE, this);
                 }
+            }
+        }, {
+            key: "lengthIntValue",
+            get: function get() {
+                return this._lengthValue;
             }
         }]);
 
         return ArrayValue;
     }(Value);
 
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 100000; i++) {
         Object.defineProperty(ArrayValue.prototype, "" + i, {
             get: function (index) {
                 return function () {
@@ -1121,14 +1485,14 @@ var $root = eval("this");
 
             _classCallCheck(this, BooleanValue);
 
-            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
+            var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(BooleanValue).call(this));
 
             if (init == "false") {
                 init = false;
             }
-            _this5.__enumList = enumList;
-            _this5.__old = _this5.__value = !!init;
-            return _this5;
+            _this3.__enumList = enumList;
+            _this3.__old = _this3.__value = !!init;
+            return _this3;
         }
 
         _createClass(BooleanValue, [{
@@ -1143,7 +1507,7 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.CHANGE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1177,14 +1541,16 @@ var $root = eval("this");
         function IntValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
             var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+            var checkDistort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, IntValue);
 
-            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this));
+            var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(IntValue).call(this, checkDistort));
 
-            _this6.__old = _this6.__value = +init & ~0 || 0;
-            _this6.__enumList = enumList;
-            return _this6;
+            _this4.__old = _this4.__value = +init & ~0 || 0;
+            _this4.__enumList = enumList;
+            _this4.__valueCheck = [48];
+            return _this4;
         }
 
         _createClass(IntValue, [{
@@ -1196,7 +1562,31 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                if (this.__checkDistort) {
+                    var str = val + "";
+                    this.__valueCheck.length = 0;
+                    for (var i = 0; i < str.length; i++) {
+                        this.__valueCheck.push(str.charCodeAt(i));
+                    }
+                }
+                this.dispatchWith(flower.Event.CHANGE, this, val);
+            }
+        }, {
+            key: "$getValue",
+            value: function $getValue() {
+                if (this.__checkDistort) {
+                    flower.breakPoint();
+                    var str = this.__value + "";
+                    var compare = "";
+                    for (var i = 0; i < this.__valueCheck.length; i++) {
+                        compare += String.fromCharCode(this.__valueCheck[i]);
+                    }
+                    if (str != compare) {
+                        this.dispatchWith(flower.Event.DISTORT, this);
+                        this.__value = parseFloat(compare);
+                    }
+                }
+                return this.__value;
             }
         }, {
             key: "$setEnumList",
@@ -1230,16 +1620,18 @@ var $root = eval("this");
         function NumberValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
             var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+            var checkDistort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, NumberValue);
 
-            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this));
+            var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(NumberValue).call(this, checkDistort));
 
-            _this7.__enumList = enumList;
-            _this7.__old = _this7.__value = +init || 0;
-            _this7.__precision = 2;
-            _this7.__multiplier = Math.pow(10, _this7.__precision);
-            return _this7;
+            _this5.__enumList = enumList;
+            _this5.__old = _this5.__value = +init || 0;
+            _this5.__precision = 2;
+            _this5.__multiplier = Math.pow(10, _this5.__precision);
+            _this5.__valueCheck = [48];
+            return _this5;
         }
 
         _createClass(NumberValue, [{
@@ -1262,7 +1654,30 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                if (this.__checkDistort) {
+                    var str = val + "";
+                    this.__valueCheck.length = 0;
+                    for (var i = 0; i < str.length; i++) {
+                        this.__valueCheck.push(str.charCodeAt(i));
+                    }
+                }
+                this.dispatchWith(flower.Event.CHANGE, this, val);
+            }
+        }, {
+            key: "$getValue",
+            value: function $getValue() {
+                if (this.__checkDistort) {
+                    var str = this.__value + "";
+                    var compare = "";
+                    for (var i = 0; i < this.__valueCheck.length; i++) {
+                        compare += String.fromCharCode(this.__valueCheck[i]);
+                    }
+                    if (str != compare) {
+                        this.dispatchWith(flower.Event.DISTORT, this);
+                        this.__value = parseFloat(compare);
+                    }
+                }
+                return this.__value;
             }
         }, {
             key: "$setEnumList",
@@ -1305,6 +1720,13 @@ var $root = eval("this");
     //////////////////////////End File:extension/black/data/member/NumberValue.js///////////////////////////
 
     //////////////////////////File:extension/black/data/member/ObjectValue.js///////////////////////////
+    /**
+     * 定义 Data 时，如下关键字不能作为属性名称
+     * `value
+     * className
+     * membersKey
+     * dispose
+     */
 
     var ObjectValue = function (_Value5) {
         _inherits(ObjectValue, _Value5);
@@ -1314,33 +1736,45 @@ var $root = eval("this");
 
             _classCallCheck(this, ObjectValue);
 
-            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
+            var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(ObjectValue).call(this));
 
-            _this8.__old = _this8.__value = {};
+            _this6.__old = _this6.__value = {};
             if (init) {
-                _this8.value = init;
+                _this6.value = init;
             }
-            _this8.__saveClass = {};
-            return _this8;
+            _this6.__saveClass = {};
+            _this6.__nosave = {};
+            return _this6;
         }
 
         _createClass(ObjectValue, [{
-            key: "setMember",
-            value: function setMember(name, value) {
+            key: "$setMember",
+            value: function $setMember(name, value) {
                 var old = this.__value[name];
                 this.__value[name] = value;
-                //this.dispatchWidth(flower.Event.UPDATE, {
-                //    "name": name,
-                //    "old": old,
-                //    "value": value
-                //});
+                this.dispatchWith(name, {
+                    "name": name,
+                    "old": old,
+                    "value": value
+                });
             }
         }, {
-            key: "setMemberSaveClass",
-            value: function setMemberSaveClass(name) {
+            key: "$setMemberSaveClass",
+            value: function $setMemberSaveClass(name) {
                 var saveClass = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
                 this.__saveClass[name] = saveClass;
+            }
+        }, {
+            key: "$setMemberSaveFlag",
+            value: function $setMemberSaveFlag(name) {
+                var save = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+                if (save == false) {
+                    this.__nosave[name] = true;
+                } else {
+                    delete this.__nosave[name];
+                }
             }
         }, {
             key: "hasMember",
@@ -1360,19 +1794,25 @@ var $root = eval("this");
                     return;
                 }
                 if (value == null) {
-                    this.setMember(name, null);
+                    this.$setMember(name, null);
                 } else {
+                    if (value && !(value instanceof Value) && (typeof value === "undefined" ? "undefined" : _typeof(value)) == "object" && value.__className) {
+                        value = flower.DataManager.createData(value.__className, value);
+                    }
                     if (value instanceof Value) {
-                        this.setMember(name, value);
+                        this.$setMember(name, value);
                     } else {
                         var val = this.__value[name];
+                        var old = val;
                         if (val instanceof Value) {
                             val.value = value;
                         } else {
-                            if (value && (typeof value === "undefined" ? "undefined" : _typeof(value)) == "object" && value.__className) {
-                                value = flower.DataManager.createData(value.__className, value);
-                            }
                             this.__value[name] = value;
+                            this.dispatchWith(name, {
+                                "name": name,
+                                "old": old,
+                                "value": value
+                            });
                         }
                     }
                 }
@@ -1395,7 +1835,7 @@ var $root = eval("this");
                     var key = list[i];
                     var value = val[key];
                     if (!this.__value.hasOwnProperty(key)) {
-                        this.setMember(key, value);
+                        this.$setMember(key, value);
                     } else {
                         this.setValue(key, value);
                     }
@@ -1411,6 +1851,9 @@ var $root = eval("this");
                 var config = {};
                 for (var i = 0; i < list.length; i++) {
                     var key = list[i];
+                    if (this.__nosave[key]) {
+                        continue;
+                    }
                     var member = val[key];
                     if (member instanceof Value) {
                         if (member instanceof ObjectValue) {
@@ -1465,6 +1908,11 @@ var $root = eval("this");
                     this.__className = null;
                 }
             }
+        }, {
+            key: "membersKey",
+            get: function get() {
+                return Object.keys(this.__value);
+            }
         }]);
 
         return ObjectValue;
@@ -1484,23 +1932,23 @@ var $root = eval("this");
 
             _classCallCheck(this, StringValue);
 
-            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
+            var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(StringValue).call(this));
 
-            _this9.__old = _this9.__value = "" + init;
-            _this9.__enumList = enumList;
-            return _this9;
+            _this7.__old = _this7.__value = "" + (init == null ? "" : init);
+            _this7.__enumList = enumList;
+            return _this7;
         }
 
         _createClass(StringValue, [{
             key: "$setValue",
             value: function $setValue(val) {
-                val = "" + val;
+                val = "" + (val == null ? "" : val);
                 if (val == this.__value) {
                     return;
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                this.dispatchWith(flower.Event.CHANGE, this, val);
             }
         }, {
             key: "$setEnumList",
@@ -1534,18 +1982,20 @@ var $root = eval("this");
         function UIntValue() {
             var init = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
             var enumList = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+            var checkDistort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
             _classCallCheck(this, UIntValue);
 
-            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this));
+            var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIntValue).call(this, checkDistort));
 
             init = +init & ~0 || 0;
             if (init < 0) {
                 init = 0;
             }
-            _this10.__enumList = enumList;
-            _this10.__old = _this10.__value = init;
-            return _this10;
+            _this8.__enumList = enumList;
+            _this8.__old = _this8.__value = init;
+            _this8.__valueCheck = [48];
+            return _this8;
         }
 
         _createClass(UIntValue, [{
@@ -1560,7 +2010,30 @@ var $root = eval("this");
                 }
                 this.__old = this.__value;
                 this.__value = val;
-                this.dispatchWidth(flower.Event.UPDATE, this, val);
+                if (this.__checkDistort) {
+                    var str = val + "";
+                    this.__valueCheck.length = 0;
+                    for (var i = 0; i < str.length; i++) {
+                        this.__valueCheck.push(str.charCodeAt(i));
+                    }
+                }
+                this.dispatchWith(flower.Event.CHANGE, this, val);
+            }
+        }, {
+            key: "$getValue",
+            value: function $getValue() {
+                if (this.__checkDistort) {
+                    var str = this.__value + "";
+                    var compare = "";
+                    for (var i = 0; i < this.__valueCheck.length; i++) {
+                        compare += String.fromCharCode(this.__valueCheck[i]);
+                    }
+                    if (str != compare) {
+                        this.dispatchWith(flower.Event.DISTORT, this);
+                        this.__value = parseFloat(compare);
+                    }
+                }
+                return this.__value;
             }
         }, {
             key: "$setEnumList",
@@ -1596,12 +2069,14 @@ var $root = eval("this");
     locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
     locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
     locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
+    locale_strings[3008] = "语法分析错误，源代码:\n{0}\n错误信息 :{1}";
     locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
     locale_strings[3011] = "数据结构类定义解析出错 : {0}\n{1}";
     locale_strings[3012] = "没有定义的数据结构 : {0}";
     locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
     locale_strings[3014] = "无法设置属性值，该对象没有此属性 : {0}";
     locale_strings[3015] = "对象不能设置为空";
+    locale_strings[3016] = "无权访问模块数据，moduleKey 错误: {0}";
     locale_strings[3100] = "没有定义的数据类型 : {0}";
     locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
     locale_strings[3102] = "还没有设定数据源 dataProvider";
@@ -1621,7 +2096,13 @@ var $root = eval("this");
                 return;
             }
             DataManager.instance = this;
-
+            this.addDefine({
+                "name": "Attribute",
+                "members": {
+                    "name": { "type": "string" },
+                    "content": { "type": "string" }
+                }
+            });
             this.addDefine({
                 "name": "Size",
                 "members": {
@@ -1634,6 +2115,23 @@ var $root = eval("this");
                 "members": {
                     "x": { "type": "int" },
                     "y": { "type": "int" }
+                }
+            });
+            this.addDefine({
+                "name": "RGB",
+                "members": {
+                    "r": { "type": "uint" },
+                    "g": { "type": "uint" },
+                    "b": { "type": "uint" }
+                }
+            });
+            this.addDefine({
+                "name": "ARGB",
+                "members": {
+                    "a": { "type": "uint" },
+                    "r": { "type": "uint" },
+                    "g": { "type": "uint" },
+                    "b": { "type": "uint" }
                 }
             });
             this.addDefine({
@@ -1674,7 +2172,7 @@ var $root = eval("this");
             value: function addRootData(name, className) {
                 var init = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
-                this[name] = this.createData(className, className);
+                this[name] = this.createData(className, init);
                 return this._root[name] = this[name];
             }
         }, {
@@ -1687,6 +2185,7 @@ var $root = eval("this");
                 }
                 if (!this._defines[className]) {
                     this._defines[className] = {
+                        //moduleKey: moduleKey,
                         id: 0,
                         className: "",
                         define: null
@@ -1700,47 +2199,80 @@ var $root = eval("this");
                 var extendClassName = "ObjectValue";
                 if (config.extends) {
                     var extendsItem = this.getClass(config.extends);
+                    if (extendsItem) {
+                        extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
+                    } else {
+                        var extendPakcages = config.extends.split(".");
+                        extendsItem = $root;
+                        for (var i = 0; i < extendPakcages.length; i++) {
+                            extendsItem = extendsItem[extendPakcages[i]];
+                        }
+                        if (extendsItem) {
+                            extendClassName = config.extends;
+                        }
+                    }
                     if (!extendsItem) {
                         sys.$error(3013, config.extends, flower.ObjectDo.toString(config));
                         return;
                     }
-                    extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
                 }
+                this.staticScript = "";
+                this.scriptContent = config.script;
+                var script = { content: "", ctor: "" };
+                this.decodeScript("\n\n", defineClass, script);
                 var content = "var " + defineClass + " = (function (_super) {\n" + "\t__extends(" + defineClass + ", _super);\n" + "\tfunction " + defineClass + "(init) {\n" + "\t\t_super.call(this,null);\n";
                 content += "\t\tthis.className = \"" + config.name + "\";\n";
                 var defineMember = "";
                 var members = config.members;
                 var bindContent = "";
+                var subContent = "";
                 if (members) {
                     var member;
                     for (var key in members) {
                         member = members[key];
                         if (member.init && _typeof(member.init) == "object" && member.init.__className) {
-                            content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
-                            content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                            content += "\t\tthis.$setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
+                            content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                         } else {
                             if (member.type === "number" || member.type === "Number") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.$setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                             } else if (member.type === "int" || member.type === "Int") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.$setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                             } else if (member.type === "uint" || member.type === "Uint") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.$setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                             } else if (member.type === "string" || member.type === "String") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.$setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                                content += "\t\tthis.$setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                             } else if (member.type === "array" || member.type === "Array") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
+                                content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? JSON.stringify(member.init) : "null") + ",\"" + member.typeValue + "\"));\n";
                             } else if (member.type === "*") {
-                                content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
-                                content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                                content += "\t\tthis.$setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                                content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             } else {
-                                content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
-                                content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                                if (member.hasOwnProperty("init") && member.init == null) {
+                                    content += "\t\tthis.$setMember(\"" + key + "\" , null);\n";
+                                } else {
+                                    content += "\t\tthis.$setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                                }
+                                content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                             }
+                        }
+                        if (member.save === true || member.save === false) {
+                            content += "\t\tthis.$setMemberSaveFlag(\"" + key + "\" ," + member.save + ");\n";
                         }
                         if (member.bind) {
                             bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n";
+                        }
+                        if (member.sub) {
+                            subContent += "\t\tthis." + member.sub.source + ".linkSubArrayValue(this." + key + ",";
+                            if (typeof member.sub.type == "string") {
+                                subContent += "\"" + member.sub.type + "\"," + (typeof member.sub.value == "string" ? "\"" + member.sub.value + "\"" : member.sub.value) + ");\n";
+                            } else {
+                                for (var s = 0; s < member.sub.type.length; s++) {
+                                    subContent += "\"" + member.sub.type[s] + "\"," + (typeof member.sub.value[s] == "string" ? "\"" + member.sub.value[s] + "\"" : member.sub.value[s]) + (s < member.sub.type.length - 1 ? "," : ");\n");
+                                }
+                            }
                         }
                         defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
                         defineMember += "\t\tget: function () {\n";
@@ -1754,9 +2286,14 @@ var $root = eval("this");
                         defineMember += "\t});\n\n";
                     }
                 }
+                if (config.init) {
+                    content += "\t\tthis.value = " + JSON.stringify(config.init) + ";\n";
+                }
                 content += "\t\tif(init) this.value = init;\n";
                 content += bindContent;
-                content += "\t}\n\n" + defineMember + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
+                content += subContent;
+                content += script.ctor;
+                content += "\t}\n\n" + "var p = " + defineClass + ".prototype;" + "\n\n" + script.content + "\n" + defineMember + "\treturn " + defineClass + ";\n" + "})(" + extendClassName + ");\n";
                 content += "DataManager.getInstance().$addClassDefine(" + defineClass + ", \"" + config.name + "\");\n";
                 if (config.exports) {
                     var name = "";
@@ -1778,7 +2315,7 @@ var $root = eval("this");
                         sys.$error(3011, e, content);
                     }
                 } else {
-                    eval(className);
+                    eval(content);
                 }
                 item.id++;
                 return this.getClass(config.name);
@@ -1796,19 +2333,23 @@ var $root = eval("this");
                 if (!item) {
                     return null;
                 }
+                //if (item.moduleKey != moduleKey) {
+                //    sys.$error(3016, moduleKey);
+                //}
                 return item.define;
             }
         }, {
             key: "createData",
             value: function createData(className) {
                 var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var distort = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
                 if (className === "number" || className === "Number") {
-                    return new NumberValue(init);
+                    return new NumberValue(init, null, distort);
                 } else if (className === "int" || className === "Int") {
-                    return new IntValue(init);
+                    return new IntValue(init, null, distort);
                 } else if (className === "uint" || className === "Uint") {
-                    return new UIntValue(init);
+                    return new UIntValue(init, null, distort);
                 } else if (className === "string" || className === "String") {
                     return new StringValue(init);
                 } else if (className === "boolean" || className === "Boolean" || className === "bool") {
@@ -1823,8 +2364,220 @@ var $root = eval("this");
                         sys.$error(3012, className);
                         return;
                     }
+                    //if (item.moduleKey != moduleKey) {
+                    //    sys.$error(3016, moduleKey);
+                    //}
                     return new item.define(init);
                 }
+            }
+        }, {
+            key: "decodeScript",
+            value: function decodeScript(before, className, script) {
+                if (this.scriptContent && this.scriptContent != "") {
+                    var scriptContent = this.scriptContent;
+                    //删除注释
+                    scriptContent = flower.StringDo.deleteProgramNote(scriptContent, 0);
+                    var i = 0;
+                    var len = scriptContent.length;
+                    var pos = 0;
+                    var list = [];
+                    this.staticScript = "";
+                    while (true) {
+                        var nextFunction = this.findNextFunction(scriptContent, pos);
+                        if (nextFunction) {
+                            this.staticScript += nextFunction.staticScript;
+                            pos = nextFunction.endIndex;
+                            list.push(nextFunction);
+                        } else {
+                            break;
+                        }
+                    }
+                    for (var i = 0; i < list.length; i++) {
+                        var func = list[i];
+                        if (func.name == "constructor") {
+                            script.ctor = before + func.content + "\n";
+                        } else if (func.gset == 0) {
+                            script.content += before + "\t" + className + (func.isStatic ? "." : ".prototype.") + func.name + " = function(" + func.params + ") " + func.content + "\n";
+                        } else {
+                            var setContent = func.gset == 1 ? "" : func.content;
+                            var getContent = func.gset == 1 ? func.content : "";
+                            var prams = func.gset == 1 ? "" : func.params;
+                            for (var f = 0; f < list.length; f++) {
+                                if (f != i && list[f].name == func.name && list[f].gset && list[f].gset != func.gset) {
+                                    if (list[f].gset == 1) {
+                                        getContent = list[f].content;
+                                    } else {
+                                        setContent = list[f].content;
+                                        prams = list[f].params;
+                                    }
+                                    list.splice(f, 1);
+                                    break;
+                                }
+                            }
+                            script.content += before + "\tObject.defineProperty(" + className + ".prototype, \"" + func.name + "\", {\n";
+                            if (getContent != "") {
+                                script.content += before + "\t\tget: function () " + getContent + ",\n";
+                            }
+                            if (setContent != "") {
+                                script.content += before + "\t\tset: function (" + prams + ") " + setContent + ",\n";
+                            }
+                            script.content += before + "\t\tenumerable: true,\n";
+                            script.content += before + "\t\tconfigurable: true\n";
+                            script.content += before + "\t\t});\n\n";
+                        }
+                    }
+                }
+            }
+
+            /**
+             * 查找下一个函数，并分析出 函数名和参数列表
+             * @param content
+             * @param start
+             * @return {
+             *      name : 函数名
+             *      gset : 0.普通函数 1.get函数 2.set函数
+             *      params : 参数列表 (也是字符串，直接用就可以)
+             *      content : 函数体
+             *      endIndex : 函数体结束标识 } 之后的那个位置
+             * }
+             */
+
+        }, {
+            key: "findNextFunction",
+            value: function findNextFunction(content, start) {
+                var len = "function".length;
+                var flag;
+                var name;
+                var params;
+                var char;
+                var pos, pos2, i;
+                var res;
+                var gset = 0;
+                var funcName;
+                var isStatic = false;
+                //跳过空格和注释
+                i = flower.StringDo.jumpProgramSpace(content, start);
+                if (i == content.length) {
+                    return null;
+                }
+                var j = i;
+                while (j < content.length) {
+                    if (content.slice(j, j + "static".length) == "static" || content.slice(j, j + len) == "function") {
+                        break;
+                    }
+                    j++;
+                }
+                if (j == content.length) {
+                    this.staticScript += content.slice(i, j);
+                    return null;
+                }
+                var staticScript = content.slice(i, j);
+                i = j;
+                if (content.slice(i, i + "static".length) == "static") {
+                    isStatic = true;
+                    i += "static".length;
+                    //跳过空格和注释
+                    i = flower.StringDo.jumpProgramSpace(content, i);
+                }
+                if (content.slice(i, i + len) == "function") {
+                    if (i != 0) {
+                        //判断 function 之前是不是分隔符
+                        char = content.charAt(i - 1);
+                        if (char != "\t" && char != " " && char != "\r" && char != "\n") {
+                            sys.$error(3007, "", this.scriptContent);
+                        }
+                    }
+                    i = pos = i + len;
+                    //跳过 function 之后的分隔符
+                    pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+                    if (pos2 == pos) {
+                        sys.$error(3007, "", this.scriptContent);
+                    }
+                    pos = pos2;
+                    //获取 function 之后的函数名
+                    name = flower.StringDo.findId(content, pos);
+                    if (name == "") {
+                        i = pos;
+                        sys.$error(3007, "", this.scriptContent);
+                    }
+                    if (name == "get" || name == "set") {
+                        pos += name.length;
+                        gset = name == "get" ? 1 : 2;
+                        //跳过 function 之后的分隔符
+                        pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+                        if (pos2 == pos) {
+                            sys.$error(3007, "", this.scriptContent);
+                        }
+                        pos = pos2;
+                        //获取 function 之后的函数名
+                        name = flower.StringDo.findId(content, pos);
+                        if (name == "") {
+                            i = pos;
+                            sys.$error(3007, "", this.scriptContent);
+                        }
+                    }
+                    funcName = name;
+                    //跳过函数名之后的分隔符
+                    i = pos = flower.StringDo.jumpProgramSpace(content, pos + name.length);
+                    //判断函数名之后是不是(
+                    char = content.charAt(pos);
+                    if (char != "(") {
+                        sys.$error(3007, "", this.scriptContent);
+                    }
+                    //跳过 (
+                    pos++;
+                    //查找 params
+                    params = "";
+                    flag = true;
+                    while (true) {
+                        //跳过空格
+                        pos = flower.StringDo.jumpProgramSpace(content, pos);
+                        //查找 param 名
+                        name = flower.StringDo.findId(content, pos);
+                        if (name == "") {
+                            if (content.charAt(pos) == ")") {
+                                i = pos + 1;
+                                break;
+                            } else {
+                                flag = false;
+                                break;
+                            }
+                        } else {
+                            params += name;
+                            pos += name.length;
+                        }
+                        //跳过空格
+                        pos = flower.StringDo.jumpProgramSpace(content, pos);
+                        char = content.charAt(pos);
+                        if (char == ",") {
+                            params += ",";
+                            pos++;
+                        }
+                    }
+                    if (!flag) {
+                        sys.$error(3007, "", this.scriptContent);
+                    }
+                    res = {
+                        name: funcName,
+                        gset: gset,
+                        params: params
+                    };
+                }
+                if (!res) {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+
+                //分析函数体
+                //跳过空格
+                var content = flower.StringDo.findFunctionContent(content, i);
+                if (content == "") {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+                res.staticScript = staticScript || "";
+                res.content = content;
+                res.endIndex = i + content.length + 1;
+                res.isStatic = isStatic;
+                return res;
             }
         }, {
             key: "clear",
@@ -1964,6 +2717,8 @@ var $root = eval("this");
             key: "updateList",
             value: function updateList(width, height) {
                 var startIndex = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+                var elementWidth = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var elementHeight = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
             }
         }, {
             key: "$clear",
@@ -2003,13 +2758,13 @@ var $root = eval("this");
         function LinearLayout() {
             _classCallCheck(this, LinearLayout);
 
-            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(LinearLayout).call(this));
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(LinearLayout).call(this));
 
-            _this11._gap = 0;
-            _this11._align = "";
+            _this9._gap = 0;
+            _this9._align = "";
 
-            _this11._fixElementSize = true;
-            return _this11;
+            _this9._fixElementSize = true;
+            return _this9;
         }
 
         _createClass(LinearLayout, [{
@@ -2079,6 +2834,8 @@ var $root = eval("this");
             key: "updateList",
             value: function updateList(width, height) {
                 var startIndex = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+                var elementWidth = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var elementHeight = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
 
                 //flower.trace("update layout",flower.EnterFrame.frame);
                 if (!this.flag) {
@@ -2094,11 +2851,13 @@ var $root = eval("this");
                 var i;
                 if (this._align == flower.Layout.VerticalAlign) {
                     if (this._fixElementSize) {
-                        var eh = list[0].height;
-                        for (i = 0; i < len; i++) {
-                            list[i].y = (i + startIndex) * (eh + this._gap);
+                        if (list.length) {
+                            elementHeight = elementHeight || list[0].height;
                         }
-                        this._maxY = (len + startIndex) * (eh + this._gap);
+                        for (i = 0; i < len; i++) {
+                            list[i].y = (i + startIndex) * (elementHeight + this._gap);
+                        }
+                        this._maxY = (len + startIndex) * (elementHeight + this._gap);
                     } else {
                         var y = 0;
                         for (i = 0; i < len; i++) {
@@ -2110,11 +2869,13 @@ var $root = eval("this");
                 }
                 if (this._align == flower.Layout.HorizontalAlign) {
                     if (this._fixElementSize) {
-                        var ew = list[0].width;
-                        for (i = 0; i < len; i++) {
-                            list[i].x = (i + startIndex) * (ew + this._gap);
+                        if (list.length) {
+                            elementWidth = elementWidth || list[0].height;
                         }
-                        this._maxX = (len + startIndex) * (ew + this._gap);
+                        for (i = 0; i < len; i++) {
+                            list[i].x = (i + startIndex) * (elementWidth + this._gap);
+                        }
+                        this._maxX = (len + startIndex) * (elementWidth + this._gap);
                     } else {
                         var x = 0;
                         for (i = 0; i < len; i++) {
@@ -2157,10 +2918,10 @@ var $root = eval("this");
         function HorizontalLayout() {
             _classCallCheck(this, HorizontalLayout);
 
-            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(HorizontalLayout).call(this));
+            var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(HorizontalLayout).call(this));
 
-            _this12.align = flower.Layout.HorizontalAlign;
-            return _this12;
+            _this10.align = flower.Layout.HorizontalAlign;
+            return _this10;
         }
 
         return HorizontalLayout;
@@ -2177,10 +2938,10 @@ var $root = eval("this");
         function VerticalLayout() {
             _classCallCheck(this, VerticalLayout);
 
-            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(VerticalLayout).call(this));
+            var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(VerticalLayout).call(this));
 
-            _this13.align = flower.Layout.VerticalAlign;
-            return _this13;
+            _this11.align = flower.Layout.VerticalAlign;
+            return _this11;
         }
 
         return VerticalLayout;
@@ -2188,6 +2949,40 @@ var $root = eval("this");
 
     black.VerticalLayout = VerticalLayout;
     //////////////////////////End File:extension/black/layout/VerticalLayout.js///////////////////////////
+
+    //////////////////////////File:extension/black/utils/Language.js///////////////////////////
+    /**
+     * 简单的多语言管理
+     */
+
+    var Language = function () {
+        function Language() {
+            _classCallCheck(this, Language);
+        }
+
+        _createClass(Language, null, [{
+            key: "register",
+            value: function register(key, language, value) {
+                if (!Language.__languages[language]) {
+                    Language.__languages[language] = {};
+                }
+                Language.__languages[language][key] = value;
+            }
+        }, {
+            key: "getLanguage",
+            value: function getLanguage(key, language) {
+                return Language.__languages[language][key];
+            }
+        }]);
+
+        return Language;
+    }();
+
+    Language.__languages = {};
+
+
+    black.Language = Language;
+    //////////////////////////End File:extension/black/utils/Language.js///////////////////////////
 
     //////////////////////////File:extension/black/utils/PanelScaleMode.js///////////////////////////
 
@@ -2205,6 +3000,20 @@ var $root = eval("this");
     black.PanelScaleMode = PanelScaleMode;
     //////////////////////////End File:extension/black/utils/PanelScaleMode.js///////////////////////////
 
+    //////////////////////////File:extension/black/utils/ScrollPolicy.js///////////////////////////
+
+    var ScrollPolicy = function ScrollPolicy() {
+        _classCallCheck(this, ScrollPolicy);
+    };
+
+    ScrollPolicy.ON = "on";
+    ScrollPolicy.OFF = "off";
+    ScrollPolicy.AUTO = "auto";
+
+
+    black.ScrollPolicy = ScrollPolicy;
+    //////////////////////////End File:extension/black/utils/ScrollPolicy.js///////////////////////////
+
     //////////////////////////File:extension/black/Group.js///////////////////////////
 
     var Group = function (_flower$Sprite) {
@@ -2213,13 +3022,21 @@ var $root = eval("this");
         function Group(data) {
             _classCallCheck(this, Group);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
+            var _this12 = _possibleConstructorReturn(this, Object.getPrototypeOf(Group).call(this));
 
             if (data != null) {
-                _this14._data = data;
+                _this12._data = data;
             }
-            _this14.$initUIComponent();
-            return _this14;
+            _this12.$IViewPort = {
+                0: 0, //contentStartX
+                1: 0, //contentStartY
+                2: 0, //contentEndX
+                3: 0, //contentEndY
+                4: null, //scrollH
+                5: null };
+            //scrollV
+            _this12.$initUIComponent();
+            return _this12;
         }
 
         _createClass(Group, [{
@@ -2277,10 +3094,10 @@ var $root = eval("this");
                         this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width * this.scaleX;
                     }
                     if (p[2] != null) {
-                        this.x = (parent.width - this.width) * 0.5 + p[2];
+                        this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -2300,16 +3117,20 @@ var $root = eval("this");
                         this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height * this.scaleY;
                     }
                     if (p[5] != null) {
-                        this.y = (parent.height - this.height) * 0.5 + p[5];
+                        this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
                     }
                 }
                 this.$validateChildrenUIComponent();
+                this.$IViewPort[0] = this.$childrenBounds.x;
+                this.$IViewPort[1] = this.$childrenBounds.y;
+                this.$IViewPort[2] = this.$childrenBounds.x + this.$childrenBounds.width;
+                this.$IViewPort[3] = this.$childrenBounds.y + this.$childrenBounds.height;
             }
         }, {
             key: "$validateChildrenUIComponent",
@@ -2319,7 +3140,7 @@ var $root = eval("this");
                     var child;
                     for (var i = 0, len = children.length; i < len; i++) {
                         child = children[i];
-                        if (child.__UIComponent) {
+                        if (child.__UIComponent && child.$UIComponent[15]) {
                             child.$validateUIComponent();
                         }
                     }
@@ -2341,26 +3162,129 @@ var $root = eval("this");
                     var count = 6;
                     while (count && this.$hasFlags(0x1000)) {
                         this.$validateUIComponent();
-                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        //super.$onFrameEnd();
+                        var children = this.__children;
+                        /**
+                         * 子对象序列改变
+                         */
+                        if (this.$hasFlags(0x0100)) {
+                            if (!this.$nativeShow) {
+                                $warn(1002, this.name);
+                                return;
+                            }
+                            this.$nativeShow.resetChildIndex(children);
+                            this.$removeFlags(0x0100);
+                        }
+                        for (var i = 0, len = children.length; i < len; i++) {
+                            if (children[i].visible) {
+                                children[i].$onFrameEnd();
+                            }
+                        }
+                        //super.$onFrameEnd();
+                        var p = this.$DisplayObject;
+                        if (this.$hasFlags(0x0002)) {
+                            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                        }
+
                         this.$resetLayout();
                         flag = true;
                         count--;
                     }
                     if (!flag) {
-                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        //super.$onFrameEnd();
+                        var children = this.__children;
+                        /**
+                         * 子对象序列改变
+                         */
+                        if (this.$hasFlags(0x0100)) {
+                            if (!this.$nativeShow) {
+                                $warn(1002, this.name);
+                                return;
+                            }
+                            this.$nativeShow.resetChildIndex(children);
+                            this.$removeFlags(0x0100);
+                        }
+                        for (var i = 0, len = children.length; i < len; i++) {
+                            if (children[i].visible) {
+                                children[i].$onFrameEnd();
+                            }
+                        }
+                        //super.$onFrameEnd();
+                        var p = this.$DisplayObject;
+                        if (this.$hasFlags(0x0002)) {
+                            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                        }
+
                         this.$resetLayout();
                     }
                     while (count && this.$hasFlags(0x1000)) {
                         this.$validateUIComponent();
-                        _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                        //super.$onFrameEnd();
+                        var children = this.__children;
+                        /**
+                         * 子对象序列改变
+                         */
+                        if (this.$hasFlags(0x0100)) {
+                            if (!this.$nativeShow) {
+                                $warn(1002, this.name);
+                                return;
+                            }
+                            this.$nativeShow.resetChildIndex(children);
+                            this.$removeFlags(0x0100);
+                        }
+                        for (var i = 0, len = children.length; i < len; i++) {
+                            if (children[i].visible) {
+                                children[i].$onFrameEnd();
+                            }
+                        }
+                        //super.$onFrameEnd();
+                        var p = this.$DisplayObject;
+                        if (this.$hasFlags(0x0002)) {
+                            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                        }
+
                         this.$resetLayout();
                         flag = true;
                         count--;
                     }
                 } else {
-                    _get(Object.getPrototypeOf(Group.prototype), "$onFrameEnd", this).call(this);
+                    //super.$onFrameEnd();
+                    var children = this.__children;
+                    /**
+                     * 子对象序列改变
+                     */
+                    if (this.$hasFlags(0x0100)) {
+                        if (!this.$nativeShow) {
+                            $warn(1002, this.name);
+                            return;
+                        }
+                        this.$nativeShow.resetChildIndex(children);
+                        this.$removeFlags(0x0100);
+                    }
+                    for (var i = 0, len = children.length; i < len; i++) {
+                        if (children[i].visible) {
+                            children[i].$onFrameEnd();
+                        }
+                    }
+                    //super.$onFrameEnd();
+                    var p = this.$DisplayObject;
+                    if (this.$hasFlags(0x0002)) {
+                        this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                    }
                     this.$resetLayout();
                 }
+                flower.DebugInfo.frameInfo.display++;
+                flower.DebugInfo.frameInfo.sprite++;
+            }
+        }, {
+            key: "$getContentWidth",
+            value: function $getContentWidth() {
+                return this.$IViewPort[2] - this.$IViewPort[0];
+            }
+        }, {
+            key: "$getContentHeight",
+            value: function $getContentHeight() {
+                return this.$IViewPort[3] - this.$IViewPort[1];
             }
         }, {
             key: "dispose",
@@ -2377,6 +3301,44 @@ var $root = eval("this");
             },
             set: function set(val) {
                 this.setData(val);
+            }
+        }, {
+            key: "contentWidth",
+            get: function get() {
+                return this.$getContentWidth();
+            }
+        }, {
+            key: "contentHeight",
+            get: function get() {
+                return this.$getContentHeight();
+            }
+        }, {
+            key: "scrollH",
+            get: function get() {
+                return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+            },
+            set: function set(val) {
+                if (val != null) {
+                    val = +val;
+                }
+                if (this.$IViewPort[4] == val) {
+                    return;
+                }
+                this.$IViewPort[4] = val;
+            }
+        }, {
+            key: "scrollV",
+            get: function get() {
+                return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+            },
+            set: function set(val) {
+                if (val != null) {
+                    val = +val;
+                }
+                if (this.$IViewPort[5] == val) {
+                    return;
+                }
+                this.$IViewPort[5] = val;
             }
         }]);
 
@@ -2398,15 +3360,16 @@ var $root = eval("this");
 
             _classCallCheck(this, UIParser);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
+            var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(UIParser).call(this));
 
-            _this15.defaultClassName = "";
-            _this15.localNameSpace = "local";
+            _this13.defaultClassName = "";
+            _this13.moduleName = "local";
+            _this13.namespaces = {};
 
-            _this15._beforeScript = beforeScript;
-            _this15.classes = flower.UIParser.classes;
-            _this15.percentWidth = _this15.percentHeight = 100;
-            return _this15;
+            _this13._beforeScript = beforeScript;
+            _this13.classes = flower.UIParser.classes;
+            _this13.percentWidth = _this13.percentHeight = 100;
+            return _this13;
         }
 
         _createClass(UIParser, [{
@@ -2414,8 +3377,11 @@ var $root = eval("this");
             value: function parseUIAsync(url) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
-                if (this.classes.namespaces[url]) {
-                    this.localNameSpace = this.classes.namespaces[url];
+                if (this.classes.uiModule[url]) {
+                    this.moduleName = this.classes.uiModule[url];
+                    if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.moduleName]) {
+                        this._beforeScript = flower.UIParser.classes.beforeScripts[this.moduleName];
+                    }
                 }
                 if (this.classes.defaultClassNames[url]) {
                     this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2431,8 +3397,11 @@ var $root = eval("this");
         }, {
             key: "parseAsync",
             value: function parseAsync(url) {
-                if (this.classes.namespaces[url]) {
-                    this.localNameSpace = this.classes.namespaces[url];
+                if (this.classes.uiModule[url]) {
+                    this.moduleName = this.classes.uiModule[url];
+                    if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.moduleName]) {
+                        this._beforeScript = flower.UIParser.classes.beforeScripts[this.moduleName];
+                    }
                 }
                 if (this.classes.defaultClassNames[url]) {
                     this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2448,7 +3417,7 @@ var $root = eval("this");
             key: "loadContentError",
             value: function loadContentError(e) {
                 if (this.hasListener(flower.Event.ERROR)) {
-                    this.dispatchWidth(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
+                    this.dispatchWith(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
                 } else {
                     sys.$error(3001, e.currentTarget.url);
                 }
@@ -2458,6 +3427,19 @@ var $root = eval("this");
             value: function loadContentComplete(e) {
                 this.relationUI = [];
                 var xml = flower.XMLElement.parse(e.data);
+                for (var i = 0; i < xml.namespaces.length; i++) {
+                    if (xml.namespaces[i].name == "f") {
+                        continue;
+                    }
+                    var moduleURL = xml.namespaces[i].value;
+                    if (moduleURL.slice(0, 2) == "./") {
+                        moduleURL = flower.Path.joinPath(this.loadURL, moduleURL);
+                    }
+                    this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
+                    if (!this.namespaces[xml.namespaces[i].name]) {
+                        sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
+                    }
+                }
                 this.loadContent = xml;
                 var list = xml.getAllElements();
                 var scriptURL = "";
@@ -2466,6 +3448,7 @@ var $root = eval("this");
                     var nameSpace = name.split(":")[0];
                     name = name.split(":")[1];
                     if (nameSpace != "f") {
+                        nameSpace = this.namespaces[nameSpace];
                         if (!this.classes[nameSpace][name] && !this.classes[nameSpace + "Content"][name]) {
                             if (!this.classes[nameSpace + "URL"][name]) {
                                 sys.$error(3002, name);
@@ -2531,25 +3514,25 @@ var $root = eval("this");
                 if (this.relationIndex >= this.relationUI.length) {
                     if (this.parseUIAsyncFlag) {
                         var ui = this.parseUI(this.loadContent, this.loadData);
-                        this.dispatchWidth(flower.Event.COMPLETE, ui);
+                        this.dispatchWith(flower.Event.COMPLETE, ui);
                     } else {
                         var data = this.parse(this.loadContent);
-                        this.dispatchWidth(flower.Event.COMPLETE, data);
+                        this.dispatchWith(flower.Event.COMPLETE, data);
                     }
                 } else {
                     var parser = new UIParser();
                     parser.defaultClassName = this.relationUI[this.relationIndex].name;
-                    parser.localNameSpace = this.relationUI[this.relationIndex].namesapce;
+                    parser.moduleName = this.relationUI[this.relationIndex].namesapce;
                     parser.parseAsync(this.relationUI[this.relationIndex].url);
                     parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
-                    parser.addListener(flower.ERROR, this.relationLoadError, this);
+                    parser.addListener(flower.Event.ERROR, this.relationLoadError, this);
                 }
             }
         }, {
             key: "relationLoadError",
             value: function relationLoadError(e) {
                 if (this.hasListener(flower.Event.ERROR)) {
-                    this.dispatchWidth(flower.Event.ERROR, e.data);
+                    this.dispatchWith(flower.Event.ERROR, e.data);
                 } else {
                     $error(e.data);
                 }
@@ -2561,7 +3544,7 @@ var $root = eval("this");
 
                 this.parse(content);
                 var className = this._className;
-                var namesapce = this.localNameSpace;
+                var namesapce = this.moduleName;
                 var UIClass = this.classes[namesapce][className];
                 var ui;
                 if (data) {
@@ -2587,6 +3570,22 @@ var $root = eval("this");
                 if (xml.getNameSapce("f") == null || xml.getNameSapce("f").value != "flower") {
                     sys.$error(3006, content);
                     return null;
+                }
+                for (var i = 0; i < xml.namespaces.length; i++) {
+                    if (xml.namespaces[i].name == "f") {
+                        continue;
+                    }
+                    var moduleURL = xml.namespaces[i].value;
+                    if (moduleURL.slice(0, 2) == "./") {
+                        if (!this.loadURL || !moduleURL) {
+                            flower.breakPoint();
+                        }
+                        moduleURL = flower.Path.joinPath(this.loadURL, moduleURL);
+                    }
+                    this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
+                    if (!this.namespaces[xml.namespaces[i].name]) {
+                        sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
+                    }
                 }
                 this.rootXML = xml;
                 var classInfo = this.decodeRootComponent(xml, content);
@@ -2616,6 +3615,7 @@ var $root = eval("this");
                 var allClassName = "";
                 var packages = [];
                 if (uinameNS != "f") {
+                    uinameNS = this.namespaces[uinameNS];
                     extendClass = uiname;
                 } else {
                     extendClass = this.classes[uinameNS][uiname];
@@ -2677,7 +3677,7 @@ var $root = eval("this");
                 }
                 content += before + "\t\tif(data) this.data = data;\n";
                 content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-                content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
+                content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);\n";
                 content += before + "\t}\n\n";
                 content += propertyList[propertyList.length - 1];
                 for (var i = 0; i < propertyList.length - 1; i++) {
@@ -2708,9 +3708,9 @@ var $root = eval("this");
                     }
                 }
                 content += classEnd;
-                content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
+                content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.moduleName + "\");\n";
                 var pkg = "";
-                var pkgs = flower.UIParser.classes.packages[this.localNameSpace] || [];
+                var pkgs = flower.UIParser.classes.packages[this.moduleName] || [];
                 pkgs = pkgs.concat(packages);
                 for (var i = 0; i < pkgs.length; i++) {
                     pkg = pkgs[i];
@@ -2730,7 +3730,7 @@ var $root = eval("this");
                 } else {
                     eval(content);
                 }
-                flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
+                flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.moduleName);
                 return {
                     "namesapce": uinameNS,
                     "className": allClassName
@@ -3003,17 +4003,15 @@ var $root = eval("this");
                         //if (createClassNameSpace != "f") {
                         //    createClassName = this.classes[createClassNameSpace][createClassName];
                         //}
-                        //if (!createClassName.split) {
-                        //    console.log("???");
-                        //}
                         thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                         thisObj = thisObj.toLocaleLowerCase();
                         if (createClassNameSpace != "f") {
-                            setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + createClassNameSpace + "\"))();\n";
+                            setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + this.namespaces[createClassNameSpace] + "\"))();\n";
                         } else {
                             setObject += before + "\tvar " + thisObj + " = new " + this.classes.f[createClassName] + "();\n";
                         }
                         setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
+                        setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".$filePath = \"" + this.loadURL + "\";\n";
                     }
                 }
                 var idAtr = xml.getAttribute("id");
@@ -3031,6 +4029,11 @@ var $root = eval("this");
                         setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
                     } else if (atrArray.length == 1) {
                         if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
+                            //if (atrValue.indexOf("$moduleKey$") >= 0) {
+                            //
+                            //} else {
+                            //
+                            //}
                             setObject += before + "\tif(" + thisObj + ".__UIComponent) ";
                             setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
                             setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
@@ -3058,6 +4061,7 @@ var $root = eval("this");
                             if (!namespaces[childNameNS]) {
                                 sys.$warn(3004, childNameNS, this.parseContent);
                             }
+                            childNameNS = this.namespaces[childNameNS];
                             if (this.classes[childNameNS][childName]) {
                                 childClass = childName;
                             } else {
@@ -3091,7 +4095,9 @@ var $root = eval("this");
                                     item.addNameSpace(this.rootXML.namespaces[n]);
                                 }
                                 var itemRenderer = new UIParser();
-                                setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.localNameSpace + "\");\n";
+                                itemRenderer.loadURL = this.loadURL;
+                                itemRenderer.namespaces = this.namespaces;
+                                setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.moduleName + "\");\n";
                             } else {
                                 funcName = className + "_get" + itemClassName;
                                 setObject += before + "\t" + thisObj + "." + childName + " = this." + funcName + "(" + thisObj + ");\n";
@@ -3146,55 +4152,60 @@ var $root = eval("this");
         }], [{
             key: "registerLocalUIClass",
             value: function registerLocalUIClass(name, cls) {
-                var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
+                var moduleName = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
 
-                flower.UIParser.classes[namespace][name] = cls;
+                flower.UIParser.classes[moduleName][name] = cls;
             }
         }, {
             key: "setLocalUIClassContent",
             value: function setLocalUIClassContent(name, content) {
-                var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
+                var moduleName = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
 
-                flower.UIParser.classes[namespace + "Content"][name] = content;
+                flower.UIParser.classes[moduleName + "Content"][name] = content;
             }
         }, {
             key: "getLocalUIClassContent",
             value: function getLocalUIClassContent(name) {
-                var namespace = arguments.length <= 1 || arguments[1] === undefined ? "local" : arguments[1];
+                var moduleName = arguments.length <= 1 || arguments[1] === undefined ? "local" : arguments[1];
 
-                return flower.UIParser.classes[namespace + "Content"] ? flower.UIParser.classes[namespace + "Content"][name] : null;
+                return flower.UIParser.classes[moduleName + "Content"] ? flower.UIParser.classes[moduleName + "Content"][name] : null;
             }
         }, {
             key: "getLocalUIClass",
             value: function getLocalUIClass(name) {
-                var namespace = arguments.length <= 1 || arguments[1] === undefined ? "local" : arguments[1];
+                var moduleName = arguments.length <= 1 || arguments[1] === undefined ? "local" : arguments[1];
 
-                return this.classes[namespace] ? this.classes[namespace][name] : null;
+                return this.classes[moduleName] ? this.classes[moduleName][name] : null;
             }
         }, {
             key: "setLocalUIURL",
             value: function setLocalUIURL(name, url) {
-                var namespace = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
+                var moduleName = arguments.length <= 2 || arguments[2] === undefined ? "local" : arguments[2];
 
-                this.classes[namespace + "URL"][name] = url;
-                this.classes.namespaces[url] = namespace;
+                this.classes[moduleName + "URL"][name] = url;
+                this.classes.uiModule[url] = moduleName;
                 this.classes.defaultClassNames[url] = name;
             }
         }, {
-            key: "addNameSapce",
-            value: function addNameSapce(name) {
-                var packageURL = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
-
-                if (!flower.UIParser.classes[name]) {
+            key: "addModule",
+            value: function addModule(moduleName, url) {
+                var packageURL = moduleName;
+                if (!flower.UIParser.classes[moduleName]) {
                     var pkgs = packageURL.split(".");
                     if (pkgs[0] == "") {
                         pkgs = [];
                     }
-                    flower.UIParser.classes.packages[name] = pkgs;
-                    flower.UIParser.classes[name] = {};
-                    flower.UIParser.classes[name + "Content"] = {};
-                    flower.UIParser.classes[name + "URL"] = {};
+                    flower.UIParser.classes.namespaces[url] = moduleName;
+                    flower.UIParser.classes.packages[moduleName] = pkgs;
+                    flower.UIParser.classes[moduleName] = {};
+                    flower.UIParser.classes[moduleName + "Content"] = {};
+                    flower.UIParser.classes[moduleName + "URL"] = {};
                 }
+            }
+        }, {
+            key: "setModuleBeforeScript",
+            value: function setModuleBeforeScript(moduleName, beforeScript) {
+                flower.UIParser.classes.beforeScripts[moduleName] = beforeScript;
             }
         }]);
 
@@ -3217,7 +4228,7 @@ var $root = eval("this");
             "Shape": "flower.Shape",
             "Mask": "flower.Mask",
 
-            "ArrayValue": "ArrayValue",
+            "ArrayValue": "flower.ArrayValue",
             "BooleanValue": "flower.BooleanValue",
             "IntValue": "flower.IntValue",
             "NumberValue": "flower.NumberValue",
@@ -3229,6 +4240,9 @@ var $root = eval("this");
             "Input": "flower.Input",
             "Image": "flower.Image",
             "Group": "flower.Group",
+            "ScrollBar": "flower.ScrollBar",
+            "HScrollBar": "flower.HScrollBar",
+            "VScrollBar": "flower.VScrollBar",
             "Button": "flower.Button",
             "Rect": "flower.Rect",
             "MaskUI": "flower.MaskUI",
@@ -3252,8 +4266,8 @@ var $root = eval("this");
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout",
 
-            "Direction": "flower.Direction",
-            "File": "flower.File"
+            "RemoteDirection": "flower.RemoteDirection",
+            "RemoteFile": "flower.RemoteFile"
         },
         local: {},
         localContent: {},
@@ -3262,36 +4276,268 @@ var $root = eval("this");
             "Array": "push",
             "ArrayValue": "push"
         },
+        uiModule: {},
         namespaces: {},
         defaultClassNames: {},
         packages: {
             "local": ""
-        }
+        },
+        beforeScripts: {}
     };
 
 
     black.UIParser = UIParser;
     //////////////////////////End File:extension/black/UIParser.js///////////////////////////
 
+    //////////////////////////File:extension/black/ScrollBar.js///////////////////////////
+
+    var ScrollBar = function (_Group2) {
+        _inherits(ScrollBar, _Group2);
+
+        function ScrollBar() {
+            _classCallCheck(this, ScrollBar);
+
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollBar).call(this));
+
+            _this14.$ScrollerBar = {
+                0: null, //viewport
+                1: true, //autoVisibility
+                2: null, //thumb
+                3: 0, //viewportX
+                4: 0, //viewportY
+                5: 0, //viewportScrollH
+                6: 0, //viewportScrollV
+                7: 0, //viewportContentWidth
+                8: 0, //viewportContentHeight
+                9: 0, //viewportWidth
+                10: 0, //viewportHeight
+                20: null, //horizontal:true vertical:false
+                50: 0, //touchStartPosition
+                51: 0 };
+            return _this14;
+        }
+
+        _createClass(ScrollBar, [{
+            key: "$onFrameEnd",
+            //touchStartThumbPosition
+            value: function $onFrameEnd() {
+                var p = this.$ScrollerBar;
+                if (p[0] && p[20] != null) {
+                    var viewport = p[0];
+                    if (p[20]) {
+                        if (p[3] != viewport.x || p[5] != viewport.scrollH || p[7] != viewport.contentWidth || p[9] != viewport.width) {
+                            p[3] = viewport.x;
+                            p[5] = viewport.scrollH;
+                            p[7] = viewport.contentWidth;
+                            p[9] = viewport.width;
+                            if (p[2]) {
+                                if (p[7] < p[9]) {
+                                    p[2].width = this.width;
+                                    p[2].x = 0;
+                                } else {
+                                    p[2].width = this.width * p[9] / p[7];
+                                    var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
+                                    if (x < 0) {
+                                        x = 0;
+                                    }
+                                    if (x + p[2].width > this.width) {
+                                        x = this.width - p[2].width;
+                                    }
+                                    p[2].x = x;
+                                }
+                            }
+                        }
+                    }
+                    if (!p[20]) {
+                        if (p[4] != viewport.y || p[6] != viewport.scrollH || p[8] != viewport.contentHeight || p[10] != viewport.height) {
+                            p[4] = viewport.y;
+                            p[6] = viewport.scrollH;
+                            p[8] = viewport.contentHeight;
+                            p[10] = viewport.height;
+                            if (p[2]) {
+                                if (p[8] < p[10]) {
+                                    p[2].height = this.height;
+                                    p[2].y = 0;
+                                } else {
+                                    p[2].height = this.height * p[10] / p[8];
+                                    var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
+                                    if (y < 0) {
+                                        y = 0;
+                                    }
+                                    if (y + p[2].height > this.height) {
+                                        y = this.height - p[2].height;
+                                    }
+                                    p[2].y = y;
+                                }
+                            }
+                        }
+                    }
+                }
+                _get(Object.getPrototypeOf(ScrollBar.prototype), "$onFrameEnd", this).call(this);
+            }
+        }, {
+            key: "__onTouchThumb",
+            value: function __onTouchThumb(e) {
+                var p = this.$ScrollerBar;
+                switch (e.type) {
+                    case flower.TouchEvent.TOUCH_BEGIN:
+                        if (p[20]) {
+                            p[50] = e.stageX;
+                            p[51] = p[2].x;
+                        } else {
+                            p[50] = e.stageY;
+                            p[51] = p[2].y;
+                        }
+                        break;
+                    case flower.TouchEvent.TOUCH_MOVE:
+                        if (p[20]) {
+                            if (p[7] < p[9]) {
+                                return;
+                            }
+                            var x = p[51] - p[50] + e.stageX;
+                            if (x < 0) {
+                                x = 0;
+                            }
+                            if (x + p[2].width > this.width) {
+                                x = this.width - p[2].width;
+                            }
+                            //p[2].x = x;
+                            if (p[0]) {
+                                p[0].x = -x * (p[7] - p[9]) / (this.width - p[2].width) + p[5];
+                            }
+                        } else {
+                            if (p[8] < p[10]) {
+                                return;
+                            }
+                            var y = p[51] - p[50] + e.stageY;
+                            if (y < 0) {
+                                y = 0;
+                            }
+                            if (y + p[2].height > this.height) {
+                                y = this.height - p[2].height;
+                            }
+                            //p[2].y = y;
+                            if (p[0]) {
+                                p[0].y = -y * (p[8] - p[10]) / (this.height - p[2].height) + p[6];
+                            }
+                        }
+                        break;
+                }
+            }
+        }, {
+            key: "viewport",
+            set: function set(val) {
+                var p = this.$ScrollerBar;
+                if (p[0] == val) {
+                    return;
+                }
+                p[0] = val;
+            },
+            get: function get() {
+                return this.$ScrollerBar[0];
+            }
+        }, {
+            key: "thumb",
+            set: function set(val) {
+                var p = this.$ScrollerBar;
+                if (p[2] == val) {
+                    return;
+                }
+                if (p[2]) {
+                    p[2].removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+                    p[2].removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
+                }
+                p[2] = val;
+                if (p[2]) {
+                    if (p[2].parent != this) {
+                        this.addChild(p[2]);
+                    }
+                    p[2].addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+                    p[2].addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
+                }
+            },
+            get: function get() {
+                return this.$ScrollerBar[2];
+            }
+        }, {
+            key: "autoVisibility",
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                this.$ScrollerBar[1] = val;
+            },
+            get: function get() {
+                return this.$ScrollerBar[1];
+            }
+        }]);
+
+        return ScrollBar;
+    }(Group);
+
+    black.ScrollBar = ScrollBar;
+    //////////////////////////End File:extension/black/ScrollBar.js///////////////////////////
+
+    //////////////////////////File:extension/black/VScrollBar.js///////////////////////////
+
+    var VScrollBar = function (_ScrollBar) {
+        _inherits(VScrollBar, _ScrollBar);
+
+        function VScrollBar() {
+            _classCallCheck(this, VScrollBar);
+
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(VScrollBar).call(this));
+
+            _this15.$ScrollerBar[20] = false;
+            return _this15;
+        }
+
+        return VScrollBar;
+    }(ScrollBar);
+
+    black.VScrollBar = VScrollBar;
+    //////////////////////////End File:extension/black/VScrollBar.js///////////////////////////
+
+    //////////////////////////File:extension/black/HScrollBar.js///////////////////////////
+
+    var HScrollBar = function (_ScrollBar2) {
+        _inherits(HScrollBar, _ScrollBar2);
+
+        function HScrollBar() {
+            _classCallCheck(this, HScrollBar);
+
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(HScrollBar).call(this));
+
+            _this16.$ScrollerBar[20] = true;
+            return _this16;
+        }
+
+        return HScrollBar;
+    }(ScrollBar);
+
+    black.HScrollBar = HScrollBar;
+    //////////////////////////End File:extension/black/HScrollBar.js///////////////////////////
+
     //////////////////////////File:extension/black/DataGroup.js///////////////////////////
 
-    var DataGroup = function (_Group2) {
-        _inherits(DataGroup, _Group2);
+    var DataGroup = function (_Group3) {
+        _inherits(DataGroup, _Group3);
 
         function DataGroup() {
             _classCallCheck(this, DataGroup);
 
-            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
+            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(DataGroup).call(this));
 
-            _this16.$DataGroup = {
+            _this17.$DataGroup = {
                 0: null, //data
                 1: null, //itemRenderer
                 2: null, //items
                 3: null, //viewer
                 4: 0, //viewerWidth
                 5: 0, //viewerHeight
-                6: 0, //contentWidth
-                7: 0, //contentHeight
+                6: 0, //elementWidth
+                7: 0, //elementHeight
                 8: null, //downItem
                 9: null, //selectedItem
                 10: false, //itemSelectedEnabled
@@ -3302,8 +4548,8 @@ var $root = eval("this");
                 15: 0, //touchTime
                 16: null };
             //touchItemData
-            _this16.addListener(flower.TouchEvent.TOUCH_RELEASE, _this16.__onTouchItem, _this16);
-            return _this16;
+            _this17.addListener(flower.TouchEvent.TOUCH_RELEASE, _this17.__onTouchItem, _this17);
+            return _this17;
         }
 
         _createClass(DataGroup, [{
@@ -3390,16 +4636,20 @@ var $root = eval("this");
                         }
                     } else {
                         layout.$clear();
-                        var elementWidth = 0;
-                        var elementHeight = 0;
-                        if (p[0].length) {
+                        var elementWidth = p[6];
+                        var elementHeight = p[7];
+                        if (p[0].length && (!elementWidth || !elementHeight)) {
                             if (!items.length) {
                                 item = this.createItem(list.getItemAt(0), 0);
                                 item.data = list.getItemAt(0);
                                 items.push(item);
                             }
-                            elementWidth = items[0].width;
-                            elementHeight = items[0].height;
+                            if (!elementWidth) {
+                                p[6] = elementWidth = items[0].width;
+                            }
+                            if (!elementHeight) {
+                                p[7] = elementHeight = items[0].height;
+                            }
                         }
                         var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                         firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
@@ -3424,7 +4674,7 @@ var $root = eval("this");
                             }
                             item.$setItemIndex(i);
                             newItems[i - firstItemIndex] = item;
-                            layout.updateList(p[4], p[5], firstItemIndex);
+                            layout.updateList(p[4], p[5], firstItemIndex, p[6], p[7]);
                             if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                                 break;
                             }
@@ -3456,17 +4706,26 @@ var $root = eval("this");
                     if (layout) {
                         if (!p[3] || !layout.fixElementSize) {
                             var size = layout.getContentSize();
-                            p[6] = size.width;
-                            p[7] = size.height;
+                            p[52] = size.width;
+                            p[53] = size.height;
                             flower.Size.release(size);
                         } else if (p[2].length) {
-                            var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                            p[6] = size.width;
-                            p[7] = size.height;
+                            var size = layout.measureSize(p[6], p[7], list.length);
+                            p[52] = size.width;
+                            p[53] = size.height;
                             flower.Size.release(size);
                         }
                     }
                 }
+            }
+        }, {
+            key: "$validateUIComponent",
+            value: function $validateUIComponent(parent) {
+                _get(Object.getPrototypeOf(DataGroup.prototype), "$validateUIComponent", this).call(this, parent);
+                this.$IViewPort[0] = 0;
+                this.$IViewPort[1] = 0;
+                this.$IViewPort[2] = this.$DataGroup[52];
+                this.$IViewPort[3] = this.$DataGroup[53];
             }
         }, {
             key: "createItem",
@@ -3525,7 +4784,7 @@ var $root = eval("this");
                 var item = e.currentTarget;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
-                        this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
+                        this.dispatchWith(flower.Event.TOUCH_BEGIN_ITEM, item.data, true);
                         if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                             p[15] = -1;
                             if (p[10]) {
@@ -3536,7 +4795,7 @@ var $root = eval("this");
                             if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
                                 if (p[11]) {
                                     item.$onClick();
-                                    this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                                    this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                                 }
                             }
                         } else {
@@ -3562,7 +4821,7 @@ var $root = eval("this");
                             }
                             if (p[11]) {
                                 item.$onClick();
-                                this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                                this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                             }
                         } else {
                             this.$releaseItem();
@@ -3650,7 +4909,7 @@ var $root = eval("this");
                     itemRenderer.selected = true;
                 }
                 if (changeFlag) {
-                    this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
+                    this.dispatchWith(flower.Event.SELECTED_ITEM_CHANGE, itemData, true);
                 }
                 if (!selectedItem) {
                     this._canSelecteItem();
@@ -3699,7 +4958,7 @@ var $root = eval("this");
                     return false;
                 }
                 if (p[0]) {
-                    p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+                    p[0].removeListener(flower.Event.CHANGE, this.__onDataUpdate, this);
                 }
                 this.removeAll();
                 p[2] = null;
@@ -3709,7 +4968,7 @@ var $root = eval("this");
                     if (!p[9]) {
                         this._canSelecteItem();
                     }
-                    p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+                    p[0].addListener(flower.Event.CHANGE, this.__onDataUpdate, this);
                 }
                 this.selectedItem = null;
                 if (p[10] && p[0].length) {
@@ -3752,6 +5011,7 @@ var $root = eval("this");
                 this.removeAll();
                 p[2] = null;
                 p[1] = val;
+                p[6] = p[7] = 0;
                 this.$addFlags(0x4000);
             }
         }, {
@@ -3763,16 +5023,9 @@ var $root = eval("this");
             key: "viewer",
             set: function set(display) {
                 this.$DataGroup[3] = display;
-            }
-        }, {
-            key: "contentWidth",
+            },
             get: function get() {
-                return this.$DataGroup[6];
-            }
-        }, {
-            key: "contentHeight",
-            get: function get() {
-                return this.$DataGroup[7];
+                return this.$DataGroup[3];
             }
         }, {
             key: "scrollEnabled",
@@ -3901,27 +5154,27 @@ var $root = eval("this");
         return DataGroup;
     }(Group);
 
-    UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
-    UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
-    UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", DataGroupEvent.TOUCH_BEGIN_ITEM);
+    UIComponent.registerEvent(DataGroup, 1110, "clickItem", flower.Event.CLICK_ITEM);
+    UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", flower.Event.SELECTED_ITEM_CHANGE);
+    UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", flower.Event.TOUCH_BEGIN_ITEM);
 
     black.DataGroup = DataGroup;
     //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
 
     //////////////////////////File:extension/black/ItemRenderer.js///////////////////////////
 
-    var ItemRenderer = function (_Group3) {
-        _inherits(ItemRenderer, _Group3);
+    var ItemRenderer = function (_Group4) {
+        _inherits(ItemRenderer, _Group4);
 
         function ItemRenderer() {
             _classCallCheck(this, ItemRenderer);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(ItemRenderer).call(this));
 
-            _this17._selected = false;
+            _this18._selected = false;
 
-            _this17.absoluteState = true;
-            return _this17;
+            _this18.absoluteState = true;
+            return _this18;
         }
 
         _createClass(ItemRenderer, [{
@@ -4022,10 +5275,11 @@ var $root = eval("this");
 
             _classCallCheck(this, Label);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, text));
 
-            _this18.$initUIComponent();
-            return _this18;
+            _this19.$initUIComponent();
+            _this19.selectable = false;
+            return _this19;
         }
 
         _createClass(Label, [{
@@ -4069,10 +5323,10 @@ var $root = eval("this");
                         this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width * this.scaleX;
                     }
                     if (p[2] != null) {
-                        this.x = (parent.width - this.width) * 0.5 + p[2];
+                        this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -4092,10 +5346,10 @@ var $root = eval("this");
                         this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height * this.scaleY;
                     }
                     if (p[5] != null) {
-                        this.y = (parent.height - this.height) * 0.5 + p[5];
+                        this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -4105,10 +5359,20 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-                //    this.$validateUIComponent();
-                //}
+                if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+                    this.$validateUIComponent();
+                }
                 _get(Object.getPrototypeOf(Label.prototype), "$onFrameEnd", this).call(this);
+                if (this.$hasFlags(0x0800)) {
+                    this.$getContentBounds();
+                    _get(Object.getPrototypeOf(Label.prototype), "$onFrameEnd", this).call(this);
+                }
+                flower.DebugInfo.frameInfo.display++;
+                flower.DebugInfo.frameInfo.text++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",
@@ -4129,25 +5393,36 @@ var $root = eval("this");
 
     //////////////////////////File:extension/black/Input.js///////////////////////////
 
-    var Input = function (_flower$TextInput) {
-        _inherits(Input, _flower$TextInput);
+    var Input = function (_flower$TextField2) {
+        _inherits(Input, _flower$TextField2);
 
         function Input() {
             var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
 
             _classCallCheck(this, Input);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(Input).call(this, text));
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Input).call(this, text));
 
-            _this19.$initUIComponent();
-            _this19.$input = {
+            _this20.$initUIComponent();
+            _this20.$input = {
                 0: null };
-            return _this19;
+            //value
+            _this20.$IViewPort = {
+                0: 0, //contentStartX
+                1: 0, //contentStartY
+                2: 0, //contentEndX
+                3: 0, //contentEndY
+                4: null, //scrollH
+                5: null, //scrollV
+                6: null };
+            //viewer
+            _this20.input = true;
+            _this20.addListener(flower.Event.STOP_INPUT, _this20.__onTextChange, _this20);
+            return _this20;
         }
 
         _createClass(Input, [{
             key: "$addFlags",
-            //value
             value: function $addFlags(flags) {
                 if ((flags & 0x0001) == 0x0001 && (this.__flags & 0x1000) != 0x1000 && (!this.parent || !this.parent.__UIComponent)) {
                     this.__flags |= 0x1000;
@@ -4187,10 +5462,10 @@ var $root = eval("this");
                         this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width * this.scaleX;
                     }
                     if (p[2] != null) {
-                        this.x = (parent.width - this.width) * 0.5 + p[2];
+                        this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -4210,10 +5485,10 @@ var $root = eval("this");
                         this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height * this.scaleY;
                     }
                     if (p[5] != null) {
-                        this.y = (parent.height - this.height) * 0.5 + p[5];
+                        this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -4221,9 +5496,8 @@ var $root = eval("this");
                 }
             }
         }, {
-            key: "$setText",
-            value: function $setText(val) {
-                _get(Object.getPrototypeOf(Input.prototype), "$setText", this).call(this, val);
+            key: "__onTextChange",
+            value: function __onTextChange(e) {
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
                     this.$input[0].value = this.text;
                     if (this.text != this.$input[0].value + "") {
@@ -4234,7 +5508,7 @@ var $root = eval("this");
         }, {
             key: "__valueChange",
             value: function __valueChange() {
-                if (this.$input[0]) {
+                if (this.$input[0] != null) {
                     this.text = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
                 }
             }
@@ -4252,14 +5526,92 @@ var $root = eval("this");
             //}
 
         }, {
+            key: "$setHtmlText",
+            value: function $setHtmlText(text) {
+                _get(Object.getPrototypeOf(Input.prototype), "$setHtmlText", this).call(this, text);
+                var p = this.$TextField;
+                this.$IViewPort[2] = p[17];
+                this.$IViewPort[3] = p[18];
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 this.removeAllBindProperty();
                 this.$UIComponent[11].dispose();
                 _get(Object.getPrototypeOf(Input.prototype), "dispose", this).call(this);
+            }
+        }, {
+            key: "$getX",
+            value: function $getX() {
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    return p[50];
+                } else {
+                    return _get(Object.getPrototypeOf(Input.prototype), "$getX", this).call(this);
+                }
+            }
+        }, {
+            key: "$setX",
+            value: function $setX(val) {
+                val = +val || 0;
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    if (p[50] == val) {
+                        return;
+                    }
+                    p[50] = val;
+                    p[100] = true;
+                } else {
+                    _get(Object.getPrototypeOf(Input.prototype), "$setX", this).call(this, val);
+                }
+            }
+        }, {
+            key: "$getY",
+            value: function $getY() {
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    return p[51];
+                } else {
+                    return _get(Object.getPrototypeOf(Input.prototype), "$getY", this).call(this);
+                }
+            }
+        }, {
+            key: "$setY",
+            value: function $setY(val) {
+                val = +val || 0;
+                var p = this.$TextField;
+                if (this.$IViewPort[6]) {
+                    if (p[51] == val) {
+                        return;
+                    }
+                    p[51] = val;
+                    p[100] = true;
+                } else {
+                    _get(Object.getPrototypeOf(Input.prototype), "$setY", this).call(this, val);
+                }
+            }
+        }, {
+            key: "$getContentWidth",
+            value: function $getContentWidth() {
+                return this.$IViewPort[2] - this.$IViewPort[0];
+            }
+        }, {
+            key: "$getContentHeight",
+            value: function $getContentHeight() {
+                return this.$IViewPort[3] - this.$IViewPort[1];
+            }
+        }, {
+            key: "viewer",
+            set: function set(val) {
+                if (this.$IViewPort[6] == val) {
+                    return;
+                }
+                this.$IViewPort[6] = val;
+                var p = this.$TextField;
+                p[100] = true;
             }
         }, {
             key: "value",
@@ -4268,21 +5620,62 @@ var $root = eval("this");
                     return;
                 }
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 this.$input[0] = val;
                 if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-                    this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+                    this.$input[0].addListener(flower.Event.CHANGE, this.__onValueChange, this);
                 }
                 this.__valueChange();
             },
             get: function get() {
                 return this.$input[0];
             }
+        }, {
+            key: "contentWidth",
+            get: function get() {
+                return this.$getContentWidth();
+            }
+        }, {
+            key: "contentHeight",
+            get: function get() {
+                return this.$getContentHeight();
+            }
+        }, {
+            key: "scrollH",
+            get: function get() {
+                return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+            },
+            set: function set(val) {
+                if (val != null) {
+                    val = +val;
+                }
+                if (this.$IViewPort[4] == val) {
+                    return;
+                }
+                this.$IViewPort[4] = val;
+            }
+        }, {
+            key: "scrollV",
+            get: function get() {
+                return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+            },
+            set: function set(val) {
+                if (val != null) {
+                    val = +val;
+                }
+                if (this.$IViewPort[5] == val) {
+                    return;
+                }
+                this.$IViewPort[5] = val;
+                var p = this.$TextField;
+                p[51] = val;
+                p[100] = true;
+            }
         }]);
 
         return Input;
-    }(flower.TextInput);
+    }(flower.TextField);
 
     UIComponent.register(Input);
     Input.prototype.__UIComponent = true;
@@ -4300,15 +5693,14 @@ var $root = eval("this");
         function Rect() {
             _classCallCheck(this, Rect);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Rect).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Rect).call(this));
 
-            _this20.$Rect = {
+            _this21.$Rect = {
                 0: 0, //width
                 1: 0 };
             //height
-            _this20.drawRect = null;
-            _this20.$initUIComponent();
-            return _this20;
+            _this21.$initUIComponent();
+            return _this21;
         }
 
         _createClass(Rect, [{
@@ -4355,10 +5747,10 @@ var $root = eval("this");
                         this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width * this.scaleX;
                     }
                     if (p[2] != null) {
-                        this.x = (parent.width - this.width) * 0.5 + p[2];
+                        this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -4378,10 +5770,10 @@ var $root = eval("this");
                         this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height * this.scaleY;
                     }
                     if (p[5] != null) {
-                        this.y = (parent.height - this.height) * 0.5 + p[5];
+                        this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -4472,7 +5864,15 @@ var $root = eval("this");
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
                 }
-                _get(Object.getPrototypeOf(Rect.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                this.$redraw();
+                //super.$onFrameEnd();
+                flower.DebugInfo.frameInfo.display++;
+                flower.DebugInfo.frameInfo.shape++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",
@@ -4501,11 +5901,11 @@ var $root = eval("this");
 
             _classCallCheck(this, Image);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this));
 
-            _this21.$initUIComponent();
-            _this21.source = source;
-            return _this21;
+            _this22.$initUIComponent();
+            _this22.source = source;
+            return _this22;
         }
 
         _createClass(Image, [{
@@ -4549,10 +5949,10 @@ var $root = eval("this");
                         this.x = p[0];
                     }
                     if (p[1] != null) {
-                        this.x = parent.width - p[1] - this.width;
+                        this.x = parent.width - p[1] - this.width * this.scaleX;
                     }
                     if (p[2] != null) {
-                        this.x = (parent.width - this.width) * 0.5 + p[2];
+                        this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
                     }
                     if (p[6]) {
                         this.width = parent.width * p[6] / 100;
@@ -4572,10 +5972,10 @@ var $root = eval("this");
                         this.y = p[3];
                     }
                     if (p[4] != null) {
-                        this.y = parent.height - p[4] - this.height;
+                        this.y = parent.height - p[4] - this.height * this.scaleY;
                     }
                     if (p[5] != null) {
-                        this.y = (parent.height - this.height) * 0.5 + p[5];
+                        this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
                     }
                     if (p[7]) {
                         this.height = parent.height * p[7] / 100;
@@ -4595,7 +5995,11 @@ var $root = eval("this");
                     this.texture = val;
                 } else {
                     if (this.__loader) {
+                        this.__loader.$useImage();
                         this.__loader.dispose();
+                    }
+                    if (typeof val == "string" && val.slice(0, 2) == "./" && this.$filePath) {
+                        val = flower.Path.joinPath(this.$filePath, val);
                     }
                     this.__loader = new flower.URLLoader(val);
                     this.__loader.load();
@@ -4613,6 +6017,7 @@ var $root = eval("this");
             value: function __onLoadComplete(e) {
                 this.__loader = null;
                 this.texture = e.data;
+                this.dispatchWith(flower.Event.COMPLETE);
             }
 
             //$onFrameEnd() {
@@ -4626,6 +6031,7 @@ var $root = eval("this");
             key: "dispose",
             value: function dispose() {
                 if (this.__loader) {
+                    this.__loader.$useImage();
                     this.__loader.dispose();
                 }
                 this.removeAllBindProperty();
@@ -4640,6 +6046,11 @@ var $root = eval("this");
             set: function set(val) {
                 this.$setSource(val);
             }
+        }, {
+            key: "isLoading",
+            get: function get() {
+                return this.__loader ? true : false;
+            }
         }]);
 
         return Image;
@@ -4648,12 +6059,14 @@ var $root = eval("this");
     UIComponent.register(Image);
     Image.prototype.__UIComponent = true;
     black.Image = Image;
+
+    UIComponent.registerEvent(Image, 1300, "loadComplete", flower.Event.COMPLETE);
     //////////////////////////End File:extension/black/Image.js///////////////////////////
 
     //////////////////////////File:extension/black/TileImage.js///////////////////////////
 
-    var TileImage = function (_Group4) {
-        _inherits(TileImage, _Group4);
+    var TileImage = function (_Group5) {
+        _inherits(TileImage, _Group5);
 
         function TileImage() {
             _classCallCheck(this, TileImage);
@@ -4680,13 +6093,13 @@ var $root = eval("this");
         function MaskUI(data) {
             _classCallCheck(this, MaskUI);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(MaskUI).call(this));
 
             if (data != null) {
-                _this23._data = data;
+                _this24._data = data;
             }
-            _this23.$initUIComponent();
-            return _this23;
+            _this24.$initUIComponent();
+            return _this24;
         }
 
         _createClass(MaskUI, [{
@@ -4874,26 +6287,26 @@ var $root = eval("this");
 
     //////////////////////////File:extension/black/Button.js///////////////////////////
 
-    var Button = function (_Group5) {
-        _inherits(Button, _Group5);
+    var Button = function (_Group6) {
+        _inherits(Button, _Group6);
 
         function Button() {
             _classCallCheck(this, Button);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-            _this24._enabled = true;
+            _this25._enabled = true;
 
-            _this24.absoluteState = true;
-            _this24.currentState = "up";
+            _this25.absoluteState = true;
+            _this25.currentState = "up";
 
-            _this24.addListener(flower.TouchEvent.TOUCH_BEGIN, _this24.__onTouch, _this24);
-            _this24.addListener(flower.TouchEvent.TOUCH_END, _this24.__onTouch, _this24);
-            _this24.addListener(flower.TouchEvent.TOUCH_RELEASE, _this24.__onTouch, _this24);
-            _this24.addListener(flower.MouseEvent.MOUSE_OVER, _this24.__onMouse, _this24);
-            _this24.addListener(flower.MouseEvent.MOUSE_OUT, _this24.__onMouse, _this24);
-            _this24.addListener(flower.Event.REMOVED, _this24.__onRemoved, _this24);
-            return _this24;
+            _this25.addListener(flower.TouchEvent.TOUCH_BEGIN, _this25.__onTouch, _this25);
+            _this25.addListener(flower.TouchEvent.TOUCH_END, _this25.__onTouch, _this25);
+            _this25.addListener(flower.TouchEvent.TOUCH_RELEASE, _this25.__onTouch, _this25);
+            _this25.addListener(flower.MouseEvent.MOUSE_OVER, _this25.__onMouse, _this25);
+            _this25.addListener(flower.MouseEvent.MOUSE_OUT, _this25.__onMouse, _this25);
+            _this25.addListener(flower.Event.REMOVED, _this25.__onRemoved, _this25);
+            return _this25;
         }
 
         _createClass(Button, [{
@@ -4985,25 +6398,29 @@ var $root = eval("this");
         function ToggleButton() {
             _classCallCheck(this, ToggleButton);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(ToggleButton).call(this));
 
-            _this25.__selected = false;
-            return _this25;
+            _this26.$ToggleButton = {
+                0: false, //
+                1: null };
+            return _this26;
         }
 
         _createClass(ToggleButton, [{
             key: "__onTouch",
+            //value
             value: function __onTouch(e) {
                 if (!this.enabled) {
                     e.stopPropagation();
                     return;
                 }
+                var p = this.$ToggleButton;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
-                        if (this.__selected) {
+                        if (p[0]) {
                             this.currentState = "selectedDown";
                         } else {
-                            this.currentState = "down";
+                            this.currentState = "selectedUp";
                         }
                         break;
                     case flower.TouchEvent.TOUCH_END:
@@ -5011,8 +6428,8 @@ var $root = eval("this");
                         if (e.type == flower.TouchEvent.TOUCH_END) {
                             this.selected = !this.selected;
                         }
-                        if (this.__selected) {
-                            this.currentState = "selectedUp";
+                        if (p[0]) {
+                            this.currentState = "down";
                         } else {
                             this.currentState = "up";
                         }
@@ -5023,51 +6440,74 @@ var $root = eval("this");
             key: "__setEnabled",
             value: function __setEnabled(val) {
                 _get(Object.getPrototypeOf(ToggleButton.prototype), "_setEnabled", this).call(this, val);
-                if (val == false && this.__selected) {
+                if (val == false && this.$ToggleButton[0]) {
                     this.selected = false;
                 }
             }
         }, {
             key: "__setSelected",
             value: function __setSelected(val) {
+                var p = this.$ToggleButton;
                 if (val == "false") {
                     val = false;
                 }
                 val = !!val;
-                if (!this.enabled || val == this.__selected) {
+                if (!this.enabled || val == p[0]) {
                     return;
                 }
-                this.__selected = val;
+                p[0] = val;
+                if (p[1] && p[1] instanceof flower.Value) {
+                    p[1].value = val;
+                    if (p[0] != p[1].value) {
+                        this.__valueChange();
+                    }
+                }
                 if (val) {
-                    this.currentState = "selectedUp";
+                    this.currentState = "down";
                 } else {
                     this.currentState = "up";
                 }
-                if (this.onChangeEXE) {
-                    this.onChangeEXE.call(this);
+                this.dispatchWith(flower.Event.CHANGE);
+            }
+        }, {
+            key: "__valueChange",
+            value: function __valueChange() {
+                var p = this.$ToggleButton;
+                if (p[1]) {
+                    this.selected = p[1] instanceof flower.Value ? p[1].value : p[1];
                 }
+            }
+        }, {
+            key: "__onValueChange",
+            value: function __onValueChange(e) {
+                this.__valueChange();
             }
         }, {
             key: "selected",
             get: function get() {
-                return this.__selected;
+                return this.$ToggleButton[0];
             },
             set: function set(val) {
                 this.__setSelected(val);
             }
         }, {
-            key: "onChange",
+            key: "value",
             set: function set(val) {
-                if (typeof val == "string") {
-                    var content = val;
-                    val = function () {
-                        eval(content);
-                    }.bind(this.eventThis);
+                var p = this.$ToggleButton;
+                if (p[1] == val) {
+                    return;
                 }
-                this.onChangeEXE = val;
+                if (p[1] && p[1] instanceof flower.Value) {
+                    p[1].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
+                }
+                p[1] = val;
+                if (p[1] && p[1] instanceof flower.Value) {
+                    p[1].addListener(flower.Event.CHANGE, this.__onValueChange, this);
+                }
+                this.__valueChange();
             },
             get: function get() {
-                return this.onChangeEXE;
+                return this.$ToggleButton[1];
             }
         }]);
 
@@ -5075,6 +6515,8 @@ var $root = eval("this");
     }(Button);
 
     black.ToggleButton = ToggleButton;
+
+    UIComponent.registerEvent(ToggleButton, 1402, "change", flower.Event.CHANGE);
     //////////////////////////End File:extension/black/ToggleButton.js///////////////////////////
 
     //////////////////////////File:extension/black/CheckBox.js///////////////////////////
@@ -5115,6 +6557,7 @@ var $root = eval("this");
                 if (this._group) {
                     this._group.$itemSelectedChange(this);
                 }
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "__setGroupName",
@@ -5148,27 +6591,29 @@ var $root = eval("this");
     }(ToggleButton);
 
     black.RadioButton = RadioButton;
+
+    UIComponent.registerEvent(RadioButton, 1401, "change", flower.Event.CHANGE);
     //////////////////////////End File:extension/black/RadioButton.js///////////////////////////
 
     //////////////////////////File:extension/black/RadioButtonGroup.js///////////////////////////
 
-    var RadioButtonGroup = function (_Group6) {
-        _inherits(RadioButtonGroup, _Group6);
+    var RadioButtonGroup = function (_Group7) {
+        _inherits(RadioButtonGroup, _Group7);
 
         function RadioButtonGroup(groupName) {
             _classCallCheck(this, RadioButtonGroup);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(RadioButtonGroup).call(this));
 
-            _this28._buttons = [];
-            _this28._enabled = true;
+            _this29._buttons = [];
+            _this29._enabled = true;
 
             if (groupName == null || groupName == "") {
-                groupName = "group" + _this28.id;
+                groupName = "group" + _this29.id;
             }
-            _this28._groupName = groupName;
-            RadioButtonGroup.groups.push(_this28);
-            return _this28;
+            _this29._groupName = groupName;
+            RadioButtonGroup.groups.push(_this29);
+            return _this29;
         }
 
         _createClass(RadioButtonGroup, [{
@@ -5234,9 +6679,7 @@ var $root = eval("this");
                         this._buttons[i].selected = false;
                     }
                 }
-                if (this.onChangeEXE) {
-                    this.onChangeEXE.call(this);
-                }
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "selection",
@@ -5273,23 +6716,6 @@ var $root = eval("this");
                 }
             }
 
-            /////////////////////////////////////Event///////////////////////////////////
-
-        }, {
-            key: "onChange",
-            set: function set(val) {
-                if (typeof val == "string") {
-                    var content = val;
-                    val = function () {
-                        eval(content);
-                    }.bind(this.eventThis);
-                }
-                this.onChangeEXE = val;
-            },
-            get: function get() {
-                return this.onChangeEXE;
-            }
-
             /////////////////////////////////////static///////////////////////////////////
 
         }], [{
@@ -5322,6 +6748,8 @@ var $root = eval("this");
 
 
     black.RadioButtonGroup = RadioButtonGroup;
+
+    UIComponent.registerEvent(RadioButtonGroup, 1400, "change", flower.Event.CHANGE);
     //////////////////////////End File:extension/black/RadioButtonGroup.js///////////////////////////
 
     //////////////////////////File:extension/black/ToggleSwitch.js///////////////////////////
@@ -5349,12 +6777,12 @@ var $root = eval("this");
         function ListBase() {
             _classCallCheck(this, ListBase);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(ListBase).call(this));
 
-            _this30.requireSelection = true;
-            _this30.itemSelectedEnabled = true;
-            _this30.itemClickedEnabled = true;
-            return _this30;
+            _this31.requireSelection = true;
+            _this31.itemSelectedEnabled = true;
+            _this31.itemClickedEnabled = true;
+            return _this31;
         }
 
         return ListBase;
@@ -5371,10 +6799,10 @@ var $root = eval("this");
         function List() {
             _classCallCheck(this, List);
 
-            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(List).call(this));
 
-            _this31.layout = new VerticalLayout();
-            return _this31;
+            _this32.layout = new VerticalLayout();
+            return _this32;
         }
 
         return List;
@@ -5391,17 +6819,17 @@ var $root = eval("this");
         function TabBar() {
             _classCallCheck(this, TabBar);
 
-            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
+            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(TabBar).call(this));
 
-            _this32.$TabBar = {
+            _this33.$TabBar = {
                 0: false, //more
                 1: null, //moreButton
                 2: null, //moreData
                 3: null };
             //moreList
-            _this32.layout = new HorizontalLayout();
-            _this32.layout.fixElementSize = false;
-            return _this32;
+            _this33.layout = new HorizontalLayout();
+            _this33.layout.fixElementSize = false;
+            return _this33;
         }
 
         _createClass(TabBar, [{
@@ -5512,17 +6940,17 @@ var $root = eval("this");
 
     //////////////////////////File:extension/black/ViewStack.js///////////////////////////
 
-    var ViewStack = function (_Group7) {
-        _inherits(ViewStack, _Group7);
+    var ViewStack = function (_Group8) {
+        _inherits(ViewStack, _Group8);
 
         function ViewStack() {
             _classCallCheck(this, ViewStack);
 
-            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
+            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewStack).call(this));
 
-            _this33._items = [];
-            _this33._selectedIndex = -1;
-            return _this33;
+            _this34._items = [];
+            _this34._selectedIndex = -1;
+            return _this34;
         }
 
         _createClass(ViewStack, [{
@@ -5537,12 +6965,12 @@ var $root = eval("this");
                     }
                 }
                 this._items.push(display);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
                 if (!find) {
-                    this.dispatchWidth(flower.Event.ADDED, display);
+                    this.dispatchWith(flower.Event.ADDED, display);
                 }
             }
         }, {
@@ -5557,12 +6985,12 @@ var $root = eval("this");
                     }
                 }
                 this._items.splice(i, 0, display);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
                 if (this._selectedIndex < 0) {
                     this._setSelectedIndex(0);
                 }
                 if (!find) {
-                    this.dispatchWidth(flower.Event.ADDED, display);
+                    this.dispatchWith(flower.Event.ADDED, display);
                 }
             }
         }, {
@@ -5573,8 +7001,8 @@ var $root = eval("this");
                         this._items.splice(i, 1);
                         if (display == this._selectedItem) {
                             this._setSelectedIndex(0);
-                            this.dispatchWidth(flower.Event.UPDATE);
-                            this.dispatchWidth(flower.Event.REMOVED, display);
+                            this.dispatchWith(flower.Event.CHANGE);
+                            this.dispatchWith(flower.Event.REMOVED, display);
                         }
                         return display;
                     }
@@ -5595,8 +7023,8 @@ var $root = eval("this");
                     this._selectedItem = this._items[0];
                     this._selectedIndex = 0;
                     _get(Object.getPrototypeOf(ViewStack.prototype), "removeChild", this).call(this, display);
-                    this.dispatchWidth(flower.Event.UPDATE);
-                    this.dispatchWidth(flower.Event.REMOVED, display);
+                    this.dispatchWith(flower.Event.CHANGE);
+                    this.dispatchWith(flower.Event.REMOVED, display);
                 } else {
                     flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
                 }
@@ -5621,7 +7049,7 @@ var $root = eval("this");
                     if (this._items[i] == display) {
                         this._items.splice(i, 1);
                         this._items.splice(index, 0, display);
-                        this.dispatchWidth(flower.Event.UPDATE);
+                        this.dispatchWith(flower.Event.CHANGE);
                         return display;
                     }
                 }
@@ -5633,7 +7061,7 @@ var $root = eval("this");
                 var opt = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
                 _get(Object.getPrototypeOf(ViewStack.prototype), "sortChild", this).call(this, key, opt);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "_setSelectedIndex",
@@ -5649,8 +7077,8 @@ var $root = eval("this");
                     this._selectedIndex = val;
                     _get(Object.getPrototypeOf(ViewStack.prototype), "addChildAt", this).call(this, this._selectedItem, this.numChildren);
                 }
-                this.dispatchWidth(flower.Event.CHANGE, this._selectedItem);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE, this._selectedItem);
+                this.dispatchWith(flower.Event.CHANGE);
             }
         }, {
             key: "getItemAt",
@@ -5677,7 +7105,6 @@ var $root = eval("this");
                 if (this._selectedIndex != -1 && this._selectedIndex >= index) {
                     this._selectedIndex++;
                 }
-                this.dispatchWidth(flower.Event.UPDATE);
             }
         }, {
             key: "length",
@@ -5714,6 +7141,8 @@ var $root = eval("this");
     }(Group);
 
     black.ViewStack = ViewStack;
+
+    UIComponent.registerEvent(ViewStack, 1500, "selectedItemChange", flower.Event.CHANGE);
     //////////////////////////End File:extension/black/ViewStack.js///////////////////////////
 
     //////////////////////////File:extension/black/Scroller.js///////////////////////////
@@ -5724,28 +7153,68 @@ var $root = eval("this");
         function Scroller() {
             _classCallCheck(this, Scroller);
 
-            var _this34 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
+            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(Scroller).call(this));
 
-            _this34._viewSize = flower.Size.create(0, 0);
-            _this34._scrollDisX = [];
-            _this34._scrollDisY = [];
-            _this34._scrollTime = [];
-            _this34._upGap = 18;
-
-            _this34.addListener(flower.TouchEvent.TOUCH_BEGIN, _this34.__onTouchScroller, _this34);
-            _this34.addListener(flower.TouchEvent.TOUCH_MOVE, _this34.__onTouchScroller, _this34);
-            _this34.addListener(flower.TouchEvent.TOUCH_END, _this34.__onTouchScroller, _this34);
-            _this34.addListener(flower.TouchEvent.TOUCH_RELEASE, _this34.__onTouchScroller, _this34);
-            _this34.width = _this34.height = 100;
+            _this35.$Scroller = {
+                0: null, //viewport
+                1: flower.Size.create(0, 0), //viewSize
+                2: 0, //startX
+                3: 0, //startY
+                4: [], //scrollDisX
+                5: [], //scrollDisY
+                6: [], //scrollTime
+                7: 0.3, //scrollOut
+                8: 0, //throw Tween
+                9: 18, //	scrollThreshold
+                10: null, //horizontalScrollBar
+                11: null, //verticalScrollBar
+                12: "auto", //scrollPolicyH
+                13: "auto", //scrollPolicyV
+                14: false, //isDraging
+                15: false, //dragH
+                16: false, //dragV
+                20: true, //scrollable
+                52: 0, //contentWidth
+                53: 0 };
+            //contentHeight
+            _this35.addListener(flower.TouchEvent.TOUCH_BEGIN, _this35.__onTouchScroller, _this35);
+            _this35.addListener(flower.TouchEvent.TOUCH_MOVE, _this35.__onTouchScroller, _this35);
+            _this35.addListener(flower.TouchEvent.TOUCH_END, _this35.__onTouchScroller, _this35);
+            _this35.addListener(flower.TouchEvent.TOUCH_RELEASE, _this35.__onTouchScroller, _this35);
+            _this35.width = _this35.height = 100;
             //var bg = new Rect();
             //bg.fillColor = 0x555555;
             //bg.percentWidth = 100;
             //bg.percentHeight = 100;
             //this.addChild(bg);
-            return _this34;
+            return _this35;
         }
 
         _createClass(Scroller, [{
+            key: "addChildAt",
+            value: function addChildAt(child, index) {
+                if (child instanceof flower.HScrollBar) {
+                    _get(Object.getPrototypeOf(Scroller.prototype), "addChildAt", this).call(this, child, index);
+                    this.horizontalScrollBar = child;
+                } else if (child instanceof flower.VScrollBar) {
+                    _get(Object.getPrototypeOf(Scroller.prototype), "addChildAt", this).call(this, child, index);
+                    this.verticalScrollBar = child;
+                } else {
+                    if (index == this.numChildren || index == this.numChildren - 1) {
+                        if (index == this.numChildren && this.numChildren - 1 >= 0 && this.getChildAt(this.numChildren - 1) instanceof flower.ScrollBar) {
+                            index--;
+                        }
+                        if (index == this.numChildren - 1 && this.numChildren - 2 >= 0 && this.getChildAt(this.numChildren - 2) instanceof flower.ScrollBar) {
+                            index--;
+                        }
+                    }
+                    _get(Object.getPrototypeOf(Scroller.prototype), "addChildAt", this).call(this, child, index);
+                    if (this.viewport == null) {
+                        this.viewport = child;
+                    }
+                }
+            }
+        }, {
             key: "$createShape",
             value: function $createShape() {
                 var shape = new Rect();
@@ -5756,66 +7225,79 @@ var $root = eval("this");
         }, {
             key: "__onTouchScroller",
             value: function __onTouchScroller(e) {
-                if (!this._viewport) {
+                var p = this.$Scroller;
+                if (!p[0] || !p[20]) {
                     return;
                 }
-                var x = this.lastTouchX;
-                var y = this.lastTouchY;
+                var x = this.mouseX;
+                var y = this.mouseY;
                 switch (e.type) {
                     case flower.TouchEvent.TOUCH_BEGIN:
-                        if (this._throw) {
-                            this._throw.dispose();
-                            this._throw = null;
+                        if (p[8]) {
+                            p[8].dispose();
+                            p[8] = null;
                         }
-                        this._startX = x - this._viewport.x;
-                        this._startY = y - this._viewport.y;
-                        this._scrollDisX.length = this._scrollDisY.length = this._scrollTime.length = 0;
+                        p[2] = x - p[0].x;
+                        p[3] = y - p[0].y;
+                        p[4].length = p[5].length = p[6].length = 0;
+                        p[14] = true;
+                        p[15] = false;
+                        p[16] = false;
                         break;
                     case flower.TouchEvent.TOUCH_MOVE:
-                        if (Math.abs(x - this._startX) > this._upGap || Math.abs(y - this._startY) > this._upGap) {
-                            this._viewport.$releaseItem();
+                        if ((Math.abs(x - p[0].x - p[2]) > p[9] || Math.abs(y - p[0].y - p[3]) > p[9]) && p[0] instanceof flower.DataGroup) {
+                            p[0].$releaseItem();
                         }
-                        var _x = this._viewport.x;
-                        var _y = this._viewport.y;
-                        if (this._viewport.contentWidth > this.width) {
-                            this._viewport.x = x - this._startX;
+                        if (!p[15] && this.$Scroller[12] != "off" && Math.abs(x - p[0].x - p[2]) > p[9] && p[0].contentWidth > p[0].width) {
+                            p[15] = true;
+                            p[2] = x - p[0].x;
                         }
-                        if (this._viewport.contentHeight > this.height) {
-                            this._viewport.y = y - this._startY;
+                        if (!p[16] && this.$Scroller[13] != "off" && Math.abs(y - p[0].y - p[3]) > p[9] && p[0].contentHeight > p[0].height) {
+                            p[16] = true;
+                            p[3] = y - p[0].y;
                         }
-                        if (this._viewport.y > this.height) {
-                            this._viewport.y = this.height;
+                        var _x = p[0].x;
+                        var _y = p[0].y;
+                        if (p[15]) {
+                            p[0].x = x - p[2];
+                            if (p[0].x > 0) {
+                                p[0].x = p[0].x * p[7];
+                            }
+                            if (p[0].x < -p[0].contentWidth + p[0].width) {
+                                p[0].x = -p[0].contentWidth + p[0].width + (p[0].x - (-p[0].contentWidth + p[0].width)) * p[7];
+                            }
                         }
-                        if (this._viewport.y < -this._viewport.contentHeight) {
-                            this._viewport.y = -this._viewport.contentHeight;
+                        if (p[16]) {
+                            p[0].y = y - p[3];
+                            if (p[0].y > 0) {
+                                p[0].y = p[0].y * p[7];
+                            }
+                            if (p[0].y < -p[0].contentHeight + p[0].height) {
+                                p[0].y = -p[0].contentHeight + p[0].height + (p[0].y - (-p[0].contentHeight + p[0].height)) * p[7];
+                            }
                         }
-                        if (this._viewport.x > this.width) {
-                            this._viewport.x = this.width;
+                        p[4].push(p[0].x - _x);
+                        p[5].push(p[0].y - _y);
+                        p[6].push(flower.CoreTime.currentTime);
+                        if (p[4].length > 4) {
+                            p[4].shift();
+                            p[5].shift();
+                            p[6].shift();
                         }
-                        if (this._viewport.x < -this._viewport.contentWidth) {
-                            this._viewport.x = -this._viewport.contentWidth;
-                        }
-                        this._scrollDisX.push(this._viewport.x - _x);
-                        this._scrollDisY.push(this._viewport.y - _y);
-                        this._scrollTime.push(flower.CoreTime.currentTime);
-                        if (this._scrollDisX.length > 4) {
-                            this._scrollDisX.shift();
-                            this._scrollDisY.shift();
-                            this._scrollTime.shift();
-                        }
-                        this._lastTouchTime = flower.CoreTime.currentTime;
+                        //p[7] = flower.CoreTime.currentTime;
                         break;
                     case flower.TouchEvent.TOUCH_END:
                     case flower.TouchEvent.TOUCH_RELEASE:
+                        p[14] = p[15] = p[16] = false;
                         var timeGap = 0.5;
-                        if (this._scrollTime.length) {
-                            timeGap = flower.CoreTime.currentTime - this._scrollTime[0];
+                        if (p[6].length) {
+                            timeGap = flower.CoreTime.currentTime - p[6][0];
                         }
                         var disX = 0;
                         var disY = 0;
-                        for (var i = 0; i < this._scrollDisX.length; i++) {
-                            disX += this._scrollDisX[i];
-                            disY += this._scrollDisY[i];
+                        for (var i = 0; i < p[4].length; i++) {
+                            disX += p[4][i];
+                            disY += p[5][i];
                         }
                         disX = disX * 100 / timeGap;
                         disY = disY * 100 / timeGap;
@@ -5831,19 +7313,23 @@ var $root = eval("this");
                         if (disY > 600) {
                             disY = 600;
                         }
-                        var toX = this._viewport.x + disX * 5;
-                        var toY = this._viewport.y + disY * 5;
+                        var toX = p[0].x + disX * 5;
+                        var toY = p[0].y + disY * 5;
                         var flag = true;
-                        if (-toX + this.width > this._viewport.contentWidth) {
-                            toX = this.width - this._viewport.contentWidth;
+                        if (-toX + p[0].width > p[0].contentWidth) {
+                            toX = p[0].width - p[0].contentWidth;
                             flag = false;
                         }
                         if (toX > 0) {
                             toX = 0;
                             flag = false;
                         }
-                        if (-toY + this.height > this._viewport.contentHeight) {
-                            toY = this.height - this._viewport.contentHeight;
+                        if (toY < -p[0].contentHeight + p[0].height) {
+                            toY = p[0].height - p[0].contentHeight;
+                            if (p[0] == 961) {
+                                flower.breakPoint();
+                                p[0].contentHeight;
+                            }
                             flag = false;
                         }
                         if (toY > 0) {
@@ -5854,8 +7340,8 @@ var $root = eval("this");
                             //trace("quit", timeGap);
                             break;
                         }
-                        var timeX = Math.abs(toX - this._viewport.x) / 350;
-                        var timeY = Math.abs(toY - this._viewport.y) / 350;
+                        var timeX = Math.abs(toX - p[0].x) / 350;
+                        var timeY = Math.abs(toY - p[0].y) / 350;
                         var time = timeX > timeY ? timeX : timeY;
                         if (time < 0.5) {
                             time = 0.5;
@@ -5863,7 +7349,7 @@ var $root = eval("this");
                         if (time > 5) {
                             time = 5;
                         }
-                        this._throw = flower.Tween.to(this._viewport, time, {
+                        p[8] = flower.Tween.to(p[0], time, {
                             x: toX,
                             y: toY
                         }, flower.Ease.CUBIC_EASE_OUT);
@@ -5873,9 +7359,40 @@ var $root = eval("this");
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
-                if (this._viewport) {
-                    this._viewport.width = this.width;
-                    this._viewport.height = this.height;
+                var p = this.$Scroller;
+                if (p[0]) {
+                    if (p[10]) {
+                        if (p[12] == "on") {
+                            if (p[10].autoVisibility) {
+                                p[10].visible = p[15] ? true : false;
+                            }
+                        } else if (p[12] == "off") {
+                            p[10].visible = false;
+                        } else if (p[12] == "auto") {
+                            if (p[10].autoVisibility) {
+                                p[10].visible = p[15] && p[0].contentWidth > p[0].width ? true : false;
+                            } else {
+                                p[10].visible = p[0].contentWidth > p[0].width ? true : false;
+                            }
+                        }
+                    }
+                    if (p[11]) {
+                        if (p[13] == "on") {
+                            if (p[11].autoVisibility) {
+                                p[11].visible = p[16] ? true : false;
+                            }
+                        } else if (p[13] == "off") {
+                            p[11].visible = false;
+                        } else if (p[13] == "auto") {
+                            if (p[11].autoVisibility) {
+                                p[11].visible = p[16] && p[0].contentHeight > p[0].height ? true : false;
+                            } else {
+                                p[11].visible = p[0].contentHeight > p[0].height ? true : false;
+                            }
+                        }
+                    }
+                    p[0].width = this.width - (p[11] && p[13] != "off" && !p[11].autoVisibility ? p[11].width : 0);
+                    p[0].height = this.height - (p[10] && p[12] != "off" && !p[10].autoVisibility ? p[10].height : 0);
                 }
                 if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
                     this.$validateUIComponent();
@@ -5886,12 +7403,13 @@ var $root = eval("this");
         }, {
             key: "dispose",
             value: function dispose() {
-                flower.Size.release(this._viewSize);
+                flower.Size.release(this.$Scroller[1]);
                 _get(Object.getPrototypeOf(Scroller.prototype), "dispose", this).call(this);
             }
         }, {
             key: "$setViewport",
             value: function $setViewport(val) {
+                var p = this.$Scroller;
                 if (typeof val == "string") {
                     var clazz = $root[val];
                     if (!clazz) {
@@ -5902,44 +7420,88 @@ var $root = eval("this");
                     }
                     val = new clazz();
                 }
-                if (this._viewport == val) {
+                if (p[0] == val) {
                     return;
                 }
-                //if (this._viewport) {
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-                //    this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-                //}
-                this._viewport = val;
-                this._viewport.viewer = this;
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-                //this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-                if (this._viewport.parent != this) {
-                    this.addChild(this._viewport);
+                p[0] = val;
+                p[0].viewer = this;
+                if (p[0].parent == null) {
+                    this.addChild(p[0]);
+                }
+                if (p[10]) {
+                    p[10].viewport = p[0];
+                }
+                if (p[11]) {
+                    p[11].viewport = p[0];
+                }
+            }
+
+            /**
+             * 设置水平滚动条
+             * @param val
+             */
+
+        }, {
+            key: "$setHorizontalScrollBar",
+            value: function $setHorizontalScrollBar(val) {
+                var p = this.$Scroller;
+                if (p[10] == val) {
+                    return;
+                }
+                if (val == null) {
+                    p[10].viewport = null;
+                }
+                p[10] = val;
+                if (p[10]) {
+                    p[10].viewport = p[0];
+                    if (p[10].parent == null) {
+                        this.addChild(p[10]);
+                    }
+                }
+            }
+
+            /**
+             * 设置垂直滚动条
+             * @param val
+             */
+
+        }, {
+            key: "$setVerticalScrollBar",
+            value: function $setVerticalScrollBar(val) {
+                var p = this.$Scroller;
+                if (p[11] == val) {
+                    return;
+                }
+                if (val == null) {
+                    p[11].viewport = null;
+                }
+                p[11] = val;
+                if (p[11]) {
+                    p[11].viewport = p[0];
+                    if (p[11].parent == null) {
+                        this.addChild(p[11]);
+                    }
                 }
             }
         }, {
             key: "$setWidth",
             value: function $setWidth(val) {
-                this._viewSize.width = val;
+                this.$Scroller[1].width = val;
             }
         }, {
             key: "$setHeight",
             value: function $setHeight(val) {
-                this._viewSize.height = val;
+                this.$Scroller[1].height = val;
             }
         }, {
             key: "$getWidth",
             value: function $getWidth() {
-                return this._viewSize.width;
+                return this.$Scroller[1].width;
             }
         }, {
             key: "$getHeight",
             value: function $getHeight() {
-                return this._viewSize.height;
+                return this.$Scroller[1].height;
             }
 
             //////////////////////////////////get&set//////////////////////////////////
@@ -5950,15 +7512,72 @@ var $root = eval("this");
                 this.$setViewport(val);
             },
             get: function get() {
-                return this._viewport;
+                return this.$Scroller[0];
             }
         }, {
-            key: "releaseItemDistance",
-            get: function get() {
-                return this._upGap;
-            },
+            key: "horizontalScrollBar",
             set: function set(val) {
-                this._upGap = +val || 0;
+                this.$setHorizontalScrollBar(val);
+            }
+        }, {
+            key: "verticalScrollBar",
+            set: function set(val) {
+                this.$setVerticalScrollBar(val);
+            }
+        }, {
+            key: "scrollPolicyH",
+            set: function set(val) {
+                this.$Scroller[12] = val;
+            },
+            get: function get() {
+                return this.$Scroller[12];
+            }
+        }, {
+            key: "scrollPolicyV",
+            set: function set(val) {
+                this.$Scroller[13] = val;
+            },
+            get: function get() {
+                return this.$Scroller[13];
+            }
+        }, {
+            key: "scrollThreshold",
+            set: function set(val) {
+                val = +val || 0;
+                if (val < 0) {
+                    val = 0;
+                }
+                this.$Scroller[9] = val;
+            },
+            get: function get() {
+                return this.$Scroller[9];
+            }
+        }, {
+            key: "scrollOut",
+            set: function set(val) {
+                val = +val || 0;
+                if (val < 0) {
+                    val = 0;
+                }
+                this.$Scroller[7] = val;
+            },
+            get: function get() {
+                return this.$Scroller[7];
+            }
+        }, {
+            key: "scrollable",
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.$Scroller[20]) {
+                    return;
+                }
+                this.$Scroller[20] = val;
+            },
+            get: function get() {
+                return this.$Scroller[20];
             }
         }]);
 
@@ -5970,15 +7589,15 @@ var $root = eval("this");
 
     //////////////////////////File:extension/black/ComboBox.js///////////////////////////
 
-    var ComboBox = function (_Group8) {
-        _inherits(ComboBox, _Group8);
+    var ComboBox = function (_Group9) {
+        _inherits(ComboBox, _Group9);
 
         function ComboBox() {
             _classCallCheck(this, ComboBox);
 
-            var _this35 = _possibleConstructorReturn(this, Object.getPrototypeOf(ComboBox).call(this));
+            var _this36 = _possibleConstructorReturn(this, Object.getPrototypeOf(ComboBox).call(this));
 
-            _this35.$comboBox = {
+            _this36.$comboBox = {
                 0: null, //label
                 1: null, //button
                 2: null, //list
@@ -5990,7 +7609,7 @@ var $root = eval("this");
                 8: null, //selectedItem
                 9: false //inSettingValue
             };
-            return _this35;
+            return _this36;
         }
 
         _createClass(ComboBox, [{
@@ -6010,7 +7629,7 @@ var $root = eval("this");
                 if (p[9]) {
                     return;
                 }
-                p[8] = e.item;
+                p[8] = e.data;
                 if (p[0]) {
                     if (p[8] && p[8][p[4]]) {
                         p[0].text = p[8][p[4]];
@@ -6102,8 +7721,8 @@ var $root = eval("this");
                 }
                 if (p[2]) {
                     p[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-                    p[2].removeListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-                    p[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+                    p[2].removeListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+                    p[2].removeListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
                 }
                 p[2] = val;
                 if (val) {
@@ -6112,8 +7731,8 @@ var $root = eval("this");
                         val.selectedItem = p[8];
                     }
                     val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-                    val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-                    val.addListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+                    val.addListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+                    val.addListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
                 }
             },
             get: function get() {
@@ -6149,7 +7768,11 @@ var $root = eval("this");
                 return this.$comboBox[4];
             },
             set: function set(val) {
-                this.$comboBox[4] = val;
+                var p = this.$comboBox;
+                if (p[4] == val) {
+                    return;
+                }
+                p[4] = val;
                 if (p[0]) {
                     if (p[8] && p[8][p[4]]) {
                         p[0].text = p[8][p[4]];
@@ -6181,16 +7804,14 @@ var $root = eval("this");
                     return;
                 }
                 if (p[7] && p[7] instanceof flower.Value) {
-                    p[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+                    p[7].removeListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
                 }
                 p[7] = val;
                 if (p[7]) {
                     p[9] = true;
                     if (p[7] instanceof flower.Value) {
-                        p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
-                        if (p[7].enumList) {
-                            this.dataProvider = new flower.ArrayValue(p[7].enumList);
-                        }
+                        p[7].addListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
+                        this.dataProvider = new flower.ArrayValue(p[7].enumList);
                     }
                     p[9] = false;
                     this.__typeValueChange();
@@ -6288,22 +7909,22 @@ var $root = eval("this");
 
     //////////////////////////File:extension/black/Panel.js///////////////////////////
 
-    var Panel = function (_Group9) {
-        _inherits(Panel, _Group9);
+    var Panel = function (_Group10) {
+        _inherits(Panel, _Group10);
 
         function Panel() {
             _classCallCheck(this, Panel);
 
-            var _this36 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
+            var _this37 = _possibleConstructorReturn(this, Object.getPrototypeOf(Panel).call(this));
 
-            _this36.$Panel = {
+            _this37.$Panel = {
                 0: "", //title
                 1: null, //titleLabel
                 2: null, //closeButton
                 3: PanelScaleMode.NO_SCALE, //scaleMode
                 4: null, //iconImage
                 5: "" };
-            return _this36;
+            return _this37;
         }
 
         _createClass(Panel, [{
@@ -6408,7 +8029,7 @@ var $root = eval("this");
         }, {
             key: "$onClose",
             value: function $onClose() {
-                this.dispatchWidth(flower.Event.CLOSE);
+                this.dispatchWith(flower.Event.CLOSE);
                 this.closePanel();
             }
         }, {
@@ -6534,27 +8155,27 @@ var $root = eval("this");
         function Alert() {
             _classCallCheck(this, Alert);
 
-            var _this37 = _possibleConstructorReturn(this, Object.getPrototypeOf(Alert).call(this));
+            var _this38 = _possibleConstructorReturn(this, Object.getPrototypeOf(Alert).call(this));
 
-            _this37.$Alert = {
+            _this38.$Alert = {
                 0: null, //confirmButton
                 1: null, //cancelButton
                 2: null, //contentLabel
                 3: "" };
-            return _this37;
+            return _this38;
         }
 
         _createClass(Alert, [{
             key: "$onConfirm",
             //content
             value: function $onConfirm(e) {
-                this.dispatchWidth(flower.Event.CONFIRM);
+                this.dispatchWith(flower.Event.CONFIRM);
                 this.closePanel();
             }
         }, {
             key: "$onCancel",
             value: function $onCancel(e) {
-                this.dispatchWidth(flower.Event.CANCEL);
+                this.dispatchWith(flower.Event.CANCEL);
                 this.closePanel();
             }
         }, {
@@ -6656,20 +8277,20 @@ var $root = eval("this");
         function Tree() {
             _classCallCheck(this, Tree);
 
-            var _this38 = _possibleConstructorReturn(this, Object.getPrototypeOf(Tree).call(this));
+            var _this39 = _possibleConstructorReturn(this, Object.getPrototypeOf(Tree).call(this));
 
-            _this38.$Tree = {
+            _this39.$Tree = {
                 0: null, //dataProvider
                 1: new flower.ArrayValue(), //dataGroupDataProvider;
                 2: {}, //openCloseTable
                 3: "path" //pathField
             };
-            _this38.requireSelection = true;
-            _this38.itemSelectedEnabled = true;
-            _this38.itemClickedEnabled = true;
-            _this38.layout = new VerticalLayout();
-            _get(Object.getPrototypeOf(Tree.prototype), "$setDataProvider", _this38).call(_this38, _this38.$Tree[1]);
-            return _this38;
+            _this39.requireSelection = true;
+            _this39.itemSelectedEnabled = true;
+            _this39.itemClickedEnabled = true;
+            _this39.layout = new VerticalLayout();
+            _get(Object.getPrototypeOf(Tree.prototype), "$setDataProvider", _this39).call(_this39, _this39.$Tree[1]);
+            return _this39;
         }
 
         _createClass(Tree, [{
@@ -6685,12 +8306,12 @@ var $root = eval("this");
                     return;
                 }
                 if (p[0]) {
-                    p[0].removeListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+                    p[0].removeListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
                     p[0].removeListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
                 }
                 p[0] = val;
                 if (p[0]) {
-                    p[0].addListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+                    p[0].addListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
                     p[0].addListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
                 }
                 this.__onTreeDataUpdate(null);
@@ -6700,7 +8321,7 @@ var $root = eval("this");
             value: function __onRemovedTreeDataUpdate(e) {
                 var item = e.data;
                 if (item.open && item.open instanceof flower.EventDispatcher) {
-                    item.open.removeListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                    item.open.removeListener(flower.Event.CHANGE, this.__onOpenItem, this);
                 }
             }
         }, {
@@ -6752,7 +8373,7 @@ var $root = eval("this");
                             if (item.open != null) {
                                 if (item.open instanceof flower.Value) {
                                     openURL[url].open = !!item.open.value;
-                                    item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                                    item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
                                 } else {
                                     openURL[url].open = !!item.open;
                                 }
@@ -6820,7 +8441,7 @@ var $root = eval("this");
                         }
                     } else {
                         item.open = new BooleanValue(openURL[url].open);
-                        item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                        item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
                     }
                 }
                 parentData.push(item);
@@ -6828,6 +8449,18 @@ var $root = eval("this");
                     var children = info.children;
                     for (var i = 0, len = children.length; i < len; i++) {
                         this.__readTreeShowItem(children[i], urlList, openURL, rootURLDepth, parentData);
+                    }
+                }
+            }
+        }, {
+            key: "expand",
+            value: function expand(url) {
+                var p = this.$Tree;
+                var parentData = p[1];
+                for (var i = 0; i < parentData.length; i++) {
+                    var item = parentData[i];
+                    if (item.path == url.slice(0, item.path.length)) {
+                        item.open.value = true;
                     }
                 }
             }
@@ -6861,14 +8494,15 @@ var $root = eval("this");
 
             _classCallCheck(this, Module);
 
-            var _this39 = _possibleConstructorReturn(this, Object.getPrototypeOf(Module).call(this));
+            var _this40 = _possibleConstructorReturn(this, Object.getPrototypeOf(Module).call(this));
 
-            Module.instance = _this39;
-            _this39.__url = url;
-            _this39.__beforeScript = beforeScript;
-            _this39.__direction = flower.Path.getPathDirection(url);
-            _this39.__progress = flower.DataManager.getInstance().createData("ProgressData");
-            return _this39;
+            Module.instance = _this40;
+            _this40.__url = url;
+            _this40.__beforeScript = beforeScript;
+            _this40.__direction = flower.Path.getPathDirection(url);
+            _this40.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
+            _this40.__progress = flower.DataManager.getInstance().createData("ProgressData");
+            return _this40;
         }
 
         _createClass(Module, [{
@@ -6885,8 +8519,9 @@ var $root = eval("this");
             key: "__onLoadModuleComplete",
             value: function __onLoadModuleComplete(e) {
                 var cfg = e.data;
-                var namespace = cfg.namespace || "local";
-                flower.UIParser.addNameSapce(namespace, cfg.name);
+                this.config = cfg;
+                this.__name = cfg.name;
+                flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
                 this.__list = [];
                 var classes = cfg.classes;
                 if (classes && Object.keys(classes).length) {
@@ -6895,15 +8530,21 @@ var $root = eval("this");
                         if (url.slice(0, 2) == "./") {
                             url = this.__direction + url.slice(2, url.length);
                         }
-                        flower.UIParser.setLocalUIURL(key, url, namespace);
+                        flower.UIParser.setLocalUIURL(key, url, cfg.name);
                     }
                 }
                 this.script = "";
                 this.script += this.__beforeScript;
                 this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
                 this.__beforeScript += "var module = $root." + cfg.name + ";\n";
+                this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
                 this.script += "module.path = \"" + this.__direction + "\";\n";
-                //this.script += "var " + cfg.packageURL + " = module;\n\n";
+                this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
+                if (cfg.execute) {
+                    this.__hasExecute = true;
+                    this.script += "$root." + cfg.name + "__executeModule = function() {" + cfg.execute + "}\n";
+                }
+                flower.UIParser.setModuleBeforeScript(cfg.name, this.__beforeScript);
                 var scripts = cfg.scripts;
                 if (scripts && Object.keys(scripts).length) {
                     for (var i = 0; i < scripts.length; i++) {
@@ -6938,7 +8579,7 @@ var $root = eval("this");
                             url = this.__direction + url.slice(2, url.length);
                         }
                         var parser = new flower.UIParser(this.__beforeScript);
-                        parser.localNameSpace = namespace;
+                        parser.moduleName = cfg.name;
                         this.__list.push({
                             type: "ui",
                             ui: parser,
@@ -6955,22 +8596,42 @@ var $root = eval("this");
                 if (this.hasListener(flower.Event.ERROR)) {
                     this.dispatch(e);
                 } else {
-                    $error(e.data);
+                    flower.$error(e.data);
                 }
             }
         }, {
             key: "__loadNext",
             value: function __loadNext(e) {
                 var item;
-                if (this.__index != 0) {
+                if (e && this.__index != 0) {
                     item = this.__list[this.__index - 1];
                     if (item.type == "data") {
-                        flower.DataManager.getInstance().addDefine(e.data);
+                        if (e.data.script) {
+                            var data = e.data;
+                            var url = e.data.script;
+                            if (url.slice(0, 2) == "./") {
+                                url = flower.Path.getPathDirection(item.url) + url.slice(2, url.length);
+                            }
+                            var loader = new flower.URLLoader(url);
+                            loader.addListener(flower.Event.COMPLETE, function (ee) {
+                                data.script = ee.data;
+                                flower.DataManager.getInstance().addDefine(data, this.__moduleKey);
+                                this.__loadNext();
+                            }, this);
+                            loader.addListener(flower.Event.ERROR, this.__loadError, this);
+                            loader.load();
+                            return;
+                        } else {
+                            flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                        }
                     } else if (item.type == "script") {
                         this.script += e.data + "\n\n\n";
                         if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                            trace("执行script:\n", this.script);
+                            //trace("执行script:\n", this.script);
+                            this.script += "flower.Module.$currentModule.data = module;";
+                            Module.$currentModule = this;
                             eval(this.script);
+                            Module.$currentModule = null;
                         }
                     }
                 }
@@ -6980,7 +8641,10 @@ var $root = eval("this");
                 this.__progress.max.value = this.__list.length;
                 this.__progress.current.value = this.__index;
                 if (this.__index == this.__list.length) {
-                    this.dispatchWidth(flower.Event.COMPLETE);
+                    if (this.__hasExecute) {
+                        $root[this.__name + "__executeModule"]();
+                    }
+                    this.dispatchWith(flower.Event.COMPLETE);
                     return;
                 }
                 item = this.__list[this.__index];
@@ -6999,9 +8663,19 @@ var $root = eval("this");
                 this.__index++;
             }
         }, {
+            key: "url",
+            get: function get() {
+                return this.__url;
+            }
+        }, {
             key: "progress",
             get: function get() {
                 return this.__progress;
+            }
+        }, {
+            key: "name",
+            get: function get() {
+                return this.__name;
             }
         }]);
 

@@ -1,7 +1,0 @@
-function init() {
-    editor.EventManager.instance.addListener(editor.ModuleEvent.SELECT_ELEMENT, this.onSelectElement, this);
-}
-
-function onSelectElement(e) {
-    this.data = e.data;
-}

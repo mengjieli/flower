@@ -41,19 +41,25 @@ class Event {
     static COMPLETE = "complete";
     static ADDED = "added";
     static REMOVED = "removed";
+    static ADD = "add";
+    static REMOVE = "remove";
     static ADDED_TO_STAGE = "added_to_stage";
     static REMOVED_FROM_STAGE = "removed_from_stage";
     static CONNECT = "connect";
     static CLOSE = "close";
     static CHANGE = "change";
     static ERROR = "error";
-    static UPDATE = "update";
     static FOCUS_IN = "focus_in";
     static FOCUS_OUT = "focus_out";
     static CONFIRM = "confirm";
     static CANCEL = "cancel";
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
+    static DISTORT = "distort";
+    static CREATION_COMPLETE = "creation_complete";
+    static SELECTED_ITEM_CHANGE = "selected_item_change";
+    static CLICK_ITEM = "click_item";
+    static TOUCH_BEGIN_ITEM = "touch_begin_item";
 
     static _eventPool = [];
 

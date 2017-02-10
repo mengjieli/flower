@@ -1,59 +1,94 @@
 class Platform {
     static type = "cocos2dx";
-    static native;
+    static native = cc.sys.isNative;
 
     static stage;
     static width;
     static height;
 
-    static start(engine, root, background) {
+    static start(engine, root, background, nativeStage = null, touchShow = null) {
+        flower.system.platform = Platform.type;
+        flower.system.native = Platform.native;
         RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
-        Platform.native = cc.sys.isNative;
         var scene = cc.Scene.extend({
             ctor: function () {
                 this._super();
-                this.scheduleUpdate();
                 //注册鼠标事件
                 cc.eventManager.addListener({
                     event: cc.EventListener.TOUCH_ONE_BY_ONE,
                     swallowTouches: true,
-                    onTouchBegan: this.onTouchesBegan.bind(this),
-                    onTouchMoved: this.onTouchesMoved.bind(this),
-                    onTouchEnded: this.onTouchesEnded.bind(this)
+                    onTouchBegan: function (touch) {
+                        engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this),
+                    onTouchMoved: function (touch) {
+                        engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this),
+                    onTouchEnded: function (touch) {
+                        engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                        return true;
+                    }.bind(this)
                 }, this);
                 cc.eventManager.addListener({
                     event: cc.EventListener.MOUSE,
-                    onMouseMove: this.onMouseMove.bind(this)
+                    onMouseMove: function (e) {
+                        engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                    }.bind(this),
+                    onMouseDown: function (e) {
+                        if (e.getButton() == 1) {
+                            engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                        }
+                    }
                 }, this);
             },
             update: function (dt) {
                 trace("dt", dt);
-            },
-            onMouseMove: function (e) {
-                engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
-            },
-            onTouchesBegan: function (touch) {
-                engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                return true;
-            },
-            onTouchesMoved: function (touch) {
-                engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                return true;
-            },
-            onTouchesEnded: function (touch) {
-                engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                return true;
-            },
+            }
         });
         Platform.stage2 = root.show;
-        Platform.stage = new scene();
+        Platform.stage = nativeStage || new scene();
         Platform.stage.update = Platform._run;
-        cc.director.runScene(Platform.stage);
+        if (nativeStage == null) {
+            cc.director.runScene(Platform.stage);
+        } else {
+            //注册鼠标事件
+            cc.eventManager.addListener({
+                event: cc.EventListener.TOUCH_ONE_BY_ONE,
+                swallowTouches: true,
+                onTouchBegan: function (touch) {
+                    if (engine.$getMouseTarget(math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y), true) == engine) {
+                        return false;
+                    }
+                    engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                },
+                onTouchMoved: function (touch) {
+                    engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                },
+                onTouchEnded: function (touch) {
+                    engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                    return true;
+                }
+            }, touchShow || nativeStage);
+            cc.eventManager.addListener({
+                event: cc.EventListener.MOUSE,
+                onMouseMove: function (e) {
+                    engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                },
+                onMouseDown: function (e) {
+                    if (e.getButton() == 1) {
+                        engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                    }
+                }
+            }, cc.director.getRunningScene());
+        }
         Platform.width = cc.director.getWinSize().width;
         Platform.height = cc.director.getWinSize().height;
         engine.$resize(Platform.width, Platform.height);
-        background.show.setPositionY(Platform.height);
-        Platform.stage.addChild(background.show);
+        //background.show.setPositionY(Platform.height);
+        //Platform.stage.addChild(background.show);
         root.show.setPositionY(Platform.height);
         Platform.stage.addChild(root.show);
         if ('keyboard' in cc.sys.capabilities) {
@@ -69,6 +104,7 @@ class Platform {
         } else {
             trace("KEYBOARD Not supported");
         }
+        Platform.stage.scheduleUpdate();
     }
 
 
@@ -81,10 +117,7 @@ class Platform {
         var now = (new Date()).getTime();
         Platform._runBack(now - Platform.lastTime);
         Platform.lastTime = now;
-        if (PlatformURLLoader.loadingList.length) {
-            var item = PlatformURLLoader.loadingList.shift();
-            item[0](item[1], item[2], item[3], item[4]);
-        }
+        PlatformURLLoader.run();
     }
 
     static pools = {};
@@ -95,36 +128,42 @@ class Platform {
             if (pools.Sprite && pools.Sprite.length) {
                 return pools.Sprite.pop();
             }
+            DebugInfo.nativeDisplayInfo.sprite++;
             return new PlatformSprite();
         }
         if (name == "Bitmap") {
             if (pools.Bitmap && pools.Bitmap.length) {
                 return pools.Bitmap.pop();
             }
+            DebugInfo.nativeDisplayInfo.bitmap++;
             return new PlatformBitmap();
         }
         if (name == "TextField") {
             if (pools.TextField && pools.TextField.length) {
                 return pools.TextField.pop();
             }
+            DebugInfo.nativeDisplayInfo.text++;
             return new PlatformTextField();
         }
         if (name == "TextInput") {
             if (pools.TextInput && pools.TextInput.length) {
                 return pools.TextInput.pop();
             }
+            DebugInfo.nativeDisplayInfo.text++;
             return new PlatformTextInput();
         }
         if (name == "Shape") {
             if (pools.Shape && pools.Shape.length) {
                 return pools.Shape.pop();
             }
+            DebugInfo.nativeDisplayInfo.shape++;
             return new PlatformShape();
         }
         if (name == "Mask") {
             if (pools.Mask && pools.Mask.length) {
                 return pools.Mask.pop();
             }
+            DebugInfo.nativeDisplayInfo.sprite++;
             return new PlatformMask();
         }
         return null;

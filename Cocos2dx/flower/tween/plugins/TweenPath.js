@@ -28,7 +28,7 @@ class TweenPath {
         this.pathSum = [];
         this.pathSum.push(0);
         for (var i = 1, len = path.length; i < len; i++) {
-            this.pathSum[i] = this.pathSum[i - 1] + Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+            this.pathSum[i] = this.pathSum[i - 1] + math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
         }
         var sum = this.pathSum[len - 1];
         for (i = 1; i < len; i++) {
@@ -69,7 +69,7 @@ class TweenPath {
     static vto(target, v, path, ease = "None") {
         var sum = 0;
         for (var i = 1, len = path.length; i < len; i++) {
-            sum += Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+            sum += math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
         }
         var time = sum / v;
         return flower.Tween.to(target, time, {"path": path}, ease);

@@ -277,22 +277,115 @@ class StringDo {
                 res.push(num);
             }
             else if (num < 2048) {
-                res.push(Math.floor(num / 64) + 128 + 64);
+                res.push(math.floor(num / 64) + 128 + 64);
                 res.push((num % 64) + 128);
             }
             else if (num < 65536) {
-                res.push(Math.floor(num / 4096) + 128 + 64 + 32);
-                res.push(Math.floor((num % 4096) / 64) + 128);
+                res.push(math.floor(num / 4096) + 128 + 64 + 32);
+                res.push(math.floor((num % 4096) / 64) + 128);
                 res.push((num % 64) + 128);
             }
             else {
-                res.push(Math.floor(num / 262144) + 128 + 64 + 32 + 16);
-                res.push(Math.floor((num % 262144) / 4096) + 128);
-                res.push(Math.floor((num % 4096) / 64) + 128);
+                res.push(math.floor(num / 262144) + 128 + 64 + 32 + 16);
+                res.push(math.floor((num % 262144) / 4096) + 128);
+                res.push(math.floor((num % 4096) / 64) + 128);
                 res.push((num % 64) + 128);
             }
         }
         return res;
+    }
+
+    /**
+     * 如果不是数字则返回 null
+     * @param value 字符串
+     */
+    static parseNumber(value) {
+        if (typeof value == "number") {
+            return value;
+        }
+        if (typeof value != "string") {
+            return null;
+        }
+        var code0 = "0".charCodeAt(0);
+        var code9 = "9".charCodeAt(0);
+        var codeP = ".".charCodeAt(0);
+        var isNumber;
+        var hasPoint = false;
+        var before = "";
+        var end = "";
+        var code;
+        var flag = true;
+        for (var p = 0; p < value.length; p++) {
+            code = value.charCodeAt(p);
+            if (hasPoint) {
+                if (code >= code0 && code <= code9) {
+                    end += value.charAt(p);
+                } else {
+                    flag = false;
+                    break;
+                }
+            } else {
+                if (code == codeP) {
+                    hasPoint = true;
+                } else if (code >= code0 && code <= code9) {
+                    before += value.charAt(p);
+                } else {
+                    flag = false;
+                    break;
+                }
+            }
+        }
+        if (flag) {
+            return parseInt(before) + (end != "" ? parseInt(end) / (Math.pow(10, end.length)) : 0);
+        }
+        return null;
+    }
+
+    static split(text, array) {
+        if (!array) {
+            return [text];
+        }
+        if (typeof array == "string") {
+            array = [array];
+        }
+        var list = [];
+        var start = 0;
+        for (var i = 0, len = text.length; i < len; i++) {
+            for (var a = 0; a < array.length; a++) {
+                if (text.slice(i, i + array[a].length) == array[a]) {
+                    list.push(text.slice(start, i));
+                    i += array[a].length - 1;
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        return list;
+    }
+
+    static intTo16(num) {
+        var str = "";
+        while (num) {
+            var n = num & 0xF;
+            num = num >> 4;
+            if (n < 10) {
+                str = n + str;
+            } else if (n == 10) {
+                str = "a" + str;
+            } else if (n == 11) {
+                str = "b" + str;
+            } else if (n == 12) {
+                str = "c" + str;
+            } else if (n == 13) {
+                str = "d" + str;
+            } else if (n == 14) {
+                str = "e" + str;
+            } else if (n == 15) {
+                str = "f" + str;
+            }
+        }
+        str = "0x" + str;
+        return str;
     }
 }
 

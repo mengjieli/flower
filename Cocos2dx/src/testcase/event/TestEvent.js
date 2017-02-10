@@ -20,7 +20,7 @@ var TestEvent = function (_TestBase) {
                 this.getResult(e.type);
             }, this);
             setTimeout(function () {
-                dispatcher.dispatchWidth("game");
+                dispatcher.dispatchWith("game");
             }, 1000);
         }));
 
@@ -35,7 +35,7 @@ var TestEvent = function (_TestBase) {
                 this.getResult(true);
             };
             dispatcher.addListener("go", goListener, this);
-            dispatcher.dispatchWidth("end");
+            dispatcher.dispatchWith("end");
         }));
 
         _this.addCase(new TestCase("EventDispatcher.removeListener2", true, function () {
@@ -48,7 +48,7 @@ var TestEvent = function (_TestBase) {
                 this.getResult(true);
             };
             dispatcher.addListener("end", endListener2, this);
-            dispatcher.dispatchWidth("end");
+            dispatcher.dispatchWith("end");
         }));
 
         _this.addCase(new TestCase("EventDispatcher.removeListener2", true, function () {
@@ -62,7 +62,7 @@ var TestEvent = function (_TestBase) {
                 this.getResult(false);
             };
             dispatcher.addListener("end", endListener2, this);
-            dispatcher.dispatchWidth("end");
+            dispatcher.dispatchWith("end");
         }));
         return _this;
     }

@@ -159,14 +159,11 @@ function compressComplete() {
         })
 }
 
-var file = new File("extension/");
+var file = new File("extension/black");
 var files = file.readFilesWidthEnd("js");
 var list = [
     "Black",
     "UIComponent",
-
-    "UIEvent",
-    "DataGroupEvent",
 
     "Value",
     "ArrayValue",
@@ -186,10 +183,15 @@ var list = [
     "HorizontalLayout",
     "VerticalLayout",
 
+    "Language",
     "PanelScaleMode",
+    "ScrollPolicy",
 
     "Group",
     "UIParser",
+    "ScrollBar",
+    "VScrollBar",
+    "HScrollBar",
     "DataGroup",
     "ItemRenderer",
     "Label",
@@ -217,7 +219,7 @@ var list = [
 ];
 var fileContent = "";
 fileContent += "var black = {};\n";
-fileContent += "var $root = eval(\"this\");\n";
+//fileContent += "var $root = eval(\"this\");\n";
 fileContent += "(function(){\n";
 while (list.length) {
     var name = list.shift();

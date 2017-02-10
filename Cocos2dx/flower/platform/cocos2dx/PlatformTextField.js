@@ -1,6 +1,7 @@
 class PlatformTextField extends PlatformDisplayObject {
 
     static $mesureTxt;
+    static $measures = {};
 
     show;
 
@@ -30,46 +31,47 @@ class PlatformTextField extends PlatformDisplayObject {
         txt.text = "";
         var txtText = "";
         var start = 0;
-        if(text == "") {
+        if (text == "") {
             txt.setString("");
         }
-        for (var i = 0; i < text.length; i++) {
-            //取一行文字进行处理
-            if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
-                var str = text.slice(start, i);
-                $mesureTxt.setString(str);
-                var lineWidth = $mesureTxt.getContentSize().width;
-                var findEnd = i;
-                var changeLine = false;
-                //如果这一行的文字宽大于设定宽
-                while (!autoSize && width && lineWidth > width) {
-                    changeLine = true;
-                    findEnd--;
-                    $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                    lineWidth = $mesureTxt.getContentSize().width;
-                }
-                if (wordWrap && changeLine) {
-                    i = findEnd;
-                    txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                } else {
-                    txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                }
-                //如果文字的高度已经大于设定的高，回退一次
-                if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
-                    txt.setString(txtText);
-                    break;
-                } else {
-                    txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                    if (wordWrap && changeLine) {
-                        txtText += "\n";
-                    }
-                }
-                start = i;
-                if (multiline == false) {
-                    break;
-                }
-            }
-        }
+        txt.setString(text);
+        //for (var i = 0; i < text.length; i++) {
+        //    //取一行文字进行处理
+        //    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+        //        var str = text.slice(start, i);
+        //        $mesureTxt.setString(str);
+        //        var lineWidth = $mesureTxt.getContentSize().width;
+        //        var findEnd = i;
+        //        var changeLine = false;
+        //        //如果这一行的文字宽大于设定宽
+        //        while (!autoSize && width && lineWidth > width) {
+        //            changeLine = true;
+        //            findEnd--;
+        //            $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //            lineWidth = $mesureTxt.getContentSize().width;
+        //        }
+        //        if (wordWrap && changeLine) {
+        //            i = findEnd;
+        //            txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        } else {
+        //            txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+        //        }
+        //        //如果文字的高度已经大于设定的高，回退一次
+        //        if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
+        //            txt.setString(txtText);
+        //            break;
+        //        } else {
+        //            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+        //            if (wordWrap && changeLine) {
+        //                txtText += "\n";
+        //            }
+        //        }
+        //        start = i;
+        //        if (multiline == false) {
+        //            break;
+        //        }
+        //    }
+        //}
         $mesureTxt.setString(txt.getString());
         return $mesureTxt.getContentSize();
     }
@@ -95,7 +97,31 @@ class PlatformTextField extends PlatformDisplayObject {
         this.setFontColor(0);
         super.release();
     }
+
+    static measureTextWidth(size, text) {
+        if(Platform.native) {
+            var $mesureTxt = PlatformTextField.$mesureTxt;
+            var sizes = PlatformTextField.$measures;
+            var width = 0;
+            for (var i = 0; i < text.length; i++) {
+                var char = text.charAt(i);
+                if (sizes[char] == null) {
+                    $mesureTxt.setFontSize(size);
+                    $mesureTxt.setString(char);
+                    sizes[char] = $mesureTxt.getContentSize().width;
+                }
+                width += sizes[char];
+            }
+            return width;
+        }
+        var $mesureTxt = PlatformTextField.$mesureTxt;
+        $mesureTxt.setFontSize(size);
+        $mesureTxt.setString(text);
+        return $mesureTxt.getContentSize().width;
+    }
 }
 
 PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
 PlatformTextField.$mesureTxt.retain();
+
+flower.$measureTextWidth = PlatformTextField.measureTextWidth;

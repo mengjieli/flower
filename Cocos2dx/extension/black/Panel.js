@@ -108,7 +108,7 @@ class Panel extends Group {
     }
 
     $onClose() {
-        this.dispatchWidth(flower.Event.CLOSE);
+        this.dispatchWith(flower.Event.CLOSE);
         this.closePanel();
     }
 

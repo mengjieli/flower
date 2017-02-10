@@ -10,6 +10,7 @@ class PlatformDisplayObject {
     __height = 0;
     __programmer = null;
     __filters = null;
+    __alpha = 1;
 
     /**
      * 0x0001 scale9Grid
@@ -80,6 +81,7 @@ class PlatformDisplayObject {
     }
 
     setAlpha(val) {
+        this.__alpha = val;
         this.show.setOpacity(val * 255);
     }
 
@@ -258,6 +260,7 @@ class PlatformDisplayObject {
         this.__rotation = 0;
         this.__width = 0;
         this.__height = 0;
+        this.__alpha = 1;
         this.__programmer = null;
         this.__programmerFlag = 0;
         if (this.__programmer) {

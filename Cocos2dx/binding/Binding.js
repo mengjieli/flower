@@ -6,6 +6,7 @@ class Binding {
     property;
     content;
     checks;
+    hasDispose = false;
 
     constructor(thisObj, checks, property, content) {
         this.thisObj = thisObj;
@@ -28,7 +29,7 @@ class Binding {
 
     $reset() {
         for (var i = 0; i < this.list.length; i++) {
-            this.list[i].removeListener(flower.Event.UPDATE, this.update, this);
+            this.list[i].removeListener(flower.Event.CHANGE, this.update, this);
         }
         this.__bind(this.thisObj, this.checks.concat(), this.property, this.content);
     }
@@ -56,6 +57,7 @@ class Binding {
                         break;
                     }
                     if (content.charAt(j) == "}") {
+                        var bindContent = content.slice(i + 1, j);
                         if (i == 0 && j == content.length - 1) {
                             this.singleValue = true;
                         }
@@ -63,10 +65,12 @@ class Binding {
                             this.stmts.push(content.slice(lastEnd, i));
                         }
                         lastEnd = j + 1;
-                        var stmt = Compiler.parserExpr(content.slice(i + 1, j), checks, {"this": thisObj}, {
+                        var stmt = Compiler.parserExpr(bindContent, checks, {"this": thisObj}, {
+                            "flower": flower,
                             "Tween": flower.Tween,
-                            "Ease": flower.Ease
-                        }, this.list);
+                            "Ease": flower.Ease,
+                            "Math": flower.Math
+                        }, this.list,this);
                         if (stmt == null) {
                             parseError = true;
                             break;
@@ -97,9 +101,17 @@ class Binding {
             }
         }
         for (i = 0; i < this.list.length; i++) {
-            this.list[i].addListener(flower.Event.UPDATE, this.update, this);
+            this.list[i].addListener(flower.Event.CHANGE, this.update, this);
         }
         this.update();
+    }
+
+    $addValueListener(value) {
+        value.addListener(flower.Event.CHANGE, this.update, this);
+    }
+
+    $removeValueListener(value) {
+        value.removeListener(flower.Event.CHANGE, this.update, this);
     }
 
     update(value = null, old = null) {
@@ -132,8 +144,9 @@ class Binding {
     }
 
     dispose() {
+        this.hasDispose = true;
         for (var i = 0; i < this.list.length; i++) {
-            this.list[i].removeListener(flower.Event.UPDATE, this.update, this);
+            this.list[i].removeListener(flower.Event.CHANGE, this.update, this);
         }
     }
 
@@ -171,5 +184,7 @@ class Binding {
     }
 
 }
+
+Binding.addBindingCheck($root);
 
 exports.Binding = Binding;

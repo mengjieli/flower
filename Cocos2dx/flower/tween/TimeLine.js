@@ -62,7 +62,7 @@ class TimeLine {
         var loopTime = 0;
         if (this._currentTime >= totalTime) {
             currentTime = this._currentTime % totalTime;
-            loopTime = Math.floor(this._currentTime / totalTime);
+            loopTime = math.floor(this._currentTime / totalTime);
             if (!this._loop) {
                 this.$setPlaying(false);
             }

@@ -42,6 +42,11 @@ class CallLater {
         }
     }
 
+    static $dispose() {
+        flower.CallLater._list = [];
+        flower.CallLater._next = [];
+    }
+
 }
 
 exports.CallLater = CallLater;

@@ -1,11 +1,12 @@
 var black = {};
-var $root = eval("this");
 (function(){
 //////////////////////////File:extension/black/core/Black.js///////////////////////////
 var sys = {};
-for (var key in flower.sys) {
-    sys[key] = flower.sys[key];
-}
+flower.addStartBack(function () {
+    for (var key in flower.sys) {
+        sys[key] = flower.sys[key];
+    }
+})
 //////////////////////////End File:extension/black/core/Black.js///////////////////////////
 
 
@@ -21,7 +22,18 @@ for (var key in flower.sys) {
  * 1020 touchBegin
  * 1021 touchEnd
  * 1022 touchRelease
+ * 1023 rightClick
  * 1100 click
+ * 1110 clickItem
+ * 1111 selectedItemChange DataGroup
+ * 1112 touchBeginItem
+ * 1130 confirm
+ * 1131 cancel
+ * 1300 loadComplete
+ * 1400 change  RadioButtonGroup
+ * 1401 change  RadioButton
+ * 1402 change ToggleButton
+ * 1500 selectedItemChange ViewStack
  */
 class UIComponent {
 
@@ -41,11 +53,12 @@ class UIComponent {
                 9: null, //uiHeight
                 10: {}, //binds
                 11: new StringValue(),//state
-                12: false, //absoluteState
+                12: false,//absoluteState
                 13: this, //eventThis
                 14: null, //layout
+                15: isContainer, //flexbox 弹性属性是否需要验证
             };
-            UIComponent.registerEvent(clazz, 1000, "creationComplete", UIEvent.CREATION_COMPLETE);
+            UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
             UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
             UIComponent.registerEvent(clazz, 1002, "addToStage", flower.Event.ADDED_TO_STAGE);
             UIComponent.registerEvent(clazz, 1003, "remove", flower.Event.REMOVED);
@@ -191,6 +204,9 @@ class UIComponent {
                 }
             }
             p[0] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -207,6 +223,9 @@ class UIComponent {
                 }
             }
             p[1] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -217,6 +236,9 @@ class UIComponent {
                 return false;
             }
             p[2] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -227,6 +249,9 @@ class UIComponent {
                 return false;
             }
             p[3] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -237,6 +262,9 @@ class UIComponent {
                 return false;
             }
             p[4] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -247,6 +275,9 @@ class UIComponent {
                 return false;
             }
             p[5] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -257,6 +288,9 @@ class UIComponent {
                 return false;
             }
             p[6] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -267,45 +301,25 @@ class UIComponent {
                 return false;
             }
             p[7] = val;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
-        //p.$getWidth = function () {
-        //    var p = this.$UIComponent;
-        //    if (p[0] != null && p[1] == null && p [2] != null) {
-        //        return (p[2] - p[0]) * 2;
-        //    }
-        //    else if (p[0] == null && p[1] != null && p[2] != null) {
-        //        return (p[1] - p[2]) * 2;
-        //    } else if (p[0] != null && p[1] != null) {
-        //        if (this.parent) {
-        //            return parent.width - p[1] - p[0];
-        //        }
-        //    } else {
-        //        if (p[6] && this.parent) {
-        //            this.width = parent.width * p[6] / 100;
-        //        }
-        //    }
-        //    return $root._get(Object.getPrototypeOf(p), "$getWidth", this).call(this);
-        //}
-        //
-        //p.$getHeight = function () {
-        //    var p = this.$UIComponent;
-        //    if (p[3] != null && p[4] == null && p [5] != null) {
-        //        return (p[5] - p[3]) * 2;
-        //    } else if (p[3] == null && p[4] != null && p[5] != null) {
-        //        return (p[4] - p[5]) * 2;
-        //    } else if (p[3] != null && p[4] != null) {
-        //        if (this.parent) {
-        //            return parent.height - p[4] - p[3];
-        //        }
-        //    } else {
-        //        if (p[7] && this.parent) {
-        //            return parent.height * p[7] / 100;
-        //        }
-        //    }
-        //    return $root._get(Object.getPrototypeOf(p), "$getHeight", this).call(this);
-        //}
+        p.$getBounds = function (fromParent = false) {
+            var rect = $root._get(Object.getPrototypeOf(p), "$getBounds", this).call(this, fromParent);
+            if (fromParent) {
+                var ui = this.$UIComponent;
+                if ((ui[0] == null || ui[1] == null) && ui[6] != null || (ui[0] != null && ui[1] != null)) {
+                    rect.width = 0;
+                }
+                if ((ui[3] == null || ui[4] == null) && ui[7] != null || (ui[3] != null && ui[4] != null)) {
+                    rect.height = 0;
+                }
+            }
+            return rect;
+        }
 
         Object.defineProperty(p, "left", {
             get: function () {
@@ -487,49 +501,18 @@ black.UIComponent = UIComponent;
 
 
 
-//////////////////////////File:extension/black/events/UIEvent.js///////////////////////////
-class UIEvent extends flower.Event {
-    constructor(type, bubbles = false) {
-        super(type, bubbles);
-    }
-
-    static CREATION_COMPLETE = "creation_complete";
-}
-
-black.UIEvent = UIEvent;
-//////////////////////////End File:extension/black/events/UIEvent.js///////////////////////////
-
-
-
-//////////////////////////File:extension/black/events/DataGroupEvent.js///////////////////////////
-class DataGroupEvent extends flower.Event {
-
-    __item;
-
-    constructor(type, bubbles = false, item = null) {
-        super(type, bubbles);
-        this.__item = item;
-    }
-
-    get item() {
-        return this.__item;
-    }
-
-    static SELECTED_ITEM_CHANGE = "selected_item_change";
-    static CLICK_ITEM = "click_item";
-    static TOUCH_BEGIN_ITEM = "touch_begin_item";
-}
-
-black.DataGroupEvent = DataGroupEvent;
-//////////////////////////End File:extension/black/events/DataGroupEvent.js///////////////////////////
-
-
-
 //////////////////////////File:extension/black/data/member/Value.js///////////////////////////
 class Value extends flower.EventDispatcher {
 
     __old = null;
     __value = null;
+    __checkDistort = null;
+    __list = null;
+
+    constructor(checkDistort = null) {
+        super();
+        this.__checkDistort = checkDistort == null ? Value.Default_Check_Distort : checkDistort;
+    }
 
     $setValue(val) {
         if (val == this.__value) {
@@ -539,7 +522,28 @@ class Value extends flower.EventDispatcher {
         this.__value = val;
     }
 
+    $getValue() {
+        return this.__value;
+    }
+
+    push(val) {
+        if (!this.__list) {
+            this.__list = [];
+        }
+        this.__list.push(val);
+    }
+
+    pop() {
+        if (this.__list) {
+            return this.__list.pop();
+        }
+        return null;
+    }
+
     get value() {
+        if (this.__checkDistort) {
+            return this.$getValue();
+        }
         return this.__value;
     }
 
@@ -550,6 +554,9 @@ class Value extends flower.EventDispatcher {
     get old() {
         return this.__old;
     }
+
+    //Value 是否自动检测非法修改
+    static Default_Check_Distort = false;
 }
 
 black.Value = Value;
@@ -561,9 +568,9 @@ black.Value = Value;
 /**
  *
  * @Event
- * Event.ADDED item
- * Event.REMOVED item
- * Event.UPDATE ArrayValue 所有更新都会触发，包括排序
+ * Event.ADD item
+ * Event.REMOV item
+ * Event.CHANGE ArrayValue 所有更新都会触发，包括排序
  */
 class ArrayValue extends Value {
 
@@ -574,6 +581,8 @@ class ArrayValue extends Value {
     _rangeMaxKey = "";
     _selectedItem = null;
     _itemType = null;
+    _subs = null;
+    $sub = false;
 
     constructor(init = null, itemType = "*") {
         super();
@@ -581,13 +590,19 @@ class ArrayValue extends Value {
         this.list = init || [];
         this._length = this.list.length;
         this.__value = this;
+        this._lengthValue = new flower.IntValue();
     }
 
     push(item) {
         this.list.push(item);
         this._length = this._length + 1;
-        this.dispatchWidth(flower.Event.ADDED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubPush(item);
+            this.__addItemChange(item);
+        }
+        this.dispatchWith(flower.Event.ADD, item);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     addItemAt(item, index) {
@@ -598,8 +613,13 @@ class ArrayValue extends Value {
         }
         this.list.splice(index, 0, item);
         this._length = this._length + 1;
-        this.dispatchWidth(flower.Event.ADDED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubAddItemAt(item, index);
+            this.__addItemChange(item);
+        }
+        this.dispatchWith(flower.Event.ADD, item);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     shift() {
@@ -608,8 +628,13 @@ class ArrayValue extends Value {
         }
         var item = this.list.shift();
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
+        this.dispatchWith(flower.Event.REMOVE, item);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -617,24 +642,38 @@ class ArrayValue extends Value {
         var i;
         startIndex = +startIndex & ~0;
         delCount = +delCount & ~0;
+        var list;
         if (delCount <= 0) {
+            list = [];
             for (i = 0; i < args.length; i++) {
+                list[i] = args[i];
                 this.list.splice(startIndex, 0, args[i]);
             }
             this._length = this._length + 1;
+            this._lengthValue.value = this._length;
             for (i = 0; i < args.length; i++) {
-                this.dispatchWidth(flower.Event.ADDED, args[i]);
+                if (this._subs) {
+                    this.__checkSubAddItemAt(args[i], startIndex + i);
+                    this.__addItemChange(args[i]);
+                }
+                this.dispatchWith(flower.Event.ADD, args[i]);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
         else {
-            var list = this.list.splice(startIndex, delCount);
+            list = this.list.splice(startIndex, delCount);
             this._length = this._length - delCount;
+            this._lengthValue.value = this._length;
             for (i = 0; i < list.length; i++) {
-                this.dispatchWidth(flower.Event.REMOVED, list[i]);
+                if (this._subs) {
+                    this.__checkSubRemoveItem(list[i]);
+                    this.__removeItemChange(list[i]);
+                }
+                this.dispatchWith(flower.Event.REMOVE, list[i]);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
+        return list;
     }
 
     slice(startIndex, end) {
@@ -649,8 +688,13 @@ class ArrayValue extends Value {
         }
         var item = this.list.pop();
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
+        this.dispatchWith(flower.Event.REMOVE, item);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
@@ -658,12 +702,19 @@ class ArrayValue extends Value {
         if (!this.list.length) {
             return;
         }
+        if (this._subs) {
+            this.__subRemoveAll();
+        }
         while (this.list.length) {
             var item = this.list.pop();
             this._length = this._length - 1;
-            this.dispatchWidth(flower.Event.REMOVED, item);
+            this._lengthValue.value = this._length;
+            if (this._subs) {
+                this.__removeItemChange(item);
+            }
+            this.dispatchWith(flower.Event.REMOVE, item);
         }
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     removeItem(item) {
@@ -671,8 +722,13 @@ class ArrayValue extends Value {
             if (this.list[i] == item) {
                 this.list.splice(i, 1);
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
-                this.dispatchWidth(flower.Event.UPDATE, this);
+                this._lengthValue.value = this._length;
+                if (this._subs) {
+                    this.__checkSubRemoveItem(item);
+                    this.__removeItemChange(item);
+                }
+                this.dispatchWith(flower.Event.REMOVE, item);
+                this.dispatchWith(flower.Event.CHANGE, this);
                 return item;
             }
         }
@@ -687,25 +743,41 @@ class ArrayValue extends Value {
         }
         var item = this.list.splice(index, 1)[0];
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
+        this.dispatchWith(flower.Event.REMOVE, item);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
     removeItemWith(key, value, key2 = "", value2 = null) {
         var item;
         var i;
-        if (key2 != "") {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var val = this.list[i][key];
+                if (val instanceof Value && !(val instanceof flower.ObjectValue) && !(val instanceof flower.ArrayValue)) {
+                    val = val.value;
+                }
+                if (val == value) {
                     item = this.list.splice(i, 1)[0];
                     break;
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var val1 = this.list[i][key];
+                if (val1 instanceof Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                var val2 = this.list[i][key2];
+                if (val2 instanceof Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                    val2 = val2.value;
+                }
+                if (val == value && val2 == value2) {
                     item = this.list.splice(i, 1)[0];
                     break;
                 }
@@ -715,32 +787,60 @@ class ArrayValue extends Value {
             return;
         }
         this._length = this._length - 1;
-        this.dispatchWidth(flower.Event.REMOVED, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this._lengthValue.value = this._length;
+        if (this._subs) {
+            this.__checkSubRemoveItem(item);
+            this.__removeItemChange(item);
+        }
+        this.dispatchWith(flower.Event.REMOVE, item);
+        this.dispatchWith(flower.Event.CHANGE, this);
         return item;
     }
 
     getItemIndex(item) {
         for (var i = 0, len = this.list.length; i < len; i++) {
-            if (this.list[i] == item) {
+            if (this.list[i] == item || !(item instanceof flower.Value) && this.list[i] instanceof Value && this.list[i].value == item) {
                 return i;
             }
         }
         return -1;
     }
 
-    getItemWith(key, value, key2 = null, value2 = null) {
+    getItemWith(key, value, key2 = "", value2 = null) {
         var i;
-        if (!key2) {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                if (val1 == value) {
                     return this.list[i];
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                keys = key2.split(".");
+                var val2 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val2 = val2[keys[k]];
+                }
+                if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                    val2 = val2.value;
+                }
+                if (val1 == value && val2 == value2) {
                     return this.list[i];
                 }
             }
@@ -763,16 +863,39 @@ class ArrayValue extends Value {
     getItemsWith(key, value, key2 = "", value2 = null) {
         var result = [];
         var i;
-        if (key2 != "") {
+        if (key2 == "") {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                if (val1 == value) {
                     result.push(this.list[i]);
                 }
             }
-        }
-        else {
+        } else {
             for (i = 0; i < this.list.length; i++) {
-                if (this.list[i][key] == value && this.list[i][key2] == value2) {
+                var keys = key.split(".");
+                var val1 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val1 = val1[keys[k]];
+                }
+                if (val1 instanceof flower.Value && !(val1 instanceof flower.ObjectValue) && !(val1 instanceof flower.ArrayValue)) {
+                    val1 = val1.value;
+                }
+                keys = key2.split(".");
+                var val2 = this.list[i];
+                for (var k = 0; k < keys.length; k++) {
+                    val2 = val2[keys[k]];
+                }
+                if (val2 instanceof flower.Value && !(val2 instanceof flower.ObjectValue) && !(val2 instanceof flower.ArrayValue)) {
+                    val2 = val2.value;
+                }
+                if (val1 == value && val2 == value2) {
                     result.push(this.list[i]);
                 }
             }
@@ -782,9 +905,12 @@ class ArrayValue extends Value {
 
     setItemsAttributeWith(findKey, findValue, setKey = "", setValue = null) {
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i][findKey] == findValue) {
+            if (this.list[i][findKey] instanceof flower.Value && this.list[i][findKey].value == findValue) {
+                this.list[i][setKey].value = setValue
+            } else if (this.list[i][findKey] == findValue) {
                 this.list[i][setKey] = setValue;
             }
+
         }
     }
 
@@ -813,12 +939,8 @@ class ArrayValue extends Value {
     }
 
     sort() {
-        var _arguments__ = [];
-        for (var argumentsLength = 0; argumentsLength < arguments.length; argumentsLength++) {
-            _arguments__ = arguments[argumentsLength];
-        }
-        this.list.sort.apply(this.list.sort, _arguments__);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.list.sort.apply(this.list, arguments);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     setItemIndex(item, index) {
@@ -828,7 +950,7 @@ class ArrayValue extends Value {
         }
         this.list.splice(itemIndex, 1);
         this.list.splice(index, 0, item);
-        this.dispatchWidth(flower.Event.UPDATE, this);
+        this.dispatchWith(flower.Event.CHANGE, this);
     }
 
     getItemAt(index) {
@@ -850,7 +972,7 @@ class ArrayValue extends Value {
             return null;
         }
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i][this.key] == value) {
+            if (this.list[i][this.key] instanceof Value && this.list[i][this.key].value == value || this.list[i][this.key] == value) {
                 return this.list[i];
             }
         }
@@ -886,6 +1008,227 @@ class ArrayValue extends Value {
         return list;
     }
 
+    createSubArrayValue(...args) {
+        if (!this._subs) {
+            this._subs = [];
+        }
+        var init = [];
+        var list = this.list;
+        for (var i = 0; i < list.length; i++) {
+            var item = this.list[i];
+            var flag = true;
+            for (var a = 0; a < arguments.length; a++, a++) {
+                if (item instanceof Value) {
+                    if (item[arguments[a]].value != arguments[a + 1]) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[arguments[a]] != arguments[a + 1]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                init.push(item);
+            }
+        }
+        var sub = new ArrayValue(init, this._itemType);
+        sub.$sub = true;
+        this._subs.push([sub, arguments]);
+        this.__addAllItemChange();
+        return sub;
+    }
+
+    /**
+     * 绑定子集数组
+     * @param sub 需要绑定的子集数组对象
+     * @param args 绑定条件，按照 属性名称1,属性值1,属性名称2,属性值2,... 的顺序传入
+     */
+    linkSubArrayValue(sub, ...args) {
+        if (!this._subs) {
+            this._subs = [];
+        }
+        sub.$sub = true;
+        sub.removeAll();
+        this._subs.push([sub, args]);
+        var list = this.list;
+        for (var i = 0; i < list.length; i++) {
+            var item = this.list[i];
+            var flag = true;
+            for (var a = 1; a < args.length; a++, a++) {
+                if (item instanceof Value) {
+                    if (item[args[a]].value != args[a + 1]) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[args[a]] != args[a + 1]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                sub.push(item);
+            }
+        }
+        this.__addAllItemChange();
+    }
+
+    __addAllItemChange() {
+        var list = this.list;
+        var subs = this._subs;
+        for (var i = 0; i < list.length; i++) {
+            var item = this.list[i];
+            for (var s = 0; s < subs.length; s++) {
+                var args = subs[s][1];
+                for (var a = 0; a < args.length; a++, a++) {
+                    var key = args[a];
+                    if (item[key] instanceof Value) {
+                        item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                    }
+                }
+            }
+        }
+    }
+
+    __addItemChange(item) {
+        var subs = this._subs;
+        for (var s = 0; s < subs.length; s++) {
+            var args = subs[s][1];
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                if (item[key] instanceof Value) {
+                    item[key].addListener(flower.Event.CHANGE, this.__onItemChange, this, 0, item);
+                }
+            }
+        }
+    }
+
+    __removeItemChange(item) {
+        var keys = item.membersKey;
+        for (var i = 0; i < keys.length; i++) {
+            if (item[keys[i]] instanceof flower.Value) {
+                item[keys[i]].removeListener(flower.Event.CHANGE, this.__onItemChange, this);
+            }
+        }
+    }
+
+    __onItemChange(e, item) {
+        var subs = this._subs;
+        for (var s = 0; s < subs.length; s++) {
+            var sub = subs[s][0];
+            var args = subs[s][1];
+            var oldIndex = sub.getItemIndex(item);
+            var flag = true;
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                var value = args[a + 1];
+                if (item[key] instanceof Value) {
+                    if (item[key].value != value) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[key] != value) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (oldIndex == -1 && flag) {
+                var index = this.getItemIndex(item);
+                var ind = -1;
+                for (var f = index - 1; f >= 0; f++) {
+                    ind = sub.getItemIndex(this.list[f]);
+                    if (ind != -1) {
+                        ind++;
+                        break;
+                    }
+                }
+                if (ind == -1) {
+                    ind = 0;
+                }
+                sub.addItemAt(item, ind);
+            } else if (oldIndex != -1 && !flag) {
+                sub.removeItem(item);
+            }
+        }
+    }
+
+    __checkSubPush(item) {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            var args = this._subs[s][1];
+            var flag = true;
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                var value = args[a + 1];
+                if (item[key] instanceof Value) {
+                    if (item[key].value != value) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[key] != value) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                sub.push(item);
+            }
+        }
+    }
+
+    __checkSubAddItemAt(item, index) {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            var args = this._subs[s][1];
+            var flag = true;
+            for (var a = 0; a < args.length; a++, a++) {
+                var key = args[a];
+                var value = args[a + 1];
+                if (item[key] instanceof Value) {
+                    if (item[key].value != value) {
+                        flag = false;
+                        break;
+                    }
+                } else if (item[key] != value) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                var ind = -1;
+                for (var f = index - 1; f >= 0; f++) {
+                    ind = sub.getItemIndex(this.list[f]);
+                    if (ind != -1) {
+                        ind++;
+                        break;
+                    }
+                }
+                if (ind == -1) {
+                    ind = 0;
+                }
+                sub.addItemAt(item, ind);
+            }
+        }
+    }
+
+    __checkSubRemoveItem(item) {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            var ind = sub.getItemIndex(item);
+            if (ind != -1) {
+                sub.removeItemAt(ind);
+            }
+        }
+    }
+
+    __subRemoveAll() {
+        for (var s = 0; s < this._subs.length; s++) {
+            var sub = this._subs[s][0];
+            sub.removeAll();
+        }
+    }
+
+
     dispose() {
         var list = this.list;
         for (var i = 0; i < list.length; i++) {
@@ -893,6 +1236,14 @@ class ArrayValue extends Value {
             if (value instanceof Value) {
                 value.dispose();
             }
+        }
+        if (this._subs) {
+            while (this._subs) {
+                var sub = this._subs.pop()[0];
+                sub.removeAll();
+                sub.dispose();
+            }
+            this._subs = null;
         }
         super.dispose();
     }
@@ -965,14 +1316,19 @@ class ArrayValue extends Value {
             while (this.list.length > val) {
                 var item = this.list.pop();
                 this._length = this._length - 1;
-                this.dispatchWidth(flower.Event.REMOVED, item);
+                this._lengthValue.value = this._length;
+                this.dispatchWith(flower.Event.REMOVE, item);
             }
-            this.dispatchWidth(flower.Event.UPDATE, this);
+            this.dispatchWith(flower.Event.CHANGE, this);
         }
+    }
+
+    get lengthIntValue() {
+        return this._lengthValue;
     }
 }
 
-for (var i = 0; i < 100; i++) {
+for (var i = 0; i < 100000; i++) {
     Object.defineProperty(ArrayValue.prototype, "" + i, {
         get: function (index) {
             return function () {
@@ -1017,7 +1373,7 @@ class BooleanValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $setEnumList(val) {
@@ -1044,10 +1400,11 @@ black.BooleanValue = BooleanValue;
 //////////////////////////File:extension/black/data/member/IntValue.js///////////////////////////
 class IntValue extends Value {
 
-    constructor(init = 0, enumList = null)  {
-        super();
+    constructor(init = 0, enumList = null, checkDistort = null) {
+        super(checkDistort);
         this.__old = this.__value = +init & ~0 || 0;
         this.__enumList = enumList;
+        this.__valueCheck = [48];
     }
 
     $setValue(val) {
@@ -1057,7 +1414,30 @@ class IntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        if (this.__checkDistort) {
+            var str = val + "";
+            this.__valueCheck.length = 0;
+            for (var i = 0; i < str.length; i++) {
+                this.__valueCheck.push(str.charCodeAt(i));
+            }
+        }
+        this.dispatchWith(flower.Event.CHANGE, this, val);
+    }
+
+    $getValue() {
+        if (this.__checkDistort) {
+            flower.breakPoint();
+            var str = this.__value + "";
+            var compare = "";
+            for (var i = 0; i < this.__valueCheck.length; i++) {
+                compare += String.fromCharCode(this.__valueCheck[i]);
+            }
+            if (str != compare) {
+                this.dispatchWith(flower.Event.DISTORT, this);
+                this.__value = parseFloat(compare);
+            }
+        }
+        return this.__value;
     }
 
     $setEnumList(val) {
@@ -1084,12 +1464,13 @@ black.IntValue = IntValue;
 //////////////////////////File:extension/black/data/member/NumberValue.js///////////////////////////
 class NumberValue extends Value {
 
-    constructor(init = 0, enumList = null) {
-        super();
+    constructor(init = 0, enumList = null, checkDistort = null) {
+        super(checkDistort);
         this.__enumList = enumList;
         this.__old = this.__value = +init || 0;
         this.__precision = 2;
         this.__multiplier = Math.pow(10, this.__precision);
+        this.__valueCheck = [48];
     }
 
     $setValue(val) {
@@ -1110,7 +1491,29 @@ class NumberValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        if (this.__checkDistort) {
+            var str = val + "";
+            this.__valueCheck.length = 0;
+            for (var i = 0; i < str.length; i++) {
+                this.__valueCheck.push(str.charCodeAt(i));
+            }
+        }
+        this.dispatchWith(flower.Event.CHANGE, this, val);
+    }
+
+    $getValue() {
+        if (this.__checkDistort) {
+            var str = this.__value + "";
+            var compare = "";
+            for (var i = 0; i < this.__valueCheck.length; i++) {
+                compare += String.fromCharCode(this.__valueCheck[i]);
+            }
+            if (str != compare) {
+                this.dispatchWith(flower.Event.DISTORT, this);
+                this.__value = parseFloat(compare);
+            }
+        }
+        return this.__value;
     }
 
     $setEnumList(val) {
@@ -1149,6 +1552,13 @@ black.NumberValue = NumberValue;
 
 
 //////////////////////////File:extension/black/data/member/ObjectValue.js///////////////////////////
+/**
+ * 定义 Data 时，如下关键字不能作为属性名称
+ * `value
+ * className
+ * membersKey
+ * dispose
+ */
 class ObjectValue extends Value {
 
     constructor(init = null) {
@@ -1158,20 +1568,29 @@ class ObjectValue extends Value {
             this.value = init;
         }
         this.__saveClass = {};
+        this.__nosave = {};
     }
 
-    setMember(name, value) {
+    $setMember(name, value) {
         var old = this.__value[name];
         this.__value[name] = value;
-        //this.dispatchWidth(flower.Event.UPDATE, {
-        //    "name": name,
-        //    "old": old,
-        //    "value": value
-        //});
+        this.dispatchWith(name, {
+            "name": name,
+            "old": old,
+            "value": value
+        });
     }
 
-    setMemberSaveClass(name, saveClass = false) {
+    $setMemberSaveClass(name, saveClass = false) {
         this.__saveClass[name] = saveClass;
+    }
+
+    $setMemberSaveFlag(name, save = false) {
+        if (save == false) {
+            this.__nosave[name] = true;
+        } else {
+            delete this.__nosave[name];
+        }
     }
 
     hasMember(name) {
@@ -1188,19 +1607,25 @@ class ObjectValue extends Value {
             return;
         }
         if (value == null) {
-            this.setMember(name, null);
+            this.$setMember(name, null);
         } else {
+            if (value && (!(value instanceof Value)) && typeof value == "object" && value.__className) {
+                value = flower.DataManager.createData(value.__className, value);
+            }
             if (value instanceof Value) {
-                this.setMember(name, value);
+                this.$setMember(name, value);
             } else {
                 var val = this.__value[name];
+                var old = val;
                 if (val instanceof Value) {
                     val.value = value;
                 } else {
-                    if (value && typeof value == "object" && value.__className) {
-                        value = flower.DataManager.createData(value.__className, value);
-                    }
                     this.__value[name] = value;
+                    this.dispatchWith(name, {
+                        "name": name,
+                        "old": old,
+                        "value": value
+                    });
                 }
             }
         }
@@ -1220,7 +1645,7 @@ class ObjectValue extends Value {
             var key = list[i];
             var value = val[key];
             if (!this.__value.hasOwnProperty(key)) {
-                this.setMember(key, value);
+                this.$setMember(key, value);
             } else {
                 this.setValue(key, value);
             }
@@ -1233,6 +1658,9 @@ class ObjectValue extends Value {
         var config = {};
         for (var i = 0; i < list.length; i++) {
             var key = list[i];
+            if (this.__nosave[key]) {
+                continue;
+            }
             var member = val[key];
             if (member instanceof Value) {
                 if (member instanceof ObjectValue) {
@@ -1274,6 +1702,10 @@ class ObjectValue extends Value {
         }
     }
 
+    get membersKey() {
+        return Object.keys(this.__value);
+    }
+
     dispose() {
         var val = this.__value;
         var list = Object.keys(val);
@@ -1297,18 +1729,18 @@ class StringValue extends Value {
 
     constructor(init = "", enumList = null) {
         super();
-        this.__old = this.__value = "" + init;
+        this.__old = this.__value = "" + (init == null ? "" : init);
         this.__enumList = enumList;
     }
 
     $setValue(val) {
-        val = "" + val;
+        val = "" + (val == null ? "" : val);
         if (val == this.__value) {
             return;
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $setEnumList(val) {
@@ -1335,14 +1767,15 @@ black.StringValue = StringValue;
 //////////////////////////File:extension/black/data/member/UIntValue.js///////////////////////////
 class UIntValue extends Value {
 
-    constructor(init = 0, enumList = null) {
-        super();
+    constructor(init = 0, enumList = null, checkDistort = null) {
+        super(checkDistort);
         init = +init & ~0 || 0;
         if (init < 0) {
             init = 0;
         }
         this.__enumList = enumList;
         this.__old = this.__value = init;
+        this.__valueCheck = [48];
     }
 
     $setValue(val) {
@@ -1355,7 +1788,29 @@ class UIntValue extends Value {
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        if (this.__checkDistort) {
+            var str = val + "";
+            this.__valueCheck.length = 0;
+            for (var i = 0; i < str.length; i++) {
+                this.__valueCheck.push(str.charCodeAt(i));
+            }
+        }
+        this.dispatchWith(flower.Event.CHANGE, this, val);
+    }
+
+    $getValue() {
+        if (this.__checkDistort) {
+            var str = this.__value + "";
+            var compare = "";
+            for (var i = 0; i < this.__valueCheck.length; i++) {
+                compare += String.fromCharCode(this.__valueCheck[i]);
+            }
+            if (str != compare) {
+                this.dispatchWith(flower.Event.DISTORT, this);
+                this.__value = parseFloat(compare);
+            }
+        }
+        return this.__value;
     }
 
     $setEnumList(val) {
@@ -1390,12 +1845,14 @@ locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}"
 locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
 locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
 locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
+locale_strings[3008] = "语法分析错误，源代码:\n{0}\n错误信息 :{1}";
 locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
 locale_strings[3011] = "数据结构类定义解析出错 : {0}\n{1}";
 locale_strings[3012] = "没有定义的数据结构 : {0}";
 locale_strings[3013] = "没有找到要集成的数据结构类 :{0} ，数据结构定义为:\n{1}";
 locale_strings[3014] = "无法设置属性值，该对象没有此属性 : {0}";
 locale_strings[3015] = "对象不能设置为空";
+locale_strings[3016] = "无权访问模块数据，moduleKey 错误: {0}";
 locale_strings[3100] = "没有定义的数据类型 : {0}";
 locale_strings[3101] = "超出索引范围 : {0}，当前索引范围 0 ~ {1}";
 locale_strings[3102] = "还没有设定数据源 dataProvider";
@@ -1406,15 +1863,24 @@ locale_strings[3201] = "没有找到对应的类 : {0}";
 
 //////////////////////////File:extension/black/data/DataManager.js///////////////////////////
 class DataManager {
+
     _defines = {};
     _root = {};
+    staticScript;
+    scriptContent;
 
     constructor() {
         if (DataManager.instance) {
             return;
         }
         DataManager.instance = this;
-
+        this.addDefine({
+            "name": "Attribute",
+            "members": {
+                "name": {"type": "string"},
+                "content": {"type": "string"}
+            }
+        });
         this.addDefine({
             "name": "Size",
             "members": {
@@ -1427,6 +1893,23 @@ class DataManager {
             "members": {
                 "x": {"type": "int"},
                 "y": {"type": "int"}
+            }
+        });
+        this.addDefine({
+            "name": "RGB",
+            "members": {
+                "r": {"type": "uint"},
+                "g": {"type": "uint"},
+                "b": {"type": "uint"}
+            }
+        });
+        this.addDefine({
+            "name": "ARGB",
+            "members": {
+                "a": {"type": "uint"},
+                "r": {"type": "uint"},
+                "g": {"type": "uint"},
+                "b": {"type": "uint"}
             }
         });
         this.addDefine({
@@ -1463,7 +1946,7 @@ class DataManager {
     }
 
     addRootData(name, className, init = null) {
-        this[name] = this.createData(className, className);
+        this[name] = this.createData(className, init);
         return this._root[name] = this[name];
     }
 
@@ -1475,6 +1958,7 @@ class DataManager {
         }
         if (!this._defines[className]) {
             this._defines[className] = {
+                //moduleKey: moduleKey,
                 id: 0,
                 className: "",
                 define: null
@@ -1488,12 +1972,27 @@ class DataManager {
         var extendClassName = "ObjectValue";
         if (config.extends) {
             var extendsItem = this.getClass(config.extends);
+            if (extendsItem) {
+                extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
+            } else {
+                var extendPakcages = config.extends.split(".");
+                extendsItem = $root;
+                for (var i = 0; i < extendPakcages.length; i++) {
+                    extendsItem = extendsItem[extendPakcages[i]];
+                }
+                if (extendsItem) {
+                    extendClassName = config.extends;
+                }
+            }
             if (!extendsItem) {
                 sys.$error(3013, config.extends, flower.ObjectDo.toString(config));
                 return;
             }
-            extendClassName = "DataManager.getInstance().getClass(\"" + config.extends + "\")";
         }
+        this.staticScript = "";
+        this.scriptContent = config.script;
+        var script = {content: "", ctor: ""};
+        this.decodeScript("\n\n", defineClass, script);
         var content = "var " + defineClass + " = (function (_super) {\n" +
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "(init) {\n" +
@@ -1502,36 +2001,54 @@ class DataManager {
         var defineMember = "";
         var members = config.members;
         var bindContent = "";
+        var subContent = "";
         if (members) {
             var member;
             for (var key in members) {
                 member = members[key];
                 if (member.init && typeof member.init == "object" && member.init.__className) {
-                    content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? member.init : "null") + "));\n";
-                    content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                    content += "\t\tthis.$setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
+                    content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                 } else {
                     if (member.type === "number" || member.type === "Number") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "int" || member.type === "Int") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "uint" || member.type === "Uint") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "string" || member.type === "String") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "array" || member.type === "Array") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? member.init : "null") + ",\"" + member.typeValue + "\"));\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? JSON.stringify(member.init) : "null") + ",\"" + member.typeValue + "\"));\n";
                     } else if (member.type === "*") {
-                        content += "\t\tthis.setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
-                        content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                        content += "\t\tthis.$setMember(\"" + key + "\" , " + (member.init != null ? member.init : "null") + ");\n";
+                        content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     } else {
-                        content += "\t\tthis.setMember(\"" + key + "\" , DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? member.init : "null") + "));\n";
-                        content += "\t\tthis.setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
+                        if (member.hasOwnProperty("init") && member.init == null) {
+                            content += "\t\tthis.$setMember(\"" + key + "\" , null);\n";
+                        } else {
+                            content += "\t\tthis.$setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.type + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "));\n";
+                        }
+                        content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                     }
+                }
+                if (member.save === true || member.save === false) {
+                    content += "\t\tthis.$setMemberSaveFlag(\"" + key + "\" ," + member.save + ");\n";
                 }
                 if (member.bind) {
                     bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
+                }
+                if (member.sub) {
+                    subContent += "\t\tthis." + member.sub.source + ".linkSubArrayValue(this." + key + ",";
+                    if (typeof member.sub.type == "string") {
+                        subContent += "\"" + member.sub.type + "\"," + (typeof member.sub.value == "string" ? "\"" + member.sub.value + "\"" : member.sub.value) + ");\n";
+                    } else {
+                        for (var s = 0; s < member.sub.type.length; s++) {
+                            subContent += "\"" + member.sub.type[s] + "\"," + (typeof member.sub.value[s] == "string" ? "\"" + member.sub.value[s] + "\"" : member.sub.value[s]) + (s < member.sub.type.length - 1 ? "," : ");\n");
+                        }
+                    }
                 }
                 defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
                 defineMember += "\t\tget: function () {\n";
@@ -1545,9 +2062,15 @@ class DataManager {
                 defineMember += "\t});\n\n";
             }
         }
+        if (config.init) {
+            content += "\t\tthis.value = " + JSON.stringify(config.init) + ";\n";
+        }
         content += "\t\tif(init) this.value = init;\n";
         content += bindContent;
-        content += "\t}\n\n" +
+        content += subContent;
+        content += script.ctor;
+        content += "\t}\n\n" + "var p = " + defineClass + ".prototype;" + "\n\n" +
+            script.content + "\n" +
             defineMember +
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
@@ -1572,7 +2095,7 @@ class DataManager {
                 sys.$error(3011, e, content);
             }
         } else {
-            eval(className);
+            eval(content);
         }
         item.id++;
         return this.getClass(config.name);
@@ -1588,16 +2111,19 @@ class DataManager {
         if (!item) {
             return null;
         }
+        //if (item.moduleKey != moduleKey) {
+        //    sys.$error(3016, moduleKey);
+        //}
         return item.define;
     }
 
-    createData(className, init = null) {
+    createData(className, init = null, distort = null) {
         if (className === "number" || className === "Number") {
-            return new NumberValue(init);
+            return new NumberValue(init, null, distort);
         } else if (className === "int" || className === "Int") {
-            return new IntValue(init);
+            return new IntValue(init, null, distort);
         } else if (className === "uint" || className === "Uint") {
-            return new UIntValue(init);
+            return new UIntValue(init, null, distort);
         } else if (className === "string" || className === "String") {
             return new StringValue(init);
         } else if (className === "boolean" || className === "Boolean" || className === "bool") {
@@ -1612,8 +2138,217 @@ class DataManager {
                 sys.$error(3012, className);
                 return;
             }
+            //if (item.moduleKey != moduleKey) {
+            //    sys.$error(3016, moduleKey);
+            //}
             return new item.define(init);
         }
+    }
+
+    decodeScript(before, className, script) {
+        if (this.scriptContent && this.scriptContent != "") {
+            var scriptContent = this.scriptContent;
+            //删除注释
+            scriptContent = flower.StringDo.deleteProgramNote(scriptContent, 0);
+            var i = 0;
+            var len = scriptContent.length;
+            var pos = 0;
+            var list = [];
+            this.staticScript = "";
+            while (true) {
+                var nextFunction = this.findNextFunction(scriptContent, pos);
+                if (nextFunction) {
+                    this.staticScript += nextFunction.staticScript;
+                    pos = nextFunction.endIndex;
+                    list.push(nextFunction);
+                } else {
+                    break;
+                }
+            }
+            for (var i = 0; i < list.length; i++) {
+                var func = list[i];
+                if (func.name == "constructor") {
+                    script.ctor = before + func.content + "\n";
+                } else if (func.gset == 0) {
+                    script.content += before + "\t" + className + (func.isStatic ? "." : ".prototype.") + func.name + " = function(" +
+                        func.params + ") " + func.content + "\n";
+                } else {
+                    var setContent = func.gset == 1 ? "" : func.content;
+                    var getContent = func.gset == 1 ? func.content : "";
+                    var prams = func.gset == 1 ? "" : func.params;
+                    for (var f = 0; f < list.length; f++) {
+                        if (f != i && list[f].name == func.name && list[f].gset && list[f].gset != func.gset) {
+                            if (list[f].gset == 1) {
+                                getContent = list[f].content;
+                            } else {
+                                setContent = list[f].content;
+                                prams = list[f].params;
+                            }
+                            list.splice(f, 1);
+                            break;
+                        }
+                    }
+                    script.content += before + "\tObject.defineProperty(" + className + ".prototype, \"" + func.name + "\", {\n";
+                    if (getContent != "") {
+                        script.content += before + "\t\tget: function () " + getContent + ",\n";
+                    }
+                    if (setContent != "") {
+                        script.content += before + "\t\tset: function (" + prams + ") " + setContent + ",\n";
+                    }
+                    script.content += before + "\t\tenumerable: true,\n"
+                    script.content += before + "\t\tconfigurable: true\n";
+                    script.content += before + "\t\t});\n\n";
+                }
+            }
+        }
+    }
+
+    /**
+     * 查找下一个函数，并分析出 函数名和参数列表
+     * @param content
+     * @param start
+     * @return {
+     *      name : 函数名
+     *      gset : 0.普通函数 1.get函数 2.set函数
+     *      params : 参数列表 (也是字符串，直接用就可以)
+     *      content : 函数体
+     *      endIndex : 函数体结束标识 } 之后的那个位置
+     * }
+     */
+    findNextFunction(content, start) {
+        var len = "function".length;
+        var flag;
+        var name;
+        var params;
+        var char;
+        var pos, pos2, i;
+        var res;
+        var gset = 0;
+        var funcName;
+        var isStatic = false;
+        //跳过空格和注释
+        i = flower.StringDo.jumpProgramSpace(content, start);
+        if (i == content.length) {
+            return null;
+        }
+        var j = i;
+        while (j < content.length) {
+            if (content.slice(j, j + "static".length) == "static" || content.slice(j, j + len) == "function") {
+                break;
+            }
+            j++;
+        }
+        if (j == content.length) {
+            this.staticScript += content.slice(i, j);
+            return null;
+        }
+        var staticScript = content.slice(i, j);
+        i = j;
+        if (content.slice(i, i + "static".length) == "static") {
+            isStatic = true;
+            i += "static".length;
+            //跳过空格和注释
+            i = flower.StringDo.jumpProgramSpace(content, i);
+        }
+        if (content.slice(i, i + len) == "function") {
+            if (i != 0) {
+                //判断 function 之前是不是分隔符
+                char = content.charAt(i - 1);
+                if (char != "\t" && char != " " && char != "\r" && char != "\n") {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+            }
+            i = pos = i + len;
+            //跳过 function 之后的分隔符
+            pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+            if (pos2 == pos) {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            pos = pos2;
+            //获取 function 之后的函数名
+            name = flower.StringDo.findId(content, pos);
+            if (name == "") {
+                i = pos;
+                sys.$error(3007, "", this.scriptContent);
+            }
+            if (name == "get" || name == "set") {
+                pos += name.length;
+                gset = name == "get" ? 1 : 2;
+                //跳过 function 之后的分隔符
+                pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+                if (pos2 == pos) {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+                pos = pos2;
+                //获取 function 之后的函数名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    i = pos;
+                    sys.$error(3007, "", this.scriptContent);
+                }
+            }
+            funcName = name;
+            //跳过函数名之后的分隔符
+            i = pos = flower.StringDo.jumpProgramSpace(content, pos + name.length);
+            //判断函数名之后是不是(
+            char = content.charAt(pos);
+            if (char != "(") {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            //跳过 (
+            pos++;
+            //查找 params
+            params = "";
+            flag = true;
+            while (true) {
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                //查找 param 名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    if (content.charAt(pos) == ")") {
+                        i = pos + 1;
+                        break;
+                    } else {
+                        flag = false;
+                        break;
+                    }
+                } else {
+                    params += name;
+                    pos += name.length;
+                }
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                char = content.charAt(pos);
+                if (char == ",") {
+                    params += ",";
+                    pos++;
+                }
+            }
+            if (!flag) {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            res = {
+                name: funcName,
+                gset: gset,
+                params: params,
+            }
+        }
+        if (!res) {
+            sys.$error(3007, "", this.scriptContent);
+        }
+
+        //分析函数体
+        //跳过空格
+        var content = flower.StringDo.findFunctionContent(content, i);
+        if (content == "") {
+            sys.$error(3007, "", this.scriptContent);
+        }
+        res.staticScript = staticScript || "";
+        res.content = content;
+        res.endIndex = i + content.length + 1;
+        res.isStatic = isStatic;
+        return res;
     }
 
     clear() {
@@ -1730,7 +2465,7 @@ class Layout {
         this.flag = true;
     }
 
-    updateList(width, height, startIndex = 0) {
+    updateList(width, height, startIndex = 0, elementWidth = 0, elementHeight = 0) {
     }
 
     $clear() {
@@ -1743,7 +2478,7 @@ class Layout {
     }
 
     set fixElementSize(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         this._fixElementSize = !!val;
@@ -1831,7 +2566,7 @@ class LinearLayout extends Layout {
         return size;
     }
 
-    updateList(width, height, startIndex = 0) {
+    updateList(width, height, startIndex = 0, elementWidth = 0, elementHeight = 0) {
         //flower.trace("update layout",flower.EnterFrame.frame);
         if (!this.flag) {
             return;
@@ -1846,11 +2581,13 @@ class LinearLayout extends Layout {
         var i;
         if (this._align == flower.Layout.VerticalAlign) {
             if (this._fixElementSize) {
-                var eh = list[0].height;
-                for (i = 0; i < len; i++) {
-                    list[i].y = (i + startIndex) * (eh + this._gap);
+                if (list.length) {
+                    elementHeight = elementHeight || list[0].height;
                 }
-                this._maxY = (len + startIndex) * (eh + this._gap);
+                for (i = 0; i < len; i++) {
+                    list[i].y = (i + startIndex) * (elementHeight + this._gap);
+                }
+                this._maxY = (len + startIndex) * (elementHeight + this._gap);
             }
             else {
                 var y = 0;
@@ -1863,11 +2600,13 @@ class LinearLayout extends Layout {
         }
         if (this._align == flower.Layout.HorizontalAlign) {
             if (this._fixElementSize) {
-                var ew = list[0].width;
-                for (i = 0; i < len; i++) {
-                    list[i].x = (i + startIndex) * (ew + this._gap);
+                if (list.length) {
+                    elementWidth = elementWidth || list[0].height;
                 }
-                this._maxX = (len + startIndex) * (ew + this._gap);
+                for (i = 0; i < len; i++) {
+                    list[i].x = (i + startIndex) * (elementWidth + this._gap);
+                }
+                this._maxX = (len + startIndex) * (elementWidth + this._gap);
             }
             else {
                 var x = 0;
@@ -1931,6 +2670,31 @@ black.VerticalLayout = VerticalLayout;
 
 
 
+//////////////////////////File:extension/black/utils/Language.js///////////////////////////
+/**
+ * 简单的多语言管理
+ */
+class Language {
+
+    static __languages = {};
+
+    static register(key, language, value) {
+        if (!Language.__languages[language]) {
+            Language.__languages[language] = {};
+        }
+        Language.__languages[language][key] = value;
+    }
+
+    static getLanguage(key, language) {
+        return Language.__languages[language][key];
+    }
+}
+
+black.Language = Language;
+//////////////////////////End File:extension/black/utils/Language.js///////////////////////////
+
+
+
 //////////////////////////File:extension/black/utils/PanelScaleMode.js///////////////////////////
 class PanelScaleMode {
     static NO_SCALE = "no_scale";
@@ -1945,6 +2709,18 @@ black.PanelScaleMode = PanelScaleMode;
 
 
 
+//////////////////////////File:extension/black/utils/ScrollPolicy.js///////////////////////////
+class ScrollPolicy {
+    static ON = "on";
+    static OFF = "off";
+    static AUTO = "auto";
+}
+
+black.ScrollPolicy = ScrollPolicy;
+//////////////////////////End File:extension/black/utils/ScrollPolicy.js///////////////////////////
+
+
+
 //////////////////////////File:extension/black/Group.js///////////////////////////
 class Group extends flower.Sprite {
 
@@ -1955,6 +2731,14 @@ class Group extends flower.Sprite {
         super();
         if (data != null) {
             this._data = data;
+        }
+        this.$IViewPort = {
+            0: 0,    //contentStartX
+            1: 0,    //contentStartY
+            2: 0,    //contentEndX
+            3: 0,    //contentEndY
+            4: null, //scrollH
+            5: null, //scrollV
         }
         this.$initUIComponent();
     }
@@ -2016,10 +2800,10 @@ class Group extends flower.Sprite {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -2039,16 +2823,20 @@ class Group extends flower.Sprite {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
             }
         }
         this.$validateChildrenUIComponent();
+        this.$IViewPort[0] = this.$childrenBounds.x;
+        this.$IViewPort[1] = this.$childrenBounds.y;
+        this.$IViewPort[2] = this.$childrenBounds.x + this.$childrenBounds.width;
+        this.$IViewPort[3] = this.$childrenBounds.y + this.$childrenBounds.height;
     }
 
     $validateChildrenUIComponent() {
@@ -2057,7 +2845,7 @@ class Group extends flower.Sprite {
             var child;
             for (var i = 0, len = children.length; i < len; i++) {
                 child = children[i];
-                if (child.__UIComponent) {
+                if (child.__UIComponent && child.$UIComponent[15]) {
                     child.$validateUIComponent();
                 }
             }
@@ -2077,26 +2865,163 @@ class Group extends flower.Sprite {
             var count = 6;
             while (count && this.$hasFlags(0x1000)) {
                 this.$validateUIComponent();
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
                 flag = true;
                 count--;
             }
             if (!flag) {
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
             }
             while (count && this.$hasFlags(0x1000)) {
                 this.$validateUIComponent();
-                super.$onFrameEnd();
+                //super.$onFrameEnd();
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+
                 this.$resetLayout();
                 flag = true;
                 count--;
             }
         } else {
-            super.$onFrameEnd();
+            //super.$onFrameEnd();
+            var children = this.__children;
+            /**
+             * 子对象序列改变
+             */
+            if (this.$hasFlags(0x0100)) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                this.$nativeShow.resetChildIndex(children);
+                this.$removeFlags(0x0100);
+            }
+            for (var i = 0, len = children.length; i < len; i++) {
+                if (children[i].visible) {
+                    children[i].$onFrameEnd();
+                }
+            }
+            //super.$onFrameEnd();
+            var p = this.$DisplayObject;
+            if (this.$hasFlags(0x0002)) {
+                this.$nativeShow.setAlpha(this.$getConcatAlpha());
+            }
             this.$resetLayout();
         }
+        flower.DebugInfo.frameInfo.display++;
+        flower.DebugInfo.frameInfo.sprite++;
+    }
+
+    $getContentWidth() {
+        return this.$IViewPort[2] - this.$IViewPort[0];
+    }
+
+    $getContentHeight() {
+        return this.$IViewPort[3] - this.$IViewPort[1];
+    }
+
+    get contentWidth() {
+        return this.$getContentWidth();
+    }
+
+    get contentHeight() {
+        return this.$getContentHeight();
+    }
+
+    get scrollH() {
+        return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+    }
+
+    set scrollH(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[4] == val) {
+            return;
+        }
+        this.$IViewPort[4] = val;
+    }
+
+    get scrollV() {
+        return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+    }
+
+    set scrollV(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[5] == val) {
+            return;
+        }
+        this.$IViewPort[5] = val;
     }
 
     dispose() {
@@ -2131,7 +3056,7 @@ class UIParser extends Group {
             "Shape": "flower.Shape",
             "Mask": "flower.Mask",
 
-            "ArrayValue": "ArrayValue",
+            "ArrayValue": "flower.ArrayValue",
             "BooleanValue": "flower.BooleanValue",
             "IntValue": "flower.IntValue",
             "NumberValue": "flower.NumberValue",
@@ -2143,6 +3068,9 @@ class UIParser extends Group {
             "Input": "flower.Input",
             "Image": "flower.Image",
             "Group": "flower.Group",
+            "ScrollBar": "flower.ScrollBar",
+            "HScrollBar": "flower.HScrollBar",
+            "VScrollBar": "flower.VScrollBar",
             "Button": "flower.Button",
             "Rect": "flower.Rect",
             "MaskUI": "flower.MaskUI",
@@ -2166,8 +3094,8 @@ class UIParser extends Group {
             "HorizontalLayout": "flower.HorizontalLayout",
             "VerticalLayout": "flower.VerticalLayout",
 
-            "Direction": "flower.Direction",
-            "File": "flower.File"
+            "RemoteDirection": "flower.RemoteDirection",
+            "RemoteFile": "flower.RemoteFile"
         },
         local: {},
         localContent: {},
@@ -2176,11 +3104,13 @@ class UIParser extends Group {
             "Array": "push",
             "ArrayValue": "push"
         },
+        uiModule: {},
         namespaces: {},
         defaultClassNames: {},
         packages: {
             "local": ""
-        }
+        },
+        beforeScripts: {}
     };
 
     _className;
@@ -2198,7 +3128,8 @@ class UIParser extends Group {
     scriptContent;
     staticScript;
     loadURL;
-    localNameSpace = "local";
+    moduleName = "local";
+    namespaces = {};
 
     constructor(beforeScript = "") {
         super();
@@ -2208,8 +3139,11 @@ class UIParser extends Group {
     }
 
     parseUIAsync(url, data = null) {
-        if (this.classes.namespaces[url]) {
-            this.localNameSpace = this.classes.namespaces[url];
+        if (this.classes.uiModule[url]) {
+            this.moduleName = this.classes.uiModule[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.moduleName]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.moduleName];
+            }
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2224,8 +3158,11 @@ class UIParser extends Group {
     }
 
     parseAsync(url) {
-        if (this.classes.namespaces[url]) {
-            this.localNameSpace = this.classes.namespaces[url];
+        if (this.classes.uiModule[url]) {
+            this.moduleName = this.classes.uiModule[url];
+            if (this._beforeScript == "" && flower.UIParser.classes.beforeScripts[this.moduleName]) {
+                this._beforeScript = flower.UIParser.classes.beforeScripts[this.moduleName];
+            }
         }
         if (this.classes.defaultClassNames[url]) {
             this.defaultClassName = this.classes.defaultClassNames[url];
@@ -2240,7 +3177,7 @@ class UIParser extends Group {
 
     loadContentError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
+            this.dispatchWith(flower.Event.ERROR, sys.getLanguage(3001, e.currentTarget.url));
         } else {
             sys.$error(3001, e.currentTarget.url);
         }
@@ -2249,6 +3186,19 @@ class UIParser extends Group {
     loadContentComplete(e) {
         this.relationUI = [];
         var xml = flower.XMLElement.parse(e.data);
+        for (var i = 0; i < xml.namespaces.length; i++) {
+            if (xml.namespaces[i].name == "f") {
+                continue;
+            }
+            var moduleURL = xml.namespaces[i].value;
+            if (moduleURL.slice(0, 2) == "./") {
+                moduleURL = flower.Path.joinPath(this.loadURL, moduleURL);
+            }
+            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
+            if (!this.namespaces[xml.namespaces[i].name]) {
+                sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
+            }
+        }
         this.loadContent = xml;
         var list = xml.getAllElements();
         var scriptURL = "";
@@ -2257,6 +3207,7 @@ class UIParser extends Group {
             var nameSpace = name.split(":")[0];
             name = name.split(":")[1];
             if (nameSpace != "f") {
+                nameSpace = this.namespaces[nameSpace];
                 if (!this.classes[nameSpace][name] && !this.classes[nameSpace + "Content"][name]) {
                     if (!this.classes[nameSpace + "URL"][name]) {
                         sys.$error(3002, name);
@@ -2320,24 +3271,24 @@ class UIParser extends Group {
         if (this.relationIndex >= this.relationUI.length) {
             if (this.parseUIAsyncFlag) {
                 var ui = this.parseUI(this.loadContent, this.loadData);
-                this.dispatchWidth(flower.Event.COMPLETE, ui);
+                this.dispatchWith(flower.Event.COMPLETE, ui);
             } else {
                 var data = this.parse(this.loadContent);
-                this.dispatchWidth(flower.Event.COMPLETE, data);
+                this.dispatchWith(flower.Event.COMPLETE, data);
             }
         } else {
             var parser = new UIParser();
             parser.defaultClassName = this.relationUI[this.relationIndex].name;
-            parser.localNameSpace = this.relationUI[this.relationIndex].namesapce;
+            parser.moduleName = this.relationUI[this.relationIndex].namesapce;
             parser.parseAsync(this.relationUI[this.relationIndex].url);
             parser.addListener(flower.Event.COMPLETE, this.loadNextRelationUI, this);
-            parser.addListener(flower.ERROR, this.relationLoadError, this);
+            parser.addListener(flower.Event.ERROR, this.relationLoadError, this);
         }
     }
 
     relationLoadError(e) {
         if (this.hasListener(flower.Event.ERROR)) {
-            this.dispatchWidth(flower.Event.ERROR, e.data);
+            this.dispatchWith(flower.Event.ERROR, e.data);
         } else {
             $error(e.data);
         }
@@ -2346,7 +3297,7 @@ class UIParser extends Group {
     parseUI(content, data = null) {
         this.parse(content);
         var className = this._className;
-        var namesapce = this.localNameSpace;
+        var namesapce = this.moduleName;
         var UIClass = this.classes[namesapce][className];
         var ui;
         if (data) {
@@ -2372,6 +3323,22 @@ class UIParser extends Group {
         if (xml.getNameSapce("f") == null || xml.getNameSapce("f").value != "flower") {
             sys.$error(3006, content);
             return null;
+        }
+        for (var i = 0; i < xml.namespaces.length; i++) {
+            if (xml.namespaces[i].name == "f") {
+                continue;
+            }
+            var moduleURL = xml.namespaces[i].value;
+            if (moduleURL.slice(0, 2) == "./") {
+                if (!this.loadURL || !moduleURL) {
+                    flower.breakPoint();
+                }
+                moduleURL = flower.Path.joinPath(this.loadURL, moduleURL);
+            }
+            this.namespaces[xml.namespaces[i].name] = this.classes.namespaces[moduleURL];
+            if (!this.namespaces[xml.namespaces[i].name]) {
+                sys.$error(3004, xml.namespaces[i].name, xml.namespaces[i].value);
+            }
         }
         this.rootXML = xml;
         var classInfo = this.decodeRootComponent(xml, content);
@@ -2408,6 +3375,7 @@ class UIParser extends Group {
         var allClassName = "";
         var packages = [];
         if (uinameNS != "f") {
+            uinameNS = this.namespaces[uinameNS];
             extendClass = uiname;
         } else {
             extendClass = this.classes[uinameNS][uiname];
@@ -2469,7 +3437,7 @@ class UIParser extends Group {
         }
         content += before + "\t\tif(data) this.data = data;\n";
         content += before + "\t\tthis." + className + "_setBindProperty" + "();\n";
-        content += before + "\t\tif(this.dispatchWidth) this.dispatchWidth(flower.UIEvent.CREATION_COMPLETE);\n";
+        content += before + "\t\tif(this.dispatchWith) this.dispatchWith(flower.Event.CREATION_COMPLETE);\n";
         content += before + "\t}\n\n";
         content += propertyList[propertyList.length - 1];
         for (var i = 0; i < propertyList.length - 1; i++) {
@@ -2500,9 +3468,9 @@ class UIParser extends Group {
             }
         }
         content += classEnd;
-        content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.localNameSpace + "\");\n";
+        content += "\n\nUIParser.registerLocalUIClass(\"" + allClassName + "\", " + changeAllClassName + ",\"" + this.moduleName + "\");\n";
         var pkg = "";
-        var pkgs = flower.UIParser.classes.packages[this.localNameSpace] || [];
+        var pkgs = flower.UIParser.classes.packages[this.moduleName] || [];
         pkgs = pkgs.concat(packages);
         for (var i = 0; i < pkgs.length; i++) {
             pkg = pkgs[i];
@@ -2522,7 +3490,7 @@ class UIParser extends Group {
         } else {
             eval(content);
         }
-        flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.localNameSpace);
+        flower.UIParser.setLocalUIClassContent(allClassName, classContent, this.moduleName);
         return {
             "namesapce": uinameNS,
             "className": allClassName,
@@ -2791,17 +3759,15 @@ class UIParser extends Group {
                 //if (createClassNameSpace != "f") {
                 //    createClassName = this.classes[createClassNameSpace][createClassName];
                 //}
-                //if (!createClassName.split) {
-                //    console.log("???");
-                //}
                 thisObj = createClassName.split(".")[createClassName.split(".").length - 1];
                 thisObj = thisObj.toLocaleLowerCase();
                 if (createClassNameSpace != "f") {
-                    setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + createClassNameSpace + "\"))();\n";
+                    setObject += before + "\tvar " + thisObj + " = new (flower.UIParser.getLocalUIClass(\"" + createClassName + "\",\"" + this.namespaces[createClassNameSpace] + "\"))();\n";
                 } else {
                     setObject += before + "\tvar " + thisObj + " = new " + this.classes.f[createClassName] + "();\n";
                 }
                 setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".eventThis = this;\n";
+                setObject += before + "\tif(" + thisObj + ".__UIComponent) " + thisObj + ".$filePath = \"" + this.loadURL + "\";\n";
             }
         }
         var idAtr = xml.getAttribute("id");
@@ -2821,6 +3787,11 @@ class UIParser extends Group {
                 setObject += before + "\t" + thisObj + ".setStatePropertyValue(\"" + atrName + "\", \"" + atrState + "\", \"" + atrValue + "\", [this]);\n";
             } else if (atrArray.length == 1) {
                 if (atrValue.indexOf("{") >= 0 && atrValue.indexOf("}") >= 0) {
+                    //if (atrValue.indexOf("$moduleKey$") >= 0) {
+                    //
+                    //} else {
+                    //
+                    //}
                     setObject += before + "\tif(" + thisObj + ".__UIComponent) ";
                     setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
                     setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
@@ -2847,6 +3818,7 @@ class UIParser extends Group {
                     if (!namespaces[childNameNS]) {
                         sys.$warn(3004, childNameNS, this.parseContent);
                     }
+                    childNameNS = this.namespaces[childNameNS];
                     if (this.classes[childNameNS][childName]) {
                         childClass = childName;
                     } else {
@@ -2879,8 +3851,10 @@ class UIParser extends Group {
                         for (var n = 0; n < this.rootXML.namespaces.length; n++) {
                             item.addNameSpace(this.rootXML.namespaces[n]);
                         }
-                        var itemRenderer = (new UIParser());
-                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.localNameSpace + "\");\n";
+                        var itemRenderer = new UIParser();
+                        itemRenderer.loadURL = this.loadURL;
+                        itemRenderer.namespaces = this.namespaces;
+                        setObject += before + "\t" + thisObj + "." + childName + " = flower.UIParser.getLocalUIClass(\"" + itemRenderer.parse(item) + "\",\"" + itemRenderer.moduleName + "\");\n";
                     } else {
                         funcName = className + "_get" + itemClassName;
                         setObject += before + "\t" + thisObj + "." + childName + " = this." + funcName + "(" + thisObj + ");\n";
@@ -2927,44 +3901,258 @@ class UIParser extends Group {
         return true;
     }
 
-    static registerLocalUIClass(name, cls, namespace = "local") {
-        flower.UIParser.classes[namespace][name] = cls;
+    static registerLocalUIClass(name, cls, moduleName = "local") {
+        flower.UIParser.classes[moduleName][name] = cls;
     }
 
-    static setLocalUIClassContent(name, content, namespace = "local") {
-        flower.UIParser.classes[namespace + "Content"][name] = content;
+    static setLocalUIClassContent(name, content, moduleName = "local") {
+        flower.UIParser.classes[moduleName + "Content"][name] = content;
     }
 
-    static getLocalUIClassContent(name, namespace = "local") {
-        return flower.UIParser.classes[namespace + "Content"] ? flower.UIParser.classes[namespace + "Content"][name] : null;
+    static getLocalUIClassContent(name, moduleName = "local") {
+        return flower.UIParser.classes[moduleName + "Content"] ? flower.UIParser.classes[moduleName + "Content"][name] : null;
     }
 
-    static getLocalUIClass(name, namespace = "local") {
-        return this.classes[namespace] ? this.classes[namespace][name] : null;
+    static getLocalUIClass(name, moduleName = "local") {
+        return this.classes[moduleName] ? this.classes[moduleName][name] : null;
     }
 
-    static setLocalUIURL(name, url, namespace = "local") {
-        this.classes[namespace + "URL"][name] = url;
-        this.classes.namespaces[url] = namespace;
+    static setLocalUIURL(name, url, moduleName = "local") {
+        this.classes[moduleName + "URL"][name] = url;
+        this.classes.uiModule[url] = moduleName;
         this.classes.defaultClassNames[url] = name;
     }
 
-    static addNameSapce(name, packageURL = "") {
-        if (!flower.UIParser.classes[name]) {
+    static addModule(moduleName, url) {
+        var packageURL = moduleName;
+        if (!flower.UIParser.classes[moduleName]) {
             var pkgs = packageURL.split(".");
             if (pkgs[0] == "") {
                 pkgs = [];
             }
-            flower.UIParser.classes.packages[name] = pkgs;
-            flower.UIParser.classes[name] = {};
-            flower.UIParser.classes[name + "Content"] = {};
-            flower.UIParser.classes[name + "URL"] = {};
+            flower.UIParser.classes.namespaces[url] = moduleName;
+            flower.UIParser.classes.packages[moduleName] = pkgs;
+            flower.UIParser.classes[moduleName] = {};
+            flower.UIParser.classes[moduleName + "Content"] = {};
+            flower.UIParser.classes[moduleName + "URL"] = {};
         }
+    }
+
+    static setModuleBeforeScript(moduleName, beforeScript) {
+        flower.UIParser.classes.beforeScripts[moduleName] = beforeScript;
     }
 }
 
 black.UIParser = UIParser;
 //////////////////////////End File:extension/black/UIParser.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/ScrollBar.js///////////////////////////
+class ScrollBar extends Group {
+
+    constructor() {
+        super();
+        this.$ScrollerBar = {
+            0: null,  //viewport
+            1: true,  //autoVisibility
+            2: null,  //thumb
+            3: 0, //viewportX
+            4: 0, //viewportY
+            5: 0, //viewportScrollH
+            6: 0, //viewportScrollV
+            7: 0, //viewportContentWidth
+            8: 0,  //viewportContentHeight
+            9: 0, //viewportWidth
+            10: 0, //viewportHeight
+            20: null, //horizontal:true vertical:false
+            50: 0, //touchStartPosition
+            51: 0, //touchStartThumbPosition
+        };
+    }
+
+    $onFrameEnd() {
+        var p = this.$ScrollerBar;
+        if (p[0] && p[20] != null) {
+            var viewport = p[0];
+            if (p[20]) {
+                if ((p[3] != viewport.x || p[5] != viewport.scrollH || p[7] != viewport.contentWidth || p[9] != viewport.width)) {
+                    p[3] = viewport.x;
+                    p[5] = viewport.scrollH;
+                    p[7] = viewport.contentWidth;
+                    p[9] = viewport.width;
+                    if (p[2]) {
+                        if (p[7] < p[9]) {
+                            p[2].width = this.width;
+                            p[2].x = 0;
+                        } else {
+                            p[2].width = this.width * p[9] / p[7];
+                            var x = -(this.width - p[2].width) * (p[3] - p[5]) / (p[7] - p[9]);
+                            if (x < 0) {
+                                x = 0;
+                            }
+                            if (x + p[2].width > this.width) {
+                                x = this.width - p[2].width;
+                            }
+                            p[2].x = x;
+                        }
+                    }
+                }
+            }
+            if (!p[20]) {
+                if ((p[4] != viewport.y || p[6] != viewport.scrollH || p[8] != viewport.contentHeight || p[10] != viewport.height)) {
+                    p[4] = viewport.y;
+                    p[6] = viewport.scrollH;
+                    p[8] = viewport.contentHeight;
+                    p[10] = viewport.height;
+                    if (p[2]) {
+                        if (p[8] < p[10]) {
+                            p[2].height = this.height;
+                            p[2].y = 0;
+                        } else {
+                            p[2].height = this.height * p[10] / p[8];
+                            var y = -(this.height - p[2].height) * (p[4] - p[6]) / (p[8] - p[10]);
+                            if (y < 0) {
+                                y = 0;
+                            }
+                            if (y + p[2].height > this.height) {
+                                y = this.height - p[2].height;
+                            }
+                            p[2].y = y;
+                        }
+                    }
+                }
+            }
+        }
+        super.$onFrameEnd();
+    }
+
+    __onTouchThumb(e) {
+        var p = this.$ScrollerBar;
+        switch (e.type) {
+            case flower.TouchEvent.TOUCH_BEGIN:
+                if (p[20]) {
+                    p[50] = e.stageX;
+                    p[51] = p[2].x;
+                } else {
+                    p[50] = e.stageY;
+                    p[51] = p[2].y;
+                }
+                break;
+            case flower.TouchEvent.TOUCH_MOVE:
+                if (p[20]) {
+                    if (p[7] < p[9]) {
+                        return;
+                    }
+                    var x = p[51] - p[50] + e.stageX;
+                    if (x < 0) {
+                        x = 0;
+                    }
+                    if (x + p[2].width > this.width) {
+                        x = this.width - p[2].width;
+                    }
+                    //p[2].x = x;
+                    if (p[0]) {
+                        p[0].x = -x * (p[7] - p[9]) / (this.width - p[2].width) + p[5];
+                    }
+                } else {
+                    if (p[8] < p[10]) {
+                        return;
+                    }
+                    var y = p[51] - p[50] + e.stageY;
+                    if (y < 0) {
+                        y = 0;
+                    }
+                    if (y + p[2].height > this.height) {
+                        y = this.height - p[2].height;
+                    }
+                    //p[2].y = y;
+                    if (p[0]) {
+                        p[0].y = -y * (p[8] - p[10]) / (this.height - p[2].height) + p[6];
+                    }
+                }
+                break;
+        }
+    }
+
+    set viewport(val) {
+        var p = this.$ScrollerBar;
+        if (p[0] == val) {
+            return;
+        }
+        p[0] = val;
+    }
+
+    get viewport() {
+        return this.$ScrollerBar[0];
+    }
+
+    set thumb(val) {
+        var p = this.$ScrollerBar;
+        if (p[2] == val) {
+            return;
+        }
+        if (p[2]) {
+            p[2].removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+            p[2].removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
+        }
+        p[2] = val;
+        if (p[2]) {
+            if (p[2].parent != this) {
+                this.addChild(p[2]);
+            }
+            p[2].addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchThumb, this);
+            p[2].addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchThumb, this);
+        }
+    }
+
+    get thumb() {
+        return this.$ScrollerBar[2];
+    }
+
+    set autoVisibility(val) {
+        if (val == "false") {
+            val = false;
+        }
+        val = !!val;
+        this.$ScrollerBar[1] = val;
+    }
+
+    get autoVisibility() {
+        return this.$ScrollerBar[1];
+    }
+}
+
+black.ScrollBar = ScrollBar;
+//////////////////////////End File:extension/black/ScrollBar.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/VScrollBar.js///////////////////////////
+class VScrollBar extends ScrollBar {
+
+    constructor() {
+        super();
+        this.$ScrollerBar[20] = false;
+    }
+}
+
+black.VScrollBar = VScrollBar;
+//////////////////////////End File:extension/black/VScrollBar.js///////////////////////////
+
+
+
+//////////////////////////File:extension/black/HScrollBar.js///////////////////////////
+class HScrollBar extends ScrollBar {
+
+    constructor() {
+        super();
+        this.$ScrollerBar[20] = true;
+    }
+}
+
+black.HScrollBar = HScrollBar;
+//////////////////////////End File:extension/black/HScrollBar.js///////////////////////////
 
 
 
@@ -2982,8 +4170,8 @@ class DataGroup extends Group {
             3: null, //viewer
             4: 0,    //viewerWidth
             5: 0,    //viewerHeight
-            6: 0,    //contentWidth
-            7: 0,    //contentHeight
+            6: 0,    //elementWidth
+            7: 0,    //elementHeight
             8: null, //downItem
             9: null, //selectedItem
             10: false,//itemSelectedEnabled
@@ -3076,16 +4264,20 @@ class DataGroup extends Group {
                 }
             } else {
                 layout.$clear();
-                var elementWidth = 0;
-                var elementHeight = 0;
-                if (p[0].length) {
+                var elementWidth = p[6];
+                var elementHeight = p[7];
+                if (p[0].length && (!elementWidth || !elementHeight)) {
                     if (!items.length) {
                         item = this.createItem(list.getItemAt(0), 0);
                         item.data = list.getItemAt(0);
                         items.push(item);
                     }
-                    elementWidth = items[0].width;
-                    elementHeight = items[0].height;
+                    if (!elementWidth) {
+                        p[6] = elementWidth = items[0].width;
+                    }
+                    if (!elementHeight) {
+                        p[7] = elementHeight = items[0].height;
+                    }
                 }
                 var firstItemIndex = layout.getFirstItemIndex(elementWidth, elementHeight, -this.x, -this.y);
                 firstItemIndex = firstItemIndex < 0 ? 0 : firstItemIndex;
@@ -3110,7 +4302,7 @@ class DataGroup extends Group {
                     }
                     item.$setItemIndex(i);
                     newItems[i - firstItemIndex] = item;
-                    layout.updateList(p[4], p[5], firstItemIndex);
+                    layout.updateList(p[4], p[5], firstItemIndex, p[6], p[7]);
                     if (layout.isElementsOutSize(-this.x, -this.y, p[4], p[5])) {
                         break;
                     }
@@ -3142,18 +4334,26 @@ class DataGroup extends Group {
             if (layout) {
                 if (!p[3] || !layout.fixElementSize) {
                     var size = layout.getContentSize();
-                    p[6] = size.width;
-                    p[7] = size.height;
+                    p[52] = size.width;
+                    p[53] = size.height;
                     flower.Size.release(size);
                 }
                 else if (p[2].length) {
-                    var size = layout.measureSize(p[2][0].width, p[2][0].height, list.length);
-                    p[6] = size.width;
-                    p[7] = size.height;
+                    var size = layout.measureSize(p[6], p[7], list.length);
+                    p[52] = size.width;
+                    p[53] = size.height;
                     flower.Size.release(size);
                 }
             }
         }
+    }
+
+    $validateUIComponent(parent) {
+        super.$validateUIComponent(parent);
+        this.$IViewPort[0] = 0;
+        this.$IViewPort[1] = 0;
+        this.$IViewPort[2] = this.$DataGroup[52];
+        this.$IViewPort[3] = this.$DataGroup[53];
     }
 
     createItem(data, index) {
@@ -3209,7 +4409,7 @@ class DataGroup extends Group {
         var item = e.currentTarget;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                this.dispatch(new DataGroupEvent(DataGroupEvent.TOUCH_BEGIN_ITEM, true, item.data));
+                this.dispatchWith(flower.Event.TOUCH_BEGIN_ITEM, item.data, true);
                 if (p[13] == flower.TouchEvent.TOUCH_BEGIN || p[9] == item.data) {
                     p[15] = -1;
                     if (p[10]) {
@@ -3220,7 +4420,7 @@ class DataGroup extends Group {
                     if (p[13] == flower.TouchEvent.TOUCH_BEGIN) {
                         if (p[11]) {
                             item.$onClick();
-                            this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                            this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                         }
                     }
                 } else {
@@ -3246,7 +4446,7 @@ class DataGroup extends Group {
                     }
                     if (p[11]) {
                         item.$onClick();
-                        this.dispatch(new DataGroupEvent(DataGroupEvent.CLICK_ITEM, true, item.data));
+                        this.dispatchWith(flower.Event.CLICK_ITEM, item.data, true);
                     }
                 } else {
                     this.$releaseItem();
@@ -3330,7 +4530,7 @@ class DataGroup extends Group {
             itemRenderer.selected = true;
         }
         if (changeFlag) {
-            this.dispatch(new DataGroupEvent(DataGroupEvent.SELECTED_ITEM_CHANGE, true, itemData));
+            this.dispatchWith(flower.Event.SELECTED_ITEM_CHANGE, itemData, true);
         }
         if (!selectedItem) {
             this._canSelecteItem();
@@ -3374,7 +4574,7 @@ class DataGroup extends Group {
             return false;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+            p[0].removeListener(flower.Event.CHANGE, this.__onDataUpdate, this);
         }
         this.removeAll();
         p[2] = null;
@@ -3384,7 +4584,7 @@ class DataGroup extends Group {
             if (!p[9]) {
                 this._canSelecteItem();
             }
-            p[0].addListener(flower.Event.UPDATE, this.__onDataUpdate, this);
+            p[0].addListener(flower.Event.CHANGE, this.__onDataUpdate, this);
         }
         this.selectedItem = null;
         if (p[10] && p[0].length) {
@@ -3425,6 +4625,7 @@ class DataGroup extends Group {
         this.removeAll();
         p[2] = null;
         p[1] = val;
+        p[6] = p[7] = 0;
         this.$addFlags(0x4000);
     }
 
@@ -3436,18 +4637,13 @@ class DataGroup extends Group {
         this.$DataGroup[3] = display;
     }
 
-    get contentWidth() {
-        return this.$DataGroup[6];
-    }
-
-    get contentHeight() {
-        return this.$DataGroup[7];
+    get viewer() {
+        return this.$DataGroup[3];
     }
 
     get scrollEnabled() {
         return true;
     }
-
 
     get selectedIndex() {
         return this.getItemDataIndex(this.$DataGroup[9]);
@@ -3565,9 +4761,9 @@ class DataGroup extends Group {
     }
 }
 
-UIComponent.registerEvent(DataGroup, 1110, "clickItem", DataGroupEvent.CLICK_ITEM);
-UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", DataGroupEvent.SELECTED_ITEM_CHANGE);
-UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", DataGroupEvent.TOUCH_BEGIN_ITEM);
+UIComponent.registerEvent(DataGroup, 1110, "clickItem", flower.Event.CLICK_ITEM);
+UIComponent.registerEvent(DataGroup, 1111, "selectedItemChange", flower.Event.SELECTED_ITEM_CHANGE);
+UIComponent.registerEvent(DataGroup, 1112, "touchBeginItem", flower.Event.TOUCH_BEGIN_ITEM);
 
 black.DataGroup = DataGroup;
 //////////////////////////End File:extension/black/DataGroup.js///////////////////////////
@@ -3678,6 +4874,7 @@ class Label extends flower.TextField {
     constructor(text = "") {
         super(text);
         this.$initUIComponent();
+        this.selectable = false;
     }
 
     $addFlags(flags) {
@@ -3716,10 +4913,10 @@ class Label extends flower.TextField {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -3739,10 +4936,10 @@ class Label extends flower.TextField {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -3751,10 +4948,20 @@ class Label extends flower.TextField {
     }
 
     $onFrameEnd() {
-        //if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
-        //    this.$validateUIComponent();
-        //}
+        if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
+            this.$validateUIComponent();
+        }
         super.$onFrameEnd();
+        if (this.$hasFlags(0x0800)) {
+            this.$getContentBounds();
+            super.$onFrameEnd();
+        }
+        flower.DebugInfo.frameInfo.display++;
+        flower.DebugInfo.frameInfo.text++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {
@@ -3772,7 +4979,7 @@ black.Label = Label;
 
 
 //////////////////////////File:extension/black/Input.js///////////////////////////
-class Input extends flower.TextInput {
+class Input extends flower.TextField {
 
     constructor(text = "") {
         super(text);
@@ -3780,6 +4987,17 @@ class Input extends flower.TextInput {
         this.$input = {
             0: null, //value
         }
+        this.$IViewPort = {
+            0: 0,    //contentStartX
+            1: 0,    //contentStartY
+            2: 0,    //contentEndX
+            3: 0,    //contentEndY
+            4: null, //scrollH
+            5: null, //scrollV
+            6: null, //viewer
+        }
+        this.input = true;
+        this.addListener(flower.Event.STOP_INPUT, this.__onTextChange, this);
     }
 
     $addFlags(flags) {
@@ -3818,10 +5036,10 @@ class Input extends flower.TextInput {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -3841,10 +5059,10 @@ class Input extends flower.TextInput {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -3852,8 +5070,7 @@ class Input extends flower.TextInput {
         }
     }
 
-    $setText(val) {
-        super.$setText(val);
+    __onTextChange(e) {
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
             this.$input[0].value = this.text;
             if (this.text != this.$input[0].value + "") {
@@ -3863,7 +5080,7 @@ class Input extends flower.TextInput {
     }
 
     __valueChange() {
-        if (this.$input[0]) {
+        if (this.$input[0] != null) {
             this.text = this.$input[0] instanceof flower.Value ? this.$input[0].value : this.$input[0];
         }
     }
@@ -3879,13 +5096,76 @@ class Input extends flower.TextInput {
     //    super.$onFrameEnd();
     //}
 
+
+    $setHtmlText(text) {
+        super.$setHtmlText.call(this, text);
+        var p = this.$TextField;
+        this.$IViewPort[2] = p[17];
+        this.$IViewPort[3] = p[18];
+    }
+
     dispose() {
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.removeAllBindProperty();
         this.$UIComponent[11].dispose();
         super.dispose();
+    }
+
+    $getX() {
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            return p[50];
+        } else {
+            return super.$getX.call(this);
+        }
+    }
+
+    $setX(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            if (p[50] == val) {
+                return;
+            }
+            p[50] = val;
+            p[100] = true;
+        } else {
+            super.$setX.call(this, val);
+        }
+    }
+
+    $getY() {
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            return p[51];
+        } else {
+            return super.$getY.call(this);
+        }
+    }
+
+    $setY(val) {
+        val = +val || 0;
+        var p = this.$TextField;
+        if (this.$IViewPort[6]) {
+            if (p[51] == val) {
+                return;
+            }
+            p[51] = val;
+            p[100] = true;
+        } else {
+            super.$setY.call(this, val);
+        }
+    }
+
+    set viewer(val) {
+        if (this.$IViewPort[6] == val) {
+            return;
+        }
+        this.$IViewPort[6] = val;
+        var p = this.$TextField;
+        p[100] = true;
     }
 
     set value(val) {
@@ -3893,17 +5173,64 @@ class Input extends flower.TextInput {
             return;
         }
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].removeListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.$input[0] = val;
         if (this.$input[0] && this.$input[0] instanceof flower.Value) {
-            this.$input[0].addListener(flower.Event.UPDATE, this.__onValueChange, this);
+            this.$input[0].addListener(flower.Event.CHANGE, this.__onValueChange, this);
         }
         this.__valueChange();
     }
 
     get value() {
         return this.$input[0];
+    }
+
+    $getContentWidth() {
+        return this.$IViewPort[2] - this.$IViewPort[0];
+    }
+
+    $getContentHeight() {
+        return this.$IViewPort[3] - this.$IViewPort[1];
+    }
+
+    get contentWidth() {
+        return this.$getContentWidth();
+    }
+
+    get contentHeight() {
+        return this.$getContentHeight();
+    }
+
+    get scrollH() {
+        return this.$IViewPort[4] == null ? this.$IViewPort[0] : this.$IViewPort[4];
+    }
+
+    set scrollH(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[4] == val) {
+            return;
+        }
+        this.$IViewPort[4] = val;
+    }
+
+    get scrollV() {
+        return this.$IViewPort[5] == null ? this.$IViewPort[1] : this.$IViewPort[5];
+    }
+
+    set scrollV(val) {
+        if (val != null) {
+            val = +val;
+        }
+        if (this.$IViewPort[5] == val) {
+            return;
+        }
+        this.$IViewPort[5] = val;
+        var p = this.$TextField;
+        p[51] = val;
+        p[100] = true;
     }
 }
 
@@ -3926,7 +5253,6 @@ class Rect extends flower.Shape {
             0: 0, //width
             1: 0, //height
         };
-        this.drawRect = null;
         this.$initUIComponent();
     }
 
@@ -3969,10 +5295,10 @@ class Rect extends flower.Shape {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -3992,10 +5318,10 @@ class Rect extends flower.Shape {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -4081,7 +5407,15 @@ class Rect extends flower.Shape {
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
         }
-        super.$onFrameEnd();
+        //super.$onFrameEnd();
+        this.$redraw();
+        //super.$onFrameEnd();
+        flower.DebugInfo.frameInfo.display++;
+        flower.DebugInfo.frameInfo.shape++;
+        var p = this.$DisplayObject;
+        if (this.$hasFlags(0x0002)) {
+            this.$nativeShow.setAlpha(this.$getConcatAlpha());
+        }
     }
 
     dispose() {
@@ -4147,10 +5481,10 @@ class Image extends flower.Bitmap {
                 this.x = p[0];
             }
             if (p[1] != null) {
-                this.x = parent.width - p[1] - this.width;
+                this.x = parent.width - p[1] - this.width * this.scaleX;
             }
             if (p[2] != null) {
-                this.x = (parent.width - this.width) * 0.5 + p[2];
+                this.x = (parent.width - this.width * this.scaleX) * 0.5 + p[2];
             }
             if (p[6]) {
                 this.width = parent.width * p[6] / 100;
@@ -4170,10 +5504,10 @@ class Image extends flower.Bitmap {
                 this.y = p[3];
             }
             if (p[4] != null) {
-                this.y = parent.height - p[4] - this.height;
+                this.y = parent.height - p[4] - this.height * this.scaleY;
             }
             if (p[5] != null) {
-                this.y = (parent.height - this.height) * 0.5 + p[5];
+                this.y = (parent.height - this.height * this.scaleY) * 0.5 + p[5];
             }
             if (p[7]) {
                 this.height = parent.height * p[7] / 100;
@@ -4188,12 +5522,15 @@ class Image extends flower.Bitmap {
         this.__source = val;
         if (val == "" || val == null) {
             this.texture = null;
-        }
-        else if (val instanceof flower.Texture) {
+        } else if (val instanceof flower.Texture) {
             this.texture = val;
         } else {
             if (this.__loader) {
+                this.__loader.$useImage();
                 this.__loader.dispose();
+            }
+            if (typeof val == "string" && val.slice(0, 2) == "./" && this.$filePath) {
+                val = flower.Path.joinPath(this.$filePath, val);
             }
             this.__loader = new flower.URLLoader(val);
             this.__loader.load();
@@ -4209,6 +5546,7 @@ class Image extends flower.Bitmap {
     __onLoadComplete(e) {
         this.__loader = null;
         this.texture = e.data;
+        this.dispatchWith(flower.Event.COMPLETE);
     }
 
     //$onFrameEnd() {
@@ -4220,6 +5558,7 @@ class Image extends flower.Bitmap {
 
     dispose() {
         if (this.__loader) {
+            this.__loader.$useImage();
             this.__loader.dispose();
         }
         this.removeAllBindProperty();
@@ -4234,11 +5573,17 @@ class Image extends flower.Bitmap {
     set source(val) {
         this.$setSource(val);
     }
+
+    get isLoading() {
+        return this.__loader?true:false;
+    }
 }
 
 UIComponent.register(Image);
 Image.prototype.__UIComponent = true;
 black.Image = Image;
+
+UIComponent.registerEvent(Image, 1300, "loadComplete", flower.Event.COMPLETE);
 //////////////////////////End File:extension/black/Image.js///////////////////////////
 
 
@@ -4251,7 +5596,7 @@ class TileImage extends Group {
     }
 
     $setSource() {
-        
+
     }
 }
 
@@ -4537,11 +5882,13 @@ black.Button = Button;
 //////////////////////////File:extension/black/ToggleButton.js///////////////////////////
 class ToggleButton extends Button {
 
-    __selected = false;
-    onChangeEXE;
-
     constructor() {
         super();
+
+        this.$ToggleButton = {
+            0: false, //
+            1: null, //value
+        };
     }
 
     __onTouch(e) {
@@ -4549,12 +5896,13 @@ class ToggleButton extends Button {
             e.stopPropagation();
             return;
         }
+        var p = this.$ToggleButton;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN :
-                if (this.__selected) {
+                if (p[0]) {
                     this.currentState = "selectedDown";
                 } else {
-                    this.currentState = "down";
+                    this.currentState = "selectedUp";
                 }
                 break;
             case flower.TouchEvent.TOUCH_END :
@@ -4562,8 +5910,8 @@ class ToggleButton extends Button {
                 if (e.type == flower.TouchEvent.TOUCH_END) {
                     this.selected = !this.selected;
                 }
-                if (this.__selected) {
-                    this.currentState = "selectedUp";
+                if (p[0]) {
+                    this.currentState = "down";
                 } else {
                     this.currentState = "up";
                 }
@@ -4573,54 +5921,78 @@ class ToggleButton extends Button {
 
     __setEnabled(val) {
         super._setEnabled(val);
-        if (val == false && this.__selected) {
+        if (val == false && this.$ToggleButton[0]) {
             this.selected = false;
         }
     }
 
     __setSelected(val) {
-        if(val == "false") {
+        var p = this.$ToggleButton;
+        if (val == "false") {
             val = false;
         }
         val = !!val;
-        if (!this.enabled || val == this.__selected) {
+        if (!this.enabled || val == p[0]) {
             return;
         }
-        this.__selected = val;
+        p[0] = val;
+        if (p[1] && p[1] instanceof flower.Value) {
+            p[1].value = val;
+            if (p[0] != p[1].value) {
+                this.__valueChange();
+            }
+        }
         if (val) {
-            this.currentState = "selectedUp";
+            this.currentState = "down";
         } else {
             this.currentState = "up";
         }
-        if (this.onChangeEXE) {
-            this.onChangeEXE.call(this);
+        this.dispatchWith(flower.Event.CHANGE);
+    }
+
+    __valueChange() {
+        var p = this.$ToggleButton;
+        if (p[1]) {
+            this.selected = p[1] instanceof flower.Value ? p[1].value : p[1];
         }
     }
 
+    __onValueChange(e) {
+        this.__valueChange();
+    }
+
     get selected() {
-        return this.__selected;
+        return this.$ToggleButton[0];
     }
 
     set selected(val) {
         this.__setSelected(val);
     }
 
-    set onChange(val) {
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
+    set value(val) {
+        var p = this.$ToggleButton;
+        if (p[1] == val) {
+            return;
         }
-        this.onChangeEXE = val;
+        if (p[1] && p[1] instanceof flower.Value) {
+            p[1].removeListener(flower.Event.CHANGE, this.__onValueChange, this);
+        }
+        p[1] = val;
+        if (p[1] && p[1] instanceof flower.Value) {
+            p[1].addListener(flower.Event.CHANGE, this.__onValueChange, this);
+        }
+        this.__valueChange();
     }
 
-    get onChange() {
-        return this.onChangeEXE;
+    get value() {
+        return this.$ToggleButton[1];
     }
 }
 
 black.ToggleButton = ToggleButton;
+
+
+UIComponent.registerEvent(ToggleButton, 1402, "change", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/ToggleButton.js///////////////////////////
 
 
@@ -4655,6 +6027,7 @@ class RadioButton extends ToggleButton {
         if (this._group) {
             this._group.$itemSelectedChange(this);
         }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     __setGroupName(val) {
@@ -4683,6 +6056,8 @@ class RadioButton extends ToggleButton {
 }
 
 black.RadioButton = RadioButton;
+
+UIComponent.registerEvent(RadioButton, 1401, "change", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/RadioButton.js///////////////////////////
 
 
@@ -4759,9 +6134,7 @@ class RadioButtonGroup extends Group {
                 this._buttons[i].selected = false;
             }
         }
-        if (this.onChangeEXE) {
-            this.onChangeEXE.call(this);
-        }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     get selection() {
@@ -4784,7 +6157,7 @@ class RadioButtonGroup extends Group {
     }
 
     set enabled(val) {
-        if(val == "false") {
+        if (val == "false") {
             val = false;
         }
         val = !!val;
@@ -4795,23 +6168,6 @@ class RadioButtonGroup extends Group {
         for (var i = 0; i < this._buttons.length; i++) {
             this._buttons[i].enabled = this._enabled;
         }
-    }
-
-    /////////////////////////////////////Event///////////////////////////////////
-    onChangeEXE;
-
-    set onChange(val) {
-        if (typeof val == "string") {
-            var content = val;
-            val = function () {
-                eval(content);
-            }.bind(this.eventThis);
-        }
-        this.onChangeEXE = val;
-    }
-
-    get onChange() {
-        return this.onChangeEXE;
     }
 
     /////////////////////////////////////static///////////////////////////////////
@@ -4839,6 +6195,8 @@ class RadioButtonGroup extends Group {
 }
 
 black.RadioButtonGroup = RadioButtonGroup;
+
+UIComponent.registerEvent(RadioButtonGroup, 1400, "change", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/RadioButtonGroup.js///////////////////////////
 
 
@@ -5021,12 +6379,12 @@ class ViewStack extends Group {
             }
         }
         this._items.push(display);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
         if (!find) {
-            this.dispatchWidth(flower.Event.ADDED, display);
+            this.dispatchWith(flower.Event.ADDED, display);
         }
     }
 
@@ -5040,12 +6398,12 @@ class ViewStack extends Group {
             }
         }
         this._items.splice(i, 0, display);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
         if (this._selectedIndex < 0) {
             this._setSelectedIndex(0);
         }
         if (!find) {
-            this.dispatchWidth(flower.Event.ADDED, display);
+            this.dispatchWith(flower.Event.ADDED, display);
         }
     }
 
@@ -5055,8 +6413,8 @@ class ViewStack extends Group {
                 this._items.splice(i, 1);
                 if (display == this._selectedItem) {
                     this._setSelectedIndex(0);
-                    this.dispatchWidth(flower.Event.UPDATE);
-                    this.dispatchWidth(flower.Event.REMOVED, display);
+                    this.dispatchWith(flower.Event.CHANGE);
+                    this.dispatchWith(flower.Event.REMOVED, display);
                 }
                 return display;
             }
@@ -5075,8 +6433,8 @@ class ViewStack extends Group {
             this._selectedItem = this._items[0];
             this._selectedIndex = 0;
             super.removeChild(display);
-            this.dispatchWidth(flower.Event.UPDATE);
-            this.dispatchWidth(flower.Event.REMOVED, display);
+            this.dispatchWith(flower.Event.CHANGE);
+            this.dispatchWith(flower.Event.REMOVED, display);
         } else {
             flower.DebugInfo.debug("ViewStack 设置 removeChildAt 超出索引范围:" + index, DebugInfo.ERROR);
         }
@@ -5099,7 +6457,7 @@ class ViewStack extends Group {
             if (this._items[i] == display) {
                 this._items.splice(i, 1);
                 this._items.splice(index, 0, display);
-                this.dispatchWidth(flower.Event.UPDATE);
+                this.dispatchWith(flower.Event.CHANGE);
                 return display;
             }
         }
@@ -5108,7 +6466,7 @@ class ViewStack extends Group {
 
     sortChild(key, opt = 0) {
         super.sortChild(key, opt);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     _setSelectedIndex(val) {
@@ -5123,8 +6481,8 @@ class ViewStack extends Group {
             this._selectedIndex = val;
             super.addChildAt(this._selectedItem, this.numChildren);
         }
-        this.dispatchWidth(flower.Event.CHANGE, this._selectedItem);
-        this.dispatchWidth(flower.Event.UPDATE);
+        this.dispatchWith(flower.Event.CHANGE, this._selectedItem);
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     get length() {
@@ -5152,7 +6510,6 @@ class ViewStack extends Group {
         if (this._selectedIndex != -1 && this._selectedIndex >= index) {
             this._selectedIndex++;
         }
-        this.dispatchWidth(flower.Event.UPDATE);
     }
 
     set selectedIndex(val) {
@@ -5181,6 +6538,8 @@ class ViewStack extends Group {
 }
 
 black.ViewStack = ViewStack;
+
+UIComponent.registerEvent(ViewStack, 1500, "selectedItemChange", flower.Event.CHANGE);
 //////////////////////////End File:extension/black/ViewStack.js///////////////////////////
 
 
@@ -5188,19 +6547,31 @@ black.ViewStack = ViewStack;
 //////////////////////////File:extension/black/Scroller.js///////////////////////////
 class Scroller extends MaskUI {
 
-    _viewport;
-    _viewSize = flower.Size.create(0, 0);
-    _startX;
-    _startY;
-    _scrollDisX = [];
-    _scrollDisY = [];
-    _scrollTime = [];
-    _lastTouchTime;
-    _throw;
-    _upGap = 18;
-
     constructor() {
         super();
+
+        this.$Scroller = {
+            0: null,  //viewport
+            1: flower.Size.create(0, 0), //viewSize
+            2: 0,  //startX
+            3: 0,  //startY
+            4: [], //scrollDisX
+            5: [], //scrollDisY
+            6: [], //scrollTime
+            7: 0.3,  //scrollOut
+            8: 0,  //throw Tween
+            9: 18, //	scrollThreshold
+            10: null, //horizontalScrollBar
+            11: null, //verticalScrollBar
+            12: "auto", //scrollPolicyH
+            13: "auto", //scrollPolicyV
+            14: false, //isDraging
+            15: false, //dragH
+            16: false, //dragV
+            20: true, //scrollable
+            52: 0,//contentWidth
+            53: 0,//contentHeight
+        }
         this.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
         this.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
         this.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
@@ -5213,6 +6584,29 @@ class Scroller extends MaskUI {
         //this.addChild(bg);
     }
 
+    addChildAt(child, index) {
+        if (child instanceof flower.HScrollBar) {
+            super.addChildAt(child, index);
+            this.horizontalScrollBar = child;
+        } else if (child instanceof flower.VScrollBar) {
+            super.addChildAt(child, index);
+            this.verticalScrollBar = child;
+        } else {
+            if (index == this.numChildren || index == this.numChildren - 1) {
+                if (index == this.numChildren && this.numChildren - 1 >= 0 && this.getChildAt(this.numChildren - 1) instanceof flower.ScrollBar) {
+                    index--;
+                }
+                if (index == this.numChildren - 1 && this.numChildren - 2 >= 0 && this.getChildAt(this.numChildren - 2) instanceof flower.ScrollBar) {
+                    index--;
+                }
+            }
+            super.addChildAt(child, index);
+            if (this.viewport == null) {
+                this.viewport = child;
+            }
+        }
+    }
+
     $createShape() {
         var shape = new Rect();
         shape.percentWidth = 100;
@@ -5221,66 +6615,79 @@ class Scroller extends MaskUI {
     }
 
     __onTouchScroller(e) {
-        if (!this._viewport) {
+        var p = this.$Scroller;
+        if (!p[0] || !p[20]) {
             return;
         }
-        var x = this.lastTouchX;
-        var y = this.lastTouchY;
+        var x = this.mouseX;
+        var y = this.mouseY;
         switch (e.type) {
             case flower.TouchEvent.TOUCH_BEGIN:
-                if (this._throw) {
-                    this._throw.dispose();
-                    this._throw = null;
+                if (p[8]) {
+                    p[8].dispose();
+                    p[8] = null;
                 }
-                this._startX = x - this._viewport.x;
-                this._startY = y - this._viewport.y;
-                this._scrollDisX.length = this._scrollDisY.length = this._scrollTime.length = 0;
+                p[2] = x - p[0].x;
+                p[3] = y - p[0].y;
+                p[4].length = p[5].length = p[6].length = 0;
+                p[14] = true;
+                p[15] = false;
+                p[16] = false;
                 break;
             case flower.TouchEvent.TOUCH_MOVE:
-                if (Math.abs(x - this._startX) > this._upGap || Math.abs(y - this._startY) > this._upGap) {
-                    this._viewport.$releaseItem();
+                if ((Math.abs(x - p[0].x - p[2]) > p[9] || Math.abs(y - p[0].y - p[3]) > p[9]) && p[0] instanceof flower.DataGroup) {
+                    p[0].$releaseItem();
                 }
-                var _x = this._viewport.x;
-                var _y = this._viewport.y;
-                if (this._viewport.contentWidth > this.width) {
-                    this._viewport.x = x - this._startX;
+                if (!p[15] && this.$Scroller[12] != "off" && Math.abs(x - p[0].x - p[2]) > p[9] && p[0].contentWidth > p[0].width) {
+                    p[15] = true;
+                    p[2] = x - p[0].x;
                 }
-                if (this._viewport.contentHeight > this.height) {
-                    this._viewport.y = y - this._startY;
+                if (!p[16] && this.$Scroller[13] != "off" && Math.abs(y - p[0].y - p[3]) > p[9] && p[0].contentHeight > p[0].height) {
+                    p[16] = true;
+                    p[3] = y - p[0].y;
                 }
-                if (this._viewport.y > this.height) {
-                    this._viewport.y = this.height;
+                var _x = p[0].x;
+                var _y = p[0].y;
+                if (p[15]) {
+                    p[0].x = x - p[2];
+                    if (p[0].x > 0) {
+                        p[0].x = p[0].x * p[7];
+                    }
+                    if (p[0].x < -p[0].contentWidth + p[0].width) {
+                        p[0].x = -p[0].contentWidth + p[0].width + (p[0].x - (-p[0].contentWidth + p[0].width)) * p[7];
+                    }
                 }
-                if (this._viewport.y < -this._viewport.contentHeight) {
-                    this._viewport.y = -this._viewport.contentHeight;
+                if (p[16]) {
+                    p[0].y = y - p[3];
+                    if (p[0].y > 0) {
+                        p[0].y = p[0].y * p[7];
+                    }
+                    if (p[0].y < -p[0].contentHeight + p[0].height) {
+                        p[0].y = -p[0].contentHeight + p[0].height + (p[0].y - (-p[0].contentHeight + p[0].height)) * p[7];
+                    }
                 }
-                if (this._viewport.x > this.width) {
-                    this._viewport.x = this.width;
+                p[4].push(p[0].x - _x);
+                p[5].push(p[0].y - _y);
+                p[6].push(flower.CoreTime.currentTime);
+                if (p[4].length > 4) {
+                    p[4].shift();
+                    p[5].shift();
+                    p[6].shift();
                 }
-                if (this._viewport.x < -this._viewport.contentWidth) {
-                    this._viewport.x = -this._viewport.contentWidth;
-                }
-                this._scrollDisX.push(this._viewport.x - _x);
-                this._scrollDisY.push(this._viewport.y - _y);
-                this._scrollTime.push(flower.CoreTime.currentTime);
-                if (this._scrollDisX.length > 4) {
-                    this._scrollDisX.shift();
-                    this._scrollDisY.shift();
-                    this._scrollTime.shift();
-                }
-                this._lastTouchTime = flower.CoreTime.currentTime;
+                //p[7] = flower.CoreTime.currentTime;
                 break;
             case flower.TouchEvent.TOUCH_END:
             case flower.TouchEvent.TOUCH_RELEASE:
+                p[14] = p[15] = p[16] = false;
                 var timeGap = 0.5;
-                if (this._scrollTime.length) {
-                    timeGap = flower.CoreTime.currentTime - this._scrollTime[0];
+                if (p[6].length) {
+                    timeGap = flower.CoreTime.currentTime - p[6][0];
                 }
                 var disX = 0;
                 var disY = 0;
-                for (var i = 0; i < this._scrollDisX.length; i++) {
-                    disX += this._scrollDisX[i];
-                    disY += this._scrollDisY[i];
+                for (var i = 0; i < p[4].length; i++) {
+                    disX += p[4][i];
+                    disY += p[5][i];
                 }
                 disX = disX * 100 / timeGap;
                 disY = disY * 100 / timeGap;
@@ -5296,19 +6703,23 @@ class Scroller extends MaskUI {
                 if (disY > 600) {
                     disY = 600;
                 }
-                var toX = this._viewport.x + disX * 5;
-                var toY = this._viewport.y + disY * 5;
+                var toX = p[0].x + disX * 5;
+                var toY = p[0].y + disY * 5;
                 var flag = true;
-                if (-toX + this.width > this._viewport.contentWidth) {
-                    toX = this.width - this._viewport.contentWidth;
+                if (-toX + p[0].width > p[0].contentWidth) {
+                    toX = p[0].width - p[0].contentWidth;
                     flag = false;
                 }
                 if (toX > 0) {
                     toX = 0;
                     flag = false;
                 }
-                if (-toY + this.height > this._viewport.contentHeight) {
-                    toY = this.height - this._viewport.contentHeight;
+                if (toY < -p[0].contentHeight + p[0].height) {
+                    toY = p[0].height - p[0].contentHeight;
+                    if (p[0] == 961) {
+                        flower.breakPoint();
+                        p[0].contentHeight;
+                    }
                     flag = false;
                 }
                 if (toY > 0) {
@@ -5319,8 +6730,8 @@ class Scroller extends MaskUI {
                     //trace("quit", timeGap);
                     break;
                 }
-                var timeX = Math.abs(toX - this._viewport.x) / 350;
-                var timeY = Math.abs(toY - this._viewport.y) / 350;
+                var timeX = Math.abs(toX - p[0].x) / 350;
+                var timeY = Math.abs(toY - p[0].y) / 350;
                 var time = timeX > timeY ? timeX : timeY;
                 if (time < 0.5) {
                     time = 0.5;
@@ -5328,7 +6739,7 @@ class Scroller extends MaskUI {
                 if (time > 5) {
                     time = 5;
                 }
-                this._throw = flower.Tween.to(this._viewport, time, {
+                p[8] = flower.Tween.to(p[0], time, {
                     x: toX,
                     y: toY
                 }, flower.Ease.CUBIC_EASE_OUT);
@@ -5337,9 +6748,40 @@ class Scroller extends MaskUI {
     }
 
     $onFrameEnd() {
-        if (this._viewport) {
-            this._viewport.width = this.width;
-            this._viewport.height = this.height;
+        var p = this.$Scroller;
+        if (p[0]) {
+            if (p[10]) {
+                if (p[12] == "on") {
+                    if (p[10].autoVisibility) {
+                        p[10].visible = p[15] ? true : false;
+                    }
+                } else if (p[12] == "off") {
+                    p[10].visible = false;
+                } else if (p[12] == "auto") {
+                    if (p[10].autoVisibility) {
+                        p[10].visible = p[15] && p[0].contentWidth > p[0].width ? true : false;
+                    } else {
+                        p[10].visible = p[0].contentWidth > p[0].width ? true : false;
+                    }
+                }
+            }
+            if (p[11]) {
+                if (p[13] == "on") {
+                    if (p[11].autoVisibility) {
+                        p[11].visible = p[16] ? true : false;
+                    }
+                } else if (p[13] == "off") {
+                    p[11].visible = false;
+                } else if (p[13] == "auto") {
+                    if (p[11].autoVisibility) {
+                        p[11].visible = p[16] && p[0].contentHeight > p[0].height ? true : false;
+                    } else {
+                        p[11].visible = p[0].contentHeight > p[0].height ? true : false;
+                    }
+                }
+            }
+            p[0].width = this.width - (p[11] && p[13] != "off" && !p[11].autoVisibility ? p[11].width : 0);
+            p[0].height = this.height - (p[10] && p[12] != "off" && !p[10].autoVisibility ? p[10].height : 0);
         }
         if (this.$hasFlags(0x1000) && !this.parent.__UIComponent) {
             this.$validateUIComponent();
@@ -5349,11 +6791,12 @@ class Scroller extends MaskUI {
     }
 
     dispose() {
-        flower.Size.release(this._viewSize);
+        flower.Size.release(this.$Scroller[1]);
         super.dispose();
     }
 
     $setViewport(val) {
+        var p = this.$Scroller;
         if (typeof val == "string") {
             var clazz = $root[val];
             if (!clazz) {
@@ -5364,40 +6807,78 @@ class Scroller extends MaskUI {
             }
             val = new clazz();
         }
-        if (this._viewport == val) {
+        if (p[0] == val) {
             return;
         }
-        //if (this._viewport) {
-        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-        //    this._viewport.removeListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-        //}
-        this._viewport = val;
-        this._viewport.viewer = this;
-        //this._viewport.addListener(flower.TouchEvent.TOUCH_BEGIN, this.__onTouchScroller, this);
-        //this._viewport.addListener(flower.TouchEvent.TOUCH_MOVE, this.__onTouchScroller, this);
-        //this._viewport.addListener(flower.TouchEvent.TOUCH_END, this.__onTouchScroller, this);
-        //this._viewport.addListener(flower.TouchEvent.TOUCH_RELEASE, this.__onTouchScroller, this);
-        if (this._viewport.parent != this) {
-            this.addChild(this._viewport);
+        p[0] = val;
+        p[0].viewer = this;
+        if (p[0].parent == null) {
+            this.addChild(p[0]);
+        }
+        if (p[10]) {
+            p[10].viewport = p[0];
+        }
+        if (p[11]) {
+            p[11].viewport = p[0];
+        }
+    }
+
+    /**
+     * 设置水平滚动条
+     * @param val
+     */
+    $setHorizontalScrollBar(val) {
+        var p = this.$Scroller;
+        if (p[10] == val) {
+            return;
+        }
+        if (val == null) {
+            p[10].viewport = null;
+        }
+        p[10] = val;
+        if (p[10]) {
+            p[10].viewport = p[0];
+            if (p[10].parent == null) {
+                this.addChild(p[10]);
+            }
+        }
+    }
+
+    /**
+     * 设置垂直滚动条
+     * @param val
+     */
+    $setVerticalScrollBar(val) {
+        var p = this.$Scroller;
+        if (p[11] == val) {
+            return;
+        }
+        if (val == null) {
+            p[11].viewport = null;
+        }
+        p[11] = val;
+        if (p[11]) {
+            p[11].viewport = p[0];
+            if (p[11].parent == null) {
+                this.addChild(p[11]);
+            }
         }
     }
 
     $setWidth(val) {
-        this._viewSize.width = val;
+        this.$Scroller[1].width = val;
     }
 
     $setHeight(val) {
-        this._viewSize.height = val;
+        this.$Scroller[1].height = val;
     }
 
     $getWidth() {
-        return this._viewSize.width;
+        return this.$Scroller[1].width;
     }
 
     $getHeight() {
-        return this._viewSize.height;
+        return this.$Scroller[1].height;
     }
 
     //////////////////////////////////get&set//////////////////////////////////
@@ -5406,15 +6887,70 @@ class Scroller extends MaskUI {
     }
 
     get viewport() {
-        return this._viewport;
+        return this.$Scroller[0];
     }
 
-    get releaseItemDistance() {
-        return this._upGap;
+    set horizontalScrollBar(val) {
+        this.$setHorizontalScrollBar(val);
     }
 
-    set releaseItemDistance(val) {
-        this._upGap = +val || 0;
+    set verticalScrollBar(val) {
+        this.$setVerticalScrollBar(val);
+    }
+
+    set scrollPolicyH(val) {
+        this.$Scroller[12] = val;
+    }
+
+    get scrollPolicyH() {
+        return this.$Scroller[12];
+    }
+
+    set scrollPolicyV(val) {
+        this.$Scroller[13] = val;
+    }
+
+    get scrollPolicyV() {
+        return this.$Scroller[13];
+    }
+
+    set scrollThreshold(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        this.$Scroller[9] = val;
+    }
+
+    get scrollThreshold() {
+        return this.$Scroller[9];
+    }
+
+    set scrollOut(val) {
+        val = +val || 0;
+        if (val < 0) {
+            val = 0;
+        }
+        this.$Scroller[7] = val;
+    }
+
+    get scrollOut() {
+        return this.$Scroller[7];
+    }
+
+    set scrollable(val) {
+        if(val == "false") {
+            val = false;
+        }
+        val = !!val;
+        if(val == this.$Scroller[20]) {
+            return;
+        }
+        this.$Scroller[20] = val;
+    }
+
+    get scrollable() {
+        return this.$Scroller[20];
     }
 }
 
@@ -5457,7 +6993,7 @@ class ComboBox extends Group {
         if (p[9]) {
             return;
         }
-        p[8] = e.item;
+        p[8] = e.data;
         if (p[0]) {
             if (p[8] && p[8][p[4]]) {
                 p[0].text = p[8][p[4]];
@@ -5546,8 +7082,8 @@ class ComboBox extends Group {
         }
         if (p[2]) {
             p[2].removeListener(flower.Event.REMOVED, this.__listRemoved, this);
-            p[2].removeListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-            p[2].removeListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+            p[2].removeListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            p[2].removeListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
         }
         p[2] = val;
         if (val) {
@@ -5556,8 +7092,8 @@ class ComboBox extends Group {
                 val.selectedItem = p[8];
             }
             val.addListener(flower.Event.REMOVED, this.__listRemoved, this);
-            val.addListener(flower.DataGroupEvent.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
-            val.addListener(flower.DataGroupEvent.CLICK_ITEM, this.__listClickItem, this);
+            val.addListener(flower.Event.SELECTED_ITEM_CHANGE, this.__listSelectItemChange, this);
+            val.addListener(flower.Event.CLICK_ITEM, this.__listClickItem, this);
         }
     }
 
@@ -5595,7 +7131,11 @@ class ComboBox extends Group {
     }
 
     set labelField(val) {
-        this.$comboBox[4] = val;
+        var p = this.$comboBox;
+        if(p[4] == val) {
+            return;
+        }
+        p[4] = val;
         if (p[0]) {
             if (p[8] && p[8][p[4]]) {
                 p[0].text = p[8][p[4]];
@@ -5627,16 +7167,14 @@ class ComboBox extends Group {
             return;
         }
         if (p[7] && p[7] instanceof flower.Value) {
-            p[7].removeListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
+            p[7].removeListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
         }
         p[7] = val;
         if (p[7]) {
             p[9] = true;
             if (p[7] instanceof flower.Value) {
-                p[7].addListener(flower.Event.UPDATE, this.__onTypeValueChange, this);
-                if (p[7].enumList) {
-                    this.dataProvider = new flower.ArrayValue(p[7].enumList);
-                }
+                p[7].addListener(flower.Event.CHANGE, this.__onTypeValueChange, this);
+                this.dataProvider = new flower.ArrayValue(p[7].enumList);
             }
             p[9] = false;
             this.__typeValueChange();
@@ -5843,7 +7381,7 @@ class Panel extends Group {
     }
 
     $onClose() {
-        this.dispatchWidth(flower.Event.CLOSE);
+        this.dispatchWith(flower.Event.CLOSE);
         this.closePanel();
     }
 
@@ -5976,12 +7514,12 @@ class Alert extends Panel {
     }
 
     $onConfirm(e) {
-        this.dispatchWidth(flower.Event.CONFIRM);
+        this.dispatchWith(flower.Event.CONFIRM);
         this.closePanel();
     }
 
     $onCancel(e) {
-        this.dispatchWidth(flower.Event.CANCEL);
+        this.dispatchWith(flower.Event.CANCEL);
         this.closePanel();
     }
 
@@ -6101,12 +7639,12 @@ class Tree extends DataGroup {
             return;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].removeListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
             p[0].removeListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
         }
         p[0] = val;
         if (p[0]) {
-            p[0].addListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].addListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
             p[0].addListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
         }
         this.__onTreeDataUpdate(null);
@@ -6115,7 +7653,7 @@ class Tree extends DataGroup {
     __onRemovedTreeDataUpdate(e) {
         var item = e.data;
         if (item.open && item.open instanceof flower.EventDispatcher) {
-            item.open.removeListener(flower.Event.UPDATE, this.__onOpenItem, this);
+            item.open.removeListener(flower.Event.CHANGE, this.__onOpenItem, this);
         }
     }
 
@@ -6166,7 +7704,7 @@ class Tree extends DataGroup {
                     if (item.open != null) {
                         if (item.open instanceof flower.Value) {
                             openURL[url].open = !!item.open.value;
-                            item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                            item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
                         } else {
                             openURL[url].open = !!item.open;
                         }
@@ -6234,7 +7772,7 @@ class Tree extends DataGroup {
                 }
             } else {
                 item.open = new BooleanValue(openURL[url].open);
-                item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
             }
         }
         parentData.push(item);
@@ -6242,6 +7780,17 @@ class Tree extends DataGroup {
             var children = info.children;
             for (var i = 0, len = children.length; i < len; i++) {
                 this.__readTreeShowItem(children[i], urlList, openURL, rootURLDepth, parentData);
+            }
+        }
+    }
+
+    expand(url) {
+        var p = this.$Tree;
+        var parentData = p[1];
+        for (var i = 0; i < parentData.length; i++) {
+            var item = parentData[i];
+            if (item.path == url.slice(0, item.path.length)) {
+                item.open.value = true;
             }
         }
     }
@@ -6273,6 +7822,9 @@ class Module extends flower.EventDispatcher {
     __url;
     __direction;
     __beforeScript;
+    __moduleKey;
+    __hasExecute;
+    __name;
 
     constructor(url, beforeScript = "") {
         super();
@@ -6280,6 +7832,7 @@ class Module extends flower.EventDispatcher {
         this.__url = url;
         this.__beforeScript = beforeScript;
         this.__direction = flower.Path.getPathDirection(url);
+        this.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
         this.__progress = flower.DataManager.getInstance().createData("ProgressData");
     }
 
@@ -6294,8 +7847,9 @@ class Module extends flower.EventDispatcher {
 
     __onLoadModuleComplete(e) {
         var cfg = e.data;
-        var namespace = cfg.namespace || "local";
-        flower.UIParser.addNameSapce(namespace, cfg.name);
+        this.config = cfg;
+        this.__name = cfg.name;
+        flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
         this.__list = [];
         var classes = cfg.classes;
         if (classes && Object.keys(classes).length) {
@@ -6304,15 +7858,21 @@ class Module extends flower.EventDispatcher {
                 if (url.slice(0, 2) == "./") {
                     url = this.__direction + url.slice(2, url.length);
                 }
-                flower.UIParser.setLocalUIURL(key, url, namespace);
+                flower.UIParser.setLocalUIURL(key, url, cfg.name);
             }
         }
         this.script = "";
         this.script += this.__beforeScript;
         this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
         this.__beforeScript += "var module = $root." + cfg.name + ";\n";
+        this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
-        //this.script += "var " + cfg.packageURL + " = module;\n\n";
+        this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
+        if (cfg.execute) {
+            this.__hasExecute = true;
+            this.script += "$root." + cfg.name + "__executeModule = function() {" + cfg.execute + "}\n";
+        }
+        flower.UIParser.setModuleBeforeScript(cfg.name, this.__beforeScript);
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
@@ -6347,7 +7907,7 @@ class Module extends flower.EventDispatcher {
                     url = this.__direction + url.slice(2, url.length);
                 }
                 var parser = new flower.UIParser(this.__beforeScript);
-                parser.localNameSpace = namespace;
+                parser.moduleName = cfg.name;
                 this.__list.push({
                     type: "ui",
                     ui: parser,
@@ -6363,21 +7923,41 @@ class Module extends flower.EventDispatcher {
         if (this.hasListener(flower.Event.ERROR)) {
             this.dispatch(e);
         } else {
-            $error(e.data);
+            flower.$error(e.data);
         }
     }
 
     __loadNext(e) {
         var item;
-        if (this.__index != 0) {
+        if (e && this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data);
+                if (e.data.script) {
+                    var data = e.data;
+                    var url = e.data.script;
+                    if (url.slice(0, 2) == "./") {
+                        url = flower.Path.getPathDirection(item.url) + url.slice(2, url.length);
+                    }
+                    var loader = new flower.URLLoader(url);
+                    loader.addListener(flower.Event.COMPLETE, function (ee) {
+                        data.script = ee.data;
+                        flower.DataManager.getInstance().addDefine(data, this.__moduleKey);
+                        this.__loadNext();
+                    }, this);
+                    loader.addListener(flower.Event.ERROR, this.__loadError, this);
+                    loader.load();
+                    return;
+                } else {
+                    flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                }
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {
-                    trace("执行script:\n", this.script);
+                    //trace("执行script:\n", this.script);
+                    this.script += "flower.Module.$currentModule.data = module;";
+                    Module.$currentModule = this;
                     eval(this.script);
+                    Module.$currentModule = null;
                 }
             }
         }
@@ -6387,7 +7967,10 @@ class Module extends flower.EventDispatcher {
         this.__progress.max.value = this.__list.length;
         this.__progress.current.value = this.__index;
         if (this.__index == this.__list.length) {
-            this.dispatchWidth(flower.Event.COMPLETE);
+            if (this.__hasExecute) {
+                $root[this.__name + "__executeModule"]();
+            }
+            this.dispatchWith(flower.Event.COMPLETE);
             return;
         }
         item = this.__list[this.__index];
@@ -6406,9 +7989,19 @@ class Module extends flower.EventDispatcher {
         this.__index++;
     }
 
+    get url() {
+        return this.__url;
+    }
+
     get progress() {
         return this.__progress;
     }
+
+    get name() {
+        return this.__name;
+    }
+
+    static $currentModule;
 }
 
 black.Module = Module;

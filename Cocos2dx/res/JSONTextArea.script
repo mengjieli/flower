@@ -1,0 +1,78 @@
+function init() {
+    this.addListener(flower.Event.CHANGE, this.onChange, this);
+    console.log("初始化")
+}
+
+function onChange(e) {
+    this.htmlText = this.decodeJSON(this.text);
+}
+
+function decodeJSON(text) {
+    var htmlText = "";
+    var inSign = false;
+    var colors = {
+        leftSign: "#000000",
+        name: "#000080",
+    }
+    var charCode = 0;
+    var aCode = "a".charCodeAt(0);
+    var zCode = "z".charCodeAt(0);
+    var ACode = "A".charCodeAt(0);
+    var ZCode = "Z".charCodeAt(0);
+    var code0 = "0".charCodeAt(0);
+    var code9 = "9".charCodeAt(0);
+    var underCode = "_".charCodeAt(0);
+    var maoCode = ":".charCodeAt(0);
+    var error = false;
+    for (var i = 0, len = text.length; i < len; i++) {
+        var char = text.charAt(i);
+        if (char == "<") {
+            inSign = true;
+            htmlText += '<font color=' + colors.leftSign + '>' + flower.TextField.changeText(char) + "</font>";
+            htmlText += '<font color=' + colors.name + '>';
+            //紧跟着的应该是字母
+            if (i == len - 1) {
+                htmlText += '</font>';
+                break;
+            }
+            i++;
+            //后面可以跟复数的空格和换行符
+            while (i < len && text.charAt(i) == " " || text.charAt(i) == "\r" || text.charAt(i) == "\n") {
+                htmlText += flower.TextField.changeText(text.charAt(i));
+                i++;
+            }
+            var abc = "";
+            charCode = text.charCodeAt(i);
+            if (charCode >= aCode && charCode <= zCode || charCode >= ACode && charCode <= ZCode || charCode == underCode) {
+                abc += text.charAt(i);
+                while (i < len) {
+                    charCode = text.charCodeAt(i);
+                    if (charCode >= aCode && charCode <= zCode && charCode >= ACode && charCode <= ZCode) {
+                        abc += text.charAt(i);
+                    } else {
+                        i--;
+                        break;
+                    }
+                    i++;
+                }
+                charCode = text.charCodeAt(i);
+                if (charCode == maoCode) {
+
+                }
+                //htmlText += abc;
+            } else {
+                if (!error) {
+                    htmlText += '<font color="#ff0000"><u color="#000000">' + flower.TextField.changeText(String.fromCharCode(charCode)) + '</u></font>';
+                } else {
+                    htmlText += String.fromCharCode(charCode);
+                }
+            }
+            htmlText += '</font>';
+            //字母后面可以跟 : 或者字母 或者空格
+            i++;
+        } else {
+            htmlText += char;
+        }
+    }
+    return htmlText;
+}

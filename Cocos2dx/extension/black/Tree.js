@@ -25,12 +25,12 @@ class Tree extends DataGroup {
             return;
         }
         if (p[0]) {
-            p[0].removeListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].removeListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
             p[0].removeListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
         }
         p[0] = val;
         if (p[0]) {
-            p[0].addListener(flower.Event.UPDATE, this.__onTreeDataUpdate, this);
+            p[0].addListener(flower.Event.CHANGE, this.__onTreeDataUpdate, this);
             p[0].addListener(flower.Event.REMOVED, this.__onRemovedTreeDataUpdate, this);
         }
         this.__onTreeDataUpdate(null);
@@ -39,7 +39,7 @@ class Tree extends DataGroup {
     __onRemovedTreeDataUpdate(e) {
         var item = e.data;
         if (item.open && item.open instanceof flower.EventDispatcher) {
-            item.open.removeListener(flower.Event.UPDATE, this.__onOpenItem, this);
+            item.open.removeListener(flower.Event.CHANGE, this.__onOpenItem, this);
         }
     }
 
@@ -90,7 +90,7 @@ class Tree extends DataGroup {
                     if (item.open != null) {
                         if (item.open instanceof flower.Value) {
                             openURL[url].open = !!item.open.value;
-                            item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                            item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
                         } else {
                             openURL[url].open = !!item.open;
                         }
@@ -158,7 +158,7 @@ class Tree extends DataGroup {
                 }
             } else {
                 item.open = new BooleanValue(openURL[url].open);
-                item.open.addListener(flower.Event.UPDATE, this.__onOpenItem, this);
+                item.open.addListener(flower.Event.CHANGE, this.__onOpenItem, this);
             }
         }
         parentData.push(item);
@@ -166,6 +166,17 @@ class Tree extends DataGroup {
             var children = info.children;
             for (var i = 0, len = children.length; i < len; i++) {
                 this.__readTreeShowItem(children[i], urlList, openURL, rootURLDepth, parentData);
+            }
+        }
+    }
+
+    expand(url) {
+        var p = this.$Tree;
+        var parentData = p[1];
+        for (var i = 0; i < parentData.length; i++) {
+            var item = parentData[i];
+            if (item.path == url.slice(0, item.path.length)) {
+                item.open.value = true;
             }
         }
     }

@@ -3,7 +3,7 @@ class ReadDirectionListRemote extends Remote {
     __back;
     __thisObj;
 
-    constructor(back, thisObj, path) {
+    constructor(back, thisObj, path, autoUpdate = false) {
         super();
         this.__back = back;
         this.__thisObj = thisObj;
@@ -14,7 +14,9 @@ class ReadDirectionListRemote extends Remote {
         msg.writeUInt(102);
         msg.writeUInt(this.id);
         msg.writeUTF(path);
+        msg.writeUTF(autoUpdate);
         this.send(msg);
+        this.autoUpdate = autoUpdate;
     }
 
     receive(cmd, msg) {
@@ -33,6 +35,9 @@ class ReadDirectionListRemote extends Remote {
         if (this.__back) {
             this.__back.call(this.__thisObj, list);
         }
-        this.__back = this.__thisObj = null;
+        if (!this.autoUpdate) {
+            this.__back = this.__thisObj = null;
+            this.dispose();
+        }
     }
 }

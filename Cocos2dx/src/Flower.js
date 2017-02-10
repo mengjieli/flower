@@ -4,6 +4,8 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
@@ -31,9 +33,9 @@ function __extends(d, b) {
     d.prototype = new __();
 }
 var flower = {};
-(function () {
+(function (math) {
     //////////////////////////File:flower/Flower.js///////////////////////////
-    var DEBUG = true;
+    var DEBUG = false;
     var TIP = false;
     var $language = "zh_CN";
     var NATIVE = true;
@@ -48,26 +50,53 @@ var flower = {};
     var RETINA = false;
     var programmers = {};
     var config = {};
+    var params = {};
+    var hasStart = false;
 
     /**
      * 启动引擎
      * @param language 使用的语言版本
      */
-    function start(completeFunc) {
-        var stage = new Stage();
+    function start(completeFunc, params) {
+        if (hasStart) {
+            if (completeFunc) completeFunc();
+            return;
+        }
+        params = params || {};
+        if (params.TIP) {
+            TIP = params.TIP;
+            flower.sys.TIP = params.TIP;
+        }
+        hasStart = false;
         Platform._runBack = CoreTime.$run;
-        Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow);
+        if (Platform.startSync) {
+            Platform.getReady(function () {
+                var stage = new Stage();
+                Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, function () {
+                    start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
+                });
+            });
+        } else {
+            var stage = new Stage();
+            Platform.start(stage, stage.$nativeShow, stage.$background.$nativeShow, params.nativeStage, params.touchShow);
+            start2(completeFunc, params.nativeStage, params.touchShow, stage, params);
+        }
+    }
 
+    function start2(completeFunc, nativeStage, touchShow, stage, params) {
+        flower.sys.engineType = Platform.type;
         var loader = new URLLoader("res/flower.json");
         loader.addListener(Event.COMPLETE, function (e) {
             var cfg = e.data;
             for (var key in cfg) {
                 config[key] = cfg[key];
             }
+            if (params.linkUser && cfg.remote) {
+                cfg.remote.linkUser = params.linkUser;
+            }
             stage.backgroundColor = cfg.backgroundColor || 0;
             SCALE = config.scale || 1;
             LANGUAGE = config.language || "";
-
             function startLoad() {
                 loader = new URLLoader("res/blank.png");
                 loader.addListener(Event.COMPLETE, function (e) {
@@ -82,7 +111,7 @@ var flower = {};
                             loader = new URLLoader("res/shaders/Source.fsh");
                             loader.addListener(Event.COMPLETE, function (e) {
                                 programmers[loader.url] = e.data;
-                                completeFunc();
+                                if (completeFunc) completeFunc();
                             });
                             loader.load();
                         });
@@ -93,7 +122,7 @@ var flower = {};
                 loader.load();
             }
 
-            if (config.remote) {
+            if (config.remote && flower.RemoteServer) {
                 flower.RemoteServer.start(startLoad);
             } else {
                 startLoad();
@@ -174,6 +203,15 @@ var flower = {};
         trace("breakPoint:", name);
     }
 
+    function dispose() {
+        flower.EnterFrame.$dispose();
+        flower.CallLater.$dispose();
+        flower.DelayCall.$dispose();
+        flower.Stage.$dispose();
+        TextureManager.getInstance().$dispose();
+        hasStart = false;
+    }
+
     flower.start = start;
     flower.getLanguage = $getLanguage;
     flower.trace = trace;
@@ -187,7 +225,9 @@ var flower = {};
         $error: $error,
         getLanguage: getLanguage
     };
-
+    flower.params = params;
+    flower.system = {};
+    flower.dispose = dispose;
     $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -201,53 +241,91 @@ var flower = {};
         _createClass(Platform, null, [{
             key: "start",
             value: function start(engine, root, background) {
+                var nativeStage = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+                var touchShow = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
+                flower.system.platform = Platform.type;
+                flower.system.native = Platform.native;
                 RETINA = cc.sys.os === cc.sys.OS_IOS || cc.sys.os === cc.sys.OS_OSX ? true : false;
-                Platform.native = cc.sys.isNative;
                 var scene = cc.Scene.extend({
                     ctor: function ctor() {
                         this._super();
-                        this.scheduleUpdate();
                         //注册鼠标事件
                         cc.eventManager.addListener({
                             event: cc.EventListener.TOUCH_ONE_BY_ONE,
                             swallowTouches: true,
-                            onTouchBegan: this.onTouchesBegan.bind(this),
-                            onTouchMoved: this.onTouchesMoved.bind(this),
-                            onTouchEnded: this.onTouchesEnded.bind(this)
+                            onTouchBegan: function (touch) {
+                                engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                                return true;
+                            }.bind(this),
+                            onTouchMoved: function (touch) {
+                                engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                                return true;
+                            }.bind(this),
+                            onTouchEnded: function (touch) {
+                                engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                                return true;
+                            }.bind(this)
                         }, this);
                         cc.eventManager.addListener({
                             event: cc.EventListener.MOUSE,
-                            onMouseMove: this.onMouseMove.bind(this)
+                            onMouseMove: function (e) {
+                                engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                            }.bind(this),
+                            onMouseDown: function onMouseDown(e) {
+                                if (e.getButton() == 1) {
+                                    engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                                }
+                            }
                         }, this);
                     },
                     update: function update(dt) {
                         trace("dt", dt);
-                    },
-                    onMouseMove: function onMouseMove(e) {
-                        engine.$addMouseMoveEvent(Math.floor(e.getLocation().x), Platform.height - Math.floor(e.getLocation().y));
-                    },
-                    onTouchesBegan: function onTouchesBegan(touch) {
-                        engine.$addTouchEvent("begin", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                        return true;
-                    },
-                    onTouchesMoved: function onTouchesMoved(touch) {
-                        engine.$addTouchEvent("move", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                        return true;
-                    },
-                    onTouchesEnded: function onTouchesEnded(touch) {
-                        engine.$addTouchEvent("end", touch.getID() || 0, Math.floor(touch.getLocation().x), Platform.height - Math.floor(touch.getLocation().y));
-                        return true;
                     }
                 });
                 Platform.stage2 = root.show;
-                Platform.stage = new scene();
+                Platform.stage = nativeStage || new scene();
                 Platform.stage.update = Platform._run;
-                cc.director.runScene(Platform.stage);
+                if (nativeStage == null) {
+                    cc.director.runScene(Platform.stage);
+                } else {
+                    //注册鼠标事件
+                    cc.eventManager.addListener({
+                        event: cc.EventListener.TOUCH_ONE_BY_ONE,
+                        swallowTouches: true,
+                        onTouchBegan: function onTouchBegan(touch) {
+                            if (engine.$getMouseTarget(math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y), true) == engine) {
+                                return false;
+                            }
+                            engine.$addTouchEvent("begin", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                            return true;
+                        },
+                        onTouchMoved: function onTouchMoved(touch) {
+                            engine.$addTouchEvent("move", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                            return true;
+                        },
+                        onTouchEnded: function onTouchEnded(touch) {
+                            engine.$addTouchEvent("end", touch.getID() || 0, math.floor(touch.getLocation().x), Platform.height - math.floor(touch.getLocation().y));
+                            return true;
+                        }
+                    }, touchShow || nativeStage);
+                    cc.eventManager.addListener({
+                        event: cc.EventListener.MOUSE,
+                        onMouseMove: function onMouseMove(e) {
+                            engine.$addMouseMoveEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                        },
+                        onMouseDown: function onMouseDown(e) {
+                            if (e.getButton() == 1) {
+                                engine.$addRightClickEvent(math.floor(e.getLocation().x), -math.floor(e.getLocation().y));
+                            }
+                        }
+                    }, cc.director.getRunningScene());
+                }
                 Platform.width = cc.director.getWinSize().width;
                 Platform.height = cc.director.getWinSize().height;
                 engine.$resize(Platform.width, Platform.height);
-                background.show.setPositionY(Platform.height);
-                Platform.stage.addChild(background.show);
+                //background.show.setPositionY(Platform.height);
+                //Platform.stage.addChild(background.show);
                 root.show.setPositionY(Platform.height);
                 Platform.stage.addChild(root.show);
                 if ('keyboard' in cc.sys.capabilities) {
@@ -263,6 +341,7 @@ var flower = {};
                 } else {
                     trace("KEYBOARD Not supported");
                 }
+                Platform.stage.scheduleUpdate();
             }
         }, {
             key: "_run",
@@ -271,10 +350,7 @@ var flower = {};
                 var now = new Date().getTime();
                 Platform._runBack(now - Platform.lastTime);
                 Platform.lastTime = now;
-                if (PlatformURLLoader.loadingList.length) {
-                    var item = PlatformURLLoader.loadingList.shift();
-                    item[0](item[1], item[2], item[3], item[4]);
-                }
+                PlatformURLLoader.run();
             }
         }, {
             key: "create",
@@ -284,36 +360,42 @@ var flower = {};
                     if (pools.Sprite && pools.Sprite.length) {
                         return pools.Sprite.pop();
                     }
+                    DebugInfo.nativeDisplayInfo.sprite++;
                     return new PlatformSprite();
                 }
                 if (name == "Bitmap") {
                     if (pools.Bitmap && pools.Bitmap.length) {
                         return pools.Bitmap.pop();
                     }
+                    DebugInfo.nativeDisplayInfo.bitmap++;
                     return new PlatformBitmap();
                 }
                 if (name == "TextField") {
                     if (pools.TextField && pools.TextField.length) {
                         return pools.TextField.pop();
                     }
+                    DebugInfo.nativeDisplayInfo.text++;
                     return new PlatformTextField();
                 }
                 if (name == "TextInput") {
                     if (pools.TextInput && pools.TextInput.length) {
                         return pools.TextInput.pop();
                     }
+                    DebugInfo.nativeDisplayInfo.text++;
                     return new PlatformTextInput();
                 }
                 if (name == "Shape") {
                     if (pools.Shape && pools.Shape.length) {
                         return pools.Shape.pop();
                     }
+                    DebugInfo.nativeDisplayInfo.shape++;
                     return new PlatformShape();
                 }
                 if (name == "Mask") {
                     if (pools.Mask && pools.Mask.length) {
                         return pools.Mask.pop();
                     }
+                    DebugInfo.nativeDisplayInfo.sprite++;
                     return new PlatformMask();
                 }
                 return null;
@@ -372,6 +454,7 @@ var flower = {};
 
 
     Platform.type = "cocos2dx";
+    Platform.native = cc.sys.isNative;
     Platform.lastTime = new Date().getTime();
     Platform.frame = 0;
     Platform.pools = {};
@@ -389,6 +472,7 @@ var flower = {};
             this.__height = 0;
             this.__programmer = null;
             this.__filters = null;
+            this.__alpha = 1;
             this.__programmerFlag = 0;
         }
 
@@ -468,6 +552,7 @@ var flower = {};
         }, {
             key: "setAlpha",
             value: function setAlpha(val) {
+                this.__alpha = val;
                 this.show.setOpacity(val * 255);
             }
         }, {
@@ -652,6 +737,7 @@ var flower = {};
                 this.__rotation = 0;
                 this.__width = 0;
                 this.__height = 0;
+                this.__alpha = 1;
                 this.__programmer = null;
                 this.__programmerFlag = 0;
                 if (this.__programmer) {
@@ -759,43 +845,44 @@ var flower = {};
                 if (text == "") {
                     txt.setString("");
                 }
-                for (var i = 0; i < text.length; i++) {
-                    //取一行文字进行处理
-                    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
-                        var str = text.slice(start, i);
-                        $mesureTxt.setString(str);
-                        var lineWidth = $mesureTxt.getContentSize().width;
-                        var findEnd = i;
-                        var changeLine = false;
-                        //如果这一行的文字宽大于设定宽
-                        while (!autoSize && width && lineWidth > width) {
-                            changeLine = true;
-                            findEnd--;
-                            $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                            lineWidth = $mesureTxt.getContentSize().width;
-                        }
-                        if (wordWrap && changeLine) {
-                            i = findEnd;
-                            txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                        } else {
-                            txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
-                        }
-                        //如果文字的高度已经大于设定的高，回退一次
-                        if (!autoSize && height && txt.getContentSize().height * (RETINA ? 1 / 2.0 : 1) > height) {
-                            txt.setString(txtText);
-                            break;
-                        } else {
-                            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
-                            if (wordWrap && changeLine) {
-                                txtText += "\n";
-                            }
-                        }
-                        start = i;
-                        if (multiline == false) {
-                            break;
-                        }
-                    }
-                }
+                txt.setString(text);
+                //for (var i = 0; i < text.length; i++) {
+                //    //取一行文字进行处理
+                //    if (text.charAt(i) == "\n" || text.charAt(i) == "\r" || i == text.length - 1) {
+                //        var str = text.slice(start, i);
+                //        $mesureTxt.setString(str);
+                //        var lineWidth = $mesureTxt.getContentSize().width;
+                //        var findEnd = i;
+                //        var changeLine = false;
+                //        //如果这一行的文字宽大于设定宽
+                //        while (!autoSize && width && lineWidth > width) {
+                //            changeLine = true;
+                //            findEnd--;
+                //            $mesureTxt.setString(text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                //            lineWidth = $mesureTxt.getContentSize().width;
+                //        }
+                //        if (wordWrap && changeLine) {
+                //            i = findEnd;
+                //            txt.setString(txtText + "\n" + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                //        } else {
+                //            txt.setString(txtText + text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0)));
+                //        }
+                //        //如果文字的高度已经大于设定的高，回退一次
+                //        if (!autoSize && height && txt.getContentSize().height * (RETINA ? (1 / 2.0) : 1) > height) {
+                //            txt.setString(txtText);
+                //            break;
+                //        } else {
+                //            txtText += text.slice(start, findEnd + (i == text.length - 1 ? 1 : 0));
+                //            if (wordWrap && changeLine) {
+                //                txtText += "\n";
+                //            }
+                //        }
+                //        start = i;
+                //        if (multiline == false) {
+                //            break;
+                //        }
+                //    }
+                //}
                 $mesureTxt.setString(txt.getString());
                 return $mesureTxt.getContentSize();
             }
@@ -823,13 +910,41 @@ var flower = {};
                 this.setFontColor(0);
                 _get(Object.getPrototypeOf(PlatformTextField.prototype), "release", this).call(this);
             }
+        }], [{
+            key: "measureTextWidth",
+            value: function measureTextWidth(size, text) {
+                if (Platform.native) {
+                    var $mesureTxt = PlatformTextField.$mesureTxt;
+                    var sizes = PlatformTextField.$measures;
+                    var width = 0;
+                    for (var i = 0; i < text.length; i++) {
+                        var char = text.charAt(i);
+                        if (sizes[char] == null) {
+                            $mesureTxt.setFontSize(size);
+                            $mesureTxt.setString(char);
+                            sizes[char] = $mesureTxt.getContentSize().width;
+                        }
+                        width += sizes[char];
+                    }
+                    return width;
+                }
+                var $mesureTxt = PlatformTextField.$mesureTxt;
+                $mesureTxt.setFontSize(size);
+                $mesureTxt.setString(text);
+                return $mesureTxt.getContentSize().width;
+            }
         }]);
 
         return PlatformTextField;
     }(PlatformDisplayObject);
 
+    PlatformTextField.$measures = {};
+
+
     PlatformTextField.$mesureTxt = new cc.LabelTTF("", "Times Roman", 12);
     PlatformTextField.$mesureTxt.retain();
+
+    flower.$measureTextWidth = PlatformTextField.measureTextWidth;
     //////////////////////////End File:flower/platform/cocos2dx/PlatformTextField.js///////////////////////////
 
     //////////////////////////File:flower/platform/cocos2dx/PlatformTextInput.js///////////////////////////
@@ -906,6 +1021,11 @@ var flower = {};
             key: "getNativeText",
             value: function getNativeText() {
                 return this.show.getString();
+            }
+        }, {
+            key: "setNativeText",
+            value: function setNativeText(val) {
+                this.show.setString(val);
             }
         }, {
             key: "changeText",
@@ -1048,6 +1168,7 @@ var flower = {};
                 this.__textureScaleX = texture.scaleX;
                 this.__textureScaleY = texture.scaleY;
                 this.show.setAnchorPoint(0, 1);
+                this.setAlpha(this.__alpha);
                 this.setX(this.__x);
                 this.setY(this.__y);
                 this.setScaleX(this.__scaleX);
@@ -1061,6 +1182,7 @@ var flower = {};
                         this.show.setShaderProgram(this.__programmer.$nativeProgrammer);
                     }
                 }
+                //this.show.setBlendFunc(gl.ONE, gl.ONE);
             }
         }, {
             key: "setFilters",
@@ -1091,21 +1213,26 @@ var flower = {};
                     return;
                 }
                 if (scale9Grid) {
-                    this.addProgrammerFlag(0x0001);
-                    var width = this.__texture.width;
-                    var height = this.__texture.height;
-                    var setWidth = this.__texture.width * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
-                    var setHeight = this.__texture.height * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+                    var texture = this.__texture;
+                    var source = texture.source;
+                    var copyx = scale9Grid.x;
+                    var copyy = scale9Grid.y;
+                    if (source) {
+                        scale9Grid.x -= texture.offX;
+                        scale9Grid.y -= texture.offY;
+                        trace("off??", texture.offX, texture.offY);
+                    }
 
-                    //flower.trace("setScal9Grid:", width, height, scale9Grid.x, scale9Grid.y, scale9Grid.width, scale9Grid.height, setWidth, setHeight);
-                    //width /= this.__textureScaleX;
-                    //height /= this.__textureScaleY;
-                    //scale9Grid.x /= this.__textureScaleX;
-                    //scale9Grid.y /= this.__textureScaleY;
-                    //scale9Grid.width /= this.__textureScaleX;
-                    //scale9Grid.height /= this.__textureScaleY;
-                    var scaleX = setWidth / width;
-                    var scaleY = setHeight / height;
+                    this.addProgrammerFlag(0x0001);
+                    var width = this.__texture.textureWidth;
+                    var height = this.__texture.textureHeight;
+                    var setWidth = this.__texture.textureWidth * this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
+                    var setHeight = this.__texture.textureHeight * this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+
+                    //var scaleX = this.__scaleX * (this.__settingWidth != null ? this.__settingWidth / this.__texture.width : 1);
+                    //var scaleY = this.__scaleY * (this.__settingHeight != null ? this.__settingHeight / this.__texture.height : 1);
+                    var scaleX = this.__scaleX * this.__textureScaleX * (this.__settingWidth ? (this.__settingWidth - (this.__texture.width - this.__texture.textureWidth)) / this.__texture.textureWidth : 1);
+                    var scaleY = this.__scaleY * this.__textureScaleY * (this.__settingHeight ? (this.__settingHeight - (this.__texture.height - this.__texture.textureHeight)) / this.__texture.textureHeight : 1);
                     var left = scale9Grid.x / width;
                     var top = scale9Grid.y / height;
                     var right = (scale9Grid.x + scale9Grid.width) / width;
@@ -1124,16 +1251,43 @@ var flower = {};
                         programmer.setUniformLocationI32(programmer.getUniformLocationForName("scale9"), 1);
                     }
                     if (Platform.native) {
-                        programmer.setUniformFloat("left", left);
-                        programmer.setUniformFloat("top", top);
-                        programmer.setUniformFloat("tleft", tleft);
-                        programmer.setUniformFloat("ttop", ttop);
-                        programmer.setUniformFloat("tright", tright);
-                        programmer.setUniformFloat("tbottom", tbottom);
-                        programmer.setUniformFloat("scaleGapX", scaleGapX);
-                        programmer.setUniformFloat("scaleGapY", scaleGapY);
-                        programmer.setUniformFloat("scaleX", scaleX);
-                        programmer.setUniformFloat("scaleY", scaleY);
+                        if (source && this.__texture.sourceRotation) {
+                            programmer.setUniformFloat("top", left);
+                            programmer.setUniformFloat("left", top);
+                            programmer.setUniformFloat("ttop", tleft);
+                            programmer.setUniformFloat("tleft", ttop);
+                            programmer.setUniformFloat("tbottom", tright);
+                            programmer.setUniformFloat("tright", tbottom);
+                            programmer.setUniformFloat("scaleGapY", scaleGapX);
+                            programmer.setUniformFloat("scaleGapX", scaleGapY);
+                            programmer.setUniformFloat("scaleY", scaleX);
+                            programmer.setUniformFloat("scaleX", scaleY);
+                            programmer.setUniformFloat("height", this.__width);
+                            programmer.setUniformFloat("width", this.__height);
+                        } else {
+                            programmer.setUniformFloat("left", left);
+                            programmer.setUniformFloat("top", top);
+                            programmer.setUniformFloat("tleft", tleft);
+                            programmer.setUniformFloat("ttop", ttop);
+                            programmer.setUniformFloat("tright", tright);
+                            programmer.setUniformFloat("tbottom", tbottom);
+                            programmer.setUniformFloat("scaleGapX", scaleGapX);
+                            programmer.setUniformFloat("scaleGapY", scaleGapY);
+                            programmer.setUniformFloat("scaleX", scaleX);
+                            programmer.setUniformFloat("scaleY", scaleY);
+                            programmer.setUniformFloat("width", this.__width);
+                            programmer.setUniformFloat("height", this.__height);
+                        }
+                        if (source) {
+                            programmer.setUniformInt("plist", 1);
+                            //programmer.setUniformInt("plistRot", this.__texture.sourceRotation ? 1 : 0);
+                            programmer.setUniformFloat("plistStartX", source.x / this.__texture.$parentTexture.width);
+                            programmer.setUniformFloat("plistEndX", (source.x + (this.__texture.sourceRotation ? source.height : source.width)) / (this.__texture.sourceRotation ? this.__texture.$parentTexture.height : this.__texture.$parentTexture.width));
+                            programmer.setUniformFloat("plistStartY", source.y / this.__texture.$parentTexture.height);
+                            programmer.setUniformFloat("plistEndY", (source.y + (this.__texture.sourceRotation ? source.width : source.height)) / (this.__texture.sourceRotation ? this.__texture.$parentTexture.width : this.__texture.$parentTexture.height));
+                        } else {
+                            programmer.setUniformInt("plist", 0);
+                        }
                     } else {
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("left"), left);
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("top"), top);
@@ -1145,7 +1299,11 @@ var flower = {};
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleGapY"), scaleGapY);
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleX"), scaleX);
                         programmer.setUniformLocationF32(programmer.getUniformLocationForName("scaleY"), scaleY);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("width"), this.__width);
+                        programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                     }
+                    scale9Grid.x = copyx;
+                    scale9Grid.y = copyy;
                 } else {
                     this.removeProgrammerFlag(0x0001);
                     if (this.__programmer) {
@@ -1161,6 +1319,14 @@ var flower = {};
                             programmer.setUniformLocationF32(programmer.getUniformLocationForName("height"), this.__height);
                         }
                     }
+                }
+            }
+        }, {
+            key: "setSourceSize",
+            value: function setSourceSize(val) {
+                if (this.__texture) {
+                    this.setScaleX(this.__scaleX);
+                    this.setScaleY(this.__scaleY);
                 }
             }
         }, {
@@ -1180,7 +1346,7 @@ var flower = {};
             value: function setScaleX(val) {
                 this.__scaleX = val;
                 if (this.__texture && this.__settingWidth != null) {
-                    this.show.setScaleX(val * this.__textureScaleX * this.__settingWidth / this.__texture.width);
+                    this.show.setScaleX(val * this.__textureScaleX * (this.__settingWidth - (this.__texture.width - this.__texture.textureWidth)) / this.__texture.textureWidth);
                 } else {
                     this.show.setScaleX(val * this.__textureScaleX);
                 }
@@ -1194,7 +1360,7 @@ var flower = {};
             value: function setScaleY(val) {
                 this.__scaleY = val;
                 if (this.__texture && this.__settingHeight != null) {
-                    this.show.setScaleY(val * this.__textureScaleY * this.__settingHeight / this.__texture.height);
+                    this.show.setScaleY(val * this.__textureScaleY * (this.__settingHeight - (this.__texture.height - this.__texture.textureHeight)) / this.__texture.textureHeight);
                 } else {
                     this.show.setScaleY(val * this.__textureScaleY);
                 }
@@ -1245,17 +1411,26 @@ var flower = {};
                 for (var i = 0; i < points.length; i++) {
                     points[i].y = -points[i].y;
                 }
-                shape.drawPoly(points, {
-                    r: fillColor >> 16,
-                    g: fillColor >> 8 & 0xFF,
-                    b: fillColor & 0xFF,
-                    a: fillAlpha * 255
-                }, lineWidth, {
-                    r: lineColor >> 16,
-                    g: lineColor >> 8 & 0xFF,
-                    b: lineColor & 0xFF,
-                    a: lineAlpha * 255
-                });
+                if (points.length == 2) {
+                    shape.drawSegment(points[0], points[1], lineWidth, {
+                        r: lineColor >> 16,
+                        g: lineColor >> 8 & 0xFF,
+                        b: lineColor & 0xFF,
+                        a: lineAlpha * 255
+                    });
+                } else {
+                    shape.drawPoly(points, {
+                        r: fillColor >> 16,
+                        g: fillColor >> 8 & 0xFF,
+                        b: fillColor & 0xFF,
+                        a: fillAlpha * 255
+                    }, lineWidth, {
+                        r: lineColor >> 16,
+                        g: lineColor >> 8 & 0xFF,
+                        b: lineColor & 0xFF,
+                        a: lineAlpha * 255
+                    });
+                }
                 for (var i = 0; i < points.length; i++) {
                     points[i].y = -points[i].y;
                 }
@@ -1329,7 +1504,6 @@ var flower = {};
             value: function dispose() {
                 if (Platform.native) {
                     cc.TextureCache.getInstance().removeTextureForKey(this.url);
-                    this.textrue.releaseData();
                 } else {
                     this.textrue.releaseData();
                 }
@@ -1353,14 +1527,25 @@ var flower = {};
             key: "loadText",
             value: function loadText(url, back, errorBack, thisObj, method, params, contentType) {
                 if (PlatformURLLoader.isLoading) {
-                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj]);
+                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadText, url, back, errorBack, thisObj, method, params, contentType]);
                     return;
                 }
-                PlatformURLLoader.isLoading = true;
                 if (TIP) {
                     $tip(2001, url);
                 }
+                PlatformURLLoader.isLoading = true;
+                PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadText;
+                PlatformURLLoader.loadingArgs = arguments;
+                PlatformURLLoader.loadingFunc.apply(null, arguments);
+            }
+        }, {
+            key: "realLoadText",
+            value: function realLoadText(url, back, errorBack, thisObj, method, params, contentType) {
+                PlatformURLLoader.loadingFrame = Platform.frame;
+                PlatformURLLoader.loadingId++;
+                var id = PlatformURLLoader.loadingId;
                 if (url.slice(0, "http://".length) == "http://") {
+                    PlatformURLLoader.checkFrame = Platform.frame + 120;
                     var pstr = "?";
                     for (var key in params) {
                         pstr += key + "=" + params[key] + "&";
@@ -1388,6 +1573,9 @@ var flower = {};
                         xhr.open("HEAD", url, true);
                     }
                     xhr.onloadend = function () {
+                        if (id != PlatformURLLoader.loadingId) {
+                            return;
+                        }
                         if (xhr.status != 200) {
                             errorBack.call(thisObj);
                         } else {
@@ -1398,31 +1586,28 @@ var flower = {};
                             }
                         }
                         PlatformURLLoader.isLoading = false;
+                        PlatformURLLoader.loadingId++;
                     };
-                    //xhr.onreadystatechange = function () {
-                    //    if (xhr.readyState == 4 && xhr.status == 200) {
-                    //        if (method == "HEAD") {
-                    //            back.call(thisObj, xhr.getAllResponseHeaders());
-                    //        } else {
-                    //            back.call(thisObj, xhr.responseText);
-                    //        }
-                    //    }
-                    //    else if (xhr.readyState == 4 && xhr.status != 200) {
-                    //        errorBack.call(thisObj);
-                    //    }
-                    //};
                     xhr.send();
                 } else {
+                    PlatformURLLoader.checkFrame = Platform.frame + 3;
                     var res;
                     var end = url.split(".")[url.split(".").length - 1];
                     if (end != "plist" && end != "xml" && end != "json") {
                         res = cc.loader.getRes(url);
                     }
                     if (res) {
+                        if (id != PlatformURLLoader.loadingId) {
+                            return;
+                        }
                         back.call(thisObj, res);
                         PlatformURLLoader.isLoading = false;
+                        PlatformURLLoader.loadingId++;
                     } else {
                         cc.loader.loadTxt(url, function (error, data) {
+                            if (id != PlatformURLLoader.loadingId) {
+                                return;
+                            }
                             if (error) {
                                 errorBack.call(thisObj);
                             } else {
@@ -1435,22 +1620,41 @@ var flower = {};
                                 back.call(thisObj, data);
                             }
                             PlatformURLLoader.isLoading = false;
+                            PlatformURLLoader.loadingId++;
                         });
                     }
                 }
             }
         }, {
             key: "loadTexture",
-            value: function loadTexture(url, back, errorBack, thisObj) {
+            value: function loadTexture(url, back, errorBack, thisObj, params) {
                 if (PlatformURLLoader.isLoading) {
-                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj]);
+                    PlatformURLLoader.loadingList.push([PlatformURLLoader.loadTexture, url, back, errorBack, thisObj, params]);
                     return;
                 }
-                PlatformURLLoader.isLoading = true;
                 if (TIP) {
                     $tip(2002, url);
                 }
+                PlatformURLLoader.isLoading = true;
+                PlatformURLLoader.loadingFunc = PlatformURLLoader.realLoadTexture;
+                PlatformURLLoader.loadingArgs = arguments;
+                PlatformURLLoader.loadingFunc.apply(null, arguments);
+            }
+        }, {
+            key: "realLoadTexture",
+            value: function realLoadTexture(url, back, errorBack, thisObj, params) {
+                PlatformURLLoader.loadingFrame = Platform.frame;
+                if (url.slice(0, "http://".length) == "http://") {
+                    PlatformURLLoader.checkFrame = Platform.frame + 120;
+                } else {
+                    PlatformURLLoader.checkFrame = Platform.frame + 3;
+                }
+                PlatformURLLoader.loadingId++;
+                var id = PlatformURLLoader.loadingId;
                 cc.loader.loadImg(url, { isCrossOrigin: true }, function (err, img) {
+                    if (id != PlatformURLLoader.loadingId) {
+                        return;
+                    }
                     if (err) {
                         errorBack.call(thisObj);
                     } else {
@@ -1473,7 +1677,23 @@ var flower = {};
                         //}
                     }
                     PlatformURLLoader.isLoading = false;
+                    PlatformURLLoader.loadingId++;
                 });
+            }
+        }, {
+            key: "run",
+            value: function run() {
+                if (PlatformURLLoader.isLoading == false) {
+                    if (PlatformURLLoader.loadingList.length) {
+                        var item = PlatformURLLoader.loadingList.shift();
+                        item[0].apply(null, item.slice(1, item.length));
+                    }
+                } else {
+                    if (Platform.frame >= PlatformURLLoader.checkFrame) {
+                        console.log("Try load again: " + PlatformURLLoader.loadingArgs[0]);
+                        PlatformURLLoader.loadingFunc.apply(null, PlatformURLLoader.loadingArgs);
+                    }
+                }
             }
         }]);
 
@@ -1485,6 +1705,7 @@ var flower = {};
 
 
     PlatformURLLoader.isLoading = false;
+    PlatformURLLoader.loadingId = 0;
     PlatformURLLoader.loadingList = [];
 
     var PlatformProgram = function () {
@@ -1578,8 +1799,8 @@ var flower = {};
 
         _createClass(PlatformWebSocket, [{
             key: "bindWebSocket",
-            value: function bindWebSocket(ip, port, thisObj, onConnect, onReceiveMessage, onError, onClose) {
-                var websocket = new LocalWebSocket("ws://" + ip + ":" + port);
+            value: function bindWebSocket(ip, port, path, thisObj, onConnect, onReceiveMessage, onError, onClose) {
+                var websocket = new LocalWebSocket("ws://" + ip + ":" + port + path);
                 this.webSocket = websocket;
                 var openFunc = function openFunc() {
                     onConnect.call(thisObj);
@@ -1657,71 +1878,67 @@ var flower = {};
     }();
     //////////////////////////End File:flower/platform/cocos2dx/PlatformWebSocket.js///////////////////////////
 
-    //////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
-    /**
-     * 调试信息
-     */
+    //////////////////////////File:flower/debug/NativeDisplayInfo.js///////////////////////////
 
 
     PlatformWebSocket.webSockets = [];
 
-    var DebugInfo = function () {
-        /**
-         *
-         * @type {{}}
-         */
+    var NativeDisplayInfo = function NativeDisplayInfo() {
+        _classCallCheck(this, NativeDisplayInfo);
 
-        function DebugInfo() {
-            _classCallCheck(this, DebugInfo);
+        this.display = 0;
+        this.text = 0;
+        this.bitmap = 0;
+        this.shape = 0;
+        this.sprite = 0;
+    };
+    //////////////////////////End File:flower/debug/NativeDisplayInfo.js///////////////////////////
 
-            this.objects = {};
-            this.textures = [];
-        }
-
-        /**
-         * 所有纹理纹理信息
-         * @type {Array}
-         */
+    //////////////////////////File:flower/debug/DisplayInfo.js///////////////////////////
 
 
-        /**
-         * 平台对象纪录
-         * @type {{}}
-         */
+    var DisplayInfo = function DisplayInfo() {
+        _classCallCheck(this, DisplayInfo);
+
+        this.display = 0;
+        this.text = 0;
+        this.bitmap = 0;
+        this.shape = 0;
+        this.sprite = 0;
+    };
+
+    //////////////////////////End File:flower/debug/DisplayInfo.js///////////////////////////
+
+    //////////////////////////File:flower/debug/CpuInfo.js///////////////////////////
 
 
-        _createClass(DebugInfo, [{
-            key: "addTexture",
-            value: function addTexture(texture) {
-                this.textures.push(texture);
-            }
-        }, {
-            key: "delTexture",
-            value: function delTexture(texture) {
-                for (var i = 0; i < this.textures.length; i++) {
-                    if (this.textures[i] == texture) {
-                        this.textures.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-        }], [{
-            key: "getInstance",
-            value: function getInstance() {
-                return DebugInfo.instance;
-            }
-        }]);
+    var CpuInfo = function CpuInfo() {
+        _classCallCheck(this, CpuInfo);
 
-        return DebugInfo;
-    }();
+        this.enterFrame = 0;
+        this.delayCall = 0;
+        this.callLater = 0;
+        this.frameEnd = 0;
+        this.fps = 0;
+    };
+    //////////////////////////End File:flower/debug/CpuInfo.js///////////////////////////
 
-    DebugInfo.instance = new DebugInfo();
+    //////////////////////////File:flower/debug/FrameInfo.js///////////////////////////
 
 
-    flower.DebugInfo = DebugInfo;
-    //////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
+    var FrameInfo = function FrameInfo() {
+        _classCallCheck(this, FrameInfo);
+
+        this.display = 0;
+        this.text = 0;
+        this.bitmap = 0;
+        this.shape = 0;
+        this.sprite = 0;
+    };
+    //////////////////////////End File:flower/debug/FrameInfo.js///////////////////////////
 
     //////////////////////////File:flower/debug/TextureInfo.js///////////////////////////
+
 
     var TextureInfo = function () {
         function TextureInfo(texture) {
@@ -1753,6 +1970,68 @@ var flower = {};
     flower.TextureInfo = TextureInfo;
     //////////////////////////End File:flower/debug/TextureInfo.js///////////////////////////
 
+    //////////////////////////File:flower/debug/DebugInfo.js///////////////////////////
+    /**
+     * 调试信息
+     */
+
+    var DebugInfo = function () {
+        function DebugInfo() {
+            _classCallCheck(this, DebugInfo);
+        }
+
+        _createClass(DebugInfo, null, [{
+            key: "addTexture",
+
+
+            /**
+             * native显示对象统计
+             */
+            value: function addTexture(texture) {
+                DebugInfo.textures.push(texture);
+            }
+
+            /**
+             * 帧遍历显示对象统计
+             * @param texture
+             */
+
+
+            /**
+             * 显示对象统计
+             */
+
+            /**
+             * 所有纹理纹理信息
+             * @type {Array}
+             */
+
+        }, {
+            key: "delTexture",
+            value: function delTexture(texture) {
+                var textures = DebugInfo.textures;
+                for (var i = 0; i < textures.length; i++) {
+                    if (textures[i] == texture) {
+                        textures.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }]);
+
+        return DebugInfo;
+    }();
+
+    DebugInfo.textures = [];
+    DebugInfo.nativeDisplayInfo = new NativeDisplayInfo();
+    DebugInfo.displayInfo = new DisplayInfo();
+    DebugInfo.cpu = new CpuInfo();
+    DebugInfo.frameInfo = new FrameInfo();
+
+
+    flower.DebugInfo = DebugInfo;
+    //////////////////////////End File:flower/debug/DebugInfo.js///////////////////////////
+
     //////////////////////////File:flower/core/CoreTime.js///////////////////////////
 
     var CoreTime = function () {
@@ -1766,7 +2045,12 @@ var flower = {};
                 CoreTime.lastTimeGap = gap;
                 CoreTime.currentTime += gap;
                 EnterFrame.$update(CoreTime.currentTime, gap);
-                Stage.$onFrameEnd();
+                var st = new Date().getTime();
+                if (CoreTime.$playEnterFrame) {
+                    Stage.$onFrameEnd();
+                }
+                var et = new Date().getTime();
+                DebugInfo.cpu.onFrameEnd += et - st;
                 TextureManager.getInstance().$check();
             }
         }, {
@@ -1780,12 +2064,22 @@ var flower = {};
     }();
 
     CoreTime.currentTime = 0;
+    CoreTime.$playEnterFrame = true;
 
 
     flower.CoreTime = CoreTime;
     //////////////////////////End File:flower/core/CoreTime.js///////////////////////////
 
     //////////////////////////File:flower/language/Language.js///////////////////////////
+
+    var Language = function Language() {
+        _classCallCheck(this, Language);
+    };
+
+    Language.currentLanguage = "";
+    Language.__languages = [];
+
+
     var $locale_strings = {};
 
     /**
@@ -1813,6 +2107,7 @@ var flower = {};
     }
 
     flower.sys.getLanguage = getLanguage;
+
     //////////////////////////End File:flower/language/Language.js///////////////////////////
 
     //////////////////////////File:flower/language/zh_CN.js///////////////////////////
@@ -1832,6 +2127,9 @@ var flower = {};
     locale_strings[1007] = "{0} 超出索引: {1}，索引范围为 0 ~ {2}";
     locale_strings[1008] = "错误的参数类型：{0} ，请参考 http://" + docsWebSite + "docs/class/{1}.md?f{2}";
     locale_strings[1020] = "开始标签和结尾标签不一致，开始标签：{0} ，结尾标签：{1}";
+    locale_strings[1030] = "目标显示对象不在同一个显示列表中";
+    locale_strings[1100] = "监听事件类型不能为空";
+    locale_strings[1101] = "监听事件回调函数不能为空";
     locale_strings[2001] = "[loadText] {0}";
     locale_strings[2002] = "[loadTexture] {0}";
     locale_strings[2003] = "[加载失败] {0}";
@@ -1881,8 +2179,9 @@ var flower = {};
             key: "once",
             value: function once(type, listener, thisObject) {
                 var priority = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var args = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
-                this.__addListener(type, listener, thisObject, priority, true);
+                this.__addListener(type, listener, thisObject, priority, true, args);
             }
 
             /**
@@ -1897,8 +2196,9 @@ var flower = {};
             key: "addListener",
             value: function addListener(type, listener, thisObject) {
                 var priority = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+                var args = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
 
-                this.__addListener(type, listener, thisObject, priority, false);
+                this.__addListener(type, listener, thisObject, priority, false, args);
             }
 
             /**
@@ -1913,10 +2213,16 @@ var flower = {};
 
         }, {
             key: "__addListener",
-            value: function __addListener(type, listener, thisObject, priority, once) {
+            value: function __addListener(type, listener, thisObject, priority, once, args) {
                 if (DEBUG) {
                     if (this.__hasDispose) {
                         $error(1002);
+                    }
+                    if (type == null) {
+                        $error(1100);
+                    }
+                    if (listener == null) {
+                        $error(1101);
                     }
                 }
                 var values = this.__EventDispatcher;
@@ -1927,11 +2233,25 @@ var flower = {};
                 }
                 for (var i = 0, len = list.length; i < len; i++) {
                     var item = list[i];
-                    if (item.listener == listener && item.thisObject == thisObject && item.del == false) {
+                    var agrsame = item.args == args ? true : false;
+                    if (!agrsame && item.args && args) {
+                        var arg1 = item.args.length ? item.args : [item.args];
+                        var arg2 = args.length ? args : [args];
+                        if (arg1.length == arg2.length) {
+                            agrsame = true;
+                            for (var a = 0; a < arg1.length; a++) {
+                                if (arg1[a] != arg2[a]) {
+                                    agrsame = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
                         return false;
                     }
                 }
-                list.push({ "listener": listener, "thisObject": thisObject, "once": once, "del": false });
+                list.push({ "listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args });
             }
         }, {
             key: "removeListener",
@@ -2008,12 +2328,16 @@ var flower = {};
                             event.$target = this;
                         }
                         event.$currentTarget = this;
+                        var args = [event];
+                        if (list[i].args) {
+                            args = args.concat(list[i].args);
+                        }
                         if (list[i].once) {
                             list[i].listener = null;
                             list[i].thisObject = null;
                             list[i].del = true;
                         }
-                        listener.call(thisObj, event);
+                        listener.apply(thisObj, args);
                     }
                 }
                 for (i = 0; i < list.length; i++) {
@@ -2024,19 +2348,25 @@ var flower = {};
                 }
             }
         }, {
-            key: "dispatchWidth",
-            value: function dispatchWidth(type) {
+            key: "dispatchWith",
+            value: function dispatchWith(type) {
                 var data = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+                var bubbles = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
                 if (DEBUG) {
                     if (this.__hasDispose) {
                         $error(1002);
                     }
                 }
-                var e = flower.Event.create(type, data);
+                var e = flower.Event.create(type, data, bubbles);
                 e.$target = this;
                 this.dispatch(e);
                 flower.Event.release(e);
+            }
+        }, {
+            key: "isDispose",
+            get: function get() {
+                return this.__hasDispose;
             }
         }]);
 
@@ -2130,19 +2460,25 @@ var flower = {};
     Event.COMPLETE = "complete";
     Event.ADDED = "added";
     Event.REMOVED = "removed";
+    Event.ADD = "add";
+    Event.REMOVE = "remove";
     Event.ADDED_TO_STAGE = "added_to_stage";
     Event.REMOVED_FROM_STAGE = "removed_from_stage";
     Event.CONNECT = "connect";
     Event.CLOSE = "close";
     Event.CHANGE = "change";
     Event.ERROR = "error";
-    Event.UPDATE = "update";
     Event.FOCUS_IN = "focus_in";
     Event.FOCUS_OUT = "focus_out";
     Event.CONFIRM = "confirm";
     Event.CANCEL = "cancel";
     Event.START_INPUT = "start_input";
     Event.STOP_INPUT = "stop_input";
+    Event.DISTORT = "distort";
+    Event.CREATION_COMPLETE = "creation_complete";
+    Event.SELECTED_ITEM_CHANGE = "selected_item_change";
+    Event.CLICK_ITEM = "click_item";
+    Event.TOUCH_BEGIN_ITEM = "touch_begin_item";
     Event._eventPool = [];
 
 
@@ -2177,11 +2513,17 @@ var flower = {};
         }, {
             key: "touchX",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.mouseX;
+                }
                 return this.$touchX;
             }
         }, {
             key: "touchY",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.mouseY;
+                }
                 return this.$touchY;
             }
         }, {
@@ -2228,13 +2570,19 @@ var flower = {};
         }
 
         _createClass(MouseEvent, [{
-            key: "touchX",
+            key: "mouseX",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.mouseX;
+                }
                 return this.$touchX;
             }
         }, {
-            key: "touchY",
+            key: "mouseY",
             get: function get() {
+                if (this.currentTarget) {
+                    return this.currentTarget.mouseY;
+                }
                 return this.$touchY;
             }
         }, {
@@ -2261,6 +2609,7 @@ var flower = {};
     MouseEvent.MOUSE_MOVE = "mouse_move";
     MouseEvent.MOUSE_OVER = "mouse_over";
     MouseEvent.MOUSE_OUT = "mouse_out";
+    MouseEvent.RIGHT_CLICK = "right_click";
 
 
     flower.MouseEvent = MouseEvent;
@@ -2442,7 +2791,7 @@ var flower = {};
 
         function ColorFilter() {
             var h = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-            var s = arguments.length <= 1 || arguments[1] === undefined ? -100 : arguments[1];
+            var s = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
             var l = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
             _classCallCheck(this, ColorFilter);
@@ -2470,6 +2819,7 @@ var flower = {};
                 return this.__h;
             },
             set: function set(val) {
+                val = +val || 0;
                 val += 180;
                 if (val < 0) {
                     val = 360 - -val % 360;
@@ -2485,6 +2835,7 @@ var flower = {};
                 return this.__s;
             },
             set: function set(val) {
+                val = +val || 0;
                 if (val > 100) {
                     val = 100;
                 } else if (val < -100) {
@@ -2498,6 +2849,7 @@ var flower = {};
                 return this.__l;
             },
             set: function set(val) {
+                val = +val || 0;
                 if (val > 100) {
                     val = 100;
                 } else if (val < -100) {
@@ -2632,6 +2984,71 @@ var flower = {};
     flower.BlurFilter = BlurFilter;
     //////////////////////////End File:flower/filters/BlurFilter.js///////////////////////////
 
+    //////////////////////////File:flower/filters/DyeingFilter.js///////////////////////////
+    /**
+     * 收集原有的 r,g,b 计算和，再根据 r,g,b 的比值重新分配 r,g,b
+     */
+
+    var DyeingFilter = function (_Filter4) {
+        _inherits(DyeingFilter, _Filter4);
+
+        function DyeingFilter() {
+            var r = arguments.length <= 0 || arguments[0] === undefined ? 0.0 : arguments[0];
+            var g = arguments.length <= 1 || arguments[1] === undefined ? 0.0 : arguments[1];
+            var b = arguments.length <= 2 || arguments[2] === undefined ? 0.0 : arguments[2];
+
+            _classCallCheck(this, DyeingFilter);
+
+            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(DyeingFilter).call(this, 3));
+
+            _this14.__r = 0;
+            _this14.__g = 0;
+            _this14.__b = 0;
+
+            _this14.r = r;
+            _this14.g = g;
+            _this14.b = b;
+            return _this14;
+        }
+
+        _createClass(DyeingFilter, [{
+            key: "$getParams",
+            value: function $getParams() {
+                var sum = this.__r + this.__g + this.__b;
+                return [this.__r / sum, this.__g / sum, this.__b / sum];
+            }
+        }, {
+            key: "r",
+            get: function get() {
+                return this.__r;
+            },
+            set: function set(val) {
+                this.__r = +val || 0;
+            }
+        }, {
+            key: "g",
+            get: function get() {
+                return this.__g;
+            },
+            set: function set(val) {
+                this.__g = +val || 0;
+            }
+        }, {
+            key: "b",
+            get: function get() {
+                return this.__b;
+            },
+            set: function set(val) {
+                this.__b = +val || 0;
+            }
+        }]);
+
+        return DyeingFilter;
+    }(Filter);
+
+    flower.DyeingFilter = DyeingFilter;
+    //////////////////////////End File:flower/filters/DyeingFilter.js///////////////////////////
+
     //////////////////////////File:flower/geom/Matrix.js///////////////////////////
 
     var Matrix = function () {
@@ -2676,8 +3093,8 @@ var flower = {};
         }, {
             key: "rotate",
             value: function rotate(angle) {
-                var sin = Math.sin(angle);
-                var cos = Math.cos(angle);
+                var sin = math.sin(angle);
+                var cos = math.cos(angle);
                 this.setTo(this.a * cos - this.c * sin, this.a * sin + this.c * cos, this.b * cos - this.d * sin, this.b * sin + this.d * cos, this.tx * cos - this.ty * sin, this.tx * sin + this.ty * cos);
             }
         }, {
@@ -2705,8 +3122,8 @@ var flower = {};
                 var sin = 0;
                 var cos = 1;
                 if (rotation) {
-                    sin = Math.sin(rotation);
-                    cos = Math.cos(rotation);
+                    sin = math.sin(rotation);
+                    cos = math.cos(rotation);
                 }
                 this.a = cos * scaleX;
                 this.b = sin * scaleY;
@@ -2719,8 +3136,8 @@ var flower = {};
                 var sin = 0;
                 var cos = 1;
                 if (rotation) {
-                    sin = Math.sin(rotation);
-                    cos = Math.cos(rotation);
+                    sin = math.sin(rotation);
+                    cos = math.cos(rotation);
                 }
                 this.a = cos * scaleX;
                 this.b = sin * scaleX;
@@ -2761,8 +3178,8 @@ var flower = {};
                     x2 = x3;
                     x3 = tmp;
                 }
-                rect.x = Math.floor(x0 < x2 ? x0 : x2);
-                rect.width = Math.ceil((x1 > x3 ? x1 : x3) - rect.x);
+                rect.x = math.floor(x0 < x2 ? x0 : x2);
+                rect.width = math.ceil((x1 > x3 ? x1 : x3) - rect.x);
                 if (y0 > y1) {
                     tmp = y0;
                     y0 = y1;
@@ -2773,8 +3190,8 @@ var flower = {};
                     y2 = y3;
                     y3 = tmp;
                 }
-                rect.y = Math.floor(y0 < y2 ? y0 : y2);
-                rect.height = Math.ceil((y1 > y3 ? y1 : y3) - rect.y);
+                rect.y = math.floor(y0 < y2 ? y0 : y2);
+                rect.height = math.ceil((y1 > y3 ? y1 : y3) - rect.y);
             }
         }, {
             key: "save",
@@ -2857,12 +3274,12 @@ var flower = {};
         }, {
             key: "length",
             get: function get() {
-                return Math.sqrt(this.x * this.x + this.y * this.y);
+                return math.sqrt(this.x * this.x + this.y * this.y);
             }
         }], [{
             key: "distance",
             value: function distance(p1, p2) {
-                return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+                return math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
             }
         }, {
             key: "release",
@@ -2943,11 +3360,11 @@ var flower = {};
                 var y0 = this.y;
                 var x1 = clipRect.x;
                 var y1 = clipRect.y;
-                var l = Math.max(x0, x1);
-                var r = Math.min(x0 + this.width, x1 + clipRect.width);
+                var l = math.max(x0, x1);
+                var r = math.min(x0 + this.width, x1 + clipRect.width);
                 if (l <= r) {
-                    var t = Math.max(y0, y1);
-                    var b = Math.min(y0 + this.height, y1 + clipRect.height);
+                    var t = math.max(y0, y1);
+                    var b = math.min(y0 + this.height, y1 + clipRect.height);
                     if (t <= b) {
                         this.setTo(l, t, r - l, b - t);
                         return this;
@@ -2959,7 +3376,7 @@ var flower = {};
         }, {
             key: "intersects",
             value: function intersects(toIntersect) {
-                return Math.max(this.x, toIntersect.x) <= Math.min(this.right, toIntersect.right) && Math.max(this.y, toIntersect.y) <= Math.min(this.bottom, toIntersect.bottom);
+                return math.max(this.x, toIntersect.x) <= math.min(this.right, toIntersect.right) && math.max(this.y, toIntersect.y) <= math.min(this.bottom, toIntersect.bottom);
             }
         }, {
             key: "isEmpty",
@@ -2982,15 +3399,15 @@ var flower = {};
         }, {
             key: "_getBaseWidth",
             value: function _getBaseWidth(angle) {
-                var u = Math.abs(Math.cos(angle));
-                var v = Math.abs(Math.sin(angle));
+                var u = math.abs(math.cos(angle));
+                var v = math.abs(math.sin(angle));
                 return u * this.width + v * this.height;
             }
         }, {
             key: "_getBaseHeight",
             value: function _getBaseHeight(angle) {
-                var u = Math.abs(Math.cos(angle));
-                var v = Math.abs(Math.sin(angle));
+                var u = math.abs(math.cos(angle));
+                var v = math.abs(math.sin(angle));
                 return v * this.width + u * this.height;
             }
         }, {
@@ -3055,6 +3472,7 @@ var flower = {};
     }();
 
     Rectangle.rectanglePool = [];
+    Rectangle.$TempRectangle = new Rectangle();
 
 
     flower.Rectangle = Rectangle;
@@ -3165,16 +3583,16 @@ var flower = {};
         function DisplayObject() {
             _classCallCheck(this, DisplayObject);
 
-            var _this14 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
+            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(DisplayObject).call(this));
 
-            _this14.__flags = 0;
-            _this14.__alpha = 1;
-            _this14.__parentAlpha = 1;
-            _this14.__concatAlpha = 1;
-            _this14.__visible = true;
+            _this15.__flags = 0;
+            _this15.__alpha = 1;
+            _this15.__parentAlpha = 1;
+            _this15.__concatAlpha = 1;
+            _this15.__visible = true;
 
             var id = DisplayObject.id++;
-            _this14.$DisplayObject = {
+            _this15.$DisplayObject = {
                 0: 1, //scaleX
                 1: 1, //scaleY
                 2: 0, //rotation
@@ -3190,20 +3608,17 @@ var flower = {};
                 12: new Matrix(), //matrix
                 13: new Matrix(), //reverseMatrix
                 14: 0, //radian
+                15: false, //simpleMode
                 20: id, //id
                 21: true, //dispatchEventToParent
+                22: 0, //lastTouchFrame
                 50: false, //focusEnabeld
                 60: [], //filters
                 61: [] };
-            return _this14;
+            //parentFilters
+            DebugInfo.displayInfo.display++;
+            return _this15;
         }
-
-        /**
-         * 是否有此标识位
-         * @param flags
-         * @returns {boolean}
-         */
-
 
         /**
          * native 显示，比如 cocos2dx 的显示对象或者 egret 的显示对象等...
@@ -3216,8 +3631,19 @@ var flower = {};
 
 
         _createClass(DisplayObject, [{
+            key: "$setSimpleMode",
+            value: function $setSimpleMode() {
+                this.$DisplayObject[15] = true;
+            }
+
+            /**
+             * 是否有此标识位
+             * @param flags
+             * @returns {boolean}
+             */
+
+        }, {
             key: "$hasFlags",
-            //parentFilters
             value: function $hasFlags(flags) {
                 return (this.__flags & flags) == flags ? true : false;
             }
@@ -3288,7 +3714,9 @@ var flower = {};
                     return;
                 }
                 this.$nativeShow.setX(val);
-                this.$invalidateReverseMatrix();
+                if (!this.$DisplayObject[15]) {
+                    this.$invalidateReverseMatrix();
+                }
             }
         }, {
             key: "$getY",
@@ -3309,7 +3737,9 @@ var flower = {};
                     return;
                 }
                 this.$nativeShow.setY(val);
-                this.$invalidateReverseMatrix();
+                if (!this.$DisplayObject[15]) {
+                    this.$invalidateReverseMatrix();
+                }
             }
         }, {
             key: "$setScaleX",
@@ -3325,7 +3755,9 @@ var flower = {};
                     return;
                 }
                 this.$nativeShow.setScaleX(val);
-                this.$invalidateMatrix();
+                if (!this.$DisplayObject[15]) {
+                    this.$invalidateMatrix();
+                }
             }
         }, {
             key: "$getScaleX",
@@ -3347,7 +3779,9 @@ var flower = {};
                     return;
                 }
                 this.$nativeShow.setScaleY(val);
-                this.$invalidateMatrix();
+                if (!this.$DisplayObject[15]) {
+                    this.$invalidateMatrix();
+                }
             }
         }, {
             key: "$getScaleY",
@@ -3369,13 +3803,15 @@ var flower = {};
                     return;
                 }
                 p[2] = val;
-                p[14] = val * Math.PI / 180;
+                p[14] = val * math.PI / 180;
                 if (!this.$nativeShow) {
                     $warn(1002, this.name);
                     return;
                 }
                 this.$nativeShow.setRotation(val);
-                this.$invalidateMatrix();
+                if (!this.$DisplayObject[15]) {
+                    this.$invalidateMatrix();
+                }
             }
         }, {
             key: "$getMatrix",
@@ -3456,7 +3892,9 @@ var flower = {};
                     }
                 }
                 p[3] = val;
-                this.$invalidatePosition();
+                if (!p[15]) {
+                    this.$invalidatePosition();
+                }
                 return true;
             }
         }, {
@@ -3481,7 +3919,9 @@ var flower = {};
                     }
                 }
                 p[4] = val;
-                this.$invalidatePosition();
+                if (!this.$DisplayObject[15]) {
+                    this.$invalidatePosition();
+                }
                 return true;
             }
         }, {
@@ -3493,11 +3933,23 @@ var flower = {};
         }, {
             key: "$getBounds",
             value: function $getBounds() {
+                var fromParent = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
                 var rect = this.$DisplayObject[7];
                 if (this.$hasFlags(0x0004)) {
                     this.$removeFlags(0x0004);
                     var contentRect = this.$getContentBounds();
                     rect.copyFrom(contentRect);
+                    var width = this.width;
+                    var height = this.height;
+                    if (rect.width != width) {
+                        rect.x = 0;
+                        rect.width = width;
+                    }
+                    if (rect.height != height) {
+                        rect.y = 0;
+                        rect.height = height = height;
+                    }
                     var matrix = this.$getMatrix();
                     matrix.$transformRectangle(rect);
                 }
@@ -3540,14 +3992,20 @@ var flower = {};
                 var parentAlpha = parent ? parent.$getConcatAlpha() : 1;
                 if (this.__parentAlpha != parentAlpha) {
                     this.__parentAlpha = parentAlpha;
-                    this.$addFlagsDown(0x0002);
+                    if (!this.$DisplayObject[15]) {
+                        this.$addFlagsDown(0x0002);
+                    }
                 }
                 if (this.__parent) {
                     this.$setParentFilters(this.__parent.$getAllFilters());
-                    this.dispatchWidth(Event.ADDED);
+                    if (!this.$DisplayObject[15]) {
+                        this.dispatchWith(Event.ADDED);
+                    }
                 } else {
                     this.$setParentFilters(null);
-                    this.dispatchWidth(Event.REMOVED);
+                    if (!this.$DisplayObject[15]) {
+                        this.dispatchWith(Event.REMOVED);
+                    }
                 }
             }
         }, {
@@ -3558,15 +4016,19 @@ var flower = {};
         }, {
             key: "$dispatchAddedToStageEvent",
             value: function $dispatchAddedToStageEvent() {
-                if (this.__stage) {
-                    this.dispatchWidth(Event.ADDED_TO_STAGE);
+                if (!this.$DisplayObject[15]) {
+                    if (this.__stage) {
+                        this.dispatchWith(Event.ADDED_TO_STAGE);
+                    }
                 }
             }
         }, {
             key: "$dispatchRemovedFromStageEvent",
             value: function $dispatchRemovedFromStageEvent() {
-                if (!this.__stage) {
-                    this.dispatchWidth(Event.REMOVED_FROM_STAGE);
+                if (!this.$DisplayObject[15]) {
+                    if (!this.__stage) {
+                        this.dispatchWith(Event.REMOVED_FROM_STAGE);
+                    }
                 }
             }
         }, {
@@ -3617,7 +4079,7 @@ var flower = {};
             key: "dispatch",
             value: function dispatch(e) {
                 _get(Object.getPrototypeOf(DisplayObject.prototype), "dispatch", this).call(this, e);
-                if (e.bubbles && this.__parent && this.$DisplayObject[21]) {
+                if (e.bubbles && !e.isPropagationStopped && this.__parent && this.$DisplayObject[21]) {
                     this.__parent.dispatch(e);
                 }
             }
@@ -3689,20 +4151,43 @@ var flower = {};
             key: "$getMouseTarget",
             value: function $getMouseTarget(touchX, touchY, multiply) {
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
+                p[22] = flower.EnterFrame.frame;
                 var bounds = this.$getContentBounds();
-                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
                     return this;
                 }
                 return null;
             }
+
+            /**
+             * 测量鼠标位置
+             */
+
+        }, {
+            key: "$measureMousePosition",
+            value: function $measureMousePosition() {
+                var p = this.$DisplayObject;
+                if (p[22] != flower.EnterFrame.frame && this.parent) {
+                    this.parent.$measureMousePosition();
+                    var mouseX = this.parent.mouseX;
+                    var mouseY = this.parent.mouseY;
+                    var point = this.$getReverseMatrix().transformPoint(mouseX, mouseY, Point.$TempPoint);
+                    mouseX = math.floor(point.x);
+                    mouseY = math.floor(point.y);
+                    p[10] = mouseX;
+                    p[11] = mouseY;
+                    p[22] = flower.EnterFrame.frame;
+                }
+            }
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
+                DebugInfo.frameInfo.display++;
                 var p = this.$DisplayObject;
                 if (this.$hasFlags(0x0002)) {
                     this.$nativeShow.setAlpha(this.$getConcatAlpha());
@@ -3711,13 +4196,50 @@ var flower = {};
         }, {
             key: "localToGlobal",
             value: function localToGlobal(point) {
-                point = point || new flower.Point();
-                var matrix;
                 var display = this;
-                while (display) {
-                    matrix = display.$getMatrix();
-                    matrix.transformPoint(point.x, point.y, point);
+                while (display.parent) {
                     display = display.parent;
+                }
+                return this.localToDisplay(point, display);
+            }
+        }, {
+            key: "localToDisplay",
+            value: function localToDisplay(point, display) {
+                point = point || new flower.Point();
+                var parentsThis = [];
+                var dis = this;
+                while (dis) {
+                    parentsThis.push(dis);
+                    dis = dis.parent;
+                }
+                var parentsDisplay = [];
+                dis = display;
+                while (dis) {
+                    parentsDisplay.push(dis);
+                    dis = dis.parent;
+                }
+                var find = false;
+                for (var i = 0; i < parentsThis.length; i++) {
+                    for (var j = 0; j < parentsDisplay.length; j++) {
+                        if (parentsThis[i] == parentsDisplay[j]) {
+                            parentsThis.splice(i, parentsThis.length - i);
+                            parentsDisplay.splice(j, parentsDisplay.length - j);
+                            find = true;
+                            break;
+                        }
+                    }
+                }
+                if (!find) {
+                    $error(1030);
+                }
+                var matrix;
+                for (var i = 0; i < parentsThis.length; i++) {
+                    matrix = parentsThis[i].$getMatrix();
+                    matrix.transformPoint(point.x, point.y, point);
+                }
+                for (var i = 0; i < parentsDisplay.length; i++) {
+                    matrix = parentsDisplay[i].$getReverseMatrix();
+                    matrix.transformPoint(point.x, point.y, point);
                 }
                 return point;
             }
@@ -3735,9 +4257,10 @@ var flower = {};
         }, {
             key: "dispose",
             value: function dispose() {
-                if (this.parent) {
-                    this.parent.removeChild(this);
+                if (this.__parent) {
+                    this.__parent.removeChild(this);
                 }
+                DebugInfo.displayInfo.display--;
                 _get(Object.getPrototypeOf(DisplayObject.prototype), "dispose", this).call(this);
             }
         }, {
@@ -3855,15 +4378,21 @@ var flower = {};
                 this.$setMultiplyTouchEnabled(val);
             }
         }, {
-            key: "lastTouchX",
+            key: "mouseX",
             get: function get() {
                 var p = this.$DisplayObject;
+                if (p[22] != flower.EnterFrame.frame) {
+                    this.$measureMousePosition();
+                }
                 return p[10];
             }
         }, {
-            key: "lastTouchY",
+            key: "mouseY",
             get: function get() {
                 var p = this.$DisplayObject;
+                if (p[22] != flower.EnterFrame.frame) {
+                    this.$measureMousePosition();
+                }
                 return p[11];
             }
         }, {
@@ -3877,12 +4406,10 @@ var flower = {};
         }, {
             key: "focusEnabled",
             get: function get() {
-                var p = this.$DisplayObject;
-                return p[50];
+                return this.$DisplayObject[50];
             },
             set: function set(val) {
-                var p = this.$DisplayObject;
-                p[50] = val;
+                this.$DisplayObject[50] = val;
             }
         }, {
             key: "id",
@@ -3921,10 +4448,14 @@ var flower = {};
         function Sprite() {
             _classCallCheck(this, Sprite);
 
-            var _this15 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
+            var _this16 = _possibleConstructorReturn(this, Object.getPrototypeOf(Sprite).call(this));
 
-            _this15.$initContainer();
-            return _this15;
+            _this16.$Sprite = {
+                0: new flower.Rectangle() //childrenBounds
+            };
+            _this16.$initContainer();
+            DebugInfo.displayInfo.sprite++;
+            return _this16;
         }
 
         _createClass(Sprite, [{
@@ -4105,7 +4636,7 @@ var flower = {};
             key: "getChildAt",
             value: function getChildAt(index) {
                 index = index & ~0;
-                if (index < 0 || index > this.__children.length) {
+                if (index < 0 || index > this.__children.length - 1) {
                     $error(1007, "getChildAt", index, this.__children.length);
                     return null;
                 }
@@ -4142,19 +4673,14 @@ var flower = {};
                 var maxY = 0;
                 var children = this.__children;
                 for (var i = 0, len = children.length; i < len; i++) {
-                    var bounds = children[i].$getBounds();
+                    if (!children[i].visible) {
+                        continue;
+                    }
+                    var bounds = children[i].$getBounds(true);
                     if (i == 0) {
-                        //minX = bounds.x;
-                        //minY = bounds.y;
                         maxX = bounds.x + bounds.width;
                         maxY = bounds.y + bounds.height;
                     } else {
-                        //if (bounds.x < minX) {
-                        //    minX = bounds.x;
-                        //}
-                        //if (bounds.y < minY) {
-                        //    minY = bounds.y;
-                        //}
                         if (bounds.x + bounds.width > maxX) {
                             maxX = bounds.x + bounds.width;
                         }
@@ -4167,6 +4693,11 @@ var flower = {};
                 rect.y = minY;
                 rect.width = maxX - minX;
                 rect.height = maxY - minY;
+                var childrenBounds = this.$Sprite[0];
+                childrenBounds.x = rect.x;
+                childrenBounds.y = rect.y;
+                childrenBounds.width = rect.width;
+                childrenBounds.height = rect.height;
             }
         }, {
             key: "$getMouseTarget",
@@ -4174,11 +4705,12 @@ var flower = {};
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
+                p[22] = flower.EnterFrame.frame;
                 var target;
                 var childs = this.__children;
                 var len = childs.length;
@@ -4208,9 +4740,17 @@ var flower = {};
                     this.$removeFlags(0x0100);
                 }
                 for (var i = 0, len = children.length; i < len; i++) {
-                    children[i].$onFrameEnd();
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
                 }
-                _get(Object.getPrototypeOf(Sprite.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                DebugInfo.frameInfo.display++;
+                DebugInfo.frameInfo.sprite++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "$releaseContainer",
@@ -4225,6 +4765,11 @@ var flower = {};
         }, {
             key: "dispose",
             value: function dispose() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                DebugInfo.displayInfo.sprite--;
                 var children = this.__children;
                 while (children.length) {
                     var child = children[children.length - 1];
@@ -4237,6 +4782,11 @@ var flower = {};
             key: "numChildren",
             get: function get() {
                 return this.__children.length;
+            }
+        }, {
+            key: "$childrenBounds",
+            get: function get() {
+                return this.$Sprite[0];
             }
         }]);
 
@@ -4276,8 +4826,8 @@ var flower = {};
                 if (this.touchEnabled == false || this.visible == false) return null;
                 if (multiply == true && this.multiplyTouchEnabled == false) return null;
                 var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
-                touchX = Math.floor(point.x);
-                touchY = Math.floor(point.y);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
                 var p = this.$DisplayObject;
                 p[10] = touchX;
                 p[11] = touchY;
@@ -4329,18 +4879,20 @@ var flower = {};
         function Bitmap(texture) {
             _classCallCheck(this, Bitmap);
 
-            var _this17 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
+            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(Bitmap).call(this));
 
-            _this17.$nativeShow = Platform.create("Bitmap");
-            _this17.texture = texture;
-            _this17.$Bitmap = {
-                0: null };
-            return _this17;
+            _this18.$nativeShow = Platform.create("Bitmap");
+            _this18.texture = texture;
+            _this18.$Bitmap = {
+                0: null, //scale9Grid
+                1: true //touchSpace
+            };
+            DebugInfo.displayInfo.bitmap++;
+            return _this18;
         }
 
         _createClass(Bitmap, [{
             key: "$setTexture",
-            //scale9Grid
             value: function $setTexture(val) {
                 if (val == this.__texture) {
                     return false;
@@ -4365,7 +4917,7 @@ var flower = {};
                     this.$nativeShow.setTexture(Texture.$blank);
                 }
                 if (this.__texture && this.__texture.dispatcher) {
-                    this.__texture.dispatcher.addListener(Event.UPDATE, this.$updateTexture, this);
+                    this.__texture.dispatcher.addListener(Event.CHANGE, this.$updateTexture, this);
                 }
                 this.$invalidateContentBounds();
                 return true;
@@ -4400,16 +4952,42 @@ var flower = {};
                 return true;
             }
         }, {
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(touchX, touchY, multiply) {
+                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
+                var p = this.$DisplayObject;
+                p[10] = touchX;
+                p[11] = touchY;
+                p[22] = flower.EnterFrame.frame;
+                var bounds;
+                bounds = Rectangle.$TempRectangle;
+                if (this.$Bitmap[1] || !this.__texture) {
+                    bounds.x = 0;
+                    bounds.y = 0;
+                    bounds.width = this.width;
+                    bounds.height = this.height;
+                } else {
+                    bounds.x = this.__texture.offX;
+                    bounds.y = this.__texture.offY;
+                    bounds.width = this.width - this.__texture.offX;
+                    bounds.height = this.height - this.__texture.offY;
+                }
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+                    return this;
+                }
+                return null;
+            }
+        }, {
             key: "$measureContentBounds",
             value: function $measureContentBounds(rect) {
+                rect.x = rect.y = 0;
                 if (this.__texture) {
-                    rect.x = this.__texture.offX;
-                    rect.y = this.__texture.offY;
-                    var p = this.$DisplayObject;
-                    rect.width = p[3] || this.__texture.width;
-                    rect.height = p[4] || this.__texture.height;
+                    rect.width = this.__texture.width;
+                    rect.height = this.__texture.height;
                 } else {
-                    rect.x = rect.y = rect.width = rect.height = 0;
+                    rect.width = rect.height = 0;
                 }
             }
         }, {
@@ -4435,12 +5013,26 @@ var flower = {};
                 return true;
             }
         }, {
+            key: "$setTouchSpace",
+            value: function $setTouchSpace(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                var p = this.$Bitmap;
+                if (p[1] == val) {
+                    return;
+                }
+                p[1] = val;
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 if (!this.$nativeShow) {
                     $warn(1002, this.name);
                     return;
                 }
+                DebugInfo.displayInfo.bitmap--;
                 this.texture = null;
                 _get(Object.getPrototypeOf(Bitmap.prototype), "dispose", this).call(this);
                 Platform.release("Bitmap", this.$nativeShow);
@@ -4463,6 +5055,14 @@ var flower = {};
             set: function set(val) {
                 this.$setScale9Grid(val);
             }
+        }, {
+            key: "touchSpace",
+            get: function get() {
+                return this.$Bitmap[1];
+            },
+            set: function set(val) {
+                this.$setTouchSpace(val);
+            }
         }]);
 
         return Bitmap;
@@ -4471,34 +5071,35 @@ var flower = {};
     flower.Bitmap = Bitmap;
     //////////////////////////End File:flower/display/Bitmap.js///////////////////////////
 
-    //////////////////////////File:flower/display/TextField.js///////////////////////////
+    //////////////////////////File:flower/display/$TextField.js///////////////////////////
 
-    var TextField = function (_DisplayObject3) {
-        _inherits(TextField, _DisplayObject3);
+    var $TextField = function (_DisplayObject3) {
+        _inherits($TextField, _DisplayObject3);
 
-        function TextField() {
+        function $TextField() {
             var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
 
-            _classCallCheck(this, TextField);
+            _classCallCheck(this, $TextField);
 
-            var _this18 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf($TextField).call(this));
 
-            _this18.$nativeShow = Platform.create("TextField");
-            _this18.$TextField = {
+            _this19.$nativeShow = Platform.create("TextField");
+            _this19.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
-                3: true, //wordWrap
-                4: true, //multiline
+                3: false, //wordWrap
+                4: false, //multiline
                 5: true //autoSize
             };
             if (text != "") {
-                _this18.text = text;
+                _this19.text = text;
             }
-            return _this18;
+            //DebugInfo.displayInfo.text++;
+            return _this19;
         }
 
-        _createClass(TextField, [{
+        _createClass($TextField, [{
             key: "$checkSettingSize",
             value: function $checkSettingSize(rect) {}
         }, {
@@ -4549,6 +5150,10 @@ var flower = {};
         }, {
             key: "$setMultiLine",
             value: function $setMultiLine(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
                 var p = this.$TextField;
                 if (p[4] == val) {
                     return false;
@@ -4575,9 +5180,43 @@ var flower = {};
                 return true;
             }
         }, {
+            key: "$setWordWrap",
+            value: function $setWordWrap(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                val = !!val;
+                var p = this.$TextField;
+                if (p[3] == val) {
+                    return false;
+                }
+                p[3] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setAutoSize",
+            value: function $setAutoSize(val) {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                val = !!val;
+                var p = this.$TextField;
+                if (p[5] == val) {
+                    return false;
+                }
+                p[5] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
             key: "$setWidth",
             value: function $setWidth(val) {
-                var flag = _get(Object.getPrototypeOf(TextField.prototype), "$setWidth", this).call(this, val);
+                var flag = _get(Object.getPrototypeOf($TextField.prototype), "$setWidth", this).call(this, val);
                 if (!flag) {
                     return;
                 }
@@ -4593,7 +5232,7 @@ var flower = {};
         }, {
             key: "$setHeight",
             value: function $setHeight(val) {
-                var flag = _get(Object.getPrototypeOf(TextField.prototype), "$setHeight", this).call(this, val);
+                var flag = _get(Object.getPrototypeOf($TextField.prototype), "$setHeight", this).call(this, val);
                 if (!flag) {
                     return;
                 }
@@ -4612,7 +5251,13 @@ var flower = {};
                 if (this.$hasFlags(0x0800)) {
                     this.$getContentBounds();
                 }
-                _get(Object.getPrototypeOf(TextField.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                //DebugInfo.frameInfo.display++;
+                //DebugInfo.frameInfo.text++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",
@@ -4621,7 +5266,8 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                _get(Object.getPrototypeOf(TextField.prototype), "dispose", this).call(this);
+                //DebugInfo.displayInfo.text--;
+                _get(Object.getPrototypeOf($TextField.prototype), "dispose", this).call(this);
                 Platform.release("TextField", this.$nativeShow);
                 this.$nativeShow = null;
             }
@@ -4657,6 +5303,18 @@ var flower = {};
             get: function get() {
                 var p = this.$TextField;
                 return p[5];
+            },
+            set: function set(val) {
+                this.$setAutoSize(val);
+            }
+        }, {
+            key: "wordWrap",
+            set: function set(val) {
+                this.$setWordWrap(val);
+            },
+            get: function get() {
+                var p = this.$TextField;
+                return p[3];
             }
         }, {
             key: "multiLine",
@@ -4669,47 +5327,2470 @@ var flower = {};
             }
         }]);
 
-        return TextField;
+        return $TextField;
     }(DisplayObject);
+    //////////////////////////End File:flower/display/$TextField.js///////////////////////////
+
+    //////////////////////////File:flower/display/TextField.js///////////////////////////
+
+
+    var TextField = function (_flower$DisplayObject) {
+        _inherits(TextField, _flower$DisplayObject);
+
+        function TextField(text) {
+            var _this20$$TextField;
+
+            _classCallCheck(this, TextField);
+
+            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextField).call(this));
+
+            _this20.__changeText = TextField.changeText;
+            _this20.__changeRealText = TextField.changeRealText;
+
+            _this20.$Sprite = {
+                0: new flower.Rectangle() //childrenBounds
+            };
+            _this20.$initContainer();
+            DebugInfo.displayInfo.text++;
+
+            _this20.$TextField = (_this20$$TextField = {
+                0: "", //text
+                1: "", //htmlText formatHtmlText
+                2: [], //lines
+                3: 0, //inputLength
+                4: new flower.Sprite(), //textContainer
+                5: null, //this.__getDefaultFocus(), //focus
+                6: "", //setHtmlText
+                7: 0, //chars
+                9: 0.5, //shineGap
+                10: 12, //fontSize
+                11: 0, //fontColor
+                12: 4, //leading
+                13: false, //wordWrap
+                14: null, //new flower.Sprite(), //backgroundContainer
+                15: 0, //textContainerMaskWidth
+                16: 0, //textContainerMaskHeight
+                17: 0, //contentWidth
+                18: 0, //contentHeight
+                21: "left", //algin
+                22: false, //input
+                23: true, //selectable
+                24: true, //multiline
+                25: false, //enterend
+                26: true, //inputtingChange
+                29: 2, //lineStart
+                30: 0, //caretIndex
+                31: 0, //caretHtmlIndex
+                32: null }, _defineProperty(_this20$$TextField, "32", null), _defineProperty(_this20$$TextField, 33, null), _defineProperty(_this20$$TextField, 34, 0), _defineProperty(_this20$$TextField, 50, 0), _defineProperty(_this20$$TextField, 51, 0), _defineProperty(_this20$$TextField, 100, false), _defineProperty(_this20$$TextField, 101, {}), _defineProperty(_this20$$TextField, 102, {}), _defineProperty(_this20$$TextField, 200, 0), _defineProperty(_this20$$TextField, 201, false), _defineProperty(_this20$$TextField, 300, false), _defineProperty(_this20$$TextField, 301, 0), _defineProperty(_this20$$TextField, 302, 0), _defineProperty(_this20$$TextField, 303, 0), _defineProperty(_this20$$TextField, 304, false), _defineProperty(_this20$$TextField, 305, ""), _defineProperty(_this20$$TextField, 306, ""), _defineProperty(_this20$$TextField, 307, 0), _defineProperty(_this20$$TextField, 308, []), _defineProperty(_this20$$TextField, 311, null), _defineProperty(_this20$$TextField, 312, null), _defineProperty(_this20$$TextField, 313, null), _defineProperty(_this20$$TextField, 350, 0), _defineProperty(_this20$$TextField, 351, 0), _defineProperty(_this20$$TextField, 330, 0), _defineProperty(_this20$$TextField, 400, false), _defineProperty(_this20$$TextField, 401, []), _defineProperty(_this20$$TextField, 402, ""), _defineProperty(_this20$$TextField, 1000, 0x526da5), _defineProperty(_this20$$TextField, 1001, 0xffffff), _this20$$TextField);
+            //被选文字的颜色
+            _this20.$TextField[4].x = _this20.$TextField[29];
+            _this20.addChild(_this20.$TextField[4]);
+            //this.addChild(this.$TextField[5]);
+            _this20.addListener(flower.TouchEvent.TOUCH_BEGIN, _this20.__onTouch, _this20);
+            _this20.addListener(flower.TouchEvent.TOUCH_MOVE, _this20.__onTouch, _this20);
+            _this20.addListener(flower.Event.FOCUS_OUT, _this20.__stopInput, _this20);
+            _this20.focusEnabled = true;
+            _this20.__input = flower.Stage.getInstance().$input;
+            flower.EnterFrame.add(_this20.$update, _this20);
+
+            if (text && text != "") {
+                _this20.text = text;
+            }
+            return _this20;
+        }
+
+        _createClass(TextField, [{
+            key: "__createBackgroundContainer",
+            value: function __createBackgroundContainer() {
+                var p = this.$TextField;
+                if (p[14] == null) {
+                    p[14] = new flower.Sprite();
+                    var index = this.getChildIndex(p[4]);
+                    this.addChildAt(p[14], index - 1 < 0 ? 0 : index - 1);
+                    if (p[21] == "right") {
+                        p[14].x = -p[29];
+                    } else if (p[21] == "center") {
+                        p[14].x = 0;
+                    } else {
+                        p[14].x = p[29];
+                    }
+                }
+            }
+        }, {
+            key: "__crateFocus",
+            value: function __crateFocus() {
+                var p = this.$TextField;
+                if (!p[5]) {
+                    var index = this.getChildIndex(p[4]);
+                    p[5] = this.__getDefaultFocus();
+                    this.addChildAt(p[5], index + 1);
+                }
+            }
+        }, {
+            key: "__onTouch",
+            value: function __onTouch(e) {
+                var p = this.$TextField;
+                if (!p[23]) {
+                    return;
+                }
+                switch (e.type) {
+                    case flower.TouchEvent.TOUCH_BEGIN:
+                        this.__cancelSelect();
+                        var doubleClick = false;
+                        var tribleClick = false;
+                        if (!p[201]) {
+                            if (flower.CoreTime.currentTime - p[200] < 200) {
+                                doubleClick = true;
+                            }
+                        } else {
+                            if (flower.CoreTime.currentTime - p[200] < 200) {
+                                doubleClick = true;
+                                tribleClick = true;
+                            }
+                        }
+                        p[200] = flower.CoreTime.currentTime;
+                        p[201] = doubleClick;
+                        if (tribleClick) {
+                            //三击
+                            this.__tribleClick();
+                        } else if (doubleClick) {
+                            //双击
+                            this.__doubleClick();
+                        } else {
+                            //单击
+                            this.__click();
+                        }
+                        p[330] = p[301];
+                        break;
+                    case flower.TouchEvent.TOUCH_MOVE:
+                        var charIndex = p[330];
+                        var info = this.__getClickPos();
+                        this.__cancelSelect();
+                        var htmlTextIndex1 = this.__getHtmlTextIndexByCharIndex(charIndex);
+                        var htmlTextIndex2 = this.__getHtmlTextIndexByCharIndex(info.charIndex);
+                        this.__selecteText(htmlTextIndex1 < htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2, p[1].slice(htmlTextIndex1 < htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2, htmlTextIndex1 > htmlTextIndex2 ? htmlTextIndex1 : htmlTextIndex2));
+                        p[301] = info.charIndex;
+                        this.$moveCaretIndex();
+                        break;
+                }
+            }
+
+            /**
+             * 连续三次点击
+             * @private
+             */
+
+        }, {
+            key: "__tribleClick",
+            value: function __tribleClick() {
+                console.log("三击");
+            }
+
+            /**
+             * 连续两次点击
+             * @private
+             */
+
+        }, {
+            key: "__doubleClick",
+            value: function __doubleClick() {
+                console.log("双击");
+            }
+
+            /**
+             * 点击
+             * @private
+             */
+
+        }, {
+            key: "__click",
+            value: function __click() {
+                this.__startInput(this.__getClickPos());
+            }
+        }, {
+            key: "__startInput",
+            value: function __startInput(info) {
+                var p = this.$TextField;
+                if (p[300]) {
+                    return;
+                }
+                if (this.input) {
+                    if (!p[5]) {
+                        this.__crateFocus();
+                    }
+                    p[300] = true;
+                    p[301] = info.charIndex;
+                    p[302] = info.htmlTextIndex;
+                    p[307] = info.lineCharIndex;
+                    p[308].length = 0;
+                    this.__input.text = "";
+                    this.__input.$setNativeText("");
+                    this.__input.$startNativeInput();
+                    flower.EnterFrame.add(this.__update, this);
+                    this.__showFocus(info);
+                }
+                this.addListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
+                this.dispatchWith(flower.Event.START_INPUT, null, true);
+            }
+        }, {
+            key: "__stopInput",
+            value: function __stopInput() {
+                this.$TextField[300] = false;
+                this.__input.$stopNativeInput();
+                this.removeListener(flower.KeyboardEvent.KEY_DOWN, this.__onKeyDown, this);
+                flower.EnterFrame.remove(this.__update, this);
+                this.__hideFocus();
+                this.dispatchWith(flower.Event.STOP_INPUT, null, true);
+            }
+        }, {
+            key: "__hideFocus",
+            value: function __hideFocus() {
+                if (this.$TextField[5]) {
+                    this.$TextField[5].visible = false;
+                }
+            }
+        }, {
+            key: "__onKeyDown",
+            value: function __onKeyDown(e) {
+                new flower.CallLater(this.__doKeyEvent, this, [e]);
+                //if (e.keyCode == 16) {
+                //    this.$TextField[308].push({keyCode: e.keyCode});
+                //} else {
+                //    this.__doKeyEvent(e);
+                //}
+            }
+
+            //输入字符
+
+        }, {
+            key: "__inputText",
+            value: function __inputText(text) {
+                var under = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+                var p = this.$TextField;
+                if (p[400]) {
+                    this.__deleteSelect();
+                    if (p[304]) {
+                        p[311] = p[301];
+                        p[312] = p[302];
+                        p[313] = p[1];
+                        p[323] = p[3];
+                    }
+                }
+                var htmlText = this.__changeText(text);
+                if (under) {
+                    htmlText = "<u>" + htmlText + "</u>";
+                }
+                this.__inputHtmlText(htmlText);
+            }
+
+            //输入字符
+
+        }, {
+            key: "__inputHtmlText",
+            value: function __inputHtmlText(text) {
+                var p = this.$TextField;
+                var chars = p[3];
+                this.htmlText = p[1].slice(0, p[302]) + text + p[1].slice(p[302], p[1].length);
+                p[301] += p[3] - chars;
+                this.$moveCaretIndex();
+            }
+
+            /**
+             * 从输入点开始删除一个字符
+             * @param num
+             */
+
+        }, {
+            key: "$deleteCaretChar",
+            value: function $deleteCaretChar() {
+                var p = this.$TextField;
+                var lines = p[2];
+                var pos = p[301];
+                if (pos == 0) {
+                    return;
+                }
+                var findLine;
+                if (pos > p[3]) {
+                    pos = p[3];
+                }
+                for (var i = 0; i < lines.length; i++) {
+                    if (pos > lines[i].charIndex && pos <= lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
+                        findLine = lines[i];
+                        break;
+                    }
+                }
+                if (!findLine) {
+                    return;
+                }
+                p[301]--;
+                pos -= findLine.charIndex;
+                if (pos == findLine.chars && findLine.index != lines.length - 1) {
+                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findLine.htmlText.length) + p[1].slice(findLine.htmlTextIndex + findLine.htmlText.length + findLine.endHtmlText.length, p[1].length);
+                    return;
+                }
+                var findSubline;
+                for (var i = 0; i < findLine.sublines.length; i++) {
+                    if (pos > findLine.sublines[i].charIndex && pos <= findLine.sublines[i].charIndex + findLine.sublines[i].chars) {
+                        findSubline = findLine.sublines[i];
+                        break;
+                    }
+                }
+                if (!findSubline) {
+                    return;
+                }
+                pos -= findSubline.charIndex;
+                var findDisplay;
+                for (var i = 0; i < findSubline.displays.length; i++) {
+                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
+                        findDisplay = findSubline.displays[i];
+                        break;
+                    }
+                }
+                pos -= findDisplay.charIndex;
+                if (findDisplay.type == 0) {
+                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex) + findDisplay.htmlText.slice(0, findDisplay.textStart) + this.__changeText(findDisplay.text.slice(0, pos - 1)) + this.__changeText(findDisplay.text.slice(pos, findDisplay.text.length)) + findDisplay.htmlText.slice(findDisplay.textEnd, findDisplay.htmlText.length) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.htmlText.length, p[1].length);
+                } else {
+                    this.htmlText = p[1].slice(0, findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex) + p[1].slice(findLine.htmlTextIndex + findSubline.htmlTextIndex + findDisplay.htmlTextIndex + findDisplay.htmlText.length, p[1].length);
+                }
+                this.$moveCaretIndex();
+            }
+
+            /**
+             * 把焦点移到其它行后，计算当前焦点的位置，当前                                                                                              位置插入的位置(htmlTextIndex)
+             * @param index 与当前行相差多少
+             */
+
+        }, {
+            key: "$moveCaretIndex",
+            value: function $moveCaretIndex() {
+                var lineIndex = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+                var p = this.$TextField;
+                this.__moveCareIndex(lineIndex);
+                var focus = p[5];
+                if (focus) {
+                    if (p[21] == "right") {
+                        focus.x -= p[29];
+                    } else if (p[21] == "center") {} else {
+                        focus.x += p[29];
+                    }
+                    if (focus.x + p[50] < p[29]) {
+                        p[50] = p[29] - focus.x;
+                        p[100] = true;
+                    }
+                    if (focus.x + focus.width > this.width - p[29]) {
+                        p[50] = this.width - p[29] - (focus.x + focus.width);
+                        p[100] = true;
+                    }
+                    if (focus.y + p[51] < 0) {
+                        p[51] = -focus.y;
+                        p[100] = true;
+                    }
+                    if (focus.y + focus.height > this.height) {
+                        p[51] = this.height - (focus.y + focus.height);
+                        p[100] = true;
+                    }
+                    focus.x += p[50];
+                    focus.y += p[51];
+                }
+            }
+        }, {
+            key: "__moveCareIndex",
+            value: function __moveCareIndex() {
+                var lineIndex = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+                var p = this.$TextField;
+                var lines = p[2];
+                var pos = p[301];
+                var focus = p[5];
+                if (focus) {
+                    focus.x = 0;
+                    focus.y = 0;
+                    focus.height = p[10] + p[12] * 0.5;
+                    if (p[21] == "center") {
+                        focus.x = this.width * .5;
+                    } else if (p[21] == "right") {
+                        focus.x = this.width;
+                    }
+                }
+                p[302] = 0;
+                var findLine;
+                for (var i = 0; i < lines.length; i++) {
+                    if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
+                        findLine = lines[i];
+                        break;
+                    }
+                }
+                if (!findLine) {
+                    return;
+                }
+                if (focus) {
+                    focus.x = findLine.x;
+                    focus.y = findLine.y;
+                    focus.height = findLine.height;
+                }
+                pos -= findLine.charIndex;
+                p[302] = findLine.htmlTextIndex;
+                var findSubline;
+                for (var i = 0; i < findLine.sublines.length; i++) {
+                    if (pos >= findLine.sublines[i].charIndex && pos < findLine.sublines[i].charIndex + findLine.sublines[i].chars || i == findLine.sublines.length - 1) {
+                        findSubline = findLine.sublines[i];
+                        break;
+                    }
+                }
+                //如果有行的移动，重新计算所在行
+                if (lineIndex) {
+                    pos = p[307];
+                    while (lineIndex) {
+                        if (lineIndex > 0) {
+                            if (!findSubline || findSubline.index < findLine.sublines.length - 1) {
+                                findSubline = findLine.sublines[findSubline.index + 1];
+                            } else {
+                                if (findLine.index < lines.length - 1) {
+                                    findLine = lines[findLine.index + 1];
+                                    if (findLine.sublines.length) {
+                                        findSubline = findLine.sublines[0];
+                                    } else {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            lineIndex--;
+                        } else {
+                            if (!findSubline || findSubline.index > 0) {
+                                findSubline = findLine.sublines[findSubline.index - 1];
+                            } else {
+                                if (findLine.index > 0) {
+                                    findLine = lines[findLine.index - 1];
+                                    if (findLine.sublines.length) {
+                                        findSubline = findLine.sublines[0];
+                                    } else {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            lineIndex++;
+                        }
+                    }
+                    if (focus) {
+                        focus.x = findLine.x;
+                        focus.y = findLine.y;
+                        focus.height = findLine.height;
+                    }
+                    p[302] = findLine.htmlTextIndex;
+                    p[301] = findLine.charIndex;
+                    if (!findSubline) {
+                        return;
+                    } else {
+                        if (focus) {
+                            focus.x += findSubline.x;
+                            focus.y += findSubline.y;
+                            focus.height = findSubline.height;
+                        }
+                        p[302] += findSubline.htmlTextIndex;
+                        p[301] += pos < findSubline.chars ? pos : findSubline.chars;
+                    }
+                } else {
+                    if (!findSubline) {
+                        return;
+                    } else {
+                        if (focus) {
+                            focus.x += findSubline.x;
+                            focus.y += findSubline.y;
+                            focus.height = findSubline.height;
+                        }
+                        pos -= findSubline.charIndex;
+                        p[302] += findSubline.htmlTextIndex;
+                        p[307] = pos;
+                    }
+                }
+                if (pos == 0) {
+                    return;
+                }
+                var findDisplay;
+                for (var i = 0; i < findSubline.displays.length; i++) {
+                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
+                        findDisplay = findSubline.displays[i];
+                        break;
+                    }
+                }
+                if (!findDisplay) {
+                    return;
+                }
+                if (focus) {
+                    focus.x += findDisplay.x;
+                }
+                pos -= findDisplay.charIndex;
+                p[302] += findDisplay.htmlTextIndex;
+                if (findDisplay.type == 0) {
+                    var text = findDisplay.text;
+                    var size = findDisplay.font.size;
+                    if (focus) {
+                        focus.x += flower.$measureTextWidth(size, text.slice(0, pos));
+                    }
+                    p[302] += findDisplay.textStart + this.__changeText(text.slice(0, pos)).length;
+                } else {
+                    if (pos) {
+                        if (focus) {
+                            focus.x += findDisplay.width;
+                        }
+                        p[302] += findDisplay.htmlText.length;
+                    }
+                }
+            }
+        }, {
+            key: "__getHtmlTextIndexByCharIndex",
+            value: function __getHtmlTextIndexByCharIndex(pos) {
+                var p = this.$TextField;
+                var lines = p[2];
+                var htmlTextIndex = 0;
+                if (pos == 0) {
+                    return htmlTextIndex;
+                }
+                var findLine;
+                for (var i = 0; i < lines.length; i++) {
+                    if (pos >= lines[i].charIndex && pos < lines[i].charIndex + lines[i].chars || i == lines.length - 1) {
+                        findLine = lines[i];
+                        break;
+                    }
+                }
+                if (!findLine) {
+                    return htmlTextIndex;
+                }
+                pos -= findLine.charIndex;
+                htmlTextIndex = findLine.htmlTextIndex;
+                var findSubline;
+                for (var i = 0; i < findLine.sublines.length; i++) {
+                    if (pos >= findLine.sublines[i].charIndex && pos < findLine.sublines[i].charIndex + findLine.sublines[i].chars || i == findLine.sublines.length - 1) {
+                        findSubline = findLine.sublines[i];
+                        break;
+                    }
+                }
+                if (!findSubline) {
+                    return htmlTextIndex;
+                } else {
+                    pos -= findSubline.charIndex;
+                    htmlTextIndex += findSubline.htmlTextIndex;
+                }
+                if (pos == 0) {
+                    return htmlTextIndex;
+                }
+                var findDisplay;
+                for (var i = 0; i < findSubline.displays.length; i++) {
+                    if (pos > findSubline.displays[i].charIndex && pos <= findSubline.displays[i].charIndex + findSubline.displays[i].chars || i == findSubline.displays.length - 1) {
+                        findDisplay = findSubline.displays[i];
+                        break;
+                    }
+                }
+                if (!findDisplay) {
+                    return htmlTextIndex;
+                }
+                pos -= findDisplay.charIndex;
+                htmlTextIndex += findDisplay.htmlTextIndex;
+                if (findDisplay.type == 0) {
+                    var text = findDisplay.text;
+                    var size = findDisplay.font.size;
+                    htmlTextIndex += findDisplay.textStart + this.__changeText(text.slice(0, pos)).length;
+                } else {
+                    if (pos) {
+                        htmlTextIndex += findDisplay.htmlText.length;
+                    }
+                }
+                return htmlTextIndex;
+            }
+        }, {
+            key: "__getCharIndexByHtmlTextIndex",
+            value: function __getCharIndexByHtmlTextIndex(index) {
+                var p = this.$TextField;
+                var lines = p[2];
+                if (lines.length) {
+                    return 0;
+                }
+                for (var i = 0; i < lines.lengt; i++) {
+                    var line = lines[i];
+                    if (line.htmlTextIndex <= index && line.htmlTextIndex + line.htmlText.length + line.endHtmlText.length > index || i == lines.length - 1) {
+                        index -= line.htmlTextIndex;
+                        var sublines = line.sublines;
+                        if (sublines.length) {
+                            return line.charIndex;
+                        }
+                        for (var s = 0; s < sublines.length; s++) {
+                            var subline = sublines[s];
+                            if (subline.htmlTextIndex <= index && subline.htmlTextIndex + subline.htmlText.length || s == sublines.length - 1) {
+                                var displays = subline.displays;
+                                if (displays.length) {
+                                    return line.charIndex + subline.charIndex;
+                                }
+                                index -= subline.htmlTextIndex;
+                                for (var d = 0; d < displays.length; d++) {
+                                    var display = displays[d];
+                                    if (display.htmlTextIndex <= index && display.htmlTextIndex + display.htmlText.length || d == displays.length - 1) {
+                                        return line.charIndex + subline.charIndex + display.text.slice(0, this.__changeRealText(display.htmlText.slice(display.textStart, index)).length).length;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return 0;
+            }
+
+            /**
+             * 增加选中的段落
+             * @param htmlTextIndex
+             * @param htmlText
+             * @private
+             */
+
+        }, {
+            key: "__selecteText",
+            value: function __selecteText(htmlTextIndex, htmlText) {
+                if (htmlText.length == 0) {
+                    return;
+                }
+                var p = this.$TextField;
+                if (!p[400]) {
+                    p[400] = true;
+                    p[402] = p[1];
+                }
+                p[401].push({ index: htmlTextIndex, htmlText: htmlText });
+                var list = p[401];
+                var oldHtmlText = p[402];
+                var newHtmlText = "";
+                var last = 0;
+                for (var i = 0; i < list.length; i++) {
+                    var item = list[i];
+                    newHtmlText += oldHtmlText.slice(last, item.index) + "<s>" + item.htmlText + "</s>";
+                    last = item.index + item.htmlText.length;
+                    if (i == list.length - 1) {
+                        newHtmlText += oldHtmlText.slice(last, oldHtmlText.length);
+                    }
+                }
+                this.__setHtmlText(newHtmlText, false);
+            }
+        }, {
+            key: "__cancelSelect",
+            value: function __cancelSelect() {
+                var p = this.$TextField;
+                if (p[400]) {
+                    p[400] = false;
+                    this.__setHtmlText(p[402], false);
+                    var list = p[401].concat();
+                    p[401].length = 0;
+                    return list;
+                }
+                return null;
+            }
+        }, {
+            key: "__deleteSelect",
+            value: function __deleteSelect() {
+                var p = this.$TextField;
+                if (p[400]) {
+                    p[400] = false;
+                    //this.__setHtmlText(p[402], false);
+                    var list = p[401];
+                    var oldHtmlText = p[402];
+                    var newHtmlText = "";
+                    var last = 0;
+                    for (var i = 0; i < list.length; i++) {
+                        var item = list[i];
+                        newHtmlText += oldHtmlText.slice(last, item.index) + this.__deleteHtmlTextContent(item.htmlText);
+                        last = item.index + item.htmlText.length;
+                        if (i == list.length - 1) {
+                            newHtmlText += oldHtmlText.slice(last, oldHtmlText.length);
+                        }
+                    }
+                    list.length = 0;
+                    this.__setHtmlText(newHtmlText, false);
+                }
+            }
+        }, {
+            key: "__deleteHtmlTextContent",
+            value: function __deleteHtmlTextContent(text) {
+                var content = "";
+                var last = -1;
+                for (var i = 0; i < text.length; i++) {
+                    var char = text.charAt(i);
+                    if (char == "<") {
+                        last = i;
+                    } else if (char == ">") {
+                        if (last != -1) {
+                            var sign = "";
+                            var index = last + 1;
+                            if (text.charAt(index) == "/") {
+                                index++;
+                            }
+                            while (index < text.length) {
+                                var c = text.charAt(index);
+                                if (c == " " || c == ">") {
+                                    break;
+                                }
+                                sign += c;
+                                index++;
+                            }
+                            if (sign == "font" || sign == "u" || sign == "s") {
+                                content += text.slice(last, i + 1);
+                            }
+                            last = -1;
+                        }
+                    }
+                }
+                return content;
+            }
+        }, {
+            key: "__update",
+            value: function __update(now, gap) {
+                var p = this.$TextField;
+                p[303] += gap;
+                if (p[303] < p[9] * 1000 || math.floor(p[303] / (p[9] * 1000)) % 2 == 0) {
+                    p[5].visible = true;
+                } else {
+                    p[5].visible = false;
+                }
+                while (p[308].length) {
+                    this.__doKeyEvent(p[308].shift());
+                }
+            }
+        }, {
+            key: "__doKeyEvent",
+            value: function __doKeyEvent(e) {
+                var p = this.$TextField;
+                if (e.keyCode == 229 && this.input) {
+                    if (!p[304]) {
+                        p[304] = true;
+                        p[305] = "";
+                        p[311] = p[301];
+                        p[312] = p[302];
+                        p[313] = p[1];
+                        p[323] = p[3];
+                        p[350] = p[50];
+                        p[351] = p[51];
+                    }
+                    p[6] += "1";
+                    var str = this.__input.$getNativeText();
+                    if (p[305] == "") {
+                        p[305] = str.charAt(str.length - 1);
+                    }
+                    p[1] = p[313];
+                    p[3] = p[323];
+                    p[301] = p[311];
+                    p[302] = p[312];
+                    p[50] = p[350];
+                    p[51] = p[351];
+                    if (e.keyCode == 16 || str != p[306].slice(0, str.length) && str.charAt(str.length - 1) != p[305] && str.charAt(str.length - 2) != p[305] && str.charAt(str.length - 3) != p[305]) {
+                        this.__inputText(str);
+                        this.__input.$setNativeText("");
+                        this.$TextField[7] = false;
+                        p[304] = false;
+                        p[305] == "";
+                        p[306] = "";
+                    } else {
+                        this.__inputText(str, true);
+                        p[306] = str;
+                        p[305] = str.charAt(str.length - 1);
+                    }
+                } else if (e.keyCode == 13 && this.input) {
+                    if (p[24]) {
+                        this.__inputText("\n");
+                    } else {
+                        if (p[25]) {
+                            this.__stopInput();
+                        } else {}
+                    }
+                } else if ((e.keyCode == 37 || e.keyCode == 39 || e.keyCode == 8 || e.keyCode == 38 || e.keyCode == 40) && this.input) {
+                    if (e.keyCode == 37) {
+                        if (p[301] == 0) {
+                            return;
+                        }
+                        p[301]--;
+                        this.$moveCaretIndex();
+                    } else if (e.keyCode == 39) {
+                        if (p[301] == p[3]) {
+                            return;
+                        }
+                        p[301]++;
+                        this.$moveCaretIndex();
+                    } else if (e.keyCode == 38) {
+                        //输入点上移一行
+                        this.$moveCaretIndex(-1);
+                    } else if (e.keyCode == 40) {
+                        //输入点下移一行
+                        this.$moveCaretIndex(1);
+                    } else if (e.keyCode == 8) {
+                        if (p[400]) {
+                            this.__deleteSelect();
+                        } else {
+                            if (p[301] == 0) {
+                                return;
+                            }
+                            this.$deleteCaretChar();
+                            this.$moveCaretIndex();
+                        }
+                    }
+                } else if (e.keyCode == 91 || e.keyCode == 17) {} else if (this.input) {
+                    var str = this.__input.$getNativeText();
+                    if (str.length) {
+                        this.__inputText(str);
+                        this.__input.$setNativeText("");
+                    }
+                }
+            }
+        }, {
+            key: "__showFocus",
+            value: function __showFocus(info) {
+                var p = this.$TextField;
+                if (this.input) {
+                    p[5].visible = true;
+                } else {
+                    p[5].visible = false;
+                }
+                p[5].x = info.focusX;
+                if (p[21] == "right") {
+                    p[5].x -= p[29];
+                } else if (p[21] == "center") {} else {
+                    p[5].x += p[29];
+                }
+                p[5].y = info.focusY;
+                p[5].height = info.focusHeight;
+                if (p[5].x + p[50] < p[29]) {
+                    p[50] = p[29] - p[5].x;
+                    p[100] = true;
+                }
+                if (p[5].x + p[5].width > this.width - p[29]) {
+                    p[50] = this.width - p[29] - (p[5].x + p[5].width);
+                    p[100] = true;
+                }
+                if (p[5].y + p[51] < 0) {
+                    p[51] = -p[5].y;
+                    p[100] = true;
+                }
+                if (p[5].y + p[5].height > this.height) {
+                    p[51] = this.height - (p[5].y + p[5].height);
+                    p[100] = true;
+                }
+                p[5].x += p[50];
+                p[5].y += p[51];
+            }
+        }, {
+            key: "__getClickPos",
+            value: function __getClickPos() {
+                var p = this.$TextField;
+                var x = this.mouseX;
+                var y = this.mouseY;
+                if (p[21] == "right") {
+                    x += p[29];
+                } else if (p[21] == "center") {} else {
+                    x -= p[29];
+                }
+                x -= p[50];
+                y -= p[51];
+                var lines = p[2];
+                var findLine;
+                var res = {
+                    line: null,
+                    subline: null,
+                    display: null,
+                    charIndex: 0,
+                    htmlTextIndex: 0,
+                    focusX: 0,
+                    focusY: 0,
+                    focusHeight: p[10] + p[12] * 0.5,
+                    lineCharIndex: 0
+                };
+                if (p[21] == "center") {
+                    res.focusX = this.width * .5;
+                } else if (p[21] == "right") {
+                    res.focusX = this.width;
+                } else {
+                    res.focusX = 0;
+                }
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+                    if (line.y <= y && line.y + line.height > y || i == lines.length - 1) {
+                        findLine = line;
+                        break;
+                    }
+                }
+                if (!findLine) {
+                    return res;
+                }
+                res.line = findLine;
+                res.charIndex = line.charIndex;
+                res.htmlTextIndex = line.htmlTextIndex;
+                res.focusX = line.x;
+                res.focusY = line.y;
+                res.focusHeight = line.height;
+                x -= line.x;
+                y -= line.y;
+                var findSubline;
+                for (var i = 0; i < findLine.sublines.length; i++) {
+                    var subline = findLine.sublines[i];
+                    if (subline.y <= y && subline.y + subline.height > y || i == findLine.sublines.length - 1) {
+                        findSubline = subline;
+                        break;
+                    }
+                }
+                if (!findSubline) {
+                    if (p[21] == "center") {
+                        res.focusX = (this.width - line.width) * .5;
+                    } else if (p[21] == "right") {
+                        res.focusX = this.width;
+                    }
+                    return res;
+                }
+                res.subline = findSubline;
+                res.charIndex += findSubline.charIndex;
+                res.htmlTextIndex += findSubline.htmlTextIndex;
+                res.focusX += findSubline.x;
+                res.focusY += findSubline.y;
+                res.focusHeight = findSubline.height;
+                x -= subline.x;
+                y -= subline.y;
+                var findDisplay;
+                for (var i = 0; i < findSubline.displays.length; i++) {
+                    var display = findSubline.displays[i];
+                    if (x < display.x + display.width || i == findSubline.displays.length - 1) {
+                        findDisplay = display;
+                        break;
+                    }
+                }
+                if (!findDisplay) {
+                    return res;
+                }
+                res.display = findDisplay;
+                res.charIndex += findDisplay.charIndex;
+                res.htmlTextIndex += findDisplay.htmlTextIndex;
+                res.focusX += findDisplay.x;
+                x -= findDisplay.x;
+                if (findDisplay.type == 0) {
+                    res.htmlTextIndex += findDisplay.textStart;
+                    res.lineCharIndex = findDisplay.charIndex;
+                    var text = findDisplay.text;
+                    var size = findDisplay.font.size;
+                    var width = 0;
+                    for (var i = 1; i <= text.length; i++) {
+                        var textWidth = flower.$measureTextWidth(size, text.slice(0, i));
+                        var charWidth = textWidth - width;
+                        width = textWidth;
+                        if (x <= charWidth * 0.5) {
+                            break;
+                        } else {
+                            x -= charWidth;
+                            res.charIndex++;
+                            res.htmlTextIndex += this.__changeText(text.charAt(i - 1)).length;
+                            res.focusX += charWidth;
+                            res.lineCharIndex++;
+                        }
+                    }
+                } else {
+                    if (x > findDisplay.width * 0.5) {
+                        res.charIndex += findDisplay.chars;
+                        res.htmlTextIndex += findDisplay.htmlText.length;
+                        res.focusX += findDisplay.width;
+                        res.lineCharIndex = findDisplay.charIndex + findDisplay.chars;
+                    } else {
+                        res.lineCharIndex = findDisplay.charIndex;
+                    }
+                }
+                return res;
+            }
+        }, {
+            key: "$setHtmlText",
+            value: function $setHtmlText(text) {
+                var p = this.$TextField;
+                this.__resetCaches();
+                this.__clearOldDisplay();
+                var ids = p[102];
+                for (var key in ids) {
+                    delete ids[key];
+                    delete this[key];
+                }
+                var container = p[4];
+                var lines = p[2];
+                lines.length = 0;
+                var font = {
+                    size: p[10],
+                    color: p[11],
+                    under: false, //下划线
+                    underColor: p[11],
+                    select: false,
+                    gap: p[12],
+                    sizes: [],
+                    colors: [],
+                    unders: [],
+                    selects: [],
+                    gaps: []
+                };
+                var line = this.__getNewLine(null, font);
+                lines.push(line);
+                var last = -1; //上一个 <
+                var lastText = "";
+                var lastHtmlText = "";
+                var lastTextStart = -1;
+                for (var i = 0, len = text.length; i < len; i++) {
+                    var char = text.charAt(i);
+                    var decodeText = false;
+                    var addSingle = null;
+                    var oldFont = font;
+                    var nextHtmlText = "";
+                    var single = false;
+                    lastHtmlText += char;
+                    if (char == "<") {
+                        last = i;
+                    } else if (char == ">") {
+                        //分析<...>标签里的内容
+                        var sign = text.slice(last + 1, i);
+                        var end = false;
+                        if (sign.charAt(sign.length - 1) == "/") {
+                            sign = sign.slice(0, sign.length - 1);
+                            single = true;
+                        }
+                        var s = 0;
+                        if (sign.charAt(0) == "/") {
+                            end = true;
+                            s++;
+                        }
+                        var name = "";
+                        //获取标签名称
+                        for (; s < sign.length; s++) {
+                            char = sign.charAt(s);
+                            if (char == " ") {
+                                break;
+                            } else {
+                                name += char;
+                            }
+                        }
+                        //分析属性
+                        var attributes = [];
+                        while (s < sign.length) {
+                            //跳过空格
+                            while (sign.charAt(s) == " " && s < sign.length) {
+                                s++;
+                            }
+                            if (s == sign.length) {
+                                break;
+                            }
+                            //获取属性名称
+                            var pos = s;
+                            while (sign.charAt(s) != "=" && sign.charAt(s) != " " && s < sign.length) {
+                                s++;
+                            }
+                            if (s == sign.length) {
+                                break;
+                            }
+                            var attributeName = sign.slice(pos, s);
+                            //跳过空格
+                            while (sign.charAt(s) == " " && s < sign.length) {
+                                s++;
+                            }
+                            if (s == sign.length) {
+                                break;
+                            }
+                            if (sign.charAt(s) == "=") {
+                                s++;
+                            } else {
+                                break;
+                            }
+                            //跳过空格
+                            while (sign.charAt(s) == " " && s < sign.length) {
+                                s++;
+                            }
+                            if (s == sign.length) {
+                                break;
+                            }
+                            //获取引号
+                            var begin = sign.charAt(s);
+                            if (begin == "\"" || begin == "'") {
+                                s++;
+                            } else {
+                                break;
+                            }
+                            //获取内容
+                            var pos = s;
+                            while (sign.charAt(s) != begin && s < sign.length) {
+                                s++;
+                            }
+                            if (s == sign.length) {
+                                break;
+                            }
+                            var attributeContent = sign.slice(pos, s);
+                            s++; //跳过引号
+                            attributes.push({
+                                name: attributeName,
+                                value: attributeContent
+                            });
+                        }
+                        if (single) {
+                            //如果是单个内容，比如<img.../>
+                            addSingle = {
+                                name: name,
+                                attributes: attributes
+                            };
+                            if (name == "img") {
+                                decodeText = true;
+                                addSingle.htmlText = text.slice(last, i + 1);
+                                lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - addSingle.htmlText.length);
+                            } else {
+                                var isfxml = false;
+                                for (var a = 0; a < attributes.length; a++) {
+                                    if (attributes[a].name == "xmlns:f" && attributes[a].value == "flower") {
+                                        isfxml = true;
+                                        break;
+                                    }
+                                }
+                                if (isfxml) {
+                                    decodeText = true;
+                                    addSingle.name = "ui";
+                                    addSingle.htmlText = text.slice(last, i + 1);
+                                    lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - addSingle.htmlText.length);
+                                }
+                            }
+                        } else {
+                            if (end) {
+                                if (name == "font" || name == "u" || name == "s") {
+                                    decodeText = true;
+                                    font = flower.ObjectDo.clone(font);
+                                    if (name == "font") {
+                                        font.size = font.sizes.pop();
+                                        font.color = font.colors.pop();
+                                        font.gap = font.gaps.pop();
+                                    } else if (name == "u") {
+                                        font.under = font.unders.pop();
+                                    } else if (name == "s") {
+                                        font.select = font.selects.pop();
+                                    }
+                                }
+                            } else {
+                                if (name == "font" || name == "u" || name == "s") {
+                                    nextHtmlText = text.slice(last, i + 1);
+                                    lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - nextHtmlText.length);
+                                    decodeText = true;
+                                    font = flower.ObjectDo.clone(font);
+                                    if (name == "font") {
+                                        font.sizes.push(font.size);
+                                        font.colors.push(font.color);
+                                        font.gaps.push(font.gap);
+                                        for (var a = 0; a < attributes.length; a++) {
+                                            if (attributes[a].name == "size") {
+                                                if (parseInt(attributes[a].value)) {
+                                                    font.size = parseInt(attributes[a].value);
+                                                }
+                                            } else if (attributes[a].name == "color") {
+                                                if (attributes[a].value.charAt(0) == "#") {
+                                                    font.color = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
+                                                }
+                                            }
+                                        }
+                                    } else if (name == "u") {
+                                        font.unders.push(font.under);
+                                        font.under = true;
+                                        font.underColor = font.color;
+                                        for (var a = 0; a < attributes.length; a++) {
+                                            if (attributes[a].name == "color") {
+                                                if (attributes[a].value.charAt(0) == "#") {
+                                                    font.underColor = parseInt("0x" + attributes[a].value.slice(1, attributes[a].value.length));
+                                                }
+                                            }
+                                        }
+                                    } else if (name == "s") {
+                                        font.selects.push(font.select);
+                                        font.select = true;
+                                    }
+                                } else {
+                                    var isfxml = false;
+                                    for (var a = 0; a < attributes.length; a++) {
+                                        if (attributes[a].name == "xmlns:f" && attributes[a].value == "flower") {
+                                            isfxml = true;
+                                            break;
+                                        }
+                                    }
+                                    if (isfxml) {
+                                        single = true;
+                                        addSingle = {
+                                            name: "ui",
+                                            attributes: attributes
+                                        };
+                                        i = this.__findFXML(text, last);
+                                        addSingle.htmlText = text.slice(last, i + 1);
+                                        decodeText = true;
+                                        lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - addSingle.htmlText.length);
+                                    }
+                                }
+                            }
+                        }
+                        last = -1;
+                    } else {
+                        if (last == -1) {
+                            lastText += char;
+                            if (lastTextStart == -1) {
+                                lastTextStart = lastHtmlText.length - 1;
+                            }
+                        }
+                    }
+                    var newLine = false;
+                    if (char == "\n" || char == "\r" || text.slice(i, i + "<br/>".length) == "<br/>") {
+                        if (p[24]) {
+                            newLine = true;
+                            decodeText = true;
+                            if (oldFont.select) {
+                                line.selectEnd = true;
+                            }
+                            if (char == "\n" || char == "\r") {
+                                line.endHtmlText = char;
+                                lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
+                                lastText = lastText.slice(0, lastText.length - 1);
+                            } else if (text.slice(i, i + "<br/>".length) == "<br/>") {
+                                line.endHtmlText = "<br/>";
+                                lastHtmlText = lastHtmlText.slice(0, lastHtmlText.length - 1);
+                                last = -1;
+                            }
+                        } else {
+                            text = text.slice(0, i);
+                            len = text.length;
+                        }
+                    }
+                    if (i == len - 1) {
+                        decodeText = true;
+                    }
+                    if (decodeText) {
+                        this.__decodeText(line, oldFont, this.__changeRealText(lastText), lastHtmlText, lastTextStart);
+                        lastHtmlText = "";
+                        lastText = "";
+                        lastTextStart = -1;
+                        if (single) {
+                            if (addSingle.name == "img") {
+                                this.__decodeImage(line, addSingle.attributes, addSingle.htmlText, oldFont);
+                            } else if (addSingle.name == "ui") {
+                                this.__decodeUI(line, addSingle.attributes, addSingle.htmlText, oldFont);
+                            }
+                        }
+                        if (newLine) {
+                            line.chars++;
+                            line = this.__getNewLine(line, font);
+                            lines.push(line);
+                        }
+                    }
+                    if (newLine && text.slice(i, i + "<br/>".length) == "<br/>") {
+                        i += "<br/>".length - 1;
+                    }
+                    lastHtmlText += nextHtmlText;
+                }
+                var oldText = p[0];
+                p[0] = "";
+                p[1] = "";
+                p[3] = 0;
+                var maxWidth = 0;
+                var maxHeight = 0;
+                for (var i = 0; i < lines.length; i++) {
+                    p[1] += lines[i].htmlText + lines[i].endHtmlText;
+                    p[3] += lines[i].chars;
+                    maxWidth = lines[i].width > maxWidth ? lines[i].width : maxWidth;
+                    maxHeight += lines[i].height;
+                    p[0] += lines[i].text + (i < lines.length - 1 ? "\n" : "");
+                }
+                maxWidth += p[29] * 2;
+                p[17] = maxWidth;
+                p[18] = maxHeight;
+                p[100] = true;
+                this.$invalidateContentBounds();
+                for (var i = 0; i < lines.length; i++) {
+                    for (var s = 0; s < lines[i].sublines.length; s++) {
+                        var subline = lines[i].sublines[s];
+                        if (p[21] == "center") {
+                            subline.x = (this.width - subline.width) * .5;
+                        } else if (p[21] == "right") {
+                            subline.x = this.width - subline.width;
+                        }
+                    }
+                }
+                this.$moveCaretIndex();
+                if (oldText != p[0]) {
+                    this.dispatchWith(flower.Event.CHANGE, null, true);
+                }
+            }
+        }, {
+            key: "__findFXML",
+            value: function __findFXML(text, start) {
+                var name = "";
+                var len = text.length;
+                for (var i = start + 1; i < len; i++) {
+                    if (text.charAt(i) == " " || text.charAt(i) == ">" || text.charAt(i) == "/") {
+                        name = text.slice(start + 1, i);
+                        break;
+                    }
+                }
+                var flag = 1;
+                var num1 = name.length + 1;
+                var num2 = name.length + 2;
+                var sign1 = "<" + name;
+                var sign2 = "</" + name;
+                for (var i = start + 1 + name.length; i < len; i++) {
+                    if (text.slice(i, i + num1) == sign1) {
+                        flag++;
+                    }
+                    if (text.slice(i, i + num2) == sign2) {
+                        flag--;
+                        if (flag == 0) {
+                            for (; i < len; i++) {
+                                if (text.charAt(i) == ">") {
+                                    break;
+                                }
+                            }
+                            return i;
+                        }
+                    }
+                }
+                return start;
+            }
+        }, {
+            key: "__clearOldDisplay",
+            value: function __clearOldDisplay() {
+                var p = this.$TextField;
+                var lines = p[2];
+                for (var l = 0; l < lines.length; l++) {
+                    var line = lines[l];
+                    for (var s = 0; s < line.sublines.length; s++) {
+                        var subline = line.sublines[s];
+                        var displays = subline.displays;
+                        for (var d = 0; d < displays.length; d++) {
+                            var item = displays[d];
+                            if (item.type == 0 && item.display) {
+                                item.display.dispose();
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            key: "__decodeText",
+            value: function __decodeText(line, font, text, htmlText, textStart) {
+                textStart = textStart == -1 ? 0 : textStart;
+                var p = this.$TextField;
+                if (!line.sublines.length) {
+                    this.__addSubLine(line, font);
+                }
+                var nextText = "";
+                var nextHtmlText = "";
+                var nextTextStart = 0;
+                while (text.length) {
+                    nextText = "";
+                    nextHtmlText = "";
+                    nextTextStart = 0;
+                    var subline = line.sublines[line.sublines.length - 1];
+                    var width = flower.$measureTextWidth(font.size, text);
+                    if (p[13] && this.$DisplayObject[3] != null) {
+                        if (subline.width + width + p[29] * 2 > this.width) {
+                            var min = 0;
+                            var minValue = 0;
+                            var max = text.length;
+                            var maxValue = width;
+                            var widths = {};
+                            widths[text.length] = width;
+                            while (true) {
+                                var mid = ~ ~((min + max) / 2);
+                                var midValue = widths[mid];
+                                if (mid == min || mid == max) {
+                                    if (subline.width + midValue + p[29] * 2 > this.width && mid) {
+                                        mid--;
+                                    }
+                                    if (mid == 0) {
+                                        this.__addSubLine(line, font);
+                                        subline = line.sublines[line.sublines.length - 1];
+                                    } else {
+                                        nextText = text.slice(mid, text.length);
+                                        nextHtmlText = htmlText.slice(textStart + mid, htmlText.length);
+                                        nextTextStart = 0;
+                                        text = text.slice(0, mid);
+                                        htmlText = htmlText.slice(0, textStart + mid);
+                                    }
+                                    break;
+                                }
+                                if (widths[mid] == null) {
+                                    midValue = widths[mid] = flower.$measureTextWidth(font.size, text.slice(0, mid));
+                                }
+                                if (subline.width + midValue + p[29] * 2 > this.width) {
+                                    max = mid;
+                                    maxValue = midValue;
+                                } else {
+                                    min = mid;
+                                    minValue = midValue;
+                                }
+                            }
+
+                            //for (var t = text.length; t >= 0; t--) {
+                            //    width = flower.$measureTextWidth(font.size, text.slice(0, t));
+                            //    if (subline.width + width + p[29] * 2 <= this.width) {
+                            //        if (t == 0) {
+                            //            this.__addSubLine(line, font);
+                            //            subline = line.sublines[line.sublines.length - 1];
+                            //            t = text.length + 1;
+                            //        } else {
+                            //            nextText = text.slice(t, text.length);
+                            //            nextHtmlText = htmlText.slice(textStart + t, htmlText.length);
+                            //            nextTextStart = 0;
+                            //            text = text.slice(0, t);
+                            //            htmlText = htmlText.slice(0, textStart + t);
+                            //            break;
+                            //        }
+                            //    }
+                            //}
+                        }
+                    }
+                    var item = {
+                        type: 0,
+                        display: null,
+                        font: font,
+                        text: text,
+                        htmlText: htmlText,
+                        htmlTextIndex: subline.htmlText.length,
+                        textStart: textStart,
+                        textEnd: textStart + this.__changeText(text).length,
+                        width: width,
+                        height: font.size,
+                        x: subline.positionX,
+                        charIndex: subline.chars,
+                        chars: text.length,
+                        subline: subline
+                    };
+                    subline.chars += item.chars;
+                    line.chars += item.chars;
+                    if (item.height + subline.gap > subline.height) {
+                        var oldHeight = subline.height;
+                        subline.height = item.height + subline.gap;
+                        line.height += subline.height - oldHeight;
+                        line.positionY += subline.height - oldHeight;
+                    }
+                    subline.width += item.width;
+                    if (subline.width > line.width) {
+                        line.width = subline.width;
+                    }
+                    subline.text += item.text;
+                    line.text += item.text;
+                    subline.htmlText += item.htmlText;
+                    line.htmlText += item.htmlText;
+                    subline.positionX += item.width;
+                    subline.displays.push(item);
+
+                    text = nextText;
+                    htmlText = nextHtmlText;
+                    textStart = nextTextStart;
+                    if (text.length) {
+                        this.__addSubLine(line, font);
+                        subline = line.sublines[line.sublines.length - 1];
+                    }
+                }
+            }
+        }, {
+            key: "__decodeImage",
+            value: function __decodeImage(line, attributes, htmlText, font) {
+                var p = this.$TextField;
+                var ids = p[102];
+                var id = "";
+                for (var i = 0; i < attributes.length; i++) {
+                    if (attributes[i].name == "id") {
+                        id = attributes[i].value;
+                    }
+                }
+                var caches = p[101];
+                if (!line.sublines.length) {
+                    this.__addSubLine(line, font);
+                }
+                var subline = line.sublines[line.sublines.length - 1];
+                var image;
+                var cache;
+                if (!caches[htmlText]) {
+                    caches[htmlText] = [];
+                }
+                if (caches[htmlText].length) {
+                    for (var i = 0; i < caches[htmlText].length; i++) {
+                        if (caches[htmlText][i].use == false) {
+                            image = caches[htmlText][i].display;
+                            caches[htmlText][i].use = true;
+                            cache = caches[htmlText][i];
+                        }
+                    }
+                }
+                if (!image) {
+                    var url = "";
+                    for (var i = 0; i < attributes.length; i++) {
+                        if (attributes[i].name == "src") {
+                            url = attributes[i].value;
+                        }
+                    }
+                    image = new flower.Bitmap();
+                    if (url != "") {
+                        var loader = new flower.URLLoader(url);
+                        loader.load();
+                        loader.addListener(flower.Event.COMPLETE, function (e) {
+                            if (image.isDispose) {
+                                return;
+                            }
+                            image.texture = e.data;
+                            cache.width = image.width;
+                            cache.height = image.height;
+                            this.$setHtmlText(p[1]);
+                        }, this);
+                    }
+                    cache = {
+                        use: true,
+                        display: image,
+                        loader: loader
+                    };
+                    caches[htmlText].push(cache);
+                }
+                if (id != "") {
+                    ids[id] = image;
+                    if (!this[id]) {
+                        this[id] = image;
+                    }
+                }
+                if (p[13] && this.$DisplayObject[3] != null) {
+                    if (subline.width + image.width + p[29] * 2 > this.width) {
+                        this.__addSubLine(line, font);
+                        subline = line.sublines[line.sublines.length - 1];
+                    }
+                }
+                cache.width = image.width;
+                cache.height = image.height;
+                var item = {
+                    type: 1,
+                    display: image,
+                    font: font,
+                    text: "",
+                    htmlText: htmlText,
+                    htmlTextIndex: subline.htmlText.length,
+                    textStart: 0,
+                    width: image.width,
+                    height: image.height,
+                    x: subline.positionX,
+                    charIndex: subline.chars,
+                    chars: 1,
+                    subline: subline
+                };
+                subline.chars += item.chars;
+                line.chars += item.chars;
+                if (item.height + subline.gap > subline.height) {
+                    var oldHeight = subline.height;
+                    subline.height = item.height + subline.gap;
+                    line.height += subline.height - oldHeight;
+                    line.positionY += subline.height - oldHeight;
+                }
+                subline.width += item.width;
+                if (subline.width > line.width) {
+                    line.width = subline.width;
+                }
+                subline.text += item.text;
+                line.text += item.text;
+                subline.htmlText += item.htmlText;
+                line.htmlText += item.htmlText;
+                subline.positionX += item.width;
+                subline.displays.push(item);
+            }
+        }, {
+            key: "__decodeUI",
+            value: function __decodeUI(line, attributes, htmlText, font) {
+                var p = this.$TextField;
+                var ids = p[102];
+                var id = "";
+                for (var i = 0; i < attributes.length; i++) {
+                    if (attributes[i].name == "id") {
+                        id = attributes[i].value;
+                    }
+                }
+                var caches = p[101];
+                if (!line.sublines.length) {
+                    this.__addSubLine(line, font);
+                }
+                var subline = line.sublines[line.sublines.length - 1];
+                var ui;
+                var cache;
+                if (!caches[htmlText]) {
+                    caches[htmlText] = [];
+                }
+                if (caches[htmlText].length) {
+                    for (var i = 0; i < caches[htmlText].length; i++) {
+                        if (caches[htmlText][i].use == false) {
+                            ui = caches[htmlText][i].display;
+                            caches[htmlText][i].use = true;
+                            cache = caches[htmlText];
+                            break;
+                        }
+                    }
+                }
+                if (!ui) {
+                    ui = new flower.UIParser();
+                    ui.percentWidth = null;
+                    ui.percentHeight = null;
+                    ui.parseUI(htmlText);
+                    cache = {
+                        use: true,
+                        display: ui
+                    };
+                    caches[htmlText].push(cache);
+                }
+                if (id != "") {
+                    ids[id] = ui;
+                    if (!this[id]) {
+                        this[id] = ui;
+                    }
+                }
+                if (p[13] && this.$DisplayObject[3] != null) {
+                    if (subline.width + ui.width + p[29] * 2 > this.width) {
+                        this.__addSubLine(line, font);
+                        subline = line.sublines[line.sublines.length - 1];
+                    }
+                }
+                cache.width = ui.width;
+                cache.height = ui.height;
+                var item = {
+                    type: 1,
+                    display: ui,
+                    font: font,
+                    text: "",
+                    htmlText: htmlText,
+                    htmlTextIndex: subline.htmlText.length,
+                    textStart: 0,
+                    width: ui.width,
+                    height: ui.height,
+                    x: subline.positionX,
+                    charIndex: subline.chars,
+                    chars: 1,
+                    subline: subline
+                };
+                subline.chars += item.chars;
+                line.chars += item.chars;
+                if (item.height + subline.gap > subline.height) {
+                    var oldHeight = subline.height;
+                    subline.height = item.height + subline.gap;
+                    line.height += subline.height - oldHeight;
+                    line.positionY += subline.height - oldHeight;
+                }
+                subline.width += item.width;
+                if (subline.width > line.width) {
+                    line.width = subline.width;
+                }
+                subline.text += item.text;
+                line.text += item.text;
+                subline.htmlText += item.htmlText;
+                line.htmlText += item.htmlText;
+                subline.positionX += item.width;
+                subline.displays.push(item);
+            }
+        }, {
+            key: "__resetCaches",
+            value: function __resetCaches() {
+                var caches = this.$TextField[101];
+                for (var key in caches) {
+                    var list = caches[key];
+                    for (var i = 0; i < list.length; i++) {
+                        list[i].use = false;
+                    }
+                }
+            }
+        }, {
+            key: "__clearCaches",
+            value: function __clearCaches() {
+                var caches = this.$TextField[101];
+                for (var key in caches) {
+                    var list = caches[key];
+                    while (list.length) {
+                        if (list[list.length - 1].use == false) {
+                            var item = list.pop();
+                            item.display.dispose();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                var keys = flower.ObjectDo.keys(caches);
+                for (var i = 0; i < keys.length; i++) {
+                    var key = keys[i];
+                    if (caches[key].length == 0) {
+                        delete caches[key];
+                    }
+                }
+            }
+        }, {
+            key: "__getNewLine",
+            value: function __getNewLine(lastLine, font) {
+                var line;
+                line = {
+                    index: this.$TextField[2].length,
+                    text: "",
+                    htmlText: "",
+                    endHtmlText: "",
+                    selectEnd: false,
+                    htmlTextIndex: 0,
+                    width: 4,
+                    height: font.size + font.gap,
+                    x: 0,
+                    y: 0,
+                    charIndex: 0,
+                    chars: 0,
+                    sublines: [],
+                    positionY: 0
+                };
+                if (lastLine) {
+                    line.y = lastLine.y + lastLine.height;
+                    line.htmlTextIndex = lastLine.htmlTextIndex + lastLine.htmlText.length + lastLine.endHtmlText.length;
+                    line.charIndex = lastLine.charIndex + lastLine.chars;
+                }
+                return line;
+            }
+        }, {
+            key: "__addSubLine",
+            value: function __addSubLine(line, font) {
+                var subline = {
+                    index: line.sublines.length,
+                    text: "",
+                    htmlText: "",
+                    htmlTextIndex: line.htmlText.length,
+                    width: 4,
+                    gap: font.gap,
+                    height: font.size + font.gap,
+                    x: 0,
+                    y: line.positionY,
+                    charIndex: line.chars,
+                    chars: 0,
+                    displays: [],
+                    line: line,
+                    positionX: 0
+                };
+                line.sublines.push(subline);
+                line.positionY += subline.height;
+                if (subline.y + subline.height > line.height) {
+                    line.height = subline.y + subline.height;
+                }
+            }
+        }, {
+            key: "__getDefaultFocus",
+            value: function __getDefaultFocus() {
+                var rect = new flower.Rect();
+                rect.fillColor = 0;
+                rect.width = 2;
+                rect.height = 12;
+                rect.visible = false;
+                return rect;
+            }
+        }, {
+            key: "__setFontSize",
+            value: function __setFontSize(val) {
+                val = +val & ~0;
+                var p = this.$TextField;
+                if (val == p[10]) {
+                    return;
+                }
+                p[10] = val;
+                this.$setHtmlText(p[1]);
+            }
+        }, {
+            key: "__setFontColor",
+            value: function __setFontColor(val) {
+                val = ~ ~val;
+                var p = this.$TextField;
+                if (val == p[11]) {
+                    return;
+                }
+                p[11] = val;
+                this.$setHtmlText(p[1]);
+            }
+        }, {
+            key: "__setHtmlText",
+            value: function __setHtmlText(val) {
+                var p = this.$TextField;
+                if (p[6] == val) {
+                    return;
+                }
+                p[6] = val;
+                this.$setHtmlText(val);
+            }
+        }, {
+            key: "__setText",
+            value: function __setText(val) {
+                val += "";
+                var val = this.__changeText(val);
+                this.__setHtmlText(val);
+            }
+        }, {
+            key: "__setWordWrap",
+            value: function __setWordWrap(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                var p = this.$TextField;
+                if (p[13] == val) {
+                    return;
+                }
+                p[13] = val;
+                this.$setHtmlText(p[1]);
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                var p = this.$TextField;
+                if (p[100]) {
+                    p[100] = false;
+                    var lines = p[2];
+                    var x = p[50];
+                    var y = p[51];
+                    var container = p[4];
+                    var bgcontainer = p[14];
+                    container.removeAll();
+                    if (bgcontainer) {
+                        bgcontainer.removeAll();
+                    }
+                    var height = this.height;
+                    for (var l = 0; l < lines.length; l++) {
+                        var line = lines[l];
+                        //if (!setHeight || line.y <= y + height && line.y + line.height < y + height) {
+                        for (var s = 0; s < line.sublines.length; s++) {
+                            var subline = line.sublines[s];
+                            //if (!setHeight || subline.y <= y + height && subline.y + subline.height < y + height) {
+                            var displays = subline.displays;
+                            for (var d = 0; d < displays.length; d++) {
+                                var item = displays[d];
+                                var display = item.display;
+                                if (item.type == 0) {
+                                    if (!display) {
+                                        display = new $TextField(item.text);
+                                        display.fontSize = item.font.size;
+                                        display.fontColor = item.font.select ? p[1001] : item.font.color;
+                                        item.display = display;
+                                    }
+                                }
+                                if (item.font.under && item.width) {
+                                    if (!item.underDisplay) {
+                                        item.underDisplay = new flower.Rect();
+                                        item.underDisplay.fillColor = item.font.select ? p[1001] : item.font.underColor;
+                                        item.underDisplay.width = item.width;
+                                        item.underDisplay.height = 1;
+                                    }
+                                    item.underDisplay.x = x + line.x + subline.x + item.x;
+                                    item.underDisplay.y = y + line.y + subline.y + subline.height;
+                                    container.addChild(item.underDisplay);
+                                }
+                                if (item.font.select && item.width) {
+                                    if (!item.selectDisplay) {
+                                        item.selectDisplay = new flower.Rect();
+                                        item.selectDisplay.fillColor = p[1000];
+                                        item.selectDisplay.width = item.width;
+                                        item.selectDisplay.height = subline.height;
+                                    }
+                                    item.selectDisplay.x = x + line.x + subline.x + item.x;
+                                    item.selectDisplay.y = y + line.y + subline.y;
+                                    if (!bgcontainer) {
+                                        this.__createBackgroundContainer();
+                                        bgcontainer = p[14];
+                                    }
+                                    bgcontainer.addChild(item.selectDisplay);
+                                }
+                                container.addChild(item.display);
+                                display.x = x + line.x + subline.x + item.x;
+                                display.y = y + line.y + subline.y + subline.height - item.height - subline.gap * 0.5;
+                            }
+                            //}
+                        }
+                        if (line.selectEnd) {
+                            var rect = new flower.Rect();
+                            rect.fillColor = p[1000];
+                            rect.width = this.width - line.x - line.width;
+                            rect.height = line.height;
+                            rect.x = x + line.x + line.width;
+                            rect.y = y + line.y;
+                        }
+                        //}
+                    }
+                    this.__clearCaches();
+                }
+                if (p[15] != this.width || p[16] != this.height) {
+                    p[15] = this.width;
+                    p[16] = this.height;
+                    this.__shape.clear();
+                    this.__shape.drawRect(p[29], 0, this.width - p[29] * 2, this.height + 2);
+                    this.$moveCaretIndex();
+                }
+
+                //Sprite
+                var children = this.__children;
+                /**
+                 * 子对象序列改变
+                 */
+                if (this.$hasFlags(0x0100)) {
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return;
+                    }
+                    this.$nativeShow.resetChildIndex(children);
+                    this.$removeFlags(0x0100);
+                }
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i].visible) {
+                        children[i].$onFrameEnd();
+                    }
+                }
+                //super.$onFrameEnd();
+                DebugInfo.frameInfo.display++;
+                DebugInfo.frameInfo.text++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
+            }
+        }, {
+            key: "$update",
+            value: function $update() {
+                var p = this.$TextField;
+                var caches = p[101];
+                var flag = false;
+                for (var key in caches) {
+                    var list = caches[key];
+                    for (var i = 0; i < list.length; i++) {
+                        var item = list[i];
+                        if (item.width != item.display.width || item.height != item.display.height) {
+                            flag = true;
+                            item.width = item.display.width;
+                            item.height = item.display.height;
+                        }
+                    }
+                }
+                if (flag) {
+                    this.$setHtmlText(p[1]);
+                }
+            }
+        }, {
+            key: "$initContainer",
+            value: function $initContainer() {
+                this.__children = [];
+                this.$nativeShow = Platform.create("Mask");
+                this.__shape = this.$createShape();
+                this.$nativeShow.setShape(this.__shape.$nativeShow, this.__shape);
+            }
+        }, {
+            key: "$createShape",
+            value: function $createShape() {
+                return new Shape();
+            }
+        }, {
+            key: "$addFlagsDown",
+            value: function $addFlagsDown(flags) {
+                if (this.$hasFlags(flags)) {
+                    return;
+                }
+                this.$addFlags(flags);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$addFlagsDown(flags);
+                }
+            }
+        }, {
+            key: "$removeFlagsDown",
+            value: function $removeFlagsDown(flags) {
+                if (!this.$hasFlags(flags)) {
+                    return;
+                }
+                this.$removeFlags(flags);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$removeFlagsDown(flags);
+                }
+            }
+        }, {
+            key: "addChild",
+            value: function addChild(child) {
+                this.addChildAt(child, this.__children.length);
+                return child;
+            }
+        }, {
+            key: "addChildAt",
+            value: function addChildAt(child, index) {
+                var children = this.__children;
+                if (index < 0 || index > children.length) {
+                    return child;
+                }
+                if (child.parent == this) {
+                    this.setChildIndex(child, index);
+                } else {
+                    if (child.parent) {
+                        child.parent.$removeChild(child);
+                    }
+                    if (!this.$nativeShow) {
+                        $warn(1002, this.name);
+                        return null;
+                    }
+                    this.$nativeShow.addChild(child.$nativeShow);
+                    children.splice(index, 0, child);
+                    child.$setStage(this.stage);
+                    child.$setParent(this);
+                    if (child.parent == this) {
+                        child.$dispatchAddedToStageEvent();
+                        this.$invalidateContentBounds();
+                        this.$addFlags(0x0100);
+                    }
+                }
+                return child;
+            }
+        }, {
+            key: "$setStage",
+            value: function $setStage(stage) {
+                _get(Object.getPrototypeOf(TextField.prototype), "$setStage", this).call(this, stage);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$setStage(this.stage);
+                }
+            }
+        }, {
+            key: "$dispatchAddedToStageEvent",
+            value: function $dispatchAddedToStageEvent() {
+                _get(Object.getPrototypeOf(TextField.prototype), "$dispatchAddedToStageEvent", this).call(this);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$dispatchAddedToStageEvent();
+                }
+            }
+        }, {
+            key: "$dispatchRemovedFromStageEvent",
+            value: function $dispatchRemovedFromStageEvent() {
+                _get(Object.getPrototypeOf(TextField.prototype), "$dispatchRemovedFromStageEvent", this).call(this);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$dispatchRemovedFromStageEvent();
+                }
+            }
+        }, {
+            key: "$removeChild",
+            value: function $removeChild(child) {
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i] == child) {
+                        if (!this.$nativeShow) {
+                            $warn(1002, this.name);
+                            return;
+                        }
+                        this.$nativeShow.removeChild(child.$nativeShow);
+                        children.splice(i, 1);
+                        this.$invalidateContentBounds();
+                        this.$addFlags(0x0100);
+                        return child;
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(child) {
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (children[i] == child) {
+                        if (!this.$nativeShow) {
+                            $warn(1002, this.name);
+                            return;
+                        }
+                        this.$nativeShow.removeChild(child.$nativeShow);
+                        children.splice(i, 1);
+                        child.$setStage(null);
+                        child.$setParent(null);
+                        child.$dispatchRemovedFromStageEvent();
+                        this.$invalidateContentBounds();
+                        this.$addFlags(0x0100);
+                        return child;
+                    }
+                }
+                return null;
+            }
+        }, {
+            key: "removeChildAt",
+            value: function removeChildAt(index) {
+                var children = this.__children;
+                if (index < 0 || index >= children.length) {
+                    return;
+                }
+                return this.removeChild(children[index]);
+            }
+        }, {
+            key: "setChildIndex",
+            value: function setChildIndex(child, index) {
+                var childIndex = this.getChildIndex(child);
+                if (childIndex == index || childIndex < 0) {
+                    return null;
+                }
+                var children = this.__children;
+                children.splice(childIndex, 1);
+                children.splice(index, 0, child);
+                this.$addFlags(0x0100);
+                return child;
+            }
+        }, {
+            key: "getChildIndex",
+            value: function getChildIndex(child) {
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    if (child == children[i]) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+        }, {
+            key: "getChildAt",
+            value: function getChildAt(index) {
+                index = index & ~0;
+                if (index < 0 || index > this.__children.length - 1) {
+                    $error(1007, "getChildAt", index, this.__children.length);
+                    return null;
+                }
+                return this.__children[index];
+            }
+        }, {
+            key: "removeAll",
+            value: function removeAll() {
+                while (this.numChildren) {
+                    this.removeChildAt(0);
+                }
+            }
+        }, {
+            key: "$changeAllFilters",
+            value: function $changeAllFilters() {
+                _get(Object.getPrototypeOf(TextField.prototype), "$changeAllFilters", this).call(this);
+                var children = this.__children;
+                for (var i = 0, len = children.length; i < len; i++) {
+                    children[i].$setParentFilters(this.$getAllFilters());
+                }
+            }
+
+            /**
+             * 测量子对象的区域
+             * @param rect
+             */
+
+        }, {
+            key: "$measureContentBounds",
+            value: function $measureContentBounds(rect) {
+                rect.x = 0;
+                rect.y = 0;
+                rect.width = this.$TextField[17];
+                rect.height = this.$TextField[18];
+                var childrenBounds = this.$Sprite[0];
+                childrenBounds.x = rect.x;
+                childrenBounds.y = rect.y;
+                childrenBounds.width = rect.width;
+                childrenBounds.height = rect.height;
+            }
+        }, {
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(touchX, touchY, multiply) {
+                if (this.touchEnabled == false || this.visible == false) return null;
+                if (multiply == true && this.multiplyTouchEnabled == false) return null;
+                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
+                var p = this.$DisplayObject;
+                p[10] = touchX;
+                p[11] = touchY;
+                p[22] = flower.EnterFrame.frame;
+                var bounds = this.__shape.$getContentBounds();
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + bounds.width && touchY < bounds.y + bounds.height) {
+                    var target;
+                    var childs = this.__children;
+                    var len = childs.length;
+                    for (var i = len - 1; i >= 0; i--) {
+                        if (childs[i].touchEnabled && (multiply == false || multiply == true && childs[i].multiplyTouchEnabled == true)) {
+                            target = childs[i].$getMouseTarget(touchX, touchY, multiply);
+                            if (target) {
+                                break;
+                            }
+                        }
+                    }
+                    return this;
+                }
+                return null;
+            }
+        }, {
+            key: "$releaseContainer",
+            value: function $releaseContainer() {
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                Platform.release("Mask", this.$nativeShow);
+                this.$nativeShow = null;
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                this.__resetCaches();
+                this.__clearCaches();
+                flower.EnterFrame.remove(this.$update, this);
+
+                //Sprite
+                if (!this.$nativeShow) {
+                    $warn(1002, this.name);
+                    return;
+                }
+                DebugInfo.displayInfo.text--;
+                var children = this.__children;
+                while (children.length) {
+                    var child = children[children.length - 1];
+                    child.dispose();
+                }
+                _get(Object.getPrototypeOf(TextField.prototype), "dispose", this).call(this);
+                this.$releaseContainer();
+            }
+        }, {
+            key: "fontSize",
+            get: function get() {
+                return this.$TextField[10];
+            },
+            set: function set(val) {
+                this.__setFontSize(val);
+            }
+        }, {
+            key: "fontColor",
+            get: function get() {
+                return this.$TextField[11];
+            },
+            set: function set(val) {
+                this.__setFontColor(val);
+            }
+        }, {
+            key: "htmlText",
+            get: function get() {
+                return this.$TextField[1];
+            },
+            set: function set(val) {
+                this.__setHtmlText(val);
+            }
+        }, {
+            key: "text",
+            get: function get() {
+                return this.$TextField[0];
+            },
+            set: function set(val) {
+                this.__setText(val);
+            }
+        }, {
+            key: "wordWrap",
+            get: function get() {
+                return this.$TextField[13];
+            },
+            set: function set(val) {
+                this.__setWordWrap(val);
+            }
+        }, {
+            key: "displays",
+            get: function get() {
+                return this.$TextField[102];
+            }
+        }, {
+            key: "algin",
+            set: function set(val) {
+                var p = this.$TextField;
+                if (p[21] == val) {
+                    return;
+                }
+                p[21] = val;
+                if (p[4]) {
+                    if (p[21] == "right") {
+                        p[4].x = -p[29];
+                    } else if (p[21] == "center") {
+                        p[4].x = 0;
+                    } else {
+                        p[4].x = p[29];
+                    }
+                }
+                if (p[14]) {
+                    if (p[21] == "right") {
+                        p[14].x = -p[29];
+                    } else if (p[21] == "center") {
+                        p[14].x = 0;
+                    } else {
+                        p[14].x = p[29];
+                    }
+                }
+                this.$setHtmlText(p[1]);
+            },
+            get: function get() {
+                return this.$TextField[21];
+            }
+        }, {
+            key: "leading",
+            set: function set(val) {
+                val = +val & ~0;
+                var p = this.$TextField;
+                if (p[12] == val) {
+                    return;
+                }
+                p[12] = val;
+                this.$setHtmlText(p[1]);
+            },
+            get: function get() {
+                return this.$TextField[12];
+            }
+        }, {
+            key: "input",
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.$TextField[22]) {
+                    return;
+                }
+                this.$TextField[22] = val;
+            },
+            get: function get() {
+                return this.$TextField[22];
+            }
+        }, {
+            key: "selectable",
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.$TextField[23]) {
+                    return;
+                }
+                this.$TextField[23] = val;
+            },
+            get: function get() {
+                return this.$TextField[23];
+            }
+        }, {
+            key: "multiline",
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.$TextField[24]) {
+                    return;
+                }
+                this.$TextField[24] = val;
+            },
+            get: function get() {
+                return this.$TextField[24];
+            }
+        }, {
+            key: "enterStop",
+            set: function set(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                val = !!val;
+                if (val == this.$TextField[25]) {
+                    return;
+                }
+                this.$TextField[25] = val;
+            },
+            get: function get() {
+                return this.$TextField[25];
+            }
+        }], [{
+            key: "changeText",
+            value: function changeText(val) {
+                for (var i = 0; i < val.length; i++) {
+                    var char = val.charAt(i);
+                    if (char == " ") {
+                        val = val.slice(0, i) + "&nbsp;" + val.slice(i + 1, val.length);
+                        i += 5;
+                    } else if (char == "<") {
+                        val = val.slice(0, i) + "&lt;" + val.slice(i + 1, val.length);
+                        i += 3;
+                    } else if (char == ">") {
+                        val = val.slice(0, i) + "&gt;" + val.slice(i + 1, val.length);
+                        i += 3;
+                    } else if (char == "&") {
+                        val = val.slice(0, i) + "&amp;" + val.slice(i + 1, val.length);
+                        i += 4;
+                    } else if (char == "\n" || char == "\r") {
+                        //val = val.slice(0, i) + "<br/>" + val.slice(i + 1, val.length);
+                        //i += 4
+                    }
+                }
+                return val;
+            }
+        }, {
+            key: "changeRealText",
+            value: function changeRealText(val) {
+                for (var i = 0; i < val.length; i++) {
+                    if (val.slice(i, i + 5) == "&amp;") {
+                        val = val.slice(0, i) + "&" + val.slice(i + 5, val.length);
+                    } else if (val.slice(i, i + 6) == "&nbsp;") {
+                        val = val.slice(0, i) + " " + val.slice(i + 6, val.length);
+                    } else if (val.slice(i, i + 4) == "&lt;") {
+                        val = val.slice(0, i) + "<" + val.slice(i + 4, val.length);
+                    } else if (val.slice(i, i + 4) == "&gt;") {
+                        val = val.slice(0, i) + ">" + val.slice(i + 4, val.length);
+                    } else if (val.slice(i, i + 5) == "<br/>") {
+                        val = val.slice(0, i) + "\n" + val.slice(i + 5, val.length);
+                    }
+                }
+                return val;
+            }
+        }]);
+
+        return TextField;
+    }(flower.DisplayObject);
 
     flower.TextField = TextField;
     //////////////////////////End File:flower/display/TextField.js///////////////////////////
 
-    //////////////////////////File:flower/display/TextInput.js///////////////////////////
+    //////////////////////////File:flower/display/$TextInput.js///////////////////////////
 
-    var TextInput = function (_DisplayObject4) {
-        _inherits(TextInput, _DisplayObject4);
+    var $TextInput = function (_DisplayObject4) {
+        _inherits($TextInput, _DisplayObject4);
 
-        function TextInput() {
+        function $TextInput() {
             var text = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
 
-            _classCallCheck(this, TextInput);
+            _classCallCheck(this, $TextInput);
 
-            var _this19 = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this));
+            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf($TextInput).call(this));
 
-            _this19.$nativeShow = Platform.create("TextInput");
-            _this19.$TextField = {
+            _this21.$TextField = {
                 0: "", //text
                 1: 12, //fontSize
                 2: 0x000000, //fontColor
                 3: true, //editEnabled
                 4: false, //inputing
-                5: false //autoSize
-            };
-            _this19.addListener(Event.FOCUS_IN, _this19.$onFocusIn, _this19);
-            _this19.addListener(Event.FOCUS_OUT, _this19.$onFocusOut, _this19);
-            _this19.addListener(KeyboardEvent.KEY_DOWN, _this19.$keyDown, _this19);
+                5: false, //autoSize
+                6: false, //multiline
+                7: false };
+            //wordWrap
+            _this21.$initNativeShow();
+            _this21.addListener(Event.FOCUS_IN, _this21.$onFocusIn, _this21);
+            _this21.addListener(Event.FOCUS_OUT, _this21.$onFocusOut, _this21);
+            _this21.addListener(KeyboardEvent.KEY_DOWN, _this21.$keyDown, _this21);
             if (text != "") {
-                _this19.text = text;
+                _this21.text = text;
             }
-            _this19.width = 100;
-            _this19.height = 21;
-            _this19.focusEnabled = true;
-            _this19.$nativeShow.setChangeBack(_this19.$onTextChange, _this19);
-            return _this19;
+            _this21.width = 100;
+            _this21.height = 21;
+            _this21.focusEnabled = true;
+            _this21.$nativeShow.setChangeBack(_this21.$onTextChange, _this21);
+            return _this21;
         }
 
-        _createClass(TextInput, [{
+        _createClass($TextInput, [{
+            key: "$initNativeShow",
+            value: function $initNativeShow() {
+                var textArea = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+                if (textArea) {
+                    this.$TextField[6] = true;
+                    this.$TextField[7] = true;
+                    this.$nativeShow = Platform.create("TextArea");
+                } else {
+                    this.$nativeShow = Platform.create("TextInput");
+                }
+            }
+        }, {
             key: "$onTextChange",
             value: function $onTextChange() {
                 if (!this.$nativeShow) {
@@ -4741,11 +7822,11 @@ var flower = {};
                     var d = this.$DisplayObject;
                     var p = this.$TextField;
                     //text, width, height, size, wordWrap, multiline, autoSize
-                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], false, false, p[5]);
+                    var size = this.$nativeShow.changeText(p[0], d[3], d[4], p[1], p[7], p[6], p[5]);
                     rect.x = 0;
                     rect.y = 0;
-                    rect.width = size.width;
-                    rect.height = size.height;
+                    rect.width = this.width; //size.width;
+                    rect.height = this.height;
                     this.$removeFlags(0x0800);
                 }
             }
@@ -4782,7 +7863,7 @@ var flower = {};
         }, {
             key: "$setWidth",
             value: function $setWidth(val) {
-                var flag = _get(Object.getPrototypeOf(TextInput.prototype), "$setWidth", this).call(this, val);
+                var flag = _get(Object.getPrototypeOf($TextInput.prototype), "$setWidth", this).call(this, val);
                 if (!flag) {
                     return;
                 }
@@ -4799,7 +7880,7 @@ var flower = {};
         }, {
             key: "$setHeight",
             value: function $setHeight(val) {
-                var flag = _get(Object.getPrototypeOf(TextInput.prototype), "$setHeight", this).call(this, val);
+                var flag = _get(Object.getPrototypeOf($TextInput.prototype), "$setHeight", this).call(this, val);
                 if (!flag) {
                     return;
                 }
@@ -4814,13 +7895,58 @@ var flower = {};
                 this.$nativeShow.setSize(this.width, this.height);
             }
         }, {
+            key: "$setFontSize",
+            value: function $setFontSize(val) {
+                var p = this.$TextField;
+                if (p[1] == val) {
+                    return false;
+                }
+                p[1] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
             key: "$setEditEnabled",
             value: function $setEditEnabled(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                var p = this.$TextField;
+                if (p[3] == val) {
+                    return false;
+                }
+                p[3] = val;
+                return true;
+            }
+        }, {
+            key: "$setMultiline",
+            value: function $setMultiline(val) {
+                if (val == "false") {
+                    val = false;
+                }
                 var p = this.$TextField;
                 if (p[6] == val) {
                     return false;
                 }
                 p[6] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                return true;
+            }
+        }, {
+            key: "$setWordWrap",
+            value: function $setWordWrap(val) {
+                if (val == "false") {
+                    val = false;
+                }
+                var p = this.$TextField;
+                if (p[7] == val) {
+                    return false;
+                }
+                p[7] = val;
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
                 return true;
             }
         }, {
@@ -4830,11 +7956,11 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                if (this.editEnabled) {
-                    var p = this.$TextField;
+                var p = this.$TextField;
+                if (p[3]) {
                     this.$nativeShow.startInput();
                     p[4] = true;
-                    this.dispatchWidth(Event.START_INPUT);
+                    this.dispatchWith(Event.START_INPUT);
                 }
             }
         }, {
@@ -4854,14 +7980,38 @@ var flower = {};
                     this.$nativeShow.stopInput();
                 }
                 this.text = this.$nativeShow.getNativeText();
-                this.dispatchWidth(Event.STOP_INPUT);
+                this.$addFlags(0x0800);
+                this.$invalidateContentBounds();
+                this.dispatchWith(Event.STOP_INPUT);
             }
         }, {
             key: "$keyDown",
             value: function $keyDown(e) {
-                if (e.key == 13) {
+                var p = this.$TextField;
+                p[0] = this.$nativeShow.getNativeText();
+                if (e.keyCode == 13 && !p[6]) {
                     this.$inputEnd();
                 }
+            }
+        }, {
+            key: "$startNativeInput",
+            value: function $startNativeInput() {
+                this.$nativeShow.startInput();
+            }
+        }, {
+            key: "$stopNativeInput",
+            value: function $stopNativeInput() {
+                this.$nativeShow.stopInput();
+            }
+        }, {
+            key: "$getNativeText",
+            value: function $getNativeText() {
+                return this.$nativeShow.getNativeText();
+            }
+        }, {
+            key: "$setNativeText",
+            value: function $setNativeText(val) {
+                this.$nativeShow.setNativeText(val);
             }
         }, {
             key: "$onFrameEnd",
@@ -4869,7 +8019,12 @@ var flower = {};
                 if (this.$hasFlags(0x0800)) {
                     var width = this.width;
                 }
-                _get(Object.getPrototypeOf(TextInput.prototype), "$onFrameEnd", this).call(this);
+                _get(Object.getPrototypeOf($TextInput.prototype), "$onFrameEnd", this).call(this);
+            }
+        }, {
+            key: "inputOver",
+            value: function inputOver() {
+                this.$inputEnd();
             }
         }, {
             key: "dispose",
@@ -4878,15 +8033,14 @@ var flower = {};
                     $warn(1002, this.name);
                     return;
                 }
-                _get(Object.getPrototypeOf(TextInput.prototype), "dispose", this).call(this);
+                _get(Object.getPrototypeOf($TextInput.prototype), "dispose", this).call(this);
                 Platform.release("TextInput", this.$nativeShow);
                 this.$nativeShow = null;
             }
         }, {
             key: "text",
             get: function get() {
-                var p = this.$TextField;
-                return p[0];
+                return this.$TextField[0];
             },
             set: function set(val) {
                 this.$setText(val);
@@ -4894,30 +8048,35 @@ var flower = {};
         }, {
             key: "fontColor",
             get: function get() {
-                var p = this.$TextField;
-                return p[2];
+                return this.$TextField[2];
             },
             set: function set(val) {
                 this.$setFontColor(val);
             }
         }, {
+            key: "fontSize",
+            get: function get() {
+                return this.$TextField[1];
+            },
+            set: function set(val) {
+                this.$setFontSize(val);
+            }
+        }, {
             key: "editEnabled",
             get: function get() {
-                var p = this.$TextField;
-                return p[3];
+                return this.$TextField[3];
             },
             set: function set(val) {
                 this.$setEditEnabled(val);
             }
         }]);
 
-        return TextInput;
+        return $TextInput;
     }(DisplayObject);
-
-    flower.TextInput = TextInput;
-    //////////////////////////End File:flower/display/TextInput.js///////////////////////////
+    //////////////////////////End File:flower/display/$TextInput.js///////////////////////////
 
     //////////////////////////File:flower/display/Shape.js///////////////////////////
+
 
     var Shape = function (_DisplayObject5) {
         _inherits(Shape, _DisplayObject5);
@@ -4925,10 +8084,10 @@ var flower = {};
         function Shape() {
             _classCallCheck(this, Shape);
 
-            var _this20 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
+            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(Shape).call(this));
 
-            _this20.$nativeShow = Platform.create("Shape");
-            _this20.$Shape = {
+            _this22.$nativeShow = Platform.create("Shape");
+            _this22.$Shape = {
                 0: 0xffffff, //fillColor
                 1: 1, //fillAlpha
                 2: 0, //lineWidth
@@ -4940,14 +8099,20 @@ var flower = {};
                 8: null, //maxY
                 9: [] //record
             };
-            _this20.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
-            return _this20;
+            _this22.$nativeShow.draw([{ x: 0, y: 0 }, { x: 1, y: 0 }], 0, 0, 0, 0, 0);
+            DebugInfo.displayInfo.shape++;
+            return _this22;
         }
 
         _createClass(Shape, [{
             key: "drawRect",
             value: function drawRect(x, y, width, height) {
                 this.$drawPolygon([{ x: x, y: y }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }]);
+            }
+        }, {
+            key: "drawLine",
+            value: function drawLine(startX, startY, endX, endY) {
+                this.$drawPolygon([{ x: startX, y: startY }, { x: endX, y: endY }]);
             }
         }, {
             key: "clear",
@@ -5132,11 +8297,18 @@ var flower = {};
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
                 this.$redraw();
-                _get(Object.getPrototypeOf(Shape.prototype), "$onFrameEnd", this).call(this);
+                //super.$onFrameEnd();
+                DebugInfo.frameInfo.display++;
+                DebugInfo.frameInfo.shape++;
+                var p = this.$DisplayObject;
+                if (this.$hasFlags(0x0002)) {
+                    this.$nativeShow.setAlpha(this.$getConcatAlpha());
+                }
             }
         }, {
             key: "dispose",
             value: function dispose() {
+                DebugInfo.displayInfo.shape--;
                 if (!this.$nativeShow) {
                     $warn(1002, this.name);
                     return;
@@ -5206,41 +8378,69 @@ var flower = {};
         function Stage() {
             _classCallCheck(this, Stage);
 
-            var _this21 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
+            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stage).call(this));
 
-            _this21.__nativeMouseMoveEvent = [];
-            _this21.__nativeTouchEvent = [];
-            _this21.__mouseOverList = [_this21];
-            _this21.__dragOverList = [_this21];
-            _this21.__touchList = [];
-            _this21.__lastMouseX = -1;
-            _this21.__lastMouseY = -1;
-            _this21.__focus = null;
+            _this23.__mouseX = 0;
+            _this23.__mouseY = 0;
+            _this23.__nativeMouseMoveEvent = [];
+            _this23.__nativeRightClickEvent = [];
+            _this23.__nativeTouchEvent = [];
+            _this23.__mouseOverList = [_this23];
+            _this23.__dragOverList = [_this23];
+            _this23.__touchList = [];
+            _this23.__lastMouseX = -1;
+            _this23.__lastMouseY = -1;
+            _this23.__lastRightX = -1;
+            _this23.__lastRightY = -1;
+            _this23.__focus = null;
+            _this23.__touchTarget = null;
+            _this23.$keyEvents = [];
 
-            _this21.__stage = _this21;
-            Stage.stages.push(_this21);
-            _this21.$background = new Shape();
-            _this21.__forntLayer = new Sprite();
-            _this21.addChild(_this21.__forntLayer);
-            _this21.$debugSprite = new Sprite();
-            _this21.__forntLayer.addChild(_this21.$debugSprite);
-            _this21.$pop = PopManager.getInstance();
-            _this21.__forntLayer.addChild(_this21.$pop);
-            _this21.$menu = MenuManager.getInstance();
-            _this21.__forntLayer.addChild(_this21.$menu);
-            _this21.$drag = DragManager.getInstance();
-            _this21.__forntLayer.addChild(_this21.$drag);
-            _this21.backgroundColor = 0;
-            return _this21;
+            _this23.__stage = _this23;
+            Stage.stages.push(_this23);
+
+            _this23.$inputSprite = new Sprite();
+            _this23.addChild(_this23.$inputSprite);
+            _this23.$inputSprite.touchEnabled = false;
+            _this23.$input = new $TextInput();
+            _this23.$input.x = -100;
+            _this23.$input.y = -100;
+            _this23.$input.width = 10;
+            _this23.$inputSprite.addChild(_this23.$input);
+            var rect = new flower.Shape();
+            rect.drawRect(0, 0, 50, 20);
+            rect.alpha = 0.01;
+            _this23.$inputSprite.addChild(rect);
+            _this23.$background = new Shape();
+            _this23.__forntLayer = new Sprite();
+            _this23.addChild(_this23.__forntLayer);
+            _this23.$debugSprite = new Sprite();
+            _this23.__forntLayer.addChild(_this23.$debugSprite);
+            _this23.$pop = PopManager.getInstance();
+            _this23.__forntLayer.addChild(_this23.$pop);
+            _this23.$menu = MenuManager.getInstance();
+            _this23.__forntLayer.addChild(_this23.$menu);
+            _this23.$drag = DragManager.getInstance();
+            _this23.__forntLayer.addChild(_this23.$drag);
+            _this23.backgroundColor = 0;
+            return _this23;
         }
 
         _createClass(Stage, [{
             key: "addChildAt",
             value: function addChildAt(child, index) {
                 _get(Object.getPrototypeOf(Stage.prototype), "addChildAt", this).call(this, child, index);
-                if (child != this.__forntLayer) {
+                if (child != this.__forntLayer && this.__forntLayer) {
                     this.addChild(this.__forntLayer);
                 }
+            }
+        }, {
+            key: "removeChild",
+            value: function removeChild(child) {
+                if (child == this.$inputSprite || child == this.$background || child == this.$debugSprite || child == this.$pop || child == this.$menu || child == this.$drag) {
+                    return;
+                }
+                _get(Object.getPrototypeOf(Stage.prototype), "removeChild", this).call(this, child);
             }
 
             ///////////////////////////////////////触摸事件处理///////////////////////////////////////
@@ -5272,6 +8472,13 @@ var flower = {};
                 this.__lastMouseY = y;
                 this.__nativeMouseMoveEvent.push({ x: x, y: y });
                 //flower.trace("mouseEvent",x,y);
+            }
+        }, {
+            key: "$addRightClickEvent",
+            value: function $addRightClickEvent(x, y) {
+                this.__lastRightX = x;
+                this.__lastRightY = y;
+                this.__nativeRightClickEvent.push({ x: x, y: y });
             }
         }, {
             key: "$addTouchEvent",
@@ -5309,11 +8516,20 @@ var flower = {};
                 mouse.mutiply = this.__touchList.length == 0 ? false : true;
                 this.__touchList.push(mouse);
                 var target = this.$getMouseTarget(x, y, mouse.mutiply);
+                this.__touchTarget = target;
                 mouse.target = target;
                 var parent = target.parent;
+                var isMenu = false;
                 while (parent && parent != this) {
+                    if (parent == this.$menu) {
+                        isMenu = true;
+                    }
                     mouse.parents.push(parent);
                     parent = parent.parent;
+                }
+                if (this.$menu.$hasMenu() && !isMenu) {
+                    this.__touchList.length = 0;
+                    return;
                 }
                 if (target) {
                     this.$setFocus(target);
@@ -5326,14 +8542,33 @@ var flower = {};
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = target.lastTouchX;
-                    event.$touchY = target.lastTouchY;
+                    event.$touchX = target.mouseX;
+                    event.$touchY = target.mouseY;
                     target.dispatch(event);
                 }
             }
         }, {
+            key: "$onRightClick",
+            value: function $onRightClick(x, y) {
+                if (this.$menu.$hasMenu()) {
+                    return;
+                }
+                var target = this.$getMouseTarget(x, y, false);
+                this.__touchTarget = target;
+                var event;
+                event = new flower.MouseEvent(flower.MouseEvent.RIGHT_CLICK);
+                event.$stageX = x;
+                event.$stageY = y;
+                event.$target = target;
+                event.$touchX = target.mouseX;
+                event.$touchY = target.mouseY;
+                target.dispatch(event);
+            }
+        }, {
             key: "$onMouseMove",
             value: function $onMouseMove(x, y) {
+                this.__mouseX = x;
+                this.__mouseY = y;
                 var target = this.$getMouseTarget(x, y, false);
                 var parent = target.parent;
                 var event;
@@ -5360,8 +8595,8 @@ var flower = {};
                             event.$stageX = x;
                             event.$stageY = y;
                             event.$target = target;
-                            event.$touchX = list[i].lastTouchX;
-                            event.$touchY = list[i].lastTouchY;
+                            event.$touchX = list[i].mouseX;
+                            event.$touchY = list[i].mouseY;
                             list[i].dispatch(event);
                         }
                     }
@@ -5378,8 +8613,8 @@ var flower = {};
                             event.$stageX = x;
                             event.$stageY = y;
                             event.$target = target;
-                            event.$touchX = this.__dragOverList[j].lastTouchX;
-                            event.$touchY = this.__dragOverList[j].lastTouchY;
+                            event.$touchX = this.__dragOverList[j].mouseX;
+                            event.$touchY = this.__dragOverList[j].mouseY;
                             this.__dragOverList[j].dispatch(event);
                         }
                     }
@@ -5405,8 +8640,8 @@ var flower = {};
                             event.$stageX = x;
                             event.$stageY = y;
                             event.$target = target;
-                            event.$touchX = list[i].lastTouchX;
-                            event.$touchY = list[i].lastTouchY;
+                            event.$touchX = list[i].mouseX;
+                            event.$touchY = list[i].mouseY;
                             list[i].dispatch(event);
                         }
                     }
@@ -5423,8 +8658,8 @@ var flower = {};
                             event.$stageX = x;
                             event.$stageY = y;
                             event.$target = target;
-                            event.$touchX = this.__mouseOverList[j].lastTouchX;
-                            event.$touchY = this.__mouseOverList[j].lastTouchY;
+                            event.$touchX = this.__mouseOverList[j].mouseX;
+                            event.$touchY = this.__mouseOverList[j].mouseY;
                             this.__mouseOverList[j].dispatch(event);
                         }
                     }
@@ -5434,8 +8669,8 @@ var flower = {};
                         event.$stageX = x;
                         event.$stageY = y;
                         event.$target = target;
-                        event.$touchX = target.lastTouchX;
-                        event.$touchY = target.lastTouchY;
+                        event.$touchX = target.mouseX;
+                        event.$touchY = target.mouseY;
                         target.dispatch(event);
                     }
                 }
@@ -5473,8 +8708,8 @@ var flower = {};
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = target.lastTouchX;
-                    event.$touchY = target.lastTouchY;
+                    event.$touchX = target.mouseX;
+                    event.$touchY = target.mouseY;
                     target.dispatch(event);
                 }
             }
@@ -5508,8 +8743,8 @@ var flower = {};
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = target.lastTouchX;
-                    event.$touchY = target.lastTouchY;
+                    event.$touchX = target.mouseX;
+                    event.$touchY = target.mouseY;
                     target.dispatch(event);
                 } else {
                     target = mouse.target;
@@ -5518,8 +8753,8 @@ var flower = {};
                     event.$stageX = x;
                     event.$stageY = y;
                     event.$target = target;
-                    event.$touchX = target.lastTouchX;
-                    event.$touchY = target.lastTouchY;
+                    event.$touchX = target.mouseX;
+                    event.$touchY = target.mouseY;
                     target.dispatch(event);
                 }
             }
@@ -5540,11 +8775,15 @@ var flower = {};
                 if (key == 18) {
                     KeyboardEvent.$alt = true;
                 }
-                var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, key);
-                if (this.__focus) {
-                    this.__focus.dispatch(event);
-                } else {
-                    this.dispatch(event);
+                this.$keyEvents.push({
+                    type: KeyboardEvent.KEY_DOWN,
+                    shift: KeyboardEvent.$shift,
+                    control: KeyboardEvent.$control,
+                    alt: KeyboardEvent.$alt,
+                    key: key
+                });
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
                 }
             }
         }, {
@@ -5559,12 +8798,44 @@ var flower = {};
                 if (key == 18) {
                     KeyboardEvent.$alt = false;
                 }
-                var event = new KeyboardEvent(KeyboardEvent.KEY_UP, key);
-                if (this.__focus) {
-                    this.__focus.dispatch(event);
-                } else {
-                    this.dispatch(event);
+                this.$keyEvents.push({
+                    type: KeyboardEvent.KEY_UP,
+                    shift: KeyboardEvent.$shift,
+                    control: KeyboardEvent.$control,
+                    alt: KeyboardEvent.$alt,
+                    key: key
+                });
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
                 }
+            }
+        }, {
+            key: "$dispatchKeyEvent",
+            value: function $dispatchKeyEvent(info) {
+                var shift = KeyboardEvent.$shift;
+                var control = KeyboardEvent.$control;
+                var alt = KeyboardEvent.$alt;
+                KeyboardEvent.$shift = info.shift;
+                KeyboardEvent.$control = info.control;
+                KeyboardEvent.$alt = info.alt;
+                if (info.type == KeyboardEvent.KEY_DOWN) {
+                    var event = new KeyboardEvent(KeyboardEvent.KEY_DOWN, info.key);
+                    if (this.__focus) {
+                        this.__focus.dispatch(event);
+                    } else {
+                        this.dispatch(event);
+                    }
+                } else if (info.type == KeyboardEvent.KEY_UP) {
+                    var event = new KeyboardEvent(KeyboardEvent.KEY_UP, info.key);
+                    if (this.__focus) {
+                        this.__focus.dispatch(event);
+                    } else {
+                        this.dispatch(event);
+                    }
+                }
+                KeyboardEvent.$shift = shift;
+                KeyboardEvent.$control = control;
+                KeyboardEvent.$alt = alt;
             }
 
             ///////////////////////////////////////键盘事件处理///////////////////////////////////////
@@ -5572,8 +8843,15 @@ var flower = {};
         }, {
             key: "$onFrameEnd",
             value: function $onFrameEnd() {
+                DebugInfo.frameInfo.display = 0;
+                DebugInfo.frameInfo.text = 0;
+                DebugInfo.frameInfo.bitmap = 0;
+                DebugInfo.frameInfo.shape = 0;
+                DebugInfo.frameInfo.sprite = 0;
                 var touchList = this.__nativeTouchEvent;
                 var mouseMoveList = this.__nativeMouseMoveEvent;
+                var rightClickList = this.__nativeRightClickEvent;
+                var hasclick = false;
                 while (touchList.length) {
                     var touch = touchList.shift();
                     if (touch.type == "begin") {
@@ -5581,6 +8859,7 @@ var flower = {};
                     } else if (touch.type == "move") {
                         this.$onTouchMove(touch.id, touch.x, touch.y);
                     } else if (touch.type == "end") {
+                        hasclick = true;
                         this.$onTouchEnd(touch.id, touch.x, touch.y);
                     }
                 }
@@ -5592,8 +8871,22 @@ var flower = {};
                     this.$onMouseMove(moveInfo.x, moveInfo.y);
                 }
                 mouseMoveList.length = 0;
+                if (rightClickList.length) {
+                    hasclick = true;
+                    var rightInfo = rightClickList[rightClickList.length - 1];
+                    this.$onRightClick(rightInfo.x, rightInfo.y);
+                }
+                rightClickList.length = 0;
+                if (hasclick) {
+                    this.$menu.$onTouch(this.__touchTarget);
+                }
+                while (this.$keyEvents.length) {
+                    this.$dispatchKeyEvent(this.$keyEvents.shift());
+                }
                 _get(Object.getPrototypeOf(Stage.prototype), "$onFrameEnd", this).call(this);
-                this.$background.$onFrameEnd();
+                //this.$background.$onFrameEnd();
+                DebugInfo.frameInfo.bitmap = DebugInfo.frameInfo.display - DebugInfo.frameInfo.text - DebugInfo.frameInfo.shape - DebugInfo.frameInfo.sprite;
+                //trace("Display:", DebugInfo.frameInfo.display, "  Text:", DebugInfo.frameInfo.text, "  Bitmap:", DebugInfo.frameInfo.bitmap, "  Shape:", DebugInfo.frameInfo.shape, "  Sprite:", DebugInfo.frameInfo.sprite);
             }
         }, {
             key: "$setWidth",
@@ -5648,6 +8941,16 @@ var flower = {};
             get: function get() {
                 return this.$debugSprite;
             }
+        }, {
+            key: "mouseX",
+            get: function get() {
+                return this.__mouseX;
+            }
+        }, {
+            key: "mouseY",
+            get: function get() {
+                return this.__mouseY;
+            }
         }], [{
             key: "getInstance",
             value: function getInstance() {
@@ -5665,6 +8968,12 @@ var flower = {};
             value: function getShortcut() {
                 return Platform.getShortcut();
             }
+        }, {
+            key: "$dispose",
+            value: function $dispose() {
+                //Stage.getInstance().removeAll();
+                Stage.stages = [];
+            }
         }]);
 
         return Stage;
@@ -5676,6 +8985,287 @@ var flower = {};
     flower.Stage = Stage;
     //////////////////////////End File:flower/display/Stage.js///////////////////////////
 
+    //////////////////////////File:flower/display/Particle.js///////////////////////////
+
+    var Particle = function (_flower$Sprite) {
+        _inherits(Particle, _flower$Sprite);
+
+        function Particle(config) {
+            _classCallCheck(this, Particle);
+
+            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(Particle).call(this));
+
+            _this24.__particles = [];
+            _this24.__cycles = [];
+            if (typeof config == "string") {
+                var loader = new flower.URLLoader(config);
+                loader.load();
+                loader.addListener(flower.Event.COMPLETE, _this24.__loadConfigComplete, _this24);
+            } else {
+                _this24.setConfig(config);
+            }
+            flower.EnterFrame.add(_this24.__update, _this24);
+            return _this24;
+        }
+
+        _createClass(Particle, [{
+            key: "__loadConfigComplete",
+            value: function __loadConfigComplete(e) {
+                this.setConfig(e.data);
+            }
+        }, {
+            key: "setConfig",
+            value: function setConfig(config) {
+                this.__config = config;
+                //{
+                //    "name": "粒子特效",
+                //    "image": "",
+                //    "mode": 0,
+                //    "life": 0,
+                //    "lifev": 0,
+                //    "max": 0,
+                //    "gx": 0,
+                //    "gy": 0
+                //}
+                this.__texture = null;
+                if (this.loader) {
+                    this.loader.dispose();
+                    this.loader = null;
+                }
+                var loader = new flower.URLLoader(config.image);
+                loader.load();
+                loader.addListener(flower.Event.COMPLETE, this.__loadTextureComplete, this);
+                this.loader = loader;
+                while (this.__cycles.length) {
+                    this.__cycles.pop().image.dispose();
+                }
+                this.__lastCount = 0;
+            }
+        }, {
+            key: "__loadTextureComplete",
+            value: function __loadTextureComplete(e) {
+                this.loader = null;
+                this.__texture = e.data;
+            }
+        }, {
+            key: "__update",
+            value: function __update(time, gap) {
+                if (!this.__texture) {
+                    return;
+                }
+                gap = gap / 1000;
+                var cfg = this.__config;
+                var particles = this.__particles;
+                var cycles = this.__cycles;
+
+                for (var i = 0; i < particles.length; i++) {
+                    var particle = particles[i];
+                    if (particle.life <= 0) {
+                        particles.splice(i, 1);
+                        i--;
+                        cycles.push(particle);
+                        //particle.image.parent.removeChild(particle.image);
+                        particle.image.visible = false;
+                    }
+                }
+
+                for (var i = 0; i < particles.length; i++) {
+                    var particle = particles[i];
+                    particle.life -= gap;
+                    particle.vx += cfg.gx * gap;
+                    particle.vy += -cfg.gy * gap;
+                    particle.x += particle.vx * gap;
+                    particle.y += particle.vy * gap;
+                    particle.scale += particle.scaleV * gap;
+                    particle.rotation += particle.rotationV * gap;
+                    particle.alpha += particle.alphaV * gap;
+                    particle.red += particle.redV * gap;
+                    particle.green += particle.greenV * gap;
+                    particle.blue += particle.blueV * gap;
+                    if (particle.oldX != ~ ~particle.x) {
+                        particle.oldX = ~ ~particle.x;
+                        particle.image.$nativeShow.setX(particle.oldX);
+                    }
+                    if (particle.oldY != ~ ~particle.y) {
+                        particle.oldY = ~ ~particle.y;
+                        particle.image.$nativeShow.setY(particle.oldY);
+                    }
+                    if (particle.oldScale != ~ ~particle.scale) {
+                        particle.oldScale = ~ ~particle.scale;
+                        particle.image.$nativeShow.setScaleX((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+                        particle.image.$nativeShow.setScaleY((particle.oldScale < 0 ? 0 : particle.oldScale) / 100);
+                    }
+                    if (particle.oldAlpha != ~ ~particle.alpha) {
+                        particle.oldAlpha = ~ ~particle.alpha;
+                        particle.image.alpha = particle.oldAlpha / 255;
+                    }
+                    if (particle.oldRed != ~ ~particle.red || particle.oldGreen != ~ ~particle.green || particle.oldBlue != ~ ~particle.blue) {
+                        particle.oldRed = ~ ~particle.red;
+                        particle.oldGreen = ~ ~particle.green;
+                        particle.oldBlue = ~ ~particle.blue;
+                        particle.filters[0].r = particle.oldRed;
+                        particle.filters[0].g = particle.oldGreen;
+                        particle.filters[0].b = particle.oldBlue;
+                        particle.image.filters = particle.filters;
+                    }
+                    if (particle.oldRotation != ~ ~particle.rotation) {
+                        particle.oldRotation = ~ ~particle.rotation;
+                        particle.image.rotation = particle.oldRotation;
+                    }
+                }
+
+                var count = cfg.max * gap / cfg.life + this.__lastCount;
+                this.__lastCount = count - ~ ~count;
+                count = ~ ~count;
+                if (particles.length + count > cfg.max) {
+                    count = cfg.max - particles.length;
+                }
+                for (var i = 0; i < count; i++) {
+                    var item;
+                    var scale = cfg.initSize - cfg.initSizeV + 2 * cfg.initSizeV * math.random();
+                    var endScale = cfg.endSize - cfg.endSizeV + 2 * cfg.endSizeV * math.random();
+                    var alpha = cfg.initAlpha - cfg.initAlphaV + 2 * cfg.initAlphaV * math.random();
+                    var endAlpha = cfg.endAlpha - cfg.endAlphaV + 2 * cfg.endAlphaV * math.random();
+                    var red = cfg.initRed - cfg.initRedV + 2 * cfg.initRedV * math.random();
+                    var endRed = cfg.endRed - cfg.endRedV + 2 * cfg.endRedV * math.random();
+                    var green = cfg.initGreen - cfg.initGreenV + 2 * cfg.initGreenV * math.random();
+                    var endGreen = cfg.endGreen - cfg.endGreenV + 2 * cfg.endGreenV * math.random();
+                    var blue = cfg.initBlue - cfg.initBlueV + 2 * cfg.initBlueV * math.random();
+                    var endBlue = cfg.endBlue - cfg.endBlueV + 2 * cfg.endBlueV * math.random();
+                    var rotation = cfg.initRotation - cfg.initRotationV + 2 * cfg.initRotationV * math.random();
+                    var endRotation = cfg.endRotation - cfg.endRotationV + 2 * cfg.endRotationV * math.random();
+                    var shootSpeed = cfg.shootSpeed - cfg.shootSpeedV + 2 * math.random() * cfg.shootSpeedV;
+                    var shootRotation = cfg.shootRotation - cfg.shootRotationV + 2 * math.random() * cfg.shootRotationV;
+                    shootRotation = shootRotation * math.PI / 180;
+                    var vx = math.cos(shootRotation) * shootSpeed;
+                    var vy = -math.sin(shootRotation) * shootSpeed;
+                    var life = cfg.life - cfg.lifev + 2 * math.random() * cfg.lifev;
+                    if (cycles.length) {
+                        item = cycles.pop();
+                        item.life = life;
+                        item.vx = vx;
+                        item.vy = vy;
+                        item.scale = scale;
+                        item.scaleV = (endScale - scale) / life;
+                        item.alpha = alpha;
+                        item.alphaV = (endAlpha - alpha) / life;
+                        item.red = red;
+                        item.redV = (endRed - red) / life;
+                        item.green = green;
+                        item.greenV = (endGreen - green) / life;
+                        item.blue = blue;
+                        item.blueV = (endBlue - blue) / life;
+                        item.rotation = rotation;
+                        item.rotationV = (endRotation - rotation) / life;
+                        item.image.visible = true;
+                    } else {
+                        item = {
+                            image: new flower.Bitmap(this.__texture),
+                            mode: cfg.mode,
+                            life: life,
+                            x: 0,
+                            y: 0,
+                            vx: vx,
+                            vy: vy,
+                            scale: scale,
+                            scaleV: (endScale - scale) / life,
+                            alpha: alpha,
+                            alphaV: (endAlpha - alpha) / life,
+                            red: red,
+                            redV: (endRed - red) / life,
+                            green: green,
+                            greenV: (endGreen - green) / life,
+                            blue: blue,
+                            blueV: (endBlue - blue) / life,
+                            rotation: rotation,
+                            rotationV: (endRotation - rotation) / life,
+                            oldX: 0,
+                            oldY: 0,
+                            oldScale: 1,
+                            oldAlpha: 1,
+                            oldRotation: 0,
+                            oldRed: 0,
+                            oldGreen: 0,
+                            oldBlue: 0,
+                            filters: [new flower.DyeingFilter()]
+                        };
+                        item.image.$setSimpleMode();
+                        this.addChild(item.image);
+                    }
+                    item.x = -cfg.xv + cfg.xv * 2 * math.random();
+                    item.y = -cfg.yv + cfg.yv * 2 * math.random();
+                    if (item.oldX != ~ ~item.x) {
+                        item.oldX = ~ ~item.x;
+                        item.image.$nativeShow.setX(item.oldX);
+                    }
+                    if (item.oldY != ~ ~item.y) {
+                        item.oldY = ~ ~item.y;
+                        item.image.$nativeShow.setY(item.oldY);
+                    }
+                    if (item.oldScale != ~ ~item.scale) {
+                        item.oldScale = ~ ~item.scale;
+                        item.image.$nativeShow.setScaleX(item.oldScale / 100);
+                        item.image.$nativeShow.setScaleY(item.oldScale / 100);
+                    }
+                    if (item.oldAlpha != ~ ~item.alpha) {
+                        item.oldAlpha = ~ ~item.alpha;
+                        item.image.alpha = item.oldAlpha / 255;
+                    }
+                    if (item.oldRed != ~ ~item.red || item.oldGreen != ~ ~item.green || item.oldBlue != ~ ~item.blue) {
+                        item.oldRed = ~ ~item.red;
+                        item.oldGreen = ~ ~item.green;
+                        item.oldBlue = ~ ~item.blue;
+                        item.filters[0].r = item.oldRed;
+                        item.filters[0].g = item.oldGreen;
+                        item.filters[0].b = item.oldBlue;
+                        item.image.filters = item.filters;
+                    }
+                    if (item.oldRotation != ~ ~item.rotation) {
+                        item.oldRotation = ~ ~item.rotation;
+                        item.image.rotation = item.oldRotation;
+                    }
+                    particles.push(item);
+                }
+            }
+        }, {
+            key: "$getMouseTarget",
+            value: function $getMouseTarget(touchX, touchY, multiply) {
+                var point = this.$getReverseMatrix().transformPoint(touchX, touchY, Point.$TempPoint);
+                touchX = math.floor(point.x);
+                touchY = math.floor(point.y);
+                var p = this.$DisplayObject;
+                p[10] = touchX;
+                p[11] = touchY;
+                p[22] = flower.EnterFrame.frame;
+                var bounds = this.$getContentBounds();
+                if (touchX >= bounds.x && touchY >= bounds.y && touchX < bounds.x + this.width && touchY < bounds.y + this.height) {
+                    return this;
+                }
+                return null;
+            }
+        }, {
+            key: "$onFrameEnd",
+            value: function $onFrameEnd() {
+                this.$removeFlags(0x0100);
+                _get(Object.getPrototypeOf(Particle.prototype), "$onFrameEnd", this).call(this);
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                flower.EnterFrame.remove(this.__update, this);
+                while (this.__cycles.length) {
+                    this.__cycles.pop().image.dispose();
+                }
+                _get(Object.getPrototypeOf(Particle.prototype), "dispose", this).call(this);
+            }
+        }]);
+
+        return Particle;
+    }(flower.Sprite);
+
+    flower.Particle = Particle;
+    //////////////////////////End File:flower/display/Particle.js///////////////////////////
+
     //////////////////////////File:flower/manager/DragManager.js///////////////////////////
 
     var DragManager = function (_Sprite3) {
@@ -5684,12 +9274,12 @@ var flower = {};
         function DragManager() {
             _classCallCheck(this, DragManager);
 
-            var _this22 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
+            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(DragManager).call(this));
 
-            _this22.__isDragging = false;
+            _this25.__isDragging = false;
 
-            _this22.touchEnabled = false;
-            return _this22;
+            _this25.touchEnabled = false;
+            return _this25;
         }
 
         _createClass(DragManager, [{
@@ -5795,27 +9385,30 @@ var flower = {};
         function MenuManager() {
             _classCallCheck(this, MenuManager);
 
-            var _this23 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
+            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(MenuManager).call(this));
 
-            _this23.__addFrame = 0;
-
-            _this23.addListener(Event.ADDED_TO_STAGE, _this23.__addedToStage, _this23);
-            return _this23;
+            _this26.__addFrame = 0;
+            return _this26;
         }
 
         _createClass(MenuManager, [{
-            key: "__addedToStage",
-            value: function __addedToStage(e) {
-                this.removeListener(Event.ADDED_TO_STAGE, this.addedToStage, this);
-                this.stage.addListener(TouchEvent.TOUCH_BEGIN, this.__onTouch, this);
+            key: "$onTouch",
+            value: function $onTouch(target) {
+                var flag = true;
+                while (target && flag) {
+                    flag = target == this ? false : true;
+                    target = target.parent;
+                }
+                if ((flag || this.$autoRemove) && flower.EnterFrame.frame > this.__addFrame && this.numChildren) {
+                    this.removeAll();
+                    return true;
+                }
+                return false;
             }
         }, {
-            key: "__onTouch",
-            value: function __onTouch(e) {
-                var frame = flower.EnterFrame.frame;
-                if (frame > this.__addFrame && this.numChildren) {
-                    this.removeAll();
-                }
+            key: "$hasMenu",
+            value: function $hasMenu() {
+                return flower.EnterFrame.frame > this.__addFrame && this.numChildren ? true : false;
             }
         }, {
             key: "addChildAt",
@@ -5860,8 +9453,26 @@ var flower = {};
         }, {
             key: "showMenu",
             value: function showMenu(display) {
+                var x = arguments.length <= 1 || arguments[1] === undefined ? -1 : arguments[1];
+                var y = arguments.length <= 2 || arguments[2] === undefined ? -1 : arguments[2];
+                var autoRemove = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
+                if (x == -1) {
+                    x = Stage.getInstance().mouseX + 1;
+                }
+                if (y == -1) {
+                    y = Stage.getInstance().mouseY;
+                }
+                display.x = x;
+                display.y = y;
                 MenuManager.getInstance().removeAll();
+                MenuManager.getInstance().$autoRemove = autoRemove;
                 MenuManager.getInstance().addChild(display);
+            }
+        }, {
+            key: "hideMenu",
+            value: function hideMenu() {
+                MenuManager.getInstance().removeAll();
             }
         }]);
 
@@ -5879,10 +9490,10 @@ var flower = {};
         function PopManager() {
             _classCallCheck(this, PopManager);
 
-            var _this24 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
+            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(PopManager).call(this));
 
-            _this24.__panels = [];
-            return _this24;
+            _this27.__panels = [];
+            return _this27;
         }
 
         _createClass(PopManager, [{
@@ -5985,7 +9596,7 @@ var flower = {};
     //////////////////////////File:flower/texture/Texture.js///////////////////////////
 
     var Texture = function () {
-        function Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight) {
+        function Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight, sourceWidth, sourceHeight) {
             _classCallCheck(this, Texture);
 
             this.__offX = 0;
@@ -5998,10 +9609,12 @@ var flower = {};
             this.__url = url;
             this.__nativeURL = nativeURL;
             this.$count = 0;
-            this.__width = w;
-            this.__height = h;
+            this.__width = +w;
+            this.__height = +h;
             this.__settingWidth = settingWidth;
             this.__settingHeight = settingHeight;
+            this.__sourceWidth = sourceWidth;
+            this.__sourceHeight = sourceHeight;
         }
 
         /**
@@ -6019,17 +9632,19 @@ var flower = {};
                 this.__settingWidth = settingWidth;
                 this.__settingHeight = settingHeight;
                 if (this.dispatcher) {
-                    this.dispatcher.dispatchWidth(Event.UPDATE);
+                    this.dispatcher.dispatchWith(Event.UPDATE);
                 }
             }
         }, {
             key: "createSubTexture",
-            value: function createSubTexture(startX, startY, width, height) {
-                var offX = arguments.length <= 4 || arguments[4] === undefined ? 0 : arguments[4];
-                var offY = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
-                var rotation = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
+            value: function createSubTexture(url, startX, startY, width, height) {
+                var sourceWidth = arguments.length <= 5 || arguments[5] === undefined ? 0 : arguments[5];
+                var sourceHeight = arguments.length <= 6 || arguments[6] === undefined ? 0 : arguments[6];
+                var offX = arguments.length <= 7 || arguments[7] === undefined ? 0 : arguments[7];
+                var offY = arguments.length <= 8 || arguments[8] === undefined ? 0 : arguments[8];
+                var rotation = arguments.length <= 9 || arguments[9] === undefined ? false : arguments[9];
 
-                var sub = new Texture(this.$nativeTexture, this.__url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY);
+                var sub = new Texture(this.$nativeTexture, url, this.__nativeURL, width, height, width * this.scaleX, height * this.scaleY, sourceWidth || this.width, sourceHeight || this.height);
                 sub.$parentTexture = this.$parentTexture || this;
                 var rect = flower.Rectangle.create();
                 rect.x = startX;
@@ -6058,8 +9673,8 @@ var flower = {};
         }, {
             key: "$addCount",
             value: function $addCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.$addCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.$addCount();
                 } else {
                     this.$count++;
                 }
@@ -6067,8 +9682,8 @@ var flower = {};
         }, {
             key: "$delCount",
             value: function $delCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.$delCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.$delCount();
                 } else {
                     this.$count--;
                     if (this.$count < 0) {
@@ -6077,10 +9692,62 @@ var flower = {};
                 }
             }
         }, {
+            key: "$setSplitInfo",
+            value: function $setSplitInfo(data) {
+                var content = data;
+                var xml = XMLElement.parse(content);
+                xml = xml.list[0];
+                var reslist;
+                var attributes;
+                for (var i = 0; i < xml.list.length; i++) {
+                    if (xml.list[i].name == "key") {
+                        if (xml.list[i].value == "frames") {
+                            reslist = xml.list[i + 1];
+                        } else if (xml.list[i].value == "metadata") {
+                            attributes = xml.list[i + 1];
+                        }
+                        i++;
+                    }
+                }
+                this.__splits = [];
+                var frameFrame;
+                var frame;
+                var maxw = 0;
+                var maxh = 0;
+                for (i = 0; i < reslist.list.length; i++) {
+                    if (reslist.list[i].name == "key") {
+                        frame = new PlistFrame(reslist.list[i].value);
+                        frame.decode(reslist.list[i + 1]);
+                        var name = frame.name;
+                        var posx = ~ ~name.split("_")[0];
+                        var posy = ~ ~name.split(".")[0].split("_")[1];
+                        var item = {
+                            x: posx,
+                            y: posy,
+                            textureX: frame._x,
+                            textureY: frame._y,
+                            textureWidth: frame._width,
+                            textureHeight: frame._height,
+                            offX: frame._moveX,
+                            offY: frame._moveY,
+                            sourceWidth: frame._sourceWidth,
+                            sourceHeight: frame._sourceHeight,
+                            rotation: frame._rotation
+                        };
+                        maxw = posx + item.sourceWidth > maxw ? posx + item.sourceWidth : maxw;
+                        maxh = posy + item.sourceHeight > maxh ? posy + item.sourceHeight : maxh;
+                        i++;
+                    }
+                }
+                this.__sourceWidth = maxw;
+                this.__sourceHeight = maxh;
+                trace("原本大小：", maxw, maxh, "现在大小:", this.width, this.height);
+            }
+        }, {
             key: "getCount",
             value: function getCount() {
-                if (this._parentTexture) {
-                    this._parentTexture.getCount();
+                if (this.$parentTexture) {
+                    this.$parentTexture.getCount();
                 } else {
                     return this.$count;
                 }
@@ -6104,6 +9771,14 @@ var flower = {};
              */
 
         }, {
+            key: "$use",
+            get: function get() {
+                return this.__use;
+            },
+            set: function set(val) {
+                this.__use = val;
+            }
+        }, {
             key: "url",
             get: function get() {
                 return this.__url;
@@ -6116,10 +9791,20 @@ var flower = {};
         }, {
             key: "width",
             get: function get() {
-                return this.__settingWidth || this.__width;
+                return this.__sourceWidth || this.__width;
             }
         }, {
             key: "height",
+            get: function get() {
+                return this.__sourceHeight || this.__height;
+            }
+        }, {
+            key: "textureWidth",
+            get: function get() {
+                return this.__settingWidth || this.__width;
+            }
+        }, {
+            key: "textureHeight",
             get: function get() {
                 return this.__settingHeight || this.__height;
             }
@@ -6146,12 +9831,12 @@ var flower = {};
         }, {
             key: "scaleX",
             get: function get() {
-                return this.width / this.__width;
+                return this.textureWidth / this.__width;
             }
         }, {
             key: "scaleY",
             get: function get() {
-                return this.height / this.__height;
+                return this.textureHeight / this.__height;
             }
         }, {
             key: "count",
@@ -6216,7 +9901,7 @@ var flower = {};
                 var texture = new Texture(nativeTexture, url, nativeURL, w, h, settingWidth, settingHeight);
                 this.list.push(texture);
                 if (DEBUG) {
-                    DebugInfo.getInstance().addTexture(texture);
+                    DebugInfo.addTexture(texture);
                 }
                 return texture;
             }
@@ -6250,12 +9935,17 @@ var flower = {};
                         if (texture.dispose()) {
                             this.list.splice(i, 1);
                             if (DEBUG) {
-                                DebugInfo.getInstance().delTexture(texture);
+                                DebugInfo.delTexture(texture);
                             }
                             i--;
                         }
                     }
                 }
+            }
+        }, {
+            key: "$dispose",
+            value: function $dispose() {
+                this.list = [];
             }
         }], [{
             key: "getInstance",
@@ -6280,16 +9970,16 @@ var flower = {};
         function URLLoader(res) {
             _classCallCheck(this, URLLoader);
 
-            var _this25 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
+            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoader).call(this));
 
-            _this25._createRes = false;
-            _this25._isLoading = false;
-            _this25._selfDispose = false;
+            _this28._createRes = false;
+            _this28._isLoading = false;
+            _this28._selfDispose = false;
 
-            _this25.$setResource(res);
-            _this25._language = LANGUAGE;
-            _this25._scale = SCALE ? SCALE : null;
-            return _this25;
+            _this28.$setResource(res);
+            _this28._language = LANGUAGE;
+            _this28._scale = SCALE ? SCALE : null;
+            return _this28;
         }
 
         _createClass(URLLoader, [{
@@ -6322,7 +10012,7 @@ var flower = {};
                     this.$setResource(res);
                 }
                 if (this._isLoading) {
-                    dispatchWidth(Event.ERROR, "URLLoader is loading, url:" + this.url);
+                    dispatchWith(Event.ERROR, "URLLoader is loading, url:" + this.url);
                     return;
                 }
                 this._loadInfo = this._res.getLoadInfo(this._language, this._scale);
@@ -6367,19 +10057,28 @@ var flower = {};
                         loader.load();
                     } else {
                         var params = {};
-                        params.r = Math.random();
+                        params.r = math.random();
                         for (var key in this._params) {
                             params[key] = this._params;
                         }
-                        PlatformURLLoader.loadTexture(URLLoader.urlHead + this._loadInfo.url, this.loadTextureComplete, this.loadError, this, params);
+                        PlatformURLLoader.loadTexture(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextureComplete, this.loadError, this, params);
                     }
                 }
+            }
+        }, {
+            key: "__concatURLHead",
+            value: function __concatURLHead(head, url) {
+                if (url.slice(0, 7) == "http://") {
+                    return url;
+                }
+                return head + url;
             }
         }, {
             key: "onLoadTexturePlistComplete",
             value: function onLoadTexturePlistComplete(e) {
                 var plist = e.data;
                 this._data = plist.getFrameTexture(this.url);
+                this._data.$addCount();
                 this.loadComplete();
             }
         }, {
@@ -6397,7 +10096,22 @@ var flower = {};
                     this._data = texture;
                     texture.$addCount();
                 }
-                new CallLater(this.loadComplete, this);
+                if (this._loadInfo.splitURL) {
+                    var res = ResItem.create(this._loadInfo.splitURL);
+                    res.__type = ResType.TEXT;
+                    var loader = new flower.URLLoader(res);
+                    loader.addListener(flower.Event.COMPLETE, this.loadTextureSplitComplete, this);
+                    loader.addListener(flower.Event.ERROR, this.loadError, this);
+                    loader.load();
+                } else {
+                    new CallLater(this.loadComplete, this);
+                }
+            }
+        }, {
+            key: "loadTextureSplitComplete",
+            value: function loadTextureSplitComplete(e) {
+                this._data.$setSplitInfo(e.data);
+                this.loadComplete();
             }
         }, {
             key: "setTextureByLink",
@@ -6435,11 +10149,11 @@ var flower = {};
             key: "loadText",
             value: function loadText() {
                 var params = {};
-                params.r = Math.random();
+                params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
-                PlatformURLLoader.loadText(URLLoader.urlHead + this._loadInfo.url, this.loadTextComplete, this.loadError, this, this._method, params);
+                PlatformURLLoader.loadText(this.__concatURLHead(URLLoader.urlHead, this._loadInfo.url), this.loadTextComplete, this.loadError, this, this._method, params);
             }
         }, {
             key: "loadTextComplete",
@@ -6497,7 +10211,19 @@ var flower = {};
                         break;
                     }
                 }
-                this.dispatchWidth(Event.COMPLETE, this._data);
+                if (this.isDispose) {
+                    if (this._data && this._type == ResType.IMAGE) {
+                        if (this._recordUse) {
+                            this._data.$use = true;
+                        }
+                        //if (!this._loadInfo.plist) {
+                        this._data.$delCount();
+                        //}
+                        this._data = null;
+                    }
+                    return;
+                }
+                this.dispatchWith(Event.COMPLETE, this._data);
                 this._selfDispose = true;
                 this.dispose();
                 this._selfDispose = false;
@@ -6506,7 +10232,7 @@ var flower = {};
             key: "loadError",
             value: function loadError(e) {
                 if (this.hasListener(Event.ERROR)) {
-                    this.dispatchWidth(Event.ERROR, getLanguage(2003, this._loadInfo.url));
+                    this.dispatchWith(Event.ERROR, getLanguage(2003, this._loadInfo.url));
                     if (this._links) {
                         for (var i = 0; i < this._links.length; i++) {
                             this._links[i].loadError();
@@ -6518,6 +10244,15 @@ var flower = {};
                 }
             }
         }, {
+            key: "$useImage",
+            value: function $useImage() {
+                if (!this._data) {
+                    this._recordUse = true;
+                    return;
+                }
+                this._data.$use = true;
+            }
+        }, {
             key: "dispose",
             value: function dispose() {
                 if (!this._selfDispose) {
@@ -6525,7 +10260,9 @@ var flower = {};
                     return;
                 }
                 if (this._data && this._type == ResType.IMAGE) {
+                    //if (!this._loadInfo.plist) {
                     this._data.$delCount();
+                    //}
                     this._data = null;
                 }
                 if (this._createRes && this._res) {
@@ -6610,12 +10347,12 @@ var flower = {};
         function URLLoaderList(list) {
             _classCallCheck(this, URLLoaderList);
 
-            var _this26 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
+            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(URLLoaderList).call(this));
 
-            _this26.__list = list;
-            _this26.__dataList = [];
-            _this26.__index = 0;
-            return _this26;
+            _this29.__list = list;
+            _this29.__dataList = [];
+            _this29.__index = 0;
+            return _this29;
         }
 
         _createClass(URLLoaderList, [{
@@ -6627,7 +10364,7 @@ var flower = {};
             key: "__loadNext",
             value: function __loadNext() {
                 if (this.__index >= this.__list.length) {
-                    this.dispatchWidth(flower.Event.COMPLETE, this.__dataList);
+                    this.dispatchWith(flower.Event.COMPLETE, this.__dataList);
                     this.__list = null;
                     this.__dataList = null;
                     this.dispose();
@@ -6697,15 +10434,17 @@ var flower = {};
         function WebSocket() {
             _classCallCheck(this, WebSocket);
 
-            var _this27 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
+            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(WebSocket).call(this));
 
-            _this27._isConnect = false;
-            return _this27;
+            _this30._isConnect = false;
+            return _this30;
         }
 
         _createClass(WebSocket, [{
             key: "connect",
             value: function connect(ip, port) {
+                var path = arguments.length <= 2 || arguments[2] === undefined ? "" : arguments[2];
+
                 if (this._localWebSocket) {
                     this._localWebSocket.releaseWebSocket(this.localWebSocket);
                 }
@@ -6713,13 +10452,13 @@ var flower = {};
                 this._ip = ip;
                 this._port = port;
                 this._localWebSocket = new PlatformWebSocket();
-                this._localWebSocket.bindWebSocket(ip, port, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
+                this._localWebSocket.bindWebSocket(ip, port, path, this, this.onConnect, this.onReceiveMessage, this.onError, this.onClose);
             }
         }, {
             key: "onConnect",
             value: function onConnect() {
                 this._isConnect = true;
-                this.dispatchWidth(flower.Event.CONNECT);
+                this.dispatchWith(flower.Event.CONNECT);
             }
         }, {
             key: "onReceiveMessage",
@@ -6736,12 +10475,12 @@ var flower = {};
         }, {
             key: "onError",
             value: function onError() {
-                this.dispatchWidth(flower.Event.ERROR);
+                this.dispatchWith(flower.Event.ERROR);
             }
         }, {
             key: "onClose",
             value: function onClose() {
-                this.dispatchWidth(flower.Event.CLOSE);
+                this.dispatchWith(flower.Event.CLOSE);
             }
         }, {
             key: "close",
@@ -6781,20 +10520,22 @@ var flower = {};
 
         function VBWebSocket() {
             var remote = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+            var errorCodeType = arguments.length <= 1 || arguments[1] === undefined ? "uint" : arguments[1];
 
             _classCallCheck(this, VBWebSocket);
 
-            var _this28 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
+            var _this31 = _possibleConstructorReturn(this, Object.getPrototypeOf(VBWebSocket).call(this));
 
-            _this28.remotes = {};
-            _this28.backs = {};
-            _this28.zbacks = {};
+            _this31.remotes = {};
+            _this31.backs = {};
+            _this31.zbacks = {};
 
-            _this28._remote = remote;
-            _this28.remotes = {};
-            _this28.backs = {};
-            _this28.zbacks = {};
-            return _this28;
+            _this31._remote = remote;
+            _this31.remotes = {};
+            _this31.backs = {};
+            _this31.zbacks = {};
+            _this31.errorCodeType = errorCodeType;
+            return _this31;
         }
 
         _createClass(VBWebSocket, [{
@@ -6819,7 +10560,12 @@ var flower = {};
                     var zbackList = this.zbacks[backCmd];
                     if (zbackList) {
                         removeList = [];
-                        var errorCode = bytes.readUInt();
+                        var errorCode;
+                        if (this.errorCodeType == "uint") {
+                            errorCode = bytes.readUInt();
+                        } else if (this.errorCodeType == "int") {
+                            errorCode = bytes.readInt();
+                        }
                         a = zbackList.concat();
                         for (i = 0; i < a.length; i++) {
                             a[i].func.call(a[i].thisObj, backCmd, errorCode, bytes);
@@ -6828,9 +10574,9 @@ var flower = {};
                             }
                         }
                         for (i = 0; i < removeList.length; i++) {
-                            for (f = 0; f < this.zbacks[cmd].length; f++) {
-                                if (this.zbacks[cmd][f].id == removeList[i]) {
-                                    this.zbacks[cmd].splice(f, 1);
+                            for (f = 0; f < this.zbacks[backCmd].length; f++) {
+                                if (this.zbacks[backCmd][f].id == removeList[i]) {
+                                    this.zbacks[backCmd].splice(f, 1);
                                     break;
                                 }
                             }
@@ -6947,8 +10693,8 @@ var flower = {};
                 this.zbacks[cmd].push({ func: back, thisObj: thisObj, id: VBWebSocket.id++ });
             }
         }, {
-            key: "removeZeroe",
-            value: function removeZeroe(cmd, back, thisObj) {
+            key: "removeZero",
+            value: function removeZero(cmd, back, thisObj) {
                 var list = this.zbacks[cmd];
                 if (list) {
                     for (var i = 0; i < list.length; i++) {
@@ -7134,7 +10880,7 @@ var flower = {};
                     }
                 }
                 this._moveX = this._offX + (this._sourceWidth - this._width) / 2;
-                this._moveY = this._offY + (this._sourceHeight - this._height) / 2;
+                this._moveY = -this._offY + (this._sourceHeight - this._height) / 2;
             }
         }, {
             key: "$setPlist",
@@ -7155,7 +10901,7 @@ var flower = {};
             key: "texture",
             get: function get() {
                 if (!this._texture) {
-                    this._texture = this._plist.texture.createSubTexture(this._x, this._y, this._width, this._height, this._moveX, this._moveY, this._rotation);
+                    this._texture = this._plist.texture.createSubTexture(this._name, this._x, this._y, this._width, this._height, this._sourceWidth, this._sourceHeight, this._moveX, this._moveY, this._rotation);
                 }
                 return this._texture;
             }
@@ -7163,10 +10909,11 @@ var flower = {};
 
         return PlistFrame;
     }();
+
+    flower.PlistFrame = PlistFrame;
     //////////////////////////End File:flower/plist/PlistFrame.js///////////////////////////
 
     //////////////////////////File:flower/plist/PlistLoader.js///////////////////////////
-
 
     var PlistLoader = function (_EventDispatcher4) {
         _inherits(PlistLoader, _EventDispatcher4);
@@ -7174,14 +10921,14 @@ var flower = {};
         function PlistLoader(url, nativeURL) {
             _classCallCheck(this, PlistLoader);
 
-            var _this29 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
+            var _this32 = _possibleConstructorReturn(this, Object.getPrototypeOf(PlistLoader).call(this));
 
-            _this29.disposeFlag = false;
+            _this32.disposeFlag = false;
 
-            _this29._url = url;
-            _this29._nativeURL = nativeURL;
-            _this29.__load();
-            return _this29;
+            _this32._url = url;
+            _this32._nativeURL = nativeURL;
+            _this32.__load();
+            return _this32;
         }
 
         _createClass(PlistLoader, [{
@@ -7252,8 +10999,8 @@ var flower = {};
                         } else if (attributes.list[i].value == "size") {
                             var size = attributes.list[i + 1].value;
                             size = size.slice(1, size.length - 1);
-                            //this.width = Math.floor(size.split(",")[0]);
-                            //this.height = Math.floor(size.split(",")[1]);
+                            //this.width = math.floor(size.split(",")[0]);
+                            //this.height = math.floor(size.split(",")[1]);
                         }
                         i++;
                     }
@@ -7307,7 +11054,7 @@ var flower = {};
             value: function loadComplete(plist) {
                 plist.texture.$delCount();
                 //var texture = plist.getFrameTexture(this.childName);
-                this.dispatchWidth(Event.COMPLETE, plist);
+                this.dispatchWith(Event.COMPLETE, plist);
             }
         }, {
             key: "dispose",
@@ -7508,7 +11255,27 @@ var flower = {};
             key: "addURL",
             value: function addURL(url) {
                 var info = ResItemInfo.create();
-                var array = url.split("/");
+
+                var plist = null;
+                var splitURL = null;
+                var array = url.split("#PLIST#");
+                if (array.length == 2) {
+                    url = array[0];
+                    plist = array[1];
+                }
+                array = url.split("#SPLIT#");
+                if (array.length == 2) {
+                    url = array[0];
+                    splitURL = array[1];
+                }
+                if (plist && !splitURL) {
+                    array = plist.split("#SPLIT#");
+                    if (array.length == 2) {
+                        plist = array[0];
+                        splitURL = array[1];
+                    }
+                }
+                array = url.split("/");
                 var last = array.pop();
                 var nameArray = last.split(".");
                 var name = "";
@@ -7540,16 +11307,20 @@ var flower = {};
                     }
                 }
                 info.url = url;
+                info.plist = plist;
                 info.settingWidth = settingWidth;
                 info.settingHeight = settingHeight;
                 info.scale = scale || 1;
                 info.language = language;
+                info.update = false;
+                info.splitURL = splitURL;
                 this.__loadList.push(info);
             }
         }, {
             key: "addInfo",
             value: function addInfo(url, plist, settingWidth, settingHeight, scale, language) {
                 var update = arguments.length <= 6 || arguments[6] === undefined ? false : arguments[6];
+                var splitURL = arguments.length <= 7 || arguments[7] === undefined ? null : arguments[7];
 
                 var info = ResItemInfo.create();
                 info.url = url;
@@ -7559,6 +11330,7 @@ var flower = {};
                 info.scale = scale || 1;
                 info.language = language;
                 info.update = update;
+                info.splitURL = splitURL;
                 this.__loadList.push(info);
                 return info;
             }
@@ -7577,7 +11349,7 @@ var flower = {};
                     if (!info) {
                         info = loadList[i];
                     } else if (scale != null) {
-                        if (loadList[i].scale != null && Math.abs(loadList[i].scale - scale) < Math.abs(info.scale - scale)) {
+                        if (loadList[i].scale != null && math.abs(loadList[i].scale - scale) < math.abs(info.scale - scale)) {
                             info = loadList[i];
                         }
                     }
@@ -7601,10 +11373,23 @@ var flower = {};
             key: "create",
             value: function create(url) {
                 var plist = null;
+                var splitURL = null;
                 var array = url.split("#PLIST#");
                 if (array.length == 2) {
                     url = array[0];
                     plist = array[1];
+                }
+                array = url.split("#SPLIT#");
+                if (array.length == 2) {
+                    url = array[0];
+                    splitURL = array[1];
+                }
+                if (plist && !splitURL) {
+                    array = plist.split("#SPLIT#");
+                    if (array.length == 2) {
+                        plist = array[0];
+                        splitURL = array[1];
+                    }
                 }
                 array = url.split("/");
                 var last = array.pop();
@@ -7651,7 +11436,7 @@ var flower = {};
                 } else {
                     res = new ResItem(useURL, ResType.getType(end));
                 }
-                res.addInfo(url, plist, settingWidth, settingHeight, scale, language);
+                res.addInfo(url, plist, settingWidth, settingHeight, scale, language, false, splitURL);
                 return res;
             }
         }, {
@@ -7689,6 +11474,11 @@ var flower = {};
 
         /**
          * plist 地址
+         */
+
+
+        /**
+         * 拼接信息配置地址
          */
 
 
@@ -7766,7 +11556,7 @@ var flower = {};
                 if (end == "json") {
                     return ResType.JSON;
                 }
-                if (end == "png" || end == "jpg") {
+                if (end == "png" || end == "jpg" || end == "PNG" || end == "JPG") {
                     return ResType.IMAGE;
                 }
                 if (end == "plist") {
@@ -7802,11 +11592,11 @@ var flower = {};
                 var target = tween.target;
                 this.centerX = target.width / 2;
                 this.centerY = target.height / 2;
-                this.centerLength = Math.sqrt(target.width * target.width + target.height * target.height) * .5;
-                this.rotationStart = Math.atan2(target.height, target.width) * 180 / Math.PI;
+                this.centerLength = math.sqrt(target.width * target.width + target.height * target.height) * .5;
+                this.rotationStart = math.atan2(target.height, target.width) * 180 / math.PI;
                 if (target.rotation) {
-                    this.lastMoveX = this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-                    this.lastMoveY = this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                    this.lastMoveX = this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+                    this.lastMoveY = this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
                 } else {
                     this.lastMoveX = 0;
                     this.lastMoveY = 0;
@@ -7858,8 +11648,8 @@ var flower = {};
                 }
                 if (this.rotationTo) {
                     target.rotation = this.rotationFrom + (this.rotationTo - this.rotationFrom) * value;
-                    moveX += this.centerX - this.centerLength * Math.cos((target.rotation + this.rotationStart) * Math.PI / 180);
-                    moveY += this.centerY - this.centerLength * Math.sin((target.rotation + this.rotationStart) * Math.PI / 180);
+                    moveX += this.centerX - this.centerLength * math.cos((target.rotation + this.rotationStart) * math.PI / 180);
+                    moveY += this.centerY - this.centerLength * math.sin((target.rotation + this.rotationStart) * math.PI / 180);
                     target.x += moveX - this.lastMoveX;
                     target.y += moveY - this.lastMoveY;
                 }
@@ -7931,7 +11721,7 @@ var flower = {};
                 this.pathSum = [];
                 this.pathSum.push(0);
                 for (var i = 1, len = path.length; i < len; i++) {
-                    this.pathSum[i] = this.pathSum[i - 1] + Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                    this.pathSum[i] = this.pathSum[i - 1] + math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
                 }
                 var sum = this.pathSum[len - 1];
                 for (i = 1; i < len; i++) {
@@ -7975,7 +11765,7 @@ var flower = {};
 
                 var sum = 0;
                 for (var i = 1, len = path.length; i < len; i++) {
-                    sum += Math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
+                    sum += math.sqrt((path[i].x - path[i - 1].x) * (path[i].x - path[i - 1].x) + (path[i].y - path[i - 1].y) * (path[i].y - path[i - 1].y));
                 }
                 var time = sum / v;
                 return flower.Tween.to(target, time, { "path": path }, ease);
@@ -8068,7 +11858,7 @@ var flower = {};
         }, {
             key: "freeFallToWithG",
             value: function freeFallToWithG(target, g, groundY) {
-                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g), { "y": groundY, "physicMove": true });
+                return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g), { "y": groundY, "physicMove": true });
             }
         }, {
             key: "fallTo",
@@ -8086,7 +11876,7 @@ var flower = {};
 
                 vX = +vX;
                 vY = +vY;
-                return flower.Tween.to(target, Math.sqrt(2 * (groundY - target.y) / g + vY * vY / (g * g)) - vY / g, {
+                return flower.Tween.to(target, math.sqrt(2 * (groundY - target.y) / g + vY * vY / (g * g)) - vY / g, {
                     "y": groundY,
                     "physicMove": true,
                     "vx": vX,
@@ -8235,25 +12025,25 @@ var flower = {};
         }, {
             key: "SineEaseIn",
             value: function SineEaseIn(t) {
-                return Math.sin((t - 1) * Math.PI * .5) + 1;
+                return math.sin((t - 1) * math.PI * .5) + 1;
             }
         }, {
             key: "SineEaseOut",
             value: function SineEaseOut(t) {
-                return Math.sin(t * Math.PI * .5);
+                return math.sin(t * math.PI * .5);
             }
         }, {
             key: "SineEaseInOut",
             value: function SineEaseInOut(t) {
-                return Math.sin((t - .5) * Math.PI) * .5 + .5;
+                return math.sin((t - .5) * math.PI) * .5 + .5;
             }
         }, {
             key: "SineEaseOutIn",
             value: function SineEaseOutIn(t) {
                 if (t < 0.5) {
-                    return Math.sin(t * Math.PI) * .5;
+                    return math.sin(t * math.PI) * .5;
                 }
-                return Math.sin((t - 1) * Math.PI) * .5 + 1;
+                return math.sin((t - 1) * math.PI) * .5 + 1;
             }
         }, {
             key: "QuadEaseIn",
@@ -8363,51 +12153,51 @@ var flower = {};
         }, {
             key: "ExpoEaseIn",
             value: function ExpoEaseIn(t) {
-                return Math.pow(2, 10 * (t - 1));
+                return math.pow(2, 10 * (t - 1));
             }
         }, {
             key: "ExpoEaseOut",
             value: function ExpoEaseOut(t) {
-                return -Math.pow(2, -10 * t) + 1;
+                return -math.pow(2, -10 * t) + 1;
             }
         }, {
             key: "ExpoEaseInOut",
             value: function ExpoEaseInOut(t) {
                 if (t < .5) {
-                    return Math.pow(2, 10 * (t * 2 - 1)) * .5;
+                    return math.pow(2, 10 * (t * 2 - 1)) * .5;
                 }
-                return -Math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
+                return -math.pow(2, -10 * (t - .5) * 2) * .5 + 1.00048828125;
             }
         }, {
             key: "ExpoEaseOutIn",
             value: function ExpoEaseOutIn(t) {
                 if (t < .5) {
-                    return -Math.pow(2, -20 * t) * .5 + .5;
+                    return -math.pow(2, -20 * t) * .5 + .5;
                 }
-                return Math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
+                return math.pow(2, 10 * ((t - .5) * 2 - 1)) * .5 + .5;
             }
         }, {
             key: "CircEaseIn",
             value: function CircEaseIn(t) {
-                return 1 - Math.sqrt(1 - t * t);
+                return 1 - math.sqrt(1 - t * t);
             }
         }, {
             key: "CircEaseOut",
             value: function CircEaseOut(t) {
-                return Math.sqrt(1 - (1 - t) * (1 - t));
+                return math.sqrt(1 - (1 - t) * (1 - t));
             }
         }, {
             key: "CircEaseInOut",
             value: function CircEaseInOut(t) {
                 if (t < .5) {
-                    return .5 - Math.sqrt(.25 - t * t);
+                    return .5 - math.sqrt(.25 - t * t);
                 }
-                return Math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
+                return math.sqrt(.25 - (1 - t) * (1 - t)) + .5;
             }
         }, {
             key: "CircEaseOutIn",
             value: function CircEaseOutIn(t) {
-                var s = Math.sqrt(.25 - (.5 - t) * (.5 - t));
+                var s = math.sqrt(.25 - (.5 - t) * (.5 - t));
                 if (t < .5) {
                     return s;
                 }
@@ -8446,31 +12236,31 @@ var flower = {};
             key: "ElasticEaseIn",
             value: function ElasticEaseIn(t) {
                 if (t == 0 || t == 1) return t;
-                return -(Math.pow(2, 10 * (t - 1)) * Math.sin((t - 1.075) * 2 * Math.PI / .3));
+                return -(math.pow(2, 10 * (t - 1)) * math.sin((t - 1.075) * 2 * math.PI / .3));
             }
         }, {
             key: "ElasticEaseOut",
             value: function ElasticEaseOut(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
-                return Math.pow(2, 10 * -t) * Math.sin((-t - .075) * 2 * Math.PI / .3) + 1;
+                return math.pow(2, 10 * -t) * math.sin((-t - .075) * 2 * math.PI / .3) + 1;
             }
         }, {
             key: "ElasticEaseInOut",
             value: function ElasticEaseInOut(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
                 if (t < .5) {
-                    return -(Math.pow(2, 10 * t - 10) * Math.sin((t * 2 - 2.15) * Math.PI / .3));
+                    return -(math.pow(2, 10 * t - 10) * math.sin((t * 2 - 2.15) * math.PI / .3));
                 }
-                return Math.pow(2, 10 - 20 * t) * Math.sin((-4 * t + 1.85) * Math.PI / .3) * .5 + 1;
+                return math.pow(2, 10 - 20 * t) * math.sin((-4 * t + 1.85) * math.PI / .3) * .5 + 1;
             }
         }, {
             key: "ElasticEaseOutIn",
             value: function ElasticEaseOutIn(t) {
                 if (t == 0 || t == .5 || t == 1) return t;
                 if (t < .5) {
-                    return Math.pow(2, -20 * t) * Math.sin((-t * 4 - .15) * Math.PI / .3) * .5 + .5;
+                    return math.pow(2, -20 * t) * math.sin((-t * 4 - .15) * math.PI / .3) * .5 + .5;
                 }
-                return -(Math.pow(2, 20 * (t - 1)) * Math.sin((t * 4 - 4.15) * Math.PI / .3)) * .5 + .5;
+                return -(math.pow(2, 20 * (t - 1)) * math.sin((t * 4 - 4.15) * math.PI / .3)) * .5 + .5;
             }
         }, {
             key: "bounceEaseIn",
@@ -8568,7 +12358,7 @@ var flower = {};
                 var loopTime = 0;
                 if (this._currentTime >= totalTime) {
                     currentTime = this._currentTime % totalTime;
-                    loopTime = Math.floor(this._currentTime / totalTime);
+                    loopTime = math.floor(this._currentTime / totalTime);
                     if (!this._loop) {
                         this.$setPlaying(false);
                     }
@@ -8791,6 +12581,16 @@ var flower = {};
                 if (target && this._startEvent && this._startEvent != "") {
                     target.addListener(this._startEvent, this.startByEvent, this);
                 }
+            }
+        }, {
+            key: "play",
+            value: function play() {
+                this.timeLine.play();
+            }
+        }, {
+            key: "stop",
+            value: function stop() {
+                this.timeLine.stop();
             }
         }, {
             key: "startByEvent",
@@ -9105,7 +12905,16 @@ var flower = {};
             key: "$update",
             value: function $update(now, gap) {
                 flower.EnterFrame.frame++;
+                var st = new Date().getTime();
+                var et;
                 flower.CallLater.$run();
+                et = new Date().getTime();
+                DebugInfo.cpu.callLater += et - st;
+                st = et;
+                flower.DelayCall.$run();
+                et = new Date().getTime();
+                DebugInfo.cpu.delayCall += et - st;
+                st = et;
                 if (flower.EnterFrame.waitAdd.length) {
                     flower.EnterFrame.enterFrames = flower.EnterFrame.enterFrames.concat(flower.EnterFrame.waitAdd);
                     flower.EnterFrame.waitAdd = [];
@@ -9114,6 +12923,19 @@ var flower = {};
                 for (var i = 0; i < copy.length; i++) {
                     copy[i].call.apply(copy[i].owner, [now, gap]);
                 }
+                et = new Date().getTime();
+                DebugInfo.cpu.enterFrame += et - st;
+                if (now - EnterFrame.__lastFPSTime > 500) {
+                    DebugInfo.cpu.fps = ~ ~((EnterFrame.frame - EnterFrame.__lastFPSFrame) * 500 / (now - EnterFrame.__lastFPSTime));
+                    EnterFrame.__lastFPSTime = now;
+                    EnterFrame.__lastFPSFrame = EnterFrame.frame;
+                }
+            }
+        }, {
+            key: "$dispose",
+            value: function $dispose() {
+                EnterFrame.enterFrames = [];
+                EnterFrame.waitAdd = [];
             }
         }]);
 
@@ -9124,6 +12946,8 @@ var flower = {};
     EnterFrame.waitAdd = [];
     EnterFrame.frame = 0;
     EnterFrame.updateFactor = 1;
+    EnterFrame.__lastFPSTime = 0;
+    EnterFrame.__lastFPSFrame = 0;
 
 
     flower.EnterFrame = EnterFrame;
@@ -9177,6 +13001,12 @@ var flower = {};
                     list.pop().$call();
                 }
             }
+        }, {
+            key: "$dispose",
+            value: function $dispose() {
+                flower.CallLater._list = [];
+                flower.CallLater._next = [];
+            }
         }]);
 
         return CallLater;
@@ -9188,6 +13018,82 @@ var flower = {};
 
     flower.CallLater = CallLater;
     //////////////////////////End File:flower/utils/CallLater.js///////////////////////////
+
+    //////////////////////////File:flower/utils/DelayCall.js///////////////////////////
+
+    var DelayCall = function () {
+        function DelayCall(time, count, func, thisObj) {
+            _classCallCheck(this, DelayCall);
+
+            this._func = func;
+            this._thisObj = thisObj;
+
+            for (var _len8 = arguments.length, args = Array(_len8 > 4 ? _len8 - 4 : 0), _key8 = 4; _key8 < _len8; _key8++) {
+                args[_key8 - 4] = arguments[_key8];
+            }
+
+            this._data = args || [];
+            this._time = time;
+            this._start = flower.CoreTime.currentTime;
+            this._count = count || 1000000000;
+            this.$complete = false;
+            DelayCall._next.push(this);
+        }
+
+        _createClass(DelayCall, [{
+            key: "$update",
+            value: function $update() {
+                if (!this.$complete && flower.CoreTime.currentTime - this._start > this._time) {
+                    this._func.apply(this._thisObj, this._data);
+                    this._count--;
+                    if (!this.$complete && this._count > 0) {
+                        this._start = flower.CoreTime.currentTime;
+                    } else {
+                        this._func = null;
+                        this._thisObj = null;
+                        this._data = null;
+                        this.$complete = true;
+                    }
+                }
+            }
+        }, {
+            key: "dispose",
+            value: function dispose() {
+                this.$complete = true;
+            }
+        }], [{
+            key: "$run",
+            value: function $run() {
+                DelayCall._list = DelayCall._list.concat(DelayCall._next);
+                DelayCall._next.length = 0;
+                var list = DelayCall._list;
+                for (var i = 0; i < list.length; i++) {
+                    list[i].$update();
+                }
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].$complete) {
+                        list.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+        }, {
+            key: "$dispose",
+            value: function $dispose() {
+                DelayCall._list.length = 0;
+                DelayCall._next.length = 0;
+            }
+        }]);
+
+        return DelayCall;
+    }();
+
+    DelayCall._list = [];
+    DelayCall._next = [];
+
+
+    flower.DelayCall = DelayCall;
+    //////////////////////////End File:flower/utils/DelayCall.js///////////////////////////
 
     //////////////////////////File:flower/utils/ObjectDo.js///////////////////////////
 
@@ -9217,7 +13123,7 @@ var flower = {};
                     }
                     str = "[\n";
                     for (var i = 0; i < obj.length; i++) {
-                        str += before + "\t" + flower.ObjectDo.toString(obj[i], maxDepth, before + "\t", depth + 1) + (i < obj.length - 1 ? ",\n" : "\n");
+                        str += before + " " + flower.ObjectDo.toString(obj[i], maxDepth, before + " ", depth + 1) + (i < obj.length - 1 ? ",\n" : "\n");
                     }
                     str += before + "]";
                 } else if (obj instanceof Object) {
@@ -9226,7 +13132,7 @@ var flower = {};
                     }
                     str = "{\n";
                     for (var key in obj) {
-                        str += before + "\t" + key + "\t: " + flower.ObjectDo.toString(obj[key], maxDepth, before + "\t", depth + 1);
+                        str += before + " \"" + key + "\": " + flower.ObjectDo.toString(obj[key], maxDepth, before + " ", depth + 1);
                         str += ",\n";
                     }
                     if (str.slice(str.length - 2, str.length) == ",\n") {
@@ -9576,20 +13482,118 @@ var flower = {};
                     if (num < 128) {
                         res.push(num);
                     } else if (num < 2048) {
-                        res.push(Math.floor(num / 64) + 128 + 64);
+                        res.push(math.floor(num / 64) + 128 + 64);
                         res.push(num % 64 + 128);
                     } else if (num < 65536) {
-                        res.push(Math.floor(num / 4096) + 128 + 64 + 32);
-                        res.push(Math.floor(num % 4096 / 64) + 128);
+                        res.push(math.floor(num / 4096) + 128 + 64 + 32);
+                        res.push(math.floor(num % 4096 / 64) + 128);
                         res.push(num % 64 + 128);
                     } else {
-                        res.push(Math.floor(num / 262144) + 128 + 64 + 32 + 16);
-                        res.push(Math.floor(num % 262144 / 4096) + 128);
-                        res.push(Math.floor(num % 4096 / 64) + 128);
+                        res.push(math.floor(num / 262144) + 128 + 64 + 32 + 16);
+                        res.push(math.floor(num % 262144 / 4096) + 128);
+                        res.push(math.floor(num % 4096 / 64) + 128);
                         res.push(num % 64 + 128);
                     }
                 }
                 return res;
+            }
+
+            /**
+             * 如果不是数字则返回 null
+             * @param value 字符串
+             */
+
+        }, {
+            key: "parseNumber",
+            value: function parseNumber(value) {
+                if (typeof value == "number") {
+                    return value;
+                }
+                if (typeof value != "string") {
+                    return null;
+                }
+                var code0 = "0".charCodeAt(0);
+                var code9 = "9".charCodeAt(0);
+                var codeP = ".".charCodeAt(0);
+                var isNumber;
+                var hasPoint = false;
+                var before = "";
+                var end = "";
+                var code;
+                var flag = true;
+                for (var p = 0; p < value.length; p++) {
+                    code = value.charCodeAt(p);
+                    if (hasPoint) {
+                        if (code >= code0 && code <= code9) {
+                            end += value.charAt(p);
+                        } else {
+                            flag = false;
+                            break;
+                        }
+                    } else {
+                        if (code == codeP) {
+                            hasPoint = true;
+                        } else if (code >= code0 && code <= code9) {
+                            before += value.charAt(p);
+                        } else {
+                            flag = false;
+                            break;
+                        }
+                    }
+                }
+                if (flag) {
+                    return parseInt(before) + (end != "" ? parseInt(end) / Math.pow(10, end.length) : 0);
+                }
+                return null;
+            }
+        }, {
+            key: "split",
+            value: function split(text, array) {
+                if (!array) {
+                    return [text];
+                }
+                if (typeof array == "string") {
+                    array = [array];
+                }
+                var list = [];
+                var start = 0;
+                for (var i = 0, len = text.length; i < len; i++) {
+                    for (var a = 0; a < array.length; a++) {
+                        if (text.slice(i, i + array[a].length) == array[a]) {
+                            list.push(text.slice(start, i));
+                            i += array[a].length - 1;
+                            start = i + 1;
+                            break;
+                        }
+                    }
+                }
+                return list;
+            }
+        }, {
+            key: "intTo16",
+            value: function intTo16(num) {
+                var str = "";
+                while (num) {
+                    var n = num & 0xF;
+                    num = num >> 4;
+                    if (n < 10) {
+                        str = n + str;
+                    } else if (n == 10) {
+                        str = "a" + str;
+                    } else if (n == 11) {
+                        str = "b" + str;
+                    } else if (n == 12) {
+                        str = "c" + str;
+                    } else if (n == 13) {
+                        str = "d" + str;
+                    } else if (n == 14) {
+                        str = "e" + str;
+                    } else if (n == 15) {
+                        str = "f" + str;
+                    }
+                }
+                str = "0x" + str;
+                return str;
             }
         }]);
 
@@ -9685,7 +13689,7 @@ var flower = {};
                     this.length++;
                 }
                 if (flag) {
-                    this.writeUInt(Math.floor(val2));
+                    this.writeUInt(math.floor(val2));
                 }
             }
         }, {
@@ -9760,10 +13764,10 @@ var flower = {};
             value: function readInt() {
                 var val = this.readUInt();
                 if (val % 2 == 1) {
-                    val = Math.floor(val / 2);
+                    val = math.floor(val / 2);
                     val = ~val;
                 } else {
-                    val = Math.floor(val / 2);
+                    val = math.floor(val / 2);
                 }
                 return val;
             }
@@ -9837,6 +13841,13 @@ var flower = {};
                 return val;
             }
         }, {
+            key: "clear",
+            value: function clear() {
+                this.bytes.length = 0;
+                this.position = 0;
+                this.length = 0;
+            }
+        }, {
             key: "toString",
             value: function toString() {
                 var str = "";
@@ -9861,7 +13872,7 @@ var flower = {};
         }, {
             key: "data",
             get: function get() {
-                return this.bytes;
+                return this.bytes.concat();
             }
         }]);
 
@@ -9903,6 +13914,59 @@ var flower = {};
                 var arr = url.split("/");
                 return arr[arr.length - 1];
             }
+        }, {
+            key: "isPeerDirection",
+            value: function isPeerDirection(url1, url2) {
+                var arr1 = url1.split("/");
+                var arr2 = url2.split("/");
+                if (arr1.length != arr2.length) {
+                    return false;
+                }
+                for (var i = 0; i < arr1.length - 1; i++) {
+                    if (arr1[i] != arr2[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }, {
+            key: "joinPath",
+            value: function joinPath(path1, path2) {
+                if (path1.charAt(path1.length - 1) != "/" && path1.split("/")[path1.split("/").length - 1].split(".").length == 1) {
+                    path1 += "/";
+                }
+                var path = path1;
+                if (path.charAt(path.length - 1) != "/") {
+                    for (var i = path.length - 2; i >= 0; i--) {
+                        if (path.charAt(i) == "/") {
+                            path = path.slice(0, i + 1);
+                            break;
+                        } else if (i == 0) {
+                            path = "";
+                        }
+                    }
+                }
+                if (path2.charAt(0) == "/") {
+                    path2 = path2.slice(1, path2.length);
+                }
+                while ((path2.slice(0, 2) == "./" || path2.slice(0, 3) == "../") && path != "") {
+                    if (path2.slice(0, 2) == "./") {
+                        path2 = path2.slice(2, path2.length);
+                    } else {
+                        path2 = path2.slice(3, path2.length);
+                        for (var i = path.length - 2; i >= 0; i--) {
+                            if (path.charAt(i) == "/") {
+                                path = path.slice(0, i + 1);
+                                break;
+                            } else if (i == 0) {
+                                path = "";
+                            }
+                        }
+                    }
+                }
+                path += path2;
+                return path;
+            }
         }]);
 
         return Path;
@@ -9931,12 +13995,12 @@ var flower = {};
         function XMLElement() {
             _classCallCheck(this, XMLElement);
 
-            var _this30 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
+            var _this33 = _possibleConstructorReturn(this, Object.getPrototypeOf(XMLElement).call(this));
 
-            _this30.namespaces = [];
-            _this30.attributes = [];
-            _this30.elements = _this30.list = [];
-            return _this30;
+            _this33.namespaces = [];
+            _this33.attributes = [];
+            _this33.elements = _this33.list = [];
+            return _this33;
         }
 
         _createClass(XMLElement, [{
@@ -10210,6 +14274,11 @@ var flower = {};
                 }
                 return i;
             }
+        }, {
+            key: "toString",
+            value: function toString() {
+                return "<" + this.name + "/>";
+            }
         }], [{
             key: "parse",
             value: function parse(content) {
@@ -10236,5 +14305,48 @@ var flower = {};
 
     flower.XMLNameSpace = XMLNameSpace;
     //////////////////////////End File:flower/utils/XMLNameSpace.js///////////////////////////
-})();
+
+    //////////////////////////File:flower/utils/Math.js///////////////////////////
+
+    var Math = function () {
+        function Math() {
+            _classCallCheck(this, Math);
+        }
+
+        _createClass(Math, null, [{
+            key: "timeToHMS",
+
+
+            /**
+             * 将时间(ms) 转换为 00:00:00 的格式
+             * @param time
+             */
+            value: function timeToHMS(time) {
+                var hour = math.floor(time / (1000 * 3600));
+                var minute = math.floor(time % (1000 * 3600) / (1000 * 60));
+                var second = math.floor(time % (1000 * 60) / 1000);
+                return (hour < 10 ? "0" + hour : hour) + ":" + (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second);
+            }
+
+            /**
+             * 将时间(ms) 转换为 00:00:00 的格式
+             * @param time
+             */
+
+        }, {
+            key: "timeToMSM",
+            value: function timeToMSM(time) {
+                var minute = math.floor(time % (1000 * 3600) / (1000 * 60));
+                var second = math.floor(time % (1000 * 60) / 1000);
+                var ms = math.floor(time % 1000 / 10);
+                return (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second) + ":" + (ms < 10 ? "0" + ms : ms);
+            }
+        }]);
+
+        return Math;
+    }();
+
+    flower.Math = Math;
+    //////////////////////////End File:flower/utils/Math.js///////////////////////////
+})(Math);
 var trace = flower.trace;

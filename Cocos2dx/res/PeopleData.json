@@ -1,0 +1,21 @@
+{
+  "name": "PeopleData",
+  "members": {
+    "name": {
+      "type": "string"
+    },
+    "sex": {
+      "desc": "性别 man  woman",
+      "type": "string"
+    },
+    "age": {
+      "desc": "年龄",
+      "type": "int"
+    },
+    "ageType": {
+      "desc": "根据年龄划分为 child young old",
+      "type": "string",
+      "bind": "{age<18?'child':(age<40?'young':'old')}"
+    }
+  }
+}

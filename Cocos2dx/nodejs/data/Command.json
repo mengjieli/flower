@@ -1,0 +1,11 @@
+{
+  "1": "LoginTask",
+  "2": "LoadJSTask",
+  "3": "LoadCommandConfigTask",
+  "4": "LoadUserConfigTask",
+  "18": "GetClientListTask",
+  "20": "TransformTask",
+  "22": "SendToClientTask",
+
+  "10000": "GetQATestAccountTask"
+}

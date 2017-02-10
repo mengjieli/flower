@@ -2,18 +2,18 @@ class StringValue extends Value {
 
     constructor(init = "", enumList = null) {
         super();
-        this.__old = this.__value = "" + init;
+        this.__old = this.__value = "" + (init == null ? "" : init);
         this.__enumList = enumList;
     }
 
     $setValue(val) {
-        val = "" + val;
+        val = "" + (val == null ? "" : val);
         if (val == this.__value) {
             return;
         }
         this.__old = this.__value;
         this.__value = val;
-        this.dispatchWidth(flower.Event.UPDATE, this, val);
+        this.dispatchWith(flower.Event.CHANGE, this, val);
     }
 
     $setEnumList(val) {

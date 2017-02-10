@@ -1,0 +1,14 @@
+{
+  "name": "texture",
+  "scripts": [
+    "./src/Main.script"
+  ],
+  "components": [
+    "./view/Main.xml"
+  ],
+  "classes": {
+  },
+  "data": [
+  ],
+  "execute":"start();"
+}

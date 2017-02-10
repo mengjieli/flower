@@ -53,13 +53,12 @@ class RemoteServer extends flower.VBWebSocket {
             </f:Group>
         </f:Panel>
         `;
-        var ui = new flower.UIParser();
-        ui.parseUI(content);
-        ui.addListener(flower.Event.COMPLETE, this.__serverInputComplete, this);
+        var parser = new flower.UIParser();
+        var ui = parser.parseUI(content);
+        this.__serverInputComplete(ui);
     }
 
-    __serverInputComplete(e) {
-        var ui = e.data;
+    __serverInputComplete(ui) {
         if (this.__config) {
             ui.serverInput.text = this.__config.server;
             ui.portInput.text = this.__config.port;
@@ -163,13 +162,12 @@ class RemoteServer extends flower.VBWebSocket {
             </f:Group>
         </f:Panel>
         `;
-        var ui = new flower.UIParser();
-        ui.parseUI(content);
-        ui.addListener(flower.Event.COMPLETE, this.__clientChooseComplete, this);
+        var parser = new flower.UIParser();
+        var ui = parser.parseUI(content);
+        this.__clientChooseComplete(ui)
     }
 
-    __clientChooseComplete(e) {
-        var ui = e.data;
+    __clientChooseComplete(ui) {
         flower.PopManager.pop(ui, true);
         flower.Tween.to(ui, 0.3, {
             x: (ui.parent.width - ui.width) / 2,
@@ -189,6 +187,9 @@ class RemoteServer extends flower.VBWebSocket {
             ui.dispose();
             if (list.selectedItem) {
                 _this.__client = list.selectedItem;
+                if (_this.__config.useHttpServer) {
+                    flower.URLLoader.urlHead = "http://" + _this.__client.ip + ":" + _this.__client.httpServerPort + "/";
+                }
                 if (_this.__readyBack) {
                     _this.__readyBack();
                     _this.__readyBack = null;
@@ -219,6 +220,18 @@ class RemoteServer extends flower.VBWebSocket {
         this.__showConnectPanel();
     }
 
+    get severIp() {
+        return this.__config.server;
+    }
+
+    get severPort() {
+        return this.__config.port;
+    }
+
+    get httpURL() {
+        return "http://" + this.__client.ip + ":" + this.__client.httpServerPort + "/";
+    }
+
     get remoteClientId() {
         return this.__client.id;
     }
@@ -247,8 +260,10 @@ class Remote {
 
     __id;
 
-    constructor() {
+    constructor(back, thisObj) {
         this.__id = Remote.id++;
+        this.back = back;
+        this.thisObj = thisObj;
         RemoteServer.getInstance().registerRemote(this);
     }
 
@@ -257,6 +272,9 @@ class Remote {
     }
 
     receive(cmd, bytes) {
+        if (this.back) {
+            this.back.call(this.thisObj, cmd, bytes, this);
+        }
     }
 
     dispose() {
@@ -278,8 +296,8 @@ remote.Remote = Remote;
 
 
 
-//////////////////////////File:remote/File.js///////////////////////////
-class File {
+//////////////////////////File:remote/RemoteFile.js///////////////////////////
+class RemoteFile {
 
     __path;
     __autoUpdate;
@@ -297,31 +315,43 @@ class File {
         new SaveFileRemote(back, thisObj, this.__path, colors, "png", width, height);
     }
 
+    readImageData(back, thisObj) {
+        new ReadImageDataRemote(back, thisObj, this.__path);
+    }
+
+    isExist(back, thisObj) {
+        new IsDirectionExistRemote(back, thisObj, this.__path);
+    }
+
     delete(back, thisObj) {
         new DeleteFileRemote(back, thisObj, this.__path);
     }
 }
 
-remote.File = File;
-//////////////////////////End File:remote/File.js///////////////////////////
+remote.RemoteFile = RemoteFile;
+//////////////////////////End File:remote/RemoteFile.js///////////////////////////
 
 
 
-//////////////////////////File:remote/Direction.js///////////////////////////
-class Direction {
+//////////////////////////File:remote/RemoteDirection.js///////////////////////////
+class RemoteDirection extends flower.EventDispatcher {
 
     __path;
     __autoUpdate;
     __list;
+    __pathList;
     __fileClass;
     __updateRemote;
+    __typeFilter;
 
     constructor(path, autoUpdate = true) {
+        super();
         this.__path = path;
         this.__autoUpdate = autoUpdate;
         this.__list = new flower.ArrayValue();
+        this.__pathList = [];
         if (this.__path && this.__autoUpdate) {
-            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path);
+            new ReadDirectionListRemote(this.__updateDirectionList, this, this.__path, this.__autoUpdate);
         }
     }
 
@@ -335,19 +365,67 @@ class Direction {
 
     __updateDirectionList(fileList) {
         var list = this.__list;
-        list.length = 0;
         var clazz = this.__fileClass;
-        for (var i = 0, len = fileList.length; i < len; i++) {
-            if (clazz) {
-                list.push(new clazz(fileList[i]));
-            } else {
-                list.push(fileList[i]);
+        var last = 0;
+        if (this.__typeFilter) {
+            for (var i = 0; i < fileList.length; i++) {
+                if (fileList[i].isDirection) continue;
+                var findType = false;
+                for (var t = 0; t < this.__typeFilter.length; t++) {
+                    if (this.__typeFilter[t] == fileList[i].fileType) {
+                        findType = true;
+                        break;
+                    }
+                }
+                if (!findType) {
+                    fileList.splice(i, 1);
+                    i--;
+                }
             }
         }
+        for (var i = 0, len = fileList.length; i < len; i++) {
+            var find = false;
+            var deleteEnd = this.__pathList.length;
+            for (var f = last; f < this.__pathList.length; f++) {
+                if (this.__pathList[f] == fileList[i].path) {
+                    find = true;
+                    deleteEnd = f;
+                    break;
+                }
+            }
+            while (last < deleteEnd) {
+                this.__pathList.splice(last, 1);
+                list.removeItemAt(last);
+                deleteEnd--;
+
+            }
+            last = deleteEnd + 1;
+            if (!find) {
+                this.__pathList.push(fileList[i].path);
+                if (clazz) {
+                    list.push(new clazz(fileList[i]));
+                } else {
+                    list.push(fileList[i]);
+                }
+            }
+        }
+        while (this.__pathList.length > fileList.length) {
+            this.__pathList.splice(fileList.length, 1);
+            list.removeItemAt(fileList.length);
+        }
+        this.dispatchWith(flower.Event.CHANGE);
     }
 
     dispose() {
 
+    }
+
+    get typeFilter() {
+        return this.__typeFilter.concat();
+    }
+
+    set typeFilter(val) {
+        this.__typeFilter = val;
     }
 
     get list() {
@@ -388,8 +466,8 @@ class Direction {
     }
 }
 
-remote.Direction = Direction;
-//////////////////////////End File:remote/Direction.js///////////////////////////
+remote.RemoteDirection = RemoteDirection;
+//////////////////////////End File:remote/RemoteDirection.js///////////////////////////
 
 
 
@@ -428,6 +506,7 @@ class IsDirectionExistRemote extends Remote {
             this.__back.call(this.__thisObj, msg.readBoolean());
         }
         this.__back = this.__thisObj = null;
+        this.dispose();
     }
 }
 //////////////////////////End File:remote/remotes/IsDirectionExistRemote.js///////////////////////////
@@ -440,7 +519,7 @@ class ReadDirectionListRemote extends Remote {
     __back;
     __thisObj;
 
-    constructor(back, thisObj, path) {
+    constructor(back, thisObj, path, autoUpdate = false) {
         super();
         this.__back = back;
         this.__thisObj = thisObj;
@@ -451,7 +530,9 @@ class ReadDirectionListRemote extends Remote {
         msg.writeUInt(102);
         msg.writeUInt(this.id);
         msg.writeUTF(path);
+        msg.writeUTF(autoUpdate);
         this.send(msg);
+        this.autoUpdate = autoUpdate;
     }
 
     receive(cmd, msg) {
@@ -470,7 +551,10 @@ class ReadDirectionListRemote extends Remote {
         if (this.__back) {
             this.__back.call(this.__thisObj, list);
         }
-        this.__back = this.__thisObj = null;
+        if (!this.autoUpdate) {
+            this.__back = this.__thisObj = null;
+            this.dispose();
+        }
     }
 }
 //////////////////////////End File:remote/remotes/ReadDirectionListRemote.js///////////////////////////
@@ -488,16 +572,25 @@ class SaveFileRemote extends Remote {
         this.__back = back;
         this.__thisObj = thisObj;
         if (typeof data == "string") {
-            var msg = new flower.VByteArray();
-            msg.writeUInt(20);
-            msg.writeUInt(this.remoteClientId);
-            msg.writeUInt(104);
-            msg.writeUInt(this.id);
-            msg.writeUTF(path);
-            msg.writeUTF(type);
-            msg.writeUTF(data);
-            this.send(msg);
-        } else {
+            var len = data.length;
+            var i = 0;
+            var index = 0;
+            while (i < len) {
+                var msg = new flower.VByteArray();
+                msg.writeUInt(20);
+                msg.writeUInt(this.remoteClientId);
+                msg.writeUInt(104);
+                msg.writeUInt(this.id);
+                msg.writeUTF(path);
+                msg.writeUTF(type);
+                msg.writeUInt(index);
+                msg.writeUInt(Math.ceil(len / 1024) - 1);
+                msg.writeUTF(data.slice(index * 1024, (index + 1) * 1024));
+                this.send(msg);
+                index++;
+                i += 1024;
+            }
+        } else if (type == "png") {
             var len = data.length;
             var i = 0;
             var index = 0;
@@ -534,6 +627,7 @@ class SaveFileRemote extends Remote {
             }
             this.__back = this.__thisObj = null;
         }
+        this.dispose();
     }
 }
 //////////////////////////End File:remote/remotes/SaveFileRemote.js///////////////////////////
@@ -565,9 +659,50 @@ class DeleteFileRemote extends Remote {
             this.__back.call(this.__thisObj);
         }
         this.__back = this.__thisObj = null;
+        this.dispose();
     }
 }
 //////////////////////////End File:remote/remotes/DeleteFileRemote.js///////////////////////////
+
+
+
+//////////////////////////File:remote/remotes/ReadImageDataRemote.js///////////////////////////
+class ReadImageDataRemote extends Remote {
+
+    __back;
+    __thisObj;
+
+    constructor(back, thisObj, path) {
+        super();
+        this.__back = back;
+        this.__thisObj = thisObj;
+
+        var msg = new flower.VByteArray();
+        msg.writeUInt(20);
+        msg.writeUInt(this.remoteClientId);
+        msg.writeUInt(110);
+        msg.writeUInt(this.id);
+        msg.writeUTF(path);
+        this.send(msg);
+    }
+
+    receive(cmd, msg) {
+        var list = [];
+        var width = msg.readUInt();
+        var height = msg.readUInt();
+        var colors = [];
+        for (var y = 0; y < height; y++) {
+            colors[y] = [];
+            for (var x = 0; x < width; x++) {
+                colors[y].push(msg.readInt());
+            }
+        }
+        if (this.__back) {
+            this.__back.call(this.__thisObj, colors);
+        }
+    }
+}
+//////////////////////////End File:remote/remotes/ReadImageDataRemote.js///////////////////////////
 
 
 
