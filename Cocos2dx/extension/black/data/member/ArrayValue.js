@@ -472,6 +472,11 @@ class ArrayValue extends Value {
         return sub;
     }
 
+    /**
+     * 绑定子集数组
+     * @param sub 需要绑定的子集数组对象
+     * @param args 绑定条件，按照 属性名称1,属性值1,属性名称2,属性值2,... 的顺序传入
+     */
     linkSubArrayValue(sub, ...args) {
         if (!this._subs) {
             this._subs = [];
@@ -534,7 +539,7 @@ class ArrayValue extends Value {
     __removeItemChange(item) {
         var keys = item.membersKey;
         for (var i = 0; i < keys.length; i++) {
-            if(item[keys[i]] instanceof flower.Value) {
+            if (item[keys[i]] instanceof flower.Value) {
                 item[keys[i]].removeListener(flower.Event.CHANGE, this.__onItemChange, this);
             }
         }
@@ -756,7 +761,7 @@ class ArrayValue extends Value {
     }
 }
 
-for (var i = 0; i < 1000; i++) {
+for (var i = 0; i < 100000; i++) {
     Object.defineProperty(ArrayValue.prototype, "" + i, {
         get: function (index) {
             return function () {

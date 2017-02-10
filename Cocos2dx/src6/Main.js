@@ -7,7 +7,7 @@ class Main {
     }
 
     ready() {
-        flower.URLLoader.urlHead = "http://localhost:12000/"
+        flower.URLLoader.urlHead = "http://localhost:12000/";
         var preloading = new PreLoading();
         preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
     }

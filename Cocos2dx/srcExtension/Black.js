@@ -2,9 +2,11 @@ var black = {};
 (function(){
 //////////////////////////File:extension/black/core/Black.js///////////////////////////
 var sys = {};
-for (var key in flower.sys) {
-    sys[key] = flower.sys[key];
-}
+flower.addStartBack(function () {
+    for (var key in flower.sys) {
+        sys[key] = flower.sys[key];
+    }
+})
 //////////////////////////End File:extension/black/core/Black.js///////////////////////////
 
 
@@ -54,7 +56,7 @@ class UIComponent {
                 12: false,//absoluteState
                 13: this, //eventThis
                 14: null, //layout
-                15: false, //flexbox 是否有弹性属性
+                15: isContainer, //flexbox 弹性属性是否需要验证
             };
             UIComponent.registerEvent(clazz, 1000, "creationComplete", flower.Event.CREATION_COMPLETE);
             UIComponent.registerEvent(clazz, 1001, "add", flower.Event.ADDED);
@@ -202,7 +204,9 @@ class UIComponent {
                 }
             }
             p[0] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -219,7 +223,9 @@ class UIComponent {
                 }
             }
             p[1] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -230,7 +236,9 @@ class UIComponent {
                 return false;
             }
             p[2] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -241,7 +249,9 @@ class UIComponent {
                 return false;
             }
             p[3] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -252,7 +262,9 @@ class UIComponent {
                 return false;
             }
             p[4] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -263,7 +275,9 @@ class UIComponent {
                 return false;
             }
             p[5] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -274,7 +288,9 @@ class UIComponent {
                 return false;
             }
             p[6] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -285,7 +301,9 @@ class UIComponent {
                 return false;
             }
             p[7] = val;
-            p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            if (!isContainer) {
+                p[15] = p[0] != null || p[1] != null || p[2] != null || p[3] != null || p[4] != null || p[5] != null || p[6] != null || p[7] != null ? true : false;
+            }
             this.$invalidateContentBounds();
         }
 
@@ -1021,6 +1039,11 @@ class ArrayValue extends Value {
         return sub;
     }
 
+    /**
+     * 绑定子集数组
+     * @param sub 需要绑定的子集数组对象
+     * @param args 绑定条件，按照 属性名称1,属性值1,属性名称2,属性值2,... 的顺序传入
+     */
     linkSubArrayValue(sub, ...args) {
         if (!this._subs) {
             this._subs = [];
@@ -1083,7 +1106,7 @@ class ArrayValue extends Value {
     __removeItemChange(item) {
         var keys = item.membersKey;
         for (var i = 0; i < keys.length; i++) {
-            if(item[keys[i]] instanceof flower.Value) {
+            if (item[keys[i]] instanceof flower.Value) {
                 item[keys[i]].removeListener(flower.Event.CHANGE, this.__onItemChange, this);
             }
         }
@@ -1305,7 +1328,7 @@ class ArrayValue extends Value {
     }
 }
 
-for (var i = 0; i < 1000; i++) {
+for (var i = 0; i < 100000; i++) {
     Object.defineProperty(ArrayValue.prototype, "" + i, {
         get: function (index) {
             return function () {
@@ -1822,6 +1845,7 @@ locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}"
 locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
 locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
 locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
+locale_strings[3008] = "语法分析错误，源代码:\n{0}\n错误信息 :{1}";
 locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
 locale_strings[3011] = "数据结构类定义解析出错 : {0}\n{1}";
 locale_strings[3012] = "没有定义的数据结构 : {0}";
@@ -1842,6 +1866,8 @@ class DataManager {
 
     _defines = {};
     _root = {};
+    staticScript;
+    scriptContent;
 
     constructor() {
         if (DataManager.instance) {
@@ -1963,6 +1989,10 @@ class DataManager {
                 return;
             }
         }
+        this.staticScript = "";
+        this.scriptContent = config.script;
+        var script = {content: "", ctor: ""};
+        this.decodeScript("\n\n", defineClass, script);
         var content = "var " + defineClass + " = (function (_super) {\n" +
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "(init) {\n" +
@@ -2038,7 +2068,9 @@ class DataManager {
         content += "\t\tif(init) this.value = init;\n";
         content += bindContent;
         content += subContent;
-        content += "\t}\n\n" +
+        content += script.ctor;
+        content += "\t}\n\n" + "var p = " + defineClass + ".prototype;" + "\n\n" +
+            script.content + "\n" +
             defineMember +
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
@@ -2111,6 +2143,212 @@ class DataManager {
             //}
             return new item.define(init);
         }
+    }
+
+    decodeScript(before, className, script) {
+        if (this.scriptContent && this.scriptContent != "") {
+            var scriptContent = this.scriptContent;
+            //删除注释
+            scriptContent = flower.StringDo.deleteProgramNote(scriptContent, 0);
+            var i = 0;
+            var len = scriptContent.length;
+            var pos = 0;
+            var list = [];
+            this.staticScript = "";
+            while (true) {
+                var nextFunction = this.findNextFunction(scriptContent, pos);
+                if (nextFunction) {
+                    this.staticScript += nextFunction.staticScript;
+                    pos = nextFunction.endIndex;
+                    list.push(nextFunction);
+                } else {
+                    break;
+                }
+            }
+            for (var i = 0; i < list.length; i++) {
+                var func = list[i];
+                if (func.name == "constructor") {
+                    script.ctor = before + func.content + "\n";
+                } else if (func.gset == 0) {
+                    script.content += before + "\t" + className + (func.isStatic ? "." : ".prototype.") + func.name + " = function(" +
+                        func.params + ") " + func.content + "\n";
+                } else {
+                    var setContent = func.gset == 1 ? "" : func.content;
+                    var getContent = func.gset == 1 ? func.content : "";
+                    var prams = func.gset == 1 ? "" : func.params;
+                    for (var f = 0; f < list.length; f++) {
+                        if (f != i && list[f].name == func.name && list[f].gset && list[f].gset != func.gset) {
+                            if (list[f].gset == 1) {
+                                getContent = list[f].content;
+                            } else {
+                                setContent = list[f].content;
+                                prams = list[f].params;
+                            }
+                            list.splice(f, 1);
+                            break;
+                        }
+                    }
+                    script.content += before + "\tObject.defineProperty(" + className + ".prototype, \"" + func.name + "\", {\n";
+                    if (getContent != "") {
+                        script.content += before + "\t\tget: function () " + getContent + ",\n";
+                    }
+                    if (setContent != "") {
+                        script.content += before + "\t\tset: function (" + prams + ") " + setContent + ",\n";
+                    }
+                    script.content += before + "\t\tenumerable: true,\n"
+                    script.content += before + "\t\tconfigurable: true\n";
+                    script.content += before + "\t\t});\n\n";
+                }
+            }
+        }
+    }
+
+    /**
+     * 查找下一个函数，并分析出 函数名和参数列表
+     * @param content
+     * @param start
+     * @return {
+     *      name : 函数名
+     *      gset : 0.普通函数 1.get函数 2.set函数
+     *      params : 参数列表 (也是字符串，直接用就可以)
+     *      content : 函数体
+     *      endIndex : 函数体结束标识 } 之后的那个位置
+     * }
+     */
+    findNextFunction(content, start) {
+        var len = "function".length;
+        var flag;
+        var name;
+        var params;
+        var char;
+        var pos, pos2, i;
+        var res;
+        var gset = 0;
+        var funcName;
+        var isStatic = false;
+        //跳过空格和注释
+        i = flower.StringDo.jumpProgramSpace(content, start);
+        if (i == content.length) {
+            return null;
+        }
+        var j = i;
+        while (j < content.length) {
+            if (content.slice(j, j + "static".length) == "static" || content.slice(j, j + len) == "function") {
+                break;
+            }
+            j++;
+        }
+        if (j == content.length) {
+            this.staticScript += content.slice(i, j);
+            return null;
+        }
+        var staticScript = content.slice(i, j);
+        i = j;
+        if (content.slice(i, i + "static".length) == "static") {
+            isStatic = true;
+            i += "static".length;
+            //跳过空格和注释
+            i = flower.StringDo.jumpProgramSpace(content, i);
+        }
+        if (content.slice(i, i + len) == "function") {
+            if (i != 0) {
+                //判断 function 之前是不是分隔符
+                char = content.charAt(i - 1);
+                if (char != "\t" && char != " " && char != "\r" && char != "\n") {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+            }
+            i = pos = i + len;
+            //跳过 function 之后的分隔符
+            pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+            if (pos2 == pos) {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            pos = pos2;
+            //获取 function 之后的函数名
+            name = flower.StringDo.findId(content, pos);
+            if (name == "") {
+                i = pos;
+                sys.$error(3007, "", this.scriptContent);
+            }
+            if (name == "get" || name == "set") {
+                pos += name.length;
+                gset = name == "get" ? 1 : 2;
+                //跳过 function 之后的分隔符
+                pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+                if (pos2 == pos) {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+                pos = pos2;
+                //获取 function 之后的函数名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    i = pos;
+                    sys.$error(3007, "", this.scriptContent);
+                }
+            }
+            funcName = name;
+            //跳过函数名之后的分隔符
+            i = pos = flower.StringDo.jumpProgramSpace(content, pos + name.length);
+            //判断函数名之后是不是(
+            char = content.charAt(pos);
+            if (char != "(") {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            //跳过 (
+            pos++;
+            //查找 params
+            params = "";
+            flag = true;
+            while (true) {
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                //查找 param 名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    if (content.charAt(pos) == ")") {
+                        i = pos + 1;
+                        break;
+                    } else {
+                        flag = false;
+                        break;
+                    }
+                } else {
+                    params += name;
+                    pos += name.length;
+                }
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                char = content.charAt(pos);
+                if (char == ",") {
+                    params += ",";
+                    pos++;
+                }
+            }
+            if (!flag) {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            res = {
+                name: funcName,
+                gset: gset,
+                params: params,
+            }
+        }
+        if (!res) {
+            sys.$error(3007, "", this.scriptContent);
+        }
+
+        //分析函数体
+        //跳过空格
+        var content = flower.StringDo.findFunctionContent(content, i);
+        if (content == "") {
+            sys.$error(3007, "", this.scriptContent);
+        }
+        res.staticScript = staticScript || "";
+        res.content = content;
+        res.endIndex = i + content.length + 1;
+        res.isStatic = isStatic;
+        return res;
     }
 
     clear() {
@@ -7691,10 +7929,27 @@ class Module extends flower.EventDispatcher {
 
     __loadNext(e) {
         var item;
-        if (this.__index != 0) {
+        if (e && this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                if (e.data.script) {
+                    var data = e.data;
+                    var url = e.data.script;
+                    if (url.slice(0, 2) == "./") {
+                        url = flower.Path.getPathDirection(item.url) + url.slice(2, url.length);
+                    }
+                    var loader = new flower.URLLoader(url);
+                    loader.addListener(flower.Event.COMPLETE, function (ee) {
+                        data.script = ee.data;
+                        flower.DataManager.getInstance().addDefine(data, this.__moduleKey);
+                        this.__loadNext();
+                    }, this);
+                    loader.addListener(flower.Event.ERROR, this.__loadError, this);
+                    loader.load();
+                    return;
+                } else {
+                    flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                }
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {

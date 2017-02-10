@@ -52,6 +52,7 @@ var flower = {};
     var config = {};
     var params = {};
     var hasStart = false;
+    var startBacks = [];
 
     /**
      * 启动引擎
@@ -66,6 +67,10 @@ var flower = {};
         if (params.TIP) {
             TIP = params.TIP;
             flower.sys.TIP = params.TIP;
+        }
+        if (params.DEBUG) {
+            DEBUG = params.DEBUG;
+            flower.sys.DEBUG = params.DEBUG;
         }
         hasStart = false;
         Platform._runBack = CoreTime.$run;
@@ -112,6 +117,9 @@ var flower = {};
                             loader.addListener(Event.COMPLETE, function (e) {
                                 programmers[loader.url] = e.data;
                                 if (completeFunc) completeFunc();
+                                while (startBacks.length) {
+                                    startBacks.shift()();
+                                }
                             });
                             loader.load();
                         });
@@ -131,6 +139,10 @@ var flower = {};
         loader.load();
     }
 
+    function addStartBack(func) {
+        startBacks.push(func);
+    }
+
     function $getLanguage() {
         return language;
     }
@@ -144,7 +156,7 @@ var flower = {};
                 args[_key - 1] = arguments[_key];
             }
 
-            msg = getLanguage(errorCode, args);
+            msg = getLanguage.apply(null, [errorCode].concat(args));
         }
         console.log(msg);
         throw msg;
@@ -159,7 +171,7 @@ var flower = {};
                 args[_key2 - 1] = arguments[_key2];
             }
 
-            msg = getLanguage(errorCode, args);
+            msg = getLanguage.apply(null, [errorCode].concat(args));
         }
         console.log("[警告] " + msg);
     }
@@ -228,6 +240,7 @@ var flower = {};
     flower.params = params;
     flower.system = {};
     flower.dispose = dispose;
+    flower.addStartBack = addStartBack;
     $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 

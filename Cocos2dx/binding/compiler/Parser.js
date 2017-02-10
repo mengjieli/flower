@@ -19,6 +19,7 @@ class Parser {
         var scanner = this.commonInfo.scanner;
         scanner.setTokenContent(content);
         var token;
+        commonInfo.lastTokenPos = 0;
         token = scanner.getNextToken();
         var newNode = {"type": "leaf", "token": token, "value": commonInfo.tokenValue};
         if (TokenType.TokenTrans[token])
@@ -37,9 +38,7 @@ class Parser {
         var commonDebug = {"file": content};
         while (true) {
             if (this.action[state][token] == undefined) {
-                //if (Engine.DEBUG) {
-                //    DebugInfo.debug("语法分析错误," + content + this.getFilePosInfo(content, commonInfo.tokenPos), DebugInfo.WARN);
-                //}
+                flower.sys.$error(3008, content, this.getFilePosInfo(content, commonInfo.lastTokenPos));
                 commonInfo.parserError = true;
                 return false;
             }
@@ -79,6 +78,7 @@ class Parser {
                 newNode = null;
             }
             if (token == null && token != "$") {
+                commonInfo.lastTokenPos = commonInfo.tokenPos;
                 token = scanner.getNextToken();
                 commonInfo.tokenCount++;
                 if (token == null)
@@ -126,185 +126,83 @@ class Parser {
 
     runProgrammer(id, node, nodes) {
         var common = this.commonInfo;
-        switch (id) {
-            case 1 :
-                node.expval = nodes[0].expval;
-                break;
-            case 3 :
-                node.expval = new Stmts();
-                node.expval.addStmt(nodes[0].expval);
-                break;
-            case 4 :
-                node.expval = new ExprStmt(nodes[0].expval);
-                break;
-            case 5 :
-                node.expval = new DeviceStmt();
-                break;
-            case 33 :
-                node.expval = new Expr("Atr", nodes[0].expval);
-                break;
-            case 34 :
-            case 52 :
-                node.expval = new Expr("int", nodes[0].value);
-                break;
-            case 35 :
-            case 53 :
-                node.expval = new Expr("0xint", nodes[0].value);
-                break;
-            case 36 :
-            case 54 :
-                node.expval = new Expr("number", nodes[0].value);
-                break;
-            case 37 :
-            case 55 :
-                node.expval = new Expr("string", nodes[0].value);
-                break;
-            case 42 :
-                node.expval = new ExprAtr();
-                node.expval.addItem(new ExprAtrItem("string", nodes[0].value));
-                break;
-            case 38 :
-                node.expval = new Expr("boolean", "true");
-                break;
-            case 39 :
-                node.expval = new Expr("boolean", "false");
-                break;
-            case 40 :
-                node.expval = new Expr("null");
-                break;
-            case 43 :
-                node.expval = new ExprAtr();
-                node.expval.addItem(new ExprAtrItem("id", nodes[0].value.name));
-                break;
-            case 44 :
-                node.expval = new ExprAtr();
-                node.expval.addItem(new ExprAtrItem("object", nodes[0].expval));
-                break;
-            case 2 :
-                node.expval = nodes[1].expval;
-                node.expval.addStmtAt(nodes[0].expval, 0);
-                break;
-            case 6 :
-                node.expval = new Expr("-a", nodes[1].expval);
-                break;
-            case 7 :
-                node.expval = new Expr("+a", nodes[1].expval);
-                break;
-            case 8 :
-                node.expval = new Expr("!", nodes[1].expval);
-                break;
-            case 27 :
-                node.expval = new Expr("~", nodes[1].expval);
-                break;
-            case 46 :
-                node.expval = nodes[0].expval;
-                node.expval.addItem(new ExprAtrItem("call", nodes[1].expval));
-                break;
-            case 51 :
-                node.expval = new Expr("string", nodes[0].value.name);
-                break;
-            case 69 :
-            case 47 :
-                node.expval = new ObjectAtr(nodes.length == 2 ? [] : nodes[1].expval);
-                break;
-            case 13 :
-                node.expval = new Expr("-", nodes[0].expval, nodes[2].expval);
-                break;
-            case 12 :
-                node.expval = new Expr("+", nodes[0].expval, nodes[2].expval);
-                break;
-            case 9 :
-                node.expval = new Expr("*", nodes[0].expval, nodes[2].expval);
-                break;
-            case 10 :
-                node.expval = new Expr("/", nodes[0].expval, nodes[2].expval);
-                break;
-            case 11 :
-                node.expval = new Expr("%", nodes[0].expval, nodes[2].expval);
-                break;
-            case 14 :
-                node.expval = new Expr("<<", nodes[0].expval, nodes[2].expval);
-                break;
-            case 15 :
-                node.expval = new Expr(">>", nodes[0].expval, nodes[2].expval);
-                break;
-            case 16 :
-                node.expval = new Expr("<<<", nodes[0].expval, nodes[2].expval);
-                break;
-            case 17 :
-                node.expval = new Expr(">>>", nodes[0].expval, nodes[2].expval);
-                break;
-            case 18 :
-                node.expval = new Expr(">", nodes[0].expval, nodes[2].expval);
-                break;
-            case 19 :
-                node.expval = new Expr("<", nodes[0].expval, nodes[2].expval);
-                break;
-            case 26 :
-                node.expval = new Expr("&", nodes[0].expval, nodes[2].expval);
-                break;
-            case 28 :
-                node.expval = new Expr("^", nodes[0].expval, nodes[2].expval);
-                break;
-            case 29 :
-                node.expval = new Expr("|", nodes[0].expval, nodes[2].expval);
-                break;
-            case 30 :
-                node.expval = new Expr("&&", nodes[0].expval, nodes[2].expval);
-                break;
-            case 31 :
-                node.expval = new Expr("||", nodes[0].expval, nodes[2].expval);
-                break;
-            case 58 :
-                node.expval = new CallParams();
-                node.expval.addParam(nodes[0].expval);
-                break;
-            case 70 :
-            case 56 :
-                node.expval = nodes.length == 2 ? new CallParams() : nodes[1].expval;
-                break;
-            case 45 :
-                node.expval = nodes[0].expval;
-                node.expval.addItem(new ExprAtrItem(".", nodes[2].value.name));
-                break;
-            case 41 :
-                node.expval = new ExprAtr();
-                node.expval.addItem(new ExprAtrItem("()", nodes[1].expval));
-                break;
-            case 25 :
-                node.expval = new Expr("!=", nodes[0].expval, nodes[3].expval);
-                break;
-            case 20 :
-                node.expval = new Expr(">=", nodes[0].expval, nodes[3].expval);
-                break;
-            case 21 :
-                node.expval = new Expr("<=", nodes[0].expval, nodes[3].expval);
-                break;
-            case 22 :
-                node.expval = new Expr("==", nodes[0].expval, nodes[3].expval);
-                break;
-            case 71 :
-            case 57 :
-                node.expval = nodes[2].expval;
-                node.expval.addParamAt(nodes[0].expval, 0);
-                break;
-            case 49 :
-                node.expval = [[nodes[0].expval, nodes[2].expval]];
-                break;
-            case 24 :
-                node.expval = new Expr("!==", nodes[0].expval, nodes[4].expval);
-                break;
-            case 23 :
-                node.expval = new Expr("===", nodes[0].expval, nodes[4].expval);
-                break;
-            case 32 :
-                node.expval = new Expr("?:", nodes[0].expval, nodes[2].expval, nodes[4].expval);
-                break;
-            case 72 :
-            case 48 :
-                node.expval = [[nodes[0].expval, nodes[2].expval]];
-                node.expval = node.expval.concat(nodes.length == 4 ? [null] : nodes[4].expval);
-                break;
+        switch (id){
+            case 1: node.expval = nodes[0].expval;break;
+            case 3: node.expval = new Stmts();node.expval.addStmt(nodes[0].expval);break;
+            case 4: node.expval = new ExprStmt(nodes[0].expval);break;
+            case 5: node.expval = new DeviceStmt();break;
+            case 46: node.expval = new Expr("Atr",nodes[0].expval);break;
+            case 47:
+            case 67: node.expval = new Expr("int",nodes[0].value);break;
+            case 48:
+            case 68: node.expval = new Expr("0xint",nodes[0].value);break;
+            case 49:
+            case 69: node.expval = new Expr("number",nodes[0].value);break;
+            case 50:
+            case 70: node.expval = new Expr("string",nodes[0].value);break;
+            case 55: node.expval = new ExprAtr();node.expval.addItem(new ExprAtrItem("string",nodes[0].value));break;
+            case 51: node.expval = new Expr("boolean","true");break;
+            case 52: node.expval = new Expr("boolean","false");break;
+            case 53: node.expval = new Expr("null");break;
+            case 56: node.expval = new ExprAtr();node.expval.addItem(new ExprAtrItem("id",nodes[0].value.name));break;
+            case 57: node.expval = new ExprAtr();node.expval.addItem(new ExprAtrItem("object",nodes[0].expval));break;
+            case 2: node.expval = nodes[1].expval;node.expval.addStmtAt(nodes[0].expval,0);break;
+            case 6: node.expval = new Expr("-a",nodes[1].expval);break;
+            case 7: node.expval = new Expr("+a",nodes[1].expval);break;
+            case 8: node.expval = new Expr("!",nodes[1].expval);break;
+            case 27: node.expval = new Expr("~",nodes[1].expval);break;
+            case 60: node.expval = nodes[0].expval;node.expval.addItem(new ExprAtrItem("call",nodes[1].expval));break;
+            case 61: node.expval = new ExprAtr();node.expval.addItem(new ExprAtrItem("id",nodes[1].value.name,true));break;
+            case 66: node.expval = new Expr("string",nodes[0].value.name);break;
+            case 84:
+            case 62: node.expval = new ObjectAtr(nodes.length==2?[]:nodes[1].expval);break;
+            case 13: node.expval = new Expr("-",nodes[0].expval,nodes[2].expval);break;
+            case 12: node.expval = new Expr("+",nodes[0].expval,nodes[2].expval);break;
+            case 9: node.expval = new Expr("*",nodes[0].expval,nodes[2].expval);break;
+            case 10: node.expval = new Expr("/",nodes[0].expval,nodes[2].expval);break;
+            case 11: node.expval = new Expr("%",nodes[0].expval,nodes[2].expval);break;
+            case 14: node.expval = new Expr("<<",nodes[0].expval,nodes[2].expval);break;
+            case 15: node.expval = new Expr(">>",nodes[0].expval,nodes[2].expval);break;
+            case 16: node.expval = new Expr("<<<",nodes[0].expval,nodes[2].expval);break;
+            case 17: node.expval = new Expr(">>>",nodes[0].expval,nodes[2].expval);break;
+            case 18: node.expval = new Expr(">",nodes[0].expval,nodes[2].expval);break;
+            case 19: node.expval = new Expr("<",nodes[0].expval,nodes[2].expval);break;
+            case 32: node.expval = new Expr("=",nodes[0].expval,nodes[2].expval);break;
+            case 26: node.expval = new Expr("&",nodes[0].expval,nodes[2].expval);break;
+            case 28: node.expval = new Expr("^",nodes[0].expval,nodes[2].expval);break;
+            case 29: node.expval = new Expr("|",nodes[0].expval,nodes[2].expval);break;
+            case 30: node.expval = new Expr("&&",nodes[0].expval,nodes[2].expval);break;
+            case 31: node.expval = new Expr("||",nodes[0].expval,nodes[2].expval);break;
+            case 54: node.expval = new ExprAtr();node.expval.addItem(new ExprAtrItem("()",nodes[1].expval));break;
+            case 73: node.expval = new CallParams();node.expval.addParam(nodes[0].expval);break;
+            case 85:
+            case 71: node.expval = nodes.length==2?new CallParams():nodes[1].expval;break;
+            case 58: node.expval = nodes[0].expval;node.expval.addItem(new ExprAtrItem(".",nodes[2].value.name));break;
+            case 38: node.expval = new Expr("-=",nodes[0].expval,nodes[3].expval);break;
+            case 37: node.expval = new Expr("+=",nodes[0].expval,nodes[3].expval);break;
+            case 25: node.expval = new Expr("!=",nodes[0].expval,nodes[3].expval);break;
+            case 33: node.expval = new Expr("*=",nodes[0].expval,nodes[3].expval);break;
+            case 34: node.expval = new Expr("/=",nodes[0].expval,nodes[3].expval);break;
+            case 35: node.expval = new Expr("%=",nodes[0].expval,nodes[3].expval);break;
+            case 40: node.expval = new Expr("<<=",nodes[0].expval,nodes[3].expval);break;
+            case 41: node.expval = new Expr(">>=",nodes[0].expval,nodes[3].expval);break;
+            case 20: node.expval = new Expr(">=",nodes[0].expval,nodes[3].expval);break;
+            case 21: node.expval = new Expr("<=",nodes[0].expval,nodes[3].expval);break;
+            case 22: node.expval = new Expr("==",nodes[0].expval,nodes[3].expval);break;
+            case 36: node.expval = new Expr("&=",nodes[0].expval,nodes[3].expval);break;
+            case 42: node.expval = new Expr("^=",nodes[0].expval,nodes[3].expval);break;
+            case 43: node.expval = new Expr("|=",nodes[0].expval,nodes[3].expval);break;
+            case 39: node.expval = new Expr("||=",nodes[0].expval,nodes[3].expval);break;
+            case 86:
+            case 72: node.expval = nodes[2].expval;node.expval.addParamAt(nodes[0].expval,0);break;
+            case 59: node.expval = nodes[0].expval;node.expval.addItem(new ExprAtrItem(".",nodes[3].value.name,true));break;
+            case 64: node.expval = [[nodes[0].expval,nodes[2].expval]];break;
+            case 24: node.expval = new Expr("!==",nodes[0].expval,nodes[4].expval);break;
+            case 23: node.expval = new Expr("===",nodes[0].expval,nodes[4].expval);break;
+            case 44: node.expval = new Expr("?:",nodes[0].expval,nodes[2].expval,nodes[4].expval);break;
+            case 87:
+            case 63: node.expval = [[nodes[0].expval,nodes[2].expval]];node.expval = node.expval.concat(nodes.length==4?[null]:nodes[4].expval);break;
+            case 45: node.expval = new Expr("spfor",nodes[2].expval,nodes[4].expval);break;
         }
     }
 

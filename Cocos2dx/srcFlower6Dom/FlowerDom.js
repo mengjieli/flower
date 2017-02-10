@@ -40,6 +40,7 @@ var programmers = {};
 var config = {};
 var params = {};
 var hasStart = false;
+var startBacks = [];
 
 /**
  * 启动引擎
@@ -54,6 +55,10 @@ function start(completeFunc, params) {
     if (params.TIP) {
         TIP = params.TIP;
         flower.sys.TIP = params.TIP;
+    }
+    if (params.DEBUG) {
+        DEBUG = params.DEBUG;
+        flower.sys.DEBUG = params.DEBUG;
     }
     hasStart = false;
     Platform._runBack = CoreTime.$run;
@@ -100,6 +105,9 @@ function start2(completeFunc, nativeStage, touchShow, stage, params) {
                         loader.addListener(Event.COMPLETE, function (e) {
                             programmers[loader.url] = e.data;
                             if (completeFunc)completeFunc();
+                            while (startBacks.length) {
+                                startBacks.shift()();
+                            }
                         });
                         loader.load();
                     });
@@ -119,6 +127,10 @@ function start2(completeFunc, nativeStage, touchShow, stage, params) {
     loader.load();
 }
 
+function addStartBack(func) {
+    startBacks.push(func);
+}
+
 function $getLanguage() {
     return language;
 }
@@ -128,7 +140,7 @@ function $error(errorCode, ...args) {
     if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
-        msg = getLanguage(errorCode, args);
+        msg = getLanguage.apply(null, [errorCode].concat(args));
     }
     console.log(msg);
     throw msg;
@@ -139,7 +151,7 @@ function $warn(errorCode, ...args) {
     if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
-        msg = getLanguage(errorCode, args);
+        msg = getLanguage.apply(null, [errorCode].concat(args));
     }
     console.log("[警告] " + msg);
 }
@@ -203,8 +215,9 @@ flower.sys = {
     getLanguage: getLanguage,
 }
 flower.params = params;
-flower.system = {}
+flower.system = {};
 flower.dispose = dispose;
+flower.addStartBack = addStartBack;
 $root.trace = trace;
 //////////////////////////End File:flower/Flower.js///////////////////////////
 

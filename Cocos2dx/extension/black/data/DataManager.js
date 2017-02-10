@@ -2,6 +2,8 @@ class DataManager {
 
     _defines = {};
     _root = {};
+    staticScript;
+    scriptContent;
 
     constructor() {
         if (DataManager.instance) {
@@ -123,6 +125,10 @@ class DataManager {
                 return;
             }
         }
+        this.staticScript = "";
+        this.scriptContent = config.script;
+        var script = {content: "", ctor: ""};
+        this.decodeScript("\n\n", defineClass, script);
         var content = "var " + defineClass + " = (function (_super) {\n" +
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "(init) {\n" +
@@ -198,7 +204,9 @@ class DataManager {
         content += "\t\tif(init) this.value = init;\n";
         content += bindContent;
         content += subContent;
-        content += "\t}\n\n" +
+        content += script.ctor;
+        content += "\t}\n\n" + "var p = " + defineClass + ".prototype;" + "\n\n" +
+            script.content + "\n" +
             defineMember +
             "\treturn " + defineClass + ";\n" +
             "})(" + extendClassName + ");\n";
@@ -271,6 +279,212 @@ class DataManager {
             //}
             return new item.define(init);
         }
+    }
+
+    decodeScript(before, className, script) {
+        if (this.scriptContent && this.scriptContent != "") {
+            var scriptContent = this.scriptContent;
+            //删除注释
+            scriptContent = flower.StringDo.deleteProgramNote(scriptContent, 0);
+            var i = 0;
+            var len = scriptContent.length;
+            var pos = 0;
+            var list = [];
+            this.staticScript = "";
+            while (true) {
+                var nextFunction = this.findNextFunction(scriptContent, pos);
+                if (nextFunction) {
+                    this.staticScript += nextFunction.staticScript;
+                    pos = nextFunction.endIndex;
+                    list.push(nextFunction);
+                } else {
+                    break;
+                }
+            }
+            for (var i = 0; i < list.length; i++) {
+                var func = list[i];
+                if (func.name == "constructor") {
+                    script.ctor = before + func.content + "\n";
+                } else if (func.gset == 0) {
+                    script.content += before + "\t" + className + (func.isStatic ? "." : ".prototype.") + func.name + " = function(" +
+                        func.params + ") " + func.content + "\n";
+                } else {
+                    var setContent = func.gset == 1 ? "" : func.content;
+                    var getContent = func.gset == 1 ? func.content : "";
+                    var prams = func.gset == 1 ? "" : func.params;
+                    for (var f = 0; f < list.length; f++) {
+                        if (f != i && list[f].name == func.name && list[f].gset && list[f].gset != func.gset) {
+                            if (list[f].gset == 1) {
+                                getContent = list[f].content;
+                            } else {
+                                setContent = list[f].content;
+                                prams = list[f].params;
+                            }
+                            list.splice(f, 1);
+                            break;
+                        }
+                    }
+                    script.content += before + "\tObject.defineProperty(" + className + ".prototype, \"" + func.name + "\", {\n";
+                    if (getContent != "") {
+                        script.content += before + "\t\tget: function () " + getContent + ",\n";
+                    }
+                    if (setContent != "") {
+                        script.content += before + "\t\tset: function (" + prams + ") " + setContent + ",\n";
+                    }
+                    script.content += before + "\t\tenumerable: true,\n"
+                    script.content += before + "\t\tconfigurable: true\n";
+                    script.content += before + "\t\t});\n\n";
+                }
+            }
+        }
+    }
+
+    /**
+     * 查找下一个函数，并分析出 函数名和参数列表
+     * @param content
+     * @param start
+     * @return {
+     *      name : 函数名
+     *      gset : 0.普通函数 1.get函数 2.set函数
+     *      params : 参数列表 (也是字符串，直接用就可以)
+     *      content : 函数体
+     *      endIndex : 函数体结束标识 } 之后的那个位置
+     * }
+     */
+    findNextFunction(content, start) {
+        var len = "function".length;
+        var flag;
+        var name;
+        var params;
+        var char;
+        var pos, pos2, i;
+        var res;
+        var gset = 0;
+        var funcName;
+        var isStatic = false;
+        //跳过空格和注释
+        i = flower.StringDo.jumpProgramSpace(content, start);
+        if (i == content.length) {
+            return null;
+        }
+        var j = i;
+        while (j < content.length) {
+            if (content.slice(j, j + "static".length) == "static" || content.slice(j, j + len) == "function") {
+                break;
+            }
+            j++;
+        }
+        if (j == content.length) {
+            this.staticScript += content.slice(i, j);
+            return null;
+        }
+        var staticScript = content.slice(i, j);
+        i = j;
+        if (content.slice(i, i + "static".length) == "static") {
+            isStatic = true;
+            i += "static".length;
+            //跳过空格和注释
+            i = flower.StringDo.jumpProgramSpace(content, i);
+        }
+        if (content.slice(i, i + len) == "function") {
+            if (i != 0) {
+                //判断 function 之前是不是分隔符
+                char = content.charAt(i - 1);
+                if (char != "\t" && char != " " && char != "\r" && char != "\n") {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+            }
+            i = pos = i + len;
+            //跳过 function 之后的分隔符
+            pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+            if (pos2 == pos) {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            pos = pos2;
+            //获取 function 之后的函数名
+            name = flower.StringDo.findId(content, pos);
+            if (name == "") {
+                i = pos;
+                sys.$error(3007, "", this.scriptContent);
+            }
+            if (name == "get" || name == "set") {
+                pos += name.length;
+                gset = name == "get" ? 1 : 2;
+                //跳过 function 之后的分隔符
+                pos2 = flower.StringDo.jumpProgramSpace(content, pos);
+                if (pos2 == pos) {
+                    sys.$error(3007, "", this.scriptContent);
+                }
+                pos = pos2;
+                //获取 function 之后的函数名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    i = pos;
+                    sys.$error(3007, "", this.scriptContent);
+                }
+            }
+            funcName = name;
+            //跳过函数名之后的分隔符
+            i = pos = flower.StringDo.jumpProgramSpace(content, pos + name.length);
+            //判断函数名之后是不是(
+            char = content.charAt(pos);
+            if (char != "(") {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            //跳过 (
+            pos++;
+            //查找 params
+            params = "";
+            flag = true;
+            while (true) {
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                //查找 param 名
+                name = flower.StringDo.findId(content, pos);
+                if (name == "") {
+                    if (content.charAt(pos) == ")") {
+                        i = pos + 1;
+                        break;
+                    } else {
+                        flag = false;
+                        break;
+                    }
+                } else {
+                    params += name;
+                    pos += name.length;
+                }
+                //跳过空格
+                pos = flower.StringDo.jumpProgramSpace(content, pos);
+                char = content.charAt(pos);
+                if (char == ",") {
+                    params += ",";
+                    pos++;
+                }
+            }
+            if (!flag) {
+                sys.$error(3007, "", this.scriptContent);
+            }
+            res = {
+                name: funcName,
+                gset: gset,
+                params: params,
+            }
+        }
+        if (!res) {
+            sys.$error(3007, "", this.scriptContent);
+        }
+
+        //分析函数体
+        //跳过空格
+        var content = flower.StringDo.findFunctionContent(content, i);
+        if (content == "") {
+            sys.$error(3007, "", this.scriptContent);
+        }
+        res.staticScript = staticScript || "";
+        res.content = content;
+        res.endIndex = i + content.length + 1;
+        res.isStatic = isStatic;
+        return res;
     }
 
     clear() {

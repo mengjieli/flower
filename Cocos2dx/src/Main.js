@@ -28,13 +28,14 @@ var Main = function () {
     function Main() {
         _classCallCheck(this, Main);
 
-        flower.start(this.ready.bind(this));
+        flower.start(this.ready.bind(this), {DEBUG: true});
     }
 
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
             flower.URLLoader.urlHead = "http://localhost:12000/";
+
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }
@@ -49,7 +50,7 @@ var Main = function () {
             var label = new flower.TextField("添加文字");
             label.fontColor = 0xff0000;
             stage.addChild(label);
-            label.addListener(flower.TouchEvent.TOUCH_BEGIN,function(){
+            label.addListener(flower.TouchEvent.TOUCH_BEGIN, function () {
                 var loader = new flower.URLLoader("res/txt.txt");
                 loader.addListener(flower.Event.COMPLETE, function (e) {
                     var txt = new flower.TextField();

@@ -15,6 +15,7 @@ var programmers = {};
 var config = {};
 var params = {};
 var hasStart = false;
+var startBacks = [];
 
 /**
  * 启动引擎
@@ -29,6 +30,10 @@ function start(completeFunc, params) {
     if (params.TIP) {
         TIP = params.TIP;
         exports.sys.TIP = params.TIP;
+    }
+    if (params.DEBUG) {
+        DEBUG = params.DEBUG;
+        exports.sys.DEBUG = params.DEBUG;
     }
     hasStart = false;
     Platform._runBack = CoreTime.$run;
@@ -75,6 +80,9 @@ function start2(completeFunc, nativeStage, touchShow, stage, params) {
                         loader.addListener(Event.COMPLETE, function (e) {
                             programmers[loader.url] = e.data;
                             if (completeFunc)completeFunc();
+                            while (startBacks.length) {
+                                startBacks.shift()();
+                            }
                         });
                         loader.load();
                     });
@@ -94,6 +102,10 @@ function start2(completeFunc, nativeStage, touchShow, stage, params) {
     loader.load();
 }
 
+function addStartBack(func) {
+    startBacks.push(func);
+}
+
 function $getLanguage() {
     return language;
 }
@@ -103,7 +115,7 @@ function $error(errorCode, ...args) {
     if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
-        msg = getLanguage(errorCode, args);
+        msg = getLanguage.apply(null, [errorCode].concat(args));
     }
     console.log(msg);
     throw msg;
@@ -114,7 +126,7 @@ function $warn(errorCode, ...args) {
     if (typeof errorCode == "string") {
         msg = errorCode;
     } else {
-        msg = getLanguage(errorCode, args);
+        msg = getLanguage.apply(null, [errorCode].concat(args));
     }
     console.log("[警告] " + msg);
 }
@@ -178,6 +190,7 @@ exports.sys = {
     getLanguage: getLanguage,
 }
 exports.params = params;
-exports.system = {}
+exports.system = {};
 exports.dispose = dispose;
+exports.addStartBack = addStartBack;
 $root.trace = trace;

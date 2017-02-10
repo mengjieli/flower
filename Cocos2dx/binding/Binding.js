@@ -6,6 +6,7 @@ class Binding {
     property;
     content;
     checks;
+    hasDispose = false;
 
     constructor(thisObj, checks, property, content) {
         this.thisObj = thisObj;
@@ -56,12 +57,7 @@ class Binding {
                         break;
                     }
                     if (content.charAt(j) == "}") {
-                        var needValue = false;
                         var bindContent = content.slice(i + 1, j);
-                        if (bindContent && bindContent.charAt(0) == "$") {
-                            needValue = true;
-                            bindContent = bindContent.slice(1, bindContent.length);
-                        }
                         if (i == 0 && j == content.length - 1) {
                             this.singleValue = true;
                         }
@@ -74,7 +70,7 @@ class Binding {
                             "Tween": flower.Tween,
                             "Ease": flower.Ease,
                             "Math": flower.Math
-                        }, this.list, needValue);
+                        }, this.list,this);
                         if (stmt == null) {
                             parseError = true;
                             break;
@@ -110,6 +106,14 @@ class Binding {
         this.update();
     }
 
+    $addValueListener(value) {
+        value.addListener(flower.Event.CHANGE, this.update, this);
+    }
+
+    $removeValueListener(value) {
+        value.removeListener(flower.Event.CHANGE, this.update, this);
+    }
+
     update(value = null, old = null) {
         var value;
         if (this.singleValue) {
@@ -140,6 +144,7 @@ class Binding {
     }
 
     dispose() {
+        this.hasDispose = true;
         for (var i = 0; i < this.list.length; i++) {
             this.list[i].removeListener(flower.Event.CHANGE, this.update, this);
         }

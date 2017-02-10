@@ -20,21 +20,26 @@ class Expr {
     checkPropertyBinding(commonInfo) {
         if (this.type == "Atr") {
             (this.expr1).checkPropertyBinding(commonInfo);
-        }
-        if (this.expr1 && this.expr1 instanceof Expr) {
+        } else if (this.expr1 && (this.expr1 instanceof Expr || this.expr1 instanceof ExprAtr)) {
             (this.expr1).checkPropertyBinding(commonInfo);
         }
-        if (this.expr2 && this.expr2 instanceof Expr) {
+        if (this.type == "spfor") {
+            commonInfo.specialFor = this.expr1.getValue();
+        }
+        if (this.expr2 && (this.expr2 instanceof Expr || this.expr2 instanceof ExprAtr)) {
             (this.expr2).checkPropertyBinding(commonInfo);
         }
-        if (this.expr3 && this.expr3 instanceof Expr) {
+        if (this.expr3 && (this.expr3 instanceof Expr || this.expr3 instanceof ExprAtr)) {
             (this.expr3).checkPropertyBinding(commonInfo);
+        }
+        if (this.type == "spfor") {
+            commonInfo.specialFor = null;
         }
     }
 
-    getValue() {
+    getValue(params) {
         if (this.type == "Atr") {
-            return this.expr1.getValue();
+            return this.expr1.getValue(params);
         }
         if (this.type == "int") {
             return this.expr1;
@@ -52,84 +57,148 @@ class Expr {
             return this.expr1;
         }
         if (this.type == "+a") {
-            return this.expr1.getValue();
+            return this.expr1.getValue(params);
         }
         if (this.type == "-a") {
-            return -this.expr1.getValue();
+            return -this.expr1.getValue(params);
         }
         if (this.type == "!") {
-            return !this.expr1.getValue();
+            return !this.expr1.getValue(params);
         }
         if (this.type == "*") {
-            return this.expr1.getValue() * this.expr2.getValue();
+            return this.expr1.getValue(params) * this.expr2.getValue(params);
         }
         if (this.type == "/") {
-            return this.expr1.getValue() / this.expr2.getValue();
+            return this.expr1.getValue(params) / this.expr2.getValue(params);
         }
         if (this.type == "%") {
-            return this.expr1.getValue() % this.expr2.getValue();
+            return this.expr1.getValue(params) % this.expr2.getValue(params);
         }
         if (this.type == "+") {
-            return this.expr1.getValue() + this.expr2.getValue();
+            return this.expr1.getValue(params) + this.expr2.getValue(params);
         }
         if (this.type == "-") {
-            return this.expr1.getValue() - this.expr2.getValue();
+            return this.expr1.getValue(params) - this.expr2.getValue(params);
         }
         if (this.type == "<<") {
-            return this.expr1.getValue() << this.expr2.getValue();
+            return this.expr1.getValue(params) << this.expr2.getValue(params);
         }
         if (this.type == ">>") {
-            return this.expr1.getValue() >> this.expr2.getValue();
+            return this.expr1.getValue(params) >> this.expr2.getValue(params);
         }
         if (this.type == ">>>") {
-            return this.expr1.getValue() >>> this.expr2.getValue();
+            return this.expr1.getValue(params) >>> this.expr2.getValue(params);
         }
         if (this.type == ">") {
-            return this.expr1.getValue() > this.expr2.getValue();
+            return this.expr1.getValue(params) > this.expr2.getValue(params);
         }
         if (this.type == "<") {
-            return this.expr1.getValue() < this.expr2.getValue();
+            return this.expr1.getValue(params) < this.expr2.getValue(params);
         }
         if (this.type == ">=") {
-            return this.expr1.getValue() >= this.expr2.getValue();
+            return this.expr1.getValue(params) >= this.expr2.getValue(params);
         }
         if (this.type == "<=") {
-            return this.expr1.getValue() <= this.expr2.getValue();
+            return this.expr1.getValue(params) <= this.expr2.getValue(params);
         }
         if (this.type == "==") {
-            return this.expr1.getValue() == this.expr2.getValue();
+            return this.expr1.getValue(params) == this.expr2.getValue(params);
         }
         if (this.type == "===") {
-            return this.expr1.getValue() === this.expr2.getValue();
+            return this.expr1.getValue(params) === this.expr2.getValue(params);
         }
         if (this.type == "!==") {
-            return this.expr1.getValue() !== this.expr2.getValue();
+            return this.expr1.getValue(params) !== this.expr2.getValue(params);
         }
         if (this.type == "!=") {
-            return this.expr1.getValue() != this.expr2.getValue();
+            return this.expr1.getValue(params) != this.expr2.getValue(params);
         }
         if (this.type == "&") {
-            return this.expr1.getValue() & this.expr2.getValue();
+            return this.expr1.getValue(params) & this.expr2.getValue(params);
         }
         if (this.type == "~") {
-            return ~this.expr1.getValue();
+            return ~this.expr1.getValue(params);
         }
         if (this.type == "^") {
-            return this.expr1.getValue() ^ this.expr2.getValue();
+            return this.expr1.getValue(params) ^ this.expr2.getValue(params);
         }
         if (this.type == "|") {
-            return this.expr1.getValue() | this.expr2.getValue();
+            return this.expr1.getValue(params) | this.expr2.getValue(params);
         }
         if (this.type == "&&") {
-            return this.expr1.getValue() && this.expr2.getValue();
+            return this.expr1.getValue(params) && this.expr2.getValue(params);
         }
         if (this.type == "||") {
-            return this.expr1.getValue() || this.expr2.getValue();
+            return this.expr1.getValue(params) || this.expr2.getValue(params);
+        }
+        if (this.type == "=") {
+            this.expr1.setValue(this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "*=") {
+            this.expr1.setValue(this.expr1.getValue(params) * this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "/=") {
+            this.expr1.setValue(this.expr1.getValue(params) / this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "%=") {
+            this.expr1.setValue(this.expr1.getValue(params) % this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "&=") {
+            this.expr1.setValue(this.expr1.getValue(params) & this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "+=") {
+            this.expr1.setValue(this.expr1.getValue(params) + this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "-=") {
+            this.expr1.setValue(this.expr1.getValue(params) - this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "||=") {
+            this.expr1.setValue(this.expr1.getValue(params) || this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "<<=") {
+            this.expr1.setValue(this.expr1.getValue(params) << this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == ">>=") {
+            this.expr1.setValue(this.expr1.getValue(params) >> this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "^=") {
+            this.expr1.setValue(this.expr1.getValue(params) ^ this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
+        }
+        if (this.type == "|=") {
+            this.expr1.setValue(this.expr1.getValue(params) | this.expr2.getValue(params), params);
+            return this.expr1.getValue(params);
         }
         if (this.type == "?:") {
-            return this.expr1.getValue() ? this.expr2.getValue() : this.expr3.getValue();
+            return this.expr1.getValue(params) ? this.expr2.getValue(params) : this.expr3.getValue(params);
+        }
+        if (this.type == "spfor") {
+            var info = params || {};
+            info["$s"] = 0;
+            info["$len"] = this.expr1.getAttribute("length");
+            info["$i"] = null;
+            for (var i = 0; i < info["$len"]; i++) {
+                info["$i"] = this.expr1.getAttribute(i);
+                this.expr2.getValue(info);
+            }
+            return info.$s;
         }
         return null;
     }
 
+    setValue(val, params) {
+        if (this.type == "Atr") {
+            this.expr1.setValue(val, params);
+        }
+    }
 }

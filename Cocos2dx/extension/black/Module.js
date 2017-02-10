@@ -113,10 +113,27 @@ class Module extends flower.EventDispatcher {
 
     __loadNext(e) {
         var item;
-        if (this.__index != 0) {
+        if (e && this.__index != 0) {
             item = this.__list[this.__index - 1];
             if (item.type == "data") {
-                flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                if (e.data.script) {
+                    var data = e.data;
+                    var url = e.data.script;
+                    if (url.slice(0, 2) == "./") {
+                        url = flower.Path.getPathDirection(item.url) + url.slice(2, url.length);
+                    }
+                    var loader = new flower.URLLoader(url);
+                    loader.addListener(flower.Event.COMPLETE, function (ee) {
+                        data.script = ee.data;
+                        flower.DataManager.getInstance().addDefine(data, this.__moduleKey);
+                        this.__loadNext();
+                    }, this);
+                    loader.addListener(flower.Event.ERROR, this.__loadError, this);
+                    loader.load();
+                    return;
+                } else {
+                    flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                }
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
                 if (this.__index == this.__list.length || this.__list[this.__index].type != "script") {

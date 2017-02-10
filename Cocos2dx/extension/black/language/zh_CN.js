@@ -8,6 +8,7 @@ locale_strings[3004] = "解析 UI 出错:无法解析的命名空间 {0} :\n{1}"
 locale_strings[3005] = "解析 UI 出错:无法解析的类名 {0} :\n{1}";
 locale_strings[3006] = "解析 UI 出错,未设置命名空间 xmlns:f=\"flower\" :\n{0}";
 locale_strings[3007] = "解析 UI 脚本文件出错, url={0} content:\n{1}";
+locale_strings[3008] = "语法分析错误，源代码:\n{0}\n错误信息 :{1}";
 locale_strings[3010] = "没有定义数据结构类名 :\n{0}";
 locale_strings[3011] = "数据结构类定义解析出错 : {0}\n{1}";
 locale_strings[3012] = "没有定义的数据结构 : {0}";
