@@ -4,7 +4,8 @@
 
 1. 关联数组
 
-`{
+```javascript
+{
   "name": "TestData",
   "members": {
     "people": {
@@ -61,11 +62,13 @@
       }
     }
   }
-}`
+}
+```
 
 2. 绑定 for 循环
 
-`flower.DataManager.addDefine({
+```javascript
+flower.DataManager.addDefine({
     "name": "TestData",
     "members": {
         "current": {"type": "number"},
@@ -83,4 +86,5 @@ d.list[0].x = 8;
 console.log(d.percent.value); //17
 var item = d.list.shift();
 item.x = 12;
-console.log(d.percent.value); //9`
+console.log(d.percent.value); //9
+```
