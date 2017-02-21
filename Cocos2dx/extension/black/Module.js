@@ -17,12 +17,12 @@ class Module extends flower.EventDispatcher {
         this.__beforeScript = beforeScript;
         this.__direction = flower.Path.getPathDirection(url);
         this.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
-        this.__progress = flower.DataManager.getInstance().createData("ProgressData");
+        this.__progress = flower.DataManager.getInstance().createData("Progress");
     }
 
     load() {
         var url = this.__url;
-        this.__progress.tip.value = url;
+        this.__progress.tip = url;
         var loader = new flower.URLLoader(url);
         loader.load();
         loader.addListener(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
@@ -125,14 +125,14 @@ class Module extends flower.EventDispatcher {
                     var loader = new flower.URLLoader(url);
                     loader.addListener(flower.Event.COMPLETE, function (ee) {
                         data.script = ee.data;
-                        flower.DataManager.getInstance().addDefine(data, this.__moduleKey);
+                        flower.DataManager.getInstance().addDefine(data, this.__beforeScript);
                         this.__loadNext();
                     }, this);
                     loader.addListener(flower.Event.ERROR, this.__loadError, this);
                     loader.load();
                     return;
                 } else {
-                    flower.DataManager.getInstance().addDefine(e.data, this.__moduleKey);
+                    flower.DataManager.getInstance().addDefine(e.data, this.__beforeScript);
                 }
             } else if (item.type == "script") {
                 this.script += e.data + "\n\n\n";
@@ -148,8 +148,8 @@ class Module extends flower.EventDispatcher {
         if (this.__list.length == 0) {
             this.__index = this.__list.length = 1;
         }
-        this.__progress.max.value = this.__list.length;
-        this.__progress.current.value = this.__index;
+        this.__progress.max = this.__list.length;
+        this.__progress.current = this.__index;
         if (this.__index == this.__list.length) {
             if (this.__hasExecute) {
                 $root[this.__name + "__executeModule"]();

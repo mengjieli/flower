@@ -19,11 +19,11 @@ class CallParams {
         }
     }
 
-    getValueList() {
-        var params = [];
+    getValueList(params) {
+        var callParams = [];
         for (var i = 0; i < this.list.length; i++) {
-            params.push((this.list[i]).getValue());
+            callParams.push((this.list[i]).getValue(params));
         }
-        return params;
+        return callParams;
     }
 }

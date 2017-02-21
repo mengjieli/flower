@@ -52,6 +52,7 @@ var flower = {};
     var config = {};
     var params = {};
     var hasStart = false;
+    var startBacks = [];
 
     /**
      * 启动引擎
@@ -66,6 +67,10 @@ var flower = {};
         if (params.TIP) {
             TIP = params.TIP;
             flower.sys.TIP = params.TIP;
+        }
+        if (params.DEBUG) {
+            DEBUG = params.DEBUG;
+            flower.sys.DEBUG = params.DEBUG;
         }
         hasStart = false;
         Platform._runBack = CoreTime.$run;
@@ -112,6 +117,9 @@ var flower = {};
                             loader.addListener(Event.COMPLETE, function (e) {
                                 programmers[loader.url] = e.data;
                                 if (completeFunc) completeFunc();
+                                while (startBacks.length) {
+                                    startBacks.shift()();
+                                }
                             });
                             loader.load();
                         });
@@ -131,6 +139,10 @@ var flower = {};
         loader.load();
     }
 
+    function addStartBack(func) {
+        startBacks.push(func);
+    }
+
     function $getLanguage() {
         return language;
     }
@@ -144,7 +156,7 @@ var flower = {};
                 args[_key - 1] = arguments[_key];
             }
 
-            msg = getLanguage(errorCode, args);
+            msg = getLanguage.apply(null, [errorCode].concat(args));
         }
         console.log(msg);
         throw msg;
@@ -159,7 +171,7 @@ var flower = {};
                 args[_key2 - 1] = arguments[_key2];
             }
 
-            msg = getLanguage(errorCode, args);
+            msg = getLanguage.apply(null, [errorCode].concat(args));
         }
         console.log("[警告] " + msg);
     }
@@ -228,6 +240,7 @@ var flower = {};
     flower.params = params;
     flower.system = {};
     flower.dispose = dispose;
+    flower.addStartBack = addStartBack;
     $root.trace = trace;
     //////////////////////////End File:flower/Flower.js///////////////////////////
 
@@ -913,21 +926,21 @@ var flower = {};
         }], [{
             key: "measureTextWidth",
             value: function measureTextWidth(size, text) {
-                if (Platform.native) {
-                    var $mesureTxt = PlatformTextField.$mesureTxt;
-                    var sizes = PlatformTextField.$measures;
-                    var width = 0;
-                    for (var i = 0; i < text.length; i++) {
-                        var char = text.charAt(i);
-                        if (sizes[char] == null) {
-                            $mesureTxt.setFontSize(size);
-                            $mesureTxt.setString(char);
-                            sizes[char] = $mesureTxt.getContentSize().width;
-                        }
-                        width += sizes[char];
-                    }
-                    return width;
-                }
+                //if(Platform.native) {
+                //    var $mesureTxt = PlatformTextField.$mesureTxt;
+                //    var sizes = PlatformTextField.$measures;
+                //    var width = 0;
+                //    for (var i = 0; i < text.length; i++) {
+                //        var char = text.charAt(i);
+                //        if (sizes[char] == null) {
+                //            $mesureTxt.setFontSize(size);
+                //            $mesureTxt.setString(char);
+                //            sizes[char] = $mesureTxt.getContentSize().width;
+                //        }
+                //        width += sizes[char];
+                //    }
+                //    return width;
+                //}
                 var $mesureTxt = PlatformTextField.$mesureTxt;
                 $mesureTxt.setFontSize(size);
                 $mesureTxt.setString(text);
@@ -14345,6 +14358,51 @@ var flower = {};
 
         return Math;
     }();
+
+    Math.E = math.E;
+    Math.LN2 = math.LN2;
+    Math.LN10 = math.LN10;
+    Math.LOG2E = math.LOG2E;
+    Math.LOG10E = math.LOG10E;
+    Math.PI = math.PI;
+    Math.SQRT1_2 = math.SQRT1_2;
+    Math.SQRT2 = math.SQRT2;
+    Math.abs = math.abs;
+    Math.acos = math.acos;
+    Math.acosh = math.acosh;
+    Math.asin = math.asin;
+    Math.asinh = math.asinh;
+    Math.atan = math.atan;
+    Math.atan2 = math.atan2;
+    Math.atanh = math.atanh;
+    Math.cbrt = math.cbrt;
+    Math.ceil = math.ceil;
+    Math.clz32 = math.clz32;
+    Math.cos = math.cos;
+    Math.cosh = math.cosh;
+    Math.exp = math.exp;
+    Math.expm1 = math.expm1;
+    Math.floor = math.floor;
+    Math.fround = math.fround;
+    Math.hypot = math.hypot;
+    Math.imul = math.imul;
+    Math.log = math.log;
+    Math.log1p = math.log1p;
+    Math.log2 = math.log2;
+    Math.log10 = math.log10;
+    Math.max = math.max;
+    Math.min = math.min;
+    Math.pow = math.pow;
+    Math.random = math.random;
+    Math.round = math.round;
+    Math.sign = math.sign;
+    Math.sin = math.sin;
+    Math.sinh = math.sinh;
+    Math.sqrt = math.sqrt;
+    Math.tan = math.tan;
+    Math.tanh = math.tanh;
+    Math.trunc = math.trunc;
+
 
     flower.Math = Math;
     //////////////////////////End File:flower/utils/Math.js///////////////////////////

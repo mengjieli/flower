@@ -28,7 +28,7 @@ var Main = function () {
     function Main() {
         _classCallCheck(this, Main);
 
-        flower.start(this.ready.bind(this), {DEBUG: true});
+        flower.start(this.ready.bind(this), {DEBUG: true, TIP: true});
     }
 
     _createClass(Main, [{
@@ -36,6 +36,56 @@ var Main = function () {
         value: function ready() {
             flower.URLLoader.urlHead = "http://localhost:12000/";
 
+            var parser = new flower.UIParser();
+            parser.parseUIAsync("res/Test.xml");
+            return;
+            var p = flower.DataManager.createData("Progress");
+            p.max = 100;
+            p.current = 5;
+            console.log(p.value)
+            //
+            //return;
+            var cfg = {
+                "name": "Max",
+                "members": {
+                    "a": {
+                        "type": "bool",
+                        "check": false
+                    },
+                    "b": {
+                        "type": "number",
+                        "init": 1
+                    },
+                    "list": {
+                        "type": "Array",
+                        "typeValue": "Point"
+                    },
+                    "max": {
+                        "type": "number",
+                        "bind": "{for(list,$s=Math.max(($s||$i.x),$i.x))}"
+                    },
+                    "b2": {
+                        "type": "number",
+                        "bind": "{b*2}"
+                    }
+                }
+            }
+            flower.DataManager.addDefine(cfg);
+
+            var d = flower.DataManager.createData("Max");
+            d.list = [{x: 3, y: 1}, {x: 4, y: 2}, {x: 2, y: 3}];
+            console.log(d.value)
+            d.list[0].x++;
+            d.list[0].x++;
+            console.log(d.value)
+            d.$a.addListener(flower.Event.CHANGE, function (e) {
+                console.log("change");
+            });
+            d.a = true;
+            d.a = true;
+            d.a = true;
+
+            return;
             var preloading = new PreLoading();
             preloading.addListener(flower.Event.COMPLETE, this.loadThemeComplete, this);
         }

@@ -755,7 +755,7 @@ class UIParser extends Group {
                     setObject += "this." + className + "_binds.push([" + thisObj + ",\"" + atrName + "\", \"" + atrValue + "\"]);\n";
                     setObject += before + "\telse " + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
                     //setObject += before + "\t" + thisObj + ".bindProperty(\"" + atrName + "\", \"" + atrValue + "\", [this]);\n";
-                } else {
+                } else {``
                     setObject += before + "\t" + thisObj + "." + atrName + " = " + (this.isNumberOrBoolean(atrValue) ? atrValue : "\"" + atrValue + "\"") + ";\n";
                 }
             }
@@ -848,6 +848,9 @@ class UIParser extends Group {
             }
         }
         else {
+            if(!str.length) {
+                return false;
+            }
             for (var i = 0; i < str.length; i++) {
                 var code = str.charCodeAt(i);
                 if (code >= 48 && code <= 57) {

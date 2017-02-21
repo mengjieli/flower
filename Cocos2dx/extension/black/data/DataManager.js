@@ -58,7 +58,7 @@ class DataManager {
             }
         });
         this.addDefine({
-            "name": "ProgressData",
+            "name": "Progress",
             "members": {
                 "current": {"type": "number"},
                 "max": {"type": "number"},
@@ -86,7 +86,7 @@ class DataManager {
         return this._root[name] = this[name];
     }
 
-    addDefine(config) {
+    addDefine(config, beforeScript = "") {
         var className = config.name;
         if (!className) {
             sys.$error(3010, flower.ObjectDo.toString(config));
@@ -129,7 +129,7 @@ class DataManager {
         this.scriptContent = config.script;
         var script = {content: "", ctor: ""};
         this.decodeScript("\n\n", defineClass, script);
-        var content = "var " + defineClass + " = (function (_super) {\n" +
+        var content = beforeScript + "\nvar " + defineClass + " = (function (_super) {\n" +
             "\t__extends(" + defineClass + ", _super);\n" +
             "\tfunction " + defineClass + "(init) {\n" +
             "\t\t_super.call(this,null);\n";
@@ -138,23 +138,30 @@ class DataManager {
         var members = config.members;
         var bindContent = "";
         var subContent = "";
+        var simpleType;
         if (members) {
             var member;
             for (var key in members) {
                 member = members[key];
+                simpleType = false;
                 if (member.init && typeof member.init == "object" && member.init.__className) {
                     content += "\t\tthis.$setMember(\"" + key + "\" , flower.DataManager.getInstance().createData(\"" + member.init.__className + "\"," + (member.init != null ? JSON.stringify(member.init) : "null") + "," + member.checkDistort + "));\n";
                     content += "\t\tthis.$setMemberSaveClass(\"" + key + "\" ," + (member.saveClass ? true : false) + ");\n";
                 } else {
                     if (member.type === "number" || member.type === "Number") {
+                        simpleType = true;
                         content += "\t\tthis.$setMember(\"" + key + "\" , new NumberValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "int" || member.type === "Int") {
+                        simpleType = true;
                         content += "\t\tthis.$setMember(\"" + key + "\" , new IntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
-                    } else if (member.type === "uint" || member.type === "Uint") {
+                    } else if (member.type === "uint" || member.type === "UInt") {
+                        simpleType = true;
                         content += "\t\tthis.$setMember(\"" + key + "\" , new UIntValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "," + member.checkDistort + "));\n";
                     } else if (member.type === "string" || member.type === "String") {
+                        simpleType = true;
                         content += "\t\tthis.$setMember(\"" + key + "\" , new StringValue(" + (member.init != null ? "\"" + member.init + "\"" : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "boolean" || member.type === "Boolean" || member.type === "bool") {
+                        simpleType = true;
                         content += "\t\tthis.$setMember(\"" + key + "\" , new BooleanValue(" + (member.init != null ? member.init : "null") + "," + (member.enumList ? JSON.stringify(member.enumList) : "null") + "));\n";
                     } else if (member.type === "array" || member.type === "Array") {
                         content += "\t\tthis.$setMember(\"" + key + "\" , new ArrayValue(" + (member.init != null ? JSON.stringify(member.init) : "null") + ",\"" + member.typeValue + "\"));\n";
@@ -174,7 +181,7 @@ class DataManager {
                     content += "\t\tthis.$setMemberSaveFlag(\"" + key + "\" ," + member.save + ");\n";
                 }
                 if (member.bind) {
-                    bindContent += "\t\tnew flower.Binding(this." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
+                    bindContent += "\t\tnew flower.Binding(this.__value." + key + ",[this],\"value\",\"" + member.bind + "\");\n"
                 }
                 if (member.sub) {
                     subContent += "\t\tthis." + member.sub.source + ".linkSubArrayValue(this." + key + ",";
@@ -186,9 +193,27 @@ class DataManager {
                         }
                     }
                 }
+                if (member.check != null) {
+                    content += "\t\tthis.__value." + key + ".check = " + member.check + ";\n";
+                }
+                //if (simpleType) {
+                    defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"$" + key + "\", {\n";
+                    defineMember += "\t\tget: function () {\n";
+                    defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
+                    defineMember += "\t\t},\n";
+                    defineMember += "\t\tset: function (val) {\n";
+                    defineMember += "\t\t},\n";
+                    defineMember += "\t\tenumerable: true,\n";
+                    defineMember += "\t\tconfigurable: true\n";
+                    defineMember += "\t});\n\n";
+                //}
                 defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
                 defineMember += "\t\tget: function () {\n";
-                defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
+                if (simpleType) {
+                    defineMember += "\t\t\treturn this.__value." + key + ".value;\n";
+                } else {
+                    defineMember += "\t\t\treturn this.__value." + key + ";\n";
+                }
                 defineMember += "\t\t},\n";
                 defineMember += "\t\tset: function (val) {\n";
                 defineMember += "\t\t\tthis.setValue(\"" + key + "\", val);\n";
@@ -512,8 +537,8 @@ class DataManager {
         return DataManager.getInstance().getClass(className);
     }
 
-    static addDefine(config) {
-        return DataManager.getInstance().addDefine(config);
+    static addDefine(config, beforeScript = "") {
+        return DataManager.getInstance().addDefine(config, beforeScript);
     }
 
     static createData(className, init = null) {

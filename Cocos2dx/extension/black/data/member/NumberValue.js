@@ -22,7 +22,7 @@ class NumberValue extends Value {
             val = Math.floor(val) + smallNumber;
             val = -val;
         }
-        if (val == this.__value) {
+        if (this.__check && val == this.__value) {
             return;
         }
         this.__old = this.__value;

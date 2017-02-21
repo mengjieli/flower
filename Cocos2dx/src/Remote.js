@@ -294,6 +294,11 @@ var remote = {};
                 new ReadImageDataRemote(back, thisObj, this.__path);
             }
         }, {
+            key: "readImageDetail",
+            value: function readImageDetail(back, thisObj) {
+                new ReadImageDetailRemote(back, thisObj, this.__path);
+            }
+        }, {
             key: "isExist",
             value: function isExist(back, thisObj) {
                 new IsDirectionExistRemote(back, thisObj, this.__path);
@@ -714,12 +719,59 @@ var remote = {};
                 if (this.__back) {
                     this.__back.call(this.__thisObj, colors);
                 }
+                this.dispose();
             }
         }]);
 
         return ReadImageDataRemote;
     }(Remote);
     //////////////////////////End File:remote/remotes/ReadImageDataRemote.js///////////////////////////
+
+    //////////////////////////File:remote/remotes/ReadImageDetailRemote.js///////////////////////////
+
+
+    var ReadImageDetailRemote = function (_Remote6) {
+        _inherits(ReadImageDetailRemote, _Remote6);
+
+        function ReadImageDetailRemote(back, thisObj, path) {
+            _classCallCheck(this, ReadImageDetailRemote);
+
+            var _this9 = _possibleConstructorReturn(this, Object.getPrototypeOf(ReadImageDetailRemote).call(this));
+
+            _this9.__back = back;
+            _this9.__thisObj = thisObj;
+            _this9.__path = path;
+
+            var msg = new flower.VByteArray();
+            msg.writeUInt(20);
+            msg.writeUInt(_this9.remoteClientId);
+            msg.writeUInt(112);
+            msg.writeUInt(_this9.id);
+            msg.writeUTF(path);
+            _this9.send(msg);
+            return _this9;
+        }
+
+        _createClass(ReadImageDetailRemote, [{
+            key: "receive",
+            value: function receive(cmd, msg) {
+                var list = [];
+                var width = msg.readUInt();
+                var height = msg.readUInt();
+                if (this.__back) {
+                    this.__back.call(this.__thisObj, {
+                        width: width,
+                        height: height,
+                        path: this.__path
+                    });
+                }
+                this.dispose();
+            }
+        }]);
+
+        return ReadImageDetailRemote;
+    }(Remote);
+    //////////////////////////End File:remote/remotes/ReadImageDetailRemote.js///////////////////////////
 })();
 for (var key in remote) {
     flower[key] = remote[key];

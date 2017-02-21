@@ -20,6 +20,10 @@ class RemoteFile {
         new ReadImageDataRemote(back, thisObj, this.__path);
     }
 
+    readImageDetail(back, thisObj) {
+        new ReadImageDetailRemote(back, thisObj, this.__path);
+    }
+
     isExist(back, thisObj) {
         new IsDirectionExistRemote(back, thisObj, this.__path);
     }

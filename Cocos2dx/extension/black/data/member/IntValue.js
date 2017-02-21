@@ -9,7 +9,7 @@ class IntValue extends Value {
 
     $setValue(val) {
         val = +val & ~0 || 0;
-        if (val == this.__value) {
+        if (this.__check && val == this.__value) {
             return;
         }
         this.__old = this.__value;

@@ -1,0 +1,15 @@
+function constructor() {
+    this._call = 13872382628;
+}
+
+function get call() {
+    return this._call;
+}
+
+function set call(val) {
+    this._call = val;
+}
+
+function print() {
+    console.log("My call is :" + this._call);
+}

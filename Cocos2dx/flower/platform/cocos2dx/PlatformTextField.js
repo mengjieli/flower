@@ -99,21 +99,21 @@ class PlatformTextField extends PlatformDisplayObject {
     }
 
     static measureTextWidth(size, text) {
-        if(Platform.native) {
-            var $mesureTxt = PlatformTextField.$mesureTxt;
-            var sizes = PlatformTextField.$measures;
-            var width = 0;
-            for (var i = 0; i < text.length; i++) {
-                var char = text.charAt(i);
-                if (sizes[char] == null) {
-                    $mesureTxt.setFontSize(size);
-                    $mesureTxt.setString(char);
-                    sizes[char] = $mesureTxt.getContentSize().width;
-                }
-                width += sizes[char];
-            }
-            return width;
-        }
+        //if(Platform.native) {
+        //    var $mesureTxt = PlatformTextField.$mesureTxt;
+        //    var sizes = PlatformTextField.$measures;
+        //    var width = 0;
+        //    for (var i = 0; i < text.length; i++) {
+        //        var char = text.charAt(i);
+        //        if (sizes[char] == null) {
+        //            $mesureTxt.setFontSize(size);
+        //            $mesureTxt.setString(char);
+        //            sizes[char] = $mesureTxt.getContentSize().width;
+        //        }
+        //        width += sizes[char];
+        //    }
+        //    return width;
+        //}
         var $mesureTxt = PlatformTextField.$mesureTxt;
         $mesureTxt.setFontSize(size);
         $mesureTxt.setString(text);

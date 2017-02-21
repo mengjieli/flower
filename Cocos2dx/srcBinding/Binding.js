@@ -23,12 +23,12 @@ class CallParams {
         }
     }
 
-    getValueList() {
-        var params = [];
+    getValueList(params) {
+        var callParams = [];
         for (var i = 0; i < this.list.length; i++) {
-            params.push((this.list[i]).getValue());
+            callParams.push((this.list[i]).getValue(params));
         }
-        return params;
+        return callParams;
     }
 }
 //////////////////////////End File:binding/compiler/structs/CallParams.js///////////////////////////
@@ -287,6 +287,7 @@ class ExprAtr {
 
     checkPropertyBinding(commonInfo) {
         var atr;
+        var atr2;
         var getValue = false;
         if (this.list[0].type == "()") {
             (this.list[0].val).checkPropertyBinding(commonInfo);
@@ -305,6 +306,7 @@ class ExprAtr {
             }
             if (commonInfo.objects["this"] && commonInfo.objects["this"][name] != null) {
                 atr = commonInfo.objects["this"][name];
+                atr2 = commonInfo.objects["this"]["$" + name];
                 this.before = commonInfo.objects["this"];
             } else if (commonInfo.objects[name] != null) {
                 this.before = commonInfo.objects[name];
@@ -320,7 +322,8 @@ class ExprAtr {
                 for (var c = 0; c < commonInfo.checks.length; c++) {
                     try {
                         atr = commonInfo.checks[c][name];
-                        if (atr) {
+                        atr2 = commonInfo.checks[c]["$" + name];
+                        if (atr != null) {
                             this.before = commonInfo.checks[c];
                         }
                     }
@@ -328,8 +331,7 @@ class ExprAtr {
                         atr = null;
                         this.before = null;
                     }
-
-                    if (atr) {
+                    if (atr != null) {
                         break;
                     }
                 }
@@ -337,10 +339,13 @@ class ExprAtr {
         }
         for (var i = 1; i < this.list.length; i++) {
             if (this.list[i].type == ".") {
-                if (atr) {
+                if (atr != null) {
                     var atrName = this.list[i].val;
                     getValue = this.list[i].getValue;
                     try {
+                        if (i == this.list.length - 1) {
+                            atr2 = atr["$" + atrName];
+                        }
                         atr = atr[atrName];
                     }
                     catch (e) {
@@ -351,12 +356,18 @@ class ExprAtr {
             }
             else if (this.list[i].type == "call") {
                 atr = null;
+                atr2 = null;
                 this.list[i].val.checkPropertyBinding(commonInfo);
             }
         }
-        if (atr && atr instanceof flower.Value && !getValue) {
-            this.value = atr;
-            commonInfo.result.push(atr);
+        if (((atr != null && atr instanceof flower.Value) || (atr2 && atr2 instanceof flower.Value)) && !getValue) {
+            if (atr2 && atr2 instanceof flower.Value) {
+                this.value = atr2;
+                commonInfo.result.push(atr2);
+            } else {
+                this.value = atr;
+                commonInfo.result.push(atr);
+            }
         }
     }
 
@@ -370,6 +381,7 @@ class ExprAtr {
         }
         var getValue = false;
         var atr;
+        var atr2;
         var lastAtr = null;
         if (this.list[0].type == "()") {
             atr = (this.list[0].val).getValue(params);
@@ -386,6 +398,7 @@ class ExprAtr {
             lastAtr = this.before;
             if (!this.equalBefore) {
                 try {
+                    atr2 = atr["$" + this.list[0].val];
                     atr = atr[this.list[0].val];
                 }
                 catch (e) {
@@ -396,15 +409,18 @@ class ExprAtr {
         for (var i = 1; i < this.list.length; i++) {
             try {
                 if (this.list[i].type == ".") {
+                    if (i == this.list.length - 1) {
+                        atr2 = atr["$" + this.list[i].val];
+                    }
                     atr = atr[this.list[i].val];
                     getValue = this.list[i].getValue;
                 }
                 else if (this.list[i].type == "call") {
                     if (i == 2 && this.beforeClass) {
-                        atr = atr.apply(null, (this.list[i].val).getValueList());
+                        atr = atr.apply(null, (this.list[i].val).getValueList(params));
                     }
                     else {
-                        atr = atr.apply(lastAtr, (this.list[i].val).getValueList());
+                        atr = atr.apply(lastAtr, (this.list[i].val).getValueList(params));
                     }
                 }
                 if (i < this.list.length - 1 && this.list[i + 1].type == "call") {
@@ -416,9 +432,9 @@ class ExprAtr {
                 return null;
             }
         }
-        if (!getValue && atr instanceof flower.Value) {
-            atr = atr.value;
-        }
+        //if (!getValue && (atr && atr instanceof flower.Value)) {
+        //    atr = atr.value;
+        //}
         return atr;
     }
 
@@ -480,9 +496,13 @@ class ExprAtr {
                 return;
             }
             var atr = item;
+            var atr2 = item;
             for (var i = 1; i < this.list.length; i++) {
                 try {
                     if (this.list[i].type == ".") {
+                        if (i == this.list.length - 1) {
+                            atr2 = atr["$" + this.list[i].val];
+                        }
                         atr = atr[this.list[i].val];
                     }
                     else if (this.list[i].type == "call") {
@@ -501,7 +521,9 @@ class ExprAtr {
                     return null;
                 }
             }
-            if (atr instanceof flower.Value) {
+            if (atr2 && atr2 instanceof flower.Value) {
+                binding["$" + type + "ValueListener"](atr2);
+            } else if (atr && atr instanceof flower.Value) {
                 binding["$" + type + "ValueListener"](atr);
             }
         }
@@ -512,10 +534,10 @@ class ExprAtr {
         }
         list.addListener(flower.Event.ADD, function (e) {
             checkItemListener.call(this, e.data, "add");
-        },this);
+        }, this);
         list.addListener(flower.Event.REMOVE, function (e) {
             checkItemListener.call(this, e.data, "remove");
-        },this);
+        }, this);
     }
 
     print() {

@@ -4,6 +4,7 @@ class Value extends flower.EventDispatcher {
     __value = null;
     __checkDistort = null;
     __list = null;
+    __check = true;
 
     constructor(checkDistort = null) {
         super();
@@ -49,6 +50,14 @@ class Value extends flower.EventDispatcher {
 
     get old() {
         return this.__old;
+    }
+
+    get check() {
+        return this.__check;
+    }
+
+    set check(val) {
+        this.__check = !!val;
     }
 
     //Value 是否自动检测非法修改

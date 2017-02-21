@@ -761,7 +761,7 @@ class ArrayValue extends Value {
     }
 }
 
-for (var i = 0; i < 100000; i++) {
+for (var i = 0; i < 1000; i++) {
     Object.defineProperty(ArrayValue.prototype, "" + i, {
         get: function (index) {
             return function () {
