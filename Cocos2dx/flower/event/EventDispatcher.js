@@ -174,7 +174,7 @@ class EventDispatcher {
             inDispatcher = true;
         }
         for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].del == false) {
+            if (list[i].del == false && !this.__hasDispose) {
                 var listener = list[i].listener;
                 var thisObj = list[i].thisObject;
                 if (event.$target == null) {
