@@ -111,9 +111,13 @@ class EventDispatcher {
         }
         for (var i = 0, len = list.length; i < len; i++) {
             if (list[i].listener == listener && list[i].thisObject == thisObject && list[i].del == false) {
-                list[i].listener = null;
-                list[i].thisObject = null;
-                list[i].del = true;
+                if (this.__inDispatcher && this.__inDispatcher[type]) {
+                    list[i].listener = null;
+                    list[i].thisObject = null;
+                    list[i].del = true;
+                } else {
+                    list.splice(i, 1);
+                }
                 break;
             }
         }
@@ -164,10 +168,10 @@ class EventDispatcher {
             this.__inDispatcher = {};
         }
         var inDispatcher = false;
-        if (this.__inDispatcher[event.type]) {
-            inDispatcher = true;
-        } else {
+        if (!this.__inDispatcher[event.type]) {
             this.__inDispatcher[event.type] = true;
+        } else {
+            inDispatcher = true;
         }
         for (var i = 0, len = list.length; i < len; i++) {
             if (list[i].del == false) {
