@@ -1,6 +1,7 @@
 class EventDispatcher {
 
     __EventDispatcher;
+    __inDispatcher;
     __hasDispose = false;
 
     constructor(target) {
@@ -84,7 +85,7 @@ class EventDispatcher {
                 if (arg1.length == arg2.length) {
                     agrsame = true;
                     for (var a = 0; a < arg1.length; a++) {
-                        if(arg1[a] != arg2[a]) {
+                        if (arg1[a] != arg2[a]) {
                             agrsame = false;
                             break;
                         }
@@ -159,7 +160,15 @@ class EventDispatcher {
         if (!list) {
             return;
         }
-
+        if (!this.__inDispatcher) {
+            this.__inDispatcher = {};
+        }
+        var inDispatcher = false;
+        if (this.__inDispatcher[event.type]) {
+            inDispatcher = true;
+        } else {
+            this.__inDispatcher[event.type] = true;
+        }
         for (var i = 0, len = list.length; i < len; i++) {
             if (list[i].del == false) {
                 var listener = list[i].listener;
@@ -180,10 +189,13 @@ class EventDispatcher {
                 listener.apply(thisObj, args);
             }
         }
-        for (i = 0; i < list.length; i++) {
-            if (list[i].del == true) {
-                list.splice(i, 1);
-                i--;
+        if (!inDispatcher) {
+            delete this.__inDispatcher[event.type];
+            for (i = 0; i < list.length; i++) {
+                if (list[i].del == true) {
+                    list.splice(i, 1);
+                    i--;
+                }
             }
         }
     }
