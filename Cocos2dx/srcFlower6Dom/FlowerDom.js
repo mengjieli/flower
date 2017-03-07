@@ -2254,6 +2254,8 @@ class EventDispatcher {
         var list = events[type];
         if (!list) {
             list = values[1][type] = [];
+        } else {
+            values[1][type] = list = list.concat();
         }
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
@@ -2264,18 +2266,18 @@ class EventDispatcher {
                 if (arg1.length == arg2.length) {
                     agrsame = true;
                     for (var a = 0; a < arg1.length; a++) {
-                        if(arg1[a] != arg2[a]) {
+                        if (arg1[a] != arg2[a]) {
                             agrsame = false;
                             break;
                         }
                     }
                 }
             }
-            if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
+            if (item.listener == listener && item.thisObject == thisObject && agrsame) {
                 return false;
             }
         }
-        list.push({"listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args});
+        list.push({"listener": listener, "thisObject": thisObject, "once": once, args: args});
     }
 
     removeListener(type, listener, thisObject) {
@@ -2288,13 +2290,15 @@ class EventDispatcher {
         if (!list) {
             return;
         }
+        events[type] = list = list.concat();
         for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].listener == listener && list[i].thisObject == thisObject && list[i].del == false) {
-                list[i].listener = null;
-                list[i].thisObject = null;
-                list[i].del = true;
+            if (list[i].listener == listener && list[i].thisObject == thisObject) {
+                list.splice(i, 1);
                 break;
             }
+        }
+        if(list.length == 0) {
+            delete events[type];
         }
     }
 
@@ -2318,12 +2322,7 @@ class EventDispatcher {
         if (!list) {
             return false;
         }
-        for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].del == false) {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
 
     dispatch(event) {
@@ -2339,32 +2338,24 @@ class EventDispatcher {
         if (!list) {
             return;
         }
-
         for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].del == false) {
-                var listener = list[i].listener;
-                var thisObj = list[i].thisObject;
-                if (event.$target == null) {
-                    event.$target = this;
-                }
-                event.$currentTarget = this;
-                var args = [event];
-                if (list[i].args) {
-                    args = args.concat(list[i].args);
-                }
-                if (list[i].once) {
-                    list[i].listener = null;
-                    list[i].thisObject = null;
-                    list[i].del = true;
-                }
-                listener.apply(thisObj, args);
+            var listener = list[i].listener;
+            var thisObj = list[i].thisObject;
+            if (event.$target == null) {
+                event.$target = this;
             }
-        }
-        for (i = 0; i < list.length; i++) {
-            if (list[i].del == true) {
-                list.splice(i, 1);
+            event.$currentTarget = this;
+            var args = [event];
+            if (list[i].args) {
+                args = args.concat(list[i].args);
+            }
+            if (list[i].once) {
+                list[i].listener = null;
+                list[i].thisObject = null;
+                list[i].splice(i, 1);
                 i--;
             }
+            listener.apply(thisObj, args);
         }
     }
 

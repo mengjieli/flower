@@ -34,6 +34,26 @@ var Main = function () {
     _createClass(Main, [{
         key: "ready",
         value: function ready() {
+            var dp = new flower.EventDispatcher();
+            var first = true;
+            var func1 = function (e) {
+                console.log("1");
+                console.log(dp.hasListener("cd"));
+                dp.removeListener("cd", func2);
+                console.log(dp.hasListener("cd"));
+                if(first) {
+                    first = false;
+                    dp.dispatchWith("ab");
+                }
+            }
+            var func2 = function (e) {
+                console.log("2");
+            }
+            dp.addListener("ab", func1);
+            dp.addListener("cd", func2);
+            dp.dispatchWith("ab");
+
+            return;
             flower.URLLoader.urlHead = "http://localhost:12000/";
 
             var parser = new flower.UIParser();
