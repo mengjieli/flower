@@ -2070,15 +2070,15 @@ class DataManager {
                     content += "\t\tthis.__value." + key + ".check = " + member.check + ";\n";
                 }
                 //if (simpleType) {
-                    defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"$" + key + "\", {\n";
-                    defineMember += "\t\tget: function () {\n";
-                    defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
-                    defineMember += "\t\t},\n";
-                    defineMember += "\t\tset: function (val) {\n";
-                    defineMember += "\t\t},\n";
-                    defineMember += "\t\tenumerable: true,\n";
-                    defineMember += "\t\tconfigurable: true\n";
-                    defineMember += "\t});\n\n";
+                defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"$" + key + "\", {\n";
+                defineMember += "\t\tget: function () {\n";
+                defineMember += "\t\t\treturn this.__value[\"" + key + "\"];\n";
+                defineMember += "\t\t},\n";
+                defineMember += "\t\tset: function (val) {\n";
+                defineMember += "\t\t},\n";
+                defineMember += "\t\tenumerable: true,\n";
+                defineMember += "\t\tconfigurable: true\n";
+                defineMember += "\t});\n\n";
                 //}
                 defineMember += "\tObject.defineProperty(" + defineClass + ".prototype,\"" + key + "\", {\n";
                 defineMember += "\t\tget: function () {\n";
@@ -2414,7 +2414,17 @@ class DataManager {
         return DataManager.getInstance().addDefine(config, beforeScript);
     }
 
+    /**
+     * @delete 使用 create 代替 createData
+     * @param className
+     * @param init
+     * @returns {*}
+     */
     static createData(className, init = null) {
+        return DataManager.getInstance().createData(className, init);
+    }
+
+    static create(className, init = null) {
         return DataManager.getInstance().createData(className, init);
     }
 
@@ -7395,7 +7405,7 @@ class Panel extends Group {
     }
 
     $checkSetting() {
-        if (this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
+        if (this.$Panel[3] != PanelScaleMode.NO_SCALE) {
             var scaleMode = this.$Panel[3];
             var scaleX = this.parent.width / this.width;
             var scaleY = this.parent.height / this.height;

@@ -2727,6 +2727,10 @@ var flower = {};
             _this8.$touchY = 0;
             _this8.$stageX = 0;
             _this8.$stageY = 0;
+            _this8.$beginTouchX = 0;
+            _this8.$beginTouchY = 0;
+            _this8.$beginStageX = 0;
+            _this8.$beginStageY = 0;
             return _this8;
         }
 
@@ -2760,6 +2764,26 @@ var flower = {};
             key: "stageY",
             get: function get() {
                 return this.$stageY;
+            }
+        }, {
+            key: "beginTouchX",
+            get: function get() {
+                return this.$beginTouchX;
+            }
+        }, {
+            key: "beginTouchY",
+            get: function get() {
+                return this.$beginTouchY;
+            }
+        }, {
+            key: "beginStageX",
+            get: function get() {
+                return this.$beginStageX;
+            }
+        }, {
+            key: "beginStageY",
+            get: function get() {
+                return this.$beginStageY;
             }
             /**
              * 此事件是在没有 touch 的情况下发生的，即没有按下
@@ -8732,8 +8756,11 @@ var flower = {};
                     startY: 0,
                     moveX: 0,
                     moveY: 0,
+                    touchX: {},
+                    touchY: {},
                     target: null,
                     parents: []
+
                 };
                 mouse.id = id;
                 mouse.startX = x;
@@ -8769,6 +8796,8 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    mouse.touchX[target.id] = target.mouseX;
+                    mouse.touchY[target.id] = target.mouseY;
                     target.dispatch(event);
                 }
             }
@@ -8935,6 +8964,10 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    event.$beginTouchX = mouse.touchX[target.id];
+                    event.$beginTouchY = mouse.touchY[target.id];
+                    event.$beginStageX = mouse.startX;
+                    event.$beginStageY = mouse.startY;
                     target.dispatch(event);
                 }
             }
@@ -8970,6 +9003,10 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    event.$beginTouchX = mouse.touchX[target.id];
+                    event.$beginTouchY = mouse.touchY[target.id];
+                    event.$beginStageX = mouse.startX;
+                    event.$beginStageY = mouse.startY;
                     target.dispatch(event);
                 } else {
                     target = mouse.target;
@@ -8980,6 +9017,10 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    event.$beginTouchX = mouse.touchX[target.id];
+                    event.$beginTouchY = mouse.touchY[target.id];
+                    event.$beginStageX = mouse.startX;
+                    event.$beginStageY = mouse.startY;
                     target.dispatch(event);
                 }
             }
@@ -10282,7 +10323,7 @@ var flower = {};
                         loader.load();
                     } else {
                         var params = {};
-                        params.r = math.random();
+                        //params.r = math.random();
                         for (var key in this._params) {
                             params[key] = this._params;
                         }
@@ -10374,7 +10415,7 @@ var flower = {};
             key: "loadText",
             value: function loadText() {
                 var params = {};
-                params.r = math.random();
+                //params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }

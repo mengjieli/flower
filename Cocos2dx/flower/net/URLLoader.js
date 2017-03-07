@@ -130,7 +130,7 @@ class URLLoader extends EventDispatcher {
                 loader.load();
             } else {
                 var params = {};
-                params.r = math.random();
+                //params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
@@ -213,7 +213,7 @@ class URLLoader extends EventDispatcher {
 
     loadText() {
         var params = {};
-        params.r = math.random();
+        //params.r = math.random();
         for (var key in this._params) {
             params[key] = this._params;
         }

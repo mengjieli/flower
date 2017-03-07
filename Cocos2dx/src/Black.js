@@ -2651,9 +2651,24 @@ var black = {};
 
                 return DataManager.getInstance().addDefine(config, beforeScript);
             }
+
+            /**
+             * @delete 使用 create 代替 createData
+             * @param className
+             * @param init
+             * @returns {*}
+             */
+
         }, {
             key: "createData",
             value: function createData(className) {
+                var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+                return DataManager.getInstance().createData(className, init);
+            }
+        }, {
+            key: "create",
+            value: function create(className) {
                 var init = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
                 return DataManager.getInstance().createData(className, init);
@@ -8047,7 +8062,7 @@ var black = {};
         }, {
             key: "$checkSetting",
             value: function $checkSetting() {
-                if (this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
+                if (this.$Panel[3] != PanelScaleMode.NO_SCALE) {
                     var scaleMode = this.$Panel[3];
                     var scaleX = this.parent.width / this.width;
                     var scaleY = this.parent.height / this.height;

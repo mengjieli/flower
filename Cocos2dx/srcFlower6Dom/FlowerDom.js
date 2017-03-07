@@ -2490,6 +2490,10 @@ class TouchEvent extends Event {
     $touchY = 0;
     $stageX = 0;
     $stageY = 0;
+    $beginTouchX = 0;
+    $beginTouchY = 0;
+    $beginStageX = 0;
+    $beginStageY = 0;
 
     constructor(type, bubbles = true) {
         super(type, bubbles);
@@ -2519,6 +2523,22 @@ class TouchEvent extends Event {
 
     get stageY() {
         return this.$stageY;
+    }
+
+    get beginTouchX() {
+        return this.$beginTouchX;
+    }
+
+    get beginTouchY() {
+        return this.$beginTouchY;
+    }
+
+    get beginStageX() {
+        return this.$beginStageX;
+    }
+
+    get beginStageY() {
+        return this.$beginStageY;
     }
 
     static TOUCH_BEGIN = "touch_begin";
@@ -8093,8 +8113,11 @@ class Stage extends Sprite {
             startY: 0,
             moveX: 0,
             moveY: 0,
+            touchX:{},
+            touchY:{},
             target: null,
-            parents: []
+            parents: [],
+
         };
         mouse.id = id;
         mouse.startX = x;
@@ -8130,6 +8153,8 @@ class Stage extends Sprite {
             event.$target = target;
             event.$touchX = target.mouseX;
             event.$touchY = target.mouseY;
+            mouse.touchX[target.id] = target.mouseX;
+            mouse.touchY[target.id] = target.mouseY;
             target.dispatch(event);
         }
     }
@@ -8293,6 +8318,10 @@ class Stage extends Sprite {
             event.$target = target;
             event.$touchX = target.mouseX;
             event.$touchY = target.mouseY;
+            event.$beginTouchX = mouse.touchX[target.id];
+            event.$beginTouchY = mouse.touchY[target.id];
+            event.$beginStageX = mouse.startX;
+            event.$beginStageY = mouse.startY;
             target.dispatch(event);
         }
     }
@@ -8327,6 +8356,10 @@ class Stage extends Sprite {
             event.$target = target;
             event.$touchX = target.mouseX;
             event.$touchY = target.mouseY;
+            event.$beginTouchX = mouse.touchX[target.id];
+            event.$beginTouchY = mouse.touchY[target.id];
+            event.$beginStageX = mouse.startX;
+            event.$beginStageY = mouse.startY;
             target.dispatch(event);
         } else {
             target = mouse.target;
@@ -8337,6 +8370,10 @@ class Stage extends Sprite {
             event.$target = target;
             event.$touchX = target.mouseX;
             event.$touchY = target.mouseY;
+            event.$beginTouchX = mouse.touchX[target.id];
+            event.$beginTouchY = mouse.touchY[target.id];
+            event.$beginStageX = mouse.startX;
+            event.$beginStageY = mouse.startY;
             target.dispatch(event);
         }
     }
@@ -9580,7 +9617,7 @@ class URLLoader extends EventDispatcher {
                 loader.load();
             } else {
                 var params = {};
-                params.r = math.random();
+                //params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
@@ -9663,7 +9700,7 @@ class URLLoader extends EventDispatcher {
 
     loadText() {
         var params = {};
-        params.r = math.random();
+        //params.r = math.random();
         for (var key in this._params) {
             params[key] = this._params;
         }

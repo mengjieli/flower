@@ -174,7 +174,7 @@ class EventDispatcher {
             inDispatcher = true;
         }
         for (var i = 0, len = list.length; i < len; i++) {
-            if (list[i].del == false && !this.__hasDispose) {
+            //if (list[i].del == false) {
                 var listener = list[i].listener;
                 var thisObj = list[i].thisObject;
                 if (event.$target == null) {
@@ -191,7 +191,7 @@ class EventDispatcher {
                     list[i].del = true;
                 }
                 listener.apply(thisObj, args);
-            }
+            //}
         }
         if (!inDispatcher) {
             delete this.__inDispatcher[event.type];

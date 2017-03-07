@@ -85,7 +85,7 @@ class Panel extends Group {
     }
 
     $checkSetting() {
-        if (this.width && this.height && this.$Panel[3] != PanelScaleMode.NO_SCALE) {
+        if (this.$Panel[3] != PanelScaleMode.NO_SCALE) {
             var scaleMode = this.$Panel[3];
             var scaleX = this.parent.width / this.width;
             var scaleY = this.parent.height / this.height;

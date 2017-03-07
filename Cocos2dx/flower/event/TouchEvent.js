@@ -5,6 +5,10 @@ class TouchEvent extends Event {
     $touchY = 0;
     $stageX = 0;
     $stageY = 0;
+    $beginTouchX = 0;
+    $beginTouchY = 0;
+    $beginStageX = 0;
+    $beginStageY = 0;
 
     constructor(type, bubbles = true) {
         super(type, bubbles);
@@ -34,6 +38,22 @@ class TouchEvent extends Event {
 
     get stageY() {
         return this.$stageY;
+    }
+
+    get beginTouchX() {
+        return this.$beginTouchX;
+    }
+
+    get beginTouchY() {
+        return this.$beginTouchY;
+    }
+
+    get beginStageX() {
+        return this.$beginStageX;
+    }
+
+    get beginStageY() {
+        return this.$beginStageY;
     }
 
     static TOUCH_BEGIN = "touch_begin";
