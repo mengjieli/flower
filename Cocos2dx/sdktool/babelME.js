@@ -11,7 +11,7 @@ function complete(list) {
     count++;
     setTimeout(function () {
         babel(list, 0);
-    }, 100);
+    }, 500);
 }
 
 function babel(list, index) {
@@ -33,4 +33,5 @@ function babel(list, index) {
 }
 
 //babelextension
-babel(["./sdktool/babel.js", "./sdktool/babelremoteserver.js", "./sdktool/babelremote.js"], 0);
+//babel(["./sdktool/babel.js", "./sdktool/babelremoteserver.js", "./sdktool/babelremote.js"], 0);
+babel(["./sdktool/babelmath.js","./sdktool/babel.js"], 0);

@@ -1,6 +1,11 @@
 var jsFiles = jsFiles||[];
 jsFiles.push("src/Main.js" );
 jsFiles.push("src/PreLoading.js" );
+jsFiles.push("src/ballGame/Ball.js" );
+jsFiles.push("src/ballGame/Game.js" );
+jsFiles.push("src/game/BallGame.js" );
+jsFiles.push("src/game/Control.js" );
+jsFiles.push("src/game/GameBall.js" );
 jsFiles.push("src/testcase/Test.js" );
 jsFiles.push("src/testcase/TestBase.js" );
 jsFiles.push("src/testcase/TestCase.js" );

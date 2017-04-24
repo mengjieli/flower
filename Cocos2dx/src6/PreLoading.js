@@ -31,7 +31,7 @@ class PreLoading extends flower.EventDispatcher {
     loadNextModule() {
         if (this.index < this.modules.length) {
             this.module = this.modules[this.index];
-            this.module.progress.percent.addListener(flower.Event.CHANGE, this.onUpdate, this);
+            this.module.progress.$percent.addListener(flower.Event.CHANGE, this.onUpdate, this);
             this.module.load();
         } else {
             this.dispose();
@@ -40,8 +40,8 @@ class PreLoading extends flower.EventDispatcher {
 
     onUpdate(e) {
         var data = this.module.progress;
-        this.progress.value = (this.index + data.percent.value) / this.modules.length;
-        if (data.percent.value == 1) {
+        this.progress = (this.index + data.percent) / this.modules.length;
+        if (data.percent == 1) {
             this.index++;
             this.loadNextModule();
         }
@@ -49,7 +49,6 @@ class PreLoading extends flower.EventDispatcher {
 
     dispose() {
         this.dispatchWith(flower.Event.COMPLETE);
-        this.progress.dispose();
         this.progressBar.dispose();
         super.dispose();
     }

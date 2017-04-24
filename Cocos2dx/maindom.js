@@ -53,6 +53,7 @@ script.src = "src/require.js";
 script.onload = function () {
     var scripts = [];
     jsFiles = [
+        "src/Math2D.js",
         "src/FlowerDom.js",
         "src/Black.js",
         "src/Binding.js",

@@ -36,7 +36,7 @@ var PreLoading = function (_flower$EventDispatch) {
         value: function loadNextModule() {
             if (this.index < this.modules.length) {
                 this.module = this.modules[this.index];
-                this.module.progress.percent.addListener(flower.Event.CHANGE, this.onUpdate, this);
+                this.module.progress.$percent.addListener(flower.Event.CHANGE, this.onUpdate, this);
                 this.module.load();
             } else {
                 this.dispose();
@@ -46,8 +46,8 @@ var PreLoading = function (_flower$EventDispatch) {
         key: "onUpdate",
         value: function onUpdate(e) {
             var data = this.module.progress;
-            this.progress.value = (this.index + data.percent.value) / this.modules.length;
-            if (data.percent.value == 1) {
+            this.progress = (this.index + data.percent) / this.modules.length;
+            if (data.percent == 1) {
                 this.index++;
                 this.loadNextModule();
             }
@@ -56,7 +56,6 @@ var PreLoading = function (_flower$EventDispatch) {
         key: "dispose",
         value: function dispose() {
             this.dispatchWith(flower.Event.COMPLETE);
-            this.progress.dispose();
             this.progressBar.dispose();
             _get(Object.getPrototypeOf(PreLoading.prototype), "dispose", this).call(this);
         }
