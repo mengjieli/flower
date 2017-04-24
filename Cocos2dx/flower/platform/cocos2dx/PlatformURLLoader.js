@@ -126,42 +126,51 @@ class PlatformURLLoader {
 
     static realLoadTexture(url, back, errorBack, thisObj, params) {
         PlatformURLLoader.loadingFrame = Platform.frame;
+        var isHttp = false;
         if (url.slice(0, "http://".length) == "http://") {
             PlatformURLLoader.checkFrame = Platform.frame + 120;
+            isHttp = true;
         } else {
             PlatformURLLoader.checkFrame = Platform.frame + 3;
         }
         PlatformURLLoader.loadingId++;
         var id = PlatformURLLoader.loadingId;
-        cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
-            if (id != PlatformURLLoader.loadingId) {
-                return;
-            }
-            if (err) {
-                errorBack.call(thisObj);
-            }
-            else {
-                if (!CACHE) {
-                    cc.loader.release(url);
+        var texture;
+        if(Platform.native && isHttp) {
+            cc.loader.loadImg(url, {isCrossOrigin: true}, function (err, img) {
+                if (id != PlatformURLLoader.loadingId) {
+                    return;
                 }
-                var texture;
-                if (Platform.native) {
-                    texture = img;
-                } else {
-                    texture = new cc.Texture2D();
-                    texture.initWithElement(img);
-                    texture.handleLoadedTexture();
+                if (err) {
+                    errorBack.call(thisObj);
                 }
-                back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                //if (Platform.native) {
-                //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                //} else {
-                //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
-                //}
-            }
+                else {
+                    if (!CACHE) {
+                        cc.loader.release(url);
+                    }
+                    if (Platform.native) {
+                        texture = img;
+                    } else {
+                        texture = new cc.Texture2D();
+                        texture.initWithElement(img);
+                        texture.handleLoadedTexture();
+                    }
+                    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                    //if (Platform.native) {
+                    //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                    //} else {
+                    //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
+                    //}
+                }
+                PlatformURLLoader.isLoading = false;
+                PlatformURLLoader.loadingId++;
+            });
+        } else {
+            texture = cc.TextureCache.getInstance().addImage(url);
+            back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
             PlatformURLLoader.isLoading = false;
             PlatformURLLoader.loadingId++;
-        });
+        }
     }
 
     static run() {

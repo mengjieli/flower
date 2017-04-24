@@ -542,7 +542,7 @@ class DataManager {
     }
 
     /**
-     * @delete 使用 create 代替 createData
+     * @deleted 使用 create 代替 createData
      * @param className
      * @param init
      * @returns {*}

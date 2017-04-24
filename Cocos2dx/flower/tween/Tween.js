@@ -14,8 +14,15 @@ class Tween {
         this._propertiesTo = propertiesTo;
         this._propertiesFrom = propertiesFrom;
         this.ease = ease || "None";
+        if (target instanceof flower.EventDispatcher) {
+            target.addListener(flower.Event.DISPOSE, this.__onTargetDispose, this);
+        }
         var timeLine = new flower.TimeLine();
         timeLine.addTween(this);
+    }
+
+    __onTargetDispose(e) {
+        this.dispose();
     }
 
     invalidProperty = false;

@@ -66,9 +66,9 @@ class BallGame extends flower.Group {
         //];
 
         var sides = [
-            [53, 30, 57, 35],
-            [57, 35, 368, 35],
-            [368, 35, 372, 30],
+            [53, 30, 65, 35],
+            [65, 35, 363, 35],
+            [365, 35, 375, 25],
 
             [416, 30, 420, 35],
             [420, 35, 731, 35],
@@ -125,8 +125,10 @@ class BallGame extends flower.Group {
             }
             var ball = new GameBall();
             ball.source = "res/eight.png";
+            size+=3;
             ball.x = 572 + 0 + m * (size / 2) * Math.sqrt(3);
             ball.y = 214 + 0 + m * (size / 2) - (a[m] - i - 1) * size;
+            size-=3;
             ball.size = size;
             this.addBall(ball);
             ball.ball.id = 1;

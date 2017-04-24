@@ -4,16 +4,18 @@ class Module extends flower.EventDispatcher {
     __list;
     __index;
     __url;
+    __initConfig;
     __direction;
     __beforeScript;
     __moduleKey;
     __hasExecute;
     __name;
 
-    constructor(url, beforeScript = "") {
+    constructor(url, beforeScript = "", config = null) {
         super();
         Module.instance = this;
         this.__url = url;
+        this.__initConfig = config;
         this.__beforeScript = beforeScript;
         this.__direction = flower.Path.getPathDirection(url);
         this.__moduleKey = "key" + Math.floor(Math.random() * 100000000);
@@ -23,14 +25,18 @@ class Module extends flower.EventDispatcher {
     load() {
         var url = this.__url;
         this.__progress.tip = url;
-        var loader = new flower.URLLoader(url);
-        loader.load();
-        loader.addListener(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
-        loader.addListener(flower.Event.ERROR, this.__loadError, this);
+        if (__initConfig) {
+            this.__onLoadModuleComplete();
+        } else {
+            var loader = new flower.URLLoader(url);
+            loader.load();
+            loader.once(flower.Event.COMPLETE, this.__onLoadModuleComplete, this);
+            loader.once(flower.Event.ERROR, this.__loadError, this);
+        }
     }
 
     __onLoadModuleComplete(e) {
-        var cfg = e.data;
+        var cfg = this.__initConfig || e.data;
         this.config = cfg;
         this.__name = cfg.name;
         flower.UIParser.addModule(cfg.name, this.__url, cfg.name);
@@ -48,7 +54,9 @@ class Module extends flower.EventDispatcher {
         this.script = "";
         this.script += this.__beforeScript;
         this.script += "var module = $root." + cfg.name + " = $root." + cfg.name + "||{};\n";
+        this.script += "var moduleRes = $root." + cfg.name + "Res;\n";
         this.__beforeScript += "var module = $root." + cfg.name + ";\n";
+        this.__beforeScript += "var moduleRes = $root." + cfg.name + "Res;\n";
         this.__beforeScript += "var moduleKey = \"key" + Math.floor(Math.random() * 100000000) + "\";\n";
         this.script += "module.path = \"" + this.__direction + "\";\n";
         this.script += "var moduleKey = \"" + this.__moduleKey + "\";\n";
@@ -57,6 +65,21 @@ class Module extends flower.EventDispatcher {
             this.script += "$root." + cfg.name + "__executeModule = function() {" + cfg.execute + "}\n";
         }
         flower.UIParser.setModuleBeforeScript(cfg.name, this.__beforeScript);
+        var resList = cfg.res;
+        if (resList && resList.length) {
+            $root[cfg.name + "Res"] = {};
+            for (var i = 0; i < resList.length; i++) {
+                var url = resList[i];
+                if (url.slice(0, 2) == "./") {
+                    url = this.__direction + url.slice(2, url.length);
+                }
+                this.__list.push({
+                    type: "res",
+                    url: url,
+                    source: resList[i]
+                });
+            }
+        }
         var scripts = cfg.scripts;
         if (scripts && Object.keys(scripts).length) {
             for (var i = 0; i < scripts.length; i++) {
@@ -84,7 +107,7 @@ class Module extends flower.EventDispatcher {
             }
         }
         var components = cfg.components;
-        if (components && Object.keys(components).length) {
+        if (components && components.length) {
             for (var i = 0; i < components.length; i++) {
                 var url = components[i];
                 if (url.slice(0, 2) == "./") {
@@ -143,6 +166,8 @@ class Module extends flower.EventDispatcher {
                     eval(this.script);
                     Module.$currentModule = null;
                 }
+            } else if (item.type == "res") {
+                $root[this.__name + "Res"][item.source] = e.data;
             }
         }
         if (this.__list.length == 0) {
@@ -164,7 +189,7 @@ class Module extends flower.EventDispatcher {
             ui.addListener(flower.Event.COMPLETE, this.__loadNext, this);
             ui.addListener(flower.Event.ERROR, this.__loadError, this);
             ui.parseAsync(url);
-        } else if (item.type == "data" || item.type == "script") {
+        } else {
             var loader = new flower.URLLoader(item.url);
             loader.addListener(flower.Event.COMPLETE, this.__loadNext, this);
             loader.addListener(flower.Event.ERROR, this.__loadError, this);

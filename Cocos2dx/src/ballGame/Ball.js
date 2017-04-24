@@ -141,7 +141,7 @@ var Ball = function () {
             if (this.stop) return;
             dt = +dt & ~0;
             while (dt) {
-                var t = 4;
+                var t = 1;
                 if (dt < t) {
                     t = dt;
                     dt = 0;
@@ -153,12 +153,14 @@ var Ball = function () {
                     this.moveT += t;
                     this.moveT = Math.round(this.moveT * 1000) / 1000;
 
+                    var oldX = this._x;
+                    var oldY = this._y;
                     //位移
                     this._x += this._vx * t * 200;
                     this._y += this._vy * t * 200;
 
                     //判断碰撞
-                    t = this.checkCollision(t);
+                    t = this.checkCollision(t, oldX, oldY);
 
                     //旋转
                     this._rotX += this._wx * t * 20;
@@ -248,7 +250,7 @@ var Ball = function () {
 
     }, {
         key: "checkCollision",
-        value: function checkCollision(t) {
+        value: function checkCollision(t, oldX, oldY) {
             //1.判断与球的碰撞
             var balls = this.$balls;
             for (var i = 0; i < balls.length; i++) {
@@ -263,6 +265,7 @@ var Ball = function () {
 
                         var dis = Math.sqrt(this._vx * t * 200 * this._vx * t * 200 + this._vy * t * 200 * this._vy * t * 200);
                         var ta = (this.size - ballDis) / dis;
+                        ta = 1;
                         //反向移动到正好碰撞的点
                         this._x -= this._vx * t * ta * 200;
                         this._y -= this._vy * t * ta * 200;
@@ -329,17 +332,18 @@ var Ball = function () {
                 //判断球是否与边相交
                 if (footPoint.getDistance(center) < this.size * 0.5 && segement.isPointInRange(footPoint) || center.getDistance(segement.point1) < this.size * 0.5 || center.getDistance(segement.point2) < this.size * 0.5) {
                     //第一种相交，球与线段相切
-                    console.log("碰到边", this.x, this.y, wall[0], wall[1], wall[2], wall[3]);
+                    //console.log("碰到边", this.x, this.y, wall[0], wall[1], wall[2], wall[3])
                     var dis = Math.sqrt(this._vx * t * 200 * this._vx * t * 200 + this._vy * t * 200 * this._vy * t * 200);
                     var backDis = this.size * 0.5 - footPoint.getDistance(center);
                     var ta = backDis / dis;
-                    if (ta > 1) {
-                        ta = 1;
-                    }
-                    t = (1 - ta) * t;
+                    //if (ta > 1) {
+                    //    ta = 1;
+                    //}
+                    ta = 1;
                     this._x -= this._vx * t * ta * 200;
                     this._y -= this._vy * t * ta * 200;
-                    console.log(this.x, this.y);
+                    t = (1 - ta) * t;
+                    //console.log(this.x, this.y)
 
                     //把球的速度转换成墙坐标系的速度
                     var wallRot = Math.atan2(segement.point2.y - segement.point1.y, segement.point2.x - segement.point1.x);
@@ -347,16 +351,17 @@ var Ball = function () {
                     var tvy = this._vy * Math.cos(wallRot) - this._vx * Math.sin(wallRot);
                     //垂直于墙面的速度反向
                     tvy = -tvy * 0.9;
+                    tvx *= 0.8;
                     //平行于墙面的速度被吸收一部分
 
                     //墙面吸收了垂直于墙面的转动
                     var twx = this._wx * Math.cos(wallRot) + this._wy * Math.sin(wallRot);
                     var twy = this._wy * Math.cos(wallRot) - this._wx * Math.sin(wallRot);
-                    twy = 0;
+                    twy = -twy;
                     //平行于墙面的转速一部分转换成速度
                     var wa = 0.1 + (10 - (Math.abs(tvy) > 10 ? 10 : Math.abs(tvy))) * 0.04;
-                    tvx += twx * this._r * wa;
-                    twx *= wa;
+                    tvx += this._wz * this._r * wa / 5;
+                    this._wz *= wa;
 
                     //速度转换成正常的坐标系
                     this._vx = tvx * Math.cos(-wallRot) + tvy * Math.sin(-wallRot);

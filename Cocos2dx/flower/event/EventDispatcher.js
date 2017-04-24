@@ -15,6 +15,9 @@ class EventDispatcher {
     }
 
     dispose() {
+        if (this.__EventDispatcher[1][flower.Event.DISPOSE]) {
+            this.dispatchWith(flower.Event.DISPOSE);
+        }
         this.__EventDispatcher = null;
         this.__hasDispose = true;
     }
@@ -117,7 +120,7 @@ class EventDispatcher {
                 break;
             }
         }
-        if(list.length == 0) {
+        if (list.length == 0) {
             delete events[type];
         }
     }
