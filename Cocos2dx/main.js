@@ -82,6 +82,7 @@ cc.game.onStart = function () {
 
     cc.loader.loadJs(["src/require.js"], function (err) {
         jsFiles = [
+            "src/Math2D.js",
             "src/Flower.js",
             "src/Black.js",
             "src/Binding.js",

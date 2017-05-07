@@ -37,7 +37,10 @@ class BallGame extends flower.Group {
     }
 
     init() {
-        var size = 25;
+        this.fps = new flower.TextField();
+        this.addChild(this.fps);
+
+        var size = 22;
 
         //var sides = [
         //    [50, 25, 57, 35],
@@ -124,20 +127,20 @@ class BallGame extends flower.Group {
                 }
             }
             var ball = new GameBall();
+            ball.source = "res/8.json";
             size+=3;
             ball.x = 572 + 0 + m * (size / 2) * Math.sqrt(3);
             ball.y = 214 + 0 + m * (size / 2) - (a[m] - i - 1) * size;
             size-=3;
             ball.size = size;
-            ball.source = "res/eight.png";
             this.addBall(ball);
             ball.ball.id = 1;
         }
 
 
         var ball = new GameBall();
-        ball.size = size;
         ball.source = "res/8.json";
+        ball.size = size;
         ball.x = 200;
         ball.y = 200;
         this.addBall(ball);
@@ -145,8 +148,8 @@ class BallGame extends flower.Group {
 
         //瞄准用的假球
         var virtualWhiteBall = new GameBall();
-        virtualWhiteBall.size = size;
         virtualWhiteBall.source = "res/8.json";
+        virtualWhiteBall.size = size;
         virtualWhiteBall.alpha = 0.3;
         virtualWhiteBall.visible = false;
         virtualWhiteBall.touchEnabeld = false;

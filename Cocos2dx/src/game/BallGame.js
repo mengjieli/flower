@@ -57,7 +57,7 @@ var BallGame = function (_flower$Group) {
     _createClass(BallGame, [{
         key: "init",
         value: function init() {
-            var size = 22;
+            var size = 25;
 
             //var sides = [
             //    [50, 25, 57, 35],
@@ -109,7 +109,7 @@ var BallGame = function (_flower$Group) {
             this.addChild(this.control);
             this.control.y = 450;
 
-            for (var i = 0; i < 15; i++) {
+            for (var i = 0; i < 0; i++) {
                 var a = [1, 3, 6, 10, 15];
                 for (var m = 0; m < a.length; m++) {
                     if (i + 1 <= a[m]) {
@@ -117,19 +117,19 @@ var BallGame = function (_flower$Group) {
                     }
                 }
                 var ball = new GameBall();
-                ball.source = "res/eight.png";
                 size += 3;
                 ball.x = 572 + 0 + m * (size / 2) * Math.sqrt(3);
                 ball.y = 214 + 0 + m * (size / 2) - (a[m] - i - 1) * size;
                 size -= 3;
                 ball.size = size;
+                ball.source = "res/eight.png";
                 this.addBall(ball);
                 ball.ball.id = 1;
             }
 
             var ball = new GameBall();
-            ball.source = "res/ball.png";
             ball.size = size;
+            ball.source = "res/8.json";
             ball.x = 200;
             ball.y = 200;
             this.addBall(ball);
@@ -137,8 +137,8 @@ var BallGame = function (_flower$Group) {
 
             //瞄准用的假球
             var virtualWhiteBall = new GameBall();
-            virtualWhiteBall.source = "res/ball.png";
             virtualWhiteBall.size = size;
+            virtualWhiteBall.source = "res/8.json";
             virtualWhiteBall.alpha = 0.3;
             virtualWhiteBall.visible = false;
             virtualWhiteBall.touchEnabeld = false;
