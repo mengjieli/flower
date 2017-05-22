@@ -2380,6 +2380,9 @@ var flower = {};
         _createClass(EventDispatcher, [{
             key: "dispose",
             value: function dispose() {
+                if (this.__EventDispatcher[1][flower.Event.DISPOSE]) {
+                    this.dispatchWith(flower.Event.DISPOSE);
+                }
                 this.__EventDispatcher = null;
                 this.__hasDispose = true;
             }
@@ -2691,6 +2694,7 @@ var flower = {};
     Event.START_INPUT = "start_input";
     Event.STOP_INPUT = "stop_input";
     Event.DISTORT = "distort";
+    Event.DISPOSE = "dispose";
     Event.CREATION_COMPLETE = "creation_complete";
     Event.SELECTED_ITEM_CHANGE = "selected_item_change";
     Event.CLICK_ITEM = "click_item";
@@ -3854,8 +3858,9 @@ var flower = {};
                 22: 0, //lastTouchFrame
                 50: false, //focusEnabeld
                 60: [], //filters
-                61: [] };
-            //parentFilters
+                61: [], //parentFilters
+                70: null };
+            //program
             DebugInfo.displayInfo.display++;
             return _this16;
         }
@@ -4668,6 +4673,19 @@ var flower = {};
             key: "contentBounds",
             get: function get() {
                 return this.$getContentBounds().clone();
+            }
+        }, {
+            key: "program",
+            set: function set(val) {
+                this.$DisplayObject[70] = val;
+                if (val) {
+                    this.$nativeShow.setProgrammer(val.$nativeProgram);
+                } else {
+                    this.$nativeShow.setProgrammer(null);
+                }
+            },
+            get: function get() {
+                return this.$DisplayObject[70];
             }
         }]);
 
@@ -11428,10 +11446,41 @@ var flower = {};
     }();
     //////////////////////////End File:flower/plist/PlistManager.js///////////////////////////
 
-    //////////////////////////File:flower/res/Res.js///////////////////////////
+    //////////////////////////File:flower/shader/Program.js///////////////////////////
 
 
     PlistManager.instance = new PlistManager();
+
+    var Program = function () {
+        function Program(vsh, fsh) {
+            _classCallCheck(this, Program);
+
+            this._vsh = vsh;
+            this._fsh = fsh;
+        }
+
+        _createClass(Program, [{
+            key: "setUniformFloat",
+            value: function setUniformFloat(name, val) {
+                this._program.setUniformFloat(name, val);
+            }
+        }, {
+            key: "$nativeProgram",
+            get: function get() {
+                if (!this._program) {
+                    this._program = new PlatformProgram("", "", vsh, fsh);
+                }
+                return this._program;
+            }
+        }]);
+
+        return Program;
+    }();
+
+    flower.Program = Program;
+    //////////////////////////End File:flower/shader/Program.js///////////////////////////
+
+    //////////////////////////File:flower/res/Res.js///////////////////////////
 
     var Res = function () {
         function Res() {
@@ -12809,11 +12858,19 @@ var flower = {};
             this._propertiesTo = propertiesTo;
             this._propertiesFrom = propertiesFrom;
             this.ease = ease || "None";
+            if (target instanceof flower.EventDispatcher) {
+                target.addListener(flower.Event.DISPOSE, this.__onTargetDispose, this);
+            }
             var timeLine = new flower.TimeLine();
             timeLine.addTween(this);
         }
 
         _createClass(Tween, [{
+            key: "__onTargetDispose",
+            value: function __onTargetDispose(e) {
+                this.dispose();
+            }
+        }, {
             key: "removeTargetEvent",
             value: function removeTargetEvent() {
                 var target;

@@ -166,7 +166,11 @@ class PlatformURLLoader {
                 PlatformURLLoader.loadingId++;
             });
         } else {
-            texture = cc.TextureCache.getInstance().addImage(url);
+            if(Platform.native) {
+                texture = cc.TextureCache.getInstance().addImage(url);
+            } else {
+                texture = cc.textureCache.addImage(url);
+            }
             back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
             PlatformURLLoader.isLoading = false;
             PlatformURLLoader.loadingId++;

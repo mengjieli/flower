@@ -2195,6 +2195,9 @@ class EventDispatcher {
     }
 
     dispose() {
+        if (this.__EventDispatcher[1][flower.Event.DISPOSE]) {
+            this.dispatchWith(flower.Event.DISPOSE);
+        }
         this.__EventDispatcher = null;
         this.__hasDispose = true;
     }
@@ -2297,7 +2300,7 @@ class EventDispatcher {
                 break;
             }
         }
-        if(list.length == 0) {
+        if (list.length == 0) {
             delete events[type];
         }
     }
@@ -2436,6 +2439,7 @@ class Event {
     static START_INPUT = "start_input";
     static STOP_INPUT = "stop_input";
     static DISTORT = "distort";
+    static DISPOSE = "dispose";
     static CREATION_COMPLETE = "creation_complete";
     static SELECTED_ITEM_CHANGE = "selected_item_change";
     static CLICK_ITEM = "click_item";
@@ -3474,6 +3478,7 @@ class DisplayObject extends EventDispatcher {
             50: false, //focusEnabeld
             60: [], //filters
             61: [], //parentFilters
+            70: null, //program
         }
         DebugInfo.displayInfo.display++;
     }
@@ -4197,6 +4202,19 @@ class DisplayObject extends EventDispatcher {
 
     get contentBounds() {
         return this.$getContentBounds().clone();
+    }
+
+    set program(val) {
+        this.$DisplayObject[70] = val;
+        if (val) {
+            this.$nativeShow.setProgrammer(val.$nativeProgram);
+        } else {
+            this.$nativeShow.setProgrammer(null);
+        }
+    }
+
+    get program() {
+        return this.$DisplayObject[70];
     }
 }
 
@@ -10597,6 +10615,35 @@ class PlistManager {
 
 
 
+//////////////////////////File:flower/shader/Program.js///////////////////////////
+class Program {
+
+    _vsh;
+    _fsh;
+    _program;
+
+    constructor(vsh, fsh) {
+        this._vsh = vsh;
+        this._fsh = fsh;
+    }
+
+    get $nativeProgram() {
+        if (!this._program) {
+            this._program = new PlatformProgram("", "", vsh, fsh);
+        }
+        return this._program;
+    }
+
+    setUniformFloat(name, val) {
+        this._program.setUniformFloat(name, val);
+    }
+}
+
+flower.Program = Program;
+//////////////////////////End File:flower/shader/Program.js///////////////////////////
+
+
+
 //////////////////////////File:flower/res/Res.js///////////////////////////
 class Res {
 
@@ -11839,8 +11886,15 @@ class Tween {
         this._propertiesTo = propertiesTo;
         this._propertiesFrom = propertiesFrom;
         this.ease = ease || "None";
+        if (target instanceof flower.EventDispatcher) {
+            target.addListener(flower.Event.DISPOSE, this.__onTargetDispose, this);
+        }
         var timeLine = new flower.TimeLine();
         timeLine.addTween(this);
+    }
+
+    __onTargetDispose(e) {
+        this.dispose();
     }
 
     invalidProperty = false;

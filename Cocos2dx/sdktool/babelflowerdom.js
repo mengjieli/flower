@@ -241,6 +241,8 @@ var list = [
     "PlistLoader",
     "PlistManager",
 
+    "Program",
+
     "Res",
     "ResItem",
     "ResItemInfo",

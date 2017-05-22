@@ -8,7 +8,9 @@ class Main {
 
     ready() {
         flower.URLLoader.urlHead = "http://localhost:12000/";
-        new BallGame();
+        //new BallGame();
+        //
+        new ChineseChess();
 
         //var index = 0;
         //var stage = flower.Stage.getInstance();

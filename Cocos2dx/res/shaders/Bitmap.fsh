@@ -89,6 +89,7 @@ vec4 dyeingFilter(vec4 color,float colorR,float colorG,float colorB);
 vec4 colorFilter(vec4 color,float colorH,float colorS,float colorL);
 vec4 strokeFilter(float strokeWidth,float r,float g,float b,float posx,float posy, vec4 color);
 vec4 blurFilter(vec4 color,float posx,float posy,float blurX,float blurY);
+vec2 changeToSplit(float posx,float posy);
 
 void main()
 {
@@ -142,7 +143,7 @@ vec4 getColor(float posx,float posy) {
         if(split) {
             vec2 point1 = changeToSplit(posx,posy);
             posx = point1[0];
-            posy = point2[1];
+            posy = point1[1];
         }
         if(plist == 1) {
             posx = posx * (plistEndX - plistStartX) + plistStartX;
@@ -152,7 +153,7 @@ vec4 getColor(float posx,float posy) {
         if(split) {
             vec2 point1 = changeToSplit(posx,posy);
             posx = point1[0];
-            posy = point2[1];
+            posy = point1[1];
         }
     }
     return v_fragmentColor * texture2D(CC_Texture0, vec2(posx,posy));

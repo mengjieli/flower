@@ -1657,41 +1657,54 @@ var flower = {};
             key: "realLoadTexture",
             value: function realLoadTexture(url, back, errorBack, thisObj, params) {
                 PlatformURLLoader.loadingFrame = Platform.frame;
+                var isHttp = false;
                 if (url.slice(0, "http://".length) == "http://") {
                     PlatformURLLoader.checkFrame = Platform.frame + 120;
+                    isHttp = true;
                 } else {
                     PlatformURLLoader.checkFrame = Platform.frame + 3;
                 }
                 PlatformURLLoader.loadingId++;
                 var id = PlatformURLLoader.loadingId;
-                cc.loader.loadImg(url, { isCrossOrigin: true }, function (err, img) {
-                    if (id != PlatformURLLoader.loadingId) {
-                        return;
-                    }
-                    if (err) {
-                        errorBack.call(thisObj);
-                    } else {
-                        if (!CACHE) {
-                            cc.loader.release(url);
+                var texture;
+                if (Platform.native && isHttp) {
+                    cc.loader.loadImg(url, { isCrossOrigin: true }, function (err, img) {
+                        if (id != PlatformURLLoader.loadingId) {
+                            return;
                         }
-                        var texture;
-                        if (Platform.native) {
-                            texture = img;
+                        if (err) {
+                            errorBack.call(thisObj);
                         } else {
-                            texture = new cc.Texture2D();
-                            texture.initWithElement(img);
-                            texture.handleLoadedTexture();
+                            if (!CACHE) {
+                                cc.loader.release(url);
+                            }
+                            if (Platform.native) {
+                                texture = img;
+                            } else {
+                                texture = new cc.Texture2D();
+                                texture.initWithElement(img);
+                                texture.handleLoadedTexture();
+                            }
+                            back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                            //if (Platform.native) {
+                            //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
+                            //} else {
+                            //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
+                            //}
                         }
-                        back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                        //if (Platform.native) {
-                        //    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
-                        //} else {
-                        //    back.call(thisObj, new cc.Texture2D(texture), texture.width, texture.height);
-                        //}
+                        PlatformURLLoader.isLoading = false;
+                        PlatformURLLoader.loadingId++;
+                    });
+                } else {
+                    if (Platform.native) {
+                        texture = cc.TextureCache.getInstance().addImage(url);
+                    } else {
+                        texture = cc.textureCache.addImage(url);
                     }
+                    back.call(thisObj, texture, texture.getContentSize().width, texture.getContentSize().height);
                     PlatformURLLoader.isLoading = false;
                     PlatformURLLoader.loadingId++;
-                });
+                }
             }
         }, {
             key: "run",
@@ -2168,6 +2181,9 @@ var flower = {};
         _createClass(EventDispatcher, [{
             key: "dispose",
             value: function dispose() {
+                if (this.__EventDispatcher[1][flower.Event.DISPOSE]) {
+                    this.dispatchWith(flower.Event.DISPOSE);
+                }
                 this.__EventDispatcher = null;
                 this.__hasDispose = true;
             }
@@ -2243,6 +2259,8 @@ var flower = {};
                 var list = events[type];
                 if (!list) {
                     list = values[1][type] = [];
+                } else {
+                    values[1][type] = list = list.concat();
                 }
                 for (var i = 0, len = list.length; i < len; i++) {
                     var item = list[i];
@@ -2260,11 +2278,11 @@ var flower = {};
                             }
                         }
                     }
-                    if (item.listener == listener && item.thisObject == thisObject && item.del == false && agrsame) {
+                    if (item.listener == listener && item.thisObject == thisObject && agrsame) {
                         return false;
                     }
                 }
-                list.push({ "listener": listener, "thisObject": thisObject, "once": once, "del": false, args: args });
+                list.push({ "listener": listener, "thisObject": thisObject, "once": once, args: args });
             }
         }, {
             key: "removeListener",
@@ -2278,13 +2296,15 @@ var flower = {};
                 if (!list) {
                     return;
                 }
+                events[type] = list = list.concat();
                 for (var i = 0, len = list.length; i < len; i++) {
-                    if (list[i].listener == listener && list[i].thisObject == thisObject && list[i].del == false) {
-                        list[i].listener = null;
-                        list[i].thisObject = null;
-                        list[i].del = true;
+                    if (list[i].listener == listener && list[i].thisObject == thisObject) {
+                        list.splice(i, 1);
                         break;
                     }
+                }
+                if (list.length == 0) {
+                    delete events[type];
                 }
             }
         }, {
@@ -2310,12 +2330,7 @@ var flower = {};
                 if (!list) {
                     return false;
                 }
-                for (var i = 0, len = list.length; i < len; i++) {
-                    if (list[i].del == false) {
-                        return true;
-                    }
-                }
-                return false;
+                return true;
             }
         }, {
             key: "dispatch",
@@ -2332,32 +2347,24 @@ var flower = {};
                 if (!list) {
                     return;
                 }
-
                 for (var i = 0, len = list.length; i < len; i++) {
-                    if (list[i].del == false) {
-                        var listener = list[i].listener;
-                        var thisObj = list[i].thisObject;
-                        if (event.$target == null) {
-                            event.$target = this;
-                        }
-                        event.$currentTarget = this;
-                        var args = [event];
-                        if (list[i].args) {
-                            args = args.concat(list[i].args);
-                        }
-                        if (list[i].once) {
-                            list[i].listener = null;
-                            list[i].thisObject = null;
-                            list[i].del = true;
-                        }
-                        listener.apply(thisObj, args);
+                    var listener = list[i].listener;
+                    var thisObj = list[i].thisObject;
+                    if (event.$target == null) {
+                        event.$target = this;
                     }
-                }
-                for (i = 0; i < list.length; i++) {
-                    if (list[i].del == true) {
-                        list.splice(i, 1);
+                    event.$currentTarget = this;
+                    var args = [event];
+                    if (list[i].args) {
+                        args = args.concat(list[i].args);
+                    }
+                    if (list[i].once) {
+                        list[i].listener = null;
+                        list[i].thisObject = null;
+                        list[i].splice(i, 1);
                         i--;
                     }
+                    listener.apply(thisObj, args);
                 }
             }
         }, {
@@ -2488,6 +2495,7 @@ var flower = {};
     Event.START_INPUT = "start_input";
     Event.STOP_INPUT = "stop_input";
     Event.DISTORT = "distort";
+    Event.DISPOSE = "dispose";
     Event.CREATION_COMPLETE = "creation_complete";
     Event.SELECTED_ITEM_CHANGE = "selected_item_change";
     Event.CLICK_ITEM = "click_item";
@@ -2515,6 +2523,10 @@ var flower = {};
             _this7.$touchY = 0;
             _this7.$stageX = 0;
             _this7.$stageY = 0;
+            _this7.$beginTouchX = 0;
+            _this7.$beginTouchY = 0;
+            _this7.$beginStageX = 0;
+            _this7.$beginStageY = 0;
             return _this7;
         }
 
@@ -2548,6 +2560,26 @@ var flower = {};
             key: "stageY",
             get: function get() {
                 return this.$stageY;
+            }
+        }, {
+            key: "beginTouchX",
+            get: function get() {
+                return this.$beginTouchX;
+            }
+        }, {
+            key: "beginTouchY",
+            get: function get() {
+                return this.$beginTouchY;
+            }
+        }, {
+            key: "beginStageX",
+            get: function get() {
+                return this.$beginStageX;
+            }
+        }, {
+            key: "beginStageY",
+            get: function get() {
+                return this.$beginStageY;
             }
             /**
              * 此事件是在没有 touch 的情况下发生的，即没有按下
@@ -8520,8 +8552,11 @@ var flower = {};
                     startY: 0,
                     moveX: 0,
                     moveY: 0,
+                    touchX: {},
+                    touchY: {},
                     target: null,
                     parents: []
+
                 };
                 mouse.id = id;
                 mouse.startX = x;
@@ -8557,6 +8592,8 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    mouse.touchX[target.id] = target.mouseX;
+                    mouse.touchY[target.id] = target.mouseY;
                     target.dispatch(event);
                 }
             }
@@ -8723,6 +8760,10 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    event.$beginTouchX = mouse.touchX[target.id];
+                    event.$beginTouchY = mouse.touchY[target.id];
+                    event.$beginStageX = mouse.startX;
+                    event.$beginStageY = mouse.startY;
                     target.dispatch(event);
                 }
             }
@@ -8758,6 +8799,10 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    event.$beginTouchX = mouse.touchX[target.id];
+                    event.$beginTouchY = mouse.touchY[target.id];
+                    event.$beginStageX = mouse.startX;
+                    event.$beginStageY = mouse.startY;
                     target.dispatch(event);
                 } else {
                     target = mouse.target;
@@ -8768,6 +8813,10 @@ var flower = {};
                     event.$target = target;
                     event.$touchX = target.mouseX;
                     event.$touchY = target.mouseY;
+                    event.$beginTouchX = mouse.touchX[target.id];
+                    event.$beginTouchY = mouse.touchY[target.id];
+                    event.$beginStageX = mouse.startX;
+                    event.$beginStageY = mouse.startY;
                     target.dispatch(event);
                 }
             }
@@ -10070,7 +10119,7 @@ var flower = {};
                         loader.load();
                     } else {
                         var params = {};
-                        params.r = math.random();
+                        //params.r = math.random();
                         for (var key in this._params) {
                             params[key] = this._params;
                         }
@@ -10162,7 +10211,7 @@ var flower = {};
             key: "loadText",
             value: function loadText() {
                 var params = {};
-                params.r = math.random();
+                //params.r = math.random();
                 for (var key in this._params) {
                     params[key] = this._params;
                 }
@@ -11184,10 +11233,41 @@ var flower = {};
     }();
     //////////////////////////End File:flower/plist/PlistManager.js///////////////////////////
 
-    //////////////////////////File:flower/res/Res.js///////////////////////////
+    //////////////////////////File:flower/shader/Program.js///////////////////////////
 
 
     PlistManager.instance = new PlistManager();
+
+    var Program = function () {
+        function Program(vsh, fsh) {
+            _classCallCheck(this, Program);
+
+            this._vsh = vsh;
+            this._fsh = fsh;
+        }
+
+        _createClass(Program, [{
+            key: "setUniformFloat",
+            value: function setUniformFloat(name, val) {
+                this._program.setUniformFloat(name, val);
+            }
+        }, {
+            key: "$nativeProgram",
+            get: function get() {
+                if (!this._program) {
+                    this._program = new PlatformProgram("", "res/shaders/Bitmap.fsh", this._vsh, this._fsh);
+                }
+                return this._program;
+            }
+        }]);
+
+        return Program;
+    }();
+
+    flower.Program = Program;
+    //////////////////////////End File:flower/shader/Program.js///////////////////////////
+
+    //////////////////////////File:flower/res/Res.js///////////////////////////
 
     var Res = function () {
         function Res() {
@@ -12565,11 +12645,19 @@ var flower = {};
             this._propertiesTo = propertiesTo;
             this._propertiesFrom = propertiesFrom;
             this.ease = ease || "None";
+            if (target instanceof flower.EventDispatcher) {
+                target.addListener(flower.Event.DISPOSE, this.__onTargetDispose, this);
+            }
             var timeLine = new flower.TimeLine();
             timeLine.addTween(this);
         }
 
         _createClass(Tween, [{
+            key: "__onTargetDispose",
+            value: function __onTargetDispose(e) {
+                this.dispose();
+            }
+        }, {
             key: "removeTargetEvent",
             value: function removeTargetEvent() {
                 var target;
