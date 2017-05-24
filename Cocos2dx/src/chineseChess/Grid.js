@@ -21,11 +21,20 @@ var Grid = function (_flower$Sprite) {
 
         _this._gridX = gridX;
         _this._gridY = gridY;
-        _this._positionX = 23 + 58 * gridX;
-        _this._positionY = 23 + 58 * gridY;
+        _this._positionX = 23 + 57 * gridX;
+        _this._positionY = 25 + 57 * gridY;
         _this.x = _this._positionX;
         _this.y = _this._positionY;
         _this.style = style;
+
+        var rect = new flower.Rect();
+        rect.fillColor = 0xff0000;
+        rect.width = 50;
+        rect.height = 50;
+        rect.x = -25;
+        rect.y = -25;
+        rect.alpha = 0;
+        _this.addChild(rect);
         return _this;
     }
 
@@ -35,11 +44,41 @@ var Grid = function (_flower$Sprite) {
     _createClass(Grid, [{
         key: "showCanMove",
         value: function showCanMove() {
-            this.showMoveFlag = true;
-            this.showMoveImage = new flower.Image(this.style + "dot.png");
-            this.showMoveImage.x = -22;
-            this.showMoveImage.y = -22;
-            this.addChild(this.showMoveImage);
+            if (!this.showMoveFlag) {
+                this.showMoveFlag = true;
+                this.showMoveImage = new flower.Image(this.style + "dot.png");
+                this.showMoveImage.x = -22 + 7;
+                this.showMoveImage.y = -22 + 6;
+                this.showMoveImage.touchEnabeld = false;
+                this.addChild(this.showMoveImage);
+            }
+        }
+    }, {
+        key: "showNotMove",
+        value: function showNotMove() {
+            if (this.showMoveFlag) {
+                this.showMoveFlag = false;
+                this.showMoveImage.dispose();
+            }
+        }
+    }, {
+        key: "showMoveBox",
+        value: function showMoveBox(color) {
+            if (!this.moveImage) {
+                this.moveImage = new flower.Image(this.style + color + "_box.png");
+                this.addChild(this.moveImage);
+                this.moveImage.x = -26;
+                this.moveImage.y = -26;
+                this.moveImage.touchEnabeld = false;
+            }
+        }
+    }, {
+        key: "hideMoveBox",
+        value: function hideMoveBox() {
+            if (this.moveImage) {
+                this.moveImage.dispose();
+                this.moveImage = null;
+            }
         }
     }, {
         key: "gridX",
